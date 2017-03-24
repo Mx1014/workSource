@@ -50,7 +50,8 @@ CREATE TABLE `eh_lease_issuers` (
 CREATE TABLE `eh_lease_issuer_addresses` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `lease_issuer_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
-  `address_id` BIGINT COMMENT 'building id ',
+  `building_id` BIGINT COMMENT 'building id ',
+  `address_id` BIGINT COMMENT 'address id ',
   `status` TINYINT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
