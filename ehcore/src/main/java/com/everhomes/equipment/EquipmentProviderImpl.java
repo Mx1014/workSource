@@ -1617,7 +1617,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionCategoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
+		//仅按域空间区分 分公司拿不到总公司的类型 by xiongying20170324
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
 		 
 		List<EquipmentInspectionCategories> result = new ArrayList<EquipmentInspectionCategories>();
 		query.fetch().map((r) -> {
