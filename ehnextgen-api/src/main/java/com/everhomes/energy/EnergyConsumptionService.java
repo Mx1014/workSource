@@ -1,9 +1,9 @@
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
-
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
