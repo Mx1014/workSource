@@ -146,6 +146,7 @@
         eh_os_objects | eh_os_object_download_logs |
         eh_docking_mappings |
         eh_service_alliance_golf_requests | eh_service_alliance_gym_requests | eh_service_alliance_server_requests |
+        eh_oauth2_client_tokens | eh_oauth2_servers |
 
         </includes>
 
