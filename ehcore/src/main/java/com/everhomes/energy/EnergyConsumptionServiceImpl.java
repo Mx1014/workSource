@@ -376,7 +376,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 BigDecimal realAmount;
                 try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula.getExpression()));
+                    realAmount = BigDecimal.valueOf(Double.valueOf(engine.eval(amountFormula.getExpression()).toString()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOGGER.error("The energy meter error");
