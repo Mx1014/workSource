@@ -31,12 +31,22 @@ public class ListEnterpriseApplyEntryCommand {
 
 	private String issuerType;
 
+	private Long LeaseIssuerId;
+
 	public String getIssuerType() {
 		return issuerType;
 	}
 
 	public void setIssuerType(String issuerType) {
 		this.issuerType = issuerType;
+	}
+
+	public Long getLeaseIssuerId() {
+		return LeaseIssuerId;
+	}
+
+	public void setLeaseIssuerId(Long leaseIssuerId) {
+		LeaseIssuerId = leaseIssuerId;
 	}
 
 	public Integer getNamespaceId() {
