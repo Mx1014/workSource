@@ -2018,7 +2018,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 BigDecimal realCost = new BigDecimal(0);
 
                 try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
+                	double ra = Double.valueOf(engine.eval(amountFormula).toString());
+                    realAmount = BigDecimal.valueOf(ra);
 
 //                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
                 } catch (ScriptException e) {
@@ -2072,7 +2073,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
         BigDecimal realCost = new BigDecimal(0);
         try {
-            realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+            realCost = BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString()));
         } catch (ScriptException e) {
             String paramsStr = "{PRICE:" + priceSetting.getSettingValue() +
                     ", AMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
@@ -2134,7 +2135,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private BigDecimal calculateBlockTariffByCostFormula(ScriptEngine engine, String costFormula) {
         BigDecimal cost = new BigDecimal(0);
         try {
-            cost.add(BigDecimal.valueOf((double) engine.eval(costFormula)));
+            cost.add(BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString())));
         } catch (ScriptException e) {
             String paramsStr = "{PRICE:" + engine.get(MeterFormulaVariable.REAL_AMOUNT.getCode()) +
                     ", REALAMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
