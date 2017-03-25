@@ -112,10 +112,10 @@ public class EnterpriseApplyEntryProviderImpl implements
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(leasePromotion.getIssuerType()));
 		}
 		if (null != leasePromotion.getStartRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.ge(String.valueOf(leasePromotion.getStartRentArea())));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.ge(leasePromotion.getStartRentArea()));
 		}
 		if (null != leasePromotion.getEndRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.le(String.valueOf(leasePromotion.getEndRentArea())));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.le(leasePromotion.getEndRentArea()));
 		}
 		if (null != leasePromotion.getStartRentAmount()) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.ge(leasePromotion.getStartRentAmount()));
