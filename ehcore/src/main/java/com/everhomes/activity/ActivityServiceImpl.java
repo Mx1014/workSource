@@ -30,24 +30,16 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -58,13 +50,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.organization.OfficialFlag;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationOwnerDTO;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -87,7 +73,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import net.greghaines.jesque.Job;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -101,7 +86,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -3259,9 +3243,22 @@ public class ActivityServiceImpl implements ActivityService {
         video.setCreatorUid(user.getId());
         video.setManufacturerType(VideoManufacturerType.YZB.toString());
         video.setRoomType(ActivityVideoRoomType.YZB.toString());
-        video.setStartTime(System.currentTimeMillis());
         video.setIntegralTag1(0l);
-        video.setVideoState(VideoState.LIVE.getCode());
+
+        VideoState videoState = VideoState.fromCode(cmd.getState());
+
+        if (videoState != null) {
+            video.setVideoState(videoState.getCode());
+        }
+
+        // 直播开始，设置开始时间为当前时间
+        if (videoState == VideoState.LIVE) {
+            video.setStartTime(System.currentTimeMillis());
+        } else if (videoState == VideoState.RECORDING && oldVideo != null) {
+            // 直播结束，设置这条记录的开始时间为直播开始时间
+            video.setStartTime(oldVideo.getStartTime());
+        }
+
         video.setOwnerType("activity");
         video.setOwnerId(cmd.getActivityId());
         activityVideoProvider.createActivityVideo(video);
