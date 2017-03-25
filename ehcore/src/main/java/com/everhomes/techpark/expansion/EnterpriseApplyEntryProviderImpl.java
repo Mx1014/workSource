@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -295,6 +296,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		pageSize = pageSize + 1;
 		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
+		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 
 		if(!StringUtils.isEmpty(request.getNamespaceId())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId()));
@@ -302,7 +304,14 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if(!StringUtils.isEmpty(request.getCommunityId())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
 		}
-		
+
+		if (null != request.getLeaseIssuerId()) {
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.FOR_RENT.getCode()));
+
+			query.addJoin(Tables.EH_LEASE_PROMOTIONS, Tables.EH_LEASE_PROMOTIONS.ID.eq(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_ID));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.eq(request.getLeaseIssuerId()));
+		}
+
 		if(!StringUtils.isEmpty(request.getIssuerType())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(request.getIssuerType()));
 		}
@@ -327,7 +336,6 @@ public class EnterpriseApplyEntryProviderImpl implements
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.le(locator.getAnchor()));
 		}
 		
-		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		query.addConditions(cond);
         query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
 		query.addLimit(pageSize);
