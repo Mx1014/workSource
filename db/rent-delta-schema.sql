@@ -58,7 +58,7 @@ CREATE TABLE `eh_lease_issuer_addresses` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
+ALTER TABLE eh_lease_promotions MODIFY COLUMN rent_areas DECIMAL(10,2);
 ALTER TABLE eh_lease_promotions ADD COLUMN `enter_time_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled';
 ALTER TABLE eh_lease_promotions ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_lease_promotions ADD COLUMN `orientation` VARCHAR(128);
