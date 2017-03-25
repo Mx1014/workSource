@@ -49,7 +49,9 @@ public class FlowVariblePrefixAllProcessorsPhoneResolver implements FlowVariable
 						txt += u.getPhones().get(0) + ", ";	
 					}
 				}
-				
+				if(txt.length() > 2) {
+					txt = txt.substring(0, txt.length()-2);
+				}
 				return txt;
 			}
 		}

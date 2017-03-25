@@ -57,4 +57,10 @@ public class FlowGraphNoStepEvent implements FlowGraphEvent {
 	@Override
 	public void fire(FlowCaseState ctx) {
 	}
+
+	@Override
+	public FlowSubject getSubject() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

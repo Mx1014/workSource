@@ -30,7 +30,9 @@ public class FlowVaribleCurrAllProcessorsNameResolver implements FlowVariableTex
 			for(UserInfo u : users) {
 				txt += u.getNickName() + ", ";
 			}
-			
+			if(txt.length() > 2) {
+				txt = txt.substring(0, txt.length()-2);
+			}
 			return txt;
 		}
 		return null;
