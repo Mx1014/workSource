@@ -651,6 +651,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
                 }
             }
+            dto.setRentAreas(String.valueOf(c.getRentAreas()));
             dto.setUnit("元/㎡/月");
             return dto;
 		}).collect(Collectors.toList());
