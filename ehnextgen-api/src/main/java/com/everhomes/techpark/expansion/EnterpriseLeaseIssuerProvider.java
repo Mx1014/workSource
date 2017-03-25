@@ -15,7 +15,7 @@ public interface EnterpriseLeaseIssuerProvider {
 
     void deleteLeaseIssuer(LeaseIssuer leaseIssuer);
 
-    List<LeaseIssuer> listLeaseIssers(Integer namespaceId, String keyword, Long pageAnchor, Integer pageSize);
+    List<LeaseIssuer> listLeaseIssers(Integer namespaceId, Long organizationId, String keyword, Long pageAnchor, Integer pageSize);
 
     LeasePromotionConfig getLeasePromotionConfigByNamespaceId(Integer namespaceId);
 
@@ -26,4 +26,8 @@ public interface EnterpriseLeaseIssuerProvider {
     List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId, Long buildingId);
 
     List<LeaseIssuerAddress> listLeaseIsserBuildings(Long leaseIssuerId);
+
+    LeaseIssuer fingLeaseIssersByOrganizationId(Integer namespaceId, Long organizationId);
+
+    LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact);
 }

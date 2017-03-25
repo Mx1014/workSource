@@ -807,7 +807,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
 
-		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, cmd.getKeyword(),
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, null, cmd.getKeyword(),
 				cmd.getPageAnchor(), pageSize);
 
 		int size = issuers.size();
@@ -926,22 +926,23 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
 		Long organizationId = cmd.getOrganizationId();
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
 		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
 
 		if (null == organizationId) {
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-
-			List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
-					null, null);
-			if (0 != issuers.size()) {
+			//先检查是不是招租发行人
+			if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
 				dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
 			}
 		}else {
-//			List<OrganizationContactDTO> admins = organizationService.getAdmins(organizationId);
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-				dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+			//先检查是不是招租发行公司
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+				}
 			}
 		}
 
@@ -950,46 +951,45 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     @Override
     public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
-//        ListBuildingCommand cmd2 = ConvertHelper.convert(cmd, ListBuildingCommand.class);
-//        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd2);
+
         ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
 		Long organizationId = cmd.getOrganizationId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         User user = UserContext.current().getUser();
         UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
-        List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
-                null, null);
+		List<BuildingDTO> buildingDTOs = new ArrayList<>();
 
-        if (0 != issuers.size()) {
-            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(issuers.get(0).getId());
+		//先查询业主
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		if (null != leaseIssuer) {
+			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
 
-			response.setBuildings(addresses.stream().map(a -> {
-                Address address = addressProvider.findAddressById(a.getAddressId());
-                com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
-                        address.getCommunityId(), address.getBuildingName());
-                return ConvertHelper.convert(building, BuildingDTO.class);
-            }).collect(Collectors.toList()));
+			buildingDTOs.addAll(addresses.stream().map(a -> {
+				Address address = addressProvider.findAddressById(a.getAddressId());
+				com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+						address.getCommunityId(), address.getBuildingName());
+				return ConvertHelper.convert(building, BuildingDTO.class);
+			}).collect(Collectors.toList()));
+		}
 
-			if (response.getBuildings().size() != 0)
-				return response;
-        }
+		if (null != organizationId)  {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
 
-        if (null != organizationId) {
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
-				List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
-
-				response.setBuildings(organizationAddresses.stream().map(a -> {
-					Address address = addressProvider.findAddressById(a.getAddressId());
-					com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
-							address.getCommunityId(), address.getBuildingName());
-					return ConvertHelper.convert(building, BuildingDTO.class);
-				}).collect(Collectors.toList()));
+					buildingDTOs.addAll(organizationAddresses.stream().map(a -> {
+						Address address = addressProvider.findAddressById(a.getAddressId());
+						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+								address.getCommunityId(), address.getBuildingName());
+						return ConvertHelper.convert(building, BuildingDTO.class);
+					}).collect(Collectors.toSet()));
+				}
 			}
+		}
 
-        }
-
+		response.setBuildings(buildingDTOs);
         return response;
     }
 
@@ -999,17 +999,37 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		User user = UserContext.current().getUser();
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		Long organizationId = cmd.getOrganizationId();
 
-		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
-				null, null);
+		//先查询业主
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		if (null != leaseIssuer) {
+			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(leaseIssuer.getId(), cmd.getBuildingId());
 
-		if (0 != issuers.size()) {
-			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId(), cmd.getBuildingId());
-			addresses.forEach(a -> {
+			dtos.addAll(addresses.stream().map(a -> {
 				Address address = addressProvider.findAddressById(a.getAddressId());
-				dtos.add(ConvertHelper.convert(address, AddressDTO.class));
-			});
+				return ConvertHelper.convert(address, AddressDTO.class);
+			}).collect(Collectors.toList()));
 		}
+
+		if (null != organizationId)  {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+
+					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
+
+					dtos.addAll(organizationAddresses.stream().filter(a -> {
+						return a.getBuildingName().equals(building.getName());
+					}).map(a -> {
+						Address address = addressProvider.findAddressById(a.getAddressId());
+						return ConvertHelper.convert(address, AddressDTO.class);
+					}).collect(Collectors.toSet()));
+				}
+			}
+		}
+
 		return dtos;
 	}
 }

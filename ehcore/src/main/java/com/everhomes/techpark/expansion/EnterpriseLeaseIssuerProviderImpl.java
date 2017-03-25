@@ -89,7 +89,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeaseIssuer> listLeaseIssers(Integer namespaceId, String keyword, Long pageAnchor, Integer pageSize) {
+	public List<LeaseIssuer> listLeaseIssers(Integer namespaceId, Long organizationId, String keyword, Long pageAnchor, Integer pageSize) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
@@ -104,6 +104,9 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 					.or(Tables.EH_ORGANIZATIONS.NAME.like(keyword)));
 		}
 
+		if (null != organizationId)
+			query.addConditions(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID.eq(organizationId));
+
 		if (null != pageAnchor)
 			query.addConditions(Tables.EH_LEASE_ISSUERS.ID.le(pageAnchor));
 
@@ -114,6 +117,32 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 
 
 		return 	query.fetch().map(new DefaultRecordMapper(Tables.EH_LEASE_ISSUERS.recordType(), LeaseIssuer.class));
+
+	}
+
+	@Override
+	public LeaseIssuer fingLeaseIssersByOrganizationId(Integer namespaceId, Long organizationId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
+		query.addConditions(Tables.EH_LEASE_ISSUERS.STATUS.eq(LeaseIssuerStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID.eq(organizationId));
+
+		return 	ConvertHelper.convert(query.fetchAny(), LeaseIssuer.class);
+
+	}
+
+	@Override
+	public LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
+		query.addConditions(Tables.EH_LEASE_ISSUERS.STATUS.eq(LeaseIssuerStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_LEASE_ISSUERS.ISSUER_CONTACT.eq(contact));
+
+		return 	ConvertHelper.convert(query.fetchAny(), LeaseIssuer.class);
 
 	}
 
