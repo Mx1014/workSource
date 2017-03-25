@@ -2,8 +2,8 @@ package com.everhomes.rest.techpark.expansion;
 
 /**
  * 与{@link com.everhomes.rest.flow.FlowCaseStatus} 状态保持一致
- * PROCESSING(1):处理中
- * RESIDED_IN(2): 已完成
+ * PROCESSING(2):处理中
+ * RESIDED_IN(4): 已完成
  * INVALID(3):已取消
  * */
 public enum ApplyEntryStatus {
