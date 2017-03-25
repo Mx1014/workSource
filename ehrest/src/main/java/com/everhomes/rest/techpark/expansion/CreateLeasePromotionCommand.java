@@ -36,7 +36,7 @@ public class CreateLeasePromotionCommand {
 	private String   rentType;
 	private String   posterUri;
 	private String   subject;
-	private String   rentAreas;
+	private BigDecimal   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
 	private String   description;
@@ -134,12 +134,15 @@ public class CreateLeasePromotionCommand {
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-	public String getRentAreas() {
+
+	public BigDecimal getRentAreas() {
 		return rentAreas;
 	}
-	public void setRentAreas(String rentAreas) {
+
+	public void setRentAreas(BigDecimal rentAreas) {
 		this.rentAreas = rentAreas;
 	}
+
 	public String getContacts() {
 		return contacts;
 	}
