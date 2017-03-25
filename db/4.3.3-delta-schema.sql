@@ -39,3 +39,7 @@ CREATE TABLE `eh_oauth2_servers` (
 ALTER TABLE eh_launch_pad_items ADD COLUMN  `more_order` INT NOT NULL DEFAULT 0;
 -- 按场景分类
 ALTER TABLE eh_item_service_categries ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
+
+-- 帖子表添加父评论id, add by tt, 20170314
+ALTER TABLE `eh_forum_posts` ADD COLUMN `parent_comment_id` BIGINT(20) COMMENT 'parent comment id';
+
