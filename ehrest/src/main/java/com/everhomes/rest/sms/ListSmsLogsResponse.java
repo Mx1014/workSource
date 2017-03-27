@@ -1,5 +1,7 @@
 package com.everhomes.rest.sms;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -7,6 +9,7 @@ import java.util.List;
  */
 public class ListSmsLogsResponse {
     private Long nextPageAnchor;
+    @ItemType(SmsLogDTO.class)
     private List<SmsLogDTO> logs;
 
     public Long getNextPageAnchor() {
