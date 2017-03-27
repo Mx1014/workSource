@@ -114,9 +114,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>创建招租
 	 */
 	@RequestMapping("createLeasePromotion")
-	@RestReturn(value=String.class)
+	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse createLeasePromotion(CreateLeasePromotionCommand cmd){
-		boolean res = enterpriseApplyEntryService.createLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.createLeasePromotion(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -128,9 +128,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>修改招租
 	 */
 	@RequestMapping("updateLeasePromotion")
-	@RestReturn(value=String.class)
+	@RestReturn(value=BuildingForRentDTO.class)
 	public RestResponse updateLeasePromotion(UpdateLeasePromotionCommand cmd){
-		boolean res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
+		BuildingForRentDTO res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -17,10 +17,10 @@ public interface EnterpriseApplyEntryService {
 	boolean applyRenew(EnterpriseApplyRenewCommand cmd);
 	
 	ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd);
-	
-	boolean createLeasePromotion(CreateLeasePromotionCommand cmd);
-	
-	boolean updateLeasePromotion(UpdateLeasePromotionCommand cmd);
+
+	BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd);
+
+	BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd);
 	
 	BuildingForRentDTO findLeasePromotionById(Long id);
 	

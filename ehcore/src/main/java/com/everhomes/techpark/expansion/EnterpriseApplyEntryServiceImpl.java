@@ -677,7 +677,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 			}
 		}
-
+		dto.setUnit("元/㎡/月");
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -695,7 +695,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     }
 
 	@Override
-	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
+	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd){
         if (null == cmd.getIssuerType())
             cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
         LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
@@ -711,10 +711,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
 		
-		if(StringUtils.isEmpty(attachmentDTOs)){
-			return true;
-		}
-		
 		/**
 		 * 重新添加
 		 */
@@ -724,11 +720,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			attachment.setCreatorUid(leasePromotion.getCreateUid());
 			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
 		}
-		return true;
+
+		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+		populateRentDTO(dto, leasePromotion.getAttachments());
+
+		return dto;
 	}
 
 	@Override
-	public boolean updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd){
 		
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 		LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
@@ -740,10 +740,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
-		
-		if(StringUtils.isEmpty(attachmentDTOs)){
-			return true;
-		}
 		
 		/**
 		 * 先删除全部图片
@@ -759,8 +755,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			attachment.setCreatorUid(UserContext.current().getUser().getId());
 			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
 		}
-		
-		return true;
+
+		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+		populateRentDTO(dto, leasePromotion.getAttachments());
+
+		return dto;
 	}
 	
 	@Override
@@ -770,8 +769,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
 		populateRentDTO(dto, leasePromotion.getAttachments());
-
-        dto.setUnit("元/㎡/月");
 
 		return dto;
 	}
@@ -956,12 +953,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
 
-		if (null == organizationId) {
-			//先检查是不是招租发行人
-			if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
-				dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
-			}
-		}else {
+		//先检查是不是招租发行人
+		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
+			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+		}
+
+		if (null != organizationId) {
 			//先检查是不是招租发行公司
 			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
 				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
