@@ -141,6 +141,7 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
@@ -196,7 +197,7 @@ public class PunchServiceImpl implements PunchService {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
     };
-    private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>() ;
+    private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
     
 	@Autowired
 	private PunchProvider punchProvider;
@@ -4994,14 +4995,14 @@ public class PunchServiceImpl implements PunchService {
 			}
 			PunchScheduling ps = new PunchScheduling();
 			ps.setRuleDate((java.sql.Date) dateSF.get().parse(r.getA())); 
-			ps.(this.setAreaName(r.getB()));
-			ps.setOrgName(this.getOrgName(r.getC()));
-			ps.setOrgType(this.getOrgType(r.getD()));
-			ps.setTokens(this.getTokens(r.getE()));
-			ps.setAddressName(this.getAddressName(r.getF()));
-			ps.setLongitude(this.getLongitude(r.getG()));
-			ps.setLatitude(this.getLatitude(r.getH()));
-			ps.setCommunityNames(this.getCommunityNames(r.getI()));
+//			ps.(this.setAreaName(r.getB()));
+//			ps.setOrgName(this.getOrgName(r.getC()));
+//			ps.setOrgType(this.getOrgType(r.getD()));
+//			ps.setTokens(this.getTokens(r.getE()));
+//			ps.setAddressName(this.getAddressName(r.getF()));
+//			ps.setLongitude(this.getLongitude(r.getG()));
+//			ps.setLatitude(this.getLatitude(r.getH()));
+//			ps.setCommunityNames(this.getCommunityNames(r.getI()));
 			result.add(ps);
 		}
 		return result;
@@ -5034,6 +5035,11 @@ public class PunchServiceImpl implements PunchService {
 			
 		}
 		
+	}
+	@Override
+	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
