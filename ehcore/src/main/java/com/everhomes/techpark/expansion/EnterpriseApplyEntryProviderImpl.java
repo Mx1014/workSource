@@ -21,6 +21,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -292,7 +293,6 @@ public class EnterpriseApplyEntryProviderImpl implements
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
 			ListingLocator locator, int pageSize, List<Long> idList) {
-		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		pageSize = pageSize + 1;
 		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
@@ -339,10 +339,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 		query.addConditions(cond);
         query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
 		query.addLimit(pageSize);
-		query.fetch().map((r) -> {
-			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
-			return null;
-		});
+		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
 
         if (enterpriseOpRequests.size() >= pageSize) {
             locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
