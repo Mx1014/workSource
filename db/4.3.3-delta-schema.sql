@@ -43,3 +43,18 @@ ALTER TABLE eh_item_service_categries ADD COLUMN `scene_type` VARCHAR(64) NOT NU
 -- 帖子表添加父评论id, add by tt, 20170314
 ALTER TABLE `eh_forum_posts` ADD COLUMN `parent_comment_id` BIGINT(20) COMMENT 'parent comment id';
 
+-- 短信日志 add by sw 20170327
+CREATE TABLE `eh_sms_logs`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `scope` VARCHAR(64),
+  `code` INTEGER,
+  `locale` VARCHAR(16),
+  `mobile` VARCHAR(128),
+  `text` text,
+  `variables` VARCHAR(512),
+  `result` text,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
