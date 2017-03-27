@@ -4994,7 +4994,13 @@ public class PunchServiceImpl implements PunchService {
 				break;
 			}
 			PunchScheduling ps = new PunchScheduling();
-			ps.setRuleDate((java.sql.Date) dateSF.get().parse(r.getA())); 
+			try {
+				ps.setRuleDate((java.sql.Date) dateSF.get().parse(r.getA()));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				throw  RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"excel is wrong format.");
+			} 
 //			ps.(this.setAreaName(r.getB()));
 //			ps.setOrgName(this.getOrgName(r.getC()));
 //			ps.setOrgType(this.getOrgType(r.getD()));
