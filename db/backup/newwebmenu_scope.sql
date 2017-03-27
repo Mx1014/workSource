@@ -1849,3 +1849,13 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '50220', '', 'EhOrganizations', '1004937', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '60400', '', 'EhOrganizations', '1004937', '2');
 
+
+
+-- 先删除 by sfyan add 20170327
+DELETE FROM eh_web_menu_scopes WHERE owner_id  = 999985 AND menu_id IN (20400, 20410, 20420);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( @menu_scope_id := @menu_scope_id + 1,20400,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( @menu_scope_id := @menu_scope_id + 1,20410,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( @menu_scope_id := @menu_scope_id + 1,20420,'', 'EhNamespaces', 999985,2);
+
