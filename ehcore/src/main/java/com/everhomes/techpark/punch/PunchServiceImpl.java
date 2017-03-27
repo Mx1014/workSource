@@ -68,6 +68,7 @@ import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDTO2;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
@@ -166,6 +167,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.excel.RowResult;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -2079,7 +2081,7 @@ public class PunchServiceImpl implements PunchService {
 
 		try {
 
-			logDay.setTime(dateSF.parse(cmd.getQueryDate()));
+			logDay.setTime(dateSF.get().parse(cmd.getQueryDate()));
 			Calendar today = Calendar.getInstance();
 			// 对于今天以后的查询，都返回为null
 			if (logDay.after(today))
@@ -4971,6 +4973,36 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub
 		
 	}
+	
+
+//	private List<OrganizationDTO2> convertToOrganizations(ArrayList list,Long userId) {
+//		if(list == null || list.isEmpty()){
+//			LOGGER.error("resultList is empty.userId="+userId);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"resultList is empty.");
+//		}
+//		List<OrganizationDTO2> result = new ArrayList<OrganizationDTO2>();
+//		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+//			RowResult r = (RowResult)list.get(rowIndex);
+//			if(r.getA() == null || r.getA().trim().equals("")){
+//				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+//				break;
+//			}
+//			OrganizationDTO2 dto = new OrganizationDTO2();
+//			dto.setCityName(this.getCityName(r.getA()));
+//			dto.setAreaName(this.setAreaName(r.getB()));
+//			dto.setOrgName(this.getOrgName(r.getC()));
+//			dto.setOrgType(this.getOrgType(r.getD()));
+//			dto.setTokens(this.getTokens(r.getE()));
+//			dto.setAddressName(this.getAddressName(r.getF()));
+//			dto.setLongitude(this.getLongitude(r.getG()));
+//			dto.setLatitude(this.getLatitude(r.getH()));
+//			dto.setCommunityNames(this.getCommunityNames(r.getI()));
+//			result.add(dto);
+//		}
+//		return result;
+//	}
+	
 	@Override
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd) {
 		// TODO Auto-generated method stub
