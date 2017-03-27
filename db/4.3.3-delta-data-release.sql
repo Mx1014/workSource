@@ -159,7 +159,7 @@ UPDATE `eh_locale_strings` SET `text`='该帖子已被主人删除' WHERE  `id`=
 
 delete from eh_banners where namespace_id = 0;
 delete from eh_item_service_categries where namespace_id = 0;
-delete from eh_launch_pad_items where namespace_id = 0;
+delete from   eh_launch_pad_items where namespace_id = 0;
 delete from eh_launch_pad_layouts where namespace_id = 0;
 
 -- 增加0域空间数据，add by tt, 20170316
@@ -170,7 +170,7 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`, `update_time`) VALUES (@id:=@id+1,0,0,'/home','ZJt44e',0,0,NULL,'','cs://1/image/aW1hZ2UvTVRvM1lXTXhNVEV4TVRSa01HTm1PV016WmpObE9UYzNZalpqTW1Gak1tVTJZdw',0,'{}',NULL,NULL,2,10,0,'2017-03-24 16:45:14',NULL,'park_tourist',0,NULL);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`, `update_time`) VALUES (@id:=@id+1,0,0,'/home','Default',0,0,NULL,'','cs://1/image/aW1hZ2UvTVRwa1pUa3haR1F3TTJVNVpqRmlPVFl5TVRFeU5XVTJZV1JpT1RBMk4yWmhZZw',13,'{\"url\": \"\"}',NULL,NULL,2,10,0,'2017-03-24 16:45:21',NULL,'default',0,NULL);
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`, `scene_type`, `apply_policy`, `update_time`) VALUES (@id:=@id+1,0,0,'/home','Default',0,0,NULL,'','cs://1/image/aW1hZ2UvTVRvM1lXTXhNVEV4TVRSa01HTm1PV016WmpObE9UYzNZalpqTW1Gak1tVTJZdw',0,'{}',NULL,NULL,2,10,0,'2017-03-24 16:45:21',NULL,'default',0,NULL);
-select ifnull(max(id),0) into @id from `eh_item_service_categries`;
+select ifnull(max(id),7) into @id from `eh_item_service_categries`;
 INSERT INTO `eh_item_service_categries` (`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`) VALUES (@id:=@id+1,'园区运营服务','cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ',1,0,1,0,'pm_admin');
 INSERT INTO `eh_item_service_categries` (`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`) VALUES (@id:=@id+1,'企业行政服务','cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ',2,0,1,0,'pm_admin');
 INSERT INTO `eh_item_service_categries` (`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`) VALUES (@id:=@id+1,'物业内部管控','cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ',3,0,1,0,'pm_admin');
