@@ -630,7 +630,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
             //TODO: set detail url
-//            processDetailUrl(dto);
+            processDetailUrl(dto);
             Address address = addressProvider.findAddressById(c.getAddressId());
             if (null != address) {
                 dto.setApartmentName(address.getApartmentName());
@@ -660,19 +660,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 
-//    private void processDetailUrl(BuildingForRentDTO dto) {
-//        try {
-//            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-//            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
-//
-//            detailUrl = String.format(detailUrl, dto.getId());
-//
-////            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
-//            dto.setDetailUrl(homeUrl + detailUrl);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private void processDetailUrl(BuildingForRentDTO dto) {
+        try {
+            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+            String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+
+            detailUrl = String.format(detailUrl, dto.getId());
+
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+            dto.setDetailUrl(homeUrl + detailUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 	@Override
 	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){

@@ -93,4 +93,5 @@ public interface ConfigConstants {
 
     public static final String BIZ_BUSINESS_PROMOTION_API = "biz.business.promotion.api";
 
+    String APPLY_ENTRY_DETAIL_URL = "apply.entry.detail.url";
 }

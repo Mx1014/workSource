@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -689,7 +691,9 @@ public class CommunityServiceImpl implements CommunityService {
         			dto.setManagerContact(member.getContactToken());
         		}
         	}
-        	
+
+			//TODO: set detail url
+			processDetailUrl(dto);
         	populateBuildingDTO(dto);
         	
         	return dto;
@@ -697,6 +701,17 @@ public class CommunityServiceImpl implements CommunityService {
         
         
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
+	}
+
+	private void processDetailUrl(BuildingDTO dto) {
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+
+		detailUrl = String.format(detailUrl, dto.getId());
+
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+		dto.setDetailUrl(homeUrl + detailUrl);
+
 	}
 
     private void populateBuildingDTO( BuildingDTO building) {
