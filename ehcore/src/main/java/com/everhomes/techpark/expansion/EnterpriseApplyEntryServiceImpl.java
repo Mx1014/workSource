@@ -681,17 +681,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
-        try {
-            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-            String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
 
-            detailUrl = String.format(detailUrl, dto.getId());
+		detailUrl = String.format(detailUrl, dto.getId());
 
-//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
-            dto.setDetailUrl(homeUrl + detailUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		dto.setDetailUrl(homeUrl + detailUrl);
+
+		String buildingDetailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
+
+		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId());
+		dto.setBuildingDetailUrl(homeUrl + buildingDetailUrl);
     }
 
 	@Override

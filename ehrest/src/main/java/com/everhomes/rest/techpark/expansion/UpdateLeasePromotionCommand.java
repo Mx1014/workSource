@@ -33,7 +33,7 @@ public class UpdateLeasePromotionCommand {
 	private String   rentType;
 	private String   posterUri;
 	private String   subject;
-	private String   rentAreas;
+	private BigDecimal   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
 	private String   description;
@@ -115,12 +115,6 @@ public class UpdateLeasePromotionCommand {
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-	public String getRentAreas() {
-		return rentAreas;
-	}
-	public void setRentAreas(String rentAreas) {
-		this.rentAreas = rentAreas;
-	}
 	public String getContacts() {
 		return contacts;
 	}
@@ -151,6 +145,12 @@ public class UpdateLeasePromotionCommand {
 	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
-	
-	
+
+	public BigDecimal getRentAreas() {
+		return rentAreas;
+	}
+
+	public void setRentAreas(BigDecimal rentAreas) {
+		this.rentAreas = rentAreas;
+	}
 }

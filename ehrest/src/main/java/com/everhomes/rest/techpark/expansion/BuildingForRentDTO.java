@@ -60,7 +60,16 @@ public class BuildingForRentDTO {
 	private String unit;
 	private String issuerType;
 	private String detailUrl;
+	private String buildingDetailUrl;
 	private Byte deleteFlag;
+
+	public String getBuildingDetailUrl() {
+		return buildingDetailUrl;
+	}
+
+	public void setBuildingDetailUrl(String buildingDetailUrl) {
+		this.buildingDetailUrl = buildingDetailUrl;
+	}
 
 	public Byte getDeleteFlag() {
 		return deleteFlag;

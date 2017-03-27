@@ -705,7 +705,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	private void processDetailUrl(BuildingDTO dto) {
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
 
 		detailUrl = String.format(detailUrl, dto.getId());
 
