@@ -629,35 +629,41 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
-            //TODO: set detail url
-            processDetailUrl(dto);
-            Address address = addressProvider.findAddressById(c.getAddressId());
-            if (null != address) {
-                dto.setApartmentName(address.getApartmentName());
-            }
+			populateRentDTO(dto, c.getAttachments());
 
-            Building building = communityProvider.findBuildingById(c.getBuildingId());
-            if(null != building){
-                dto.setBuildingName(building.getName());
-                dto.setAddress(building.getAddress());
-                dto.setLatitude(building.getLatitude());
-                dto.setLongitude(building.getLongitude());
-            }
-
-            dto.setPosterUrl(contentServerService.parserUri(c.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-            List<LeasePromotionAttachment> attachments = c.getAttachments();
-            if(null != attachments){
-                for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-                    leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-                }
-            }
-            dto.setRentAreas(String.valueOf(c.getRentAreas()));
-            dto.setUnit("元/㎡/月");
+			dto.setRentAreas(String.valueOf(c.getRentAreas()));
+			dto.setUnit("元/㎡/月");
             return dto;
 		}).collect(Collectors.toList());
 		
 		res.setDtos(dtos);
 		return res;
+	}
+
+	private void populateRentDTO(BuildingForRentDTO dto, List<LeasePromotionAttachment> attachments) {
+		//TODO: set detail url
+		processDetailUrl(dto);
+		Address address = addressProvider.findAddressById(dto.getAddressId());
+		if (null != address) {
+			dto.setApartmentName(address.getApartmentName());
+		}
+
+		Building building = communityProvider.findBuildingById(dto.getBuildingId());
+		if(null != building){
+			dto.setBuildingName(building.getName());
+			dto.setAddress(building.getAddress());
+			dto.setLatitude(building.getLatitude());
+			dto.setLongitude(building.getLongitude());
+		}
+
+		dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+
+		if(null != attachments){
+			for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
+				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+			}
+		}
+
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -746,14 +752,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public BuildingForRentDTO findLeasePromotionById(Long id){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(id);
-		leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-		List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
-		if(null != attachments){
-			for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-			}
-		}
+
         BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+		populateRentDTO(dto, leasePromotion.getAttachments());
+
         dto.setUnit("元/㎡/月");
 
 		return dto;
