@@ -56,6 +56,7 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
@@ -219,5 +220,7 @@ public interface PunchService {
 	public void deletePunchPoint(DeleteCommonCommand cmd);
 
 	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
+
+	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd);
 
 }

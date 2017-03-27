@@ -196,6 +196,7 @@ public class PunchServiceImpl implements PunchService {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         }
     };
+    private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>() ;
     
 	@Autowired
 	private PunchProvider punchProvider;
@@ -4846,7 +4847,10 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd) { 
-		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		ListPunchPointsResponse response = new ListPunchPointsResponse();
+		PunchRuleOwnerMap map =  punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		if(null == map)
+			return response;
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchLocationRule plr = null;
 		if(pr.getLocationRuleId()==null){
@@ -4866,7 +4870,6 @@ public class PunchServiceImpl implements PunchService {
 		}
 		
 		List<PunchGeopoint> geos = this.punchProvider.listPunchGeopointsByRuleId(cmd.getOwnerType(), cmd.getOwnerId(), plr.getId()) ;
-		ListPunchPointsResponse response = new ListPunchPointsResponse();
 		if(null != geos){
 			response.setPoints(new ArrayList<PunchGeoPointDTO>());
 			for(PunchGeopoint geo : geos){
@@ -4965,6 +4968,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response) {
+		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(), null));
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -4975,33 +4979,33 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 
-//	private List<OrganizationDTO2> convertToOrganizations(ArrayList list,Long userId) {
-//		if(list == null || list.isEmpty()){
-//			LOGGER.error("resultList is empty.userId="+userId);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"resultList is empty.");
-//		}
-//		List<OrganizationDTO2> result = new ArrayList<OrganizationDTO2>();
-//		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
-//			RowResult r = (RowResult)list.get(rowIndex);
-//			if(r.getA() == null || r.getA().trim().equals("")){
-//				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
-//				break;
-//			}
-//			OrganizationDTO2 dto = new OrganizationDTO2();
-//			dto.setCityName(this.getCityName(r.getA()));
-//			dto.setAreaName(this.setAreaName(r.getB()));
-//			dto.setOrgName(this.getOrgName(r.getC()));
-//			dto.setOrgType(this.getOrgType(r.getD()));
-//			dto.setTokens(this.getTokens(r.getE()));
-//			dto.setAddressName(this.getAddressName(r.getF()));
-//			dto.setLongitude(this.getLongitude(r.getG()));
-//			dto.setLatitude(this.getLatitude(r.getH()));
-//			dto.setCommunityNames(this.getCommunityNames(r.getI()));
-//			result.add(dto);
-//		}
-//		return result;
-//	}
+	private List<PunchScheduling> convertToOrganizations(ArrayList list,Long userId) {
+		if(list == null || list.isEmpty()){
+			LOGGER.error("resultList is empty.userId="+userId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"resultList is empty.");
+		}
+		List<PunchScheduling> result = new ArrayList<PunchScheduling>();
+		for(int rowIndex=1;rowIndex<list.size();rowIndex++){
+			RowResult r = (RowResult)list.get(rowIndex);
+			if(r.getA() == null || r.getA().trim().equals("")){
+				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+				break;
+			}
+			PunchScheduling ps = new PunchScheduling();
+			ps.setRuleDate((java.sql.Date) dateSF.get().parse(r.getA())); 
+			ps.(this.setAreaName(r.getB()));
+			ps.setOrgName(this.getOrgName(r.getC()));
+			ps.setOrgType(this.getOrgType(r.getD()));
+			ps.setTokens(this.getTokens(r.getE()));
+			ps.setAddressName(this.getAddressName(r.getF()));
+			ps.setLongitude(this.getLongitude(r.getG()));
+			ps.setLatitude(this.getLatitude(r.getH()));
+			ps.setCommunityNames(this.getCommunityNames(r.getI()));
+			result.add(ps);
+		}
+		return result;
+	}
 	
 	@Override
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd) {

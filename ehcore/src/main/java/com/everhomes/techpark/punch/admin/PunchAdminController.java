@@ -332,7 +332,7 @@ public class PunchAdminController extends ControllerBase {
 	@RequestMapping("listPunchWiFis")
 	@RestReturn(value = ListPunchWiFisResponse.class)
 	public RestResponse listPunchWiFis(@Valid ListPunchRulesCommonCommand cmd) {
-		ListPunchWiFiRuleListResponse resp = punchService.listPunchWiFiRule(cmd);
+		ListPunchWiFisResponse resp = punchService.listPunchWiFis(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
