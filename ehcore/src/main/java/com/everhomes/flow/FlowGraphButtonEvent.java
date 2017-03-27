@@ -62,6 +62,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		this.cmd = cmd;
 	}
 
+	@Override
 	public FlowSubject getSubject() {
 		return subject;
 	}
@@ -150,7 +151,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			ctx.setNextNode(next);
 			
 			if(current.getTrackTransferLeave() != null) {
-				current.getTrackTransferLeave().fireAction(ctx, null);	
+				current.getTrackTransferLeave().fireAction(ctx, ctx.getCurrentEvent());	
 			} else {
 				tracker = new FlowEventLog();
 				tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));

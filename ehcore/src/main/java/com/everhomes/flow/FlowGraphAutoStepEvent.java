@@ -200,4 +200,10 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 		ctx.getLogs().add(log);	//added but not save to database now.
 	}
 
+	@Override
+	public FlowSubject getSubject() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

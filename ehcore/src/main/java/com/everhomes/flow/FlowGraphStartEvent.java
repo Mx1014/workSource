@@ -51,4 +51,10 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 		return new ArrayList<FlowEntitySel>();
 	}
 
+	@Override
+	public FlowSubject getSubject() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
