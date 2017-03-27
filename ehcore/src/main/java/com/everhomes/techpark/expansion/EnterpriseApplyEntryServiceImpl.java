@@ -699,6 +699,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         if (null == cmd.getIssuerType())
             cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
         LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+		leasePromotion.setAttachments(null);
+
         if (null != cmd.getEnterTime())
 		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
@@ -714,15 +716,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		/**
 		 * 重新添加
 		 */
-		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-			attachment.setLeaseId(leasePromotion.getId());
-			attachment.setCreatorUid(leasePromotion.getCreateUid());
-			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setLeaseId(leasePromotion.getId());
+				attachment.setCreatorUid(leasePromotion.getCreateUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
 		}
 
 		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
-		populateRentDTO(dto, leasePromotion.getAttachments());
+		populateRentDTO(dto, null != attachmentDTOs?attachmentDTOs.stream().map(a -> ConvertHelper.convert(a, LeasePromotionAttachment.class)
+		).collect(Collectors.toList()):null);
 
 		return dto;
 	}
@@ -745,19 +750,22 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		 * 先删除全部图片
 		 */
 		enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
-		
+
 		/**
 		 * 重新添加
 		 */
-		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-			attachment.setLeaseId(leasePromotion.getId());
-			attachment.setCreatorUid(UserContext.current().getUser().getId());
-			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setLeaseId(leasePromotion.getId());
+				attachment.setCreatorUid(leasePromotion.getCreateUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
 		}
 
 		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
-		populateRentDTO(dto, leasePromotion.getAttachments());
+		populateRentDTO(dto, null != attachmentDTOs?attachmentDTOs.stream().map(a -> ConvertHelper.convert(a, LeasePromotionAttachment.class)
+		).collect(Collectors.toList()):null);
 
 		return dto;
 	}
