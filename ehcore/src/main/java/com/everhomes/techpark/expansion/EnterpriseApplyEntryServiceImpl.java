@@ -777,6 +777,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Override
 	public boolean updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+
+		if (null == cmd.getId()) {
+			LOGGER.error("Invalid param id, cmd={}", cmd);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Status can not be modified.");
+		}
+
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getApplyEntryById(cmd.getId());
 		
 		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
