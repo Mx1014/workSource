@@ -428,7 +428,7 @@ public class PunchAdminController extends ControllerBase {
      */
     @RequestMapping("importPunchScheduling")
     @RestReturn(value = String.class)
-    public RestResponse importPunchScheduling(@RequestParam(value = "attachment") MultipartFile[] files) {
+    public RestResponse importPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "attachment") MultipartFile[] files) {
     	punchService.importPunchScheduling(files);
         RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
         response.setErrorCode(ErrorCodes.SUCCESS);

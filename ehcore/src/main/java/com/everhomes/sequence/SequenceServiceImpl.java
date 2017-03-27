@@ -321,10 +321,11 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPunchStatistics.class, Tables.EH_PUNCH_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PUNCH_STATISTICS.ID.max()).from(Tables.EH_PUNCH_STATISTICS).fetchOne().value1();
         });
+        
 
-        syncTableSequence(null, EhPunchScheduling.class, Tables.EH_PUNCH_SCHEDULING.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_PUNCH_SCHEDULING.ID.max()).from(Tables.EH_PUNCH_SCHEDULING).fetchOne().value1();
-        });
+        syncTableSequence(null, EhPunchSchedulings.class, Tables.EH_PUNCH_SCHEDULINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PUNCH_SCHEDULINGS.ID.max()).from(Tables.EH_PUNCH_SCHEDULINGS).fetchOne().value1();
+        });	
         
         syncTableSequence(EhGroups.class, EhRentalBillAttachments.class, Tables.EH_RENTAL_BILL_ATTACHMENTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_RENTAL_BILL_ATTACHMENTS.ID.max()).from(Tables.EH_RENTAL_BILL_ATTACHMENTS).fetchOne().value1();
