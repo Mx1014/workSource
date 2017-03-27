@@ -52,7 +52,6 @@ CREATE TABLE `eh_sms_logs`(
   `locale` VARCHAR(16),
   `mobile` VARCHAR(128),
   `text` text,
-  `template_id` BIGINT,
   `variables` VARCHAR(512),
   `result` text,
   `create_time` DATETIME,
