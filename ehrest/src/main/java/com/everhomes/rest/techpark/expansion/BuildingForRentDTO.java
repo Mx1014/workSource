@@ -37,7 +37,7 @@ public class BuildingForRentDTO {
 	private String   posterUri;
 	private String   posterUrl;
 	private String   subject;
-	private String   rentAreas;
+	private BigDecimal   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
 	private String   description;
@@ -60,6 +60,15 @@ public class BuildingForRentDTO {
 	private String unit;
 	private String issuerType;
 	private String detailUrl;
+	private Byte deleteFlag;
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
 
 	public BigDecimal getRentAmount() {
 		return rentAmount;
@@ -206,11 +215,11 @@ public class BuildingForRentDTO {
 		this.subject = subject;
 	}
 
-	public String getRentAreas() {
+	public BigDecimal getRentAreas() {
 		return rentAreas;
 	}
 
-	public void setRentAreas(String rentAreas) {
+	public void setRentAreas(BigDecimal rentAreas) {
 		this.rentAreas = rentAreas;
 	}
 

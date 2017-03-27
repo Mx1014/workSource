@@ -34,7 +34,16 @@ public class ListBuildingForRentCommand {
 	private BigDecimal startRentAmount;
 	private BigDecimal endRentAmount;
 	private Long userId;
+	private Long organizationId;
 	private String issuerType;
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	public BigDecimal getStartRentArea() {
 		return startRentArea;

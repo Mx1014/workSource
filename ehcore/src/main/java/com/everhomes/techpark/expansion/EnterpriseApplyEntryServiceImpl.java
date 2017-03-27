@@ -626,12 +626,26 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(lease, locator, pageSize);
 		
 		res.setNextPageAnchor(locator.getAnchor());
-		
+
+		long userId = UserContext.current().getUser().getId();
+		CheckIsLeaseIssuerDTO flag = new CheckIsLeaseIssuerDTO();
+		flag.setFlag(LeasePromotionFlag.DISABLED.getCode());
+		if (null != cmd.getOrganizationId()) {
+			CheckIsLeaseIssuerCommand cmd2 = new CheckIsLeaseIssuerCommand();
+			cmd2.setOrganizationId(cmd.getOrganizationId());
+			flag.setFlag(checkIsLeaseIssuer(cmd2).getFlag());
+		}
+
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
 			populateRentDTO(dto, c.getAttachments());
 
-			dto.setRentAreas(String.valueOf(c.getRentAreas()));
+			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
+			if (LeaseIssuerType.NORMAL_USER.getCode().equals(dto.getIssuerType())) {
+				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag() &&
+						userId == c.getCreateUid())
+					dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
+			}
 			dto.setUnit("元/㎡/月");
             return dto;
 		}).collect(Collectors.toList());
