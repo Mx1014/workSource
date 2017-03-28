@@ -47,4 +47,6 @@ public interface EnterpriseApplyEntryProvider {
 			int pageSize, List<Long> idList);
 
 	void updateApplyEntry(EnterpriseOpRequest request);
+
+	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
 }

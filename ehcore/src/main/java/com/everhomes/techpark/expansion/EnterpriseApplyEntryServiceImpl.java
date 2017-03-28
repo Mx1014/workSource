@@ -638,7 +638,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
-			populateRentDTO(dto, c.getAttachments());
+
+			populateRentDTO(dto);
 
 			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
 			if (LeaseIssuerType.NORMAL_USER.getCode().equals(dto.getIssuerType())) {
@@ -646,7 +647,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						userId == c.getCreateUid())
 					dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
 			}
-			dto.setUnit("元/㎡/月");
+
             return dto;
 		}).collect(Collectors.toList());
 		
@@ -654,12 +655,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 
-	private void populateRentDTO(BuildingForRentDTO dto, List<LeasePromotionAttachment> attachments) {
+	private void populateRentDTO(BuildingForRentDTO dto) {
 		//TODO: set detail url
 		processDetailUrl(dto);
-		Address address = addressProvider.findAddressById(dto.getAddressId());
-		if (null != address) {
-			dto.setApartmentName(address.getApartmentName());
+
+		if (null != dto.getAddressId()) {
+			Address address = addressProvider.findAddressById(dto.getAddressId());
+			if (null != address) {
+				dto.setApartmentName(address.getApartmentName());
+			}
 		}
 
 		Building building = communityProvider.findBuildingById(dto.getBuildingId());
@@ -670,13 +674,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto.setLongitude(building.getLongitude());
 		}
 
-		dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+		long userId = UserContext.current().getUser().getId();
+		dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
 
-		if(null != attachments){
-			for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-			}
-		}
+		List<LeasePromotionAttachment> attachments = getAttachmentsByLeaseId(dto.getId());
+		dto.setAttachments(attachments.stream().map(a -> {
+			BuildingForRentAttachmentDTO ad = ConvertHelper.convert(a, BuildingForRentAttachmentDTO.class);
+			ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), userId));
+
+			return ad;
+		}).collect(Collectors.toList()));
+
 		dto.setUnit("元/㎡/月");
 	}
 
@@ -699,7 +707,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         if (null == cmd.getIssuerType())
             cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
         LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-		leasePromotion.setAttachments(null);
 
         if (null != cmd.getEnterTime())
 		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
@@ -726,8 +733,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
-		populateRentDTO(dto, null != attachmentDTOs?attachmentDTOs.stream().map(a -> ConvertHelper.convert(a, LeasePromotionAttachment.class)
-		).collect(Collectors.toList()):null);
+
+		populateRentDTO(dto);
 
 		return dto;
 	}
@@ -740,6 +747,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		if (null != cmd.getEnterTime())
 			leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+
+		leasePromotion.setIssuerType(lease.getIssuerType());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
 		leasePromotion.setCreateTime(lease.getCreateTime());
 		leasePromotion.setCreateUid(lease.getCreateUid());
@@ -765,19 +774,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
-		populateRentDTO(dto, null != attachmentDTOs?attachmentDTOs.stream().map(a -> ConvertHelper.convert(a, LeasePromotionAttachment.class)
-		).collect(Collectors.toList()):null);
+
+		populateRentDTO(dto);
 
 		return dto;
 	}
-	
+
+	private List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId) {
+		List<LeasePromotionAttachment> attachments = enterpriseApplyEntryProvider.getAttachmentsByLeaseId(leaseId);
+
+		return attachments;
+	}
+
 	@Override
 	public BuildingForRentDTO findLeasePromotionById(Long id){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(id);
 
         BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
-		populateRentDTO(dto, leasePromotion.getAttachments());
+		populateRentDTO(dto);
 
 		return dto;
 	}

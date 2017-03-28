@@ -24,21 +24,21 @@ public class LeasePromotion extends EhLeasePromotions {
 	private Double latitude;
 	
 	
-	private List<LeasePromotionAttachment> attachments;
+//	private List<LeasePromotionAttachment> attachments;
 
 	private BigDecimal startRentArea;
 	private BigDecimal endRentArea;
 	private BigDecimal startRentAmount;
 	private BigDecimal endRentAmount;
 
-	public List<LeasePromotionAttachment> getAttachments() {
-		return attachments;
-	}
-
-
-	public void setAttachments(List<LeasePromotionAttachment> attachments) {
-		this.attachments = attachments;
-	}
+//	public List<LeasePromotionAttachment> getAttachments() {
+//		return attachments;
+//	}
+//
+//
+//	public void setAttachments(List<LeasePromotionAttachment> attachments) {
+//		this.attachments = attachments;
+//	}
 
 
 	public java.lang.String getPosterUrl() {

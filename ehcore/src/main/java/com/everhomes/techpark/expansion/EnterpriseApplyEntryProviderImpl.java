@@ -31,8 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class EnterpriseApplyEntryProviderImpl implements
-		EnterpriseApplyEntryProvider {
+public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryProvider {
 	
 	@Autowired
 	private DbProvider dbProvider;
@@ -137,8 +136,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 						.limit(pageSize)
 						.fetch().map((r) -> {
 							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
-							List<LeasePromotionAttachment> attachments = this.getAttachments(lease.getId());
-							lease.setAttachments(attachments);
+
 							leasePromotions.add(lease);
 							return null;
 						});
@@ -150,8 +148,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		}
 		return leasePromotions;
 	}
-	
-	private List<LeasePromotionAttachment> getAttachments(Long leaseId){
+
+	@Override
+	public List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
 		List<LeasePromotionAttachment> attachments = context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
@@ -161,8 +160,8 @@ public class EnterpriseApplyEntryProviderImpl implements
 		});
 		return attachments;
 	}
-	
-	
+
+
 	@Override
 	public LeasePromotion createLeasePromotion(LeasePromotion leasePromotion) {
 		long id = sequenceProvider.getNextSequence(NameMapper
@@ -182,11 +181,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		LeasePromotion leasePromotion = ConvertHelper.convert(dao.findById(id), LeasePromotion.class);
-		
-		if(null == leasePromotion) 
-			return leasePromotion;
-		List<LeasePromotionAttachment> attachments = this.getAttachments(leasePromotion.getId());
-		leasePromotion.setAttachments(attachments);
+
 		return leasePromotion;
 	}
 	
