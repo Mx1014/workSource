@@ -242,6 +242,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		equipment.setId(id);
 		equipment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
         
 		LOGGER.info("creatEquipmentInspectionEquipment: " + equipment);
 		
