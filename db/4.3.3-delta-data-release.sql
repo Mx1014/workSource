@@ -406,3 +406,7 @@ VALUES ('4029', '0', '0', '', '0', '', 'text_tracker_curr_transfer_phone', '转�
 -- add by yanjun 2017-03-28
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('shake.open.door', '1', 'use shake open door function  0:not, 1:yes', '0', NULL);
+
+-- fix 8047 add by xiongying20170328
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1l6bGxZV1k1TVdaak5qUTBNemN5Tm1VM1ptRXdOekUyTWpVMU1tSmtOZw' where id in (112848, 112878 ) and namespace_id = 999983;
+update eh_launch_pad_items set action_data = '{"itemLocation":"/home/Coupons","layoutName":"CouponsLayout","title":"资源租赁"}' where id in (112848, 112878 ) and namespace_id = 999983;
