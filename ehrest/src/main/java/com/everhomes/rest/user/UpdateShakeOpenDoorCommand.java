@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
- * <li>namespaceId: 域空间</li>
- * <li>statDate: 统计日</li>
+ * <li></li>
+ * <li>shakeOpenDoor: 开启参数0或1</li>
  * </ul>
  */
 public class UpdateShakeOpenDoorCommand {
