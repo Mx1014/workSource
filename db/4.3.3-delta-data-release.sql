@@ -269,8 +269,8 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999990', @eh_service_alliance_categories);
 
 update eh_banners set action_type = 33 where name in("高尔夫","高端健身会所") and namespace_id = 999990;
-update eh_banners set action_data = '{"type":201002,"parentId":201002,"displayType": "list"}' where name = "高尔夫" and namespace_id = 999990;
-update eh_banners set action_data = '{"type":201003,"parentId":201003,"displayType": "list"}' where name = "高端健身会所" and namespace_id = 999990;
+update eh_banners set action_data = '{"type":201033,"parentId":201033,"displayType": "list"}' where name = "高尔夫" and namespace_id = 999990;
+update eh_banners set action_data = '{"type":201034,"parentId":201034,"displayType": "list"}' where name = "高端健身会所" and namespace_id = 999990;
 
 UPDATE eh_launch_pad_items set action_type = 33 , action_data = '{"type":201004,"parentId":201004,"displayType": "grid"}' where item_label = '旅游' and namespace_id = 999990;
 
