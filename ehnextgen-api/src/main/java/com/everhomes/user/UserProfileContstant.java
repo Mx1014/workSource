@@ -30,4 +30,9 @@ public interface UserProfileContstant {
      * 
      */
     public static final String YZB_VIDEO_PERMISION = "yzb_video_permision";
+    
+    /**
+     * 是否启用摇一摇开门
+     */
+    public static final String SHAKE_OPEN_DOOR = "shake_open_door";
 }

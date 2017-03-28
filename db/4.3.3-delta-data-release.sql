@@ -392,3 +392,11 @@ INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`,
 VALUES ('4028', '0', '0', '', '0', '', 'text_tracker_curr_transfer_name', '转交人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-transfer-name', '1');
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('4029', '0', '0', '', '0', '', 'text_tracker_curr_transfer_phone', '转交人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-transfer-phone', '1');
+
+
+
+
+
+-- add by yanjun 2017-03-28
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('shake.open.door', '1', 'use shake open door function  0:not, 1:yes', '0', NULL);
