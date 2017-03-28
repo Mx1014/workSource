@@ -17,7 +17,7 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 
 /**
- * 节点跟踪的 上个节点操作执行人姓名
+ * 节点跟踪的 上个节点操作执行人手机号
  * @author janson
  *
  */
@@ -33,8 +33,10 @@ public class FlowVarsTextTrackerPrefixProcessorPhone implements FlowVariableText
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
 		if(ctx.getOperator() != null && ctx.getOperator().getId() > User.MAX_SYSTEM_USER_ID) {
-			flowService.fixupUserInfoInContext(ctx, ctx.getOperator());
-			return ctx.getOperator().getNickName();
+			UserInfo ui = flowService.getUserInfoInContext(ctx, ctx.getOperator().getId());
+			if(ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
+				return ui.getPhones().get(0);
+			}
 		}
 		
 		return null;
