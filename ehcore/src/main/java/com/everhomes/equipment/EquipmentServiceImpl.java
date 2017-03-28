@@ -2846,6 +2846,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private List<String> importEquipmentStandardsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -2862,7 +2863,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				standard.setOwnerId(cmd.getOwnerId());
 				standard.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
-				
+				standard.setNamespaceId(namespaceId);
 				standard.setCreatorUid(userId);
 				standard.setOperatorUid(userId);
 				LOGGER.info("add standard");
@@ -2878,6 +2879,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
 			dbProvider.execute((TransactionStatus status) -> {
@@ -2892,7 +2894,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
 					equipment.setRemarks(s[9]);
 				}
-
+				equipment.setNamespaceId(namespaceId);
 				equipment.setOwnerType(cmd.getOwnerType());
 				equipment.setOwnerId(cmd.getOwnerId());
 				equipment.setTargetType(cmd.getTargetType());
@@ -2916,6 +2918,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	private List<String> importEquipmentAccessoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -2926,7 +2929,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				accessory.setModelNumber(s[2]);;
 				accessory.setSpecification(s[3]);;
 				accessory.setLocation(s[4]);;
-
+				accessory.setNamespaceId(namespaceId);
 				accessory.setOwnerType(cmd.getOwnerType());
 				accessory.setOwnerId(cmd.getOwnerId());
 				accessory.setTargetType(cmd.getTargetType());
