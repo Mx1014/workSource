@@ -8,7 +8,5 @@ public interface OAuth2ClientHandlerConstant {
 
     String OAUTH2_HANDLER = "OAuth2Handler-";
 
-    String HANDLER_HUAN_TENG = "HuanTengSmart";// 幻腾智能
-
     String HANDLER_GENERAL = "General";// 通用的handler
 }

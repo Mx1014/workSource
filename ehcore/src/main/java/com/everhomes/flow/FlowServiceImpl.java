@@ -2731,7 +2731,7 @@ public class FlowServiceImpl implements FlowService {
 		Long orgId = flow.getOrganizationId();
 		
 		for(FlowUserSelection sel : selections) {
-			if(users.size() > maxCount) {
+			if(users.size() >= maxCount) {
 				//为了加快处理的速度，有的情况不需要拿太多用户
 				break;
 			}
@@ -3629,7 +3629,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		Long orgId = selections.get(0).getOrganizationId();
 		List<Long> users = resolvUserSelections(ctx, new HashMap<String, Long>(), FlowEntityType.FLOW_NODE
-				, nodeId, selections, 1, 5);
+				, nodeId, selections, 1, 3);
 		for(Long u : users) {
 			UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
 			if(ui != null) {

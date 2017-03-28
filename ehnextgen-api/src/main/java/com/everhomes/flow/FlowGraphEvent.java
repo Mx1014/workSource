@@ -13,4 +13,5 @@ public interface FlowGraphEvent {
 	Long getFiredButtonId();
 	public List<FlowEntitySel> getEntitySel();
 	void fire(FlowCaseState ctx);
+	FlowSubject getSubject();
 }

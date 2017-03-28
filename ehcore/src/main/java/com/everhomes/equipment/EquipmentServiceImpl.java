@@ -707,7 +707,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.creatEquipmentStandard(standard);
 			
 		} else {
-			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+			EquipmentInspectionStandards exist = verifyEquipmentStandard(cmd.getId());
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setRepeatSettingId(exist.getRepeatSettingId());
 			standard.setStatus(exist.getStatus());
@@ -890,7 +890,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		User user = UserContext.current().getUser();
 
-		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
+		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 
 		if(EquipmentStandardStatus.INACTIVE.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
@@ -1041,7 +1041,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public EquipmentStandardsDTO findEquipmentStandard(DeleteEquipmentStandardCommand cmd) {
 		
-		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
+		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
 		
 		//填充关联设备数equipmentsCount
 		processEquipmentsCount(standard);
@@ -1077,9 +1077,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		standard.setEquipmentsCount(count);
 	}
 	
-	private EquipmentInspectionStandards verifyEquipmentStandard(Long standardId, String ownerType, Long ownerId) {
+	private EquipmentInspectionStandards verifyEquipmentStandard(Long standardId) {
 
-		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(standardId, ownerType, ownerId);
+		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(standardId);
 		
 		if(standard == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
@@ -3060,20 +3060,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<EquipmentInspectionTasks> allTasks = null;
 
 		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
-		List<Long> ownerIds = new ArrayList<>();
-
-		if(organization != null) {
-			String[] path = organization.getPath().split("/");
-			for (int i = path.length - 1; i > 0; i--) {
-				ownerIds.add(Long.valueOf(path[i]));
-			}
-		}
+//		List<Long> ownerIds = new ArrayList<>();
+//
+//		if(organization != null) {
+//			String[] path = organization.getPath().split("/");
+//			for (int i = path.length - 1; i > 0; i--) {
+//				ownerIds.add(Long.valueOf(path[i]));
+//			}
+//		}
 
 		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
-					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, userId);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
-					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey);
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+					null, null, offset, userId);
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+					null, null, offset, pageSize + 1, cacheKey);
 
 		}
 		if(!isAdmin) {
@@ -3095,11 +3095,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
-						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, userId);
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+					executeStandardIds, reviewStandardIds, offset, userId);
 
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
-						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
 
 		}
 
@@ -3156,8 +3156,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 
-	private String convertListEquipmentInspectionTasksCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
+	private String convertListEquipmentInspectionTasksCache(Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
+				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -3166,10 +3166,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 
 		sb.append(userId);
-		sb.append("-");
-		sb.append(ownerType);
-		sb.append("-");
-		sb.append(ownerIds);
+//		sb.append("-");
+//		sb.append(ownerType);
+//		sb.append("-");
+//		sb.append(ownerIds);
 		sb.append("-community-");
 		if(targetId != null && targetId.size() > 0) {
 			sb.append(targetId.get(0));
@@ -3662,9 +3662,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public List<InspectionItemDTO> listParametersByStandardId(
 			ListParametersByStandardIdCommand cmd) {
-		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId(), cmd.getOwnerType(), cmd.getOwnerId());
-	
-		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), 
+		EquipmentInspectionStandards standard = verifyEquipmentStandard(cmd.getStandardId());
+
+		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(),
 				cmd.getOwnerId(), cmd.getOwnerType());
 		if(template == null || Status.INACTIVE.equals(Status.fromStatus(template.getStatus()))) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,

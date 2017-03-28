@@ -146,7 +146,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
     @Override
     public void updateOAuth2Server(UpdateOAuth2ServerCommand cmd) {
         if (cmd.getId() != null) {
-            OAuth2Server oAuth2Server = oAuth2ServerProvider.findOAuth2ServerByVendor(cmd.getVendor());
+            OAuth2Server oAuth2Server = oAuth2ServerProvider.findOAuth2ServerById(cmd.getId());
             if (cmd.getVendor() != null) {
                 oAuth2Server.setVendor(cmd.getVendor());
             }
