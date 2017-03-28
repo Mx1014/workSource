@@ -30,7 +30,7 @@ public class FlowVarsTextRemindCurrentAllProcessorsName implements FlowVariableT
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
 		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount()-1l); //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
+				, ctx.getFlowCase().getStepCount());
 		String txt = "";
 		int i = 0;
 		

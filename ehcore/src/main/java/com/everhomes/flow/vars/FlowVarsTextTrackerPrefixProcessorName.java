@@ -17,7 +17,7 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
 
 /**
- * 节点跟踪的 上个节点操作执行人手机号
+ * 节点跟踪的 上个节点操作执行人姓名
  * @author janson
  *
  */
