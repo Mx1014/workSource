@@ -757,6 +757,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.NAMESPACE_ID.eq(namespaceId));
+
+		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+	@Override
 	public EquipmentInspectionAccessories findAccessoryById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionAccessoriesDao dao = new EhEquipmentInspectionAccessoriesDao(context.configuration());

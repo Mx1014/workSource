@@ -58,3 +58,8 @@ CREATE TABLE `eh_sms_logs`(
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 增加域空间 add by xiongying20170328
+ALTER TABLE eh_equipment_inspection_accessories ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_equipment_inspection_items ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_equipment_inspection_templates ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;

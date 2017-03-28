@@ -282,3 +282,9 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 SET @eh_service_alliance_jump_module = (SELECT max(id) FROM eh_service_alliance_jump_module);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@eh_service_alliance_jump_module := @eh_service_alliance_jump_module + 1), '999990', '电商', 'BIZS', '0');
+
+
+-- 设备增加域空间 add by xiongying20170328
+update eh_equipment_inspection_accessories set namespace_id = 999992;
+update eh_equipment_inspection_items set namespace_id = 999992;
+update eh_equipment_inspection_templates set namespace_id = 999992;

@@ -2534,7 +2534,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private EquipmentInspectionEquipments verifyEquipment(Long equipmentId, String ownerType, Long ownerId) {
 
-		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, ownerType, ownerId);
+//		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, ownerType, ownerId);
+
+		//改用namespaceId by xiongying20170328
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(equipmentId, UserContext.getCurrentNamespaceId());
 		
 		if(equipment == null) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
