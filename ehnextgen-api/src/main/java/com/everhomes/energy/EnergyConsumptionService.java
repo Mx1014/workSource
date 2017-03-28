@@ -18,8 +18,6 @@ import java.util.List;
  */
 public interface EnergyConsumptionService {
 
-    ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
-
     /**
      * 创建能耗表记(水表, 电表)
      * @param cmd   cmd
