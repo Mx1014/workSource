@@ -1,8 +1,10 @@
 // @formatter:off
 package com.everhomes.community;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -10,10 +12,17 @@ import com.everhomes.acl.*;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,17 +133,6 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -157,11 +155,6 @@ import com.everhomes.user.UserGroupHistory;
 import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.VersionRange;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
@@ -1719,8 +1712,62 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 
-	
-	
+	@Override
+	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpResponse response) {
+		CommunityUserResponse resp = listUserCommunities(cmd);
+		List<CommunityUserDto> dtos = resp.getUserCommunities();
+
+//		Workbook wb = new XSSFWorkbook();
+//
+//		Font font = wb.createFont();
+//		font.setFontName("黑体");
+//		font.setFontHeightInPoints((short) 16);
+//		CellStyle style = wb.createCellStyle();
+//		style.setFont(font);
+//
+//		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+//		sheet.setDefaultColumnWidth(20);
+//		sheet.setDefaultRowHeightInPoints(20);
+//		Row row = sheet.createRow(0);
+//		row.createCell(0).setCellValue("姓名");
+//		row.createCell(1).setCellValue("性别");
+//		row.createCell(2).setCellValue("手机号");
+//		row.createCell(3).setCellValue("注册时间");
+//		row.createCell(4).setCellValue("认证状态");
+//		row.createCell(5).setCellValue("企业");
+//		row.createCell(6).setCellValue("是否高管");
+//		row.createCell(7).setCellValue("职位");
+//		row.createCell(8).setCellValue("缴费类型");
+//
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		int size = dtos.size();
+//		for(int i = 0; i < size; i++){
+//			Row tempRow = sheet.createRow(i + 1);
+//			CommunityUserDto dto = dtos.get(i);
+//			tempRow.createCell(0).setCellValue(dto.getUserName());
+//			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+//			tempRow.createCell(2).setCellValue(dto.getPhone());
+//			tempRow.createCell(3).setCellValue(sdf.format());
+//			tempRow.createCell(4).setCellValue(order.getRechargeTime()==null?"":datetimeSF.format(order.getRechargeTime()));
+//			tempRow.createCell(5).setCellValue(null == order.getMonthCount()?"":order.getMonthCount().toString());
+//			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
+//			VendorType type = VendorType.fromCode(order.getPaidType());
+//			tempRow.createCell(7).setCellValue(null==type?"":type.getDescribe());
+//			tempRow.createCell(8).setCellValue(ParkingRechargeType.fromCode(order.getRechargeType()).getDescribe());
+//
+//		}
+//		ByteArrayOutputStream out = null;
+//		try {
+//			out = new ByteArrayOutputStream();
+//			wb.write(out);
+//			DownloadUtils.download(out, response);
+//		} catch (IOException e) {
+//			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"exportParkingRechageOrders is fail.");
+//		}
+	}
+
 
 	@Override
 	public CountCommunityUserResponse countCommunityUsers(
