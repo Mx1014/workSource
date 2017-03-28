@@ -3848,6 +3848,11 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
 	@Override
+	public void videoCallback() {
+		LOGGER.info("video callbacll................");
+	}
+
+	@Override
 	public ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd) {
 		if (cmd.getNamespaceId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

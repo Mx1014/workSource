@@ -362,3 +362,29 @@ UPDATE `eh_configurations` SET `value`='259200' WHERE `name`='aclink.user_key_ti
 UPDATE `eh_configurations` SET `value`='259200' WHERE `name`='aclink.user_key_timeout' and `namespace_id`=1000000 limit 1;
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999983, 'aclink.user_key_timeout', '259200', 'timeout in second for qr kexingkexueyuan');
 
+-- add by sfyan 20170328 重整缴费管理菜单 配置
+DELETE FROM eh_web_menu_scopes WHERE owner_id  = 999985 AND menu_id IN (20400, 20410, 20420);
+DELETE FROM `eh_service_module_scopes` WHERE `namespace_id`  = 999985 AND `module_id` IN (20400);
+DELETE FROM `eh_acls` WHERE `role_id` = 1001 AND `role_type` = 'EhAclRoles' AND `privilege_id` = 10095;
+DELETE FROM eh_web_menu_scopes WHERE owner_id  = 999985 AND menu_id IN (SELECT id FROM `eh_web_menus` WHERE `name` = '缴费管理');
+DELETE FROM eh_service_module_scopes WHERE namespace_id  = 999985 AND module_id IN (SELECT id FROM `eh_service_modules` WHERE `name` = '缴费管理');
+DELETE FROM `eh_web_menus` WHERE `name` = '缴费管理';
+DELETE FROM `eh_service_modules` WHERE `name` = '缴费管理';
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
+VALUES (20700, '缴费管理', 20000, NULL, 'react:/property-service/payment-management', 0, 2, '/20000/20700', 'park', 252, 20700);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('20700', '缴费管理', '20000', '/20000/20700', '0', '2', '2', '0', UTC_TIMESTAMP());
+SET @service_module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes`(`id`, `module_id`,`module_name`, `namespace_id`, `apply_policy`) VALUES( @service_module_id := @service_module_id + 1,20700,'', 999985,2);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( @menu_scope_id := @menu_scope_id + 1,20700,'', 'EhNamespaces', 999985,2);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'20027','20700','缴费管理','1','1','缴费管理 全部权限','710');
+SET @eh_service_module_privileges = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ((@eh_service_module_privileges := @eh_service_module_privileges + 1), '20700', '0', '20027', '缴费管理', '0', UTC_TIMESTAMP());
+
+	
+	
