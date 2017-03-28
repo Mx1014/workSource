@@ -299,6 +299,10 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 update eh_equipment_inspection_accessories set namespace_id = 999992;
 update eh_equipment_inspection_items set namespace_id = 999992;
 update eh_equipment_inspection_templates set namespace_id = 999992;
+update eh_equipment_inspection_tasks set namespace_id = 999992;
+update eh_equipment_inspection_standards set namespace_id = 999992;
+update eh_equipment_inspection_equipments set namespace_id = 999992;
+
 
 -- new version of variable supported by janson 2017-03-24
 UPDATE `eh_locale_templates` SET `description`='${processorName} 被驳回', `text`='${processorName} 驳回' WHERE `scope`='flow' and `code`=10002 limit 1;

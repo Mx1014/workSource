@@ -1264,6 +1264,29 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name) {
+		List<EquipmentInspectionTemplates> templates = new ArrayList<EquipmentInspectionTemplates>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.STATUS.eq(Status.ACTIVE.getCode()));
+
+		if(!StringUtils.isNullOrEmpty(name)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAME.like("%"+name+"%"));
+		}
+
+		query.fetch().map((r) -> {
+			templates.add(ConvertHelper.convert(r, EquipmentInspectionTemplates.class));
+			return null;
+		});
+		if(templates.size()==0)
+			return null;
+
+		return templates;
+	}
+
+	@Override
 	public List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(
 			Long templateId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
