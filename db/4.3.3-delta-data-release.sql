@@ -164,6 +164,8 @@ delete from eh_launch_pad_layouts where namespace_id = 0;
 
 select max(id) into @sc_id from `eh_service_alliance_categories`;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`) VALUES (@sc_id:=@sc_id+1, 'community', 240111044331051460, 0, '创业服务', '创业服务', 0, 2, 1, now(), 0, NULL, 0, '', 1, 0, NULL);
+select max(id) into @id from `eh_service_alliances`;
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`) VALUES (@id:=@id+1, 0, 'community', 240111044331051460, '创业服务', '创业服务', @sc_id);
 
 -- 增加0域空间数据，add by tt, 20170316
 select max(id) into @id from `eh_banners`;
