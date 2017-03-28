@@ -20,6 +20,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.launchpad.LaunchPadService;
+import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
@@ -44,6 +45,9 @@ public class LauchPadUiController extends ControllerBase {
     
     @Autowired
     private LaunchPadService launchPadService;
+
+    @Autowired
+    private MessagingKickoffService kickoffService;
     
     /**
      * <b>URL: /ui/launchpad/getLaunchPadItemsByScene</b>
@@ -53,6 +57,7 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getLaunchPadItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        kickoffService.checkKickoffStatus(request);
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItemsByScene(cmd, request);
         RestResponse resp =  new RestResponse(commandResponse);
@@ -78,6 +83,7 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     @RequireAuthentication(false)
     public RestResponse getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd, HttpServletRequest request,HttpServletResponse response) {
+        kickoffService.checkKickoffStatus(request);
         
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
         RestResponse resp =  new RestResponse();
@@ -132,6 +138,8 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        kickoffService.checkKickoffStatus(request);
+        
     	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
     	RestResponse resp =  new RestResponse(commandResponse);
         resp.setErrorCode(ErrorCodes.SUCCESS);
@@ -147,6 +155,8 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=CategryItemDTO.class, collection = true)
     @RequireAuthentication(false)
     public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+        kickoffService.checkKickoffStatus(request);
+        
         RestResponse resp =  new RestResponse(launchPadService.getAllCategryItemsByScene(cmd, request));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
