@@ -25,13 +25,7 @@ public interface FlowStateProcessor {
 
 	void endStepEnter(FlowCaseState ctx, FlowGraphNode from);
 
-	UserInfo getApplier(FlowCaseState ctx, String variable);
-
-	UserInfo getCurrProcessor(FlowCaseState ctx, String variable);
-
 	FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO);
-
-	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
 	FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO);
 

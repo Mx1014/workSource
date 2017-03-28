@@ -8,11 +8,11 @@ import com.everhomes.rest.user.UserInfo;
 @Component(FlowVariableTextResolver.APPLIER_PHONE)
 public class FlowVaribleApplierNameResolver implements FlowVariableTextResolver {
 	@Autowired
-	private FlowStateProcessor flowStateProcessor;
+	FlowService flowService;
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		UserInfo userInfo = flowStateProcessor.getApplier(ctx, variable);
+		UserInfo userInfo = flowService.getUserInfoInContext(ctx, ctx.getFlowCase().getApplyUserId());
 		if(userInfo == null || userInfo.getPhones() == null || userInfo.getPhones().size() == 0) {
 			return "error";//TODO use error ?
 		}

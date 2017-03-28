@@ -11,12 +11,12 @@ import com.everhomes.rest.flow.FlowEntityType;
 @Component(FlowVariableUserResolver.APPLIER)
 public class FlowVariableApplyUserResolver implements FlowVariableUserResolver {
 	@Autowired
-	FlowStateProcessor flowStateProcessor;
+	FlowService flowService;
 	
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType fromEntity, Long entityId,
 			FlowUserSelection userSelection, int loopCnt) {
-		return flowStateProcessor.getApplierSelection(ctx, userSelection);
+		return flowService.getApplierSelection(ctx, userSelection);
 	}
 
 }
