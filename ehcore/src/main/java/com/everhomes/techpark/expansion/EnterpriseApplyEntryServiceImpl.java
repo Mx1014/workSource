@@ -737,8 +737,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 		LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
-		
-		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+
+		if (null != cmd.getEnterTime())
+			leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
 		leasePromotion.setCreateTime(lease.getCreateTime());
 		leasePromotion.setCreateUid(lease.getCreateUid());
