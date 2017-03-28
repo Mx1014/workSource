@@ -242,6 +242,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		equipment.setId(id);
 		equipment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
         
 		LOGGER.info("creatEquipmentInspectionEquipment: " + equipment);
 		
@@ -754,6 +755,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionEquipmentsDao dao = new EhEquipmentInspectionEquipmentsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), EquipmentInspectionEquipments.class);
+	}
+
+	@Override
+	public EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.NAMESPACE_ID.eq(namespaceId));
+
+		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
 	}
 
 	@Override

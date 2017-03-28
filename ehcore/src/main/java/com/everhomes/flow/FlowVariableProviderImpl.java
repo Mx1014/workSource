@@ -133,7 +133,7 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
 					query.addConditions(Tables.EH_FLOW_VARIABLES.MODULE_TYPE.eq(moduleType));	
 				}
 				
-				query.addConditions(Tables.EH_FLOW_VARIABLES.VAR_TYPE.eq(varType));
+				query.addConditions(Tables.EH_FLOW_VARIABLES.VAR_TYPE.contains(varType));
 				
 				if(name != null) {
 					query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));	

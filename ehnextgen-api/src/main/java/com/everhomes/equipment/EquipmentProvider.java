@@ -28,6 +28,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionStandards findStandardById(Long id);
 	EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionEquipments findEquipmentById(Long id);
+	EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId);
 	EquipmentInspectionAccessories findAccessoryById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionAccessories findAccessoryById(Long id);
 	EquipmentInspectionTasks findEquipmentTaskById(Long id, String ownerType, Long ownerId);

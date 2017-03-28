@@ -13,6 +13,11 @@ import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.user.User;
 
+/**
+ * 上一步操作执行人
+ * @author janson
+ *
+ */
 @Component(FlowVariableUserResolver.PREFIX_NODE_PROCESSOR)
 public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUserResolver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowVariablePrefixNodeProcessorResolver.class);
@@ -35,7 +40,7 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		//上个节点处理人是自己
 		List<Long> users = new ArrayList<Long>();
 		Long userId = ctx.getOperator().getId();
-		if(userId > User.SYSTEM_UID) {
+		if(userId > User.MAX_SYSTEM_USER_ID) {
 			users.add(ctx.getOperator().getId());	
 		}
 		
