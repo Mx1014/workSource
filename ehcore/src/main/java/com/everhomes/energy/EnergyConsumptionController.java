@@ -450,20 +450,6 @@ public class EnergyConsumptionController extends ControllerBase {
         return response(energyConsumptionService.listEnergyDefaultSettingTemplates());
     }
 
-    /**
-     * <b>URL: /energy/listAuthorizationCommunityByUser</b>
-     * <p>授权人员 管理小区列表</p>
-     */
-    @RequestMapping("listAuthorizationCommunityByUser")
-    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
-    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-        ListAuthorizationCommunityByUserResponse resp = energyConsumptionService.listAuthorizationCommunityByUser(cmd);
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
 
 
 }
