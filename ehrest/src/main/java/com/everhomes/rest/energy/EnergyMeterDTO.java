@@ -25,6 +25,8 @@ import java.sql.Timestamp;
  *     <li>todayReadStatus: 今日读表状态{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>dayPrompt: 每日读表提示</li>
  *     <li>monthPrompt: 每月读表提示</li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
+ *     <li>priceConfig: 梯度价格方案 参考{@link com.everhomes.rest.energy.EnergyMeterPriceConfigDTO}</li>
  * </ul>
  */
 public class EnergyMeterDTO {
@@ -48,6 +50,9 @@ public class EnergyMeterDTO {
     private Byte todayReadStatus;
     private BigDecimal dayPrompt;
     private BigDecimal monthPrompt;
+
+    private Byte calculationType;
+    private EnergyMeterPriceConfigDTO priceConfig;
 
     public Long getId() {
         return id;
@@ -191,6 +196,22 @@ public class EnergyMeterDTO {
 
     public void setLastReading(BigDecimal lastReading) {
         this.lastReading = lastReading;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public EnergyMeterPriceConfigDTO getPriceConfig() {
+        return priceConfig;
+    }
+
+    public void setPriceConfig(EnergyMeterPriceConfigDTO priceConfig) {
+        this.priceConfig = priceConfig;
     }
 
     @Override

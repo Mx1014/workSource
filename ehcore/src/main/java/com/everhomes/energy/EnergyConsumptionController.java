@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.Date;
 
 /**
@@ -376,4 +377,93 @@ public class EnergyConsumptionController extends ControllerBase {
     	energyConsumptionService.calculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
+
+    /**
+     * <p>新建梯度单价方案</p>
+     * <b>URL: /energy/createEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("createEnergyMeterPriceConfig")
+    public RestResponse createEnergyMeterPriceConfig(@Valid CreateEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.createEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>修改梯度单价方案</p>
+     * <b>URL: /energy/updateEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("updateEnergyMeterPriceConfig")
+    public RestResponse updateEnergyMeterPriceConfig(@Valid UpdateEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.updateEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>梯度单价方案列表</p>
+     * <b>URL: /energy/listEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value =EnergyMeterPriceConfigDTO.class, collection = true)
+    @RequestMapping("listEnergyMeterPriceConfig")
+    public RestResponse listEnergyMeterPriceConfig(@Valid ListEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.listEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>获取梯度单价方案</p>
+     * <b>URL: /energy/getEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("getEnergyMeterPriceConfig")
+    public RestResponse getEnergyMeterPriceConfig(@Valid GetEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.getEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>删除梯度单价方案</p>
+     * <b>URL: /energy/deleteEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("deleteEnergyMeterPriceConfig")
+    public RestResponse deleteEnergyMeterPriceConfig(@Valid DelelteEnergyMeterPriceConfigCommand cmd) {
+        energyConsumptionService.deleteEnergyMeterPriceConfig(cmd);
+        return success();
+    }
+
+    /**
+     * <p>新建表记的默认属性值</p>
+     * <b>URL: /energy/createEnergyMeterDefaultSetting</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createEnergyMeterDefaultSetting")
+    public RestResponse createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd) {
+        energyConsumptionService.createEnergyMeterDefaultSetting(cmd);
+        return success();
+    }
+
+    /**
+     * <p>获取默认设置</p>
+     * <b>URL: /energy/listEnergyDefaultSettingTemplates</b>
+     */
+    @RestReturn(value = EnergyMeterDefaultSettingTemplateDTO.class, collection = true)
+    @RequestMapping("listEnergyDefaultSettingTemplates")
+    public RestResponse listEnergyDefaultSettingTemplates() {
+        return response(energyConsumptionService.listEnergyDefaultSettingTemplates());
+    }
+
+    /**
+     * <b>URL: /energy/listAuthorizationCommunityByUser</b>
+     * <p>授权人员 管理小区列表</p>
+     */
+    @RequestMapping("listAuthorizationCommunityByUser")
+    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+        ListAuthorizationCommunityByUserResponse resp = energyConsumptionService.listAuthorizationCommunityByUser(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
 }

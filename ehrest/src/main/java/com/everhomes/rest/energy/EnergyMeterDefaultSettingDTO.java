@@ -9,6 +9,8 @@ import java.math.BigDecimal;
  *     <li>id: id</li>
  *     <li>name: 属性名称</li>
  *     <li>settingValue: 属性值</li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
+ *     <li>priceConfigName: 价格方案名称</li>
  *     <li>formulaName: 公式名称</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
  *     <li>settingStatus: 状态 {@link com.everhomes.rest.energy.EnergyCommonStatus}</li>
@@ -23,6 +25,9 @@ public class EnergyMeterDefaultSettingDTO {
     private String meterType;
     private Byte formulaType;
     private Byte settingStatus;
+
+    private Byte calculationType;
+    private String priceConfigName;
 
     public Long getId() {
         return id;
@@ -78,6 +83,22 @@ public class EnergyMeterDefaultSettingDTO {
 
     public void setFormulaType(Byte formulaType) {
         this.formulaType = formulaType;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public String getPriceConfigName() {
+        return priceConfigName;
+    }
+
+    public void setPriceConfigName(String priceConfigName) {
+        this.priceConfigName = priceConfigName;
     }
 
     @Override

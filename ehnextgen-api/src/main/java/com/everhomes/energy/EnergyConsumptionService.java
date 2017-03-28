@@ -1,6 +1,8 @@
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
@@ -208,4 +210,35 @@ public interface EnergyConsumptionService {
     void syncEnergyMeterReadingLogIndex();
 
     void syncEnergyMeterIndex();
+
+    /**
+     * 创建梯度价格方案
+     * */
+    EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 修改梯度价格方案
+     * */
+    EnergyMeterPriceConfigDTO updateEnergyMeterPriceConfig(UpdateEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 获得梯度价格方案
+     * */
+    EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 梯度价格方案列表
+     * */
+    List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 删除梯度价格方案
+     * */
+    void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd);
+
+    void createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd);
+
+    List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
+
+    ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 }

@@ -20,7 +20,7 @@ public interface EnergyMeterCategoryProvider {
     /**
      * 获取表记分类列表
      */
-    List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType);
+    List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId);
  
 	EnergyMeterCategory findById(Long id); 
     /**
