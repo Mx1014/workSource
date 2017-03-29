@@ -219,7 +219,11 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd, Long creatorUid) {
-        //黑名单权限校验 by sfyan20161213
+
+        //check权限 by sfyan 20170329
+        checkCreateTopicPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getContentCategory(), cmd.getCurrentOrgId());
+
+        //黑名单权限校验 by sfyan 20161213
         checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
 
         //报名人数限制必须在1到10000之间，add by tt, 20161013
@@ -3965,7 +3969,7 @@ public class ForumServiceImpl implements ForumService {
 //	    return this.createTopic(topicCmd);
 //	}
 
-    private void checkCreateTopic(String ownerType, Long ownerId, Long categoryId, Long currentOrgId){
+    private void checkCreateTopicPrivilege(String ownerType, Long ownerId, Long categoryId, Long currentOrgId){
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
 //        //至少有一项不能为空 才校验权限
@@ -4104,14 +4108,11 @@ public class ForumServiceImpl implements ForumService {
         default:
             break;
         }
-        String ownerType = null;
-        Long ownerId = null;
         if(visibleRegionType == VisibleRegionType.COMMUNITY){
-            ownerType = EntityType.COMMUNITY.getCode();
-            ownerId = visibleRegionId;
+            topicCmd.setOwnerType(EntityType.COMMUNITY.getCode());
+            topicCmd.setOwnerId(visibleRegionId);
         }
-
-        checkCreateTopic(ownerType, ownerId, cmd.getContentCategory(), currentOrgId);
+        topicCmd.setCurrentOrgId(currentOrgId);
 
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
