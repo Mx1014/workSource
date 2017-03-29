@@ -11,12 +11,5 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10155', '1001', '0', '1', UTC_TIMESTAMP());
 
 
--- 用户管理 add by sw 20170329
-delete from eh_web_menus where id = 34000;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('34000', '用户管理', '30000', NULL, 'user--user_management/1', '0', '2', '/30000/34000', 'park', '340', '34000');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('34100', '用户管理', '30000', NULL, 'user--user_management/0', '0', '2', '/30000/34100', 'park', '340', '34000');
-
 -- 能耗管理 add by xiongying 20170329
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('energy', '10015', 'zh_CN', '单价方案已被引用，不可删除');
