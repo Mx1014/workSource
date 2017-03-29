@@ -554,12 +554,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//分公司 总公司 改用namespaceId by xiongying 20170329
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.name.eq(ownerId));
+		//       if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_TYPE.eq(ownerType));
+//		}
 		
 
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.desc());

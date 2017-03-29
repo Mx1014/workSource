@@ -497,7 +497,7 @@ public class QualityServiceImpl implements QualityService {
 			category.setName(cmd.getName());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
-//			category.setna
+			category.setNamespaceId(user.getNamespaceId());
 			category.setStatus(QualityInspectionCategoryStatus.ACTIVE.getCode());
 			category.setCreatorUid(user.getId());
 			if(cmd.getParentId() != null) {
@@ -518,6 +518,7 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			QualityInspectionCategories category = verifiedCategoryById(cmd.getId());
 			category.setName(cmd.getName());
+			category.setNamespaceId(user.getNamespaceId());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
 			if(cmd.getParentId() != null) {

@@ -425,3 +425,4 @@ UPDATE `eh_locale_templates` SET `description`='${nodeName} 被驳回', `text`='
 
 -- 品质增加域空间 add by xiongying20170329
 update eh_quality_inspection_categories set namespace_id = 999992;
+update eh_quality_inspection_evaluation_factors set namespace_id = 999992;
