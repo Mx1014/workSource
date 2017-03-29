@@ -115,22 +115,34 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
+            String buildingName = "";
+            Address address = addressProvider.findAddressById(dto.getAddressId());
+            if (null != address) {
+
+            }
+            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
+//            if(null != leasePromotion){
+//                dto.setSourceName(leasePromotion.getSubject());
+//                Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
+//                dto.getBuildings().add(proessBuildingDTO(building));
+//            }
+
+            map.put("applyBuilding", defaultIfNull(applyEntry.getApplyUserName(), ""));
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
             map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
             String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
                     applyEntry.getApplyType() + "", locale, "");
             map.put("applyType", defaultIfNull(applyType, ""));
-            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
-            this.processSourceName(applyEntry);
-            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
+//            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
+//            this.processSourceName(applyEntry);
+//            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
             map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
             
-            String jsonStr = "";
-            if(null != applyEntry.getAreaSize())
-            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
-            else
-            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_NOAREA_CODE, locale, map, "[]");
+            String jsonStr;
+
+            jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
+
             return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
         } else {
             LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
