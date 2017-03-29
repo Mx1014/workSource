@@ -212,12 +212,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务地点");
 		e.setValue(dto.getAddress());
 		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("所属分类");
-		e.setValue(dto.getCategoryName());
-		entities.add(e);
+
+		if (StringUtils.isNotBlank(dto.getCategoryName())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("所属分类");
+			e.setValue(dto.getCategoryName());
+			entities.add(e);
+		}
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -230,7 +232,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系电话");
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
-		
+
+		//TODO:为科兴与一碑对接
+		if(dto.getNamespaceId() == 999983 &&
+				dto.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("状态");
+			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			entities.add(e);
+		}
+
 		return entities;
 	}
 
