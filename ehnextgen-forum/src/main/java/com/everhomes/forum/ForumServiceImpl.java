@@ -3965,6 +3965,18 @@ public class ForumServiceImpl implements ForumService {
 //	    return this.createTopic(topicCmd);
 //	}
 
+    private void checkCreateTopic(String ownerType, Long ownerId, Long categoryId, Long currentOrgId){
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+//        //至少有一项不能为空 才校验权限
+//        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
+//            return;
+//        }
+        if(CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
+        }
+    }
+
     private void checkBlacklist(String ownerType, Long ownerId, Long categoryId, Long forumId){
         ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
         ownerId = null == ownerId ? 0L : ownerId;
@@ -4011,6 +4023,7 @@ public class ForumServiceImpl implements ForumService {
         VisibleRegionType visibleRegionType = null;
         Long visibleRegionId = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        Long currentOrgId = null;
         switch(sceneType) {
         case DEFAULT:
         case PARK_TOURIST:
@@ -4041,6 +4054,7 @@ public class ForumServiceImpl implements ForumService {
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            currentOrgId = org.getId();
             if(org != null) {
                 String orgType = org.getOrganizationType();
                 
@@ -4090,7 +4104,15 @@ public class ForumServiceImpl implements ForumService {
         default:
             break;
         }
-        
+        String ownerType = null;
+        Long ownerId = null;
+        if(visibleRegionType == VisibleRegionType.COMMUNITY){
+            ownerType = EntityType.COMMUNITY.getCode();
+            ownerId = visibleRegionId;
+        }
+
+        checkCreateTopic(ownerType, ownerId, cmd.getContentCategory(), currentOrgId);
+
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
         }
