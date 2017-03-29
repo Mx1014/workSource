@@ -15,13 +15,10 @@ import javax.validation.constraints.NotNull;
  */
 public class ListUserRelatedPrivilegeByModuleIdCommand {
 
-    @NotNull
     private String ownerType;
 
-    @NotNull
     private Long ownerId;
 
-    @NotNull
     private Long organizationId;
 
     @NotNull
