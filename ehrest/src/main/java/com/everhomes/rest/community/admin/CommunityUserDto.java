@@ -1,5 +1,6 @@
 package com.everhomes.rest.community.admin;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationDTO;
 
 import java.sql.Timestamp;
@@ -47,6 +48,7 @@ public class CommunityUserDto {
     private String identityNumber;
     private Byte gender;
 
+	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> organizations;
 
 	public List<OrganizationDTO> getOrganizations() {
