@@ -69,24 +69,4 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
 
         return false;
     }
-    
-    @Override
-    public void removeKickoffTag(Integer namespaceId, LoginToken loginToken) {
-        String key = getKickoffMessageKey(namespaceId, loginToken);
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        redisTemplate.delete(key);
-        Object o = redisTemplate.opsForValue().get(key);
-    }
-    
-    @Override
-    public void checkKickoffStatus(HttpServletRequest request) {
-        LoginToken loginToken = userService.getLoginToken(request);
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if(namespaceId != null && loginToken != null && isKickoff(namespaceId, loginToken)) {
-            removeKickoffTag(namespaceId, loginToken);
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-                    UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
-        }
-    }
 }
