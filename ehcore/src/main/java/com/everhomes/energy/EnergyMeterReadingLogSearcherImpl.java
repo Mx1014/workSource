@@ -93,10 +93,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             builder.field("communityId", readingLog.getCommunityId());
-            builder.field("meterId", meter.getId());
-            builder.field("meterType", meter.getMeterType());
-            builder.field("billCategoryId", meter.getBillCategoryId());
-            builder.field("serviceCategoryId", meter.getServiceCategoryId());
             builder.field("reading", readingLog.getReading());
             BigDecimal oldMeterReading = readingLog.getOldMeterReading();
             if (oldMeterReading != null) {// 换表会有旧表读数
@@ -104,10 +100,21 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             }
             builder.field("resetFlag", readingLog.getResetMeterFlag());
             builder.field("changeFlag", readingLog.getChangeMeterFlag());
-            builder.field("meterName", meter.getName());
-            builder.field("meterNumber", meter.getMeterNumber());
-            builder.field("operatorName", operator.getNickName());
             builder.field("operateTime", readingLog.getOperateTime().getTime());
+
+            if(meter != null) {
+                builder.field("meterId", meter.getId());
+                builder.field("meterType", meter.getMeterType());
+                builder.field("billCategoryId", meter.getBillCategoryId());
+                builder.field("serviceCategoryId", meter.getServiceCategoryId());
+                builder.field("meterName", meter.getName());
+                builder.field("meterNumber", meter.getMeterNumber());
+            }
+
+            if(operator != null) {
+                builder.field("operatorName", operator.getNickName());
+            }
+
             builder.endObject();
             return builder;
         } catch (IOException e) {
