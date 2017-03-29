@@ -47,3 +47,6 @@ ALTER TABLE eh_energy_month_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if
 
 ALTER TABLE eh_energy_date_statistics ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
 ALTER TABLE eh_energy_date_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
+
+-- 用户管理 add by sw 	
+ALTER TABLE `eh_organization_members` ADD INDEX i_target_id (target_id)
