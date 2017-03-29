@@ -9,3 +9,6 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `menu_id`, `show_flag`, `privilege_i
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10155', '1001', '0', '1', UTC_TIMESTAMP());
+
+-- 用户管理 add by sw 	
+ALTER TABLE `eh_organization_members` ADD INDEX i_target_id (target_id)
