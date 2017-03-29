@@ -39,4 +39,15 @@ public enum FlowStepType {
 
         return null;
     }
+    
+    public int getCodeInt() {
+    	int i = 0;
+    	for(FlowStepType t : FlowStepType.values()) {
+    		if(code.equalsIgnoreCase(t.getCode())) {
+    			return i;
+    		}
+    		i++;
+    	}
+    	return 0xFF;
+    }
 }

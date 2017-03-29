@@ -5,6 +5,7 @@ public interface FlowConstants {
     String EVALURTE_TITLE = "evaluate";
     Integer FLOW_CONFIG_VER = 0;
     Integer FLOW_CONFIG_START = 1;
+    Integer FLOW_MAX_NAME_CNT = 3;
     
     // 物业报修模块id
     Long PM_TASK_MODULE = 20100L;

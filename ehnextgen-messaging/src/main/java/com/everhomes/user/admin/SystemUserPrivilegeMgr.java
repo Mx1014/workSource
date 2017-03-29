@@ -147,7 +147,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
             LOGGER.debug("user organizations:{}", orgDTOs);
-
+            descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), organizationId));
             for (OrganizationDTO orgDTO: orgDTOs) {
                 descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId()));
             }

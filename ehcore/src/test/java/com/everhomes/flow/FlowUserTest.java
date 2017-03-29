@@ -6,15 +6,23 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.redis.JsonStringRedisSerializer;
 import com.everhomes.rest.organization.ListOrganizationJobPositionCommand;
 import com.everhomes.rest.organization.ListOrganizationJobPositionResponse;
 import com.everhomes.user.User;
@@ -24,6 +32,8 @@ import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowUserTest extends LoginAuthTestCase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
+	
 	@Configuration
     @ComponentScan(basePackages = {
         "com.everhomes"
@@ -46,6 +56,9 @@ public class FlowUserTest extends LoginAuthTestCase {
     
     @Autowired
     private OrganizationService organizationService;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
     
     private User testUser1;
     private User testUser2;
@@ -92,6 +105,41 @@ public class FlowUserTest extends LoginAuthTestCase {
     	
     	List<Long> users = flowUserSelectionService.findUsersByJobPositionId(null, resp.getRequests().get(0).getId(), 300014l);
     	Assert.assertTrue(users.size() > 0);
+    }
+    
+    @Test
+    public void testRedis() {
+    	JsonStringRedisSerializer json = new JsonStringRedisSerializer();
+    	final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+    	JdkSerializationRedisSerializer jdkSerial = new JdkSerializationRedisSerializer();
+    	User u = new User();
+    	u.setAccountName("aaaa");
+    	
+      byte[] b1 = json.serialize("abcd");
+      byte[] b2 = stringRedisSerializer.serialize("abcd");
+      byte[] b3 = jdkSerial.serialize("abcd");
+      
+      byte[] b4 = json.serialize(u);
+      
+      LOGGER.info(new String(b1));
+      LOGGER.info(new String(b2));
+      LOGGER.info(new String(b3));
+      LOGGER.info(new String(b4));
+      
+      long messageSequence = 1234l;
+      
+      Accessor acc = this.bigCollectionProvider.getMapAccessor("hello", String.valueOf(messageSequence));
+      RedisTemplate redisTemplate = acc.getTemplate();
+      Object v = redisTemplate.opsForValue().get("testhello");
+      LOGGER.info("v=" + v);
+      
+      Accessor acc2 = this.bigCollectionProvider.getMapAccessor("hello", "java:32333");
+      RedisTemplate redisTemplate2 = acc2.getTemplate();
+      redisTemplate2.setDefaultSerializer(jdkSerial);
+      redisTemplate2.setKeySerializer(jdkSerial);
+      redisTemplate2.setValueSerializer(jdkSerial);
+      Object v2 = redisTemplate2.opsForValue().get("testhello");
+      LOGGER.info("v=" + v);
     }
     
 }

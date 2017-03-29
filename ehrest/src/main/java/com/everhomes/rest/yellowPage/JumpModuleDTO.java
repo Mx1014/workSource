@@ -1,6 +1,9 @@
 package com.everhomes.rest.yellowPage;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -19,6 +22,19 @@ public class JumpModuleDTO {
     private String moduleName;
 
     private String moduleUrl;
+
+    private Long parentId;
+
+    @ItemType(JumpModuleDTO.class)
+    private List<JumpModuleDTO> children;
+
+    public List<JumpModuleDTO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<JumpModuleDTO> children) {
+        this.children = children;
+    }
 
     public Long getId() {
         return id;
@@ -50,6 +66,14 @@ public class JumpModuleDTO {
 
     public void setModuleUrl(String moduleUrl) {
         this.moduleUrl = moduleUrl;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 
     @Override

@@ -17,4 +17,5 @@ public interface BroadcastProvider {
 
 	Integer selectBroadcastCountToday(Integer namespaceId, String ownerType, Long ownerId);
 
+    void deleteBroadcast(Broadcast broadcast);
 }

@@ -7,7 +7,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些</li>
  * <li>entityType: 实体类型，{@link com.everhomes.rest.user.UserCurrentEntityType}</li>
- * <li>entityContent: 实体内容，会根据具体实体类型有不同的JSON结构</li>
+ * <li>entityContent: 实体内容，会根据具体实体类型有不同的JSON结构: </li>
+ * <li> entityType为family时，参考{@link com.everhomes.rest.family.FamilyDTO}</li>
+ * <li> entityType为organization时，参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li> entityType为community_residential或community_commercial或community时，参考{@link com.everhomes.rest.address.CommunityDTO}</li>
  * <li>name: 显示名称</li>
  * <li>aliasName: 别名</li>
  * <li>avatar: 显示头像URI</li>

@@ -9,15 +9,22 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
@@ -59,6 +66,14 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private CommunityProvider communityProvider;
+
+    @Autowired
+    private SmsProvider smsProvider;
+
+    @Autowired
+    private FlowEventLogProvider flowEventLogProvider;
+    @Autowired
+    private UserProvider userProvider;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -216,7 +231,49 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
 			List<Tuple<String, Object>> variables) {
-		// TODO Auto-generated method stub
+
+        FlowCase flowCase = ctx.getFlowCase();
+        EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
+        String applyUserName = applyEntry.getApplyUserName();
+        String applyContact = applyEntry.getApplyContact();
+        if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_NODE_CODE == templateId) {
+
+            smsProvider.addToTupleList(variables, "applyUserName", applyUserName);
+            smsProvider.addToTupleList(variables, "applyContact", applyContact);
+
+        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_APPROVE_CODE == templateId){
+            //TODO: 给被分配的人发短信
+
+            FlowEventLog flowEventLog = null;
+            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
+                    , ctx.getFlowCase().getId()
+                    , ctx.getFlowCase().getStepCount()); ////stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
+            if(logs != null && logs.size() > 0) {
+                for(FlowEventLog log : logs) {
+                    if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {
+                        flowEventLog = log;
+                    }
+                }
+            }
+
+            if (null != flowEventLog) {
+                if (null != flowEventLog.getFlowSelectionId()) {
+                    User entityUser = userProvider.findUserById(flowEventLog.getFlowUserId());
+                    UserIdentifier entityIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(entityUser.getId(), IdentifierType.MOBILE.getCode());
+                    smsProvider.addToTupleList(variables, "operatorName", entityUser.getNickName());
+                    smsProvider.addToTupleList(variables, "operatorContact", entityIdentifier.getIdentifierToken());
+                }
+            }
+
+        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_ABSORT_CODE == templateId){
+            //
+        }else if (SmsTemplateCode.APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE == templateId){
+            smsProvider.addToTupleList(variables, "applyUserName", applyUserName);
+            smsProvider.addToTupleList(variables, "applyContact", applyContact);
+
+        }else if (SmsTemplateCode.APPLY_ENTRY_COMPLETED_CODE == templateId){
+
+        }
 		
 	}
 }

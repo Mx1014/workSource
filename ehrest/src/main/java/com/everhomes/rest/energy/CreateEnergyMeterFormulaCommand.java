@@ -8,7 +8,9 @@ import javax.validation.constraints.Size;
 
 /**
  * <ul>
- *     <li>organizationId: 组织id</li>
+ *     <li>ownerId: 公式所属组织id</li>
+ *     <li>ownerType: 公式所属组织类型</li>
+ *     <li>communityId: 公式所属园区id</li>
  *     <li>name: 公式名称</li>
  *     <li>expression: 公式</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
@@ -16,18 +18,37 @@ import javax.validation.constraints.Size;
  */
 public class CreateEnergyMeterFormulaCommand {
 
-    @NotNull private Long organizationId;
+    @NotNull private Long ownerId;
+    @NotNull private String ownerType;
+    @NotNull private Long communityId;
     @NotNull @Size(max = 255) private String name;
     @NotNull @Size(max = 255) private String expression;
     @EnumType(EnergyFormulaType.class)
     private Byte formulaType;
 
-    public Long getOrganizationId() {
-        return organizationId;
+
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public String getName() {

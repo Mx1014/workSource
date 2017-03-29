@@ -92,6 +92,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
+import com.everhomes.util.CronDateUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -221,7 +223,14 @@ public class QualityProviderImpl implements QualityProvider {
 			scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
 					"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
         });
-		
+
+		//五分钟后启动通知
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 	}
 
 	@Override
@@ -403,7 +412,6 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return maps;
 	}
-
 
 	@Override
 	public void createQualityInspectionStandards(
@@ -999,12 +1007,13 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long createTime) {
+	public List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long startTime, Long endTime) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
 		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
 
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayQualityInspectionTasks, sql=" + query.getSQL());
@@ -1017,6 +1026,29 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 
 		return tasks;
+	}
+
+	@Override
+	public QualityInspectionTasks findLastestQualityInspectionTask(Long startTime) {
+		QualityInspectionTasks[] result = new QualityInspectionTasks[1];
+
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null,
+				(DSLContext context, Object reducingContext) -> {
+					result[0] = context.select().from(Tables.EH_QUALITY_INSPECTION_TASKS)
+							.where(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)))
+							.orderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME)
+							.fetchAny().map((r) -> {
+								return ConvertHelper.convert(r, QualityInspectionTasks.class);
+							});
+
+					if (result[0] != null) {
+						return false;
+					} else {
+						return true;
+					}
+				});
+
+		return result[0];
 	}
 
 

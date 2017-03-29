@@ -2,12 +2,14 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -46,6 +48,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private BuildingProvider buildingProvider;
 	@Autowired
 	private CommunityProvider communityProvider;
+	@Autowired
+	private FlowButtonProvider flowButtonProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -55,7 +59,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			//新建flowcase
 			Integer namespaceId = UserContext.getCurrentNamespaceId();
 			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
-					FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
+					FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.PMTASK.getCode());
 			if(null == flow) {
 				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
@@ -87,7 +91,19 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+
+			String params = flowNode.getParams();
+
+			if(StringUtils.isBlank(params)) {
+				LOGGER.error("Invalid flowNode param.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+						"Invalid flowNode param.");
+			}
+
+			JSONObject paramJson = JSONObject.parseObject(params);
+			String nodeType = paramJson.getString("nodeType");
+
+			task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;
@@ -191,16 +207,29 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		//TODO:autoStep 没有消息 暂时改成firebutton
+//		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//		stepDTO.setFlowCaseId(flowCase.getId());
+//		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+//		stepDTO.setFlowVersion(flowCase.getFlowVersion());
+//		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+//		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//		stepDTO.setStepCount(flowCase.getStepCount());
+//		flowService.processAutoStep(stepDTO);
 
-		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-		stepDTO.setFlowCaseId(flowCase.getId());
-		stepDTO.setFlowMainId(flowCase.getFlowMainId());
-		stepDTO.setFlowVersion(flowCase.getFlowVersion());
-		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-		stepDTO.setStepCount(flowCase.getStepCount());
-		flowService.processAutoStep(stepDTO);
+		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(),
+				flowCase.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
 
+		FlowButton button = null;
+		for (FlowButton b: buttons) {
+			if (FlowStepType.APPROVE_STEP.getCode().equals(b.getFlowStepType()))
+				button = b;
+		}
+
+		FlowFireButtonCommand fireButtonCommand = new FlowFireButtonCommand();
+		fireButtonCommand.setFlowCaseId(flowCase.getId());
+		fireButtonCommand.setButtonId(button.getId());
+		flowService.fireButton(fireButtonCommand);
 	}
 
 }

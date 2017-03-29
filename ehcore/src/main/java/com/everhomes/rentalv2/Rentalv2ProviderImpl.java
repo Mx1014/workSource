@@ -23,6 +23,7 @@ import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Record4;
 import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOnConditionStep;
 import org.jooq.UpdateConditionStep;
@@ -419,7 +420,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.REFUNDING.getCode()));
+				.ne(SiteBillStatus.REFUNDING.getCode())); 
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.OFFLINE_PAY.getCode())); 
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -431,7 +434,41 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return result;
 	}
+	@Override
+	public List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> orderIds = new ArrayList<Long>();
+		SelectConditionStep<Record1<Long>> step1 = context
+				.selectDistinct(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID)
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS ).where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID
+				.in(siteRuleIds));
+		step1.fetch().map((r) -> {
+			orderIds.add(r.value1());
+			return null;
+		});
+		SelectJoinStep<Record> step = context
+				.select()
+				.from(Tables.EH_RENTALV2_ORDERS )   ;
 
+		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.in(orderIds);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode())); 
+		step.where(condition);
+//		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
+//				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
+//				.map(new RentalResourceOrderRecordMapper());
+//
+//		List<RentalOrder> result = resultRecord.stream().map((r) -> {
+//			return ConvertHelper.convert(r, RentalOrder.class);
+//		}).collect(Collectors.toList());
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+					});
+		return result;
+	}
+	
 	@Override
 	public List<RentalItemsOrder> findRentalItemsBillByItemsId(Long siteItemId) {
 
@@ -785,6 +822,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
 
 		return step.where(condition).fetchOneInto(Double.class);
 	}

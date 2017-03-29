@@ -45,6 +45,8 @@ import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 
+import javax.servlet.http.HttpServletResponse;
+
 
 public interface CommunityService {
     ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd);
@@ -91,6 +93,8 @@ public interface CommunityService {
 	ImportDataResponse importBuildingData(MultipartFile mfile, Long userId);
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
+
+	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	

@@ -177,22 +177,26 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		ctx.setFlowGraph(flowGraph);
-		
-		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+		FlowGraphNode node = null;
+		if(flowCase.getCurrentNodeId() == null) {
+			node = flowGraph.getNodes().get(0);
+		} else {
+			node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());	
+		}
 		if(node == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
 		}
 		ctx.setCurrentNode(node);
 		
 		if(stepDTO.getFlowTargetId() != null) {
-			FlowGraphNode targetNode = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+			FlowGraphNode targetNode = flowGraph.getGraphNode(stepDTO.getFlowTargetId());
 			ctx.setNextNode(targetNode);
 		}
 		
 		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
 		ctx.setOperator(userInfo);
-//		FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
-		ctx.setCurrentEvent(null);
+		FlowGraphNoStepEvent event = new FlowGraphNoStepEvent(stepDTO);
+		ctx.setCurrentEvent(event);
 		ctx.setStepType(FlowStepType.NO_STEP);	
 		
 		return ctx;	
@@ -442,7 +446,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	@Override
 	public void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
 		FlowStepType fromStep = ctx.getStepType();
-		FlowGraphNode curr = ctx.getCurrentNode();
 		switch(fromStep) {
 		case NO_STEP:
 			break;
@@ -451,10 +454,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case REJECT_STEP:
 			break;
 		case TRANSFER_STEP:
-			if(curr.getTrackTransferLeave() != null) {
-				curr.getTrackTransferLeave().fireAction(ctx, null);	
-			}
-			
 			break;
 		case COMMENT_STEP:
 			break;
@@ -475,9 +474,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowGraphNode curr = ctx.getCurrentNode();
 		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
 		boolean logStep = false;
-		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
-		
 		switch(fromStep) {
 		case NO_STEP:
 			break;
@@ -517,28 +514,5 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			ctx.getLogs().add(log);	//added but not save to database now.
 		}
-	}
-	
-	//variable support
-	@Override
-	public UserInfo getApplier(FlowCaseState ctx, String variable) {
-		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
-		return userInfo;
-	}
-	
-	@Override
-	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
-		return ctx.getOperator();
-	}
-	
-	@Override
-	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel) {
-		List<Long> users = new ArrayList<>();
-		UserInfo userInfo = getApplier(ctx, "");
-		if(null != userInfo) {
-			users.add(userInfo.getId());
-		}
-		
-		return users;
 	}
 }

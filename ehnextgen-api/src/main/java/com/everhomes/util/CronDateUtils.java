@@ -1,5 +1,6 @@
 package com.everhomes.util;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,5 +45,10 @@ public class CronDateUtils {
             return null;
         }
         return date;
+    }
+
+    public static void main(String[] args) {
+        long current = System.currentTimeMillis();
+        System.out.print(getCron(new Timestamp(current)));
     }
 }

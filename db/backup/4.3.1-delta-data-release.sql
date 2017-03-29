@@ -77,6 +77,20 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 
 -- merge from sa2.1 by xiongying20170301 & issues7061
+
+SET @layout_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);  
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
+	VALUES ((@layout_id := @layout_id + 1), 999985, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"资产管理","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21,"columnCount":2},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"Gallery", "entityCount": 6, "newsSize":  5},"style":"LargeImageListView","defaultOrder":2,"separatorFlag":0,"separatorHeight":0}]}', '2017030701', '0', '2', UTC_TIMESTAMP(), 'pm_admin');	
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type) 
+	VALUES ((@layout_id := @layout_id + 1), 999985, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"资产管理","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21,"columnCount":2},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"Gallery", "entityCount": 6, "newsSize":  5},"style":"LargeImageListView","defaultOrder":2,"separatorFlag":0,"separatorHeight":0}]}', '2017030701', '0', '2', UTC_TIMESTAMP(), 'park_tourist');	
+
+    
+    
+    
+    
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);    
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+
 SET @layout_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time, scene_type)
 	VALUES ((@layout_id := @layout_id + 1), 999985, 'SecondServiceMarketLayout', '{"versionCode":"2017022202","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"资产管理","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"OPPush","instanceConfig":{"itemGroup":"Gallery", "entityCount": 6, "newsSize":  5},"style":"LargeImageListView","defaultOrder":2,"separatorFlag":0,"separatorHeight":0}]}', '2017022202', '0', '2', UTC_TIMESTAMP(), 'pm_admin');
@@ -89,6 +103,7 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
 
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+
     VALUES ((@item_id := @item_id + 1), 999985, '0', '0', '0', '/secondhome', 'GovAgencies', '业主查询', '业主查询', 'cs://1/image/aW1hZ2UvTVRwbE5ESmpNamRqTURobU5qWXlZMlkyT0dNME1HRTRNV1kwWldWbE1qZGhPUQ', '1', '1', 14,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
     VALUES ((@item_id := @item_id + 1), 999985, '0', '0', '0', '/secondhome', 'GovAgencies', '租户查询', '租户查询', 'cs://1/image/aW1hZ2UvTVRvNE1tUTBNR016T1dKaVptRXpZamxsTmpNMU5HSXpZV0V5TTJRNFkyVTRPUQ', '1', '1', 14,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');

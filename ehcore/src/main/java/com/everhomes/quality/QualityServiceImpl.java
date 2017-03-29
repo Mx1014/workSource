@@ -1444,18 +1444,17 @@ public class QualityServiceImpl implements QualityService {
 		return dto;
 	}
 
-	@Scheduled(cron = "0 0 7 * * ? ")
+//	@Scheduled(cron = "0 0 7 * * ? ")
 	@Override
-	public void sendTaskMsg() {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
-			long current = System.currentTimeMillis();//当前时间毫秒数
-			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-			
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("sendTaskMsg, zero = " + zero);
-			}
-			
-			List<QualityInspectionTasks> tasks = qualityProvider.listTodayQualityInspectionTasks(zero);
+	public void sendTaskMsg(Long startTime, Long endTime) {
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
+//			long current = System.currentTimeMillis();//当前时间毫秒数
+//			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+//
+//			if (LOGGER.isInfoEnabled()) {
+//				LOGGER.info("sendTaskMsg, zero = " + zero);
+//			}
+			List<QualityInspectionTasks> tasks = qualityProvider.listTodayQualityInspectionTasks(startTime, endTime);
 
 			if (tasks != null && tasks.size() > 0) {
 				for (QualityInspectionTasks task : tasks) {
@@ -1500,7 +1499,7 @@ public class QualityServiceImpl implements QualityService {
 				}
 
 			}
-		});
+//		});
 	}
 	
 	@Override

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.everhomes.rest.group.GroupMemberStatus;
 import org.apache.commons.collections.CollectionUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -845,11 +846,11 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		return listUserByKeyword(keyword, null, namespaceId, locator, pageSize);
+		return listUserByKeyword(null, keyword, null, namespaceId, locator, pageSize);
 	}
 	
 	@Override
-	public List<User> listUserByKeyword(String keyword, Byte executiveFlag,
+	public List<User> listUserByKeyword(Long organizationId, String keyword, Byte executiveFlag,
 			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
 
 		List<User> list = new ArrayList<User>();
@@ -868,9 +869,16 @@ public class UserProviderImpl implements UserProvider {
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		    }
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
-            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
-            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+
+            SelectOnConditionStep query = context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+		    if (null != organizationId) {
+                query.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+            }
+
+            query.where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);
@@ -1422,5 +1430,54 @@ public class UserProviderImpl implements UserProvider {
 		return null;
 	}
 
-	
+    @Override
+    public List<User> listUserByNickName(String keyword) {
+        long startTime = System.currentTimeMillis();
+        List<User> list = new ArrayList<User>();
+        if(keyword == null)
+            return null;
+
+        String str = "%"+keyword+"%";
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
+            context.select().from(Tables.EH_USERS)
+                    .where(Tables.EH_USERS.NICK_NAME.like(str))
+                    .fetch().map(r -> {
+                User user = ConvertHelper.convert(r,User.class);
+                user.setId(r.getValue(Tables.EH_USERS.ID));
+                user.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+                list.add(user);
+                return null;
+            });
+            return true;
+        });
+        long endTime = System.currentTimeMillis();
+        LOGGER.debug("listUserByNickName size = " + list.size() + ", elapse=" + (endTime - startTime));
+        return list;
+    }
+
+    @Override
+    public List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, uid));
+
+        if(groupDiscriminator != null) {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.GROUP_DISCRIMINATOR.eq(groupDiscriminator))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        } else {
+            return context.select().from(Tables.EH_USER_GROUPS)
+                    .where(Tables.EH_USER_GROUPS.OWNER_UID.eq(uid))
+                    .and(Tables.EH_USER_GROUPS.MEMBER_STATUS.eq((GroupMemberStatus.ACTIVE.getCode())))
+                    .fetch().map((r)-> {
+                        return ConvertHelper.convert(r, UserGroup.class);
+                    });
+        }
+
+    }
+
+
 }

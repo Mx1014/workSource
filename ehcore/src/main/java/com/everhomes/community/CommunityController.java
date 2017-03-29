@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,8 +173,17 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
-	
 
+    /**
+     * <b>URL: /community/exportCommunityUsers</b>
+     * <p>导出园区用户列表</p>
+     */
+    @RequestMapping("exportCommunityUsers")
+    public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+        communityService.exportCommunityUsers(cmd, response);
+
+
+    }
 	
 	/**
 	 * <b>URL: /community/countCommunityUsers</b>

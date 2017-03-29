@@ -65,7 +65,7 @@ public interface UserProvider {
     List<InvitationRoster> listInvitationRostor(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback);
 	List<User> listUserByKeyword(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
-	List<User> listUserByKeyword(String keyword,Byte executiveFlag, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByKeyword(Long organizationId, String keyword,Byte executiveFlag, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	User findUserByNamespace(Integer namespaceId, String namespaceUserToken);
 	void createUserCommunity(UserCommunity userCommunity);
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
@@ -102,4 +102,7 @@ public interface UserProvider {
 	List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize);
 	List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize);
 	Organization findAnyUserRelatedOrganization(Long id, Integer namespaceId);
+
+    List<User> listUserByNickName(String keyword);
+    List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator);
 }

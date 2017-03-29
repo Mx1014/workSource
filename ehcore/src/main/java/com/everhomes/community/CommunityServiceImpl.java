@@ -1,22 +1,24 @@
 // @formatter:off
 package com.everhomes.community;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
 import com.everhomes.module.ServiceModuleAssignment;
-import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +37,6 @@ import com.everhomes.configuration.ConfigurationsProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactProvider;
-import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
@@ -72,8 +72,6 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
@@ -127,19 +125,6 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -160,16 +145,13 @@ import com.everhomes.user.UserGroupHistory;
 import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.VersionRange;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -1656,7 +1638,7 @@ public class CommunityServiceImpl implements CommunityService {
 			index = 10000;
 		}
 		
-		users = userProvider.listUserByKeyword(cmd.getKeywords(),cmd.getExecutiveFlag(), namespaceId, locator, index);
+		users = userProvider.listUserByKeyword(cmd.getOrganizationId(), cmd.getKeywords(),cmd.getExecutiveFlag(), namespaceId, locator, index);
 		
 		if(null == users) 
 			return res;
@@ -1673,11 +1655,16 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setExecutiveFlag(user.getExecutiveTag());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
+
+			Set<OrganizationDTO> organizationDTOs = new HashSet<>();
 			if(null != members){
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
 						dto.setIsAuth(1);
-						break;
+					}
+					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+					if (null != org) {
+						organizationDTOs.add(ConvertHelper.convert(org, OrganizationDTO.class));
 					}
 				}
 //				if(null != m){
@@ -1694,7 +1681,11 @@ public class CommunityServiceImpl implements CommunityService {
 //					}
 //				}
 			}
-			
+			List<OrganizationDTO> Organizations = new ArrayList<>();
+			Organizations.addAll(organizationDTOs);
+
+			dto.setOrganizations(Organizations);
+
 			if(0 != cmd.getIsAuth()){
 				if(cmd.getIsAuth().equals(dto.getIsAuth())){
 					dtos.add(dto);
@@ -1713,8 +1704,70 @@ public class CommunityServiceImpl implements CommunityService {
 		return res;
 	}
 
-	
-	
+	@Override
+	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+		CommunityUserResponse resp = listUserCommunities(cmd);
+		List<CommunityUserDto> dtos = resp.getUserCommunities();
+
+		Workbook wb = new XSSFWorkbook();
+
+		Font font = wb.createFont();
+		font.setFontName("黑体");
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+
+		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+		sheet.setDefaultColumnWidth(20);
+		sheet.setDefaultRowHeightInPoints(20);
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("姓名");
+		row.createCell(1).setCellValue("性别");
+		row.createCell(2).setCellValue("手机号");
+		row.createCell(3).setCellValue("注册时间");
+		row.createCell(4).setCellValue("认证状态");
+		row.createCell(5).setCellValue("企业");
+		row.createCell(6).setCellValue("是否高管");
+		row.createCell(7).setCellValue("职位");
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+		int size = dtos.size();
+		for(int i = 0; i < size; i++){
+			Row tempRow = sheet.createRow(i + 1);
+			CommunityUserDto dto = dtos.get(i);
+			List<OrganizationDTO> organizations = dto.getOrganizations();
+			StringBuilder enterprises = new StringBuilder();
+
+			for (int k = 0,l = organizations.size(); k < l; k++) {
+				if (k == l-1)
+					enterprises.append(organizations.get(k).getName());
+				else
+					enterprises.append(organizations.get(k).getName()).append(",");
+			}
+
+			tempRow.createCell(0).setCellValue(dto.getUserName());
+			tempRow.createCell(1).setCellValue(UserGender.fromCode(dto.getGender()).getText());
+			tempRow.createCell(2).setCellValue(dto.getPhone());
+			tempRow.createCell(3).setCellValue(null != dto.getApplyTime() ? sdf.format(dto.getApplyTime()) : "");
+			tempRow.createCell(4).setCellValue(dto.getIsAuth() == 1 ? "认证" : "非认证");
+			tempRow.createCell(5).setCellValue(enterprises.toString());
+			tempRow.createCell(6).setCellValue(null == dto.getExecutiveFlag() ? "否" : (dto.getExecutiveFlag() == 0 ? "否" : "是"));
+			tempRow.createCell(7).setCellValue(null == dto.getPosition() ? "无" : dto.getPosition());
+
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			DownloadUtils.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingRechageOrders is fail.");
+		}
+	}
+
 
 	@Override
 	public CountCommunityUserResponse countCommunityUsers(

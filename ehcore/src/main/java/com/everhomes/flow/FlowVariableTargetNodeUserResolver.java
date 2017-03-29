@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class FlowVariableTargetNodeUserResolver implements FlowVariableUserResol
 	FlowService flowService;
 	
 	@Override
-	public List<Long> variableUserResolve(FlowCaseState ctx,
+	public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities,
 			FlowEntityType fromEntity, Long entityId,
 			FlowUserSelection userSelection, int loopCnt) {
 		FlowCase flowCase = ctx.getFlowCase();
@@ -39,7 +40,7 @@ public class FlowVariableTargetNodeUserResolver implements FlowVariableUserResol
 		
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(node.getId()
 				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode(), flowCase.getFlowVersion());
-		return flowService.resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, node.getId(), selections, loopCnt);
+		return flowService.resolvUserSelections(ctx, processedEntities, FlowEntityType.FLOW_NODE, node.getId(), selections, loopCnt);
 	}
 
 }

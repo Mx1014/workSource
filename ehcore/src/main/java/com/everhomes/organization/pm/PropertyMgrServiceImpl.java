@@ -1923,6 +1923,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setUnsaleCount(temp = (temp = result.get(PmAddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp);
 		sum += temp;
 		dto.setAptCount(sum);
+		
+		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
+		if (sum == 0) {
+			return getApartmentStatistics(cmd);
+		}
+		
 		return dto;
 	}
 
@@ -2042,18 +2048,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(family.getAddressId());
 				dto.setId(family.getId());
-                // dto.setMemberCount(family.getMemberCount());
+				// dto.setMemberCount(family.getMemberCount());
                 List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
                         UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
                 dto.setMemberCount((long) organizationOwners.size());
-			}
+            }
 			else
 			{
 				dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(apartmentDTO.getAddressId());
 				dto.setId(0L);
-                // dto.setMemberCount(family.getMemberCount());
+				// dto.setMemberCount(0L);
                 List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
                         UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
                 dto.setMemberCount((long) organizationOwners.size());

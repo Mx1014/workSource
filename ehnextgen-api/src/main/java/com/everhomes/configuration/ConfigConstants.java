@@ -92,5 +92,8 @@ public interface ConfigConstants {
     public static final String TASK_SERVER_ADDRESS = "task.server.address";
 
     public static final String BIZ_BUSINESS_PROMOTION_API = "biz.business.promotion.api";
+    public static final String EQUIPMENT_TASK_NOTIFY_TIME = "equipment.task.notify.time";
+    public static final String EQUIPMENT_TASK_NOTIFY_FLAG = "equipment.task.notify.flag";
+    public static final String SHAKE_OPEN_DOOR = "shake.open.door";
 
 }
