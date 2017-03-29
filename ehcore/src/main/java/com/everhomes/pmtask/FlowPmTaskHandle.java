@@ -123,7 +123,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 
@@ -142,7 +142,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 
@@ -160,7 +160,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 
