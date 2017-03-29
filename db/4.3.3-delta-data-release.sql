@@ -427,3 +427,4 @@ UPDATE `eh_locale_templates` SET `description`='${nodeName} 被驳回', `text`='
 update eh_quality_inspection_categories set namespace_id = 999992;
 update eh_quality_inspection_evaluation_factors set namespace_id = 999992;
 update eh_quality_inspection_tasks set namespace_id = 999992;
+update eh_quality_inspection_logs set namespace_id = 999992;

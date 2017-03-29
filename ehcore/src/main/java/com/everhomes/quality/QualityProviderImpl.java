@@ -283,12 +283,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//总公司 分公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//		}
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(targetId));
         }
@@ -1187,7 +1189,7 @@ public class QualityProviderImpl implements QualityProvider {
 //        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
 //		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
 		//总公司 分公司 改用namespaceId by xiongying20170329
-//		Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.name.equal(ownerId);
+		Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.equal(UserContext.getCurrentNamespaceId());
 
 		
 		if(taskType != null) {
@@ -1373,12 +1375,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE.eq(ownerType));    	
-		}
+		// 总公司 分公司 改用namespaceId by xiongying20170329
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS..eq(ownerId));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE.eq(ownerType));
+//		}
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.TARGET_ID.eq(targetId));
         }

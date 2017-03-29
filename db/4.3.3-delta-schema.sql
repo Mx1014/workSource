@@ -68,3 +68,4 @@ ALTER TABLE eh_equipment_inspection_templates ADD COLUMN  `namespace_id` INT NOT
 ALTER TABLE eh_quality_inspection_categories ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
 ALTER TABLE eh_quality_inspection_evaluation_factors ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_logs ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
