@@ -93,6 +93,7 @@ import com.everhomes.rest.user.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -111,6 +112,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.*;
@@ -954,9 +956,10 @@ public class UserServiceImpl implements UserService {
 							+ deviceIdentifier + ", oldUserLogin=" + login);
 				}
 				//kickoff this login
-				login.setStatus(UserLoginStatus.LOGGED_OFF);
 				ref.setOldDeviceId(login.getDeviceIdentifier());
 				ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId()));
+				login.setStatus(UserLoginStatus.LOGGED_OFF); //顺序非常重要，不能放上面一行
+//				login.setLoginInstanceNumber(new Random().nextInt());
 			}
 			login.setDeviceIdentifier(deviceIdentifier);
 		}
@@ -983,9 +986,10 @@ public class UserServiceImpl implements UserService {
 							+ deviceIdentifier + ", oldUserLogin=" + login);
 				}
 				//kickoff this login
-				login.setStatus(UserLoginStatus.LOGGED_OFF);
 				ref.setOldDeviceId(login.getDeviceIdentifier());
 				ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), ref.getImpId()));
+				login.setStatus(UserLoginStatus.LOGGED_OFF);//顺序非常重要，不能放上面一行
+//				login.setLoginInstanceNumber(new Random().nextInt());
 			}
 			login.setDeviceIdentifier(deviceIdentifier);
 		}
@@ -1127,8 +1131,13 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 
-		if(!ref.getOldDeviceId().isEmpty()) {
+		//TODO better here, get token from foundLogin
+		LoginToken token = new LoginToken(foundLogin.getUserId(), foundLogin.getLoginId(), foundLogin.getLoginInstanceNumber(), foundLogin.getImpersonationId());
+		
+		if(!ref.getOldDeviceId().isEmpty() && !ref.getOldLoginToken().toString().equals(token.toString())) {
 			kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+			kickoffService.remoteKickoffTag(namespaceId, token);
+			
 			//	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 			//	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 			//	            locale = user.getLocale(); 
@@ -1343,6 +1352,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean isValidLoginToken(LoginToken loginToken) {
 		assert(loginToken != null);
+		
+		//added by janson, isKickoff ? 2017-03-29
+		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), loginToken)) {
+//			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), loginToken);
+	      throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+		}
+		
 		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
 		UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
@@ -3431,10 +3447,20 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	public boolean isLogon(){
+		//added by janson 2017-03-29
+//		UserLogin userLogin = UserContext.current().getLogin();
+//		LoginToken token = new LoginToken(userLogin.getUserId(), userLogin.getLoginId(), userLogin.getLoginInstanceNumber(), userLogin.getImpersonationId());
+//		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), token)) {
+//			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), token);
+//         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+//                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+//		}
+		
 		User user = UserContext.current().getUser();
 		if(null == user){
 			return false;
 		}
+		
 		LOGGER.debug("Check for login. userId = {}", user.getId());
 		if(user.getId() > 0){
 			return true;
