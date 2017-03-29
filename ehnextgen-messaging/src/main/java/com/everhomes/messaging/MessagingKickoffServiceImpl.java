@@ -26,7 +26,7 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     @Override
     public String getKickoffMessageKey(Integer namespaceId, LoginToken loginToken) {
         long impId = (loginToken.getImpId() == null? 0: loginToken.getImpId().longValue());
-        String id = String.format("%d:%d:%d:%d", loginToken.getUserId(), loginToken.getUserId(), loginToken.getLoginId(), impId);
+        String id = String.format("%d:%d:%d:%d", loginToken.getUserId(), loginToken.getLoginInstanceNumber(), loginToken.getLoginId(), impId);
         if(namespaceId == null || namespaceId.equals(0)) {
             return messageBoxPrefix + ":" + id; 
         } else {
@@ -59,5 +59,20 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
         }
 
         return false;
+    }
+    
+    @Override
+    public void remoteKickoffTag(Integer namespaceId, LoginToken loginToken) {
+        try {
+            String key = getKickoffMessageKey(namespaceId, loginToken);
+            Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            redisTemplate.delete(key);
+            Object o = redisTemplate.opsForValue().get(key);
+            LOGGER.debug("object=" + o);
+          
+        } catch(Exception ex) {
+            LOGGER.info("kickoff error, loginToken error? " + ex.getMessage());   
+        }    	
     }
 }
