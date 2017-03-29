@@ -833,7 +833,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		
 		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
-		
+
+		if (null != cmd.getServiceUrl()) {
+			try {
+				String serviceUrl = URLEncoder.encode(cmd.getServiceUrl(), "utf8");
+				serviceAlliance.setServiceUrl(serviceUrl);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+
+		}
+
 		if(null != serviceAlliance.getCategoryId()) {
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceAlliance.getCategoryId());
 			serviceAlliance.setServiceType(category.getName());
