@@ -326,16 +326,16 @@ class PmTaskCommonServiceImpl {
         }
     }
 
-    Byte convertFlowStatus(String params) {
+    Byte convertFlowStatus(String nodeType) {
 
-        if(StringUtils.isBlank(params)) {
-            LOGGER.error("Invalid flowNode param.");
-            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-                    "Invalid flowNode param.");
-        }
-
-        JSONObject paramJson = JSONObject.parseObject(params);
-        String nodeType = paramJson.getString("nodeType");
+//        if(StringUtils.isBlank(params)) {
+//            LOGGER.error("Invalid flowNode param.");
+//            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//                    "Invalid flowNode param.");
+//        }
+//
+//        JSONObject paramJson = JSONObject.parseObject(params);
+//        String nodeType = paramJson.getString("nodeType");
 
         switch (nodeType) {
             case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();

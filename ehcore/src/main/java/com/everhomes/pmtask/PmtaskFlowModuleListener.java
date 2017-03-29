@@ -126,7 +126,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
 			if ("ACCEPTING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
@@ -145,12 +145,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 
 			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {

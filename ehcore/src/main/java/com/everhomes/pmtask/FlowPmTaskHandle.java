@@ -2,12 +2,14 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -89,7 +91,19 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+
+			String params = flowNode.getParams();
+
+			if(StringUtils.isBlank(params)) {
+				LOGGER.error("Invalid flowNode param.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+						"Invalid flowNode param.");
+			}
+
+			JSONObject paramJson = JSONObject.parseObject(params);
+			String nodeType = paramJson.getString("nodeType");
+
+			task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;
