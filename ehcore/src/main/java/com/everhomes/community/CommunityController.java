@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,6 +151,7 @@ public class CommunityController extends ControllerBase {
 	 */
 	@RequestMapping("getBuilding")
     @RestReturn(value=BuildingDTO.class)
+    @RequireAuthentication(false)
 	public RestResponse getBuilding(GetBuildingCommand cmd) {
 		BuildingDTO dto = communityService.getBuilding(cmd);
 		RestResponse response =  new RestResponse(dto);

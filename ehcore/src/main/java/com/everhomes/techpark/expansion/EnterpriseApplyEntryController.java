@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -137,6 +138,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 */
 	@RequestMapping("findLeasePromotionById")
 	@RestReturn(value=BuildingForRentDTO.class)
+	@RequireAuthentication(false)
 	public RestResponse findLeasePromotionById(FindLeasePromotionByIdCommand cmd){
 		RestResponse response = new RestResponse(enterpriseApplyEntryService.findLeasePromotionById(cmd.getId()));
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -4,6 +4,7 @@ package com.everhomes.techpark.expansion;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
@@ -61,6 +62,9 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private CommunityProvider communityProvider;
     @Autowired
     private AddressProvider addressProvider;
+    @Autowired
+    private BuildingProvider buildingProvider;
+
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -116,18 +120,20 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             Map<String, Object> map = new HashMap<>();
 
             String buildingName = "";
-            Address address = addressProvider.findAddressById(dto.getAddressId());
-            if (null != address) {
-
-            }
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
-//            if(null != leasePromotion){
-//                dto.setSourceName(leasePromotion.getSubject());
-//                Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-//                dto.getBuildings().add(proessBuildingDTO(building));
-//            }
 
-            map.put("applyBuilding", defaultIfNull(applyEntry.getApplyUserName(), ""));
+            buildingName = leasePromotion.getRentPosition();
+            com.everhomes.building.Building building = buildingProvider.findBuildingById(dto.getBuildingId());
+            if (null != building) {
+                buildingName = building.getName();
+            }
+            Address address = addressProvider.findAddressById(dto.getAddressId());
+
+            if (null != address) {
+                buildingName = address.getBuildingName() + " " + address.getApartmentName();
+            }
+
+            map.put("applyBuilding", defaultIfNull(buildingName, ""));
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
             map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
