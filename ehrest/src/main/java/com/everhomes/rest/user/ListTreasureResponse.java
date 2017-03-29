@@ -36,6 +36,8 @@ public class ListTreasureResponse {
     private String businessUrl;
     private String businessRealm;
     private Byte activityDefaultListStyle;
+    private Byte shakeOpenDoorUser;
+    private Byte shakeOpenDoorNamespace;
 	
 	public Byte getActivityDefaultListStyle() {
 		return activityDefaultListStyle;
@@ -153,6 +155,22 @@ public class ListTreasureResponse {
 
 	public void setBusinessRealm(String businessRealm) {
 		this.businessRealm = businessRealm;
+	}
+
+	public Byte getShakeOpenDoorUser() {
+		return shakeOpenDoorUser;
+	}
+
+	public void setShakeOpenDoorUser(Byte shakeOpenDoorUser) {
+		this.shakeOpenDoorUser = shakeOpenDoorUser;
+	}
+
+	public Byte getShakeOpenDoorNamespace() {
+		return shakeOpenDoorNamespace;
+	}
+
+	public void setShakeOpenDoorNamespace(Byte shakeOpenDoorNamespace) {
+		this.shakeOpenDoorNamespace = shakeOpenDoorNamespace;
 	}
 
 }

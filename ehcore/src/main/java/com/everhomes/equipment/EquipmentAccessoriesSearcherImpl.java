@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.user.UserContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -128,8 +129,10 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
 
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        //改用namespaceId by xiongying20170328
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
+//        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -184,6 +187,7 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
 	private XContentBuilder createDoc(EquipmentInspectionAccessories accessory){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("namespaceId", accessory.getNamespaceId());
             b.field("ownerId", accessory.getOwnerId());
             b.field("ownerType", accessory.getOwnerType());
             b.field("targetId", accessory.getTargetId());

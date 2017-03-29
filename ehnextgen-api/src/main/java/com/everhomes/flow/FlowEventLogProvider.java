@@ -63,4 +63,14 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findPrefixNodeEnterLogs(Long nodeId, Long caseId, Long stepCount);
 
+	//获取上一个节点的处理人
+	FlowEventLog findPefixFireLog(Long nodeId, Long fromNodeId, Long caseId,
+			Long stepCount);
+
+	/**
+     * 当前节点的实际处理人的日志
+     */
+	List<FlowEventLog> findCurrentNodeEnterLogs(Long nodeId, Long caseId,
+			Long stepCount);
+
 }
