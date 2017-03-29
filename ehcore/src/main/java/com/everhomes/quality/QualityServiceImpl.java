@@ -300,6 +300,7 @@ public class QualityServiceImpl implements QualityService {
 	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
 		
 		QualityInspectionLogs log = new QualityInspectionLogs();
+		log.setNamespaceId(UserContext.getCurrentNamespaceId());
 		log.setOwnerType(standard.getOwnerType());
 		log.setOwnerId(standard.getOwnerId());
 		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
@@ -320,6 +321,7 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
+		standard.setNamespaceId(user.getNamespaceId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
 		standard.setTargetId(cmd.getTargetId());
@@ -2432,7 +2434,7 @@ public class QualityServiceImpl implements QualityService {
 		String day = sdf.format(current);
 		
 		QualityInspectionTasks task = new QualityInspectionTasks();
-		
+		task.setNamespaceId(user.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
@@ -2505,7 +2507,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
-		
+		specification.setNamespaceId(UserContext.getCurrentNamespaceId());
 		specification.setCreatorUid(UserContext.current().getUser().getId());
 		specification.setApplyPolicy(SpecificationApplyPolicy.ADD.getCode());
 		if(cmd.getParentId() != null) {
@@ -2536,6 +2538,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
+				newSpecification.setNamespaceId(UserContext.getCurrentNamespaceId());
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
