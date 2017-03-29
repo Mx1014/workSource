@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
-import org.apache.http.HttpResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.CommunityDTO;
@@ -45,6 +44,8 @@ import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+
+import javax.servlet.http.HttpServletResponse;
 
 
 public interface CommunityService {
@@ -93,7 +94,7 @@ public interface CommunityService {
 	
 	CommunityUserResponse listUserCommunities(ListCommunityUsersCommand cmd);
 
-	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpResponse response);
+	void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response);
 	
 	CountCommunityUserResponse countCommunityUsers(CountCommunityUsersCommand cmd);
 	

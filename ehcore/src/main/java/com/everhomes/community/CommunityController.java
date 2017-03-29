@@ -175,11 +175,11 @@ public class CommunityController extends ControllerBase {
 	}
 
     /**
-     * <b>URL: /community/listCommunityUsers</b>
-     * <p>查询园区用户列表</p>
+     * <b>URL: /community/exportCommunityUsers</b>
+     * <p>导出园区用户列表</p>
      */
-    @RequestMapping("listCommunityUsers")
-    public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpResponse response) {
+    @RequestMapping("exportCommunityUsers")
+    public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
         communityService.exportCommunityUsers(cmd, response);
 
 
