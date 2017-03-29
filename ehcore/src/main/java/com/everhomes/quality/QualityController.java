@@ -237,7 +237,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/listEvaluations</b>
-	 * <p>查看绩效</p>
+	 * <p>查看绩效(暂时还是按照ownerType和ownerId)</p>
 	 */
 	@RequestMapping("listEvaluations")
 	@RestReturn(value = ListEvaluationsResponse.class)
@@ -253,7 +253,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/exportEvaluations</b>
-	 * <p>导出绩效</p>
+	 * <p>导出绩效（暂时还是按照ownerType和ownerId）</p>
 	 */
 	@RequestMapping("exportEvaluations")
 	public HttpServletResponse exportEvaluations(@Valid ListEvaluationsCommand cmd,HttpServletResponse response) {

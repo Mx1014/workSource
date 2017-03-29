@@ -555,7 +555,7 @@ public class QualityProviderImpl implements QualityProvider {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.lt(locator.getAnchor()));
         }
 		//分公司 总公司 改用namespaceId by xiongying 20170329
-//		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.name.eq(ownerId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
 		//       if(ownerId != null && ownerId != 0) {
 //        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
 //        }
@@ -1184,8 +1184,11 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_TASKS);
     
-        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
-		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
+//        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
+//		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
+		//总公司 分公司 改用namespaceId by xiongying20170329
+//		Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.name.equal(ownerId);
+
 		
 		if(taskType != null) {
 			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));

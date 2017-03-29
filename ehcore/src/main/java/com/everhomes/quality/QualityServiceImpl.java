@@ -619,6 +619,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(cmd.getId() == null) {
 			QualityInspectionEvaluationFactors factor = new QualityInspectionEvaluationFactors();
+			factor.setNamespaceId(user.getNamespaceId());
 			factor.setOwnerId(cmd.getOwnerId());
 			factor.setOwnerType(cmd.getOwnerType());
 			factor.setCategoryId(cmd.getCategoryId());
@@ -630,6 +631,7 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.createQualityInspectionEvaluationFactors(factor);
 		} else {
 			QualityInspectionEvaluationFactors factor = verifiedFactorById(cmd.getId());
+			factor.setNamespaceId(user.getNamespaceId());
 			factor.setOwnerId(cmd.getOwnerId());
 			factor.setOwnerType(cmd.getOwnerType());
 			factor.setCategoryId(cmd.getCategoryId());
