@@ -106,8 +106,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
-	private FlowNodeProvider flowNodeProvider;
-	@Autowired
 	private BuildingProvider buildingProvider;
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -581,7 +579,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				task.setDeleteTime(now);
 				pmTaskProvider.updateTask(task);
 			}
-
+			//更新工作流case状态
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+			flowCase.setStatus(FlowCaseStatus.ABSORTED.getCode());
+			flowCaseProvider.updateFlowCase(flowCase);
 			//elasticsearch更新
 			pmTaskSearch.deleteById(task.getId());
 
@@ -644,7 +645,17 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
 			pmTaskProvider.updateTask(task);
 			dto.setStatus(task.getStatus());
-			
+
+			//更新工作流case状态
+			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+			Byte flowCaseStatus = state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+					(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
+							FlowCaseStatus.PROCESS.getCode());
+
+			flowCase.setStatus(flowCaseStatus);
+			flowCaseProvider.updateFlowCase(flowCase);
+
 			CategoryDTO taskCategory = createCategoryDTO();
 			dto.setTaskCategoryName(taskCategory.getName());
 			dto.setCategoryName(ebeiPmTask.getServiceName());

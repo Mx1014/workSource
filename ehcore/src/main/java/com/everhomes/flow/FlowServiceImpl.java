@@ -1897,7 +1897,7 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setOwnerId(ga.getOwnerId());
 		flowCase.setOwnerType(ga.getOwnerType());
 		flowCase.setCaseType(FlowCaseType.DUMB.getCode());
-		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+		flowCase.setStatus(FlowCaseStatus.PROCESS.getCode());
 		flowCase.setProjectId(ga.getProjectId());
 		flowCase.setProjectType(ga.getProjectType());
 		
