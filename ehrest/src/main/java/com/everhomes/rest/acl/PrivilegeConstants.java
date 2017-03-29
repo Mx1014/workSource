@@ -128,4 +128,6 @@ public interface PrivilegeConstants {
     long DELETE_ACTIVITY_COMMENT0    = 10152L;// 非官方活动评论删除权限
     long DELETE_ACTIVITY_COMMENT1    = 10153L;// 官方活动评论删除权限
 
+    long PUBLISH_NOTICE_TOPIC    = 10155L;// 发布公告
+
 }
