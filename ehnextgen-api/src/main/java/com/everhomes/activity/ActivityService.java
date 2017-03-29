@@ -83,6 +83,8 @@ public interface ActivityService {
 
     ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd);
 
+    void videoCallback();
+
     ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
 
 	ListOfficialActivityByNamespaceResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);

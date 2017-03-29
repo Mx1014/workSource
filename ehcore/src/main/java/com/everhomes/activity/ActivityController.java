@@ -444,6 +444,21 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /activity/videoCallback</b>
+     * <p>直播回调</p>
+     */
+    @RequestMapping("videoCallback")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse videoCallback() {
+        activityService.videoCallback();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /activity/devicechange</b>
