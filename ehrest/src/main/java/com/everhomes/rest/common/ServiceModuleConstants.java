@@ -5,5 +5,5 @@ package com.everhomes.rest.common;
  */
 public interface ServiceModuleConstants {
 
-    Long TOPIC_NOTICE_MODULE = 10100L; //论坛公告模块
+    long TOPIC_NOTICE_MODULE = 10100; //论坛公告模块
 }
