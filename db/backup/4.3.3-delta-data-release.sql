@@ -260,22 +260,22 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 SET @eh_service_alliance_categories = (SELECT max(id) FROM eh_service_alliance_categories);
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '高尔夫', '高尔夫', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', '');
-SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);    
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331051500', '高尔夫', '高尔夫', @eh_service_alliance_categories, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999990', @eh_service_alliance_categories);
 
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '健身会所', '健身会所', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', ''); 
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+    VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '健身会所', '健身会所', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', '');
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331051500', '健身会所', '健身会所', @eh_service_alliance_categories, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999990', @eh_service_alliance_categories);
 
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
-    VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '十乐生活', '十乐生活', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', ''); 
-INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+    VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '十乐生活', '十乐生活', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', '');
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
     VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331051500', '十乐生活', '十乐生活', @eh_service_alliance_categories, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999990', @eh_service_alliance_categories);
 
@@ -353,8 +353,7 @@ VALUES ('4006', '0', '0', '', '0', '', 'text_button_msg_target_processors_name',
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('4007', '0', '0', '', '0', '', 'text_button_msg_target_processors_phone', '目标节点处理人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-processors-phone', '1');
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('4008', '0', '0', '', '0', '', 'text_button_msg_target_transfer_name', '被转交人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-transfer-name', '1');
-INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4008', '0', '0', '', '0', '', 'text_button_msg_target_transfer_name', '被转交人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-transfer-name', '1'); INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('4009', '0', '0', '', '0', '', 'text_button_msg_target_transfer_phone', '被转交人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-transfer-phone', '1');
 
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
@@ -410,3 +409,22 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- fix 8047 add by xiongying20170328
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1l6bGxZV1k1TVdaak5qUTBNemN5Tm1VM1ptRXdOekUyTWpVMU1tSmtOZw' where id in (112848, 112878 ) and namespace_id = 999983;
 update eh_launch_pad_items set action_data = '{"itemLocation":"/home/Coupons","layoutName":"CouponsLayout","title":"资源租赁"}' where id in (112848, 112878 ) and namespace_id = 999983;
+
+-- janson 3-28
+UPDATE `eh_flow_variables` SET `script_cls`='flow-variable-text-remind-prefix-processor-name' WHERE `id`='4028';
+UPDATE `eh_flow_variables` SET `script_cls`='flow-variable-text-remind-prefix-processor-phone' WHERE `id`='4029';
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3013', '0', '0', '', '0', '', 'user_button_msg_transfer_processor', '转交人', 'node_user_button_msg', 'bean_id', 'flow-variable-button-msg-curr-processor', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4030', '0', '0', '', '0', '', 'text_button_msg_curr_transfer_name', '转交人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4031', '0', '0', '', '0', '', 'text_button_msg_curr_transfer_phone', '转交人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-phone', '1');
+
+-- janson 3-29
+UPDATE `eh_locale_templates` SET `description`='${nodeName} 被驳回', `text`='${nodeName} 驳回' WHERE `scope`='flow' and `code`=10002 limit 1;
+
+-- 品质增加域空间 add by xiongying20170329
+update eh_quality_inspection_categories set namespace_id = 999992;
+update eh_quality_inspection_evaluation_factors set namespace_id = 999992;
+update eh_quality_inspection_tasks set namespace_id = 999992;
+update eh_quality_inspection_logs set namespace_id = 999992;

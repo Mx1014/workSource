@@ -300,6 +300,7 @@ public class QualityServiceImpl implements QualityService {
 	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
 		
 		QualityInspectionLogs log = new QualityInspectionLogs();
+		log.setNamespaceId(UserContext.getCurrentNamespaceId());
 		log.setOwnerType(standard.getOwnerType());
 		log.setOwnerId(standard.getOwnerId());
 		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
@@ -320,6 +321,7 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
+		standard.setNamespaceId(user.getNamespaceId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
 		standard.setTargetId(cmd.getTargetId());
@@ -497,6 +499,7 @@ public class QualityServiceImpl implements QualityService {
 			category.setName(cmd.getName());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
+			category.setNamespaceId(user.getNamespaceId());
 			category.setStatus(QualityInspectionCategoryStatus.ACTIVE.getCode());
 			category.setCreatorUid(user.getId());
 			if(cmd.getParentId() != null) {
@@ -517,6 +520,7 @@ public class QualityServiceImpl implements QualityService {
 		} else {
 			QualityInspectionCategories category = verifiedCategoryById(cmd.getId());
 			category.setName(cmd.getName());
+			category.setNamespaceId(user.getNamespaceId());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
 			if(cmd.getParentId() != null) {
@@ -617,6 +621,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(cmd.getId() == null) {
 			QualityInspectionEvaluationFactors factor = new QualityInspectionEvaluationFactors();
+			factor.setNamespaceId(user.getNamespaceId());
 			factor.setOwnerId(cmd.getOwnerId());
 			factor.setOwnerType(cmd.getOwnerType());
 			factor.setCategoryId(cmd.getCategoryId());
@@ -628,6 +633,7 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.createQualityInspectionEvaluationFactors(factor);
 		} else {
 			QualityInspectionEvaluationFactors factor = verifiedFactorById(cmd.getId());
+			factor.setNamespaceId(user.getNamespaceId());
 			factor.setOwnerId(cmd.getOwnerId());
 			factor.setOwnerType(cmd.getOwnerType());
 			factor.setCategoryId(cmd.getCategoryId());
@@ -1256,9 +1262,11 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
-			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(user.getId());
+//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("userName", operator.getContactName());
+		    map.put("userName", operators.get(0).getContactName());
 		    map.put("taskName", task.getTaskName());
 		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
@@ -1266,11 +1274,13 @@ public class QualityServiceImpl implements QualityService {
 			String locale = "zh_CN";
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
-			
-			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
-			msgMap.put("operator", operator.getContactName());
-			msgMap.put("target", target.getContactName());
+			msgMap.put("operator", operators.get(0).getContactName());
+			msgMap.put("target", targets.get(0).getContactName());
 			msgMap.put("taskName", task.getTaskName());
 			msgMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
@@ -1324,9 +1334,11 @@ public class QualityServiceImpl implements QualityService {
 				&& cmd.getReviewResult() == QualityInspectionTaskReviewResult.UNQUALIFIED.getCode()) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("taskNumber", task.getTaskNumber());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
-			if(member != null) {
-				map.put("userName", member.getContactName());
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			if(members != null) {
+				map.put("userName", members.get(0).getContactName());
 			} else {
 				map.put("userName", user.getNickName());
 			}
@@ -1404,9 +1416,11 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
-			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> operators = organizationProvider.listOrganizationMembersByUId(user.getId());
+//			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("userName", operator.getContactName());
+		    map.put("userName", operators.get(0).getContactName());
 		    map.put("taskName", task.getTaskName());
 		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
@@ -1414,11 +1428,13 @@ public class QualityServiceImpl implements QualityService {
 			String locale = "zh_CN";
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
-			
-			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
+
+			//总公司 分公司 在分公司通讯录而不在总公司通讯录中时可能查无此人 by xiongying20170329
+			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
+//			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
-		    map.put("operator", operator.getContactName());
-		    map.put("target", target.getContactName());
+		    map.put("operator", operators.get(0).getContactName());
+		    map.put("target", targets.get(0).getContactName());
 		    map.put("taskName", task.getTaskName());
 		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
@@ -1512,7 +1528,7 @@ public class QualityServiceImpl implements QualityService {
 			String day = sdf.format(current);
 			
 			QualityInspectionTasks task = new QualityInspectionTasks();
-			
+			task.setNamespaceId(standard.getNamespaceId());
 			task.setOwnerType(standard.getOwnerType());
 			task.setOwnerId(standard.getOwnerId());
 			task.setTargetType(standard.getTargetType());
@@ -2418,7 +2434,7 @@ public class QualityServiceImpl implements QualityService {
 		String day = sdf.format(current);
 		
 		QualityInspectionTasks task = new QualityInspectionTasks();
-		
+		task.setNamespaceId(user.getNamespaceId());
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
 		task.setTargetId(cmd.getTargetId());
@@ -2491,7 +2507,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
-		
+		specification.setNamespaceId(UserContext.getCurrentNamespaceId());
 		specification.setCreatorUid(UserContext.current().getUser().getId());
 		specification.setApplyPolicy(SpecificationApplyPolicy.ADD.getCode());
 		if(cmd.getParentId() != null) {
@@ -2522,6 +2538,7 @@ public class QualityServiceImpl implements QualityService {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
+				newSpecification.setNamespaceId(UserContext.getCurrentNamespaceId());
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
