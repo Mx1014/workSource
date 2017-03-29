@@ -71,8 +71,6 @@ public class ForumUiController extends ControllerBase {
     @RestReturn(value=TopicFilterDTO.class, collection=true)
     @RequireAuthentication(false)
     public RestResponse getTopicQueryFilters(HttpServletRequest request, GetTopicQueryFilterCommand cmd) {
-        kickoffService.checkKickoffStatus(request);
-        
         List<TopicFilterDTO> filterDtoList = forumService.getTopicQueryFilters(cmd);
         
         RestResponse response = new RestResponse(filterDtoList);

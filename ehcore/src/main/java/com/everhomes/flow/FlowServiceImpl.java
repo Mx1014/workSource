@@ -1870,6 +1870,9 @@ public class FlowServiceImpl implements FlowService {
 		return flowCase;
 	}
 	
+	/**
+	 * 创建一个没有工作流对应的 flowCase
+	 */
 	@Override
 	public FlowCase createDumpFlowCase(GeneralModuleInfo ga, CreateFlowCaseCommand flowCaseCmd) {
 		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);

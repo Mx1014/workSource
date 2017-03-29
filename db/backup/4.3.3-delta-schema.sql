@@ -63,3 +63,9 @@ CREATE TABLE `eh_sms_logs`(
 ALTER TABLE eh_equipment_inspection_accessories ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
 ALTER TABLE eh_equipment_inspection_items ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
 ALTER TABLE eh_equipment_inspection_templates ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+
+-- 品质核查增加域空间 add by xiongying20170329
+ALTER TABLE eh_quality_inspection_categories ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_evaluation_factors ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_tasks ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_logs ADD COLUMN  `namespace_id` INT NOT NULL DEFAULT 0;

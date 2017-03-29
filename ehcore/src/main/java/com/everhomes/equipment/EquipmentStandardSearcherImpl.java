@@ -201,7 +201,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("standardType", standard.getStandardType());
             b.field("inspectionCategoryId", standard.getInspectionCategoryId());
             b.field("status", standard.getStatus());
-            b.field("namespaceId", UserContext.getCurrentNamespaceId());
+            b.field("namespaceId", standard.getNamespaceId());
 
             b.endObject();
             return b;

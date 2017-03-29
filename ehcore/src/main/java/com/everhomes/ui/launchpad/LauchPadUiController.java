@@ -57,8 +57,6 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getLaunchPadItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        kickoffService.checkKickoffStatus(request);
-        
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItemsByScene(cmd, request);
         RestResponse resp =  new RestResponse(commandResponse);
 //        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
@@ -83,8 +81,6 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     @RequireAuthentication(false)
     public RestResponse getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd, HttpServletRequest request,HttpServletResponse response) {
-        kickoffService.checkKickoffStatus(request);
-        
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
         RestResponse resp =  new RestResponse();
         // 有域空间时，这样判断ETAG会导致有些域空间拿不到数据（同一个域空间不同场景切换也有问题），先暂时不使用ETAG by lqs 20160514
@@ -138,9 +134,7 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     @RequireAuthentication(false)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        kickoffService.checkKickoffStatus(request);
-        
-    	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
+        GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
     	RestResponse resp =  new RestResponse(commandResponse);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
@@ -155,8 +149,6 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=CategryItemDTO.class, collection = true)
     @RequireAuthentication(false)
     public RestResponse getAllCategryItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        kickoffService.checkKickoffStatus(request);
-        
         RestResponse resp =  new RestResponse(launchPadService.getAllCategryItemsByScene(cmd, request));
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

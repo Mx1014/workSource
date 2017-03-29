@@ -56,8 +56,6 @@ public class BannerUiController extends ControllerBase {
     @RestReturn(value=BannerDTO.class,collection=true)
     @RequireAuthentication(false)
     public RestResponse getBannersByScene(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        kickoffService.checkKickoffStatus(request);
-        
         List<BannerDTO> result = bannerService.getBannersByScene(cmd, request);
         RestResponse resp =  new RestResponse(result);
         // 在多场景的情况下，etag不能使用，以免不同的场景拿不到数据 by lqs 20160617
