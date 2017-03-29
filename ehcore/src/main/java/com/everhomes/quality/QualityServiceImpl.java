@@ -497,6 +497,7 @@ public class QualityServiceImpl implements QualityService {
 			category.setName(cmd.getName());
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
+//			category.setna
 			category.setStatus(QualityInspectionCategoryStatus.ACTIVE.getCode());
 			category.setCreatorUid(user.getId());
 			if(cmd.getParentId() != null) {

@@ -453,16 +453,18 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
         SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
-    
+
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//总公司分公司问题 改成namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
+//		}
 		
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
@@ -927,12 +929,15 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_TYPE.eq(ownerType));    	
-		}
+
+		//总公司分公司问题 改成namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//		}
 		
 		if(parentId != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.PARENT_ID.eq(parentId));
@@ -1643,9 +1648,11 @@ public class QualityProviderImpl implements QualityProvider {
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PATH.like(superiorPath));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
-		
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		//改成用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+
 		if(scopeCode != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
 		if(scopeId != null)
