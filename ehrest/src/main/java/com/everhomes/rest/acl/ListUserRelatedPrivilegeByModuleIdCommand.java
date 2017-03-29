@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- * <li>ownerType: 范围权限</li>
+ * <li>ownerType: 类型 EhCommunities, EhOrganizations，参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId: 范围id</li>
  * <li>organizationId: 机构id</li>
  * <li>moduleId: 模块id</li>
