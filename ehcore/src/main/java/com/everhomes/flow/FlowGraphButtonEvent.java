@@ -91,6 +91,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		FlowEventLog log = null;
 		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
+		Long oldStep = flowCase.getStepCount();
 		
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
@@ -305,6 +306,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		//Important!!! not change this order
 		if(logType == FlowLogType.BUTTON_FIRED) {
+			//记录某一个节点的按钮被执行的次数
 			List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
 			if(likeLogs != null && likeLogs.size() > 0) {
 				log.setButtonFiredCount(new Long(likeLogs.size()));
@@ -325,6 +327,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
+		log.setStepCount(oldStep);
 		
 		ctx.getLogs().add(log);	//added but not save to database now.
 

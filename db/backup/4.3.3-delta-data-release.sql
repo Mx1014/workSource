@@ -164,6 +164,8 @@ delete from eh_launch_pad_layouts where namespace_id = 0;
 
 select max(id) into @sc_id from `eh_service_alliance_categories`;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`, `display_mode`, `display_destination`, `selected_logo_url`) VALUES (@sc_id:=@sc_id+1, 'community', 240111044331051460, 0, '创业服务', '创业服务', 0, 2, 1, now(), 0, NULL, 0, '', 1, 0, NULL);
+select max(id) into @id from `eh_service_alliances`;
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`) VALUES (@id:=@id+1, 0, 'community', 240111044331051460, '创业服务', '创业服务', @sc_id);
 
 -- 增加0域空间数据，add by tt, 20170316
 select max(id) into @id from `eh_banners`;
@@ -297,3 +299,114 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 update eh_equipment_inspection_accessories set namespace_id = 999992;
 update eh_equipment_inspection_items set namespace_id = 999992;
 update eh_equipment_inspection_templates set namespace_id = 999992;
+update eh_equipment_inspection_tasks set namespace_id = 999992;
+update eh_equipment_inspection_standards set namespace_id = 999992;
+update eh_equipment_inspection_equipments set namespace_id = 999992;
+
+
+-- new version of variable supported by janson 2017-03-24
+UPDATE `eh_locale_templates` SET `description`='${processorName} 被驳回', `text`='${processorName} 驳回' WHERE `scope`='flow' and `code`=10002 limit 1;
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3000', '0', '0', '', '0', '', 'user_applier', '发起人', 'node_user_processor', 'bean_id', 'flow-variable-applier', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3001', '0', '0', '', '0', '', 'user_prefix_processor', '上一步操作执行人', 'node_user_processor', 'bean_id', 'flow-variable-prefix-node-processor', '1');
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3002', '0', '0', '', '0', '', 'user_button_msg_applier', '发起人', 'node_user_button_msg', 'bean_id', 'flow-variable-applier', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3003', '0', '0', '', '0', '', 'user_button_msg_supervisor', '督办', 'node_user_button_msg', 'bean_id', 'flow-variable-supervisor', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3004', '0', '0', '', '0', '', 'user_button_msg_curr_processors', '本节点处理人', 'node_user_button_msg', 'bean_id', 'flow-variable-button-msg-curr-processors', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3005', '0', '0', '', '0', '', 'user_button_msg_curr_processor', '本节点操作执行人', 'node_user_button_msg', 'bean_id', 'flow-variable-button-msg-curr-processor', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3006', '0', '0', '', '0', '', 'user_button_msg_target_processors', '目标节点处理人', 'node_user_button_msg', 'bean_id', 'flow-variable-button-msg-target-processors', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3012', '0', '0', '', '0', '', 'user_button_msg_target_transfer', '被转交人', 'node_user_button_msg', 'bean_id', 'flow-variable-button-msg-target-transfer', '1');
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3007', '0', '0', '', '0', '', 'user_remind_applier', '发起人', 'node_user_remind', 'bean_id', 'flow-variable-applier', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3008', '0', '0', '', '0', '', 'user_remind_supervisor', '督办', 'node_user_remind', 'bean_id', 'flow-variable-supervisor', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3009', '0', '0', '', '0', '', 'user_remind_prefix_processor', '上一步操作执行人', 'node_user_remind', 'bean_id', 'flow-variable-user-remind-prefix-processor', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3010', '0', '0', '', '0', '', 'user_remind_prefix_processors', '上一步处理人', 'node_user_remind', 'bean_id', 'flow-variable-user-remind-prefix-processors', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('3011', '0', '0', '', '0', '', 'user_remind_curr_processors', '本节点处理人', 'node_user_remind', 'bean_id', 'flow-variable-user-remind-curr-processors', '1');
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4000', '0', '0', '', '0', '', 'text_button_msg_applier_name', '发起人姓名', 'text_button_msg', 'bean_id', 'flow-variable-applier-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4001', '0', '0', '', '0', '', 'text_button_msg_applier_phone', '发起人手机号', 'text_button_msg', 'bean_id', 'flow-variable-applier-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4002', '0', '0', '', '0', '', 'text_button_msg_curr_processors_name', '本节点处理人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4003', '0', '0', '', '0', '', 'text_button_msg_curr_processors_phone', '本节点处理人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4004', '0', '0', '', '0', '', 'text_button_msg_curr_processor_name', '本节点操作执行人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4005', '0', '0', '', '0', '', 'text_button_msg_curr_processor_phone', '本节点操作执行人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4006', '0', '0', '', '0', '', 'text_button_msg_target_processors_name', '目标节点处理人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4007', '0', '0', '', '0', '', 'text_button_msg_target_processors_phone', '目标节点处理人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4008', '0', '0', '', '0', '', 'text_button_msg_target_transfer_name', '被转交人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-transfer-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4009', '0', '0', '', '0', '', 'text_button_msg_target_transfer_phone', '被转交人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-target-transfer-phone', '1');
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4010', '0', '0', '', '0', '', 'text_remind_applier_name', '发起人姓名', 'text_remind', 'bean_id', 'flow-variable-applier-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4011', '0', '0', '', '0', '', 'text_remind_applier_phone', '发起人手机号', 'text_remind', 'bean_id', 'flow-variable-applier-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4012', '0', '0', '', '0', '', 'text_remind_prefix_processors_name', '上一步处理人姓名', 'text_remind', 'bean_id', 'flow-variable-text-remind-prefix-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4013', '0', '0', '', '0', '', 'text_remind_prefix_processors_phone', '上一步处理人手机号', 'text_remind', 'bean_id', 'flow-variable-text-remind-prefix-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4014', '0', '0', '', '0', '', 'text_remind_curr_processors_name', '本节点处理人姓名', 'text_remind', 'bean_id', 'flow-variable-text-remind-curr-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4015', '0', '0', '', '0', '', 'text_remind_curr_processors_phone', '本节点处理人手机号', 'text_remind', 'bean_id', 'flow-variable-text-remind-curr-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4016', '0', '0', '', '0', '', 'text_remind_prefix_processor_name', '上一步操作执行人姓名', 'text_remind', 'bean_id', 'flow-variable-text-remind-prefix-processor-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4017', '0', '0', '', '0', '', 'text_remind_prefix_processor_phone', '上一步操作执行人手机号', 'text_remind', 'bean_id', 'flow-variable-text-remind-prefix-processor-phone', '1');
+
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4018', '0', '0', '', '0', '', 'text_tracker_applier_name', '发起人姓名', 'text_tracker', 'bean_id', 'flow-variable-applier-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4019', '0', '0', '', '0', '', 'text_tracker_applier_phone', '发起人手机号', 'text_tracker', 'bean_id', 'flow-variable-applier-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4020', '0', '0', '', '0', '', 'text_tracker_prefix_processors_name', '上一步处理人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-prefix-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4021', '0', '0', '', '0', '', 'text_tracker_prefix_processors_phone', '上一步处理人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-prefix-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4022', '0', '0', '', '0', '', 'text_tracker_curr_processors_name', '本节点处理人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-processors-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4023', '0', '0', '', '0', '', 'text_tracker_curr_processors_phone', '本节点处理人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-processors-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4024', '0', '0', '', '0', '', 'text_tracker_prefix_processor_name', '上一步操作执行人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-prefix-processor-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4025', '0', '0', '', '0', '', 'text_tracker_prefix_processor_phone', '上一步操作执行人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-prefix-processor-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4026', '0', '0', '', '0', '', 'text_tracker_target_transfer_name', '被转交人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-target-transfer-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4027', '0', '0', '', '0', '', 'text_tracker_target_transfer_phone', '被转交人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-target-transfer-phone', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4028', '0', '0', '', '0', '', 'text_tracker_curr_transfer_name', '转交人姓名', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-transfer-name', '1');
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('4029', '0', '0', '', '0', '', 'text_tracker_curr_transfer_phone', '转交人手机号', 'text_tracker', 'bean_id', 'flow-variable-text-tracker-curr-transfer-phone', '1');
+
+
+
+
+
+-- add by yanjun 2017-03-28
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('shake.open.door', '1', 'use shake open door function  0:not, 1:yes', '0', NULL);
+
+-- fix 8047 add by xiongying20170328
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1l6bGxZV1k1TVdaak5qUTBNemN5Tm1VM1ptRXdOekUyTWpVMU1tSmtOZw' where id in (112848, 112878 ) and namespace_id = 999983;
+update eh_launch_pad_items set action_data = '{"itemLocation":"/home/Coupons","layoutName":"CouponsLayout","title":"资源租赁"}' where id in (112848, 112878 ) and namespace_id = 999983;
