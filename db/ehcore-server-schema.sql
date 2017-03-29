@@ -6622,6 +6622,7 @@ CREATE TABLE `eh_quality_inspection_categories` (
   `create_time` DATETIME,
   `score` DOUBLE NOT NULL DEFAULT 0,
   `description` TEXT COMMENT 'content data',
+  `namespace_id` INT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -6637,6 +6638,7 @@ CREATE TABLE `eh_quality_inspection_evaluation_factors` (
   `weight` DOUBLE NOT NULL DEFAULT 0,
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `create_time` DATETIME,
+  `namespace_id` INT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -6667,6 +6669,7 @@ CREATE TABLE `eh_quality_inspection_logs` (
   `process_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: insert, 2: update, 3: delete',
   `operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record operator user id',
   `create_time` DATETIME,
+  `namespace_id` INT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -6884,6 +6887,7 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `executive_position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
+  `namespace_id` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),		  
   KEY `standard_id` (`standard_id`),
   KEY `status` (`status`),
