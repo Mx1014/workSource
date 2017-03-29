@@ -846,11 +846,11 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		return listUserByKeyword(null, keyword, null, namespaceId, locator, pageSize);
+		return listUserByKeyword(null, null, keyword, null, namespaceId, locator, pageSize);
 	}
 	
 	@Override
-	public List<User> listUserByKeyword(Long organizationId, String keyword, Byte executiveFlag,
+	public List<User> listUserByKeyword(Byte gender, Long organizationId, String keyword, Byte executiveFlag,
 			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
 
 		List<User> list = new ArrayList<User>();
@@ -865,6 +865,10 @@ public class UserProviderImpl implements UserProvider {
 			if(executiveFlag != null){ 
 				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
 			}
+
+            if(gender != null){
+                cond = cond.and(Tables.EH_USERS.GENDER.eq(gender));
+            }
 			 
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));

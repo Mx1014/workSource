@@ -1638,7 +1638,8 @@ public class CommunityServiceImpl implements CommunityService {
 			index = 10000;
 		}
 		
-		users = userProvider.listUserByKeyword(cmd.getOrganizationId(), cmd.getKeywords(),cmd.getExecutiveFlag(), namespaceId, locator, index);
+		users = userProvider.listUserByKeyword(cmd.getGender(), cmd.getOrganizationId(), cmd.getKeywords(),
+				cmd.getExecutiveFlag(), namespaceId, locator, index);
 		
 		if(null == users) 
 			return res;
