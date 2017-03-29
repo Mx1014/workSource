@@ -419,3 +419,6 @@ INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`,
 VALUES ('4030', '0', '0', '', '0', '', 'text_button_msg_curr_transfer_name', '转交人姓名', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-name', '1');
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('4031', '0', '0', '', '0', '', 'text_button_msg_curr_transfer_phone', '转交人手机号', 'text_button_msg', 'bean_id', 'flow-variable-text-button-msg-curr-processor-phone', '1');
+
+-- janson 3-29
+UPDATE `eh_locale_templates` SET `description`='${nodeName} 被驳回', `text`='${nodeName} 驳回' WHERE `scope`='flow' and `code`=10002 limit 1;
