@@ -5,6 +5,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.PriceCalculationType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyDateStatisticsDao;
@@ -127,6 +128,21 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 	}
 
 	@Override
+	public List<BigDecimal> getBlockSumAmountBetweenDate(Long meterId, Date begin, Date end) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+		List<BigDecimal> result  = context.select(Tables.EH_ENERGY_DATE_STATISTICS.CURRENT_AMOUNT.sum()).from(Tables.EH_ENERGY_DATE_STATISTICS)
+				.where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.between(begin, end))
+				.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
+				.and(Tables.EH_ENERGY_DATE_STATISTICS.CALCULATION_TYPE.eq(PriceCalculationType.BLOCK_TARIFF.getCode()))
+				.groupBy(Tables.EH_ENERGY_DATE_STATISTICS.CONFIG_ID)
+				.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
+				.fetchInto(BigDecimal.class);
+//				.fetchOne().value1() ;
+		return result;
+	}
+
+	@Override
 	public BigDecimal getSumAmountBetweenDate(Long meterId,Date begin, Date end) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
@@ -146,6 +162,7 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 		BigDecimal result  = context.select(Tables.EH_ENERGY_DATE_STATISTICS.CURRENT_COST.sum()).from(Tables.EH_ENERGY_DATE_STATISTICS)
 				.where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.between(begin, end))
 				.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
+				.and(Tables.EH_ENERGY_DATE_STATISTICS.CALCULATION_TYPE.eq(PriceCalculationType.STANDING_CHARGE_TARIFF.getCode()))
 				.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
 				.fetchOne().value1() ;
 		return result;

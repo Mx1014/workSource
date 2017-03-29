@@ -7,18 +7,42 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *     <li>organizationId: 组织id</li>
+ *     <li>ownerId: 组织id</li>
+ *     <li>ownerType: 组织类型</li>
+ *     <li>communityId: 园区</li>
  *     <li>categoryType: 分类类型 {@link com.everhomes.rest.energy.EnergyCategoryType}</li>
  * </ul>
  */
 public class ListEnergyMeterCategoriesCommand {
 
-    @NotNull private Long organizationId;
+    @NotNull private Long ownerId;
+    @NotNull private String ownerType;
+    @NotNull private Long communityId;
     @EnumType(value = EnergyCategoryType.class)
     @NotNull private Byte categoryType;
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     public Byte getCategoryType() {
@@ -29,9 +53,6 @@ public class ListEnergyMeterCategoriesCommand {
         this.categoryType = categoryType;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
 
     @Override
     public String toString() {

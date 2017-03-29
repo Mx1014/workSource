@@ -35,6 +35,7 @@ public class FlowVariblePrefixAllProcessorsPhoneResolver implements FlowVariable
 			for(int i = logs.size()-1; i >= 0; i--) {
 				FlowGraphNode gnode = ctx.getFlowGraph().getGraphNode(logs.get(i).getFlowNodeId());
 				if(gnode != null && gnode.getFlowNode().getNodeLevel() < currNode.getFlowNode().getNodeLevel()) {
+					node = gnode.getFlowNode();
 					break;
 				}
 			}
@@ -48,7 +49,9 @@ public class FlowVariblePrefixAllProcessorsPhoneResolver implements FlowVariable
 						txt += u.getPhones().get(0) + ", ";	
 					}
 				}
-				
+				if(txt.length() > 2) {
+					txt = txt.substring(0, txt.length()-2);
+				}
 				return txt;
 			}
 		}

@@ -730,7 +730,7 @@ public class OrganizationController extends ControllerBase {
      * <p>搜索 机构</p>
      */
     @RequestMapping("searchOrganization")
-    @RestReturn(value=OrganizationDTO.class, collection=true)
+    @RestReturn(value=SearchOrganizationCommandResponse.class, collection=true)
     public RestResponse searchOrganization(@Valid SearchOrganizationCommand cmd) {
     	SearchOrganizationCommandResponse res = organizationService.searchOrganization(cmd);
         RestResponse response = new RestResponse(res);

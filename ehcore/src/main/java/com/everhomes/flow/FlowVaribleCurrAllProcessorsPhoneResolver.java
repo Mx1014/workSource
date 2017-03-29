@@ -35,7 +35,9 @@ public class FlowVaribleCurrAllProcessorsPhoneResolver implements FlowVariableTe
 				}
 				
 			}
-			
+			if(txt.length() > 2) {
+				txt = txt.substring(0, txt.length()-2);
+			}
 			return txt;
 		}
 		return null;

@@ -2639,6 +2639,7 @@ CREATE TABLE `eh_equipment_inspection_accessories` (
   `specification` VARCHAR(1024),
   `location` VARCHAR(1024),
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
+  `namespace_id` INT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2797,6 +2798,7 @@ CREATE TABLE `eh_equipment_inspection_items` (
   `value_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0-none、1-two-tuple、2-range',
   `unit` VARCHAR(32),
   `value_jason` VARCHAR(512),
+  `namespace_id` INT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2948,6 +2950,7 @@ CREATE TABLE `eh_equipment_inspection_templates` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
   `delete_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',
   `delete_time` DATETIME,
+  `namespace_id` INT NOT NULL DEFAULT 0,
 	
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -3699,6 +3702,7 @@ CREATE TABLE `eh_forum_posts` (
   `max_quantity` INTEGER COMMENT 'max person quantity',
   `activity_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity category id',		
   `activity_content_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity content category id',
+  `parent_comment_id` BIGINT(20) COMMENT 'parent comment id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   KEY `i_eh_post_seqs` (`modify_seq`),
@@ -4094,6 +4098,7 @@ CREATE TABLE `eh_item_service_categries` (
   `align` TINYINT DEFAULT 0 COMMENT '0: left, 1: center',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active',
   `namespace_id` INTEGER,
+  `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -4190,6 +4195,7 @@ CREATE TABLE `eh_launch_pad_items` (
   `scale_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: 不需要, 1: 需要',
   `service_categry_id` BIGINT COMMENT 'service categry id',
   `selected_icon_uri` VARCHAR(1024),
+  `more_order` INT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`),
   KEY `i_eh_scoped_cfg_combo` (`namespace_id`,`app_id`,`scope_code`,`scope_id`,`item_name`),
@@ -4538,6 +4544,35 @@ CREATE TABLE `eh_oauth2_codes` (
   KEY `i_eh_ocode_modify_time`(`modify_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_oauth2_servers`;
+CREATE TABLE `eh_oauth2_servers` (
+  `id` BIGINT NOT NULL,
+  `vendor` VARCHAR(32) NOT NULL COMMENT 'OAuth2 server name',
+  `client_id` VARCHAR(128) NOT NULL COMMENT 'third part provided',
+  `client_secret` VARCHAR(128) NOT NULL COMMENT 'third part provided',
+  `redirect_uri` VARCHAR(1024) NOT NULL COMMENT 'authorize success redirect to this url',
+  `response_type` VARCHAR(128) NOT NULL COMMENT 'e.g: code',
+  `grant_type` VARCHAR(128) NOT NULL COMMENT 'e.g: authorization_code',
+  `state` VARCHAR(128) NOT NULL COMMENT 'e.g: OAuth server will response this filed original',
+  `scope` VARCHAR(256) NULL DEFAULT NULL COMMENT 'space-delimited scope tokens per RFC 6749',
+  `authorize_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'OAuth server provided authorize url',
+  `token_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'OAuth server provided get token url',
+  `create_time` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
+
+DROP TABLE IF EXISTS `eh_oauth2_client_tokens`;
+CREATE TABLE `eh_oauth2_client_tokens` (
+  `id` BIGINT NOT NULL,
+  `token_string` VARCHAR(128) NOT NULL COMMENT 'token string issued to requestor',
+  `vendor` VARCHAR(32) NOT NULL COMMENT 'OAuth2 server name',
+  `grantor_uid` BIGINT NOT NULL COMMENT 'eh_users id',
+  `expiration_time` DATETIME NOT NULL COMMENT 'a successful acquire of access token by the code should immediately expires it',
+  `scope` VARCHAR(256) NULL DEFAULT NULL COMMENT 'space-delimited scope tokens per RFC 6749',
+  `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: access token, 1: refresh token',
+  `create_time` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
 
 --
 -- member of global sharding group
@@ -8522,6 +8557,21 @@ CREATE TABLE `eh_shards`(
   KEY `i_eh_shards_create_time` (`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_sms_logs`;
+CREATE TABLE `eh_sms_logs`(
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `scope` VARCHAR(64),
+  `code` INTEGER,
+  `locale` VARCHAR(16),
+  `mobile` VARCHAR(128),
+  `text` text,
+  `variables` VARCHAR(512),
+  `result` text,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_source_account`;
 CREATE TABLE `eh_source_account` (

@@ -53,7 +53,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(FlowVaribleCurrAllP
 				for(UserInfo u : users) {
 					txt += u.getNickName() + ", ";
 				}
-				
+				if(txt.length() > 2) {
+					txt = txt.substring(0, txt.length()-2);
+				}
 				return txt;
 			}
 		}

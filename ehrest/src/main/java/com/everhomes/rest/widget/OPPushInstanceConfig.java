@@ -6,7 +6,13 @@ import com.everhomes.util.StringHelper;
 import java.io.Serializable;
 
 /**
- * Created by xq.tian on 2017/1/10.
+ * <ul>
+ *     <li>itemGroup: itemGroup</li>
+ *     <li>entityCount: 之前用的，现在又不用了，暂时没有意义</li>
+ *     <li>subjectHeight：标题显示行数</li>
+ *     <li>descriptionHeight：描述显示行数</li>
+ *     <li>newsSize：显示多少条</li>
+ * </ul>
  */
 public class OPPushInstanceConfig implements Serializable {
 

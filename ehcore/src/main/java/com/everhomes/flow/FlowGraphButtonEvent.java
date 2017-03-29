@@ -62,6 +62,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		this.cmd = cmd;
 	}
 
+	@Override
 	public FlowSubject getSubject() {
 		return subject;
 	}
@@ -90,6 +91,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		FlowEventLog log = null;
 		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
+		Long oldStep = flowCase.getStepCount();
 		
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
@@ -105,8 +107,8 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		case APPROVE_STEP:
 			next = null;
-			if(!btn.getFlowButton().getGotoNodeId().equals(0)) {
-				next = ctx.getFlowGraph().getGraphNode(btn.getFlowButton().getGotoNodeId());
+			if(!btn.getFlowButton().getGotoLevel().equals(0) && btn.getFlowButton().getGotoLevel() < ctx.getFlowGraph().getNodes().size()) {
+				next = ctx.getFlowGraph().getNodes().get(btn.getFlowButton().getGotoLevel());
 			}
 			if(next == null) {
 				//get next level
@@ -149,9 +151,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			next = current;
 			ctx.setNextNode(next);
 			
-			tracker = new FlowEventLog();
-			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
-			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(current.getTrackTransferLeave() != null) {
+				current.getTrackTransferLeave().fireAction(ctx, ctx.getCurrentEvent());	
+			} else {
+				tracker = new FlowEventLog();
+				tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+				tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			}
 			
 			log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
@@ -300,6 +306,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		//Important!!! not change this order
 		if(logType == FlowLogType.BUTTON_FIRED) {
+			//记录某一个节点的按钮被执行的次数
 			List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
 			if(likeLogs != null && likeLogs.size() > 0) {
 				log.setButtonFiredCount(new Long(likeLogs.size()));
@@ -320,6 +327,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
+		log.setStepCount(oldStep);
 		
 		ctx.getLogs().add(log);	//added but not save to database now.
 

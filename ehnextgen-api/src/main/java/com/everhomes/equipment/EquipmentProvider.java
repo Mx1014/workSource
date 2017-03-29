@@ -28,6 +28,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionStandards findStandardById(Long id);
 	EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionEquipments findEquipmentById(Long id);
+	EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId);
 	EquipmentInspectionAccessories findAccessoryById(Long id, String ownerType, Long ownerId);
 	EquipmentInspectionAccessories findAccessoryById(Long id);
 	EquipmentInspectionTasks findEquipmentTaskById(Long id, String ownerType, Long ownerId);
@@ -77,7 +78,7 @@ public interface EquipmentProvider {
 	Long createEquipmentInspectionTemplates(EquipmentInspectionTemplates template);
 	void updateEquipmentInspectionTemplates(EquipmentInspectionTemplates template);
 	EquipmentInspectionTemplates findEquipmentInspectionTemplate(Long id, Long ownerId, String ownerType);
-	
+
 	Long createEquipmentInspectionItems(EquipmentInspectionItems item);
 	Long updateEquipmentInspectionItems(EquipmentInspectionItems item);
 	EquipmentInspectionItems findEquipmentInspectionItem(Long id);
@@ -87,6 +88,7 @@ public interface EquipmentProvider {
 	EquipmentInspectionTemplateItemMap findEquipmentInspectionTemplateItemMap(Long id);
 	List<EquipmentInspectionTemplateItemMap> listEquipmentInspectionTemplateItemMap(Long templateId);
 	List<EquipmentInspectionTemplates> listInspectionTemplates(Long ownerId, String ownerType, String name);
+	List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name);
 	List<EquipmentInspectionStandards> listEquipmentInspectionStandardsByTemplateId(Long templateId);
 	
 	void createEquipmentStandardMap(EquipmentStandardMap map);
@@ -127,7 +129,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
-	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(Long inspectionCategoryId,
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey);
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);

@@ -25,6 +25,13 @@ public interface EnergyDateStatisticProvider {
 
 	BigDecimal getSumAmountBetweenDate(Long meterId, Date begin, Date end);
 
+	/**
+	 * 固定收费部分直接把每天的相加
+	 * @param meterId
+	 * @param begin
+	 * @param end
+     * @return
+     */
 	BigDecimal getSumCostBetweenDate(Long meterId ,Date begin, Date end);
  
 
@@ -34,4 +41,15 @@ public interface EnergyDateStatisticProvider {
     EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date);
 
 	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
+
+	/**
+	 * 获取分段部分的消耗量
+	 * @param meterId
+	 * @param begin
+	 * @param end
+     * @return
+     */
+	List<BigDecimal> getBlockSumAmountBetweenDate(Long meterId, Date begin, Date end);
+
+
 }

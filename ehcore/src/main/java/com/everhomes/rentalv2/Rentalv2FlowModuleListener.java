@@ -518,13 +518,17 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			//TODO: 给督办发短信
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_APPROVE_CODE == templateId){
 			//TODO：给被分配的人发短信
-			FlowGraphNode flowGraphNode = ctx.getPrefixNode();
 
 			FlowEventLog flowEventLog = null;
-			List<FlowEventLog> logs = ctx.getLogs();
-			for (FlowEventLog log: logs) {
-				if (FlowLogType.BUTTON_FIRED.getCode().equals(log.getLogType()))
-					flowEventLog = log;
+			List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
+					, ctx.getFlowCase().getId()
+					, ctx.getFlowCase().getStepCount()); ////stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
+			if(logs != null && logs.size() > 0) {
+				for(FlowEventLog log : logs) {
+					if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {
+						flowEventLog = log;
+					}
+				}
 			}
 
 			if (null != flowEventLog) {

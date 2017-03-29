@@ -459,5 +459,15 @@ public interface FlowService {
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 
 	List<UserInfo> listUserSelectionsByNode(FlowCaseState ctx, Long nodeId);
+
+	UserInfo getPrefixProcessor(FlowCaseState ctx, Long prefixNodeId);
+
+	UserInfo getCurrProcessor(FlowCaseState ctx, String variable);
+
+	UserInfo getUserInfoInContext(FlowCaseState ctx, Long userId);
+
+	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
+
+	void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui);
 	
 }

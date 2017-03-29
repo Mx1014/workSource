@@ -242,6 +242,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		equipment.setId(id);
 		equipment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
         
 		LOGGER.info("creatEquipmentInspectionEquipment: " + equipment);
 		
@@ -757,6 +758,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public EquipmentInspectionEquipments findEquipmentById(Long id, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.ID.eq(id));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.NAMESPACE_ID.eq(namespaceId));
+
+		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
+	@Override
 	public EquipmentInspectionAccessories findAccessoryById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhEquipmentInspectionAccessoriesDao dao = new EhEquipmentInspectionAccessoriesDao(context.configuration());
@@ -1116,8 +1134,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.ID.eq(id));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_ID.eq(ownerId));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.OWNER_ID.eq(ownerId));
 		 
 		List<EquipmentInspectionTemplates> result = new ArrayList<EquipmentInspectionTemplates>();
 		query.fetch().map((r) -> {
@@ -1242,6 +1260,29 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(templates.size()==0)
 			return null;
 		
+		return templates;
+	}
+
+	@Override
+	public List<EquipmentInspectionTemplates> listInspectionTemplates(Integer namespaceId, String name) {
+		List<EquipmentInspectionTemplates> templates = new ArrayList<EquipmentInspectionTemplates>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTemplatesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.STATUS.eq(Status.ACTIVE.getCode()));
+
+		if(!StringUtils.isNullOrEmpty(name)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TEMPLATES.NAME.like("%"+name+"%"));
+		}
+
+		query.fetch().map((r) -> {
+			templates.add(ConvertHelper.convert(r, EquipmentInspectionTemplates.class));
+			return null;
+		});
+		if(templates.size()==0)
+			return null;
+
 		return templates;
 	}
 
@@ -1994,8 +2035,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	@Cacheable(value="listEquipmentInspectionTasksUseCache", key="{#cacheKey}", unless="#result.size() == 0")
 	@Override
-	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
-			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey) {
+	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(Long inspectionCategoryId, List<String> targetType,
+			List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey) {
 
 		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
@@ -2006,8 +2047,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
 //        }
 //
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.in(ownerIds));
+		//关于ownerId的校验在第一步拿项目列表的时候已经做过了 所以此处不必再根据其来捞东西 by xiongying20170324
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.in(ownerIds));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
 		if(targetType != null && targetType.size() > 0)

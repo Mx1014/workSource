@@ -48,6 +48,16 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
 		log.setTrackerApplier(this.getFlowAction().getTrackerApplier());
 		log.setTrackerProcessor(this.getFlowAction().getTrackerProcessor());
+		
+		if(event != null) {
+			FlowSubject subject = event.getSubject();
+			if(subject.getContent() != null && !subject.getContent().isEmpty()) {
+				log.setSubjectId(subject.getId());	
+			} else {
+				log.setSubjectId(0l);
+			}
+		}
+		
 		ctx.getLogs().add(log);
 	}
 

@@ -26,7 +26,7 @@ public class FlowVariableTransferTargetNameResolver implements FlowVariableTextR
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		if(FlowStepType.TRANSFER_STEP.getCode().equals(ctx.getStepType())) {
+		if(FlowStepType.TRANSFER_STEP.equals(ctx.getStepType())) {
 			List<FlowEntitySel> sels = ctx.getCurrentEvent().getEntitySel();
 			if(sels == null || sels.size() == 0) {
 				return null;

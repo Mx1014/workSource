@@ -26,23 +26,24 @@ public class FlowVariableTransferTargetPhoneResolver implements FlowVariableText
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		UserInfo ui = null;
-		if(FlowStepType.TRANSFER_STEP.getCode().equals(ctx.getStepType())) {
+		if(FlowStepType.TRANSFER_STEP.equals(ctx.getStepType())) {
 			List<FlowEntitySel> sels = ctx.getCurrentEvent().getEntitySel();
 			if(sels == null || sels.size() == 0) {
 				return null;
 			}
-			ui = userService.getUserSnapshotInfoWithPhone(sels.get(0).getEntityId());
+			UserInfo ui = userService.getUserSnapshotInfoWithPhone(sels.get(0).getEntityId());
+			if(ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
+				return ui.getPhones().get(0);
+			}
 		} else {
 			//获取转交进入节点的日志
 			FlowEventLog log = flowEventLogProvider.getLastNodeEnterStep(ctx.getFlowCase());
 			if(log != null && FlowStepType.TRANSFER_STEP.getCode().equals(log.getButtonFiredStep())) {
-				ui = userService.getUserSnapshotInfoWithPhone(log.getFlowUserId());
+				UserInfo ui = userService.getUserSnapshotInfoWithPhone(log.getFlowUserId());
+				if(ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
+					return ui.getPhones().get(0);
+				}
 			}
-		}
-		
-		if(ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
-			return ui.getPhones().get(0);
 		}
 		
 		return null;

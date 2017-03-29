@@ -1345,6 +1345,7 @@ public class FlowServiceImpl implements FlowService {
 	private FlowGraphButton getFlowGraphButton(FlowButton flowButton) {
 		FlowGraphButton graphBtn = new FlowGraphButton();
 		graphBtn.setFlowButton(flowButton);
+		
 		FlowGraphAction graphAction = null;
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
 				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
@@ -1463,6 +1464,13 @@ public class FlowServiceImpl implements FlowService {
 		flowButton.setFlowMainId(flow.getFlowMainId());
 		flowButton.setFlowVersion(flow.getFlowVersion());
 		flowButton.setFlowNodeId(flowNode.getId());
+		if(!flowButton.getGotoNodeId().equals(0l)) {
+			//把 gotoNodeId 变成相对值 gotoLevel
+			FlowNode fn = flowNodeProvider.getFlowNodeById(flowButton.getGotoNodeId());
+			if(fn != null) {
+				flowButton.setGotoLevel(fn.getNodeLevel());
+			}
+		}
 		flowButtonProvider.createFlowButton(flowButton);
 		
 		//step4 create flowButton's actions
@@ -1967,31 +1975,31 @@ public class FlowServiceImpl implements FlowService {
         List<FlowVariable> vars = new ArrayList<>();
         String para = null;
         List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, flow.getOwnerId(), flow.getOwnerType(), flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        		, flow.getOwnerId(), flow.getOwnerType(), flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
-        if(vars2 != null) {
-        	vars.addAll(vars2);
-        }
-        
-        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, cmd.getFlowVariableType());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, 0l, null, para, cmd.getFlowVariableType());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         
         if(!cmd.getNamespaceId().equals(0)) {
         	vars2 = flowVariableProvider.findVariables(0
-        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        		, 0l, null, 0l, null, para, cmd.getFlowVariableType());
         	if(vars2 != null) {
         		vars.addAll(vars2);
         	} 	
@@ -2017,8 +2025,9 @@ public class FlowServiceImpl implements FlowService {
 			cmd.setNamespaceId(0);
 		}
 		
-		String flowVariableType = FlowVariableType.TEXT.getCode();
-		if(flowVariableType.equals(cmd.getFlowVariableType())) {
+		FlowVariableType varType = FlowVariableType.fromCode(cmd.getFlowVariableType());
+		if(varType == FlowVariableType.TEXT || varType == FlowVariableType.TEXT_BUTTON 
+				|| varType == FlowVariableType.TEXT_REMIND || varType == FlowVariableType.TEXT_TRACKER) {
 			FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
 			if(entityType == null) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
@@ -2034,7 +2043,7 @@ public class FlowServiceImpl implements FlowService {
 			FlowVariableResponse resp = new FlowVariableResponse();
 			String para = null;
 			List<FlowVariable> vars = flowVariableProvider.findVariables(0
-	        		, 0l, null, 0l, null, para, FlowVariableType.NODE_USER.getCode());
+	        		, 0l, null, 0l, null, para, cmd.getFlowVariableType());
 			
 			List<FlowVariableDTO> dtos = new ArrayList<>();
 			resp.setDtos(dtos);
@@ -2723,7 +2732,7 @@ public class FlowServiceImpl implements FlowService {
 		Long orgId = flow.getOrganizationId();
 		
 		for(FlowUserSelection sel : selections) {
-			if(users.size() > maxCount) {
+			if(users.size() >= maxCount) {
 				//为了加快处理的速度，有的情况不需要拿太多用户
 				break;
 			}
@@ -3621,7 +3630,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		Long orgId = selections.get(0).getOrganizationId();
 		List<Long> users = resolvUserSelections(ctx, new HashMap<String, Long>(), FlowEntityType.FLOW_NODE
-				, nodeId, selections, 1, 5);
+				, nodeId, selections, 1, 3);
 		for(Long u : users) {
 			UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
 			if(ui != null) {
@@ -3634,6 +3643,83 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return userSels;
+	}
+	
+	/**
+	 * 上一个节点的执行人，也就是进入上个节点的执行者
+	 * @param ctx
+	 * @param prefixNodeId
+	 * @return
+	 */
+	@Override
+	public UserInfo getPrefixProcessor(FlowCaseState ctx, Long prefixNodeId) {
+		FlowEventLog log = flowEventLogProvider.findPefixFireLog(ctx.getFlowCase().getCurrentNodeId(), prefixNodeId
+				, ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
+		UserInfo ui = null;
+		if(log != null && log.getFlowUserId() != null && !log.getFlowUserId().equals(0l)) {
+			ui = userService.getUserSnapshotInfoWithPhone(log.getFlowUserId());
+			if(ui != null) {
+				OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+				if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+					ui.setNickName(om.getContactName());
+				}				
+			}
+		}
+		
+		return ui;
+	}
+	
+	/**
+	 * 当前执行人，进入这个节点之前的执行人
+	 */
+	@Override
+	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
+		UserInfo ui = ctx.getOperator();
+		if(ui != null) {
+			OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+			if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+				ui.setNickName(om.getContactName());
+			}				
+		}
+		
+		return ui;
+	}
+	
+	/**
+	 * 申请人
+	 * @param ctx
+	 * @param variable
+	 * @return
+	 */
+	@Override
+	public UserInfo getUserInfoInContext(FlowCaseState ctx, Long userId) {
+		UserInfo ui = userService.getUserSnapshotInfoWithPhone(userId);
+		if(ui != null) {
+			OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+			if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+				ui.setNickName(om.getContactName());
+			}				
+		}
+		return ui;
+	}
+	
+	@Override
+	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel) {
+		List<Long> users = new ArrayList<>();
+		UserInfo userInfo = getUserInfoInContext(ctx, ctx.getFlowCase().getApplyUserId());
+		if(null != userInfo) {
+			users.add(userInfo.getId());
+		}
+		
+		return users;
+	}
+	
+	@Override
+	public void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui) {
+		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+		if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+			ui.setNickName(om.getContactName());
+		}
 	}
 	
 //	@Override

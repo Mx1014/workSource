@@ -189,7 +189,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		ctx.setCurrentNode(node);
 		
 		if(stepDTO.getFlowTargetId() != null) {
-			FlowGraphNode targetNode = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+			FlowGraphNode targetNode = flowGraph.getGraphNode(stepDTO.getFlowTargetId());
 			ctx.setNextNode(targetNode);
 		}
 		
@@ -446,7 +446,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	@Override
 	public void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
 		FlowStepType fromStep = ctx.getStepType();
-		FlowGraphNode curr = ctx.getCurrentNode();
 		switch(fromStep) {
 		case NO_STEP:
 			break;
@@ -455,10 +454,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case REJECT_STEP:
 			break;
 		case TRANSFER_STEP:
-			if(curr.getTrackTransferLeave() != null) {
-				curr.getTrackTransferLeave().fireAction(ctx, null);	
-			}
-			
 			break;
 		case COMMENT_STEP:
 			break;
@@ -519,31 +514,5 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			ctx.getLogs().add(log);	//added but not save to database now.
 		}
-	}
-	
-	//variable support
-	@Override
-	public UserInfo getApplier(FlowCaseState ctx, String variable) {
-		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
-		return userInfo;
-	}
-	
-	/**
-	 * 当前执行人
-	 */
-	@Override
-	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
-		return ctx.getOperator();
-	}
-	
-	@Override
-	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel) {
-		List<Long> users = new ArrayList<>();
-		UserInfo userInfo = getApplier(ctx, "");
-		if(null != userInfo) {
-			users.add(userInfo.getId());
-		}
-		
-		return users;
 	}
 }

@@ -43,6 +43,10 @@ public class SendNoticeAction implements Runnable {
         propertyMgrService.pushMessage(command, user);
 
         LOGGER.debug("End scheduling a push to push....");
+
+        UserContext.setCurrentNamespaceId(null);
+        UserContext.setCurrentUser(null);
+        UserContext.current().setScheme(null);
     }
 
     public SendNoticeAction(String cmd, String userId, String schema){

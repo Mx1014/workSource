@@ -33,7 +33,7 @@ public class FlowVariableTargetNodeTransferResolver implements FlowVariableUserR
 			Map<String, Long> processedEntities, FlowEntityType fromEntity,
 			Long entityId, FlowUserSelection userSelection, int loopCnt) {
 		Long uid = null;
-		if(FlowStepType.TRANSFER_STEP.getCode().equals(ctx.getStepType())) {
+		if(FlowStepType.TRANSFER_STEP.equals(ctx.getStepType())) {
 			List<FlowEntitySel> sels = ctx.getCurrentEvent().getEntitySel();
 			if(sels == null || sels.size() == 0) {
 				return null;

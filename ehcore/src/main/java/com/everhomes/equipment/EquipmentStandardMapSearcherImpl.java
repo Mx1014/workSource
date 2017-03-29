@@ -7,6 +7,7 @@ import java.util.List;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.user.UserContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -136,8 +137,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+		//总公司分公司的原因改用namespaceId by xiongying20170328
+		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -186,7 +189,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	    		dto.setEquipmentModel(equipment.getEquipmentModel());
 	    		dto.setStatus(equipment.getStatus());
 	    		dto.setStandardId(map.getStandardId());
-	    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+	    		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
 	            if(standard != null) {
 	            	dto.setStandardName(standard.getName());
 	            }
@@ -224,6 +227,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
             if(standard != null) {
             	b.field("standardNumber", standard.getStandardNumber());
+				b.field("namespaceId", standard.getNamespaceId());
             } else {
             	b.field("standardNumber", "");
             }
@@ -232,6 +236,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             if(equipment != null) {
             	b.field("ownerId", equipment.getOwnerId());
             	b.field("ownerType", equipment.getOwnerType());
+				b.field("namespaceId", equipment.getNamespaceId());
             	b.field("targetId", equipment.getTargetId());
             	b.field("targetType", equipment.getTargetType());
             	b.field("equipmentName", equipment.getName());
