@@ -13,3 +13,7 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 
 -- 能耗管理 add by xiongying 20170329
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('energy', '10015', 'zh_CN', '单价方案已被引用，不可删除');
+
+-- 更新用户管理菜单 add by sw 20170330
+update eh_web_menus set data_type = 'user--user_identify' where id = 35000;
+update eh_web_menus set data_type = 'user--user_management' where id = 34000;
