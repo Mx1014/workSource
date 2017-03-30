@@ -279,21 +279,6 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
-      //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
-        try {
-        	if(cmd.getOfficialFlag() == OfficialFlag.YES.getCode() && null != cmd.getStartTime()){
-        		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        		Date startTime= f.parse(cmd.getStartTime());
-            	if(startTime.before(DateHelper.currentGMTTime())){
-            		activity.setCreateTime(new Timestamp(startTime.getTime() - 24*60*60*1000));
-            	}
-        	}
-        	
-        } catch (ParseException e) {
-        	activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        }
-        
-        
         //added by janson
         if(cmd.getIsVideoSupport() == null) {
             cmd.setIsVideoSupport((byte)0);
