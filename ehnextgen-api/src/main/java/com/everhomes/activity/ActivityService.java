@@ -83,7 +83,7 @@ public interface ActivityService {
 
     ActivityVideoDTO setActivityVideo(SetActivityVideoInfoCommand cmd);
 
-    void videoCallback();
+    void videoCallback(VideoCallbackCommand cmd);
 
     ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd);
 
