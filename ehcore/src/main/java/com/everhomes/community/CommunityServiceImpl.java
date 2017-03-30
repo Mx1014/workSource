@@ -1659,15 +1659,21 @@ public class CommunityServiceImpl implements CommunityService {
 
 			Set<OrganizationDTO> organizationDTOs = new HashSet<>();
 			if(null != members){
+
+				Set<OrganizationDTO> set = new HashSet<>();
+
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
 						dto.setIsAuth(1);
 					}
 					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-						organizationDTOs.add(ConvertHelper.convert(org, OrganizationDTO.class));
+					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
+							&& org.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
+						set.add(ConvertHelper.convert(org, OrganizationDTO.class));
 					}
 				}
+				organizationDTOs.addAll(set);
+
 //				if(null != m){
 //					Organization org = organizationProvider.findOrganizationById(m.getCommunityId());
 //					if(null != org)
