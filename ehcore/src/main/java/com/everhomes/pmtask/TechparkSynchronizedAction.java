@@ -125,7 +125,7 @@ public class TechparkSynchronizedAction implements Runnable{
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
 		param.put("fileFlag", String.valueOf(null==task.getPriority()?1:task.getPriority()));
-		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
+		param.put("fileTitle", task.getAddress() + "物业报修");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
 		
