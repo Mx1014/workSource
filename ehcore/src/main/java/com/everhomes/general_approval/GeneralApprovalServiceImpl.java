@@ -146,7 +146,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			cmd21.setProjectType(ga.getProjectType()); 
 			//把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
-			
+			cmd21.setTitle(ga.getApprovalName());
+
 			FlowCase flowCase = null;
 			if(null == flow) {
 				// 给他一个默认哑的flow
