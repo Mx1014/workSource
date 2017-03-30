@@ -158,11 +158,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         String buildingName = "";
         if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
 			//续租的 
-            Organization org = organizationProvider.findOrganizationById(applyEntry.getEnterpriseId());
-            List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(applyEntry.getEnterpriseId());
-            if (null != addresses && addresses.size() != 0) {
-//                buildingName =
-            }
+
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
 			Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
