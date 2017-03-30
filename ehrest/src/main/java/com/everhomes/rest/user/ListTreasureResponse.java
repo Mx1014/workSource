@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  *<li>businessUrl:电商链接</li>
  *<li>businessRealm:电商realm</li>
  *<li>activityDefaultListStyle:活动列表默认样式</li>
+ *<li>shakeOpenDoorUser:当前用户是否开启摇一摇</li>
+ *<li>shakeOpenDoorNamespace:当前域空间是否开启</li>
  *</ul>
  */
 public class ListTreasureResponse {
