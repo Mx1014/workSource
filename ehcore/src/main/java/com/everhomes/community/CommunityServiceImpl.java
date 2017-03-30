@@ -1664,7 +1664,7 @@ public class CommunityServiceImpl implements CommunityService {
 						dto.setIsAuth(1);
 					}
 					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-					if (null != org) {
+					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
 						organizationDTOs.add(ConvertHelper.convert(org, OrganizationDTO.class));
 					}
 				}
