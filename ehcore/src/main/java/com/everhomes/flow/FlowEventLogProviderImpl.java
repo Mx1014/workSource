@@ -327,7 +327,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	o.setIntegralTag5(r.getValue(Tables.EH_FLOW_CASES.INTEGRAL_TAG5));
     	
     	o.setEventLogId(r.getValue(Tables.EH_FLOW_EVENT_LOGS.ID));
-    	
+    	o.setTitle(r.getValue(Tables.EH_FLOW_CASES.TITLE));
     	return o;
     }
     

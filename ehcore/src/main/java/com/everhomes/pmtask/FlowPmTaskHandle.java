@@ -5,6 +5,8 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
@@ -50,6 +52,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowButtonProvider flowButtonProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -66,6 +70,9 @@ class FlowPmTaskHandle implements PmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+
+			createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());

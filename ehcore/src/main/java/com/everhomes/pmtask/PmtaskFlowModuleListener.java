@@ -132,7 +132,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				//TODO: 同步数据到科技园
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
-
+					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 					if (null != logs && logs.size() != 0) {
 						for (PmTaskLog r: logs) {

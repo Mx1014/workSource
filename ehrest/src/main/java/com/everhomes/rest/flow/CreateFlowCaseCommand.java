@@ -11,6 +11,8 @@ public class CreateFlowCaseCommand {
 	private Long projectId;
 	private String projectType;
 	private String content;
+	private String title;
+	
 	public Long getFlowMainId() {
 		return flowMainId;
 	}
@@ -60,6 +62,13 @@ public class CreateFlowCaseCommand {
 	}
 	public void setProjectType(String projectType) {
 		this.projectType = projectType;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	@Override
     public String toString() {
