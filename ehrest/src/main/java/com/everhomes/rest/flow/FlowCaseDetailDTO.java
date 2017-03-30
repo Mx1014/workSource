@@ -42,6 +42,7 @@ public class FlowCaseDetailDTO {
 	private String currNodeParams;
 	private Long stepCount;
 	private Long rejectCount;
+	private String title;
     
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities;
@@ -289,6 +290,14 @@ public class FlowCaseDetailDTO {
 
 	public void setRejectCount(Long rejectCount) {
 		this.rejectCount = rejectCount;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	@Override
