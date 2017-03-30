@@ -3858,9 +3858,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 		VideoState videoState = null;
 		if(cmd.getModule().equals("live")){
-			if(cmd.getState() == -1){
-				videoState = VideoState.EXCEPTION;
-			}else if(cmd.getState() == 0){
+			if(cmd.getState() == 0){
 				videoState = VideoState.UN_READY;
 			}else{
 				videoState = VideoState.LIVE;
