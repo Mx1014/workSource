@@ -914,16 +914,29 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid communityId param.");
         }
-
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
         if (null != cmd.getEnterpriseIds()) {
             for (Long id: cmd.getEnterpriseIds()) {
-                LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-                leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
-                leaseIssuer.setEnterpriseId(id);
-                enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+
+				LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
+				//已存在，过滤掉
+				if (null == leaseIssuer) {
+					leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+					leaseIssuer.setNamespaceId(namespaceId);
+					leaseIssuer.setEnterpriseId(id);
+					enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+				}
             }
         }else {
-            LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+			LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
+
+			if (null != leaseIssuer) {
+				LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
+				throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+						"LeaseIssuer exist.");
+			}
+
+            leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
             leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
             //TODO:门牌地址
             enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);

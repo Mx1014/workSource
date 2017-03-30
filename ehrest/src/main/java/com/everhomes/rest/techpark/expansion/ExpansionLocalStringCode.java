@@ -12,4 +12,5 @@ public interface ExpansionLocalStringCode {
     int FLOW_DETAIL_CONTENT_CODE = 2;// 工作流详情
 //    int FLOW_DETAIL_CONTENT_NOAREA_CODE = 3;// 工作流详情
 
+    int LEASE_ISSUER_EXIST = 4; //已存在
 }

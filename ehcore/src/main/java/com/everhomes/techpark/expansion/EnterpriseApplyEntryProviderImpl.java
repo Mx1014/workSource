@@ -129,7 +129,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		}
 
 		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.lt(locator.getAnchor()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
