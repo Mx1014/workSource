@@ -1354,10 +1354,10 @@ public class UserServiceImpl implements UserService {
 		assert(loginToken != null);
 		
 		//added by janson, isKickoff ? 2017-03-29
-		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), loginToken)) {
-//			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), loginToken);
-	      throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
-		}
+//		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), loginToken)) {
+////			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), loginToken);
+//	      throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+//		}
 		
 		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
