@@ -836,12 +836,19 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		if (null != cmd.getServiceUrl()) {
 			try {
-				String serviceUrl = URLEncoder.encode(cmd.getServiceUrl(), "utf8");
+				String serviceUrl = cmd.getServiceUrl();
+				int index = serviceUrl.indexOf("?");
+				if (index != -1) {
+					String prefix = serviceUrl.substring(0, index + 1);
+					serviceUrl = serviceUrl.substring(index + 1, serviceUrl.length());
+					serviceUrl = URLEncoder.encode(serviceUrl, "utf8");
+					serviceUrl = prefix + serviceUrl;
+				}
+
 				serviceAlliance.setServiceUrl(serviceUrl);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-
 		}
 
 		if(null != serviceAlliance.getCategoryId()) {
