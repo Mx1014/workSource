@@ -2140,6 +2140,9 @@ public class FlowServiceImpl implements FlowService {
 				if(flowNode != null) {
 					updateCaseDTO(detail, flowNode, dto, type);	
 				}
+				if(dto.getTitle() != null) {
+					dto.setModuleName(dto.getTitle());
+				}
 				dtos.add(dto);
 			}	
 			resp.setNextPageAnchor(locator.getAnchor());
@@ -2190,6 +2193,10 @@ public class FlowServiceImpl implements FlowService {
 		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
+		}
+		
+		if(dto.getTitle() != null) {
+			dto.setModuleName(dto.getTitle());
 		}
 		
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
