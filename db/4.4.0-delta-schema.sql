@@ -7,7 +7,7 @@ CREATE TABLE `eh_energy_meter_price_config` (
   `community_id` BIGINT NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price configs, enterprise, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  
+
   `name`         VARCHAR(255) COMMENT 'config name',
   `description`      VARCHAR(512) COMMENT 'description config',
   `expression`   VARCHAR(1024) COMMENT 'expression json',
@@ -25,7 +25,7 @@ ALTER TABLE eh_energy_meter_default_settings ADD COLUMN `owner_id` BIGINT NOT NU
 ALTER TABLE eh_energy_meter_default_settings ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
 ALTER TABLE eh_energy_meter_default_settings ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
 
-ALTER TABLE eh_energy_meter_formulas ADD COLUMN `community_id` BIGINT NOT NULL DEFAULT 0; 
+ALTER TABLE eh_energy_meter_formulas ADD COLUMN `community_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_energy_meter_formulas ADD COLUMN `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price formulas, enterprise, etc';
 ALTER TABLE eh_energy_meter_formulas ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT 0;
 
@@ -48,5 +48,8 @@ ALTER TABLE eh_energy_month_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if
 ALTER TABLE eh_energy_date_statistics ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
 ALTER TABLE eh_energy_date_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
 
--- 用户管理 add by sw 	
+-- 用户管理 add by sw
 ALTER TABLE `eh_organization_members` ADD INDEX i_target_id (target_id);
+
+-- add by janson 03-30
+ALTER TABLE `eh_flow_cases` ADD COLUMN `title` VARCHAR(64) NULL AFTER `evaluate_score`;
