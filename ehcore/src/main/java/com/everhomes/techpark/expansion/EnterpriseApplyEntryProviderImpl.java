@@ -129,10 +129,11 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		}
 
 		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.gt(locator.getAnchor()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.lt(locator.getAnchor()));
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
+						.orderBy(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.desc())
 						.limit(pageSize)
 						.fetch().map((r) -> {
 							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
@@ -142,7 +143,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 						});
 		
 		if(leasePromotions.size() >= pageSize) {
-			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getId());
+			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getCreateTime().getTime());
 		}else {
 			locator.setAnchor(null);
 		}
