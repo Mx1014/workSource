@@ -3210,7 +3210,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         return dto;
 	}
-	
+
+
 	//live from normal user
 	private ActivityVideoDTO setUserActivityVideo(SetActivityVideoInfoCommand cmd) {
 	    ActivityVideo video = new ActivityVideo();
@@ -3848,8 +3849,55 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
 	@Override
-	public void videoCallback() {
-		LOGGER.info("video callbacll................");
+	public void videoCallback(VideoCallbackCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getLid()) || StringUtils.isEmpty(cmd.getModule())){
+			LOGGER.warn("params is null");
+			return;
+		}
+		User user = UserContext.current().getUser();
+
+		VideoState videoState = null;
+		if(cmd.getModule().equals("live")){
+			if(cmd.getState() == -1){
+				videoState = VideoState.EXCEPTION;
+			}else if(cmd.getState() == 0){
+				videoState = VideoState.UN_READY;
+			}else{
+				videoState = VideoState.LIVE;
+			}
+		}else if(cmd.getModule().equals("ﬁle") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().equals("record")){
+			if(cmd.getState() == -1){
+				videoState = VideoState.EXCEPTION;
+			}else if(cmd.getState() == 1){
+				videoState = VideoState.RECORDING;
+			}else{
+				videoState = VideoState.LIVE;
+			}
+		}else{
+			LOGGER.warn("params error. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+			return;
+		}
+
+		ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByVid(cmd.getLid());
+		if(oldVideo != null) {
+			//new activity, delete the old one
+			oldVideo.setVideoState(VideoState.INVALID.getCode());
+			activityVideoProvider.updateActivityVideo(oldVideo);
+		}else{
+			LOGGER.warn("video Non-existent vid = {}", cmd.getLid());
+			return;
+		}
+
+		ActivityVideo video = ConvertHelper.convert(oldVideo, ActivityVideo.class);
+		video.setCreatorUid(user.getId());
+		video.setVideoState(videoState.getCode());
+		video.setId(null);
+		if(videoState == VideoState.LIVE){
+			if(cmd.getState() == 1){
+				video.setStartTime(System.currentTimeMillis());
+			}
+		}
+		activityVideoProvider.createActivityVideo(video);
 	}
 
 	@Override
