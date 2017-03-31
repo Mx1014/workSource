@@ -2069,7 +2069,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+//                    engine.put(MeterFormulaVariable.AMOUNT.getCode(), realAmount);
                     realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
                 }
 
@@ -2288,14 +2288,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,monthEnd);
             EnergyMeterSettingLog costSetting   = meterSettingLogProvider
                     .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,monthEnd);
+            EnergyMeterSettingLog rateSetting   = meterSettingLogProvider
+                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,monthEnd);
 
             String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
             BigDecimal realCost = new BigDecimal(0);
+            
             if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                     PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
                 ScriptEngine engine = manager.getEngineByName("js");
-                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
+                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
                 realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
             }
 
