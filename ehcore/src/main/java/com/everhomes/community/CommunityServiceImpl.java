@@ -1542,8 +1542,7 @@ public class CommunityServiceImpl implements CommunityService {
 			detailDto.setAddresses(addressDtos);
 
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
-					&& organization.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
-				LOGGER.debug("organization={}", organization.toString());
+					&& OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
 
 				set.add(detailDto);
 			}
