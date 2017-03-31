@@ -567,7 +567,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setProjectId(projectId);
         
         //TODO better added by janson 临时办法，4.4.2 必须改动
-        if(UserContext.getCurrentNamespaceId(null).equals(999983l)) {
+        if(UserContext.getCurrentNamespaceId(null).equals(999983)) {
         	flowCaseCmd.setTitle("园区入驻");
         }
         	
