@@ -344,7 +344,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 sentScopeDto = new TopicScopeDTO();
                 sentScopeDto.setId(group2Id);
                 sentScopeDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_PM_COMMUNITY_GROUP);
+                code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_GROUP);
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 sentScopeDto.setName(menuName);
                 sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;

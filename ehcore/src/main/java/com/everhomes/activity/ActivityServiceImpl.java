@@ -3389,7 +3389,8 @@ public class ActivityServiceImpl implements ActivityService {
     public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
 	   ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
-	   dto.setVideoUrl("yzb://" + video.getVideoSid());
+	   if(null != video.getVideoSid())
+	   		dto.setVideoUrl("yzb://" + video.getVideoSid());
        return dto;
     }
    
