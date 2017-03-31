@@ -37,6 +37,7 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.ActivityType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -149,6 +150,11 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime())+"\n"
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
     				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    	
+    	String contentStr = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_TIME);
+    	
+    	
+    	return null;
     }
     
     // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
@@ -157,6 +163,50 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 			return time.substring(0,time.lastIndexOf("."));
 		}
     	return time;
+    }
+    
+	//    1 若活动发布时全天开关开启，则活动时间显示为： 
+	//    #活动开始时间# 年-月-日 ~ #活动结束时间# 年-月-日；
+	//     1.1 若为同一天，则简化为  年-月-日 
+	//     1.2 若为同年，则简化为  年-月-日 ~ 月-日
+	//  2. 若活动发布时全天开关关闭，则活动时间显示为： 
+	//       #活动开始时间# 年-月-日 时 : 分  ~ #活动结束时间# 年-月-日 时 : 分；
+	//     2.1 若开始时间与结束时间为同一天，则简化为：年-月-日  时 : 分  ~ 时 : 分 
+	//     2.2 若为同年，则简化  年-月-日  时 : 分  ~ 月-日   时 : 分  
+    private String formatDate(ActivityDTO activityDTO){
+    	if(activityDTO.getAllDayFlag() == 1){
+    		if()
+    	}
+    	
+    	return "";
+    }
+    
+    private String getYear(String time){
+    	if(time.length() >= 16 ){
+    		return time.substring(0, 4);
+    	}
+    	return "xxxx";
+    }
+    
+    private String getMonth(String time){
+    	if(time.length() >= 16 ){
+    		return time.substring(5, 7);
+    	}
+    	return "xx";
+    }
+    
+    private String getDay(String time){
+    	if(time.length() >= 16 ){
+    		return time.substring(8, 10);
+    	}
+    	return "xx";
+    }
+    
+    private String getHourAndMin(String time){
+    	if(time.length() >= 16 ){
+    		return time.substring(11, 16);
+    	}
+    	return "xx:xx";
     }
     
     private boolean isOld(String versionString){
