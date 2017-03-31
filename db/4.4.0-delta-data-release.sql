@@ -21,6 +21,8 @@ update eh_web_menus set data_type = 'user--user_management' where id = 34000;
 -- 园区入驻 add by sw 20170331
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
 	VALUES ('1', '1000000', '1', '1', '1', '1', '1');
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
+	VALUES ('1', '999983', '1', '1', '1', '1', '1');
 	
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('expansion.applyType', '5', 'zh_CN', '该信息已存在！');
 delete from eh_locale_templates where `scope` = 'expansion';
@@ -34,10 +36,6 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('apply.entry.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s', '', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
-
-UPDATE eh_lease_promotions SET rent_areas = 190 where id = 51;
-UPDATE eh_lease_promotions SET rent_areas = 90.44 where id = 52;
-UPDATE eh_lease_promotions SET rent_areas = 400 where id = 280;
 
 -- 更新活动选项中的图标 update avatal.all from avatar.organization    add by yanjun
 UPDATE eh_configurations a

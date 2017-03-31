@@ -55,6 +55,11 @@ ALTER TABLE `eh_organization_members` ADD INDEX i_target_id (target_id);
 ALTER TABLE `eh_flow_cases` ADD COLUMN `title` VARCHAR(64) NULL AFTER `evaluate_score`;
 
 -- add by sw 20170331
+
+UPDATE eh_lease_promotions SET rent_areas = 190 where id = 51;
+UPDATE eh_lease_promotions SET rent_areas = 90.44 where id = 52;
+UPDATE eh_lease_promotions SET rent_areas = 400 where id = 280;
+
 CREATE TABLE `eh_lease_issuers` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
