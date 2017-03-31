@@ -29,3 +29,16 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ('expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '企业: ${enterpriseName}\n电话: ${contactPhone}', '0');
 UPDATE eh_web_menus set name = '入驻申请' where id = 40120;
+
+
+
+-- 更新活动选项中的图标 update avatal.all from avatar.organization    add by yanjun
+UPDATE eh_configurations a
+SET a.value = (SELECT
+                 b.value
+               FROM (SELECT
+                       c.value
+                     FROM eh_configurations c
+                     WHERE c.name = 'post.menu.avatar.organization'
+                     LIMIT 1) AS b)
+WHERE a.NAME = 'post.menu.avatar.all';

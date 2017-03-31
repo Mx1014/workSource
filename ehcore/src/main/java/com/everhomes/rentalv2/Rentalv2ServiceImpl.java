@@ -3519,7 +3519,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	        map.put("useDetail", useDetail ); 
 			String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
-			
+			RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(order.getResourceTypeId());
+			cmd.setTitle(resourceType.getName());
 	    	cmd.setContent(contentString);
 //	    	LOGGER.debug("cmd = \n"+cmd);
 	    	FlowCase flowCase = flowService.createFlowCase(cmd);
