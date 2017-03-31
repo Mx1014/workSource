@@ -47,3 +47,9 @@ SET a.value = (SELECT
                      WHERE c.name = 'post.menu.avatar.organization'
                      LIMIT 1) AS b)
 WHERE a.NAME = 'post.menu.avatar.all';
+
+-- add by yanjun 2017-03-28
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('shake.open.door', '1', 'use shake open door function  0:not, 1:yes', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('shake.open.door', '0', 'use shake open door function  0:not, 1:yes', '999983', NULL);
