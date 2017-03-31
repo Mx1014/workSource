@@ -2288,8 +2288,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,monthEnd);
             EnergyMeterSettingLog costSetting   = meterSettingLogProvider
                     .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,monthEnd);
-            EnergyMeterSettingLog rateSetting   = meterSettingLogProvider
-                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,monthEnd);
 
             String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
@@ -2299,7 +2297,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
                 ScriptEngine engine = manager.getEngineByName("js");
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
-                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+                //由于currentAmount其实是realAmount  已经算了一遍times，所以此处times赋值为1 by xiongying20170401
+                engine.put(MeterFormulaVariable.TIMES.getCode(), 1);
                 realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
             }
 
