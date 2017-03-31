@@ -2,39 +2,32 @@ package com.everhomes.techpark.expansion;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import org.apache.commons.lang.math.RandomUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.building.BuildingProvider;
@@ -146,8 +139,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     @Autowired
     private AddressProvider addressProvider;
     @Autowired
-    private CommunityService communityService;
-
+    private RolePrivilegeService rolePrivilegeService;
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
 			GetEnterpriseDetailByIdCommand cmd) {
@@ -908,8 +900,58 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "LeaseIssuer not found.");
         }
-        leaseIssuer.setStatus(LeaseIssuerStatus.INACTIVE.getCode());
-        enterpriseLeaseIssuerProvider.updateLeaseIssuer(leaseIssuer);
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        dbProvider.execute((TransactionStatus status) -> {
+            //删除人
+            enterpriseLeaseIssuerProvider.deleteLeaseIssuer(leaseIssuer);
+            //删除地址
+            enterpriseLeaseIssuerProvider.deleteLeaseIssuerAddressByLeaseIssuerId(leaseIssuer.getId());
+            //删除招租信息
+            //判断是普通用户还是企业
+            if (!StringUtils.isEmpty(leaseIssuer.getIssuerContact())) {
+
+                UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId,
+                        leaseIssuer.getIssuerContact());
+
+                if (null != userIdentifier) {
+
+                    List<LeasePromotion> list = enterpriseApplyEntryProvider.listLeasePromotionsByUidAndIssuerType(userIdentifier.getOwnerUid(),
+                            LeaseIssuerType.NORMAL_USER.getCode());
+
+                    if (!CollectionUtils.isEmpty(list)) {
+
+                        List<Long> ids = list.stream().map(r -> r.getId()).collect(Collectors.toList());
+                        enterpriseApplyEntryProvider.deleteApplyEntrysByLeasePromotionIds(ids);
+
+                        enterpriseApplyEntryProvider.deleteLeasePromotionByUidAndIssuerType(userIdentifier.getOwnerUid(),
+                                LeaseIssuerType.NORMAL_USER.getCode());
+                    }
+                }
+            }else {
+                //先查公司管理员，删除公司管理员发的招租
+                ListServiceModuleAdministratorsCommand cmd2 = new ListServiceModuleAdministratorsCommand();
+                cmd2.setOrganizationId(leaseIssuer.getEnterpriseId());
+                List<OrganizationContactDTO> users = rolePrivilegeService.listOrganizationAdministrators(cmd2);
+                if (null != users) {
+                    for (OrganizationContactDTO u: users) {
+
+                        List<LeasePromotion> list = enterpriseApplyEntryProvider.listLeasePromotionsByUidAndIssuerType(u.getTargetId(),
+                                LeaseIssuerType.NORMAL_USER.getCode());
+                        if (!CollectionUtils.isEmpty(list)) {
+                            List<Long> ids = list.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+                            enterpriseApplyEntryProvider.deleteApplyEntrysByLeasePromotionIds(ids);
+
+                            enterpriseApplyEntryProvider.deleteLeasePromotionByUidAndIssuerType(u.getTargetId(),
+                                    LeaseIssuerType.NORMAL_USER.getCode());
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+
     }
 
     @Override
@@ -921,45 +963,54 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     "Invalid communityId param.");
         }
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-        if (null != cmd.getEnterpriseIds()) {
-            for (Long id: cmd.getEnterpriseIds()) {
 
-				LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
-				//已存在，过滤掉
-				if (null == leaseIssuer) {
-					leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-					leaseIssuer.setNamespaceId(namespaceId);
-					leaseIssuer.setEnterpriseId(id);
-					enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
-				}
-            }
-        }else {
-			LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
+        dbProvider.execute((TransactionStatus status) -> {
 
-			if (null != leaseIssuer) {
-				LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
-				throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
-						"LeaseIssuer exist.");
-			}
+            if (null != cmd.getEnterpriseIds()) {
+                for (Long id : cmd.getEnterpriseIds()) {
 
-            leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-            leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
-            //TODO:门牌地址
-            enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+                    LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
+                    //已存在，过滤掉
+                    if (null == leaseIssuer) {
+                        leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+                        leaseIssuer.setNamespaceId(namespaceId);
+                        leaseIssuer.setEnterpriseId(id);
+                        enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+                    }
+                }
+            } else {
+                LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
 
-            if (null != cmd.getAddressIds()) {
-                for (Long id: cmd.getAddressIds()) {
-					Address address = addressProvider.findAddressById(id);
-					com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
-							address.getCommunityId(), address.getBuildingName());
+                if (null != leaseIssuer) {
+                    LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
+                    throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+                            "LeaseIssuer exist.");
+                }
+
+                if (null == cmd.getAddressIds()) {
+                    LOGGER.error("Invalid addressIds param, cmd={}", cmd);
+                    throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+                            "Invalid addressIds param.");
+                }
+
+                leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+                leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+                //TODO:门牌地址
+                enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+
+                for (Long id : cmd.getAddressIds()) {
+                    Address address = addressProvider.findAddressById(id);
+                    com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+                            address.getCommunityId(), address.getBuildingName());
                     LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
                     leaseIssuerAddress.setAddressId(id);
                     leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
-					leaseIssuerAddress.setBuildingId(building.getId());
+                    leaseIssuerAddress.setBuildingId(building.getId());
                     createLeaseIssuerAddress(leaseIssuerAddress);
                 }
             }
-        }
+            return null;
+        });
 
     }
 

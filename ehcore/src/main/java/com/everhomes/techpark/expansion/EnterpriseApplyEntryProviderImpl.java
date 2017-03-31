@@ -6,8 +6,10 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
+import com.everhomes.rest.techpark.expansion.LeaseIssuerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
@@ -260,7 +262,29 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		dao.deleteById(id);
 		return true;
 	}
-	
+
+	@Override
+	public void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		DeleteQuery query = context.deleteQuery(Tables.EH_LEASE_PROMOTIONS);
+		query.addConditions(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.eq(id));
+		query.addConditions(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(issuerType));
+
+		query.execute();
+	}
+
+	@Override
+	public List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectQuery query = context.selectQuery(Tables.EH_LEASE_PROMOTIONS);
+		query.addConditions(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.eq(id));
+		query.addConditions(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(issuerType));
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, LeasePromotion.class));
+	}
+
 	@Override
 	public boolean deleteApplyEntry(long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -288,7 +312,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-			ListingLocator locator, int pageSize, List<Long> idList) {
+													 ListingLocator locator, int pageSize, List<Long> idList) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		pageSize = pageSize + 1;
 		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
@@ -315,7 +339,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		if(null != request.getApplyType()){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
 		}
-		
+
 		if(!StringUtils.isEmpty(request.getStatus())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
 		}
@@ -323,27 +347,40 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		if(!StringUtils.isEmpty(request.getSourceType())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
 		}
-		
+
 		if(null != idList && idList.size()>0){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.in(idList));
 		}
-		
+
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.le(locator.getAnchor()));
 		}
-		
+
 		query.addConditions(cond);
-        query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
+		query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
 		query.addLimit(pageSize);
 		List<EnterpriseOpRequest> enterpriseOpRequests = query.fetch().map(new DefaultRecordMapper(Tables.EH_ENTERPRISE_OP_REQUESTS.recordType(), EnterpriseOpRequest.class));
 
-        if (enterpriseOpRequests.size() >= pageSize) {
-            locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
-            enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
-        } else {
-            locator.setAnchor(null);
-        }
-        return enterpriseOpRequests;
+		if (enterpriseOpRequests.size() >= pageSize) {
+			locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
+			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+		} else {
+			locator.setAnchor(null);
+		}
+		return enterpriseOpRequests;
+	}
+
+	@Override
+	public void deleteApplyEntrysByLeasePromotionIds(List<Long> idList) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		DeleteQuery query = context.deleteQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
+
+		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(LeaseIssuerType.NORMAL_USER.getCode()));
+		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(ApplyEntrySourceType.FOR_RENT.getCode()));
+		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.in(idList));
+
+		query.execute();
 	}
 	
 }

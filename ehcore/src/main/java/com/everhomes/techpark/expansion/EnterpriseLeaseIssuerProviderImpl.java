@@ -171,14 +171,14 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public void deleteLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhLeaseIssuerAddresses.class));
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuerAddresses.class));
-		leaseIssuerAddress.setId(id);
-		EhLeaseIssuerAddressesDao dao = new EhLeaseIssuerAddressesDao(context.configuration());
-		dao.delete(leaseIssuerAddress);
+	public void deleteLeaseIssuerAddressByLeaseIssuerId(Long leaseIssuerId) {
 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuerAddresses.class));
+
+		DeleteQuery query = context.deleteQuery(Tables.EH_LEASE_ISSUER_ADDRESSES);
+		query.addConditions(Tables.EH_LEASE_ISSUER_ADDRESSES.LEASE_ISSUER_ID.eq(leaseIssuerId));
+
+		query.execute();
 	}
 
 	@Override

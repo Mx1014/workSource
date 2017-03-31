@@ -49,4 +49,10 @@ public interface EnterpriseApplyEntryProvider {
 	void updateApplyEntry(EnterpriseOpRequest request);
 
 	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
+
+	void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType);
+
+	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
+
+	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
 }

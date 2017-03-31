@@ -21,7 +21,7 @@ public interface EnterpriseLeaseIssuerProvider {
 
     void createLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress);
 
-    void deleteLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress);
+    void deleteLeaseIssuerAddressByLeaseIssuerId(Long leaseIssuerId);
 
     List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId, Long buildingId);
 
