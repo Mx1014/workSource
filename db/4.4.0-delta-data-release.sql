@@ -28,3 +28,4 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 	VALUES ('expansion', '2', 'zh_CN', '园区入驻工作流详情内容', '[{\"key\":\"预约楼栋\",\"value\":\"${applyBuilding}\",\"entityType\":\"list\"},{\"key\":\"姓名\",\"value\":\"${applyUserName}\",\"entityType\":\"list\"},{\"key\":\"手机号\",\"value\":\"${contactPhone}\",\"entityType\":\"list\"},{\"key\":\"公司名称\",\"value\":\"${enterpriseName}\",\"entityType\":\"list\"},{\"key\":\"申请类型\",\"value\":\"${applyType}\",\"entityType\":\"list\"},{\"key\":\"备注\",\"value\":\"${description}\",\"entityType\":\"multi_line\"}]', '0');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ('expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '企业: ${enterpriseName}\n电话: ${contactPhone}', '0');
+UPDATE eh_web_menus set name = '入驻申请' where id = 40120;
