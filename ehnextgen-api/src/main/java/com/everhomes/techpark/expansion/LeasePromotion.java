@@ -1,5 +1,6 @@
 package com.everhomes.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
@@ -23,18 +24,21 @@ public class LeasePromotion extends EhLeasePromotions {
 	private Double latitude;
 	
 	
-	private List<LeasePromotionAttachment> attachments;
-	
+//	private List<LeasePromotionAttachment> attachments;
 
+	private BigDecimal startRentArea;
+	private BigDecimal endRentArea;
+	private BigDecimal startRentAmount;
+	private BigDecimal endRentAmount;
 
-	public List<LeasePromotionAttachment> getAttachments() {
-		return attachments;
-	}
-
-
-	public void setAttachments(List<LeasePromotionAttachment> attachments) {
-		this.attachments = attachments;
-	}
+//	public List<LeasePromotionAttachment> getAttachments() {
+//		return attachments;
+//	}
+//
+//
+//	public void setAttachments(List<LeasePromotionAttachment> attachments) {
+//		this.attachments = attachments;
+//	}
 
 
 	public java.lang.String getPosterUrl() {
@@ -81,13 +85,39 @@ public class LeasePromotion extends EhLeasePromotions {
 		return latitude;
 	}
 
-
 	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	
-	
-	
-	
 
+	public BigDecimal getStartRentArea() {
+		return startRentArea;
+	}
+
+	public void setStartRentArea(BigDecimal startRentArea) {
+		this.startRentArea = startRentArea;
+	}
+
+	public BigDecimal getEndRentArea() {
+		return endRentArea;
+	}
+
+	public void setEndRentArea(BigDecimal endRentArea) {
+		this.endRentArea = endRentArea;
+	}
+
+	public BigDecimal getStartRentAmount() {
+		return startRentAmount;
+	}
+
+	public void setStartRentAmount(BigDecimal startRentAmount) {
+		this.startRentAmount = startRentAmount;
+	}
+
+	public BigDecimal getEndRentAmount() {
+		return endRentAmount;
+	}
+
+	public void setEndRentAmount(BigDecimal endRentAmount) {
+		this.endRentAmount = endRentAmount;
+	}
 }

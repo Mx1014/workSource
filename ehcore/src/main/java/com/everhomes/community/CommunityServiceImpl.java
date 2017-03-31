@@ -9,10 +9,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
@@ -671,7 +673,9 @@ public class CommunityServiceImpl implements CommunityService {
         			dto.setManagerContact(member.getContactToken());
         		}
         	}
-        	
+
+			//TODO: set detail url
+			processDetailUrl(dto);
         	populateBuildingDTO(dto);
         	
         	return dto;
@@ -679,6 +683,17 @@ public class CommunityServiceImpl implements CommunityService {
         
         
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
+	}
+
+	private void processDetailUrl(BuildingDTO dto) {
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
+
+		detailUrl = String.format(detailUrl, dto.getId());
+
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+		dto.setDetailUrl(homeUrl + detailUrl);
+
 	}
 
     private void populateBuildingDTO( BuildingDTO building) {
@@ -867,7 +882,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
-		Building building = new Building();
+		Building building = ConvertHelper.convert(cmd, Building.class);
 		building.setAddress(cmd.getAddress());
 		building.setAliasName(cmd.getAliasName());
 		building.setAreaSize(cmd.getAreaSize());

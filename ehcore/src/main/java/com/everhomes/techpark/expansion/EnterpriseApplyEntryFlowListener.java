@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.techpark.expansion;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
@@ -8,21 +12,23 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.StringHelper;
@@ -30,8 +36,6 @@ import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
 
-import org.jooq.Record;
-import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +70,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private CommunityProvider communityProvider;
+    @Autowired
+    private AddressProvider addressProvider;
+    @Autowired
+    private BuildingProvider buildingProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Autowired
     private SmsProvider smsProvider;
@@ -92,22 +103,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        // 不用做什么
-        /*ApplyEntryStatus status = null;
-        switch (ctx.getStepType()) {
-            case APPROVE_STEP:
-                status = ApplyEntryStatus.RESIDED_IN;
-                break;
-            case REJECT_STEP:
-                status = ApplyEntryStatus.INVALID;
-                break;
-            case ABSORT_STEP:
-                status = ApplyEntryStatus.INVALID;
-                break;
-        }
+        // 更新状态
+        FlowCase flowCase = ctx.getFlowCase();
+        Byte status = flowCase.getStatus();
+
         if (status != null) {
-            enterpriseApplyEntryProvider.updateApplyEntryStatus(ctx.getFlowCase().getReferId(), status.getCode());
-        }*/
+            enterpriseApplyEntryProvider.updateApplyEntryStatus(ctx.getFlowCase().getReferId(), status);
+        }
     }
 
     @Override
@@ -124,25 +126,38 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
         if (applyEntry != null) {
+            EnterpriseApplyEntryDTO dto = ConvertHelper.convert(applyEntry, EnterpriseApplyEntryDTO.class);
+
+            if (null != applyEntry.getAddressId()){
+                Address address = addressProvider.findAddressById(applyEntry.getAddressId());
+                if (null != address){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                }
+            }
+            flowCase.setCustomObject(JSONObject.toJSONString(dto));
+
             String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
+            String buildingName = processBuildingName(applyEntry);
+
+            map.put("applyBuilding", defaultIfNull(buildingName, ""));
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
             map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
             String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
                     applyEntry.getApplyType() + "", locale, "");
             map.put("applyType", defaultIfNull(applyType, ""));
-            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
-            this.processSourceName(applyEntry);
-            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
+//            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
+//            this.processSourceName(applyEntry);
+//            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
             map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
             
-            String jsonStr = "";
-            if(null != applyEntry.getAreaSize())
-            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
-            else
-            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_NOAREA_CODE, locale, map, "[]");
+            String jsonStr;
+
+            jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
+
             return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
         } else {
             LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
@@ -154,30 +169,47 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         return obj != null ? obj : defaultValue;
     }
 
-    private void processSourceName(EnterpriseOpRequest applyEntry) {
-        applyEntry.setSourceName("");
+    private String processBuildingName(EnterpriseOpRequest applyEntry) {
+        String buildingName = "";
         if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
 			//续租的 
-        	applyEntry.setSourceName("续租"); 
-			 
+
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
 			Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
 			if(null != building){
-				applyEntry.setSourceName(building.getName());
-			}
+                buildingName = building.getName();
+            }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
 				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
 			//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
-			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-			if(null != leasePromotion){
-				applyEntry.setSourceName(leasePromotion.getSubject()); 
-			}
+//			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
+//			if(null != leasePromotion){
+//				applyEntry.setSourceName(leasePromotion.getSubject());
+//			}
+
+            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
+
+            buildingName = leasePromotion.getRentPosition();
+            com.everhomes.building.Building building = buildingProvider.findBuildingById(applyEntry.getBuildingId());
+            if (null != building) {
+                buildingName = building.getName();
+            }
+            Address address = addressProvider.findAddressById(applyEntry.getAddressId());
+
+            if (null != address) {
+                buildingName = address.getBuildingName() + " " + address.getApartmentName();
+            }
 		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())){
 			//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
 			if(null != yellowPage){
-				applyEntry.setSourceName("创客申请"); 
+                if (null != yellowPage.getBuildingId()) {
+                    Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
+                    if(null != building){
+                        buildingName = building.getName();
+                    }
+                }
 			}
 		}
 //        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
@@ -190,6 +222,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 //            if (null != leasePromotion)
 //                applyEntry.setSourceName(leasePromotion.getSubject());
 //        }
+
+        return buildingName;
     }
 
     @Override

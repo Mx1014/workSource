@@ -96,4 +96,7 @@ public interface ConfigConstants {
     public static final String EQUIPMENT_TASK_NOTIFY_FLAG = "equipment.task.notify.flag";
     public static final String SHAKE_OPEN_DOOR = "shake.open.door";
 
+    String APPLY_ENTRY_DETAIL_URL = "apply.entry.detail.url";
+
+    String APPLY_ENTRY_BUILDING_DETAIL_URL = "apply.entry.building.detail.url";
 }

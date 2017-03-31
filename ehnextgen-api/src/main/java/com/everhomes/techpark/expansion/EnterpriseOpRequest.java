@@ -6,7 +6,15 @@ public class EnterpriseOpRequest extends EhEnterpriseOpRequests{
 	
 	private String sourceName;
 	
-	
+	private Long LeaseIssuerId;
+
+	public Long getLeaseIssuerId() {
+		return LeaseIssuerId;
+	}
+
+	public void setLeaseIssuerId(Long leaseIssuerId) {
+		LeaseIssuerId = leaseIssuerId;
+	}
 
 	public String getSourceName() {
 		return sourceName;

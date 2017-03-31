@@ -49,7 +49,36 @@ public class EnterpriseApplyEntryCommand {
 
 	private String description;
 
-	private Long contractId; 
+	private Long contractId;
+
+	private String issuerType;
+
+	private Long addressId;
+	private Long buildingId;
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
 
 	public String getSourceType() {
 		return sourceType;

@@ -12,18 +12,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.community.CommunityService;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.organization.*;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import org.apache.commons.lang.math.RandomUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
@@ -33,9 +45,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.enterprise.EnterpriseAttachment;
-import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -51,49 +61,14 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
-import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
-import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
-import com.everhomes.rest.techpark.expansion.ExpansionConst;
-import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
-import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
-import com.everhomes.rest.techpark.expansion.LeasePromotionType;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -166,60 +141,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     @Autowired
     private LocaleStringService localeStringService;
 
-    @Override
-	public ListEnterpriseDetailResponse listEnterpriseDetails(
-			ListEnterpriseDetailCommand cmd) {
-		
-		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
-		List<Long> enterpriseIds = new ArrayList<Long>();
-		ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-		//根据楼栋名称查询
-		if(!StringUtils.isEmpty(cmd.getBuildingName())){
-			List<EnterpriseAddress> enterpriseAddresses = enterpriseApplyEntryProvider.listBuildingEnterprisesByBuildingName(cmd.getBuildingName(), locator, pageSize+1);
-			for (EnterpriseAddress enterpriseAddress : enterpriseAddresses) {
-				enterpriseIds.add(enterpriseAddress.getEnterpriseId());
-			}
-		}else{
-			List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
-		                , cmd.getCommunityId(), pageSize+1, new ListingQueryBuilderCallback() {
-
-		            @Override
-		            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-		                    SelectQuery<? extends Record> query) {
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(cmd.getCommunityId()));
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
-		                return query;
-		            }
-		      });    
-			
-			for (EnterpriseCommunityMap enterpriseCommunityMap : enterpriseMaps) {
-				enterpriseIds.add(enterpriseCommunityMap.getMemberId());
-			}
-		}
-		
-		List<EnterpriseDetailDTO> dtos = new ArrayList<EnterpriseDetailDTO>();
-		
-		if(null != locator.getAnchor())
-			enterpriseIds.remove(enterpriseIds.size()-1);
-		
-		for (Long enterpriseId : enterpriseIds) {
-			EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(enterpriseId);
-			if(null != enterpriseDetail){
-				EnterpriseDetailDTO dto = toEnterpriseDetailDTO(enterpriseDetail);
-				dto.setContactPhone(enterpriseDetail.getContact());
-				dtos.add(dto);
-			}
-				
-		}
-		
-		res.setNextPageAnchor(locator.getAnchor());
-		res.setDetails(dtos);
-		return res;
-	}
+	@Autowired
+	private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
+    @Autowired
+    private AddressProvider addressProvider;
+    @Autowired
+    private CommunityService communityService;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
@@ -291,8 +218,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public ListEnterpriseApplyEntryResponse listApplyEntrys(
-			ListEnterpriseApplyEntryCommand cmd) {
+	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		
@@ -338,6 +264,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if(null != contract)
 					dto.setContract(organizationService.processContract(contract));
 			}
+
+			//填充楼栋门牌
+            if (null != c.getAddressId()){
+                Address address = addressProvider.findAddressById(c.getAddressId());
+                if (null != address){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                }
+            }
+
 			return dto;
 		}).collect(Collectors.toList());
 		for (EnterpriseApplyEntryDTO dto : dtos) {
@@ -401,6 +337,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
+
+        if (null == cmd.getIssuerType())
+            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		if(null != cmd.getContactPhone())
@@ -468,7 +408,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
-            return this.createFlowCase(request,projectId, projectType);
+    		if (null == cmd.getIssuerType() || LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
+                FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType);
+                request.setFlowcaseId(flowCase1.getId());
+                enterpriseApplyEntryProvider.updateApplyEntry(request);
+                return flowCase1;
+            }
+            return null;
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
@@ -567,7 +513,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setProjectId(projectId);
         
         //TODO better added by janson 临时办法，4.4.2 必须改动
-        if(UserContext.getCurrentNamespaceId(null).equals(999983l)) {
+        if(UserContext.getCurrentNamespaceId(null).equals(999983)) {
         	flowCaseCmd.setTitle("园区入驻");
         }
         	
@@ -595,8 +541,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
         String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
-        map.put("applyType", defaultIfNull(applyType,""));
-        map.put("areaSize", defaultIfNull(request.getAreaSize(),""));
+        map.put("enterpriseName", defaultIfNull(request.getEnterpriseName(),""));
+        map.put("contactPhone", defaultIfNull(request.getApplyContact(),""));
 
         return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
                 ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
@@ -672,12 +618,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 	
 	@Override
-	public ListBuildingForRentResponse listLeasePromotions(
-			ListBuildingForRentCommand cmd) {
+	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType())
-			cmd.setRentType( LeasePromotionType.ORDINARY.getCode());
+			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
+
+		lease.setCreateUid(cmd.getUserId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
@@ -685,71 +632,129 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(lease, locator, pageSize);
 		
 		res.setNextPageAnchor(locator.getAnchor());
-		
-		for (LeasePromotion leasePromotion : leasePromotions) {
-			leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-			List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
-			if(null != attachments){
-				for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-					leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-				}
-			}
-			
-			Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-			if(null != building){
-				leasePromotion.setBuildingName(building.getName());
-				leasePromotion.setAddress(building.getAddress());
-				leasePromotion.setLatitude(building.getLatitude());
-				leasePromotion.setLongitude(building.getLongitude());
-			}
-				
+
+		long userId = UserContext.current().getUser().getId();
+		CheckIsLeaseIssuerDTO flag = new CheckIsLeaseIssuerDTO();
+		flag.setFlag(LeasePromotionFlag.DISABLED.getCode());
+		if (null != cmd.getOrganizationId()) {
+			CheckIsLeaseIssuerCommand cmd2 = new CheckIsLeaseIssuerCommand();
+			cmd2.setOrganizationId(cmd.getOrganizationId());
+			flag.setFlag(checkIsLeaseIssuer(cmd2).getFlag());
 		}
-		
+
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
-			return ConvertHelper.convert(c, BuildingForRentDTO.class);
+            BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
+
+			populateRentDTO(dto);
+
+			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
+			if (LeaseIssuerType.NORMAL_USER.getCode().equals(dto.getIssuerType())) {
+				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag() &&
+						userId == c.getCreateUid())
+					dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
+			}
+
+            return dto;
 		}).collect(Collectors.toList());
 		
 		res.setDtos(dtos);
 		return res;
 	}
 
+	private void populateRentDTO(BuildingForRentDTO dto) {
+		//TODO: set detail url
+		processDetailUrl(dto);
+
+		if (null != dto.getAddressId()) {
+			Address address = addressProvider.findAddressById(dto.getAddressId());
+			if (null != address) {
+				dto.setApartmentName(address.getApartmentName());
+			}
+		}
+
+		Building building = communityProvider.findBuildingById(dto.getBuildingId());
+		if(null != building){
+			dto.setBuildingName(building.getName());
+			dto.setAddress(building.getAddress());
+			dto.setLatitude(building.getLatitude());
+			dto.setLongitude(building.getLongitude());
+		}
+
+		long userId = UserContext.current().getUser().getId();
+		dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+
+		List<LeasePromotionAttachment> attachments = getAttachmentsByLeaseId(dto.getId());
+		dto.setAttachments(attachments.stream().map(a -> {
+			BuildingForRentAttachmentDTO ad = ConvertHelper.convert(a, BuildingForRentAttachmentDTO.class);
+			ad.setContentUrl(contentServerService.parserUri(a.getContentUri(), EntityType.USER.getCode(), userId));
+
+			return ad;
+		}).collect(Collectors.toList()));
+
+		dto.setUnit("元/㎡/月");
+	}
+
+    private void processDetailUrl(BuildingForRentDTO dto) {
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_DETAIL_URL, "");
+
+		detailUrl = String.format(detailUrl, dto.getId());
+
+		dto.setDetailUrl(homeUrl + detailUrl);
+
+		String buildingDetailUrl = configurationProvider.getValue(ConfigConstants.APPLY_ENTRY_BUILDING_DETAIL_URL, "");
+
+		buildingDetailUrl = String.format(buildingDetailUrl, dto.getBuildingId());
+		dto.setBuildingDetailUrl(homeUrl + buildingDetailUrl);
+    }
+
 	@Override
-	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
-		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd){
+        if (null == cmd.getIssuerType())
+            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+        LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+
+        if (null != cmd.getEnterTime())
+		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
 		if (null==cmd.getRentType())
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		leasePromotion.setRentType(cmd.getRentType());
+
 		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
 		
-		if(StringUtils.isEmpty(attachmentDTOs)){
-			return true;
-		}
-		
-		
 		/**
 		 * 重新添加
 		 */
-		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-			attachment.setLeaseId(leasePromotion.getId());
-			attachment.setCreatorUid(leasePromotion.getCreateUid());
-			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setLeaseId(leasePromotion.getId());
+				attachment.setCreatorUid(leasePromotion.getCreateUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
 		}
-		return true;
+
+		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+		populateRentDTO(dto);
+
+		return dto;
 	}
 
 	@Override
-	public boolean updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd){
 		
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 		LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
-		
-		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+
+		if (null != cmd.getEnterTime())
+			leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+
+		leasePromotion.setIssuerType(lease.getIssuerType());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
 		leasePromotion.setCreateTime(lease.getCreateTime());
 		leasePromotion.setCreateUid(lease.getCreateUid());
@@ -757,39 +762,45 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
 		
-		if(StringUtils.isEmpty(attachmentDTOs)){
-			return true;
-		}
-		
 		/**
 		 * 先删除全部图片
 		 */
 		enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
-		
+
 		/**
 		 * 重新添加
 		 */
-		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-			attachment.setLeaseId(leasePromotion.getId());
-			attachment.setCreatorUid(UserContext.current().getUser().getId());
-			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setLeaseId(leasePromotion.getId());
+				attachment.setCreatorUid(leasePromotion.getCreateUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
 		}
-		
-		return true;
+
+		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+		populateRentDTO(dto);
+
+		return dto;
 	}
-	
+
+	private List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId) {
+		List<LeasePromotionAttachment> attachments = enterpriseApplyEntryProvider.getAttachmentsByLeaseId(leaseId);
+
+		return attachments;
+	}
+
 	@Override
 	public BuildingForRentDTO findLeasePromotionById(Long id){
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(id);
-		leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-		List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
-		if(null != attachments){
-			for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-			}
-		}
-		return ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+        BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+		populateRentDTO(dto);
+
+		return dto;
 	}
 	
 	@Override
@@ -810,6 +821,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Override
 	public boolean updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+
+		if (null == cmd.getId()) {
+			LOGGER.error("Invalid param id, cmd={}", cmd);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Status can not be modified.");
+		}
+
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getApplyEntryById(cmd.getId());
 		
 		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
@@ -833,5 +851,250 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
 		return enterpriseApplyEntryProvider.deleteLeasePromotion(cmd.getId());
 	}
-	
+
+	@Override
+	public ListLeaseIssuersResponse listLeaseIssuers(ListLeaseIssuersCommand cmd) {
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
+
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, null, cmd.getKeyword(),
+				cmd.getPageAnchor(), pageSize);
+
+		int size = issuers.size();
+
+		if (size > 0) {
+			if (size == pageSize)
+				resp.setNextPageAnchor(issuers.get(size -1).getId());
+		}
+
+		resp.setRequests(issuers.stream().map(r -> {
+			LeaseIssuerDTO dto = ConvertHelper.convert(r, LeaseIssuerDTO.class);
+			//TODO:set address
+            if (null != r.getEnterpriseId()) {
+                Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+                OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(r.getEnterpriseId());
+                if (null != orgDetail) {
+                    dto.setIssuerContact(orgDetail.getContact());
+                }
+
+                dto.setIssuerName(org.getName());
+//                dto.setIssuerContact(org.get);
+                List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
+                dto.setAddresses(organizationAddresses.stream().map(a -> {
+                    Address address = addressProvider.findAddressById(a.getAddressId());
+                    return ConvertHelper.convert(address, AddressDTO.class);
+                }).collect(Collectors.toList()));
+            }else {
+                List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(r.getId(), null);
+                dto.setAddresses(addresses.stream().map(a -> {
+                    Address address = addressProvider.findAddressById(a.getAddressId());
+                    return ConvertHelper.convert(address, AddressDTO.class);
+                }).collect(Collectors.toList()));
+            }
+			return dto;
+		}).collect(Collectors.toList()));
+
+		return resp;
+	}
+
+    @Override
+    public void deleteLeaseIssuer(DeleteLeaseIssuerCommand cmd) {
+        LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.getLeaseIssuerById(cmd.getId());
+
+        if (null == leaseIssuer) {
+            LOGGER.error("LeaseIssuer not found, cmd={}", cmd);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "LeaseIssuer not found.");
+        }
+        leaseIssuer.setStatus(LeaseIssuerStatus.INACTIVE.getCode());
+        enterpriseLeaseIssuerProvider.updateLeaseIssuer(leaseIssuer);
+    }
+
+    @Override
+    public void addLeaseIssuer(AddLeaseIssuerCommand cmd) {
+
+        if (null == cmd.getCommunityId()) {
+            LOGGER.error("Invalid communityId param, cmd={}", cmd);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId param.");
+        }
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (null != cmd.getEnterpriseIds()) {
+            for (Long id: cmd.getEnterpriseIds()) {
+
+				LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, id);
+				//已存在，过滤掉
+				if (null == leaseIssuer) {
+					leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+					leaseIssuer.setNamespaceId(namespaceId);
+					leaseIssuer.setEnterpriseId(id);
+					enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+				}
+            }
+        }else {
+			LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, cmd.getIssuerContact());
+
+			if (null != leaseIssuer) {
+				LOGGER.error("LeaseIssuer exist, cmd={}", cmd);
+				throw errorWith(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, ExpansionLocalStringCode.LEASE_ISSUER_EXIST,
+						"LeaseIssuer exist.");
+			}
+
+            leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+            leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //TODO:门牌地址
+            enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+
+            if (null != cmd.getAddressIds()) {
+                for (Long id: cmd.getAddressIds()) {
+					Address address = addressProvider.findAddressById(id);
+					com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+							address.getCommunityId(), address.getBuildingName());
+                    LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
+                    leaseIssuerAddress.setAddressId(id);
+                    leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
+					leaseIssuerAddress.setBuildingId(building.getId());
+                    createLeaseIssuerAddress(leaseIssuerAddress);
+                }
+            }
+        }
+
+    }
+
+    private void createLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
+        leaseIssuerAddress.setStatus((byte)2);
+        leaseIssuerAddress.setCreatorUid(UserContext.current().getUser().getId());
+        enterpriseLeaseIssuerProvider.createLeaseIssuerAddress(leaseIssuerAddress);
+    }
+
+    @Override
+    public LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd) {
+        if (null == cmd.getNamespaceId())
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+        LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+
+        if (null == config) {
+            LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "LeaseIssuerConfig not found.");
+        }
+
+        return ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
+
+    }
+
+    @Override
+    public CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd) {
+        CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
+		Long organizationId = cmd.getOrganizationId();
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
+
+		//先检查是不是招租发行人
+		if (null != enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken())) {
+			dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+		}
+
+		if (null != organizationId) {
+			//先检查是不是招租发行公司
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+				}
+			}
+		}
+
+        return dto;
+    }
+
+    @Override
+    public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
+
+        ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
+		Long organizationId = cmd.getOrganizationId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		List<BuildingDTO> buildingDTOs = new ArrayList<>();
+
+		//先查询业主
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		if (null != leaseIssuer) {
+			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
+
+			buildingDTOs.addAll(addresses.stream().map(a -> {
+				Address address = addressProvider.findAddressById(a.getAddressId());
+				com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+						address.getCommunityId(), address.getBuildingName());
+				return ConvertHelper.convert(building, BuildingDTO.class);
+			}).collect(Collectors.toList()));
+		}
+
+		if (null != organizationId)  {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+
+					buildingDTOs.addAll(organizationAddresses.stream().map(a -> {
+						Address address = addressProvider.findAddressById(a.getAddressId());
+						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+								address.getCommunityId(), address.getBuildingName());
+						return ConvertHelper.convert(building, BuildingDTO.class);
+					}).collect(Collectors.toSet()));
+				}
+			}
+		}
+
+		response.setBuildings(buildingDTOs);
+        return response;
+    }
+
+	@Override
+	public List<AddressDTO> listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd) {
+		List<AddressDTO> dtos = new ArrayList<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		Long organizationId = cmd.getOrganizationId();
+
+		//先查询业主
+		LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.findLeaseIssersByContact(namespaceId, identifier.getIdentifierToken());
+		if (null != leaseIssuer) {
+			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(leaseIssuer.getId(), cmd.getBuildingId());
+
+			dtos.addAll(addresses.stream().map(a -> {
+				Address address = addressProvider.findAddressById(a.getAddressId());
+				return ConvertHelper.convert(address, AddressDTO.class);
+			}).collect(Collectors.toList()));
+		}
+
+		if (null != organizationId)  {
+			if (null != enterpriseLeaseIssuerProvider.fingLeaseIssersByOrganizationId(namespaceId, organizationId)) {
+				SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+
+					com.everhomes.building.Building building = buildingProvider.findBuildingById(cmd.getBuildingId());
+
+					dtos.addAll(organizationAddresses.stream().filter(a -> {
+						return a.getBuildingName().equals(building.getName());
+					}).map(a -> {
+						Address address = addressProvider.findAddressById(a.getAddressId());
+						return ConvertHelper.convert(address, AddressDTO.class);
+					}).collect(Collectors.toSet()));
+				}
+			}
+		}
+
+		return dtos;
+	}
 }

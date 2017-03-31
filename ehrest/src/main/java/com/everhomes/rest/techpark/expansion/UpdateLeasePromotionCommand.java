@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -32,15 +33,52 @@ public class UpdateLeasePromotionCommand {
 	private String   rentType;
 	private String   posterUri;
 	private String   subject;
-	private String   rentAreas;
+	private BigDecimal   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
 	private String   description;
 	private Long enterTime;
-	
+
+	private Byte enterTimeFlag;
+	private Long addressId;
+	private String orientation;
+	private BigDecimal rentAmount;
+
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
-	
+
+	public Byte getEnterTimeFlag() {
+		return enterTimeFlag;
+	}
+
+	public void setEnterTimeFlag(Byte enterTimeFlag) {
+		this.enterTimeFlag = enterTimeFlag;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public BigDecimal getRentAmount() {
+		return rentAmount;
+	}
+
+	public void setRentAmount(BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -77,12 +115,6 @@ public class UpdateLeasePromotionCommand {
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-	public String getRentAreas() {
-		return rentAreas;
-	}
-	public void setRentAreas(String rentAreas) {
-		this.rentAreas = rentAreas;
-	}
 	public String getContacts() {
 		return contacts;
 	}
@@ -113,6 +145,12 @@ public class UpdateLeasePromotionCommand {
 	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
-	
-	
+
+	public BigDecimal getRentAreas() {
+		return rentAreas;
+	}
+
+	public void setRentAreas(BigDecimal rentAreas) {
+		this.rentAreas = rentAreas;
+	}
 }

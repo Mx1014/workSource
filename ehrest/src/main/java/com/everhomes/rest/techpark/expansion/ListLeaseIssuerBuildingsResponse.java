@@ -1,29 +1,29 @@
-package com.everhomes.rest.community;
-
-import java.util.List;
+package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 
 /**
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>buildings: 楼栋信息，参考{@link com.everhomes.rest.community.BuildingDTO}</li>
+ * <li>buildings: 楼栋信息，参考{@link BuildingDTO}</li>
  * </ul>
  */
-public class ListBuildingCommandResponse {
+public class ListLeaseIssuerBuildingsResponse {
 
 	private Long nextPageAnchor;
 	
 	@ItemType(BuildingDTO.class)
 	private List<BuildingDTO> buildings;
 	
-	public ListBuildingCommandResponse() {
+	public ListLeaseIssuerBuildingsResponse() {
     }
     
-    public ListBuildingCommandResponse(Long nextPageAnchor, List<BuildingDTO> buildings) {
+    public ListLeaseIssuerBuildingsResponse(Long nextPageAnchor, List<BuildingDTO> buildings) {
         this.nextPageAnchor = nextPageAnchor;
         this.buildings = buildings;
     }
