@@ -146,15 +146,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOldPostContent(ActivityDTO activityDTO){
-    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime())+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
-    				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
-    	
-    	String contentStr = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_TIME);
-    	
-    	
-    	return null;
+    	return formatDate(activityDTO) + "\n"
+    			+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
+    			(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+
     }
     
     // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
@@ -174,41 +169,53 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 	//     2.1 若开始时间与结束时间为同一天，则简化为：年-月-日  时 : 分  ~ 时 : 分 
 	//     2.2 若为同年，则简化  年-月-日  时 : 分  ~ 月-日   时 : 分  
     private String formatDate(ActivityDTO activityDTO){
-    	if(activityDTO.getAllDayFlag() == 1){
-    		if()
+    	
+    	//如果时间字符串有异常，保持原样
+    	if(activityDTO.getStartTime() == null || activityDTO.getStartTime().length() < 16 || 
+    			activityDTO.getStopTime() == null || activityDTO.getStartTime().length() < 16){
+    		
+    		return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
+    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime());
     	}
     	
-    	return "";
-    }
-    
-    private String getYear(String time){
-    	if(time.length() >= 16 ){
-    		return time.substring(0, 4);
+    	
+    	String startYear = activityDTO.getStartTime().substring(0, 4);
+    	String startMon = activityDTO.getStartTime().substring(5, 7);
+    	String startDay = activityDTO.getStartTime().substring(8, 10);
+    	String startHourAndMin = activityDTO.getStartTime().substring(11, 16);
+    	
+    	String stopYear = activityDTO.getStopTime().substring(0, 4);
+    	String stopMon = activityDTO.getStopTime().substring(5, 7);
+    	String stopDay = activityDTO.getStopTime().substring(8, 10);
+    	String stopHourAndMin = activityDTO.getStopTime().substring(11, 16);
+    	
+    	
+    	
+    	String res = "";
+    	String activityTimeStr = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_TIME);
+    	if(activityDTO.getAllDayFlag() != null && activityDTO.getAllDayFlag() == 1){
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " ~ " + stopMon + "-" + stopDay;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + "\n"
+    					+ getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + " ~ " + stopMon + "-" + stopDay;
+    		}
+    	}else{
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopHourAndMin;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopMon + "-" + stopDay + " " + stopHourAndMin;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin +"\n"
+    					+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + "-" + stopMon + "-" + stopDay + " "+ stopHourAndMin;
+    		}
     	}
-    	return "xxxx";
+
+    	return res;
     }
-    
-    private String getMonth(String time){
-    	if(time.length() >= 16 ){
-    		return time.substring(5, 7);
-    	}
-    	return "xx";
-    }
-    
-    private String getDay(String time){
-    	if(time.length() >= 16 ){
-    		return time.substring(8, 10);
-    	}
-    	return "xx";
-    }
-    
-    private String getHourAndMin(String time){
-    	if(time.length() >= 16 ){
-    		return time.substring(11, 16);
-    	}
-    	return "xx:xx";
-    }
-    
+
     private boolean isOld(String versionString){
     	if (versionString == null || versionString.equals("")) {
 			return true;
