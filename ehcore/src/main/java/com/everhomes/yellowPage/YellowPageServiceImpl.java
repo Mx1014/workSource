@@ -845,7 +845,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					serviceUrl = prefix + serviceUrl;
 				}
 
-				serviceAlliance.setServiceUrl(serviceUrl);
+				serviceAlliance.setServiceUrl("zl://browser/i/" + serviceUrl);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
