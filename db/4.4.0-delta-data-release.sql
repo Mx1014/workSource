@@ -35,6 +35,9 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
 
+UPDATE eh_lease_promotions SET rent_areas = 190 where id = 51;
+UPDATE eh_lease_promotions SET rent_areas = 90.44 where id = 52;
+UPDATE eh_lease_promotions SET rent_areas = 400 where id = 280;
 
 -- 更新活动选项中的图标 update avatal.all from avatar.organization    add by yanjun
 UPDATE eh_configurations a
