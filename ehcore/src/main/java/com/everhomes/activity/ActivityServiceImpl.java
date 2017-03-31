@@ -3388,7 +3388,9 @@ public class ActivityServiceImpl implements ActivityService {
    @Override
     public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
-       return ConvertHelper.convert(video, ActivityVideoDTO.class);
+	   ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+	   dto.setVideoUrl("yzb://" + video.getVideoSid());
+       return dto;
     }
    
    @Override
