@@ -30,6 +30,10 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 	VALUES ('expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '企业: ${enterpriseName}\n电话: ${contactPhone}', '0');
 UPDATE eh_web_menus set name = '入驻申请' where id = 40120;
 
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('apply.entry.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s', '', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
 
 
 -- 更新活动选项中的图标 update avatal.all from avatar.organization    add by yanjun
