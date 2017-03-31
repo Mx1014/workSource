@@ -1462,36 +1462,11 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		List<OrganizationDetailDTO> orgDtos = new ArrayList<OrganizationDetailDTO>();
 		if(null != members){
-			for (OrganizationMember member : members) {
-				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(member.getOrganizationId());
-				if(null == detail){
-					detail = new OrganizationDetail();
-					Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
-					if(null != organization){
-						detail.setDisplayName(organization.getName());
-						detail.setOrganizationId(organization.getId());
-					}
-				}
-				
-				OrganizationDetailDTO detailDto = ConvertHelper.convert(detail, OrganizationDetailDTO.class);
-				
-				List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(detailDto.getOrganizationId());
-				
-				List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
-				if(null != orgAddresses){
-					for (OrganizationAddress organizationAddress : orgAddresses) {
-						Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-						if(null != address)
-							addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
-					}
-				}
-				detailDto.setAddresses(addressDtos);
-				
-				orgDtos.add(detailDto);
-			}
-			
+
+			orgDtos.addAll(populateOrganizationDetails(members));
 		}
-		
+
+
 		if(null != user){
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
@@ -1522,7 +1497,44 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return dto;
 	}
-	
+
+	private Set<OrganizationDetailDTO> populateOrganizationDetails(List<OrganizationMember> members) {
+		Set<OrganizationDetailDTO> set = new HashSet<>();
+
+		for (OrganizationMember member : members) {
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(member.getOrganizationId());
+			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(null == detail){
+				detail = new OrganizationDetail();
+				if(null != organization){
+					detail.setDisplayName(organization.getName());
+					detail.setOrganizationId(organization.getId());
+				}
+			}
+
+			OrganizationDetailDTO detailDto = ConvertHelper.convert(detail, OrganizationDetailDTO.class);
+
+			List<OrganizationAddress> orgAddresses = organizationProvider.findOrganizationAddressByOrganizationId(detailDto.getOrganizationId());
+
+			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
+			if(null != orgAddresses){
+				for (OrganizationAddress organizationAddress : orgAddresses) {
+					Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+					if(null != address)
+						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+				}
+			}
+			detailDto.setAddresses(addressDtos);
+
+			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
+					&& organization.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
+				set.add(detailDto);
+			}
+		}
+
+		return set;
+	}
+
 	private CommunityUserResponse listUserByOrganizationIdOrCommunityId(ListCommunityUsersCommand cmd){
 		if(null == cmd.getOrganizationId() && null == cmd.getCommunityId()){
 			LOGGER.error("organizationId and communityId All are empty");
@@ -1657,17 +1669,23 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
 
-			Set<OrganizationDTO> organizationDTOs = new HashSet<>();
+			Set<OrganizationDetailDTO> organizationDTOs = new HashSet<>();
 			if(null != members){
+
+//				Set<OrganizationDTO> set = new HashSet<>();
+
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
 						dto.setIsAuth(1);
 					}
-					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-						organizationDTOs.add(ConvertHelper.convert(org, OrganizationDTO.class));
-					}
+//					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+//					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
+//							&& org.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
+//						set.add(ConvertHelper.convert(org, OrganizationDTO.class));
+//					}
 				}
+				organizationDTOs.addAll(populateOrganizationDetails(members));
+
 //				if(null != m){
 //					Organization org = organizationProvider.findOrganizationById(m.getCommunityId());
 //					if(null != org)
@@ -1682,9 +1700,8 @@ public class CommunityServiceImpl implements CommunityService {
 //					}
 //				}
 			}
-			List<OrganizationDTO> Organizations = new ArrayList<>();
+			List<OrganizationDetailDTO> Organizations = new ArrayList<>();
 			Organizations.addAll(organizationDTOs);
-
 			dto.setOrganizations(Organizations);
 
 			if(0 != cmd.getIsAuth()){
@@ -1737,7 +1754,7 @@ public class CommunityServiceImpl implements CommunityService {
 		for(int i = 0; i < size; i++){
 			Row tempRow = sheet.createRow(i + 1);
 			CommunityUserDto dto = dtos.get(i);
-			List<OrganizationDTO> organizations = dto.getOrganizations();
+			List<OrganizationDetailDTO> organizations = dto.getOrganizations();
 			StringBuilder enterprises = new StringBuilder();
 
 			for (int k = 0,l = organizations.size(); k < l; k++) {

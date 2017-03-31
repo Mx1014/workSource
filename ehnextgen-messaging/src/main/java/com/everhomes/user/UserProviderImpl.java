@@ -882,7 +882,7 @@ public class UserProviderImpl implements UserProvider {
                 cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
             }
 
-            query.where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+            query.where(cond).groupBy(Tables.EH_USERS.ID).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);

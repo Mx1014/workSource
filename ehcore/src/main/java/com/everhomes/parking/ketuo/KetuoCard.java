@@ -8,7 +8,16 @@ public class KetuoCard {
 	private String validTo;
 	private Integer freeMoney;
 	private Integer isAllow;
-	
+	private String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Integer getCardId() {
 		return cardId;
 	}
