@@ -48,6 +48,10 @@ public class SendNoticeToPmAdminAction implements Runnable {
         propertyMgrService.sendNoticeToPmAdmin(cmd, new Timestamp(operateTime));
         long end = System.currentTimeMillis();
         LOGGER.info("Push message to pm admin end, time = {} seconds", (end - start) / 1000);
+
+        UserContext.setCurrentNamespaceId(null);
+        UserContext.setCurrentUser(null);
+        UserContext.current().setScheme(null);
     }
 
     public SendNoticeToPmAdminAction(String cmd, String operateTime, String userId, String schema) {

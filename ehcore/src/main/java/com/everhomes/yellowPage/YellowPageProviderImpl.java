@@ -26,10 +26,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.elasticsearch.common.lang3.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +34,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -887,6 +886,63 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
+	public void createGolfRequest(ServiceAllianceGolfRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceGolfRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		dao.insert(request);
+	}
+
+	@Override
+	public ServiceAllianceGolfRequest findGolfRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceGolfRequest.class);
+	}
+
+	@Override
+	public void createGymRequest(ServiceAllianceGymRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceGymRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceGymRequestsDao dao = new EhServiceAllianceGymRequestsDao(context.configuration());
+		dao.insert(request);
+	}
+
+	@Override
+	public ServiceAllianceGymRequest findGymRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceGymRequestsDao dao = new EhServiceAllianceGymRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceGymRequest.class);
+	}
+
+	@Override
+	public void createServerRequest(ServiceAllianceServerRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.
+				getSequenceDomainFromTablePojo(EhServiceAllianceServerRequests.class));
+		request.setId(id);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		EhServiceAllianceServerRequestsDao dao = new EhServiceAllianceServerRequestsDao(context.configuration());
+		dao.insert(request);
+	}
+
+	@Override
+	public ServiceAllianceServerRequest findServerRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceServerRequestsDao dao = new EhServiceAllianceServerRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceServerRequest.class);
+	}
+
+	@Override
 	public List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize) {
 		List<ServiceAllianceInvestRequests> requests = new ArrayList<ServiceAllianceInvestRequests>();
 
@@ -935,7 +991,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 		return modules;
 	}
-
 
 	@Override
 	public List<ServiceAllianceAttachment> listAttachments(

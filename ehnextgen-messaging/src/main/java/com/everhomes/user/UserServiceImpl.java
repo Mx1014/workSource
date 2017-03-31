@@ -93,6 +93,7 @@ import com.everhomes.rest.user.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -111,6 +112,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.*;
@@ -365,7 +367,7 @@ public class UserServiceImpl implements UserService {
      * 校验短信发送频率
      */
     private void verifySmsTimes(String smsAction, String identifierToken, String deviceId) {
-        RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "1").getTemplate();
+        RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "").getTemplate();
         // 设置value的序列化，要不然下面的increment方法会报错
         template.setValueSerializer(new StringRedisSerializer());
         ValueOperations op = template.opsForValue();
@@ -377,19 +379,22 @@ public class UserServiceImpl implements UserService {
         Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "3"));
         Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
 
+        // 老版本的客户端没有deviceId
+        boolean hasDeviceId = StringUtils.isNotBlank(deviceId);
+
         // 每个手机号每天发送次数≤5
         String phoneDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.DAY.name(), identifierToken);
         Object times = op.get(phoneDayKey);
 
         if(times == null) {
             // 设置今天晚上23:59:59过期
-            LocalDate yesterdayStart = LocalDate.now().plusDays(1);
-            long seconds = (java.sql.Date.valueOf(yesterdayStart).getTime() - System.currentTimeMillis()) / 1000;
+            LocalDate tomorrowStart = LocalDate.now().plusDays(1);
+            long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
             op.set(phoneDayKey, String.valueOf(0), seconds, TimeUnit.SECONDS);
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForADay) {
-                LOGGER.error("Verification code request is too frequent, please try again after 24 hours");
+                LOGGER.error("Verification code request is too frequent, please try again after 24 hours. phone={}, times={}", identifierToken, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
                         "Verification code request is too frequent, please try again after 24 hours");
             }
@@ -397,19 +402,20 @@ public class UserServiceImpl implements UserService {
 
         // 每个手机设备每天发送次数≤20
         String deviceDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.DEVICE.name(), SmsVerify.Duration.DAY.name(), deviceId);
-        times = op.get(deviceDayKey);
-
-        if(times == null) {
-            // 设置今天晚上23:59:59过期
-            LocalDate yesterdayStart = LocalDate.now().plusDays(1);
-            long seconds = (java.sql.Date.valueOf(yesterdayStart).getTime() - System.currentTimeMillis()) / 1000;
-            op.set(deviceDayKey, String.valueOf(0), seconds, TimeUnit.SECONDS);
-        } else {
-            Integer t = Integer.valueOf((String) times);
-            if (t >= smsTimesDeviceForADay) {
-                LOGGER.error("Verification code request is too frequent, please try again after 24 hours");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
-                        "Verification code request is too frequent, please try again after 24 hours");
+        if (hasDeviceId) {
+            times = op.get(deviceDayKey);
+            if(times == null) {
+                // 设置今天晚上23:59:59过期
+                LocalDate tomorrowStart = LocalDate.now().plusDays(1);
+                long seconds = (java.sql.Date.valueOf(tomorrowStart).getTime() - System.currentTimeMillis()) / 1000;
+                op.set(deviceDayKey, String.valueOf(0), seconds, TimeUnit.SECONDS);
+            } else {
+                Integer t = Integer.valueOf((String) times);
+                if (t >= smsTimesDeviceForADay) {
+                    LOGGER.error("Verification code request is too frequent, please try again after 24 hours. deviceId={}, times={}", deviceId, t);
+                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
+                            "Verification code request is too frequent, please try again after 24 hours");
+                }
             }
         }
 
@@ -422,7 +428,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Integer t = Integer.valueOf((String) times);
             if (t >= smsTimesPhoneForAnHour) {
-                LOGGER.error("Verification code request is too frequent, please 1 hour to try again");
+                LOGGER.error("Verification code request is too frequent, please 1 hour to try again. phone={}, times={}", identifierToken, t);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
                         "Verification code request is too frequent, please 1 hour to try again");
             }
@@ -430,37 +436,43 @@ public class UserServiceImpl implements UserService {
 
         // 每个手机设备每小时发送次数≤10
         String deviceHourKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.DEVICE.name(), SmsVerify.Duration.HOUR.name(), deviceId);
-        times = op.get(deviceHourKey);
+        if (hasDeviceId) {
+            times = op.get(deviceHourKey);
 
-        if(times == null) {
-            op.set(deviceHourKey, String.valueOf(0), 1, TimeUnit.HOURS);
-        } else {
-            Integer t = Integer.valueOf((String) times);
-            if (t >= smsTimesDeviceForAnHour) {
-                LOGGER.error("Verification code request is too frequent, please 1 hour to try again");
-                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
-                        "Verification code request is too frequent, please 1 hour to try again");
+            if(times == null) {
+                op.set(deviceHourKey, String.valueOf(0), 1, TimeUnit.HOURS);
+            } else {
+                Integer t = Integer.valueOf((String) times);
+                if (t >= smsTimesDeviceForAnHour) {
+                    LOGGER.error("Verification code request is too frequent, please 1 hour to try again. deviceId={}, times={}", deviceId, t);
+                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
+                            "Verification code request is too frequent, please 1 hour to try again");
+                }
             }
         }
 
         // 发送验证码时间不得小于60s
         String minDurationKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.SECOND.name(), identifierToken);
-        times = op.get(minDurationKey);
+        if (smsMinDuration > 0) {
+            times = op.get(minDurationKey);
 
-        if(times == null) {
-            op.set(minDurationKey, String.valueOf(0), smsMinDuration, TimeUnit.SECONDS);
-        } else {
-            LOGGER.error("The time for sending the verification code shall not be less than {}s", smsMinDuration);
-            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_MIN_DURATION,
-                    "The time for sending the verification code shall not be less than %s s", smsMinDuration);
+            if(times == null) {
+                op.set(minDurationKey, String.valueOf(0), smsMinDuration, TimeUnit.SECONDS);
+            } else {
+                LOGGER.error("The time for sending the verification code shall not be less than {}s, phone={}, deviceId={}.", smsMinDuration, identifierToken, deviceId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_MIN_DURATION,
+                        "The time for sending the verification code shall not be less than %s s", smsMinDuration);
+            }
         }
 
         LOGGER.info("sms verify success smsAction={}, identifierToken={}, deviceId={}", smsAction, identifierToken, deviceId);
         // 发送次数增加 1
         op.increment(phoneHourKey, 1L);
         op.increment(phoneDayKey, 1L);
-        op.increment(deviceHourKey, 1L);
-        op.increment(deviceDayKey, 1L);
+        if (hasDeviceId) {
+            op.increment(deviceHourKey, 1L);
+            op.increment(deviceDayKey, 1L);
+        }
     }
 
     private String getCacheKey(String... keys) {
@@ -623,7 +635,7 @@ public class UserServiceImpl implements UserService {
 				try {
 					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getInitialPassword(),salt)));
 				} catch (Exception e) {
-					LOGGER.error("encode password failed");
+					LOGGER.error("encode password failed", e);
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 
 				}
@@ -944,9 +956,10 @@ public class UserServiceImpl implements UserService {
 							+ deviceIdentifier + ", oldUserLogin=" + login);
 				}
 				//kickoff this login
-				login.setStatus(UserLoginStatus.LOGGED_OFF);
 				ref.setOldDeviceId(login.getDeviceIdentifier());
 				ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), login.getImpersonationId()));
+				login.setStatus(UserLoginStatus.LOGGED_OFF); //顺序非常重要，不能放上面一行
+//				login.setLoginInstanceNumber(new Random().nextInt());
 			}
 			login.setDeviceIdentifier(deviceIdentifier);
 		}
@@ -973,9 +986,10 @@ public class UserServiceImpl implements UserService {
 							+ deviceIdentifier + ", oldUserLogin=" + login);
 				}
 				//kickoff this login
-				login.setStatus(UserLoginStatus.LOGGED_OFF);
 				ref.setOldDeviceId(login.getDeviceIdentifier());
 				ref.setOldLoginToken(new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber(), ref.getImpId()));
+				login.setStatus(UserLoginStatus.LOGGED_OFF);//顺序非常重要，不能放上面一行
+//				login.setLoginInstanceNumber(new Random().nextInt());
 			}
 			login.setDeviceIdentifier(deviceIdentifier);
 		}
@@ -1117,8 +1131,13 @@ public class UserServiceImpl implements UserService {
 			kickoffLoginByDevice(foundLogin);
 		}
 
-		if(!ref.getOldDeviceId().isEmpty()) {
+		//TODO better here, get token from foundLogin
+		LoginToken token = new LoginToken(foundLogin.getUserId(), foundLogin.getLoginId(), foundLogin.getLoginInstanceNumber(), foundLogin.getImpersonationId());
+		
+		if(!ref.getOldDeviceId().isEmpty() && !ref.getOldLoginToken().toString().equals(token.toString())) {
 			kickoffService.kickoff(namespaceId, ref.getOldLoginToken());
+			kickoffService.remoteKickoffTag(namespaceId, token);
+			
 			//	        String locale = Locale.SIMPLIFIED_CHINESE.toString();
 			//	        if(null != user && user.getLocale() != null && !user.getLocale().isEmpty()) {
 			//	            locale = user.getLocale(); 
@@ -1333,6 +1352,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean isValidLoginToken(LoginToken loginToken) {
 		assert(loginToken != null);
+		
+		//added by janson, isKickoff ? 2017-03-29
+		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), loginToken)) {
+//			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), loginToken);
+	      throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+		}
+		
 		String userKey = NameMapper.getCacheKey("user", loginToken.getUserId(), null);
 		Accessor accessor = this.bigCollectionProvider.getMapAccessor(userKey, String.valueOf(loginToken.getLoginId()));
 		UserLogin login = accessor.getMapValueObject(String.valueOf(loginToken.getLoginId()));
@@ -1363,7 +1389,7 @@ public class UserServiceImpl implements UserService {
 			day = (dateNow.getTime()-dateCompare.getTime())/(24*60*60*1000);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("compareValue : {}", compareValue, e );
 		}
 
 
@@ -1541,7 +1567,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		} catch(Exception e) {
-			LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId);
+			LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId, e);
 		}
 
 		return communityId;
@@ -1659,7 +1685,7 @@ public class UserServiceImpl implements UserService {
 		}catch(Exception e){
 			//TODO
 			//skip all exception
-
+			LOGGER.warn("cmd : {}", cmd, e);
 		}
 
 		//get enum type
@@ -1906,7 +1932,7 @@ public class UserServiceImpl implements UserService {
 			String url=contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId());
 			user.setAvatarUrl(url);
 		}catch(Exception e){
-			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri);
+			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri, e);
 		}
 	}
 	@Override
@@ -2243,7 +2269,7 @@ public class UserServiceImpl implements UserService {
 							break;
 						}
 					} catch (Exception e) {
-						LOGGER.error("Invalid entity id, userId=" + userId + ", entity=" + entity);
+						LOGGER.error("Invalid entity id, userId=" + userId + ", entity=" + entity, e);
 					}
 				}
 			}
@@ -2959,7 +2985,7 @@ public class UserServiceImpl implements UserService {
                 user = this.userProvider.findUserById(id);
             }    
         } catch(Exception ex) {
-         LOGGER.info("try userId not found");   
+         LOGGER.info("try userId not found", ex);
         }
         
         if(user == null) {
@@ -3295,7 +3321,7 @@ public class UserServiceImpl implements UserService {
 			try{
 				return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
 			} catch (Exception e) {
-				LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+				LOGGER.error("Invalid login token.tokenString={}",loginTokenString, e);
 				return null;
 			}
 
@@ -3421,10 +3447,20 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	public boolean isLogon(){
+		//added by janson 2017-03-29
+//		UserLogin userLogin = UserContext.current().getLogin();
+//		LoginToken token = new LoginToken(userLogin.getUserId(), userLogin.getLoginId(), userLogin.getLoginInstanceNumber(), userLogin.getImpersonationId());
+//		if(kickoffService.isKickoff(UserContext.getCurrentNamespaceId(), token)) {
+//			kickoffService.remoteKickoffTag(UserContext.getCurrentNamespaceId(), token);
+//         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+//                UserServiceErrorCode.ERROR_KICKOFF_BY_OTHER, "Kickoff by others");
+//		}
+		
 		User user = UserContext.current().getUser();
 		if(null == user){
 			return false;
 		}
+		
 		LOGGER.debug("Check for login. userId = {}", user.getId());
 		if(user.getId() > 0){
 			return true;

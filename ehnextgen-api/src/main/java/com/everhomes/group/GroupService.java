@@ -1,87 +1,13 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.group.AcceptJoinGroupInvitation;
-import com.everhomes.rest.group.ApprovalGroupRequestCommand;
-import com.everhomes.rest.group.ApproveAdminRoleCommand;
-import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
-import com.everhomes.rest.group.CancelGroupRequestCommand;
-import com.everhomes.rest.group.CommandResult;
-import com.everhomes.rest.group.CreateBroadcastCommand;
-import com.everhomes.rest.group.CreateBroadcastResponse;
-import com.everhomes.rest.group.CreateGroupCategoryCommand;
-import com.everhomes.rest.group.CreateGroupCategoryResponse;
-import com.everhomes.rest.group.CreateGroupCommand;
-import com.everhomes.rest.group.DeleteGroupCategoryCommand;
-import com.everhomes.rest.group.GetAdminRoleStatusCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenResponse;
-import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
-import com.everhomes.rest.group.GetClubPlaceholderNameResponse;
-import com.everhomes.rest.group.GetGroupCommand;
-import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
-import com.everhomes.rest.group.GetGroupParametersCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
-import com.everhomes.rest.group.GetShareInfoCommand;
-import com.everhomes.rest.group.GetShareInfoResponse;
-import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupMemberDTO;
-import com.everhomes.rest.group.GroupMemberSnapshotDTO;
-import com.everhomes.rest.group.InviteToBeAdminCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByFamilyCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByPhoneCommand;
-import com.everhomes.rest.group.InviteToJoinGroupCommand;
-import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
-import com.everhomes.rest.group.ListBroadcastsCommand;
-import com.everhomes.rest.group.ListBroadcastsResponse;
-import com.everhomes.rest.group.ListGroupByTagCommand;
-import com.everhomes.rest.group.ListGroupCategoriesCommand;
-import com.everhomes.rest.group.ListGroupCategoriesResponse;
-import com.everhomes.rest.group.ListGroupCommand;
-import com.everhomes.rest.group.ListGroupCommandResponse;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusCommand;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusResponse;
-import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
-import com.everhomes.rest.group.ListMemberCommandResponse;
-import com.everhomes.rest.group.ListMemberInRoleCommand;
-import com.everhomes.rest.group.ListMemberInStatusCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
-import com.everhomes.rest.group.ListPublicGroupCommand;
-import com.everhomes.rest.group.ListUserGroupPostCommand;
-import com.everhomes.rest.group.ListUserGroupPostResponse;
-import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
-import com.everhomes.rest.group.RejectAdminRoleCommand;
-import com.everhomes.rest.group.RejectGroupRequestCommand;
-import com.everhomes.rest.group.RejectJoinGroupInvitation;
-import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
-import com.everhomes.rest.group.RequestAdminRoleCommand;
-import com.everhomes.rest.group.RequestToJoinGroupCommand;
-import com.everhomes.rest.group.ResignAdminRoleCommand;
-import com.everhomes.rest.group.RevokeAdminRoleCommand;
-import com.everhomes.rest.group.RevokeGroupMemberCommand;
-import com.everhomes.rest.group.SearchGroupCommand;
-import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
-import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.GroupParametersResponse;
-import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryResponse;
-import com.everhomes.rest.group.UpdateGroupCommand;
-import com.everhomes.rest.group.UpdateGroupMemberCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
+import com.everhomes.rest.group.*;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
+
+import java.util.List;
 
 public interface GroupService {
 //    GroupDTO createGroup(CreateGroupCommand cmd);
@@ -233,4 +159,8 @@ public interface GroupService {
 	GroupDTO createBusinessGroup(String groupName);
 	void joinBusinessGroup(Long groupId);
 
+    /**
+     * 删除俱乐部的广播
+     */
+    void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd);
 }

@@ -39,6 +39,8 @@ public class QualityStandardsDTO {
 
 	private Long id;
 
+	private Integer namespaceId;
+
 	private String name;
 	
 	private String ownerType;
@@ -92,6 +94,14 @@ public class QualityStandardsDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public String getName() {

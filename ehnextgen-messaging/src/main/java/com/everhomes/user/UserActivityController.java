@@ -56,6 +56,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.UpdateShakeOpenDoorCommand;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.RequireAuthentication;
@@ -458,5 +459,20 @@ public class UserActivityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+	 * <b>URL: /user/updateShakeOpenDoor</b>
+	 * <p> 更新用户自己的摇一摇开门权限  </p>
+	 */
+    @RequestMapping("updateShakeOpenDoor")
+    @RestReturn(value = String.class )
+    public RestResponse updateShakeOpenDoor(@Valid UpdateShakeOpenDoorCommand cmd) {
+    	
+		this.userActivityService.updateShakeOpenDoor(cmd.getShakeOpenDoor());
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
     }
 }

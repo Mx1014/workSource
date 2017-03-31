@@ -31,6 +31,6 @@ public interface LaunchPadProvider {
 	UserLaunchPadItem getUserLaunchPadItemByOwner(Long userId, String sceneType, String ownerType, Long ownerId, Long itemId);
 	void updateUserLaunchPadItemById(UserLaunchPadItem userItem);
 	LaunchPadItem findLaunchPadItemByTargetAndScopeAndSence(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId, SceneType sceneType);
-    List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId);
+    List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId, String sceneType);
     void createItemServiceCategry(ItemServiceCategry itemServiceCategry);
 }

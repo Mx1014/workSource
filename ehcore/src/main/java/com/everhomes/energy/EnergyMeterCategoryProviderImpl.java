@@ -55,11 +55,14 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
-    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType) {
+    public List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType, Long ownerId, String ownerType, Long communityId) {
         return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
                 .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType))
+                .and(EH_ENERGY_METER_CATEGORIES.OWNER_ID.eq(ownerId))
+                .and(EH_ENERGY_METER_CATEGORIES.OWNER_TYPE.eq(ownerType))
+                .and(EH_ENERGY_METER_CATEGORIES.COMMUNITY_ID.eq(communityId))
                 .fetchInto(EnergyMeterCategory.class);
     }
 

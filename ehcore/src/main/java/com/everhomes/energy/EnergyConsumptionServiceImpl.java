@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -8,20 +9,29 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -29,7 +39,12 @@ import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +59,7 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
@@ -150,10 +166,52 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private EnergyMeterPriceConfigProvider priceConfigProvider;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
+//    @Override
+//    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+//
+//        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+//            if(null == cmd.getOrganizationId()) {
+//                LOGGER.error("Not privilege", cmd);
+//                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+//                        "Not privilege");
+//            }
+//        }
+//
+//        ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+//
+//        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
+//        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
+//        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
+//
+//        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+//
+//        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+//            SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//            User user = UserContext.current().getUser();
+//            List<CommunityDTO> result = new ArrayList<>();
+//            dtos.forEach(r -> {
+//                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+//                    result.add(r);
+//                }
+//            });
+//            response.setCommunities(result);
+//
+//        }else{
+//            response.setCommunities(dtos);
+//        }
+//        return response;
+//    }
+
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
 
         EnergyMeterType meterType = EnergyMeterType.fromCode(cmd.getMeterType());
         if (meterType == null) {
@@ -198,6 +256,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
             updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
             updateCmd.setMeterId(meter.getId());
+            updateCmd.setCalculationType(cmd.getCalculationType());
+            updateCmd.setConfigId(cmd.getConfigId());
             this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
@@ -208,7 +268,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
             readEnergyMeterCmd.setCurrReading(meter.getStartReading());
             readEnergyMeterCmd.setMeterId(meter.getId());
-            readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+            readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
             readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
             this.readEnergyMeter(readEnergyMeterCmd);
             return true;
@@ -241,6 +301,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
         dto.setPrice(priceLog != null ? priceLog.getSettingValue() : null);
 
+        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(priceLog.getCalculationType()))) {
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceLog.getConfigId(), meter.getOwnerId(),
+                    meter.getOwnerType(), meter.getCommunityId(), currNamespaceId());
+            if(priceConfig != null) {
+                dto.setPriceConfig(toEnergyMeterPriceConfigDTO(priceConfig));
+            }
+        }
         // 当前倍率
         EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE);
         dto.setRate(rateLog != null ? rateLog.getSettingValue() : null);
@@ -268,6 +335,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             // 月读表差
             dto.setMonthPrompt(this.processMonthPrompt(meter));
         }
+
         return dto;
     }
 
@@ -344,7 +412,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 BigDecimal realAmount;
                 try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula.getExpression()));
+                    realAmount = BigDecimal.valueOf(Double.valueOf(engine.eval(amountFormula.getExpression()).toString()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     LOGGER.error("The energy meter error");
@@ -396,7 +464,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meter.setMeterNumber(cmd.getMeterNumber());
             }
             dbProvider.execute(r -> {
-                if (cmd.getPrice() != null) {
+                if (cmd.getPrice() != null || cmd.getConfigId() != null) {
                     this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
                 }
                 if (cmd.getRate() != null) {
@@ -431,7 +499,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.setNamespaceId(currNamespaceId());
         switch (settingType) {
             case PRICE:
-                log.setSettingValue(cmd.getPrice());
+                log.setCalculationType(cmd.getCalculationType());
+                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                    log.setSettingValue(cmd.getPrice());
+                }
+                if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                    log.setConfigId(cmd.getConfigId());
+                }
+
                 break;
             case RATE:
                 log.setSettingValue(cmd.getRate());
@@ -593,10 +668,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                     updateCmd.setMeterId(r.getId());
                     // 价格
-                    if (cmd.getPrice() != null) {
+                    if (cmd.getPrice() != null || cmd.getConfigId() != null) {
                         updateCmd.setPrice(cmd.getPrice());
                         updateCmd.setStartTime(cmd.getPriceStart());
                         updateCmd.setEndTime(cmd.getPriceEnd());
+                        updateCmd.setConfigId(cmd.getConfigId());
+                        updateCmd.setCalculationType(cmd.getCalculationType());
                         this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                     }
                     // 倍率
@@ -684,8 +761,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case PRICE:
+                        setting.setCalculationType(cmd.getCalculationType());
+                        if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                            setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
+                            setting.setConfigId(0L);
+                        }
+                        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                            setting.setSettingValue(null);
+                            setting.setConfigId(cmd.getConfigId());
+                        }
                     case RATE:
-                        // 价格及倍率类型
+                        // 倍率类型
                         setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case AMOUNT_FORMULA:
@@ -706,7 +792,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public EnergyMeterFormulaDTO createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
 
         // 预处理公式的表达式
         String processedExpression = this.processFormulaExpression(cmd.getExpression());
@@ -714,6 +800,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         this.checkFormulaExpressionValid(processedExpression);
 
         EnergyMeterFormula formula = new EnergyMeterFormula();
+        formula.setOwnerId(cmd.getOwnerId());
+        formula.setOwnerType(cmd.getOwnerType());
+        formula.setCommunityId(cmd.getCommunityId());
+
         formula.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         formula.setExpression(processedExpression);
         formula.setName(cmd.getName());
@@ -739,6 +829,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         engine.put(MeterFormulaVariable.AMOUNT.getCode(), 1);
         engine.put(MeterFormulaVariable.PRICE.getCode(), 2);
         engine.put(MeterFormulaVariable.TIMES.getCode(), 3);
+        engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), 4);
 
         try {
             engine.eval(processedExpression);
@@ -767,8 +858,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public EnergyMeterCategoryDTO createEnergyMeterCategory(CreateEnergyMeterCategoryCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
         EnergyMeterCategory category = new EnergyMeterCategory();
+        category.setOwnerId(cmd.getOwnerId());
+        category.setOwnerType(cmd.getOwnerType());
+        category.setCommunityId(cmd.getCommunityId());
         category.setNamespaceId(currNamespaceId());
         category.setName(cmd.getName());
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -813,7 +907,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
 
         List<EnergyMeter> meterList = new ArrayList<>();
         ArrayList list = processorExcel(file);
@@ -823,6 +917,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 continue;
             }
             EnergyMeter meter = new EnergyMeter();
+            meter.setOwnerId(cmd.getOwnerId());
+            meter.setOwnerType(cmd.getOwnerType());
             meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
             meter.setCommunityId(cmd.getCommunityId());
             meter.setNamespaceId(currNamespaceId());
@@ -862,9 +958,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             if (NumberUtils.isNumber(result.getH())) {
                 meter.setPrice(new BigDecimal(result.getH()));
-            } else {
-                meter.setStartReading(new BigDecimal("1"));
             }
+//            else {
+//                meter.setStartReading(new BigDecimal("1"));
+//            }
             if (NumberUtils.isNumber(result.getI())) {
                 meter.setRate(new BigDecimal(result.getI()));
             } else {
@@ -884,6 +981,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
+            if(NumberUtils.isNumber(result.getL())) {
+                meter.setCalculationType(Byte.valueOf(result.getL()));
+            }
+            if(!StringUtils.isEmpty(result.getM())) {
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findByName(result.getM(), cmd.getOwnerId(),
+                                                            cmd.getOwnerType(), cmd.getCommunityId(), currNamespaceId());
+                if(priceConfig != null) {
+                    meter.setConfigId(priceConfig.getId());
+                } else {
+                    LOGGER.error("Import energy meter error, error field price config");
+                    throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field price config");
+                }
+            }
             dbProvider.execute(r -> {
                 meterProvider.createEnergyMeter(meter);
                 // 创建setting log 记录
@@ -894,6 +1004,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
                 updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
                 updateCmd.setMeterId(meter.getId());
+                updateCmd.setCalculationType(meter.getCalculationType());
+                updateCmd.setConfigId(meter.getConfigId());
                 this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
@@ -904,7 +1016,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
                 readEnergyMeterCmd.setCurrReading(meter.getStartReading());
                 readEnergyMeterCmd.setMeterId(meter.getId());
-                readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
                 readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
                 this.readEnergyMeter(readEnergyMeterCmd);
                 return true;
@@ -1526,8 +1638,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(currNamespaceId(), cmd.getFormulaType());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                cmd.getCommunityId(), currNamespaceId(), cmd.getFormulaType());
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
     }
 
@@ -1554,8 +1667,99 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public List<EnergyMeterSettingLogDTO> listEnergyMeterSettingLogs(ListEnergyMeterSettingLogsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
-        return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
+
+        if(EnergyMeterSettingType.PRICE.equals(EnergyMeterSettingType.fromCode(cmd.getSettingType()))) {
+            //log按createTime升序排 放入map时 对同一天的修改 后改的覆盖先前的
+            List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogsOrderByCreateTime(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
+            Map<Long, EnergyMeterPriceDTO> maps = mapEnergyMeterPriceDTO(logs);
+            return dealEnergyMeterPriceDTO(maps);
+        } else {
+            List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
+            return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
+        }
+
+    }
+
+    private Map<Long, EnergyMeterPriceDTO> mapEnergyMeterPriceDTO(List<EnergyMeterSettingLog> logs) {
+        Map<Long, EnergyMeterPriceDTO> maps = new HashMap<>();
+        logs.forEach(log -> {
+            EnergyMeterPriceDTO dto = new EnergyMeterPriceDTO();
+            //开始时间-创建时间-价钱    结束时间-创建时间-价钱
+            dto.setMeterId(log.getMeterId());
+            dto.setCreateTime(log.getCreateTime());
+            dto.setTime(log.getStartTime());
+            dto.setSettingValue(log.getSettingValue());
+            if(log.getConfigId() != null && log.getConfigId() > 0L) {
+                //价钱梯度表的方案名
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(log.getConfigId());
+                if(priceConfig != null)
+                    dto.setPlanName(priceConfig.getName());
+            }
+            if(dto.getTime() != null) {
+                maps.put(dto.getTime().getTime(), dto);
+            } else {
+                maps.put(Long.MAX_VALUE-1, dto);
+            }
+
+            EnergyMeterPriceDTO endDTO = new EnergyMeterPriceDTO();
+            endDTO.setMeterId(dto.getMeterId());
+            endDTO.setCreateTime(dto.getCreateTime());
+            endDTO.setSettingValue(dto.getSettingValue());
+            endDTO.setPlanName(dto.getPlanName());
+            endDTO.setTime(log.getEndTime());
+            if(endDTO.getTime() != null) {
+                maps.put(endDTO.getTime().getTime(), endDTO);
+            } else {
+                maps.put(Long.MAX_VALUE-1, endDTO);
+            }
+        });
+        return maps;
+    }
+
+    private List<EnergyMeterSettingLogDTO> dealEnergyMeterPriceDTO(Map<Long, EnergyMeterPriceDTO> maps) {
+        List<EnergyMeterSettingLogDTO> dtos = new ArrayList<EnergyMeterSettingLogDTO>();
+        Object[] key_arr = maps.keySet().toArray();
+        if(key_arr.length > 0) {
+            Arrays.sort(key_arr);
+            if(key_arr.length >= 2) {
+                for(int i = 0; i < key_arr.length-2; i++) {
+                    EnergyMeterPriceDTO value = maps.get(key_arr[i]);
+                    EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                    dto.setMeterId(value.getMeterId());
+                    dto.setSettingValue(value.getSettingValue());
+                    dto.setPriceConfigName(value.getPlanName());
+//                    dto.setFormulaName(value.getPlanName());
+                    dto.setStartTime(value.getTime());
+                    EnergyMeterPriceDTO nextValue = maps.get(key_arr[i+1]);
+                    dto.setEndTime(nextValue.getTime());
+
+                    dtos.add(dto);
+                }
+
+                EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-2]);
+                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                dto.setMeterId(value.getMeterId());
+                dto.setStartTime(value.getTime());
+                EnergyMeterPriceDTO nextValue = maps.get(key_arr[key_arr.length-1]);
+                dto.setEndTime(nextValue.getTime());
+
+                dto.setSettingValue(nextValue.getSettingValue());
+                dto.setPriceConfigName(value.getPlanName());
+
+                dtos.add(dto);
+            } else if(key_arr.length == 1) {
+                EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-1]);
+                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                dto.setMeterId(value.getMeterId());
+                dto.setStartTime(value.getTime());
+                dto.setSettingValue(value.getSettingValue());
+                dto.setPriceConfigName(value.getPlanName());
+
+                dtos.add(dto);
+            }
+
+        }
+        return dtos;
     }
 
     private EnergyMeterSettingLogDTO toEnergyMeterSettingLogDTO(EnergyMeterSettingLog log) {
@@ -1563,6 +1767,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (log.getFormulaId() != null) {
             EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), log.getFormulaId());
             dto.setFormulaName(formula.getName());
+        }
+        if(log.getConfigId() != null && log.getConfigId() != 0L) {
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(log.getConfigId());
+            if(priceConfig != null) {
+                dto.setPriceConfigName(priceConfig.getName());
+            }
         }
         return dto;
     }
@@ -1576,13 +1786,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
         List<EnergyMeterDefaultSetting> settings = new ArrayList<>();
         if (cmd.getMeterType() != null) {
-            settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+            settings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                            cmd.getCommunityId(),currNamespaceId(), cmd.getMeterType());
         } else {
-            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.WATER.getCode());
-            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
+            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                                cmd.getCommunityId(),currNamespaceId(), EnergyMeterType.WATER.getCode());
+            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                                cmd.getCommunityId(),currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
             settings.addAll(waterSettings);
             settings.addAll(elecSettings);
         }
@@ -1599,6 +1812,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dto.setFormulaType(formula.getFormulaType());
             }
         }
+        if(EnergyMeterSettingType.PRICE.equals(EnergyMeterSettingType.fromCode(setting.getSettingType()))) {
+            if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(setting.getCalculationType()))) {
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(setting.getConfigId(), setting.getOwnerId(),
+                        setting.getOwnerType(), setting.getCommunityId(), currNamespaceId());
+                dto.setPriceConfigName(priceConfig.getName());
+            }
+
+        }
         // 表的类型
         String meterType = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
         dto.setMeterType(meterType);
@@ -1614,8 +1835,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType(),
+                                                        cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
         return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
     }
 
@@ -1744,6 +1966,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         // Timestamp dayBeforeYestBegin = getDayBegin(cal);
         for(EnergyMeter meter : meters){
             try {
+
                 EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class);
                 // 前天的最后的读数
                 EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
@@ -1823,23 +2046,36 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 ScriptEngine engine = manager.getEngineByName("js");
 
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                //分段计费后 settingValue可能为null
+//                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
                 engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
                 BigDecimal realAmount = new BigDecimal(0);
                 BigDecimal realCost = new BigDecimal(0);
 
                 try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
-                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+                	double ra = Double.valueOf(engine.eval(amountFormula).toString());
+                    realAmount = BigDecimal.valueOf(ra);
+
+//                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
                 } catch (ScriptException e) {
                     String paramsStr = "{AMOUNT:" + amount +
-                            ", PRICE:" + priceSetting.getSettingValue() +
                             ", TIMES:" + rateSetting.getSettingValue() +
                             "}";
-                    LOGGER.error("evaluate formula error, amountFormula={}, costFormula={}, params={}", amountFormula, costFormula, paramsStr);
+                    LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
                     e.printStackTrace();
                     throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+                }
+
+                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+                    realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
+                }
+
+                if(PriceCalculationType.BLOCK_TARIFF.equals(
+                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                    realCost = calculateBlockTariff(manager,priceSetting,realAmount, costFormula);
                 }
 
                 //删除昨天的记录（手工刷的时候）
@@ -1867,6 +2103,129 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 throw new RuntimeException(String.format("meter id = %s, meterName = %s", meter.getId(), meter.getName()), e);
             }
         }
+    }
+
+    private BigDecimal calculateStandingChargeTariff(ScriptEngine engine, EnergyMeterSettingLog priceSetting, String costFormula) {
+        engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+        BigDecimal realCost = new BigDecimal(0);
+        try {
+            realCost = BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString()));
+        } catch (ScriptException e) {
+            String paramsStr = "{PRICE:" + priceSetting.getSettingValue() +
+                    ", AMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
+                    ", TIMES:" + engine.get(MeterFormulaVariable.TIMES.getCode()) +
+                    "}";
+            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+            e.printStackTrace();
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+        }
+
+        return realCost;
+    }
+
+    private BigDecimal calculateBlockTariff(ScriptEngineManager manager, EnergyMeterSettingLog priceSetting, BigDecimal realAmount, String costFormula) {
+        EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceSetting.getConfigId());
+        EnergyMeterPriceConfigDTO priceConfigDTO = toEnergyMeterPriceConfigDTO(priceConfig);
+        BigDecimal totalCost = new BigDecimal(0);
+        if(priceConfigDTO != null && priceConfigDTO.getExpression() != null) {
+            ScriptEngine engine = manager.getEngineByName("javascript");
+            List<EnergyMeterRangePriceDTO> rangePriceDTOs = priceConfigDTO.getExpression().getRangePrice();
+            if(rangePriceDTOs != null && rangePriceDTOs.size() > 0) {
+                BigDecimal zero = new BigDecimal(0);
+
+                for(EnergyMeterRangePriceDTO rangePriceDTO : rangePriceDTOs) {
+
+                    BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
+                    BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
+                    RangeBoundaryType lowerBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getLowerBoundary());
+                    RangeBoundaryType upperBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getUpperBoundary());
+                    //在区间内
+                    if((minValue.compareTo(zero) < 0 || calculateLowerBoundary(lowerBoundary, minValue, realAmount))
+                            && (maxValue.compareTo(zero) < 0  || calculateUpperBoundary(upperBoundary, maxValue, realAmount))) {
+                        engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+                        engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount.subtract(minValue));
+                        totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+
+                    }
+                    //比该区间最大值大
+                    if(maxValue.compareTo(zero) >= 0 && greaterThanMax(upperBoundary, maxValue, realAmount)) {
+                        if(minValue.compareTo(zero) < 0) {
+                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(zero));
+                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+                        } else {
+                            engine.put(MeterFormulaVariable.PRICE.getCode(),rangePriceDTO.getPrice());
+                            engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), maxValue.subtract(minValue));
+                            totalCost.add(calculateBlockTariffByCostFormula(engine, costFormula));
+
+                        }
+
+                    }
+                    //比该区间最小值小则不计算
+                }
+            }
+        }
+        return totalCost;
+    }
+
+    private BigDecimal calculateBlockTariffByCostFormula(ScriptEngine engine, String costFormula) {
+        BigDecimal cost = new BigDecimal(0);
+        try {
+            cost.add(BigDecimal.valueOf(Double.valueOf(engine.eval(costFormula).toString())));
+        } catch (ScriptException e) {
+            String paramsStr = "{PRICE:" + engine.get(MeterFormulaVariable.REAL_AMOUNT.getCode()) +
+                    ", REALAMOUNT:" + engine.get(MeterFormulaVariable.AMOUNT.getCode()) +
+                    "}";
+            LOGGER.error("evaluate formula error, costFormula={}, params={}", costFormula, paramsStr);
+            e.printStackTrace();
+            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+        }
+        return cost;
+    }
+
+    private Boolean calculateLowerBoundary(RangeBoundaryType lowerBoundary, BigDecimal minValue, BigDecimal realAmount) {
+        Boolean rangeFlag = false;
+        switch (lowerBoundary) {
+            case LESS:
+                rangeFlag = (minValue.compareTo(realAmount) < 0);
+                break;
+
+            case LESS_AND_EQUAL:
+                rangeFlag = (minValue.compareTo(realAmount) <= 0);
+                break;
+        }
+
+        return rangeFlag;
+    }
+
+    private Boolean calculateUpperBoundary(RangeBoundaryType upperBoundary, BigDecimal maxValue, BigDecimal realAmount) {
+        Boolean rangeFlag = false;
+        switch (upperBoundary) {
+            case GREATER:
+                rangeFlag = (maxValue.compareTo(realAmount) > 0);
+                break;
+
+            case GREATER_AND_EQUAL:
+                rangeFlag = (maxValue.compareTo(realAmount) >= 0);
+                break;
+        }
+
+        return rangeFlag;
+    }
+
+    private Boolean greaterThanMax(RangeBoundaryType upperBoundary, BigDecimal maxValue, BigDecimal realAmount) {
+        Boolean flag = false;
+        switch (upperBoundary) {
+            case GREATER:
+                flag = (maxValue.compareTo(realAmount) <= 0);
+                break;
+
+            case GREATER_AND_EQUAL:
+                flag = (maxValue.compareTo(realAmount) < 0);
+                break;
+        }
+
+        return flag;
     }
 
     /**
@@ -1901,6 +2260,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         Timestamp monthBegin = getDayBegin(cal);
         cal.add(Calendar.YEAR, -1);
         Timestamp lastYear = getDayBegin(cal);
+        BigDecimal zero = new BigDecimal(0);
+        ScriptEngineManager manager = new ScriptEngineManager();
         for(EnergyMeter meter : meters){
 
             //取月初的上次度数和月末的当前读数
@@ -1920,8 +2281,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             monthStat.setLastReading(monthBeginStat.getLastReading());
             //统计该表sum 用量和费用
-            monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-            monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
+            BigDecimal currentAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime()));
+            monthStat.setCurrentAmount(currentAmount);
+            //收费按最新规则算
+            EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
+                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,monthEnd);
+            EnergyMeterSettingLog costSetting   = meterSettingLogProvider
+                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,monthEnd);
+
+            String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+
+            BigDecimal realCost = new BigDecimal(0);
+            if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                ScriptEngine engine = manager.getEngineByName("js");
+                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
+                realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
+            }
+
+            if(PriceCalculationType.BLOCK_TARIFF.equals(
+                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                realCost = calculateBlockTariff(manager,priceSetting,currentAmount, costFormula);
+            }
+            monthStat.setCurrentCost(realCost);
+
             //delete
             energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.get().format(monthBegin));
             //写数据库
@@ -2019,6 +2402,131 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void syncEnergyMeterIndex() {
         meterSearcher.syncFromDb();
+    }
+
+    @Override
+    public EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd) {
+        EnergyMeterPriceConfig priceConfig = ConvertHelper.convert(cmd, EnergyMeterPriceConfig.class);
+        priceConfig.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        priceConfig.setNamespaceId(currNamespaceId());
+        priceConfigProvider.createEnergyMeterPriceConfig(priceConfig);
+        return toEnergyMeterPriceConfigDTO(priceConfig);
+    }
+
+    @Override
+    public EnergyMeterPriceConfigDTO updateEnergyMeterPriceConfig(UpdateEnergyMeterPriceConfigCommand cmd) {
+        //暂时没有update
+        return null;
+    }
+
+    @Override
+    public EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd) {
+        EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getCommunityId(),currNamespaceId());
+
+        return toEnergyMeterPriceConfigDTO(priceConfig);
+    }
+
+    @Override
+    public List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd) {
+        List<EnergyMeterPriceConfig> priceConfig = priceConfigProvider.listPriceConfig(cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getCommunityId(), currNamespaceId());
+        return priceConfig.stream().map(this::toEnergyMeterPriceConfigDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_PRICE_CONFIG.getCode() + cmd.getId()).tryEnter(() -> {
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                    cmd.getCommunityId(),currNamespaceId());
+
+            if(priceConfig != null) {
+                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByPriceConfigId(currNamespaceId(), priceConfig.getId());
+                if(settingLog != null) {
+                    LOGGER.info("The price config has been reference, config id = {}", priceConfig.getId());
+                    throw errorWith(SCOPE, ERR_PRICE_CONFIG_HAS_BEEN_REFERENCE, "The price config has been reference");
+                } else {
+                    priceConfigProvider.deletePriceConfig(priceConfig);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd) {
+        if(cmd != null && cmd.getDefaultSettings() != null) {
+            cmd.getDefaultSettings().forEach(defaultSetting -> {
+                EnergyMeterDefaultSetting df = ConvertHelper.convert(defaultSetting, EnergyMeterDefaultSetting.class);
+                defaultSettingProvider.createEnergyMeterDefaultSetting(df);
+            });
+        }
+    }
+
+    @Override
+    public List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates() {
+        List<EnergyMeterDefaultSetting> defaultSettings = defaultSettingProvider.listDefaultSetting(0L, "", 0L, 0, null);
+        if(defaultSettings != null) {
+            List<EnergyMeterDefaultSettingTemplateDTO> dtos = defaultSettings.stream().map(defaultSetting -> {
+                EnergyMeterDefaultSettingTemplateDTO dto = ConvertHelper.convert(defaultSetting, EnergyMeterDefaultSettingTemplateDTO.class);
+                return dto;
+            }).collect(Collectors.toList());
+
+            return dtos;
+        }
+        return null;
+    }
+
+    @Override
+    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+            if(null == cmd.getOrganizationId()) {
+                LOGGER.error("Not privilege", cmd);
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+                        "Not privilege");
+            }
+        }
+
+        ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+
+        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
+        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
+        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
+
+        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+
+        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+            SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+            User user = UserContext.current().getUser();
+            List<CommunityDTO> result = new ArrayList<>();
+            dtos.forEach(r -> {
+                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+                    result.add(r);
+                }
+            });
+            response.setCommunities(result);
+
+        }else{
+            response.setCommunities(dtos);
+        }
+        return response;
+
+    }
+
+    private EnergyMeterPriceConfigDTO toEnergyMeterPriceConfigDTO(EnergyMeterPriceConfig priceConfig) {
+        EnergyMeterPriceConfigDTO dto = ConvertHelper.convert(priceConfig, EnergyMeterPriceConfigDTO.class);
+
+        if(priceConfig.getExpression() != null) {
+            dto.setExpression(analyzeExpression(priceConfig.getExpression()));
+        }
+        return dto;
+    }
+
+    private EnergyMeterPriceConfigExpressionDTO analyzeExpression(String expression) {
+        Gson gson = new Gson();
+        EnergyMeterPriceConfigExpressionDTO expressionDTO = gson.fromJson(expression, new TypeToken<EnergyMeterPriceConfigExpressionDTO>() {}.getType());
+        return expressionDTO;
     }
 
 }

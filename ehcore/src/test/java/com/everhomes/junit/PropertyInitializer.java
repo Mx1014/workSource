@@ -22,7 +22,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("redis.bus.host", "redis-server")
             .withProperty("redis.bus.port", "6379")
             .withProperty("redis.store.master.host", "redis-server")
-            .withProperty("redis.store.master.port", "6379")
+            .withProperty("redis.store.master.port", "6380")
             .withProperty("upload.max.size", 100000)
             .withProperty("heartbeat.interval", 10000)
             .withProperty("scheduler.pool.size", 100)
@@ -60,6 +60,8 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("biz.appKey", "39628d1c-0646-4ff6-9691-2c327b03f9c4")
             .withProperty("biz.secretKey", "PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+Y6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==")
             .withProperty("elastic.nodes.httpports", "9200")
+            .withProperty("equipment.ip", "127.0.0.1")
+            .withProperty("src.path", "/home/janson/ssd2/everhomes/ehnextgen")
             );
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -28,8 +27,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -174,8 +171,17 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
 	}
-	
 
+    /**
+     * <b>URL: /community/exportCommunityUsers</b>
+     * <p>导出园区用户列表</p>
+     */
+    @RequestMapping("exportCommunityUsers")
+    public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+        communityService.exportCommunityUsers(cmd, response);
+
+
+    }
 	
 	/**
 	 * <b>URL: /community/countCommunityUsers</b>

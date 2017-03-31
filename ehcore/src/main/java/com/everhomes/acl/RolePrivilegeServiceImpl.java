@@ -578,26 +578,52 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId){
-		List<Long> privilegeIds = getUserPrivileges(null ,organizationId, userId);
-		// 用户在当前机构自身权限
-		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId));
+		List<Long> privilegeIds = new ArrayList<>();
+		if(null != organizationId){
+			privilegeIds.addAll(getUserPrivileges(null ,organizationId, userId));
 
-		List<Long> userPIds = this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.USER.getCode(), userId);
-		if(null == userPIds || userPIds.size() == 0){
-			List<String> groupTypes = new ArrayList<>();
-			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-			groupTypes.add(OrganizationGroupType.GROUP.getCode());
-			List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
-			for (OrganizationDTO organization:organizations) {
-				privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
-			}
+			// 用户在当前机构自身权限
+			privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId));
+
+		}
+
+		//如果ownerType和ownerId没传，则默认返回用户所有的项目模块权限 add by sfyan 20170329
+		if(null == EntityType.fromCode(ownerType) || null == ownerId){
+			privilegeIds.addAll(getUserModulePrivilegeByAllProject(EntityType.USER.getCode(), userId, moduleId));
 		}else{
-			privilegeIds.addAll(userPIds);
+			privilegeIds.addAll(getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.USER.getCode(), userId));
+
+		}
+
+		//如果个人没有权限，就去找他的所属机构节点的权限 add by sfyan 20170329
+		if(null == privilegeIds || privilegeIds.size() == 0){
+			if(null != organizationId){
+				List<String> groupTypes = new ArrayList<>();
+				groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+				groupTypes.add(OrganizationGroupType.GROUP.getCode());
+				List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+
+				//如果ownerType和ownerId没传，则默认返回机构所有的项目模块权限 add by sfyan 20170329
+				if(null == EntityType.fromCode(ownerType) || null == ownerId){
+					for (OrganizationDTO organization:organizations) {
+						privilegeIds.addAll(getUserModulePrivilegeByAllProject(EntityType.ORGANIZATIONS.getCode(), organization.getId(), moduleId));
+					}
+					//所属根节点的权限也要加进去 add by sfyan 20170329
+					privilegeIds.addAll(getUserModulePrivilegeByAllProject(EntityType.ORGANIZATIONS.getCode(), organizationId, moduleId));
+
+				}else{
+					for (OrganizationDTO organization:organizations) {
+						privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+					}
+				}
+
+			}
 		}
 
 
 		List<Long> pIds = new ArrayList<>();
 
+		//获取的权限当中有模块的超管权限，就把模块下面所有的权限都返回 add by sfyan 20170329
 		List<ServiceModulePrivilege> moduleSuperPrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
 		for (ServiceModulePrivilege moduleSuperPrivilege:  moduleSuperPrivileges) {
 			if(privilegeIds.contains(moduleSuperPrivilege.getPrivilegeId())){
@@ -609,6 +635,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+		//从拥有的权限里面筛选出模块权限返回  add by sfyan 20170329
 		List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.ORDINARY);
 		for (ServiceModulePrivilege modulePrivilege:  modulePrivileges) {
 			if(privilegeIds.contains(modulePrivilege.getPrivilegeId())){
@@ -617,6 +644,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 		return pIds;
+	}
+
+	private List<Long> getUserModulePrivilegeByAllProject(String targetType, Long targetId, Long moduleId){
+		List<Long> privilegeIds = new ArrayList<>();
+		List<Long> moduleIds = new ArrayList<>();
+		moduleIds.add(moduleId);
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listResourceAssignments(targetType, targetId, null, moduleIds);
+		for (ServiceModuleAssignment assignment: assignments) {
+			if(EntityType.COMMUNITY == EntityType.fromCode(assignment.getOwnerType())){
+				privilegeIds.addAll(getResourceAclPrivilegeIds(assignment.getOwnerType(), assignment.getOwnerId(), targetType, targetId));
+			}
+		}
+		return privilegeIds;
 	}
 
 	 /**
@@ -711,6 +751,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(null != ids){
 						privilegeIds.addAll(ids);
 					}
+				}
+				ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), organizationId);
+				if(null != ids){
+					privilegeIds.addAll(ids);
 				}
 			}
 		}
@@ -1870,11 +1914,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			groupTypes.add(OrganizationGroupType.GROUP.getCode());
 			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 			List<Long> targetIds = new ArrayList<>();
+			targetIds.add(cmd.getOrganizationId());
 			for (OrganizationDTO orgDTO: orgDTOs) {
 				targetIds.add(orgDTO.getId());
 			}
 			if(targetIds.size() > 0){
-				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
@@ -1895,6 +1940,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
+
 		Long startTime1 = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1927,7 +1973,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
-		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
+		if(0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
 			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
@@ -1942,8 +1988,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			List<OrganizationDTO> orgDTOs = new ArrayList<>();
 
-
-
 			// 没有，则获取个人所在公司节点的业务模块下的项目
 			if(serviceModuleAssignments.size() == 0){
 				List<String> groupTypes = new ArrayList<>();
@@ -1952,11 +1996,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				groupTypes.add(OrganizationGroupType.GROUP.getCode());
 				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 				List<Long> targetIds = new ArrayList<>();
+				targetIds.add(cmd.getOrganizationId());
 				for (OrganizationDTO orgDTO: orgDTOs) {
 					targetIds.add(orgDTO.getId());
 				}
 				if(targetIds.size() > 0){
-					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 				}
 			}
 
@@ -1998,7 +2043,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long endTime5 = System.currentTimeMillis();
 		List<ProjectDTO> projects = new ArrayList<>();
 		if(0 != categoryIds.size()){
-			List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds, ResourceCategoryType.CATEGORY.getCode())
+			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
 						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
 						dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());

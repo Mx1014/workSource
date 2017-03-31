@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteRules：场所时间段</li>
  * <li>billAttachments：订单附加信息</li> 
  * <li>unpayCancelTime：未支付取消时间</li>
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -87,6 +88,7 @@ public class RentalBillDTO {
 	private List<BillAttachmentDTO> billAttachments; 
 
 	private Byte toastFlag;
+	private String confirmationPrompt;
 	
 	
 	@Override
@@ -429,6 +431,16 @@ public class RentalBillDTO {
 
 	public void setUnpayCancelTime(Long unpayCancelTime) {
 		this.unpayCancelTime = unpayCancelTime;
+	}
+
+
+	public String getConfirmationPrompt() {
+		return confirmationPrompt;
+	}
+
+
+	public void setConfirmationPrompt(String confirmationPrompt) {
+		this.confirmationPrompt = confirmationPrompt;
 	}
 
  

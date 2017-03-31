@@ -138,6 +138,15 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
     }
 
     @Override
+    public EnergyMeterSettingLog findSettingByPriceConfigId(Integer namespaceId, Long priceConfigId) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.CONFIG_ID.eq(priceConfigId))
+                .fetchAnyInto(EnergyMeterSettingLog.class);
+    }
+
+    @Override
     public List<EnergyMeterSettingLog> listEnergyMeterSettingLogs(Integer namespaceId, Long meterId, Byte settingType) {
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
@@ -145,6 +154,17 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType))
                 .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
+                .fetchInto(EnergyMeterSettingLog.class);
+    }
+
+    @Override
+    public List<EnergyMeterSettingLog> listEnergyMeterSettingLogsOrderByCreateTime(Integer namespaceId, Long meterId, Byte settingType) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType))
+                .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.asc())
                 .fetchInto(EnergyMeterSettingLog.class);
     }
 

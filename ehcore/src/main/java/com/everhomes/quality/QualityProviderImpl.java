@@ -92,6 +92,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
+import com.everhomes.util.CronDateUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -221,7 +223,14 @@ public class QualityProviderImpl implements QualityProvider {
 			scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
 					"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
         });
-		
+
+		//五分钟后启动通知
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
 	}
 
 	@Override
@@ -263,9 +272,9 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds,
-			List<QualityInspectionStandardGroupMap> maps, Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
+	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType,
+		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
+		List<Long> standardIds, Byte manualFlag) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -274,12 +283,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//总公司 分公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//		}
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(targetId));
         }
@@ -303,49 +314,12 @@ public class QualityProviderImpl implements QualityProvider {
 			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
 			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
-			if (groupIds != null) {
-				//主动生成的任务按部门岗位查 by xiongying20170214
-				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(1L);
-				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode()));
-				Condition con3 = null;
-				for(ExecuteGroupAndPosition groupId : groupIds) {
-					Condition con2 = null;
-					con2 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
-					con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
-					if(con3 == null) {
-						con3 = con2;
-					} else {
-						con3 = con3.or(con2);
-					}
-				}
-				con1 = con1.and(con3);
-				//产品修改需求，自动生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以先查出standardIds再根据standardIds来查 by xiongying20170214
-
-				if (maps != null && maps.size() > 0) {
-					Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(0L);
-					Condition con6 = null;
-					for(QualityInspectionStandardGroupMap map : maps ) {
-						Condition con4 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.eq(map.getStandardId());
-						if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
-						}
-						if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()));
-						}
-
-						if(con6 == null) {
-							con6 = con4;
-						} else {
-							con6 = con6.or(con4);
-						}
-
-					}
-					con5 = con5.and(con6);
-					con1 = con1.or(con5);
-				}
+			if(standardIds != null) {
+				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
+				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
 				con = con.or(con1);
-				query.addConditions(con);
 			}
+			query.addConditions(con);
 		}
 
 		if(executeStatus != null) {
@@ -364,11 +338,7 @@ public class QualityProviderImpl implements QualityProvider {
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 		}
-		
-		if(standardIds != null) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
-		}
-		
+
 		if(manualFlag != null) {
 			//fix bug :byte to long ...MANUAL_FLAG.eq(manualFlag));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(manualFlag)));
@@ -407,7 +377,11 @@ public class QualityProviderImpl implements QualityProvider {
 				Condition con4 = null;
 				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
 				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
-				con5 = con5.or(con4);
+				if(con5 == null) {
+					con5 = con4;
+				} else {
+					con5 = con5.or(con4);
+				}
 			}
 			con = con5;
 		}
@@ -440,7 +414,6 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return maps;
 	}
-
 
 	@Override
 	public void createQualityInspectionStandards(
@@ -482,16 +455,18 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
         SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
-    
+
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//总公司分公司问题 改成namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
+//		}
 		
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
@@ -581,12 +556,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_TYPE.eq(ownerType));    	
-		}
+		//分公司 总公司 改用namespaceId by xiongying 20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		//       if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_TYPE.eq(ownerType));
+//		}
 		
 
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.desc());
@@ -872,10 +849,10 @@ public class QualityProviderImpl implements QualityProvider {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
             	
                 assert(standard != null);
-                if(QualityGroupType.EXECUTIVE_GROUP.getCode()==record.getGroupType()) {
+                if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                 	standard.getExecutiveGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
-				 if(record.getGroupType()==QualityGroupType.REVIEW_GROUP.getCode()) {
+				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
 					 standard.getReviewGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
 				 
@@ -956,12 +933,15 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_TYPE.eq(ownerType));    	
-		}
+
+		//总公司分公司问题 改成namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_TYPE.eq(ownerType));
+//		}
 		
 		if(parentId != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.PARENT_ID.eq(parentId));
@@ -1036,12 +1016,13 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long createTime) {
+	public List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long startTime, Long endTime) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
 		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
 
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.le(new Timestamp(endTime)));
 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayQualityInspectionTasks, sql=" + query.getSQL());
@@ -1054,6 +1035,29 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 
 		return tasks;
+	}
+
+	@Override
+	public QualityInspectionTasks findLastestQualityInspectionTask(Long startTime) {
+		QualityInspectionTasks[] result = new QualityInspectionTasks[1];
+
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null,
+				(DSLContext context, Object reducingContext) -> {
+					result[0] = context.select().from(Tables.EH_QUALITY_INSPECTION_TASKS)
+							.where(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)))
+							.orderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME)
+							.fetchAny().map((r) -> {
+								return ConvertHelper.convert(r, QualityInspectionTasks.class);
+							});
+
+					if (result[0] != null) {
+						return false;
+					} else {
+						return true;
+					}
+				});
+
+		return result[0];
 	}
 
 
@@ -1182,8 +1186,11 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_TASKS);
     
-        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
-		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
+//        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
+//		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
+		//总公司 分公司 改用namespaceId by xiongying20170329
+		Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.equal(UserContext.getCurrentNamespaceId());
+
 		
 		if(taskType != null) {
 			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
@@ -1368,12 +1375,14 @@ public class QualityProviderImpl implements QualityProvider {
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.ID.lt(locator.getAnchor()));
         }
-        if(ownerId != null && ownerId != 0) {
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_ID.eq(ownerId));
-        }
-		if(!StringUtils.isNullOrEmpty(ownerType)) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE.eq(ownerType));    	
-		}
+		// 总公司 分公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//        if(ownerId != null && ownerId != 0) {
+//        	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_ID.eq(ownerId));
+//        }
+//		if(!StringUtils.isNullOrEmpty(ownerType)) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE.eq(ownerType));
+//		}
 		if(targetId != null && targetId != 0) {
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_LOGS.TARGET_ID.eq(targetId));
         }
@@ -1420,8 +1429,10 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.eq(id));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
+		//总公司 分公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType));
 		 
@@ -1488,8 +1499,10 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.eq(id));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		//总公司 分公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
 		 
 		List<QualityInspectionSpecifications> result = new ArrayList<QualityInspectionSpecifications>();
@@ -1648,9 +1661,11 @@ public class QualityProviderImpl implements QualityProvider {
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PATH.like(superiorPath));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
-		
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		//改成用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+
 		if(scopeCode != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
 		if(scopeId != null)
@@ -1677,8 +1692,10 @@ public class QualityProviderImpl implements QualityProvider {
 		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PARENT_ID.eq(parentId));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		//分公司 总公司 改用namespaceId by xiongying 20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		
 		if(scopeCode != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
@@ -1717,9 +1734,11 @@ public class QualityProviderImpl implements QualityProvider {
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
-		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+
+		//总公司 分公司 改用namespaceId by xiongying 20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
@@ -1849,8 +1868,10 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.eq(targetId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE.eq(targetType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
+		//分公司 总公司 改用namespaceId by xiongying20170329
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PATH.like(superiorPath));
 		if(startTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.ge(new Timestamp(startTime)));

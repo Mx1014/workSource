@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.activity.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -21,65 +22,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCategoryDTO;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityGoodsDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.CreateActivityAttachmentCommand;
-import com.everhomes.rest.activity.CreateActivityGoodsCommand;
-import com.everhomes.rest.activity.DeleteActivityAttachmentCommand;
-import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
-import com.everhomes.rest.activity.DeleteSignupInfoCommand;
-import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
-import com.everhomes.rest.activity.ExportSignupInfoCommand;
-import com.everhomes.rest.activity.GetActivityAchievementCommand;
-import com.everhomes.rest.activity.GetActivityAchievementResponse;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityGoodsCommand;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ImportSignupInfoCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityAttachmentsCommand;
-import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
-import com.everhomes.rest.activity.ListActivityCategories;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
-import com.everhomes.rest.activity.ListActivityGoodsCommand;
-import com.everhomes.rest.activity.ListActivityGoodsResponse;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.ListSignupInfoCommand;
-import com.everhomes.rest.activity.ListSignupInfoResponse;
-import com.everhomes.rest.activity.ManualSignupCommand;
-import com.everhomes.rest.activity.SetActivityAchievementCommand;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.SetActivityWarningCommand;
-import com.everhomes.rest.activity.SignupInfoDTO;
-import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
-import com.everhomes.rest.activity.UpdateSignupInfoCommand;
-import com.everhomes.rest.activity.VertifyPersonByPhoneCommand;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
@@ -440,6 +382,21 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=ActivityVideoDTO.class)
     public RestResponse setActivityVideoInfo(@Valid SetActivityVideoInfoCommand cmd) {
         RestResponse response = new RestResponse(activityService.setActivityVideo(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/videoCallback</b>
+     * <p>直播回调</p>
+     */
+    @RequestMapping("videoCallback")
+    @RestReturn(value=String.class)
+    @RequireAuthentication(false)
+    public RestResponse videoCallback(@Valid VideoCallbackCommand cmd) {
+        activityService.videoCallback(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

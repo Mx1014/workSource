@@ -71,6 +71,14 @@ public class PmProviderImpl implements PmTaskProvider{
     	dao.insert(pmTask);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTasks.class, null);
     }
+
+	@Override
+	public void deleteTask(PmTask pmTask){
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTasksDao dao = new EhPmTasksDao(context.configuration());
+		dao.delete(pmTask);
+	}
 	
 	@Override
     public void createTaskTarget(PmTaskTarget pmTaskTarget){

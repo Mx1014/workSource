@@ -62,6 +62,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		this.cmd = cmd;
 	}
 
+	@Override
 	public FlowSubject getSubject() {
 		return subject;
 	}
@@ -69,13 +70,15 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	public void setSubject(FlowSubject subject) {
 		this.subject = subject;
 	}
-
-	public Long getEntityId() {
-		return cmd.getEntityId();
+	
+	@Override
+	public Long getFiredButtonId() {
+		return cmd.getButtonId();
 	}
 
-	public String getFlowEntityType() {
-		return cmd.getFlowEntityType();
+	@Override
+	public List<FlowEntitySel> getEntitySel() {
+		return cmd.getEntitySel();
 	}
 
 	@Override
@@ -88,6 +91,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		FlowEventLog log = null;
 		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
+		Long oldStep = flowCase.getStepCount();
 		
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
@@ -103,8 +107,8 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		case APPROVE_STEP:
 			next = null;
-			if(!btn.getFlowButton().getGotoNodeId().equals(0)) {
-				next = ctx.getFlowGraph().getGraphNode(btn.getFlowButton().getGotoNodeId());
+			if(!btn.getFlowButton().getGotoLevel().equals(0) && btn.getFlowButton().getGotoLevel() < ctx.getFlowGraph().getNodes().size()) {
+				next = ctx.getFlowGraph().getNodes().get(btn.getFlowButton().getGotoLevel());
 			}
 			if(next == null) {
 				//get next level
@@ -112,8 +116,12 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			}
 			
 			tracker = new FlowEventLog();
-			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
 			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
+				//显示任务跟踪语句
+				subject = new FlowSubject();
+			}
 			
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
@@ -130,6 +138,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			
 			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
 			ctx.setNextNode(next);
+			if(subject == null) {
+				subject = new FlowSubject();
+			}
 			
 			flowCase.setRejectNodeId(current.getFlowNode().getId());
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
@@ -140,9 +151,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			next = current;
 			ctx.setNextNode(next);
 			
-			tracker = new FlowEventLog();
-			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
-			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(current.getTrackTransferLeave() != null) {
+				current.getTrackTransferLeave().fireAction(ctx, ctx.getCurrentEvent());	
+			} else {
+				tracker = new FlowEventLog();
+				tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+				tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			}
 			
 			log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
@@ -155,10 +170,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			log.setFlowNodeId(next.getFlowNode().getId());
 			log.setParentId(0l);
 			log.setFlowCaseId(ctx.getFlowCase().getId());
-			log.setFlowUserId(cmd.getEntityId());
+			if(cmd.getEntitySel() != null && cmd.getEntitySel().size() == 1) {
+				log.setFlowUserId(cmd.getEntitySel().get(0).getEntityId());	
+			}
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			log.setLogType(FlowLogType.NODE_ENTER.getCode());
 			log.setLogTitle("");
+			log.setButtonFiredStep(nextStep.getCode());//mark as transfer log
 			ctx.getLogs().add(log);
 			log = null;
 			
@@ -195,10 +213,15 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			if(ctx.getOperator() != null) {
 				templateMap.put("applierName", ctx.getOperator().getNickName());	
 			}
-			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
-			tracker.setStepCount(ctx.getFlowCase().getStepCount());
-			
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
+			
+			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(subject == null) {
+				//显示任务跟踪语句
+				subject = new FlowSubject();
+			}
+			
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			
@@ -283,6 +306,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		//Important!!! not change this order
 		if(logType == FlowLogType.BUTTON_FIRED) {
+			//记录某一个节点的按钮被执行的次数
 			List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
 			if(likeLogs != null && likeLogs.size() > 0) {
 				log.setButtonFiredCount(new Long(likeLogs.size()));
@@ -293,9 +317,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setFlowNodeId(next.getFlowNode().getId());
 		log.setParentId(0l);
 		log.setFlowUserName(firedUser.getNickName());
-		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
-			log.setFlowSelectionId(cmd.getEntityId());
-		}
+//		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
+//			log.setFlowSelectionId(cmd.getEntityId());
+//		}
 		
 		if(subject != null) {
 			log.setSubjectId(subject.getId());
@@ -303,13 +327,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
+		log.setStepCount(oldStep);
 		
 		ctx.getLogs().add(log);	//added but not save to database now.
 
-	}
-
-	@Override
-	public Long getFiredButtonId() {
-		return cmd.getButtonId();
 	}
 }

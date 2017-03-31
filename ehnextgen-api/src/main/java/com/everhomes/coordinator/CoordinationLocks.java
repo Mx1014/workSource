@@ -55,13 +55,17 @@ public enum CoordinationLocks {
     ENERGY_METER_CATEGORY("energyMeter.category"),
     ENERGY_METER_FORMULA("energyMeter.formula"),
 
+    UPDATE_ASSET_BILL_TEMPLATE("assetBillTemplate.update"),
+
     UPDATE_QUESTIONNAIRE("update.questionnaire"),
 	UPDATE_QUESTIONNAIRE_OPTION("update.questionnaire.option"),
 
     WARNING_EQUIPMENT_TASK("warning.equipment.task"),
     WARNING_QUALITY_TASK("warning.quality.task"),
 
-    OS_OBJECT("os.object");
+    OS_OBJECT("os.object"),
+    ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),;
+
 
     private String code;
     private CoordinationLocks(String code) {

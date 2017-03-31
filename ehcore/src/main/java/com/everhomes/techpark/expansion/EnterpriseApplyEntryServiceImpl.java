@@ -511,6 +511,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setContent(this.getBriefContent(request));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         flowCaseCmd.setProjectId(projectId);
+        
+        //TODO better added by janson 临时办法，4.4.2 必须改动
+        if(UserContext.getCurrentNamespaceId(null).equals(999983)) {
+        	flowCaseCmd.setTitle("园区入驻");
+        }
+        	
         if (flow != null) {
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());

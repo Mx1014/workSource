@@ -204,7 +204,7 @@ public class AddressDTO {
 		this.memberStatus = memberStatus;
 	}
 
-	@Override
+    @Override
     public String toString(){
         return StringHelper.toJsonString(this);
         

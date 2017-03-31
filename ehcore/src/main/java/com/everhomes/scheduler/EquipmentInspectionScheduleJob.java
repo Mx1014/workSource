@@ -3,10 +3,13 @@ package com.everhomes.scheduler;
 import java.sql.Timestamp;
 import java.util.*;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import com.everhomes.util.CronDateUtils;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,22 +17,20 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.util.DateHelper;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 @Component
 @Scope("prototype")
 public class EquipmentInspectionScheduleJob extends QuartzJobBean {
 	
 private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspectionScheduleJob.class);
-	
+
+	private static SchedulerFactory gSchedulerFactory = new StdSchedulerFactory();
+
 	@Autowired
 	private EquipmentProvider equipmentProvider;
 	
@@ -41,9 +42,12 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 	@Autowired
 	private DbProvider dbProvider;
-	
+
 	@Autowired
-	private CoordinationProvider coordinationProvider;
+	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 
 	@Override
 	protected void executeInternal(JobExecutionContext context)
@@ -51,9 +55,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+
+		//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
+		scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
+
 		closeDelayTasks();
 		createTask();
-		
+		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
+		if(notifyFlag) {
+			sendTaskMsg();
+		}
+
 	}
 	
 	private void createTask() {
@@ -179,6 +191,30 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		
 		LOGGER.info("EquipmentInspectionScheduleJob: close expired review tasks.");
 		equipmentProvider.closeExpiredReviewTasks();
+	}
+
+	private void sendTaskMsg() {
+		long current = System.currentTimeMillis();//当前时间毫秒数
+		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+
+		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+		//通知当天零点到11分的所有任务
+		equipmentService.sendTaskMsg(zero, endTime+60000);
+		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
+
+		if(task != null) {
+			Timestamp taskStartTime = task.getExecutiveStartTime();
+			//默认提前十分钟
+			long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+
+			String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
+
+			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+					cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+		}
+
 	}
 
 }

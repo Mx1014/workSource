@@ -45,8 +45,12 @@ import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
@@ -255,7 +259,38 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultDateRule<b>
+	 * <p>
+	 * 修改默认规则时间
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultDateRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultDateRule(@Valid UpdateDefaultDateRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultDateRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultAttachmentRule<b>
+	 * <p>
+	 * 修改默认规则提示文字
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultAttachmentRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultAttachmentRule(@Valid UpdateDefaultAttachmentRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultAttachmentRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * 
 	 * <b>URL: /rental/admin/getResourceList<b>
@@ -408,6 +443,42 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /rental/admin/updateResourceAttachment</b>
+	 * <p>
+	 * 添加修改资源的提交信息
+	 * </p>
+	 */
+
+	@RequestMapping("updateResourceAttachment")
+	@RestReturn(value = String.class)
+	public RestResponse updateResourceAttachment(@Valid UpdateResourceAttachmentCommand cmd) {
+		rentalService.updateResourceAttachment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateRentalDate</b>
+	 * <p>
+	 * 添加修改资源的开放时间
+	 * </p>
+	 */
+
+	@RequestMapping("updateRentalDate")
+	@RestReturn(value = String.class)
+	public RestResponse updateRentalDate(@Valid UpdateRentalDateCommand cmd) {
+		rentalService.updateRentalDate(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /rental/admin/updateRentalSiteRules</b>
 	 * <p>

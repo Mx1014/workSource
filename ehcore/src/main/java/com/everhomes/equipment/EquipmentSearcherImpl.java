@@ -7,6 +7,7 @@ import java.util.List;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.techpark.punch.PunchTimeRule;
+import com.everhomes.user.UserContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -136,8 +137,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        //分公司和总公司的问题，改为用namespaceId来弄 by xiongying20170328
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -192,7 +195,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	    		dtos.add(dto);
         	}
         }
-        
+        LOGGER.info("query equipment: {}", dtos);
         response.setEquipment(dtos);
         return response;
 	}
@@ -217,8 +220,10 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("reviewStatus", EquipmentReviewStatus.DELETE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        //分公司和总公司的问题，改为用namespaceId来弄
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getTargetId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
         
@@ -287,8 +292,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	private XContentBuilder createDoc(EquipmentInspectionEquipments equipment){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("ownerId", equipment.getOwnerId());
-            b.field("ownerType", equipment.getOwnerType());
+//            b.field("ownerId", equipment.getOwnerId());
+//            b.field("ownerType", equipment.getOwnerType());
+            b.field("namespaceId", equipment.getNamespaceId());
             b.field("targetId", equipment.getTargetId());
             b.field("targetType", equipment.getTargetType());
             b.field("status", equipment.getStatus());

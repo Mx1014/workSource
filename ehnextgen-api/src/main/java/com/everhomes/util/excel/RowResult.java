@@ -22,6 +22,16 @@ public class RowResult {
 	private String N;
 	private String O;
 	private String P;
+	private String Q;
+	private String R;
+	private String S;
+	private String T;
+	private String U;
+	private String V;
+	private String W;
+	private String X;
+	private String Y;
+	private String Z;
 	public String getA() {
 		return A;
 	}
@@ -143,11 +153,73 @@ public class RowResult {
 	{
 		P = p;
 	}
+	public String getQ() {
+		return Q;
+	}
+	public void setQ(String q) {
+		Q = q;
+	}
+	public String getR() {
+		return R;
+	}
+	public void setR(String r) {
+		R = r;
+	}
+	public String getS() {
+		return S;
+	}
+	public void setS(String s) {
+		S = s;
+	}
+	public String getT() {
+		return T;
+	}
+	public void setT(String t) {
+		T = t;
+	}
+	public String getU() {
+		return U;
+	}
+	public void setU(String u) {
+		U = u;
+	}
+	public String getV() {
+		return V;
+	}
+	public void setV(String v) {
+		V = v;
+	}
+	public String getW() {
+		return W;
+	}
+	public void setW(String w) {
+		W = w;
+	}
+	public String getX() {
+		return X;
+	}
+	public void setX(String x) {
+		X = x;
+	}
+	public String getY() {
+		return Y;
+	}
+	public void setY(String y) {
+		Y = y;
+	}
+	public String getZ() {
+		return Z;
+	}
+	public void setZ(String z) {
+		Z = z;
+	}
 	@Override
 	public String toString() {
 		
 		return "RowResult [A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", E="+ E + ", F=" + F + ", G=" + G + ", H=" + H + 
-				", I=" +I + ", J=" + J + ", K=" + K + ", L="+ L + ", M=" + M + ", N=" + N + ", O=" + O +", P=" + P +"]";
+				", I=" +I + ", J=" + J + ", K=" + K + ", L="+ L + ", M=" + M + ", N=" + N + ", O=" + O + ", P=" + P + ", Q=" + Q
+				 + ", R=" + R + ", S=" + S + ", T=" + T + ", U=" + U + ", V=" + V + ", W=" + W + ", X=" + X + ", Y=" + Y
+				 + ", Z=" + Z +"]";
 	}
 	
 	public static String trimString(String str){

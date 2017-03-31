@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
- *     <li>organizationId: 组织id</li>
+ *     <li>ownerId: 组织id</li>
  *     <li>communityId: 小区id</li>
  *     <li>name: 表记名称</li>
  *     <li>meterNumber: 表记编号</li>
@@ -21,11 +21,14 @@ import java.math.BigDecimal;
  *     <li>price: 价格</li>
  *     <li>costFormulaId: 费用计算公式</li>
  *     <li>amountFormulaId: 用量计算公式</li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType}</li>
+ *     <li>configId: 价格方案id </li>
+ *     <li>ownerType: 所属组织类型</li>
  * </ul>
  */
 public class CreateEnergyMeterCommand {
 
-    @NotNull private Long organizationId;
+    @NotNull private Long ownerId;
     @NotNull private Long communityId;
     @NotNull @Size(max = 100) private String name;
     @NotNull @Size(max = 50) private String meterNumber;
@@ -38,6 +41,9 @@ public class CreateEnergyMeterCommand {
     @NotNull private BigDecimal price;
     @NotNull private Long costFormulaId;
     @NotNull private Long amountFormulaId;
+    private Byte calculationType;
+    private Long configId;
+    private String ownerType;
 
     public Long getCommunityId() {
         return communityId;
@@ -55,12 +61,12 @@ public class CreateEnergyMeterCommand {
         this.name = name;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getOwnerId() {
+        return ownerId;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
 
     public Byte getMeterType() {
@@ -141,6 +147,30 @@ public class CreateEnergyMeterCommand {
 
     public void setAmountFormulaId(Long amountFormulaId) {
         this.amountFormulaId = amountFormulaId;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public Long getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

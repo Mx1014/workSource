@@ -164,9 +164,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
-		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
-		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		if(null != organizationId){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
+		}
 		if(null != moduleIds && moduleIds.size() >0){
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
 		}
@@ -185,9 +187,12 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
-		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
-		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.in(targetIds));
+
+		if(null != organizationId){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
+		}
 		if(null != moduleIds && moduleIds.size() >0){
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
 		}

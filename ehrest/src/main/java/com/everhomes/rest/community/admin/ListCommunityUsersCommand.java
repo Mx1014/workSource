@@ -22,6 +22,8 @@ public class ListCommunityUsersCommand {
 	private Integer namespaceId;
 	
 	private Byte executiveFlag;
+
+	private Byte gender;
 	
 	private Integer isAuth;
 	
@@ -30,7 +32,14 @@ public class ListCommunityUsersCommand {
 	private Long communityId;
 	
 	private Long organizationId;
-	
+
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
+	}
 
 	public Long getPageAnchor() {
 		return pageAnchor;

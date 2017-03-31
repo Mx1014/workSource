@@ -545,7 +545,21 @@ public class PmTaskController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    } 
+    }
+
+    /**
+     * <b>URL: /pmtask/synchronizedData</b>
+     * <p>迁移数据</p>
+     */
+    @RequestMapping("synchronizedData")
+    @RestReturn(value=String.class)
+    public RestResponse synchronizedData(SearchTasksCommand cmd) {
+        pmTaskService.synchronizedData(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /pmtask/createStatistics</b>

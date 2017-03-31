@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>iconUri: 图标uri</li>
  * <li>status: 状态 0 关闭 2 开启</li>
  * <li>namespaceId: 域空间</li>
+ * <li>payMode: 支付模式 (工作流模式) {@link com.everhomes.rest.rentalv2.admin.PayMode}</li>
  * </ul>
  */
 public class UpdateResourceTypeCommand {
@@ -21,6 +22,8 @@ public class UpdateResourceTypeCommand {
 	private java.lang.String  iconUri;
 	private java.lang.Byte    status;
 	private java.lang.Integer namespaceId;
+	private Byte payMode;
+
 	
 	@Override
     public String toString() {
@@ -73,6 +76,14 @@ public class UpdateResourceTypeCommand {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
 	}
 	
 }
