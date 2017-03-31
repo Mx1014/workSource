@@ -12,17 +12,17 @@ public class FlowCaseDetail extends FlowCase {
 	
 	private Long eventLogId;
 
-	private String title;
-
-	@Override
-	public String getTitle() {
-		return title;
-	}
-
-	@Override
-	public void setTitle(String title) {
-		this.title = title;
-	}
+//	private String title;
+//
+//	@Override
+//	public String getTitle() {
+//		return title;
+//	}
+//
+//	@Override
+//	public void setTitle(String title) {
+//		this.title = title;
+//	}
 
 	public Long getEventLogId() {
 		return eventLogId;
