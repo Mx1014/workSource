@@ -1543,6 +1543,8 @@ public class CommunityServiceImpl implements CommunityService {
 
 			if (null != organization && organization.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
 					&& organization.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
+				LOGGER.debug("organization={}", organization.toString());
+
 				set.add(detailDto);
 			}
 		}
@@ -1774,9 +1776,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 			for (int k = 0,l = organizations.size(); k < l; k++) {
 				if (k == l-1)
-					enterprises.append(organizations.get(k).getName());
+					enterprises.append(organizations.get(k).getDisplayName());
 				else
-					enterprises.append(organizations.get(k).getName()).append(",");
+					enterprises.append(organizations.get(k).getDisplayName()).append(",");
 			}
 
 			tempRow.createCell(0).setCellValue(dto.getUserName());
