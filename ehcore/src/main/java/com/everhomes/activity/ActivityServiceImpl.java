@@ -3861,8 +3861,12 @@ public class ActivityServiceImpl implements ActivityService {
 		if(cmd.getModule().equals("live")){
 			if(cmd.getState() == 0){
 				videoState = VideoState.UN_READY;
-			}else{
+			}else if(cmd.getState() == 1){
 				videoState = VideoState.LIVE;
+			}else{
+				//其他状态，不处理
+				LOGGER.debug("lived Not handle. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+				return;
 			}
 		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
 			if(cmd.getState() == -1){
@@ -3870,7 +3874,9 @@ public class ActivityServiceImpl implements ActivityService {
 			}else if(cmd.getState() == 1){
 				videoState = VideoState.RECORDING;
 			}else{
-				videoState = VideoState.LIVE;
+				//其他状态，不处理
+				LOGGER.debug("Recoding Not handle. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+				return;
 			}
 		}else{
 			LOGGER.warn("params error. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
