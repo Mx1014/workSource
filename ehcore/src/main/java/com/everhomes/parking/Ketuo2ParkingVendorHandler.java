@@ -163,9 +163,11 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
 
-			String plateOwnerName = card.getName();
+			if (null != card.getName()) {
+				String plateOwnerName = card.getName();
+				parkingCardDTO.setPlateOwnerName(plateOwnerName);
+			}
 
-			parkingCardDTO.setPlateOwnerName(plateOwnerName);
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone("");
 			if(card.getFreeMoney() != 0)
