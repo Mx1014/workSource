@@ -227,7 +227,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 TopicFilterDTO cmntyGroupFilterDto = new TopicFilterDTO();
                 cmntyGroupFilterDto.setId(group2Id);
                 cmntyGroupFilterDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+                code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_GROUP);
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 cmntyGroupFilterDto.setName(menuName);
                 cmntyGroupFilterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
