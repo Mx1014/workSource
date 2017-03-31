@@ -87,12 +87,17 @@ public class UserContext {
 	public static Integer getCurrentNamespaceId(Integer namespaceId){
 		UserContext context = s_userContexts.get();
 		
-		if(context == null || context.getUser() == null) {
+		if(context == null) {
 			return null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
         }
 		
+		//added by janson 如果预先设置了域空间，则优先用 context 里面的域空间
 		if(null == namespaceId || Namespace.DEFAULT_NAMESPACE == namespaceId){
 			namespaceId = context.namespaceId;
+		}
+		
+		if(context.getUser() == null) {
+			return null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
 		}
 		
 		if(null == namespaceId || Namespace.DEFAULT_NAMESPACE == namespaceId){
