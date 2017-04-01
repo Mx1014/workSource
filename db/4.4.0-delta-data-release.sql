@@ -59,5 +59,15 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 -- add by sw 20170401
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
 	VALUES ('3', '999985', '0', '0', '0', '1', '1');
+SET @eh_web_menu_scopes = (SELECT max(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40100', '', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40110', '', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40120', '', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40130', '', 'EhNamespaces', '999985', '2');	
+
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('app.route.browser.outer.uri', 'zl://browser/e?url=', '', '0', NULL);
+	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
