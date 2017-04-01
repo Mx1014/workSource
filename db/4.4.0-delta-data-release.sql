@@ -33,9 +33,9 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 UPDATE eh_web_menus set name = '入驻申请' where id = 40120;
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('apply.entry.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/rent_detail/%s', '', '0', NULL);
+	VALUES ('apply.entry.detail.url', '/park-entry/dist/index.html#/rent_detail/%s', '', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html?hideNavigationBar=1#/building_detail/%s', '', '0', NULL);
+	VALUES ('apply.entry.building.detail.url', '/park-entry/dist/index.html#/building_detail/%s', '', '0', NULL);
 
 -- 更新活动选项中的图标 update avatal.all from avatar.organization    add by yanjun
 UPDATE eh_configurations a
@@ -71,3 +71,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
+	
+update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
+update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
