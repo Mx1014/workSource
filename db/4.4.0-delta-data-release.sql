@@ -20,7 +20,7 @@ update eh_web_menus set data_type = 'user--user_management' where id = 34000;
 
 -- 园区入驻 add by sw 20170331
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
-	VALUES ('1', '1000000', '1', '1', '1', '1', '1');
+	VALUES ('1', '1000000', '0', '0', '0', '1', '1');
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
 	VALUES ('2', '999983', '1', '1', '1', '1', '1');
 	
