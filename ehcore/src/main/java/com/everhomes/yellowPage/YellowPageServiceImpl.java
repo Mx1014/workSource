@@ -726,6 +726,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if (null != dto.getServiceUrl()) {
 			try {
 				String serviceUrl = dto.getServiceUrl();
+				dto.setDisplayServiceUrl(dto.getServiceUrl());
+				String routeUri = configurationProvider.getValue(ConfigConstants.APP_ROUTE_BROWSER_OUTER_URI, "");
+
+				serviceUrl = String.format(routeUri, serviceUrl);
 				int index = serviceUrl.indexOf("?");
 				if (index != -1) {
 					String prefix = serviceUrl.substring(0, index + 1);
@@ -733,10 +737,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 					serviceUrl = URLEncoder.encode(serviceUrl, "utf8");
 					serviceUrl = prefix + serviceUrl;
 				}
-				dto.setDisplayServiceUrl(dto.getServiceUrl());
 
-				String routeUri = configurationProvider.getValue(ConfigConstants.APP_ROUTE_BROWSER_OUTER_URI, "");
-				dto.setServiceUrl(routeUri + serviceUrl);
+				dto.setServiceUrl(serviceUrl);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
