@@ -55,3 +55,9 @@ update eh_lease_promotions set issuer_type = 'ORGANIZATION';
 -- add by yanjun 2017-03-31
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('shake.open.door', '0', 'use shake open door function  0:not, 1:yes', '999983', NULL);
+
+-- add by sw 20170401
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
+	VALUES ('3', '999985', '0', '0', '0', '1', '1');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('app.route.browser.outer.uri', 'zl://browser/e?url=', '', '0', NULL);
