@@ -15,6 +15,7 @@ public interface ActivityLocalStringCode {
 	 static final int ACTIVITY_LOCATION = 8;
 	 static final int ACTIVITY_INVITOR = 9;
 	 static final int ACTIVITY_INCOMPATIBLE = 10;
+	 static final int ACTIVITY_TIME = 11;
 	 
 	 
 }
