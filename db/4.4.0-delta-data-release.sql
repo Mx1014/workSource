@@ -47,3 +47,6 @@ SET a.value = (SELECT
                      WHERE c.name = 'post.menu.avatar.organization'
                      LIMIT 1) AS b)
 WHERE a.NAME = 'post.menu.avatar.all';
+
+-- 招租管理 add by sw 20170401
+update eh_lease_promotions set issuer_type = 'ORGANIZATION';
