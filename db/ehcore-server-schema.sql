@@ -6888,6 +6888,8 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `executive_position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
+  `namespace_id` INT NOT NULL DEFAULT 0,
+  
   PRIMARY KEY (`id`),		  
   KEY `standard_id` (`standard_id`),
   KEY `status` (`status`),
