@@ -866,4 +866,19 @@ public class ActivityProviderImpl implements ActivityProivider {
 		.map(r->ConvertHelper.convert(r, ActivityRoster.class));
 	}
 	
+	@Override
+	public List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer pageOffset, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<EhActivityRosterRecord>  query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+		query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+		if(status != null){
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(status.byteValue()));
+		}
+		query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.abs());
+		query.addLimit(pageOffset, pageSize);
+		
+		return query.fetch().map(r->ConvertHelper.convert(r, ActivityRoster.class));
+	}
+	
 }

@@ -3452,6 +3452,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 post.setCommunityId(communityId);
                 
+                populatePostCreatorCommunityName(post);
+                
                 populatePostCreatorInfo(userId, post);
                 
                 populatePostAttachements(userId, post, post.getAttachments());
@@ -3569,6 +3571,17 @@ public class ForumServiceImpl implements ForumService {
 //        }
 //    }
     
+    //填充小区名
+    private void populatePostCreatorCommunityName(Post post){
+    	User user  = userProvider.findUserById(post.getCreatorUid());
+    	if(user != null && user.getCommunityId() != null){
+    		Community community = communityProvider.findCommunityById(user.getCommunityId());
+    		if(community != null){
+    			post.setCreatorCommunityName(community.getName());
+    		}
+    	}
+    }
+
     private void populatePostCreatorInfo(long userId, Post post) {
         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
         String creatorNickName = post.getCreatorNickName();

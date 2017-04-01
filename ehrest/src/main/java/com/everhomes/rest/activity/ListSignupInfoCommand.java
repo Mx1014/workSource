@@ -13,8 +13,9 @@ import com.everhomes.util.StringHelper;
  */
 public class ListSignupInfoCommand {
 	private Long activityId;
+	private Integer status;
 	private Integer pageSize;
-	private Long pageAnchor;
+	private Integer pageOffset;
 
 	public Integer getPageSize() {
 		return pageSize;
@@ -24,12 +25,12 @@ public class ListSignupInfoCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Integer getPageOffset() {
+		return pageOffset;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
 	}
 
 	public Long getActivityId() {
@@ -40,6 +41,14 @@ public class ListSignupInfoCommand {
 		this.activityId = activityId;
 	}
 	
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

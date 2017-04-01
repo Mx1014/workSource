@@ -13,7 +13,7 @@ import com.everhomes.discover.ItemType;
  * </ul>
  */
 public class ListSignupInfoResponse {
-	private Long nextPageAnchor;
+	private Integer nextPageOffset;
 	@ItemType(SignupInfoDTO.class)
 	private List<SignupInfoDTO> signupInfoDTOs;
 
@@ -21,18 +21,18 @@ public class ListSignupInfoResponse {
 		super();
 	}
 
-	public ListSignupInfoResponse(Long nextPageAnchor, List<SignupInfoDTO> signupInfoDTOs) {
+	public ListSignupInfoResponse(Integer nextPageOffset, List<SignupInfoDTO> signupInfoDTOs) {
 		super();
-		this.nextPageAnchor = nextPageAnchor;
+		this.nextPageOffset = nextPageOffset;
 		this.signupInfoDTOs = signupInfoDTOs;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
 	}
 
 	public List<SignupInfoDTO> getSignupInfoDTOs() {

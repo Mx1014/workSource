@@ -481,6 +481,11 @@ public class ActivityServiceImpl implements ActivityService {
 			signupInfoDTO.setCreateFlag((byte)0);
 		}
 		
+		if(activityRoster.getCreateTime() != null){
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:MM");
+			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
+		}
+		
 		return signupInfoDTO;
 	}
 
@@ -701,13 +706,20 @@ public class ActivityServiceImpl implements ActivityService {
 	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getPageAnchor(), pageSize+1);
-		Long nextPageAnchor = null;
+		
+		Integer pageOffset = 1;
+        if (cmd.getPageOffset() != null){
+        	pageOffset = cmd.getPageOffset();
+        }
+        Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
+        
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getStatus(), offset, pageSize+1);
+		Integer nextPageOffset = null;
 		if (rosters.size() > pageSize) {
 			rosters.remove(rosters.size()-1);
-			nextPageAnchor = rosters.get(rosters.size()-1).getId();
+			nextPageOffset = cmd.getPageOffset() + 1;
 		}
-		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
+		return new ListSignupInfoResponse(nextPageOffset, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
 	@Override
