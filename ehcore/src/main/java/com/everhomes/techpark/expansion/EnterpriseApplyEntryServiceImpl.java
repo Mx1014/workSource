@@ -673,7 +673,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 
 		long userId = UserContext.current().getUser().getId();
-		dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+
+		if (null != dto.getPosterUri()) {
+			dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+		}else {
+			String uri = configurationProvider.getValue("apply.entry.default.post.url", "");
+			if (!StringUtils.isEmpty(uri)) {
+				dto.setPosterUrl(contentServerService.parserUri(dto.getPosterUri(), EntityType.USER.getCode(), userId));
+			}
+		}
 
 		List<LeasePromotionAttachment> attachments = getAttachmentsByLeaseId(dto.getId());
 		dto.setAttachments(attachments.stream().map(a -> {
@@ -841,7 +849,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Override
 	public boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
-		return enterpriseApplyEntryProvider.deleteLeasePromotion(cmd.getId());
+		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+
+		if (null == leasePromotion) {
+			LOGGER.error("LeasePromotion not found, cmd={}", cmd);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LeasePromotion not found.");
+		}
+		leasePromotion.setStatus(LeasePromotionStatus.INACTIVE.getCode());
+		return enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
 	}
 
 	@Override

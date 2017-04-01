@@ -734,7 +734,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 					serviceUrl = prefix + serviceUrl;
 				}
 				dto.setDisplayServiceUrl(dto.getServiceUrl());
-				dto.setServiceUrl("zl://browser/i/" + serviceUrl);
+
+				String routeUri = configurationProvider.getValue(ConfigConstants.APP_ROUTE_BROWSER_OUTER_URI, "");
+				dto.setServiceUrl(routeUri + serviceUrl);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
