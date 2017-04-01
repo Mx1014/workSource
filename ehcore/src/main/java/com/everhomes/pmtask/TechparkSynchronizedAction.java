@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.user.UserIdentifier;
 import org.apache.commons.httpclient.HttpStatus;
 import com.everhomes.configuration.ConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
@@ -128,18 +130,11 @@ public class TechparkSynchronizedAction implements Runnable{
 		param.put("fileTitle", task.getAddress() + "物业报修");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
-		
-		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
-			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
-			if(null != orgMember) {
-				param.put("submitUserPhone", orgMember.getContactToken());
-			}
-		}else {
-			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
-			if(null != orgMember) {
-				param.put("submitUserPhone", orgMember.getContactToken());
-			}
-		}
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(task.getCreatorUid(), IdentifierType.MOBILE.getCode());
+
+		param.put("submitUserPhone", userIdentifier.getIdentifierToken());
+
 		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, organizationId);
 
 		param.put("acquiringDept", organization.getName());
