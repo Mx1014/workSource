@@ -77,6 +77,7 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterDefaultSettings.class));
         setting.setId(id);
         setting.setCreatorUid(UserContext.current().getUser().getId());
+        setting.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         setting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         rwDao().insert(setting);
     }
