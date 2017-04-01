@@ -48,5 +48,10 @@ SET a.value = (SELECT
                      LIMIT 1) AS b)
 WHERE a.NAME = 'post.menu.avatar.all';
 
+
 -- 招租管理 add by sw 20170401
 update eh_lease_promotions set issuer_type = 'ORGANIZATION';
+
+-- add by yanjun 2017-03-31
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ('shake.open.door', '0', 'use shake open door function  0:not, 1:yes', '999983', NULL);
