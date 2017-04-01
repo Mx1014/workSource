@@ -87,7 +87,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
 
     private XContentBuilder createDoc(EnergyMeterReadingLog readingLog) {
         try {
-            EnergyMeter meter = meterProvider.findById(UserContext.getCurrentNamespaceId(), readingLog.getMeterId());
+            EnergyMeter meter = meterProvider.findById(readingLog.getNamespaceId(), readingLog.getMeterId());
             User operator = userProvider.findUserById(readingLog.getOperatorId());
 
             XContentBuilder builder = XContentFactory.jsonBuilder();
