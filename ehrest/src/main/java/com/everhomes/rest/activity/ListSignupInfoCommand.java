@@ -7,8 +7,9 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>activityId: 活动id</li>
+ * <li>status: 状态，0待确认、1已确认、2已驳回、不填则为全部</li>
  * <li>pageSize: 每页大小</li>
- * <li>pageAnchor: 锚点</li>
+ * <li>pageOffset: 页码</li>
  * </ul>
  */
 public class ListSignupInfoCommand {

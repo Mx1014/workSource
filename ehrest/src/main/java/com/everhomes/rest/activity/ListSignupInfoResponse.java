@@ -8,7 +8,7 @@ import com.everhomes.discover.ItemType;
 /**
  * 
  * <ul>
- * <li>nextPageAnchor: 下页锚点</li>
+ * <li>nextPageOffset: 下页页码</li>
  * <li>signupInfoDTOs: 报名信息列表，参考{@link com.everhomes.rest.activity.SignupInfoDTO}</li>
  * </ul>
  */
