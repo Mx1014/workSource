@@ -1288,6 +1288,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhActivityVideo.class, Tables.EH_ACTIVITY_VIDEO.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ACTIVITY_VIDEO.ID.max()).from(Tables.EH_ACTIVITY_VIDEO).fetchOne().value1();
         });
+        syncTableSequence(null, EhEnergyMeterDefaultSettings.class, Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.ID.max()).from(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS).fetchOne().value1();
+        });
 
     }
 
