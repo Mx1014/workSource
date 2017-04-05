@@ -54,6 +54,7 @@ public class ActivityPostCommand{
     private String contactNumber;
     private String startTime;
     private String endTime;
+    private Byte allDayFlag;
     private String signupEndTime;
     private Byte checkinFlag;
     private Byte confirmFlag;
@@ -210,7 +211,15 @@ public class ActivityPostCommand{
         this.endTime = endTime;
     }
 
-    public Byte getCheckinFlag() {
+    public Byte getAllDayFlag() {
+		return allDayFlag;
+	}
+
+	public void setAllDayFlag(Byte allDayFlag) {
+		this.allDayFlag = allDayFlag;
+	}
+
+	public Byte getCheckinFlag() {
         return checkinFlag;
     }
 

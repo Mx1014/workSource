@@ -3,7 +3,10 @@ package com.everhomes.activity;
 
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,6 +100,14 @@ public class ActivityProviderImpl implements ActivityProivider {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
+    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
+        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
+        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
+        	}
+    	}
+        
         activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
