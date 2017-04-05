@@ -57,8 +57,16 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('shake.open.door', '0', 'use shake open door function  0:not, 1:yes', '999983', NULL);
 
 -- add by sw 20170401
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
+	
+update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
+update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
+
+-- 华润招租管理 add by sw 20170405
+UPDATE eh_launch_pad_items SET action_type = 28, action_data = '' where item_label = '看房' and namespace_id = 999985;
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
-	VALUES ('3', '999985', '1', '1', '1', '1', '1');
+	VALUES ('3', '999985', '1', '1', '1', '1', '0');
 SET @eh_web_menu_scopes = (SELECT max(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40100', '', 'EhNamespaces', '999985', '2');
@@ -69,8 +77,5 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40130', '', 'EhNamespaces', '999985', '2');	
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
+
 	
-update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
-update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
