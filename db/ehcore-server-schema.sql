@@ -3359,7 +3359,7 @@ CREATE TABLE `eh_flow_cases` (
   `case_type` VARCHAR(64) COMMENT 'inner, outer etc',
   `content` TEXT,
   `evaluate_score` INTEGER NOT NULL DEFAULT 0,
-  `title` VARCHAR(64) NULL AFTER `evaluate_score`,
+  `title` VARCHAR(64) NULL,
   
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
