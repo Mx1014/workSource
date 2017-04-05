@@ -1805,13 +1805,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 
+		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
+
 		User user = UserContext.current().getUser();
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
 			if (null == userIdentifier) {
-				LOGGER.error(" User not found", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_INFO,
-						"User not found");
+				return response;
 			}
 			user = userProvider.findUserById(userIdentifier.getOwnerUid());
 		}
@@ -1819,7 +1819,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
-		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
 	    if(null != namespaceDetail) {
