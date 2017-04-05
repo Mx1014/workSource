@@ -1745,7 +1745,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				response.setPassword(conf.getConfHostKey());
 			} else {
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("meetingNo", confId);
+				map.put("meetingNo", cmd.getConfId());
 
 				String scope = VideoconfNotificationTemplateCode.SCOPE;
 				int code = VideoconfNotificationTemplateCode.VIDEOCONF_JOINURL_TEMPLATE;
