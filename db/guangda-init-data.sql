@@ -616,4 +616,28 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999979,0,0,0,'/home','Bizs','','we生活','cs://1/image/aW1hZ2UvTVRveE0yWXlNMlpqWWpKaFltUXhOMkUxTVRsaU1EY3lZbUUyTWpabVltRXhZUQ',1,1,14,CONCAT('{\"url\": \"', @eh_core_serverURL, '/mobile/static/coming_soon/index.html\"}'), 12,0,1,0,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1),999979,0,0,0,'/home','Bizs','','投诉建议','cs://1/image/aW1hZ2UvTVRvNFlqTXpORGxqTXpGak9UVXlNV1V3WlROaU1HVXlZalJpTnpjNFkySmlaUQ',1,1,60,'{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议"}', 13,0,1,0,'1',0,NULL,NULL,NULL,0,'park_tourist',0,NULL);
 
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 1, 'zh_CN', '验证码-光大', '39374');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 4, 'zh_CN', '派单-光大we谷', '39393');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 5, 'zh_CN', '	任务-光大we谷', '39394');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 6, 'zh_CN', '	任务2-光大we谷', '39395');
 
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 7, 'zh_CN', '新报修-光大', '39397');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 9, 'zh_CN', '看楼-光大we谷', '39396');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 12, 'zh_CN', '预定1-光大', '39400');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 13, 'zh_CN', '预定2-光大', '39401');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 14, 'zh_CN', '预定3-光大', '39402');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES(999979, 'sms.default.yzx', 15, 'zh_CN', '物业任务3-光大', '39399');
+    
+SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'app.agreements.url', CONCAT(@eh_core_serverURL, '/mobile/static/app_agreements/guangda_agreements.html'), 'the relative path for guangda app agreements', '999980', NULL);
