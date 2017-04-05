@@ -74,3 +74,7 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	
 update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
 update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
+
+-- 视频会议加入会议协议格式 by xiongying20170405
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('videoconf.notification', '4', 'zh_CN', '加入会议协议格式', 'cfcloud://www.confcloud.cn/join?confno={meetingNo}', '0');
