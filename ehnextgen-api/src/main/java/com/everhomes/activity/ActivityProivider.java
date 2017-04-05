@@ -86,5 +86,5 @@ public interface ActivityProivider {
 
 	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
 	
-	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer pageOffset, int pageSize);
+	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer offset, int pageSize);
 }

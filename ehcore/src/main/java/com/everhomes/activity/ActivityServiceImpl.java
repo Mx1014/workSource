@@ -725,14 +725,22 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), null, 100000);
+		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 1, 0, 100000);
+		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), 2, 0, 100000);
+		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 0, 0, 100000);
+		
+		rosters.addAll(rostersConfirms);
+		rosters.addAll(rostersRejects);
+		rosters.addAll(rostersUnConfirms);
+		
 		if (rosters.size() > 0) {
 			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
 			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
-			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
-					"typeText", "sourceFlagText"));
-			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源"));
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", /*"position",*/ "leaderFlagText",
+					"signupTime", "typeText", "sourceFlagText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", /*"职位",*/ "是否高管", "报名时间", "类型", "报名来源"));
 			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20));
 			
 			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
