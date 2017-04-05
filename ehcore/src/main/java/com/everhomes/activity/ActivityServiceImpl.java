@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -30,24 +31,16 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationDetail;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -58,13 +51,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.organization.OfficialFlag;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationOwnerDTO;
-import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -87,7 +74,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import net.greghaines.jesque.Job;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -101,7 +87,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -3226,7 +3211,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         return dto;
 	}
-	
+
+
 	//live from normal user
 	private ActivityVideoDTO setUserActivityVideo(SetActivityVideoInfoCommand cmd) {
 	    ActivityVideo video = new ActivityVideo();
@@ -3259,9 +3245,22 @@ public class ActivityServiceImpl implements ActivityService {
         video.setCreatorUid(user.getId());
         video.setManufacturerType(VideoManufacturerType.YZB.toString());
         video.setRoomType(ActivityVideoRoomType.YZB.toString());
-        video.setStartTime(System.currentTimeMillis());
         video.setIntegralTag1(0l);
-        video.setVideoState(VideoState.LIVE.getCode());
+
+        VideoState videoState = VideoState.fromCode(cmd.getState());
+
+        if (videoState != null) {
+            video.setVideoState(videoState.getCode());
+        }
+
+        // 直播开始，设置开始时间为当前时间
+        if (videoState == VideoState.LIVE) {
+            video.setStartTime(System.currentTimeMillis());
+        } else if (videoState == VideoState.RECORDING && oldVideo != null) {
+            // 直播结束，设置这条记录的开始时间为直播开始时间
+            video.setStartTime(oldVideo.getStartTime());
+        }
+
         video.setOwnerType("activity");
         video.setOwnerId(cmd.getActivityId());
         activityVideoProvider.createActivityVideo(video);
@@ -3389,7 +3388,13 @@ public class ActivityServiceImpl implements ActivityService {
    @Override
     public ActivityVideoDTO getActivityVideo(GetActivityVideoInfoCommand cmd) {
        ActivityVideo video = activityVideoProvider.getActivityVideoByActivityId(cmd.getActivityId());
-       return ConvertHelper.convert(video, ActivityVideoDTO.class);
+	   if(null != video){
+		   ActivityVideoDTO dto = ConvertHelper.convert(video, ActivityVideoDTO.class);
+		   if(null != video.getVideoSid())
+			   dto.setVideoUrl("yzb://" + video.getVideoSid());
+		   return dto;
+	   }
+       return null;
     }
    
    @Override
@@ -3851,6 +3856,62 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
 	@Override
+	public void videoCallback(VideoCallbackCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getLid()) || StringUtils.isEmpty(cmd.getModule())){
+			LOGGER.warn("params is null");
+			return;
+		}
+		User user = UserContext.current().getUser();
+
+		VideoState videoState = null;
+		if(cmd.getModule().equals("live")){
+			if(cmd.getState() == 0){
+				videoState = VideoState.UN_READY;
+			}else if(cmd.getState() == 1){
+				videoState = VideoState.LIVE;
+			}else{
+				//其他状态，不处理
+				LOGGER.debug("lived Not handle. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+				return;
+			}
+		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
+			if(cmd.getState() == -1){
+				videoState = VideoState.EXCEPTION;
+			}else if(cmd.getState() == 1){
+				videoState = VideoState.RECORDING;
+			}else{
+				//其他状态，不处理
+				LOGGER.debug("Recoding Not handle. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+				return;
+			}
+		}else{
+			LOGGER.warn("params error. lid = {}, module = {}, from = {}", cmd.getLid(), cmd.getModule(), cmd.getFrom());
+			return;
+		}
+
+		ActivityVideo oldVideo = activityVideoProvider.getActivityVideoByVid(cmd.getLid());
+		if(oldVideo != null) {
+			//new activity, delete the old one
+			oldVideo.setVideoState(VideoState.INVALID.getCode());
+			activityVideoProvider.updateActivityVideo(oldVideo);
+		}else{
+			LOGGER.warn("video Non-existent vid = {}", cmd.getLid());
+			return;
+		}
+
+		ActivityVideo video = ConvertHelper.convert(oldVideo, ActivityVideo.class);
+		video.setCreatorUid(user.getId());
+		video.setVideoState(videoState.getCode());
+		video.setId(null);
+		if(videoState == VideoState.LIVE){
+			if(cmd.getState() == 1){
+				video.setStartTime(System.currentTimeMillis());
+			}
+		}
+		activityVideoProvider.createActivityVideo(video);
+	}
+
+	@Override
 	public ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd) {
 		if (cmd.getNamespaceId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3882,5 +3943,40 @@ public class ActivityServiceImpl implements ActivityService {
 			LOGGER.error("Parser uri is error." + e.getMessage());
 		}
 		return null;
+	}
+
+	public static void main(String[] args) {
+		String a = "{\n" +
+				"    \"module\": \"file\",\n" +
+				"    \"from\": \"record\",\n" +
+				"    \"appid\": \"K0MvwB2WmFJNrgg4\",\n" +
+				"    \"lid\": \"2kGogxABi86pHQkd\",\n" +
+				"    \"fid\": \"/video/4/5d/2kGogxABi86pHQkd.mp4\",\n" +
+				"    \"size\": \"1220641\",\n" +
+				"    \"dura\": \"14\",\n" +
+				"    \"state\": 1,\n" +
+				"    \"msg\": \"created\"\n" +
+				"}";
+
+		VideoCallbackCommand cmd = JSONObject.parseObject(a, VideoCallbackCommand.class);
+		VideoState videoState = null;
+		if(cmd.getModule().trim().equals("live")){
+			if(cmd.getState() == 0){
+				videoState = VideoState.UN_READY;
+			}else{
+				videoState = VideoState.LIVE;
+			}
+		}else if(cmd.getModule().trim().equals("file") && !StringUtils.isEmpty(cmd.getFrom()) && cmd.getFrom().trim().equals("record")){
+			if(cmd.getState() == -1){
+				videoState = VideoState.EXCEPTION;
+			}else if(cmd.getState() == 1){
+				videoState = VideoState.RECORDING;
+			}else{
+				videoState = VideoState.LIVE;
+			}
+		}else{
+			System.out.print("aaaa...........");
+			return;
+		}
 	}
 }

@@ -2,7 +2,7 @@ ehapp.version=master-SNAPSHOT
 codegen.version=0.0.3-SNAPSHOT
 ehutil.version=0.0.7-SNAPSHOT
 ehutil-common.version=0.0.2-SNAPSHOT
-ehplatform.version=0.0.10-SNAPSHOT
+ehplatform.version=0.0.11-SNAPSHOT
 ehplatform-persist.version=0.0.5-SNAPSHOT
 ehcodegen.version=0.0.3-SNAPSHOT
 

@@ -444,7 +444,7 @@ public class ParkingServiceImpl implements ParkingService {
     					parkingCardRequest.setCarBrand(carBrand.getName());
     			}
     		}
-    		
+
     		parkingProvider.requestParkingCard(parkingCardRequest);
     		
     		addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
@@ -458,7 +458,11 @@ public class ParkingServiceImpl implements ParkingService {
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
     		createFlowCaseCommand.setContent("车牌号码：" + parkingCardRequest.getPlateNumber() + "\n"
     				+ "车主电话：" + parkingCardRequest.getPlateOwnerPhone());
-        	
+
+			if (UserContext.getCurrentNamespaceId().equals(999983)) {
+				createFlowCaseCommand.setTitle("停车月卡申请");
+			}
+
         	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
     		
     		parkingCardRequest.setFlowId(flowCase.getFlowMainId());

@@ -171,7 +171,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         				);
         	}
     		
-    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
+    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).leftOuterJoin(Tables.EH_FLOWS)
     		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
     		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
     		    	.limit(count).fetch().map(new FlowCaseRecordMapper());

@@ -19,9 +19,7 @@ public interface EnterpriseApplyEntryProvider {
 	
 	List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize);
-	
-	List<EnterpriseAddress> listBuildingEnterprisesByBuildingName(String buildingName, ListingLocator locator, int pageSize);
-	
+
 	LeasePromotion createLeasePromotion(LeasePromotion leasePromotion);
 	
 	LeasePromotion getLeasePromotionById(Long id);
@@ -47,4 +45,14 @@ public interface EnterpriseApplyEntryProvider {
 
 	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator,
 			int pageSize, List<Long> idList);
+
+	void updateApplyEntry(EnterpriseOpRequest request);
+
+	List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId);
+
+	void deleteLeasePromotionByUidAndIssuerType(long id, String issuerType);
+
+	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
+
+	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
 }

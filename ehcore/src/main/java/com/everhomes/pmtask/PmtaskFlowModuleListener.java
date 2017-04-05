@@ -126,13 +126,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
 			if ("ACCEPTING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
-
+					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 					if (null != logs && logs.size() != 0) {
 						for (PmTaskLog r: logs) {
@@ -145,12 +145,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 
 			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -212,12 +212,14 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务地点");
 		e.setValue(dto.getAddress());
 		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("所属分类");
-		e.setValue(dto.getCategoryName());
-		entities.add(e);
+
+		if (StringUtils.isNotBlank(dto.getCategoryName())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("所属分类");
+			e.setValue(dto.getCategoryName());
+			entities.add(e);
+		}
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -230,7 +232,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系电话");
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
-		
+
+		//TODO:为科兴与一碑对接
+		if(dto.getNamespaceId() == 999983 &&
+				dto.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("状态");
+			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			entities.add(e);
+		}
+
 		return entities;
 	}
 

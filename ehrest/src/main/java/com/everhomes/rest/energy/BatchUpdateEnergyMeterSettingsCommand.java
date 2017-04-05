@@ -23,6 +23,8 @@ import java.util.List;
  *     <li>costFormulaEnd: 费用计算公式结束时间 </li>
  *     <li>amountFormulaStart: 用量计算公式开始时间</li>
  *     <li>amountFormulaEnd: 用量计算公式结束时间</li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
+ *     <li>configId: 价格方案id </li>
  * </ul>
  */
 public class BatchUpdateEnergyMeterSettingsCommand {
@@ -48,6 +50,9 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     private Long amountFormulaStart;
     private Long amountFormulaEnd;
+
+    private Byte calculationType;
+    private Long configId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -159,6 +164,22 @@ public class BatchUpdateEnergyMeterSettingsCommand {
 
     public void setAmountFormulaEnd(Long amountFormulaEnd) {
         this.amountFormulaEnd = amountFormulaEnd;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public Long getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
     }
 
     @Override

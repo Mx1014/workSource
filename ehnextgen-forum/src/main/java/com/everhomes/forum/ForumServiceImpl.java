@@ -219,7 +219,11 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopic(NewTopicCommand cmd, Long creatorUid) {
-        //黑名单权限校验 by sfyan20161213
+
+        //check权限 by sfyan 20170329
+        checkCreateTopicPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getContentCategory(), cmd.getCurrentOrgId());
+
+        //黑名单权限校验 by sfyan 20161213
         checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
 
         //报名人数限制必须在1到10000之间，add by tt, 20161013
@@ -3965,6 +3969,18 @@ public class ForumServiceImpl implements ForumService {
 //	    return this.createTopic(topicCmd);
 //	}
 
+    private void checkCreateTopicPrivilege(String ownerType, Long ownerId, Long categoryId, Long currentOrgId){
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+//        //至少有一项不能为空 才校验权限
+//        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
+//            return;
+//        }
+        if(CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+            resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
+        }
+    }
+
     private void checkBlacklist(String ownerType, Long ownerId, Long categoryId, Long forumId){
         ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
         ownerId = null == ownerId ? 0L : ownerId;
@@ -4011,6 +4027,7 @@ public class ForumServiceImpl implements ForumService {
         VisibleRegionType visibleRegionType = null;
         Long visibleRegionId = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        Long currentOrgId = null;
         switch(sceneType) {
         case DEFAULT:
         case PARK_TOURIST:
@@ -4041,6 +4058,7 @@ public class ForumServiceImpl implements ForumService {
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            currentOrgId = org.getId();
             if(org != null) {
                 String orgType = org.getOrganizationType();
                 
@@ -4090,7 +4108,12 @@ public class ForumServiceImpl implements ForumService {
         default:
             break;
         }
-        
+        if(visibleRegionType == VisibleRegionType.COMMUNITY){
+            topicCmd.setOwnerType(EntityType.COMMUNITY.getCode());
+            topicCmd.setOwnerId(visibleRegionId);
+        }
+        topicCmd.setCurrentOrgId(currentOrgId);
+
         if(creatorTag != null) {
             topicCmd.setCreatorTag(creatorTag.getCode());
         }

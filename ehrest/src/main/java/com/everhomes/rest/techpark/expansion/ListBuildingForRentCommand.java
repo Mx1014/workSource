@@ -1,6 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import java.math.BigDecimal;
 
 /**
  * <ul>
@@ -27,8 +28,72 @@ public class ListBuildingForRentCommand {
     private Long buildingId;
     
     private String rentType;
-    
-    public Byte getStatus() {
+
+	private BigDecimal startRentArea;
+	private BigDecimal endRentArea;
+	private BigDecimal startRentAmount;
+	private BigDecimal endRentAmount;
+	private Long userId;
+	private Long organizationId;
+	private String issuerType;
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public BigDecimal getStartRentArea() {
+		return startRentArea;
+	}
+
+	public void setStartRentArea(BigDecimal startRentArea) {
+		this.startRentArea = startRentArea;
+	}
+
+	public BigDecimal getEndRentArea() {
+		return endRentArea;
+	}
+
+	public void setEndRentArea(BigDecimal endRentArea) {
+		this.endRentArea = endRentArea;
+	}
+
+	public BigDecimal getStartRentAmount() {
+		return startRentAmount;
+	}
+
+	public void setStartRentAmount(BigDecimal startRentAmount) {
+		this.startRentAmount = startRentAmount;
+	}
+
+	public BigDecimal getEndRentAmount() {
+		return endRentAmount;
+	}
+
+	public void setEndRentAmount(BigDecimal endRentAmount) {
+		this.endRentAmount = endRentAmount;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Byte getStatus() {
 		return status;
 	}
 	public void setStatus(Byte status) {

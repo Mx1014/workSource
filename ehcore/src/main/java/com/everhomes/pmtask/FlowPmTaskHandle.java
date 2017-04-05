@@ -2,12 +2,16 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,6 +52,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private CommunityProvider communityProvider;
 	@Autowired
 	private FlowButtonProvider flowButtonProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -64,6 +70,9 @@ class FlowPmTaskHandle implements PmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+			Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+
+			createFlowCaseCommand.setTitle(taskCategory.getName());
 			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
@@ -89,7 +98,19 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+
+			String params = flowNode.getParams();
+
+			if(StringUtils.isBlank(params)) {
+				LOGGER.error("Invalid flowNode param.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+						"Invalid flowNode param.");
+			}
+
+			JSONObject paramJson = JSONObject.parseObject(params);
+			String nodeType = paramJson.getString("nodeType");
+
+			task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;
@@ -109,7 +130,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 
@@ -128,7 +149,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 
@@ -146,7 +167,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+			if(StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 

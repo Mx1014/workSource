@@ -594,7 +594,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(community != null) {
 			response.setNamespaceId(community.getNamespaceId());
 		}
-		
+
+		processServiceUrl(response);
 		return response;
 	}
 
@@ -712,12 +713,36 @@ public class YellowPageServiceImpl implements YellowPageService {
 				dto.setButtonTitle(sa.getButtonTitle());
 			}
 
+			processServiceUrl(dto);
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 
         }
         return response;
+	}
+
+	private void processServiceUrl(ServiceAllianceDTO dto) {
+		if (null != dto.getServiceUrl()) {
+			try {
+				String serviceUrl = dto.getServiceUrl();
+				dto.setDisplayServiceUrl(dto.getServiceUrl());
+				String routeUri = configurationProvider.getValue(ConfigConstants.APP_ROUTE_BROWSER_OUTER_URI, "");
+
+				serviceUrl = String.format(routeUri, serviceUrl);
+				int index = serviceUrl.indexOf("?");
+				if (index != -1) {
+					String prefix = serviceUrl.substring(0, index + 1);
+					serviceUrl = serviceUrl.substring(index + 1, serviceUrl.length());
+					serviceUrl = URLEncoder.encode(serviceUrl, "utf8");
+					serviceUrl = prefix + serviceUrl;
+				}
+
+				dto.setServiceUrl(serviceUrl);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
@@ -833,7 +858,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		
 		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
-		
+
 		if(null != serviceAlliance.getCategoryId()) {
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceAlliance.getCategoryId());
 			serviceAlliance.setServiceType(category.getName());

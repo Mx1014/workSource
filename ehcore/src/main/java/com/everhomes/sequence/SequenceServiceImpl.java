@@ -1250,6 +1250,15 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhDockingMappings.class, Tables.EH_DOCKING_MAPPINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOCKING_MAPPINGS.ID.max()).from(Tables.EH_DOCKING_MAPPINGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhLeaseIssuers.class, Tables.EH_LEASE_ISSUERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_ISSUERS.ID.max()).from(Tables.EH_LEASE_ISSUERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhLeaseIssuerAddresses.class, Tables.EH_LEASE_ISSUER_ADDRESSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_ISSUER_ADDRESSES.ID.max()).from(Tables.EH_LEASE_ISSUER_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhLeaseConfigs.class, Tables.EH_LEASE_CONFIGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_CONFIGS.ID.max()).from(Tables.EH_LEASE_CONFIGS).fetchOne().value1();
+        });
         syncTableSequence(null, EhServiceAllianceGolfRequests.class, Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS).fetchOne().value1();
         });
@@ -1273,6 +1282,16 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOauth2ClientTokens.class, Tables.EH_OAUTH2_CLIENT_TOKENS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_OAUTH2_CLIENT_TOKENS.ID.max()).from(Tables.EH_OAUTH2_CLIENT_TOKENS).fetchOne().value1();
         });
+        syncTableSequence(null, EhEnergyMeterPriceConfig.class, Tables.EH_ENERGY_METER_PRICE_CONFIG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_PRICE_CONFIG.ID.max()).from(Tables.EH_ENERGY_METER_PRICE_CONFIG).fetchOne().value1();
+        });
+        syncTableSequence(null, EhActivityVideo.class, Tables.EH_ACTIVITY_VIDEO.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACTIVITY_VIDEO.ID.max()).from(Tables.EH_ACTIVITY_VIDEO).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterDefaultSettings.class, Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.ID.max()).from(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

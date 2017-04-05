@@ -846,11 +846,11 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		return listUserByKeyword(keyword, null, namespaceId, locator, pageSize);
+		return listUserByKeyword(null, null, keyword, null, namespaceId, locator, pageSize);
 	}
 	
 	@Override
-	public List<User> listUserByKeyword(String keyword, Byte executiveFlag,
+	public List<User> listUserByKeyword(Byte gender, Long organizationId, String keyword, Byte executiveFlag,
 			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
 
 		List<User> list = new ArrayList<User>();
@@ -865,13 +865,26 @@ public class UserProviderImpl implements UserProvider {
 			if(executiveFlag != null){ 
 				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
 			}
+
+            if(gender != null){
+                cond = cond.and(Tables.EH_USERS.GENDER.eq(gender));
+            }
 			 
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		    }
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
-            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
-            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+
+            SelectOnConditionStep query = context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+		    if (null != organizationId) {
+                query.leftOuterJoin(Tables.EH_ORGANIZATION_MEMBERS).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+
+                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));            }
+
+            query.where(cond).groupBy(Tables.EH_USERS.ID).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);

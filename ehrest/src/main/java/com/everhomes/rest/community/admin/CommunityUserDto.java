@@ -1,6 +1,11 @@
 package com.everhomes.rest.community.admin;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -43,7 +48,18 @@ public class CommunityUserDto {
     private String position;
     private String identityNumber;
     private Byte gender;
-	
+
+	@ItemType(OrganizationDetailDTO.class)
+	private List<OrganizationDetailDTO> organizations;
+
+	public List<OrganizationDetailDTO> getOrganizations() {
+		return organizations;
+	}
+
+	public void setOrganizations(List<OrganizationDetailDTO> organizations) {
+		this.organizations = organizations;
+	}
+
 	public Byte getExecutiveFlag() {
 		return executiveFlag;
 	}

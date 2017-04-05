@@ -50,6 +50,12 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class NewTopicCommand {
+    private String ownerType;
+
+    private Long ownerId;
+
+    private Long currentOrgId;
+
     @NotNull
     private Long forumId;
     
@@ -290,6 +296,30 @@ public class NewTopicCommand {
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getCurrentOrgId() {
+        return currentOrgId;
+    }
+
+    public void setCurrentOrgId(Long currentOrgId) {
+        this.currentOrgId = currentOrgId;
+    }
 
     @Override
     public String toString() {

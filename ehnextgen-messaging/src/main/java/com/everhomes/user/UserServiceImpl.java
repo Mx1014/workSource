@@ -367,9 +367,10 @@ public class UserServiceImpl implements UserService {
      * 校验短信发送频率
      */
     private void verifySmsTimes(String smsAction, String identifierToken, String deviceId) {
-        RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "").getTemplate();
-        // 设置value的序列化，要不然下面的increment方法会报错
-        template.setValueSerializer(new StringRedisSerializer());
+    	//added by janson 消息序列化不正确的根本原因在于这里 03-31
+        RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "").getTemplate(new StringRedisSerializer());
+        // 设置value的序列化，要不然下面的increment方法会报错 
+//        template.setValueSerializer(new StringRedisSerializer()); 坚决不用这种写法，会导致消息模块报错！因为这个是设置全局的 template
         ValueOperations op = template.opsForValue();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();

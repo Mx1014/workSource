@@ -806,7 +806,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				cell8.setCellValue(category.getName());
 				Cell cell9 = tempRow.createCell(9);
 				cell9.setCellStyle(style);
-				cell9.setCellValue(convertStatus(task.getStatus()));
+				cell9.setCellValue(pmTaskCommonService.convertStatus(task.getStatus()));
 
 			}
 
@@ -837,21 +837,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}  
 		// 打开一个新的输入流  
 		return new ByteArrayInputStream(baos.toByteArray());
-	}
-	
-	private String convertStatus(Byte status){
-		if(status == 1)
-			return "未处理";
-		else if(status == 2)
-			return "已分派";
-		else if(status == 3)
-			return "已完成";
-		else if(status == 4)
-			return "已关闭";
-		else if(status == 5)
-			return "已回访";
-		else
-			return "";
 	}
 
 	@Override
@@ -1820,13 +1805,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 
+		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
+
 		User user = UserContext.current().getUser();
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
 			if (null == userIdentifier) {
-				LOGGER.error(" User not found", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_INFO,
-						"User not found");
+				return response;
 			}
 			user = userProvider.findUserById(userIdentifier.getOwnerUid());
 		}
@@ -1834,7 +1819,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
-		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
 	    if(null != namespaceDetail) {

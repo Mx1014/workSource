@@ -2,6 +2,8 @@ package com.everhomes.messaging;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,10 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class MessagingKickoffServiceImpl implements MessagingKickoffService {
@@ -19,6 +25,9 @@ public class MessagingKickoffServiceImpl implements MessagingKickoffService {
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
+
+    @Autowired
+    private UserService userService;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     private String messageBoxPrefix = "kickoff:";

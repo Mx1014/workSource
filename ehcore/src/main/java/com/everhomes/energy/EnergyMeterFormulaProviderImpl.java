@@ -49,9 +49,12 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
     }
 
     @Override
-    public List<EnergyMeterFormula> listMeterFormulas(Integer namespaceId, Byte formulaType) {
+    public List<EnergyMeterFormula> listMeterFormulas(Long ownerId, String ownerType, Long communityId, Integer namespaceId, Byte formulaType) {
         return context().selectFrom(EH_ENERGY_METER_FORMULAS)
                 .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_FORMULAS.OWNER_ID.eq(ownerId))
+                .and(EH_ENERGY_METER_FORMULAS.OWNER_TYPE.eq(ownerType))
+                .and(EH_ENERGY_METER_FORMULAS.COMMUNITY_ID.eq(communityId))
                 .and(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType))
                 .fetchInto(EnergyMeterFormula.class);

@@ -20,4 +20,6 @@ public interface ActivityVideoProvider {
 
     ActivityVideo getActivityVideoByActivityId(Long activityId);
 
+    ActivityVideo getActivityVideoByVid(String vid);
+
 }

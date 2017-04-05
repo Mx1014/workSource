@@ -7,7 +7,7 @@ package com.everhomes.rest.techpark.expansion;
  * */
 public enum LeasePromotionStatus {
 	
-	RENTING((byte)1), RENTAL((byte)2), OFFLINE((byte)3);
+	INACTIVE((byte)0), RENTING((byte)1), RENTAL((byte)2), OFFLINE((byte)3);
 	
 	private byte code;
 	

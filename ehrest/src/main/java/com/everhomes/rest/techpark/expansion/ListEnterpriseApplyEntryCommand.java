@@ -9,7 +9,7 @@ package com.everhomes.rest.techpark.expansion;
  * <li>communityId：小区id</li>
  * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3)</li>
  * <li>sourceType：招租类型{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}</li> 
- * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li> 
+ * <li>status：  参考{@link com.everhomes.rest.techpark.expansion.ApplyEntryStatus}}</li>
  * <li>buildingId： 楼栋id-如果为空就是搜全部</li> 
  * </ul>
  */
@@ -28,8 +28,28 @@ public class ListEnterpriseApplyEntryCommand {
 	private String sourceType; //1:enterprise 2:chuangke space 
     
 	private Long buildingId;
-    
-    public Integer getNamespaceId() {
+
+	private String issuerType;
+
+	private Long LeaseIssuerId;
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Long getLeaseIssuerId() {
+		return LeaseIssuerId;
+	}
+
+	public void setLeaseIssuerId(Long leaseIssuerId) {
+		LeaseIssuerId = leaseIssuerId;
+	}
+
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 	public void setNamespaceId(Integer namespaceId) {

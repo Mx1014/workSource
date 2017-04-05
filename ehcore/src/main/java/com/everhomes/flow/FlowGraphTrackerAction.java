@@ -51,7 +51,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		
 		if(event != null) {
 			FlowSubject subject = event.getSubject();
-			if(subject.getContent() != null && !subject.getContent().isEmpty()) {
+			if(subject != null && subject.getContent() != null && !subject.getContent().isEmpty()) {
 				log.setSubjectId(subject.getId());	
 			} else {
 				log.setSubjectId(0l);
