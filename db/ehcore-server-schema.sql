@@ -1189,7 +1189,17 @@ CREATE TABLE `eh_buildings` (
   `floor_count` VARCHAR(64),
   `namespace_building_type` VARCHAR(128),
   `namespace_building_token` VARCHAR(128),
-  
+  `traffic_description` text,
+  `lift_description` text,
+  `pm_description` text,
+  `parking_lot_description` text,
+  `environmental_description` text,
+  `power_description` text,
+  `telecommunication_description` text,
+  `air_condition_description` text,
+  `security_description` text,
+  `fire_control_description` text,
+
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2079,6 +2089,26 @@ CREATE TABLE `eh_energy_count_statistics` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+--
+-- 梯度价格表
+--
+CREATE TABLE `eh_energy_meter_price_config` (
+  `id`           BIGINT  NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price configs, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+
+  `name`         VARCHAR(255) COMMENT 'config name',
+  `description`      VARCHAR(512) COMMENT 'description config',
+  `expression`   VARCHAR(1024) COMMENT 'expression json',
+  `status`       TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid`  BIGINT,
+  `create_time`  DATETIME,
+  `update_uid`   BIGINT,
+  `update_time`  DATETIME,
+  PRIMARY KEY (`id`)
+);
 
 --
 -- 每日水电报表
@@ -2111,6 +2141,8 @@ CREATE TABLE `eh_energy_date_statistics` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费',
+  `config_id` BIGINT COMMENT 'if setting_type is price and  have this value',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2131,6 +2163,9 @@ CREATE TABLE `eh_energy_meter_categories` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price formulas, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2177,6 +2212,11 @@ CREATE TABLE `eh_energy_meter_default_settings` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price formulas, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费',
+  `config_id` BIGINT COMMENT 'if setting_type is price and  have this value',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2218,6 +2258,9 @@ CREATE TABLE `eh_energy_meter_formulas` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price formulas, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2265,6 +2308,8 @@ CREATE TABLE `eh_energy_meter_setting_logs` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费',
+  `config_id` BIGINT COMMENT 'if setting_type is price and  have this value',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2296,6 +2341,11 @@ CREATE TABLE `eh_energy_meters` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the price energy meter, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费',
+  `config_id` BIGINT COMMENT 'if setting_type is price and  have this value',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -2331,6 +2381,9 @@ CREATE TABLE `eh_energy_month_statistics` (
   `create_time` DATETIME,
   `update_uid` BIGINT,
   `update_time` DATETIME,
+  `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费',
+  `config_id` BIGINT COMMENT 'if setting_type is price and  have this value',
+  
   PRIMARY KEY (`id`)
   
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -2622,6 +2675,11 @@ CREATE TABLE `eh_enterprise_op_requests` (
   `process_message` TEXT,
   `process_time` DATETIME,
   `contract_id` BIGINT COMMENT 'eh_contracts id',
+  `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user',
+  `building_id` BIGINT NOT NULL DEFAULT 0,
+  `address_id` BIGINT NOT NULL DEFAULT 0,
+  `flowcase_id` BIGINT NOT NULL DEFAULT 0,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -3301,7 +3359,8 @@ CREATE TABLE `eh_flow_cases` (
   `case_type` VARCHAR(64) COMMENT 'inner, outer etc',
   `content` TEXT,
   `evaluate_score` INTEGER NOT NULL DEFAULT 0,
-
+  `title` VARCHAR(64) NULL AFTER `evaluate_score`,
+  
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
   `string_tag3` VARCHAR(128),
@@ -4249,7 +4308,7 @@ CREATE TABLE `eh_lease_promotions` (
   `rent_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent',
   `poster_uri` VARCHAR(128),
   `subject` VARCHAR(512),
-  `rent_areas` VARCHAR(100),
+  `rent_areas` DECIMAL(10,2),
   `description` TEXT,
   `create_uid` BIGINT,
   `create_time` DATETIME,
@@ -4262,10 +4321,51 @@ CREATE TABLE `eh_lease_promotions` (
   `enter_time` DATETIME COMMENT 'enter time',
   `namespace_type` VARCHAR(128),
   `namespace_token` VARCHAR(256),
+  `enter_time_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+  `address_id` BIGINT NOT NULL DEFAULT 0,
+  `orientation` VARCHAR(128),
+  `rent_amount` DECIMAL(10,2),
+  `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_lease_issuers` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `issuer_contact` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent',
+  `issuer_name` VARCHAR(128),
+  `enterprise_id` BIGINT COMMENT 'enterprise id',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `status` TINYINT COMMENT '0: inactive, 2: active',
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_lease_issuer_addresses` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `lease_issuer_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
+  `building_id` BIGINT COMMENT 'building id ',
+  `address_id` BIGINT COMMENT 'address id ',
+  `status` TINYINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `eh_lease_configs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `rent_amount_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+  `issuing_lease_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+  `issuer_manage_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+  `park_indroduce_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+  `renew_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of global parition
