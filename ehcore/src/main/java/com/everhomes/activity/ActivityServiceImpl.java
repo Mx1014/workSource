@@ -719,7 +719,10 @@ public class ActivityServiceImpl implements ActivityService {
 			rosters.remove(rosters.size()-1);
 			nextPageOffset = cmd.getPageOffset() + 1;
 		}
-		return new ListSignupInfoResponse(nextPageOffset, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
+		
+		Integer unConfirmCount = activityProvider.countActivityRoster(cmd.getActivityId(), new Integer(ActivityRosterStatusFlag.ACTIVITYROSTER_UNCONFIRM.getCode()));
+		
+		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
 	@Override

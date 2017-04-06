@@ -14,6 +14,7 @@ import com.everhomes.discover.ItemType;
  */
 public class ListSignupInfoResponse {
 	private Integer nextPageOffset;
+	private Integer unConfirmCount;
 	@ItemType(SignupInfoDTO.class)
 	private List<SignupInfoDTO> signupInfoDTOs;
 
@@ -21,9 +22,10 @@ public class ListSignupInfoResponse {
 		super();
 	}
 
-	public ListSignupInfoResponse(Integer nextPageOffset, List<SignupInfoDTO> signupInfoDTOs) {
+	public ListSignupInfoResponse(Integer nextPageOffset, Integer unConfirmCount, List<SignupInfoDTO> signupInfoDTOs) {
 		super();
 		this.nextPageOffset = nextPageOffset;
+		this.unConfirmCount = unConfirmCount;
 		this.signupInfoDTOs = signupInfoDTOs;
 	}
 
@@ -33,6 +35,14 @@ public class ListSignupInfoResponse {
 
 	public void setNextPageOffset(Integer nextPageOffset) {
 		this.nextPageOffset = nextPageOffset;
+	}
+
+	public Integer getUnConfirmCount() {
+		return unConfirmCount;
+	}
+
+	public void setUnConfirmCount(Integer unConfirmCount) {
+		this.unConfirmCount = unConfirmCount;
 	}
 
 	public List<SignupInfoDTO> getSignupInfoDTOs() {
