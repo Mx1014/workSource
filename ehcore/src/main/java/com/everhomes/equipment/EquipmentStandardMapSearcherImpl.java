@@ -149,7 +149,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
         
         if(cmd.getReviewStatus() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewStatus", cmd.getReviewStatus()));
-        
+
+		if(cmd.getReviewResult() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("reviewResult", cmd.getReviewResult()));
+
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -222,6 +225,7 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
            
             b.field("reviewStatus", map.getReviewStatus());
+			b.field("reviewResult", map.getReviewResult());
             b.field("status", map.getStatus());
             
             EquipmentInspectionStandards standard = equipmentProvider.findStandardById(map.getStandardId());
