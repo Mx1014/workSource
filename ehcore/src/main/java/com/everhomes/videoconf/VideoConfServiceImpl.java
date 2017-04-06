@@ -1752,6 +1752,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 				String joinUrl = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
 				response.setJoinUrl(joinUrl);
+				//没有的话原样返回会议号 by xiongying20170406
+				response.setCondId(cmd.getConfId());
 			}
 			
 //			else {

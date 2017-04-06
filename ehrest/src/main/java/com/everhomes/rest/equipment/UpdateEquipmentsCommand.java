@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>pictureFlag: 是否需要拍照 0：否 1：是</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -105,7 +106,17 @@ public class UpdateEquipmentsCommand {
     private String remarks;
 
     private Long inspectionCategoryId;
-	
+
+	private Byte pictureFlag;
+
+	public Byte getPictureFlag() {
+		return pictureFlag;
+	}
+
+	public void setPictureFlag(Byte pictureFlag) {
+		this.pictureFlag = pictureFlag;
+	}
+
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
 	}
