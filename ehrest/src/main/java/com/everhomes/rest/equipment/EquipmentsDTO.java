@@ -108,6 +108,8 @@ public class EquipmentsDTO {
     private List<EquipmentStandardMapDTO> eqStandardMap;
     
     private String remarks;
+
+	private Byte pictureFlag;
     
     public Long getId() {
 		return id;

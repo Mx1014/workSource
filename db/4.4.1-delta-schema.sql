@@ -4,4 +4,4 @@ alter table `eh_activities`
    
    
 -- 设备表增加字段是否需要拍照 add by xiongying20170406
-ALTER TABLE `eh_activities` ADD COLUMN `picture_flag` tinyint(4) DEFAULT '1' NULL COMMENT 'whether need to take a picture while report equipment task, 0 not, 1 yes'
+ALTER TABLE `eh_equipment_inspection_equipments` ADD COLUMN `picture_flag` tinyint(4) DEFAULT '1' NULL COMMENT 'whether need to take a picture while report equipment task, 0 not, 1 yes'
