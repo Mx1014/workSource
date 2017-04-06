@@ -4,6 +4,9 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('acti
 -- 更新报修与工作流状态不同步 add by sw 20170206
 UPDATE eh_pm_tasks join (SELECT refer_id from eh_flow_cases where id in (SELECT flow_case_id from eh_pm_tasks where flow_case_id != 0) and `status` = 4) t on t.refer_id = id set `status` = 4;
 
+-- 处理设备-标准关联关系脏数据 add by xiongying20170406
+update eh_equipment_inspection_equipment_standard_map set review_status = 4 where target_id in(select id from eh_equipment_inspection_equipments where status = 0);
+
 -- 科技园报修 add by sw 20170406
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
 	VALUES (1000000, 'sms.default.yzx', 34, 'zh_CN', '物业任务分配人员', '40775');

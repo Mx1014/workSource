@@ -739,8 +739,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
-
-					unReviewEquipmentStandardRelations(map);
+					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
+						unReviewEquipmentStandardRelations(map);
+					}
 				}
 			}
 			
