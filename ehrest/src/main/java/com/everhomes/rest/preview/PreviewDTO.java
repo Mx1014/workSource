@@ -2,7 +2,13 @@
 package com.everhomes.rest.preview;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ *  <li>id: 预览内容id</li>
+ *  <li>content: 预览内容</li>
+ *  <li>contentType: 预览内容类型</li>
+ * </ul>
+ */
 public class PreviewDTO {
     private Long id;
     private String content;

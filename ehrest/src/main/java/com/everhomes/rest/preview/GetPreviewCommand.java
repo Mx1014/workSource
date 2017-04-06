@@ -5,7 +5,6 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author yanjun
  * <ul>
  *  <li>id: 预览内容id</li>
  * </ul>

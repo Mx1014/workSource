@@ -3,8 +3,6 @@ package com.everhomes.rest.preview;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * @author yanjun
  * <ul>
  *  <li>content: 预览内容</li>
  *  <li>contentType: 预览内容类型</li>
