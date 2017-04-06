@@ -1,7 +1,7 @@
 package com.everhomes.activity;
 
 public enum ConfirmStatus {
-    UN_CONFIRMED((byte) 0, "未确认"), CONFIRMED((byte) 1, "已确认");
+    UN_CONFIRMED((byte) 0, "未确认"), CONFIRMED((byte) 1, "已确认"), REJECT((byte) 2, "已驳回");
     private Byte code;
     private String text;
 

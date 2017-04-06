@@ -387,7 +387,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            if(user.getAddressId()!=null){
 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
 	            }
-	            activityProvider.createActivityRoster(roster);
+//	            activityProvider.createActivityRoster(roster);
+	            createActivityRoster(roster);
+	            
 	            activityProvider.updateActivity(activity);
 //	            return status;
 	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -461,7 +463,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
-	            activityProvider.createActivityRoster(roster);
+	            
+	            createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
 	        });
@@ -469,6 +472,16 @@ public class ActivityServiceImpl implements ActivityService {
     	
 		return convertActivityRoster(activityRoster, outActivity);
 	}
+    
+    //如果原来已经报过（驳回，重复报名），则更新。
+    private void createActivityRoster(ActivityRoster roster){
+    	ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(roster.getActivityId(), roster.getUid());
+        if(oldRoster != null){
+        	activityProvider.deleteRoster(oldRoster);
+        }
+        activityProvider.createActivityRoster(roster);
+        
+    }
 
 	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
@@ -720,7 +733,7 @@ public class ActivityServiceImpl implements ActivityService {
 			nextPageOffset = cmd.getPageOffset() + 1;
 		}
 		
-		Integer unConfirmCount = activityProvider.countActivityRoster(cmd.getActivityId(), new Integer(ActivityRosterStatusFlag.ACTIVITYROSTER_UNCONFIRM.getCode()));
+		Integer unConfirmCount = activityProvider.countActivityRoster(cmd.getActivityId(), new Integer(ConfirmStatus.UN_CONFIRMED.getCode()));
 		
 		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
@@ -1253,7 +1266,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
         LOGGER.info("check roster the current roster is {}",userRoster);
-        if(userRoster==null){
+        if(userRoster==null || ConfirmStatus.REJECT.getCode().equals(userRoster.getConfirmFlag())){
             return ActivityStatus.UN_SIGNUP;
         }
         if (CheckInStatus.CHECKIN.getCode().equals(userRoster.getCheckinFlag())) {
@@ -1458,7 +1471,7 @@ public class ActivityServiceImpl implements ActivityService {
         int total = roster.getAdultCount() + roster.getChildCount();
         dbProvider.execute(status->{
             //need lock
-            activityProvider.deleteRoster(roster);
+//            activityProvider.deleteRoster(roster);
             if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
@@ -1475,6 +1488,10 @@ public class ActivityServiceImpl implements ActivityService {
             if(roster.getConfirmFamilyId()!=null)
                 activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
             activityProvider.updateActivity(activity);
+            
+            roster.setConfirmFlag(ConfirmStatus.REJECT.getCode());
+            activityProvider.updateRoster(roster);
+            
             return status;
         });
         

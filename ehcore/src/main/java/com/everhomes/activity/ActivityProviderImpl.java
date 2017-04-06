@@ -275,7 +275,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId) {
-       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.ne(ConfirmStatus.REJECT.getCode()));
     }
     
     
