@@ -2069,7 +2069,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+//                    engine.put(MeterFormulaVariable.AMOUNT.getCode(), realAmount);
                     realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
                 }
 
@@ -2292,10 +2292,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
             BigDecimal realCost = new BigDecimal(0);
+            
             if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                     PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
                 ScriptEngine engine = manager.getEngineByName("js");
-                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
+                //由于currentAmount其实是realAmount  已经算了一遍times，所以此处times赋值为1 by xiongying20170401
+                engine.put(MeterFormulaVariable.TIMES.getCode(), 1);
                 realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
             }
 
