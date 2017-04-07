@@ -4,6 +4,18 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES('acti
 -- 更新报修与工作流状态不同步 add by sw 20170206
 UPDATE eh_pm_tasks join (SELECT refer_id from eh_flow_cases where id in (SELECT flow_case_id from eh_pm_tasks where flow_case_id != 0) and `status` = 4) t on t.refer_id = id set `status` = 4;
 
+-- 配置ufine会议室预订，并把app上快递改成会议室add by tt, 20170407
+update eh_rentalv2_resource_types set pay_mode = 1 where id = 61;
+select id into @id from eh_launch_pad_items where namespace_id = 999990 and item_label = '快递' and scene_type = 'park_tourist';
+delete from eh_launch_pad_items where id = @id;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES (@id, 999990, 0, 0, 0, '/home', 'Bizs', 'MEETINGROOM', '会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', 1, 1, 49, '{"resourceTypeId":60,"pageType":0,"payMode":1}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, NULL, NULL);
+select id into @id from eh_launch_pad_items where namespace_id = 999990 and item_label = '快递' and scene_type = 'pm_admin';
+delete from eh_launch_pad_items where id = @id;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES (@id, 999990, 0, 0, 0, '/home', 'Bizs', 'MEETINGROOM', '会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', 1, 1, 49, '{"resourceTypeId":60,"pageType":0,"payMode":1}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, NULL, NULL);
+
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9EUTJOV1k1WXpBME1EY3pOR0V3TXpJM1l6QmhaakpqT1dVM1lUTTRNUQ' where namespace_id = 999990 and action_type = 49;
+update eh_launch_pad_items set action_data='{"resourceTypeId":61,"pageType":0,"payMode":1}' where namespace_id = 999990 and action_type = 49 and scope_code = 0;
+
 -- 处理设备-标准关联关系脏数据 add by xiongying20170406
 update eh_equipment_inspection_equipment_standard_map set review_status = 4 where target_id in(select id from eh_equipment_inspection_equipments where status = 0);
 
