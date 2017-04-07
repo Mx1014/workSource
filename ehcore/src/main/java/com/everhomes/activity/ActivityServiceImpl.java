@@ -536,6 +536,7 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setPosition(cmd.getPosition());
         roster.setLeaderFlag(cmd.getLeaderFlag());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+        roster.setEmail(cmd.getEmail());
         
         return roster;
 	}
@@ -580,6 +581,7 @@ public class ActivityServiceImpl implements ActivityService {
 		roster.setOrganizationName(cmd.getOrganizationName());
 		roster.setPosition(cmd.getPosition());
 		roster.setLeaderFlag(cmd.getLeaderFlag());
+		roster.setEmail(cmd.getEmail());
 		return roster;
 	}
 
@@ -671,6 +673,7 @@ public class ActivityServiceImpl implements ActivityService {
 	        roster.setOrganizationName(row.getE().trim());
 	        roster.setPosition(row.getF().trim());
 	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
+	        roster.setEmail(row.getH().trim());
 	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
 	        
 	        rosters.add(roster);
