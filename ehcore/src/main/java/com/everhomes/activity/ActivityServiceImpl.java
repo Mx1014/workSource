@@ -760,7 +760,7 @@ public class ActivityServiceImpl implements ActivityService {
 			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
 					"signupTime", "typeText", "sourceFlagText", "email"));
 			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "报名时间", "类型", "报名来源", "邮箱"));
-			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
 			
 			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
 				propertyNames.add("confirmFlagText");
