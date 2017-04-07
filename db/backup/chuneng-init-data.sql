@@ -832,6 +832,7 @@ delete from eh_launch_pad_items where id = @id;
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES (@id, 999990, 0, 0, 0, '/home', 'Bizs', 'MEETINGROOM', '会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', 1, 1, 49, '{"resourceTypeId":60,"pageType":0,"payMode":1}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, NULL, NULL);
 
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9EUTJOV1k1WXpBME1EY3pOR0V3TXpJM1l6QmhaakpqT1dVM1lUTTRNUQ' where namespace_id = 999990 and action_type = 49;
+update eh_launch_pad_items set action_data='{"resourceTypeId":61,"pageType":0,"payMode":1}' where namespace_id = 999990 and action_type = 49 and scope_code = 0;
 
 	
 	
