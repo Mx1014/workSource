@@ -24,6 +24,10 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -38,7 +42,9 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.region.RegionServiceErrorCode;
@@ -56,6 +62,7 @@ import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.hibernate.sql.Update;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.Record4;
@@ -97,6 +104,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     @Autowired
     private RegionProvider regionProvider;
@@ -1609,12 +1619,23 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			
 			this.batchAddAddresses(community, datas);
 			
+			updateCommunityAptCount(community);
 		} catch (Exception e) {
 			throw new RuntimeErrorException("File parsing error", e);
 		}
 		
 	}
 	
+	private void updateCommunityAptCount(Community community) {
+		if (community != null) {
+			Integer count = addressProvider.countApartment(community.getId());
+			if (community.getAptCount() == null || community.getAptCount().intValue() != count.intValue()) {
+				community.setAptCount(count);
+				communityProvider.updateCommunity(community);
+			}
+		}
+	}
+
 	@Override
 	public void importAddressData(MultipartFile[] files) {
 		
@@ -1663,9 +1684,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		}
 		
 	}
+	private Long findOrganizationByCommunity(Community community) {
+		if (community != null) {
+			List<OrganizationCommunityDTO> list = organizationProvider.findOrganizationCommunityByCommunityId(community.getId());
+			if (list != null && !list.isEmpty()) {
+				return list.get(0).getOrganizationId();
+			}
+		}
+		return null;
+	}
 	
 	private void batchAddAddresses(Community community, List<String[]> datas){
-		
+		Long organizationId = findOrganizationByCommunity(community);
 		for (String[] arr : datas) {
 			
 			if(org.springframework.util.StringUtils.isEmpty(arr[0]) 
@@ -1709,11 +1739,31 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			
 			if(null != addr){
 				LOGGER.error("Data already exists. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
+				insertOrganizationAddressMapping(organizationId, community, addr);
 				continue;
 			}
 			addressProvider.createAddress(address);
+			insertOrganizationAddressMapping(organizationId, community, address);
 		}
 	}
+	
+	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address) {
+		if (organizationId != null && community != null && address != null) {
+			CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
+			if (communityAddressMapping == null) {
+				CommunityAddressMapping addressMapping = new CommunityAddressMapping();
+				addressMapping.setOrganizationId(organizationId);
+				addressMapping.setCommunityId(community.getId());
+				addressMapping.setAddressId(address.getId());
+				addressMapping.setOrganizationAddress(address.getAddress());
+				addressMapping.setLivingStatus(PmAddressMappingStatus.DEFAULT.getCode());
+				addressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				addressMapping.setUpdateTime(addressMapping.getCreateTime());
+				organizationProvider.createOrganizationAddressMapping(addressMapping);
+			}
+		}
+	}
+	
 	
 	 private Map<String, List<String[]>> convertToAddrDatas(List list) {
 		 Map<String, List<String[]>> map = new HashMap<String, List<String[]>>();

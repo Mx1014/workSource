@@ -739,8 +739,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
-
-					unReviewEquipmentStandardRelations(map);
+					if(EquipmentReviewStatus.REVIEWED.equals(EquipmentReviewStatus.fromStatus(map.getReviewStatus()))) {
+						unReviewEquipmentStandardRelations(map);
+					}
 				}
 			}
 			
@@ -2045,6 +2046,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	dto.setEquipmentName(equipment.getName());
         	dto.setEquipmentLocation(equipment.getLocation());
         	dto.setQrCodeFlag(equipment.getQrCodeFlag());
+			dto.setPictureFlag(equipment.getPictureFlag());
         }
         
         Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());

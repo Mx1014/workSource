@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -22,18 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphEvent;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowUserSelection;
-import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
@@ -96,15 +85,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		//当前节点已经变成上一个节点
-		FlowGraphNode currentNode = ctx.getPrefixNode();
+//		FlowGraphNode currentNode = ctx.getPrefixNode();
 
-		if (null == currentNode)
+		//业务的下一个节点是当前节点
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+
+		if (null == currentNode || currentNode instanceof FlowGraphNodeEnd)
 			return;
 
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
-		//业务的下一个节点是当前节点
-		FlowNode nextNode = ctx.getCurrentNode().getFlowNode();
+
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
@@ -150,6 +141,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 
 			}else if ("PROCESSING".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+			}else if ("COMPLETED".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 			}
