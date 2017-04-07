@@ -23,6 +23,7 @@ import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.OpPromotionSearchCommand;
 import com.everhomes.rest.promotion.UpdateOpPromotionCommand;
+import com.everhomes.util.RequireAuthentication;
 
 @RestController
 @RequestMapping("/preview")
@@ -44,6 +45,7 @@ public class PreviewController extends ControllerBase {
     
     @RequestMapping("getPreview")
     @RestReturn(value=PreviewDTO.class)
+    @RequireAuthentication(false)
     public RestResponse getPreview(@Valid GetPreviewCommand cmd) {
     	PreviewDTO result = previewService.getPreview(cmd.getId());
     	RestResponse response = new RestResponse();
