@@ -37,3 +37,14 @@ UPDATE eh_launch_pad_items set default_order = (@order_ := @order_ + 1) where it
 UPDATE eh_launch_pad_items set default_order = (@order_ := @order_ + 1) where item_label = '嗒嗒会议室' and namespace_id = 999990;
 
 UPDATE eh_launch_pad_items set delete_flag = 0,icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU1qWTNZVEl3TVRBeE5tTXhNVEl3WmpKaE1EZ3dZVE13WlRRNU9UUXhNQQ' where item_label = '会议室' and namespace_id = 999990;
+
+-- 储能加任务管理菜单 add by sw 20170407
+SET @eh_web_menu_scopes = (SELECT max(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '70000', '', 'EhNamespaces', '999990', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '70100', '', 'EhNamespaces', '999990', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '70200', '', 'EhNamespaces', '999990', '2');
+
+
