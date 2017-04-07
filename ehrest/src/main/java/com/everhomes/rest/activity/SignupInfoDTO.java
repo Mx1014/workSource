@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>checkinFlag: 是否已签到，1是0否</li>
  * <li>signupTime: 报名时间 yyyy-MM-dd HH:MM</li>
  * <li>email: 邮箱</li>
+ * <li>order: 序号</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -47,6 +48,7 @@ public class SignupInfoDTO {
 	private Byte createFlag;
 	private String signupTime;
 	private String email;
+	private String order;
 	
 	public Byte getCreateFlag() {
 		return createFlag;
@@ -180,6 +182,12 @@ public class SignupInfoDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public String getOrder() {
+		return order;
+	}
+	public void setOrder(String order) {
+		this.order = order;
 	}
 	@Override
 	public String toString() {

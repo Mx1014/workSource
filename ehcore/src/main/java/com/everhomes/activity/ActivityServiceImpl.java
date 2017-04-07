@@ -495,7 +495,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		
 		if(activityRoster.getCreateTime() != null){
-			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:MM");
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
 		}
 		
@@ -757,10 +757,10 @@ public class ActivityServiceImpl implements ActivityService {
 			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
 			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
-			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
-					"signupTime", "typeText", "sourceFlagText", "email"));
-			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "报名时间", "类型", "报名来源", "邮箱"));
-			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
+					"typeText", "signupTime", "sourceFlagText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "邮箱", "类型", "报名时间", "报名来源"));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
 			
 			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
 				propertyNames.add("confirmFlagText");
@@ -773,6 +773,13 @@ public class ActivityServiceImpl implements ActivityService {
 				titleSizes.add(10);
 			}
 			
+			if(signupInfoDTOs.size() > 0){
+				signupInfoDTOs.get(0).setOrder("创建者");
+			}
+			for(int i=1; i<signupInfoDTOs.size(); i++){
+				signupInfoDTOs.get(i).setOrder(String.valueOf(i));
+			}
+			excelUtils.setNeedSequenceColumn(false);
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
 		}else {
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -786,7 +793,17 @@ public class ActivityServiceImpl implements ActivityService {
 		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag())==null?TrueOrFalseFlag.FALSE.getText():TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
 		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType())==null?UserAuthFlag.NOT_REGISTER.getText():UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
 		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
-		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		//signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		String configFlagText = "";
+		if(ConfirmStatus.CONFIRMED.getCode().equals(signupInfoDTO.getConfirmFlag())){
+			configFlagText = ConfirmStatus.CONFIRMED.getText();
+		}else if(ConfirmStatus.REJECT.getCode().equals(signupInfoDTO.getConfirmFlag())){
+			configFlagText = ConfirmStatus.REJECT.getText();
+		}else{
+			configFlagText = ConfirmStatus.UN_CONFIRMED.getText();
+		}
+		signupInfoDTO.setConfirmFlagText(configFlagText);
+		
 		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag())==null?CheckInStatus.UN_CHECKIN.getText():CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
 		return signupInfoDTO;
 	}
