@@ -10,4 +10,4 @@ CREATE TABLE `eh_previews` (
 ALTER TABLE `eh_links` ADD COLUMN `rich_content` longtext NULL COMMENT 'rich_content';
 
 -- 报名表里增加邮箱字段  2017-04-07 add by yanjun
-ALTER TABLE `eh_activity_roster` ADD COLUMN `email` VARCHAR(200) NULL ;
+ALTER TABLE `eh_activity_roster`  ADD COLUMN `email` VARCHAR(128) NULL ;
