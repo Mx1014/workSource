@@ -22,8 +22,8 @@ public enum ParkingCarLockStatus {
         return code;
     }
 
-    public static EnergyMeterStatus fromCode(Byte code) {
-        for (EnergyMeterStatus type : EnergyMeterStatus.values()) {
+    public static ParkingCarLockStatus fromCode(Byte code) {
+        for (ParkingCarLockStatus type : ParkingCarLockStatus.values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }
