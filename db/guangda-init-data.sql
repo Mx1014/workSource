@@ -104,7 +104,6 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 	VALUES(@organization_id, @community_id);
 
 
-
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
 	VALUES(@building1_id, @community_id, '光大We谷产业园1栋1号楼', 'A1栋', 0, '0769-22992838', '东莞市松山湖总部二路2号', 49267.68, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999979);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
@@ -707,3 +706,9 @@ SET @module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`) 
 SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
 menu_id IN (select id from eh_service_modules) AND `owner_id` = 999979;
+
+
+update eh_addresses set building_name = '光大We谷产业园1栋1号楼' where building_name = '1栋1号楼' and namespace_id = 999979;
+update eh_addresses set building_name = '光大We谷产业园1栋2号楼' where building_name = '1栋2号楼' and namespace_id = 999979;
+update eh_addresses set building_name = '光大We谷产业园2栋1号楼' where building_name = '2栋3号楼' and namespace_id = 999979;
+update eh_addresses set building_name = '光大We谷产业园2栋2号楼' where building_name = '2栋4号楼' and namespace_id = 999979;
