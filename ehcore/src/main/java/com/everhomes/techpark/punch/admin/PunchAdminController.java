@@ -429,7 +429,7 @@ public class PunchAdminController extends ControllerBase {
     @RequestMapping("importPunchScheduling")
     @RestReturn(value = String.class)
     public RestResponse importPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "attachment") MultipartFile[] files) {
-    	punchService.importPunchScheduling(files);
+    	punchService.importPunchScheduling(cmd , files);
         RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -766,9 +766,11 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <p>
 	 * 查询公司某部门/某人 考勤规则 
+	 * 已经废弃-by 2.5
 	 * </p>
 	 * <b>URL: /punch/getTargetPunchAllRule</b>
 	 */
+	@Deprecated
 	@RequestMapping("getTargetPunchAllRule")
 	@RestReturn(value = GetTargetPunchAllRuleResponse.class)
 	public RestResponse getTargetPunchAllRule(@Valid GetTargetPunchAllRuleCommand cmd) {
@@ -782,9 +784,12 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <p>
 	 * 设置公司某部门/某人 考勤规则 
+	 * 已经废弃-by2.5
 	 * </p>
 	 * <b>URL: /punch/updateTargetPunchAllRule</b>
 	 */
+
+	@Deprecated
 	@RequestMapping("updateTargetPunchAllRule")
 	@RestReturn(value = String.class)
 	public RestResponse updateTargetPunchAllRule(@Valid UpdateTargetPunchAllRuleCommand cmd) {

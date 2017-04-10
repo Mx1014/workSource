@@ -111,7 +111,7 @@ public interface PunchProvider {
  
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay);
 
-	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId, String name);
+	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId,String targetType , Long targetId, String name);
 
 	PunchTimeRule getPunchTimeRuleById(Long id);
 

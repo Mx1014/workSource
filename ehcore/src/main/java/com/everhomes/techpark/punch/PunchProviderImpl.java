@@ -391,7 +391,7 @@ long id = sequenceProvider.getNextSequence(NameMapper
 	}
 
 	@Override
-	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String name) {
+	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String targetType , Long targetId,String name) {
 	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -402,6 +402,10 @@ long id = sequenceProvider.getNextSequence(NameMapper
 			query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != targetType)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId));
 		
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {

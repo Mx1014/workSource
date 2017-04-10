@@ -5,15 +5,28 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+
+
+
+
+import javassist.runtime.DotClass;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
@@ -29,10 +42,12 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchTimeRule;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
@@ -49,11 +64,36 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	private static final Long MILLISECONDGMT=8*3600*1000L;
 	private static final Long DAY_MILLISECONDGMT=24*3600*1000L;
 	
-	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
-	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final SimpleDateFormat dateMinutesSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
+//	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+//	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//	private static final SimpleDateFormat dateMinutesSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
+    private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
+    }; 
+    private static ThreadLocal<SimpleDateFormat> timeSF = new ThreadLocal<SimpleDateFormat>(){
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm:ss");
+        }
+    }; 
+    private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>(){
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMM");
+        }
+    }; 
+    private static ThreadLocal<SimpleDateFormat> datetimeSF = new ThreadLocal<SimpleDateFormat>(){
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        }
+    };
+    private static ThreadLocal<SimpleDateFormat> dateMinutesSF = new ThreadLocal<SimpleDateFormat>(){
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        }
+    };
 	@Autowired
 	private ApprovalCategoryProvider approvalCategoryProvider;
 	
@@ -184,8 +224,8 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		for (TimeRange timeRange : timeRangeList) {
 			if (!punchService.isWorkDay(new Date(timeRange.getFromTime()), punchRule)
 					|| !punchService.isWorkDay(new Date(timeRange.getEndTime()), punchRule)
-					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule)
-					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule)
+					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule,new Date(timeRange.getFromTime()))
+					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule,new Date(timeRange.getEndTime()))
 					|| punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
 				return true;
 			}
@@ -215,14 +255,14 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 
 	private List<ApprovalDayActualTime> calculateActualResult(Long userId, PunchRule punchRule, List<TimeRange> timeRangeList) {
-		PunchTimeRule punchTimeRule = punchService.getPunchTimeRule(punchRule);
 		List<ApprovalDayActualTime> approvalDayActualTimeList = new ArrayList<>();
 		timeRangeList.forEach(a->{
 			//如果不跨天
 			if (punchService.isSameDay(new Date(a.getFromTime()), new Date(a.getEndTime()))) {
-				
+				Date fromTime = new Date(a.getFromTime());
+				PunchTimeRule fromPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), fromTime) ; 
 				//3. 如果请假时长大于等于应该上班时长，则记录实际请假时长为1天
-				a.setActualResult(calculateOneDayTime(a.getFromTime(), a.getEndTime(), punchTimeRule));
+				a.setActualResult(calculateOneDayTime(a.getFromTime(), a.getEndTime(), fromPunchTimeRule));
 				//4. 计算每天的具体时长
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
@@ -233,55 +273,94 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				//如果跨天
 				//(一)直接计算天数，起止时间分别在最晚上班时间之前，起止时间分别在最早下班之后，开始时间在最晚上班之前且结束时间在最早下班时间之后，开始时间在最早下班时间之后且结束时间在最晚上班时间之前
 				Date fromTime = new Date(a.getFromTime());
+				PunchTimeRule fromPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), fromTime) ;
 				Date endTime = new Date(a.getEndTime());
-				Time endEarlyTime = punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime());
-				if ((!Time.valueOf(timeSF.format(fromTime)).after(punchTimeRule.getStartLateTime()) && !Time.valueOf(timeSF.format(endTime)).after(punchTimeRule.getStartLateTime()))) {
+				PunchTimeRule endPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), endTime) ;
+				Time endEarlyTime = punchService.getEndTime(endPunchTimeRule.getStartEarlyTime(), endPunchTimeRule.getWorkTime());
+				if ((!Time.valueOf(timeSF.get().format(fromTime)).after(fromPunchTimeRule.getStartLateTime()) && !Time.valueOf(timeSF.get().format(endTime)).after(endPunchTimeRule.getStartLateTime()))) {
 					//起止时间分别在最晚上班时间之前
 					a.setActualResult(convertDayToActualResult(calculateDeltaDay(fromTime, endTime) - calculateNotWorkDay(fromTime, endTime, userId, punchRule)));
 					calculateEverydayResultWholeDay(userId, punchRule, fromTime, endTime, true, false, approvalDayActualTimeList);
-				}else if ((!Time.valueOf(timeSF.format(fromTime)).before(endEarlyTime) && !Time.valueOf(timeSF.format(endTime)).before(endEarlyTime))) {
+				}else if ((!Time.valueOf(timeSF.get().format(fromTime)).before(endEarlyTime) && !Time.valueOf(timeSF.get().format(endTime)).before(endEarlyTime))) {
 					//起止时间分别在最早下班之后
 					a.setActualResult(convertDayToActualResult(calculateDeltaDay(fromTime, endTime) - calculateNotWorkDay(fromTime, endTime, userId, punchRule)));
 					calculateEverydayResultWholeDay(userId, punchRule, fromTime, endTime, false, true, approvalDayActualTimeList);
-				}else if (!Time.valueOf(timeSF.format(fromTime)).after(punchTimeRule.getStartLateTime()) && !Time.valueOf(timeSF.format(endTime)).before(endEarlyTime)) {
+				}else if (!Time.valueOf(timeSF.get().format(fromTime)).after(fromPunchTimeRule.getStartLateTime()) && !Time.valueOf(timeSF.get().format(endTime)).before(endEarlyTime)) {
 					//开始时间在最晚上班之前且结束时间在最早下班时间之后
 					a.setActualResult(convertDayToActualResult(calculateDeltaDay(fromTime, endTime) + 1 - calculateNotWorkDay(fromTime, endTime, userId, punchRule)));
 					calculateEverydayResultWholeDay(userId, punchRule, fromTime, endTime, true, true, approvalDayActualTimeList);
-				}else if (!Time.valueOf(timeSF.format(fromTime)).before(endEarlyTime) && !Time.valueOf(timeSF.format(endTime)).after(punchTimeRule.getStartLateTime())) {
+				}else if (!Time.valueOf(timeSF.get().format(fromTime)).before(endEarlyTime) && !Time.valueOf(timeSF.get().format(endTime)).after(endPunchTimeRule.getStartLateTime())) {
 					//开始时间在最早下班时间之后且结束时间在最晚上班时间之前
 					a.setActualResult(convertDayToActualResult(calculateDeltaDay(fromTime, endTime) - 1 - calculateNotWorkDay(fromTime, endTime, userId, punchRule)));
 					calculateEverydayResultWholeDay(userId, punchRule, fromTime, endTime, false, false, approvalDayActualTimeList);
 				}else {
 					//(二)不直接计算天数
 					//0. 计算每天的实际时长
-					calculateEverydayResultTime(userId, punchRule, punchTimeRule, fromTime, endTime, approvalDayActualTimeList);
+					calculateEverydayResultTime(userId, punchRule, fromPunchTimeRule,endPunchTimeRule, fromTime, endTime, approvalDayActualTimeList);
 					//1. 格式化起止时间，如果小于最晚上班时间，则以最晚上班时间计算，如果大于最早下班时间，则以最早下班时间计算，分别记为fromTime, endTime
-					fromTime = formatTime(a.getFromTime(), punchTimeRule.getStartLateTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime())); //formatFromTime(a.getFromTime(), punchTimeRule.getStartLateTime());
-					endTime = formatTime(a.getEndTime(), punchTimeRule.getStartLateTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime())); //formatEndTime(a.getEndTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()));
-					//2. 计算午休时间差, 记为deltaNoonRestTime
-					long deltaNoonRestTime = punchTimeRule.getAfternoonArriveTime().getTime() - punchTimeRule.getNoonLeaveTime().getTime();
-					//3. 计算最早下班时间与最晚上班时间的时间差并扣除午休时间，记为deltaWorkTime
-					long deltaWorkTime = punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()).getTime() - punchTimeRule.getStartLateTime().getTime() - (deltaNoonRestTime);
-					//4. 计算最早下班时间到第二天最晚上班时间之间的时间差，记为deltaAcrossDayTime
-					long deltaAcrossDayTime = DAY_MILLISECONDGMT - (punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()).getTime() - punchTimeRule.getStartLateTime().getTime());
-					//5. 计算跨越的天数，即起止日期相减的天数，记为deltaDay
-					long deltaDay = calculateDeltaDay(fromTime, endTime);
-					//6. 计算午休时间次数，如果同在午休开始时间之前或同在午休结束时间之后，则与跨越天数相同，如果在正向两侧则为跨越天数+1，如果在反向两侧则为跨越开数-1，记为noonRestTimes
-					long noonRestTimes = 0L;
-					if ((!Time.valueOf(timeSF.format(fromTime)).after(punchTimeRule.getNoonLeaveTime()) && !Time.valueOf(timeSF.format(endTime)).after(punchTimeRule.getNoonLeaveTime()))
-							|| (!Time.valueOf(timeSF.format(fromTime)).before(punchTimeRule.getAfternoonArriveTime()) && !Time.valueOf(timeSF.format(endTime)).before(punchTimeRule.getAfternoonArriveTime()))) {
-						noonRestTimes = deltaDay;
-					}else if (!Time.valueOf(timeSF.format(fromTime)).after(punchTimeRule.getNoonLeaveTime()) && !Time.valueOf(timeSF.format(endTime)).before(punchTimeRule.getAfternoonArriveTime())) {
-						noonRestTimes = deltaDay + 1;
-					}else if (!Time.valueOf(timeSF.format(fromTime)).before(punchTimeRule.getAfternoonArriveTime()) && !Time.valueOf(timeSF.format(endTime)).after(punchTimeRule.getNoonLeaveTime())) {
-						noonRestTimes = deltaDay - 1;
+					fromTime = formatTime(a.getFromTime(), fromPunchTimeRule.getStartLateTime(), punchService.getEndTime(fromPunchTimeRule.getStartEarlyTime(), fromPunchTimeRule.getWorkTime())); //formatFromTime(a.getFromTime(), punchTimeRule.getStartLateTime());
+					endTime = formatTime(a.getEndTime(), endPunchTimeRule.getStartLateTime(), punchService.getEndTime(endPunchTimeRule.getStartEarlyTime(), endPunchTimeRule.getWorkTime())); //formatEndTime(a.getEndTime(), punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()));
+//					//2. 计算午休时间差, 记为deltaNoonRestTime
+//					long deltaNoonRestTime = punchTimeRule.getAfternoonArriveTime().getTime() - punchTimeRule.getNoonLeaveTime().getTime();
+//					//3. 计算最早下班时间与最晚上班时间的时间差并扣除午休时间，记为deltaWorkTime
+//					long deltaWorkTime = punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()).getTime() - punchTimeRule.getStartLateTime().getTime() - (deltaNoonRestTime);
+//					//4. 计算最早下班时间到第二天最晚上班时间之间的时间差，记为deltaAcrossDayTime
+//					long deltaAcrossDayTime = DAY_MILLISECONDGMT - (punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime()).getTime() - punchTimeRule.getStartLateTime().getTime());
+//					//5. 计算跨越的天数，即起止日期相减的天数，记为deltaDay
+//					long deltaDay = calculateDeltaDay(fromTime, endTime);
+//					//6. 计算午休时间次数，如果同在午休开始时间之前或同在午休结束时间之后，则与跨越天数相同，如果在正向两侧则为跨越天数+1，如果在反向两侧则为跨越开数-1，记为noonRestTimes
+//					long noonRestTimes = 0L;
+//					if ((!Time.valueOf(timeSF.get().format(fromTime)).after(punchTimeRule.getNoonLeaveTime()) && !Time.valueOf(timeSF.get().format(endTime)).after(punchTimeRule.getNoonLeaveTime()))
+//							|| (!Time.valueOf(timeSF.get().format(fromTime)).before(punchTimeRule.getAfternoonArriveTime()) && !Time.valueOf(timeSF.get().format(endTime)).before(punchTimeRule.getAfternoonArriveTime()))) {
+//						noonRestTimes = deltaDay;
+//					}else if (!Time.valueOf(timeSF.get().format(fromTime)).after(punchTimeRule.getNoonLeaveTime()) && !Time.valueOf(timeSF.get().format(endTime)).before(punchTimeRule.getAfternoonArriveTime())) {
+//						noonRestTimes = deltaDay + 1;
+//					}else if (!Time.valueOf(timeSF.get().format(fromTime)).before(punchTimeRule.getAfternoonArriveTime()) && !Time.valueOf(timeSF.get().format(endTime)).after(punchTimeRule.getNoonLeaveTime())) {
+//						noonRestTimes = deltaDay - 1;
+//					}
+//					//7. 计算非工作日的天数，记为deltaNotWorkDay
+//					long deltaNotWorkDay = calculateNotWorkDay(fromTime, endTime, userId, punchRule);
+//					//8. 得出公式，(endTime-fromTime)-deltaDay*deltaAcrossDayTime-noonRestTimes*deltaNoonRestTime-deltaNotWorkDay*deltaWorkTime=最终请假的时间，记为finalAbsentTime
+//					long finalAbsentTime = (endTime.getTime() - fromTime.getTime()) - deltaDay * deltaAcrossDayTime - noonRestTimes * deltaNoonRestTime - deltaNotWorkDay * deltaWorkTime;
+//					//9. 如果以上最终请假时间大于（不包含）deltaWorkTime，则finalAbsentTime/deltaWorkTime的结果即为天数，余数即为小时分钟数
+					 
+					MyDate myDate = new MyDate();
+					long finalAbsentTime = 0l;
+					Calendar startCalendar = Calendar.getInstance();
+					startCalendar.setTime(fromTime);
+					startCalendar.set(Calendar.HOUR_OF_DAY, 1);
+					Calendar endCalendar = Calendar.getInstance();
+					endCalendar.setTime(endTime);
+					endCalendar.set(Calendar.HOUR_OF_DAY, 2);
+					for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
+						PunchTimeRule dayPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), startCalendar.getTime()) ;
+						
+						PunchTimeRuleDTO dto = ConvertHelper.convert(dayPunchTimeRule, PunchTimeRuleDTO.class); 
+						dto.setAfternoonArriveTime(null!=dayPunchTimeRule.getAfternoonArriveTimeLong()?dayPunchTimeRule.getAfternoonArriveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getAfternoonArriveTime()));
+						dto.setNoonLeaveTime(null!=dayPunchTimeRule.getNoonLeaveTimeLong()?dayPunchTimeRule.getNoonLeaveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getNoonLeaveTime()));
+						dto.setStartEarlyTime(null!=dayPunchTimeRule.getStartEarlyTimeLong()?dayPunchTimeRule.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartEarlyTime()));
+						dto.setStartLateTime(null!=dayPunchTimeRule.getStartLateTimeLong()?dayPunchTimeRule.getStartLateTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartLateTime()));
+						
+						dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=dayPunchTimeRule.getWorkTimeLong()?dayPunchTimeRule.getWorkTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getWorkTime())));
+						dto.setDaySplitTime(null!=dayPunchTimeRule.getDaySplitTimeLong()?dayPunchTimeRule.getDaySplitTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getDaySplitTime()));
+						if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(fromTime))){
+							//如果是开始日 则计算小时分钟
+							
+							Long fromTimeLong = punchService.convertTimeToGMTMillisecond(new Time(fromTime.getTime())); 
+							caculateAbsentDate(myDate,fromTimeLong,dto);
+						}else if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(endTime))){
+							//如果是结束日 则计算小时分钟
+							Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime())); 
+							caculateAbsentDate(myDate,endTimeLong,dto);
+							
+						}else{
+							//如果非开始日和结束日,日期+1
+							int days = myDate.getDays()+1;
+							myDate.setDays(days);
+						}
+						
 					}
-					//7. 计算非工作日的天数，记为deltaNotWorkDay
-					long deltaNotWorkDay = calculateNotWorkDay(fromTime, endTime, userId, punchRule);
-					//8. 得出公式，(endTime-fromTime)-deltaDay*deltaAcrossDayTime-noonRestTimes*deltaNoonRestTime-deltaNotWorkDay*deltaWorkTime=最终请假的时间，记为finalAbsentTime
-					long finalAbsentTime = (endTime.getTime() - fromTime.getTime()) - deltaDay * deltaAcrossDayTime - noonRestTimes * deltaNoonRestTime - deltaNotWorkDay * deltaWorkTime;
-					//9. 如果以上最终请假时间大于（不包含）deltaWorkTime，则finalAbsentTime/deltaWorkTime的结果即为天数，余数即为小时分钟数
-					a.setActualResult(convertMsToActualResult(finalAbsentTime, deltaWorkTime));
+					a.setActualResult(myDate.toString());
 					
 				}
 			}
@@ -295,9 +374,53 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		return approvalDayActualTimeList;
 	}
 
+	private void caculateAbsentDate(MyDate myDate, Long timeLong, PunchTimeRuleDTO dto) {
+		long actualLong = 0l;
+		if(timeLong<=dto.getStartLateTime()){
+			//0.x<最晚上班时间
+			//请假日期+1
+			int days = myDate.getDays()+1;
+			myDate.setDays(days);
+		}else if(timeLong<=dto.getNoonLeaveTime()){
+			//1.最晚上班时间<x<=午休开始时间
+			// 中午下班-请假时间 +最早下班-下午上班
+			actualLong = dto.getNoonLeaveTime()-timeLong + dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
+		}else if(timeLong<=dto.getAfternoonArriveTime()){
+			//2.午休开始时间<x<=午休结束时间  
+			//最早下班-下午上班
+			actualLong =   dto.getEndEarlyTime()-dto.getAfternoonArriveTime();
+
+		}else if(timeLong<=dto.getEndEarlyTime()){
+			//3.午休结束时间<x<=最早下班时间
+			//最早下班-请假时间
+			actualLong =   dto.getEndEarlyTime()-timeLong;
+			
+		}else{
+			//4.最早下班时间<x
+			//不管了
+		}
+
+		actualLong = actualLong / 1000 / 60;
+		int minutes = myDate.getMinutes() + Long.valueOf(actualLong % 60).intValue();
+		int hous = myDate.getHours() + Long.valueOf(actualLong / 60).intValue();
+		if(minutes > 60){
+			minutes -=60;
+			hous+=1;
+		}
+		if(hous >24){
+			hous -=60;
+			int days = myDate.getDays()+1;
+			myDate.setDays(days);
+		}
+		myDate.setHours(hous);
+		myDate.setMinutes(minutes);
+		
+	}
+
+
 	private String calculateOneDayTime(Long fromTimeLong, Long endTimeLong, PunchTimeRule punchTimeRule){
-		Time fromTime = Time.valueOf(timeSF.format(new Date(fromTimeLong)));
-		Time endTime = Time.valueOf(timeSF.format(new Date(endTimeLong)));
+		Time fromTime = Time.valueOf(timeSF.get().format(new Date(fromTimeLong)));
+		Time endTime = Time.valueOf(timeSF.get().format(new Date(endTimeLong)));
 		//1. 如果请假开始时间小于最晚上班时间，以最晚上班时间为准
 		//林园说就以实际请假的开始时间算
 //		if (fromTime.getTime() < punchTimeRule.getStartLateTime().getTime()) {
@@ -312,14 +435,14 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 	
 	//用于计算每天的实际请假时长（跨天）
-	private void calculateEverydayResultTime(Long userId, PunchRule punchRule, PunchTimeRule punchTimeRule,
+	private void calculateEverydayResultTime(Long userId, PunchRule punchRule, PunchTimeRule fromPunchTimeRule, PunchTimeRule endPunchTimeRule,
 			Date fromTime, Date endTime, List<ApprovalDayActualTime> approvalDayActualTimeList) {
 		Date date = fromTime;
-		Time earlyLeaveTime = punchService.getEndTime(punchTimeRule.getStartEarlyTime(), punchTimeRule.getWorkTime());
+		Time earlyLeaveTime = punchService.getEndTime(fromPunchTimeRule.getStartEarlyTime(), fromPunchTimeRule.getWorkTime());
 		//计算开始时间所在的日期
-		if (!Time.valueOf(timeSF.format(fromTime)).before(earlyLeaveTime)) {
+		if (!Time.valueOf(timeSF.get().format(fromTime)).before(earlyLeaveTime)) {
 			//如果开始时间在最早下班时间之后，则不需要计算
-		}else if (!Time.valueOf(timeSF.format(fromTime)).after(punchTimeRule.getStartLateTime())) {
+		}else if (!Time.valueOf(timeSF.get().format(fromTime)).after(fromPunchTimeRule.getStartLateTime())) {
 			//如果开始时间在最晚上班之前，表示是一完整天
 			ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 			actualTime.setUserId(userId);
@@ -332,7 +455,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			actualTime.setUserId(userId);
 			actualTime.setTimeDate(new java.sql.Date(fromTime.getTime()));
 			try {
-				actualTime.setActualResult(calculateOneDayTime(fromTime.getTime(), datetimeSF.parse(dateSF.format(fromTime)+" "+timeSF.format(earlyLeaveTime)).getTime(), punchTimeRule));
+				actualTime.setActualResult(calculateOneDayTime(fromTime.getTime(), datetimeSF.get().parse(dateSF.get().format(fromTime)+" "+timeSF.get().format(earlyLeaveTime)).getTime(), fromPunchTimeRule));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"calculate time error");
@@ -343,7 +466,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		while(true) {
 			date = new Date(date.getTime() + DAY_MILLISECONDGMT);
 			
-			if (dateSF.format(date).equals(dateSF.format(endTime))) {
+			if (dateSF.get().format(date).equals(dateSF.get().format(endTime))) {
 				break;
 			}
 			//如果是工作日，则表示是完整天
@@ -357,9 +480,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 		
 		//计算结束时间所在日期
-		if (!Time.valueOf(timeSF.format(endTime)).after(punchTimeRule.getStartLateTime())) {
+		if (!Time.valueOf(timeSF.get().format(endTime)).after(endPunchTimeRule.getStartLateTime())) {
 			//如果结束时间在最晚上班时间之前，则不计算
-		}else if (!Time.valueOf(timeSF.format(endTime)).before(earlyLeaveTime)) {
+		}else if (!Time.valueOf(timeSF.get().format(endTime)).before(earlyLeaveTime)) {
 			//如果结束时间在最早下班时间之后，则表示一完整天
 			ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 			actualTime.setUserId(userId);
@@ -372,7 +495,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			actualTime.setUserId(userId);
 			actualTime.setTimeDate(new java.sql.Date(endTime.getTime()));
 			try {
-				actualTime.setActualResult(calculateOneDayTime(datetimeSF.parse(dateSF.format(endTime)+" "+timeSF.format(punchTimeRule.getStartLateTime())).getTime(), endTime.getTime(), punchTimeRule));
+				actualTime.setActualResult(calculateOneDayTime(datetimeSF.get().parse(dateSF.get().format(endTime)+" "+timeSF.get().format(endPunchTimeRule.getStartLateTime())).getTime(), endTime.getTime(), endPunchTimeRule));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"calculate time error");
@@ -393,7 +516,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					actualTime.setActualResult(new MyDate(1, 0, 0).toString());
 					approvalDayActualTimeList.add(actualTime);
 				}
-			}else if (dateSF.format(date).equals(dateSF.format(endTime))) {
+			}else if (dateSF.get().format(date).equals(dateSF.get().format(endTime))) {
 				if (containEndTime) {
 					ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 					actualTime.setUserId(userId);
@@ -455,7 +578,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private long calculateDeltaDay(Date fromTime, Date endTime) {
 		try {
-			return (dateSF.parse(dateSF.format(endTime)).getTime() - dateSF.parse(dateSF.format(fromTime)).getTime()) / (DAY_MILLISECONDGMT);
+			return (dateSF.get().parse(dateSF.get().format(endTime)).getTime() - dateSF.get().parse(dateSF.get().format(fromTime)).getTime()) / (DAY_MILLISECONDGMT);
 		} catch (ParseException e) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"calculate delta day error");
@@ -464,18 +587,18 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	//不管对于开始时间还是结束时间，都需要格式化，如果小于最晚上班时间则格式化最晚上班时间，如果大于最早下班时间则格式化为最早下班时间
 	private Date formatTime(Long time, Time startLateTime, Time endEarlyTime) {
-		if (Time.valueOf(timeSF.format(new Date(time))).getTime() < startLateTime.getTime()) {
+		if (Time.valueOf(timeSF.get().format(new Date(time))).getTime() < startLateTime.getTime()) {
 			try {
-				return datetimeSF.parse(dateSF.format(new Date(time)) + " " + timeSF.format(startLateTime));
+				return datetimeSF.get().parse(dateSF.get().format(new Date(time)) + " " + timeSF.get().format(startLateTime));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"format time error");
 			}
 		}
 		
-		if (Time.valueOf(timeSF.format(new Date(time))).getTime() > endEarlyTime.getTime()) {
+		if (Time.valueOf(timeSF.get().format(new Date(time))).getTime() > endEarlyTime.getTime()) {
 			try {
-				return datetimeSF.parse(dateSF.format(new Date(time)) + " " + timeSF.format(endEarlyTime));
+				return datetimeSF.get().parse(dateSF.get().format(new Date(time)) + " " + timeSF.get().format(endEarlyTime));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"format end time error");
@@ -486,9 +609,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 	
 	private Date formatFromTime(Long fromTime, Time startLateTime) {
-		if (Time.valueOf(timeSF.format(new Date(fromTime))).getTime() < startLateTime.getTime()) {
+		if (Time.valueOf(timeSF.get().format(new Date(fromTime))).getTime() < startLateTime.getTime()) {
 			try {
-				return datetimeSF.parse(dateSF.format(new Date(fromTime)) + " " + timeSF.format(startLateTime));
+				return datetimeSF.get().parse(dateSF.get().format(new Date(fromTime)) + " " + timeSF.get().format(startLateTime));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"format from time error");
@@ -498,9 +621,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 
 	private Date formatEndTime(Long endTime, Time endEarlyTime) {
-		if (Time.valueOf(timeSF.format(new Date(endTime))).getTime() > endEarlyTime.getTime()) {
+		if (Time.valueOf(timeSF.get().format(new Date(endTime))).getTime() > endEarlyTime.getTime()) {
 			try {
-				return datetimeSF.parse(dateSF.format(new Date(endTime)) + " " + timeSF.format(endEarlyTime));
+				return datetimeSF.get().parse(dateSF.get().format(new Date(endTime)) + " " + timeSF.get().format(endEarlyTime));
 			} catch (ParseException e) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"format end time error");
@@ -670,7 +793,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(approvalRequest.getId());
 		StringBuilder sb = new StringBuilder();
 		if (ListUtils.isNotEmpty(approvalTimeRangeList)) {
-			approvalTimeRangeList.forEach(a->sb.append(dateMinutesSF.format(a.getFromTime())).append(" ~ ").append(dateMinutesSF.format(a.getEndTime())).append(", "));
+			approvalTimeRangeList.forEach(a->sb.append(dateMinutesSF.get().format(a.getFromTime())).append(" ~ ").append(dateMinutesSF.get().format(a.getEndTime())).append(", "));
 			if (sb.length()>1) {
 				return sb.substring(0, sb.length()-2);
 			}

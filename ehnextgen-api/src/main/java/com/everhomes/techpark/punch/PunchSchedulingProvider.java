@@ -1,5 +1,6 @@
 package com.everhomes.techpark.punch;
 
+import java.util.Date;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
@@ -17,5 +18,10 @@ public interface PunchSchedulingProvider {
 
 	List<PunchScheduling> queryPunchSchedulings(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long ruleId, Date time);
+
+	PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long ruleId, java.sql.Date time);
 
 }

@@ -10,7 +10,7 @@
   `target_type` VARCHAR(128)  COMMENT 'target resource(user/organization) type',
   `target_id` BIGINT  COMMENT 'target resource(user/organization) id', 
   `rule_date` DATE  COMMENT 'date',
-  `punch_rule_id` BIGINT COMMENT 'eh_punch_rules id --not necessary',
+  `punch_rule_id` BIGINT COMMENT 'eh_punch_rules id  ',
   `time_rule_id` BIGINT COMMENT 'eh_punch_time_rules id --null:not work day',
   `creator_uid` BIGINT ,
   `create_time` DATETIME ,
@@ -28,3 +28,19 @@ ALTER TABLE `eh_punch_time_rules` ADD COLUMN `work_time_long` BIGINT  COMMENT 'h
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `noon_leave_time_long` BIGINT ;
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `afternoon_arrive_time_long` BIGINT ;
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `day_split_time_long` BIGINT DEFAULT 18000000 COMMENT 'the time a day begin'  ;
+
+-- 请假申请增加统计表,用以每月的考勤统计
+-- 这个表在申请被审批的时候修改.
+CREATE TABLE `eh_approval_range_statistics` (
+  `id` BIGINT NOT NULL,
+  `punch_month` VARCHAR(8) DEFAULT NULL COMMENT 'yyyymm',
+  `owner_type` VARCHAR(128) DEFAULT NULL COMMENT 'owner resource(user/organization) type',
+  `owner_id` BIGINT DEFAULT NULL COMMENT 'owner resource(user/organization) id',
+  `user_id` BIGINT DEFAULT NULL COMMENT 'user id',   
+  `approval_type` TINYINT NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
+  `category_id` BIGINT DEFAULT NULL COMMENT 'concrete category id',
+  `actual_result` VARCHAR(128) DEFAULT NULL COMMENT 'actual result, e.g 1day3hours 1.3.0',
+  `creator_uid` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 ;

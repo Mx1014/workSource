@@ -1,8 +1,10 @@
 package com.everhomes.techpark.punch;
 
+import java.util.Date;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -98,4 +100,28 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 
     private void prepareObj(PunchScheduling obj) {
     }
+
+	@Override
+	public PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long id, Date time) { 
+		return  getPunchSchedulingByRuleDateAndTarget(id, new java.sql.Date(time.getTime()));
+	
+	}
+	@Override
+	public PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long id, java.sql.Date time) {
+	 
+		List<PunchScheduling> results = queryPunchSchedulings(null, 1, new ListingQueryBuilderCallback()  {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {  
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(time));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.PUNCH_RULE_ID.equal(id));
+//				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
+				return null;
+			}
+		});
+		if(null == results || results.size()==0)
+			return null;
+		else 
+			return results.get(0);
+	}
 }

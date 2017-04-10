@@ -176,9 +176,9 @@ public interface PunchService {
 
 	boolean isWorkDay(Date date1, PunchRule punchRule);
 
-	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
+//	PunchTimeRule getPunchTimeRule(PunchRule punchRule);
 
-	boolean isWorkTime(Time time, PunchRule punchRule);
+//	boolean isWorkTime(Time time, PunchRule punchRule);
 
 	boolean isRestTime(Date fromTime, Date endTime, PunchRule punchRule);
 
@@ -213,7 +213,7 @@ public interface PunchService {
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response);
 
-	public void importPunchScheduling(MultipartFile[] files);
+	public void importPunchScheduling(ListPunchRulesCommonCommand cmd, MultipartFile[] files);
 
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd);
 
@@ -222,5 +222,11 @@ public interface PunchService {
 	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
 
 	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd);
+
+	PunchTimeRule getPunchTimeRuleByRuleIdAndDate(Long ruleId, Date date);
+
+	boolean isWorkTime(Time time, PunchRule punchRule, Date date);
+
+	Long convertTimeToGMTMillisecond(Time time);
 
 }
