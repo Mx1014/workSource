@@ -46,7 +46,7 @@ import com.everhomes.rest.techpark.park.WaitingLine;
 @RequestMapping("/techpark/park")
 public class ParkController extends ControllerBase{
 	
-	@Autowired
+//	@Autowired
 	private ParkService parkService;
 	
 	@Autowired
