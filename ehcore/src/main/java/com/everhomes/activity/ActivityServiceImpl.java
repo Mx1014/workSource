@@ -3057,7 +3057,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(orderByCreateTime) {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
@@ -3107,7 +3107,7 @@ public class ActivityServiceImpl implements ActivityService {
         } else {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
