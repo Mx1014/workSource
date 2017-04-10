@@ -437,19 +437,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return false;
     }
-//	public static void main(String[] args) {
-//		String s= "{\"data\":{\"parkingTime\":109568},\"resCode\":0,\"resMsg\":null}";
-//		JSONObject json = JSONObject.parseObject(s);
-//		Object obj = json.get("resCode");
-//		if(null != obj ) {
-//			int resCode = (int) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
-//		
-//	}
+
 	private boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);

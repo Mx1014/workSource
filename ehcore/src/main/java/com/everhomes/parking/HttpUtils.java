@@ -97,6 +97,16 @@ public class HttpUtils {
      *
      * @param url
      * @param params 表单提交 content-type : application/x-www-form-urlencoded
+     * @return
+     */
+    public static String post(String url, Map<String, String> params) {
+        return post(url, params, null);
+    }
+
+    /**
+     *
+     * @param url
+     * @param params 表单提交 content-type : application/x-www-form-urlencoded
      * @param headers
      * @return
      */

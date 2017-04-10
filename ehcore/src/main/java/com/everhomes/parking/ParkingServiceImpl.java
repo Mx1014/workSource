@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.parking.*;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -75,65 +76,6 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.AttachmentDescriptor;
-import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.GetParkingActivityCommand;
-import com.everhomes.rest.parking.GetParkingTempFeeCommand;
-import com.everhomes.rest.parking.GetRechargeResultCommand;
-import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.IsOrderDelete;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ListParkingCarSeriesCommand;
-import com.everhomes.rest.parking.ListParkingCarSeriesResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
-import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingActivityDTO;
-import com.everhomes.rest.parking.ParkingAttachmentDTO;
-import com.everhomes.rest.parking.ParkingAttachmentType;
-import com.everhomes.rest.parking.ParkingCarSerieDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardIssueFlag;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.parking.ParkingFlowConstant;
-import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRechargeType;
-import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
-import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
-import com.everhomes.rest.parking.ParkingRequestFlowType;
-import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
-import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.SetParkingActivityCommand;
-import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingLotConfigCommand;
-import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -1531,5 +1473,26 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		
 	}
-	
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+
+		checkPlateNumber(cmd.getPlateNumber());
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String venderName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+
+
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
+	}
+
 }

@@ -84,8 +84,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
-    	
+
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
