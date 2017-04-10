@@ -32,7 +32,7 @@ import com.everhomes.util.RequireAuthentication;
 @RequestMapping("/admin/techpark/park")
 public class ParkAdminController extends ControllerBase{
 	
-	@Autowired
+//	@Autowired
 	private ParkService parkService;
 	
 	@Autowired
