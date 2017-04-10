@@ -1,6 +1,6 @@
 package com.everhomes.parking.wanke;
 
-public class WankeTemoFee {
+public class WankeTempFee {
 	
 	private String orderNo;
 	private String entryTime;

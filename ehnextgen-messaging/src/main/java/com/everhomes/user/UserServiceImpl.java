@@ -1967,7 +1967,7 @@ public class UserServiceImpl implements UserService {
 	private UserInfo getUserBasicInfo(Long uid, boolean hideMobile) {
 		assert(uid != null);
 		User user=UserContext.current().getUser();
-		if(user.getId().longValue() == uid.longValue()){
+		if(user != null && user.getId() != null && user.getId().longValue() == uid.longValue()){
 			return getUserInfo();
 		}
 
