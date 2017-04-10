@@ -15,7 +15,7 @@ public class LockParkingCarCommand {
     @NotNull
     private String plateNumber;
 
-    private Byte lockFlag;
+    private Byte lockStatus;
 
     public String getOwnerType() {
         return ownerType;
@@ -49,11 +49,11 @@ public class LockParkingCarCommand {
         this.plateNumber = plateNumber;
     }
 
-    public Byte getLockFlag() {
-        return lockFlag;
+    public Byte getLockStatus() {
+        return lockStatus;
     }
 
-    public void setLockFlag(Byte lockFlag) {
-        this.lockFlag = lockFlag;
+    public void setLockStatus(Byte lockStatus) {
+        this.lockStatus = lockStatus;
     }
 }
