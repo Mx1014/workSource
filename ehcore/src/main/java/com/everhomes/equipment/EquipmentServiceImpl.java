@@ -1,13 +1,7 @@
 package com.everhomes.equipment;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -17,202 +11,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.rest.equipment.*;
 import com.everhomes.util.*;
 
+import com.everhomes.util.doc.DocUtil;
+import com.google.zxing.WriterException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -464,84 +272,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
-import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
-import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
-import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
-import com.everhomes.rest.equipment.EquipmentAccessoryMapDTO;
-import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
-import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
-import com.everhomes.rest.equipment.EquipmentParameterDTO;
-import com.everhomes.rest.equipment.EquipmentQrCodeTokenDTO;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
-import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
-import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
-import com.everhomes.rest.equipment.EquipmentTaskProcessType;
-import com.everhomes.rest.equipment.EquipmentTaskResult;
-import com.everhomes.rest.equipment.EquipmentTaskStatus;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
-import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
-import com.everhomes.rest.equipment.ImportDataType;
-import com.everhomes.rest.equipment.ImportOwnerCommand;
-import com.everhomes.rest.equipment.InspectionItemDTO;
-import com.everhomes.rest.equipment.InspectionItemResult;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
-import com.everhomes.rest.equipment.InspectionTemplateDTO;
-import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
-import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
-import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
-import com.everhomes.rest.equipment.ListTaskByIdCommand;
-import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListTasksByTokenCommand;
-import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
-import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.SearchEquipmentsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentsResponse;
-import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
-import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
-import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
-import com.everhomes.rest.equipment.StandardGroupDTO;
-import com.everhomes.rest.equipment.StandardType;
-import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
-import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
-import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.equipment.TaskCountDTO;
-import com.everhomes.rest.equipment.TaskType;
-import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
-import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -596,6 +326,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.videoconf.ConfOrders;
+import sun.misc.BASE64Encoder;
 
 @Component
 public class EquipmentServiceImpl implements EquipmentService {
@@ -4069,6 +3800,60 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		response.setTasks(tasks);
 		return response;
+	}
+
+	public HttpServletResponse exportEquipmentsCard(SearchEquipmentsCommand cmd, HttpServletResponse response) {
+		Integer pageSize = Integer.MAX_VALUE;
+		cmd.setPageSize(pageSize);
+
+		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
+		List<EquipmentsDTO> dtos = equipments.getEquipment();
+
+//		URL rootPath = RentalServiceImpl.class.getResource("/");
+//		String filePath =rootPath.getPath() + this.downloadDir ;
+//		File file = new File(filePath);
+//		if(!file.exists())
+//			file.mkdirs();
+//		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
+//		//新建了一个文件
+//		this.createEquipmentsBook(filePath, dtos);
+
+		dtos.forEach(dto -> {
+			DocUtil docUtil=new DocUtil();
+			Map<String, Object> dataMap=new HashMap<String, Object>();
+			dataMap.put("sequenceNo", dto.getSequenceNo());
+			dataMap.put("versionNo", dto.getVersionNo());
+			dataMap.put("name", dto.getName());
+			dataMap.put("equipmentModel", dto.getEquipmentModel());
+			dataMap.put("parameter", dto.getParameter());
+			dataMap.put("customNumber", dto.getCustomNumber());
+			dataMap.put("manufacturer", dto.getManufacturer());
+			dataMap.put("manager", dto.getManager());
+			dataMap.put("status", dto.getStatus());
+			dataMap.put("shenyeLogo", docUtil.getImageStr("E:\\4d6193896405e960.jpg"));
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
+				BufferedImage image = null;
+				ByteArrayOutputStream out = null;
+				try {
+					image = QRCodeEncoder.createQrCode(dto.getQrCodeToken(), 270, 270, null);
+					out = new ByteArrayOutputStream();
+					ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (WriterException e) {
+					e.printStackTrace();
+				}
+				BASE64Encoder encoder=new BASE64Encoder();
+				byte[] data=out.toByteArray();
+				dataMap.put("qrCode", encoder.encode(data));
+			}
+
+			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
+		});
+
+//		return download(filePath,response);
+		return null;
 	}
 
 }
