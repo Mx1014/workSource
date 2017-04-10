@@ -106,7 +106,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 	VALUES (@qu_id, @shi_id, '福田区', 'FUTIANQU', 'NSQ', '/广东/深圳市/福田区', '3', '3', NULL, '0755', '2', '0', '999993');
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '东莞市',  @qu_id, '松山湖', '海岸环庆大厦', '海岸环庆大厦', '福田路24号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999993);
+	VALUES(@community_id, UUID(), @shi_id, '深圳市',  @qu_id, '福田区', '海岸环庆大厦', '海岸环庆大厦', '福田路24号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999993);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.084319, 22.540574, 'uxbpbzvxcryp');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
