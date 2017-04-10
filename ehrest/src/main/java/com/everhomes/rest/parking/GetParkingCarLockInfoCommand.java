@@ -15,6 +15,8 @@ public class GetParkingCarLockInfoCommand {
     @NotNull
     private String plateNumber;
 
+    private Long organizationId;
+
     public String getOwnerType() {
         return ownerType;
     }
@@ -45,5 +47,13 @@ public class GetParkingCarLockInfoCommand {
 
     public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }
