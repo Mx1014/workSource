@@ -376,4 +376,14 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
+	}
 }

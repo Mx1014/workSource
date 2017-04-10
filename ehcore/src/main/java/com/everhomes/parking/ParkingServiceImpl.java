@@ -1484,15 +1484,41 @@ public class ParkingServiceImpl implements ParkingService {
 		String venderName = parkingLot.getVendorName();
 		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
 
-		List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
 
+		dto.setOwnerId(cmd.getOwnerId());
+		dto.setOwnerType(cmd.getOwnerType());
+		dto.setParkingLotId(cmd.getParkingLotId());
+		dto.setPlateNumber(cmd.getPlateNumber());
+		dto.setParkingLotName(parkingLot.getName());
 
-		return null;
+		Long organizationId = cmd.getOrganizationId();
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		String plateOwnerName = user.getNickName();
+
+		if(null != organizationId) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+			if(null != organizationMember) {
+				plateOwnerName = organizationMember.getContactName();
+			}
+		}
+		if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+			dto.setPlateOwnerName(plateOwnerName);
+		}
+		return dto;
 	}
 
 	@Override
 	public void lockParkingCar(LockParkingCarCommand cmd) {
+		checkPlateNumber(cmd.getPlateNumber());
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
+		String venderName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		handler.lockParkingCar(cmd);
 	}
 
 }

@@ -385,7 +385,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
+//		KetuoTempFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
 //		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
@@ -539,8 +539,8 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 		
 	}
 
-	private KetuoTemoFee getTempFee(String plateNumber) {
-		KetuoTemoFee tempFee = null;
+	private KetuoTempFee getTempFee(String plateNumber) {
+		KetuoTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_TEMP_FEE);
@@ -548,9 +548,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity<KetuoTemoFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTemoFee>>(){});
+		KetuoJsonEntity<KetuoTempFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTempFee>>(){});
 		if(entity.isSuccess()){
-			List<KetuoTemoFee> list = entity.getData();
+			List<KetuoTempFee> list = entity.getData();
 			if(null != list && !list.isEmpty()) {
 				tempFee = list.get(0);
 			}
@@ -562,7 +562,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
 			Long parkingLotId, String plateNumber) {
-		KetuoTemoFee tempFee = getTempFee(plateNumber);
+		KetuoTempFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(null == tempFee)
@@ -593,5 +593,15 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
 	}
 }
