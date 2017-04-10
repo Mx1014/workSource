@@ -58,5 +58,62 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '70100', '', 'EhNamespaces', '999990', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '70200', '', 'EhNamespaces', '999990', '2');
+	
+-- 任务管理下面的菜单 整理 add by sfyan 20170410 已执行
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10079, '0', '业务授权视图 管理员', '业务授权视图 业务模块权限', NULL);
+UPDATE eh_acl_privileges SET name = '任务列表 管理员', description = '任务列表 业务模块权限' WHERE id = 10078;
+
+DELETE FROM eh_web_menu_privileges WHERE privilege_id = 10078;
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10078', '70100', '任务列表', '1', '1', '任务列表 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10079', '70200', '业务授权视图', '1', '1', '业务授权视图 全部权限', '712');
+
+UPDATE eh_service_modules SET level = 1 WHERE id = 70000;
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('70100', '任务列表', '70000', '/70000/70100', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('70200', '业务授权视图', '70000', '/70000/70200', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '70100', '1', '10078', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '70200', '1', '10079', NULL, '0', UTC_TIMESTAMP());
+
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,NOW(), 'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10079 ;
+
+-- 海岸新增园区楼栋 add by sfyan 20170410
+SET @community_id = 240111044331054836; 
+SET @organization_id = 1000631;  	
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
+SET @forum_id = 179511;
+SET @feedback_forum_id = 179512; 
+SET @building1_id = 180301;
+SET @shi_id = 16090; 
+SET @qu_id = 16091; 
+
+
+SET @community_id = 240111044331054836; 
+SET @organization_id = 1000631;  	
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
+SET @forum_id = 179511;
+SET @feedback_forum_id = 179512; 
+SET @building1_id = 180301;
+SET @shi_id = 14953; 
+SET @qu_id = 16090; 
+
+INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
+	VALUES (@qu_id, @shi_id, '福田区', 'FUTIANQU', 'NSQ', '/广东/深圳市/福田区', '3', '3', NULL, '0755', '2', '0', '999993');
+
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), @shi_id, '东莞市',  @qu_id, '松山湖', '海岸环庆大厦', '海岸环庆大厦', '福田路24号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 214, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999993);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.084319, 22.540574, 'uxbpbzvxcryp');
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(@organization_id, @community_id);
+	
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building1_id, @community_id, '海岸环庆大厦', '海岸环庆大厦', 0, '0755-82738680', '深圳市福田区福田路24号', 103587.01, 114.084319, 22.540574, '海岸环庆大厦作为福田CBD国际甲级写字楼，是全深圳唯一的70年办公产权的写字楼，享受全深圳所有最顶级最成熟的配套资源。项目位于福田中心区福田南路24号，以中心公园为全景，由深圳市海岸融通投资有限公司开发，江苏建工集团承建。海岸城的缔造者，11年写字楼开发运营成熟经验，少数成功开发超过5座写字楼的地产企业，精工铸造超过同行的商务品质，海岸物业管理为资产保值增值提供保障。 
+海岸环庆大厦占地面积7343.11平方米，总建筑面积103587.01平方米，楼高225米，其中办公面积69657.59平方米；商业面积4613.59平方米。地面停车位133个，地下停车位335个，电梯采用日本三菱品牌，客梯12部（高中低区各4部），转乘梯3部，消防电梯2部，低区电梯速度为4M/秒，中高区电梯速度为6M/秒，电梯轿厢规格为2000*1700*3200.大堂面积580平方米，层高13.4米，地面采用浅灰色砂岩石，墙面采用米黄大理石，天花为玻璃天窗配采光遮阳百叶。外立面采用LOW-E玻璃幕墙，室内空调采用美国约克水冷中央空调。竣工验收已在2016年11月18日完成，计划于2016年12月28日入伙。世界500强企业进驻，全球金融企业总部聚集，共赢中心未来。 ', NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999993);
 
 
