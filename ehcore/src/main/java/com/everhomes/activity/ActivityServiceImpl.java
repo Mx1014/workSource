@@ -3057,7 +3057,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(orderByCreateTime) {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
@@ -3107,7 +3107,7 @@ public class ActivityServiceImpl implements ActivityService {
         } else {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
@@ -3153,7 +3153,7 @@ public class ActivityServiceImpl implements ActivityService {
                 return dto;
                 //全部查速度太慢，先把查出的部分排序 by xiongying20161208
              // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
-            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
+            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/filter(r -> r != null).collect(Collectors.toList());
 
             return activityDtos;
         }
