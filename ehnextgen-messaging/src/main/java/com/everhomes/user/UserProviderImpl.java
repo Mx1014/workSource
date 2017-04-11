@@ -880,7 +880,7 @@ public class UserProviderImpl implements UserProvider {
             SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
             boolean orgQueryFlag = false;
 
-            if (null != isAuth) {
+            if (null != isAuth && 0 != isAuth) {
                 if (1 == isAuth) {
                     orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
                 }else if (2 == isAuth){
