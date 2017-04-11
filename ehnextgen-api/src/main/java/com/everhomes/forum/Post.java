@@ -31,6 +31,8 @@ public class Post extends EhForumPosts {
     
     private Byte creatorAdminFlag;
     
+    private String creatorCommunityName;
+    
     private String forumName;
     
     private Byte likeFlag;
@@ -40,7 +42,7 @@ public class Post extends EhForumPosts {
     private String shareUrl;
     
     private Long communityId;
-        
+    
     public Post() {
     }
 
@@ -94,7 +96,15 @@ public class Post extends EhForumPosts {
         this.creatorAdminFlag = creatorAdminFlag;
     }
 
-    public String getForumName() {
+    public String getCreatorCommunityName() {
+		return creatorCommunityName;
+	}
+
+	public void setCreatorCommunityName(String creatorCommunityName) {
+		this.creatorCommunityName = creatorCommunityName;
+	}
+
+	public String getForumName() {
         return forumName;
     }
 
@@ -162,7 +172,7 @@ public class Post extends EhForumPosts {
         this.communityId = communityId;
     }
 
-    public String toString() {
+	public String toString() {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writeValueAsString(this);

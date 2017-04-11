@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>sourceFlag: 来源，1自发报名2后台录入</li>
  * <li>confirmFlag: 报名确认，1已确认0未确认</li>
  * <li>checkinFlag: 是否已签到，1是0否</li>
+ * <li>signupTime: 报名时间 yyyy-MM-dd HH:MM</li>
+ * <li>email: 邮箱</li>
+ * <li>order: 序号</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -43,6 +46,9 @@ public class SignupInfoDTO {
 	private Byte checkinFlag;
 	private String checkinFlagText;
 	private Byte createFlag;
+	private String signupTime;
+	private String email;
+	private String order;
 	
 	public Byte getCreateFlag() {
 		return createFlag;
@@ -164,7 +170,25 @@ public class SignupInfoDTO {
 	public void setCheckinFlag(Byte checkinFlag) {
 		this.checkinFlag = checkinFlag;
 	}
-	
+	public String getSignupTime() {
+		return signupTime;
+	}
+	public void setSignupTime(String signupTime) {
+		this.signupTime = signupTime;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getOrder() {
+		return order;
+	}
+	public void setOrder(String order) {
+		this.order = order;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

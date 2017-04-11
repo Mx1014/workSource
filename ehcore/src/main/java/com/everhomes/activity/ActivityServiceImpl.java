@@ -372,7 +372,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            if(user.getAddressId()!=null){
 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
 	            }
-	            activityProvider.createActivityRoster(roster);
+//	            activityProvider.createActivityRoster(roster);
+	            createActivityRoster(roster);
+	            
 	            activityProvider.updateActivity(activity);
 //	            return status;
 	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -446,7 +448,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
-	            activityProvider.createActivityRoster(roster);
+	            
+	            createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
 	        });
@@ -454,6 +457,16 @@ public class ActivityServiceImpl implements ActivityService {
     	
 		return convertActivityRoster(activityRoster, outActivity);
 	}
+    
+    //如果原来已经报过（驳回，重复报名），则更新。
+    private void createActivityRoster(ActivityRoster roster){
+    	ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(roster.getActivityId(), roster.getUid());
+        if(oldRoster != null){
+        	activityProvider.deleteRoster(oldRoster);
+        }
+        activityProvider.createActivityRoster(roster);
+        
+    }
 
 	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
@@ -464,6 +477,11 @@ public class ActivityServiceImpl implements ActivityService {
 			signupInfoDTO.setCreateFlag((byte)1);
 		}else {
 			signupInfoDTO.setCreateFlag((byte)0);
+		}
+		
+		if(activityRoster.getCreateTime() != null){
+			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			signupInfoDTO.setSignupTime(f.format(activityRoster.getCreateTime()));
 		}
 		
 		return signupInfoDTO;
@@ -503,6 +521,7 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setPosition(cmd.getPosition());
         roster.setLeaderFlag(cmd.getLeaderFlag());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+        roster.setEmail(cmd.getEmail());
         
         return roster;
 	}
@@ -547,6 +566,7 @@ public class ActivityServiceImpl implements ActivityService {
 		roster.setOrganizationName(cmd.getOrganizationName());
 		roster.setPosition(cmd.getPosition());
 		roster.setLeaderFlag(cmd.getLeaderFlag());
+		roster.setEmail(cmd.getEmail());
 		return roster;
 	}
 
@@ -638,6 +658,7 @@ public class ActivityServiceImpl implements ActivityService {
 	        roster.setOrganizationName(row.getE().trim());
 	        roster.setPosition(row.getF().trim());
 	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
+	        roster.setEmail(row.getH().trim());
 	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
 	        
 	        rosters.add(roster);
@@ -686,27 +707,45 @@ public class ActivityServiceImpl implements ActivityService {
 	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getPageAnchor(), pageSize+1);
-		Long nextPageAnchor = null;
+		
+		Integer pageOffset = 1;
+        if (cmd.getPageOffset() != null){
+        	pageOffset = cmd.getPageOffset();
+        }
+        Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
+        
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getStatus(), offset, pageSize+1);
+		Integer nextPageOffset = null;
 		if (rosters.size() > pageSize) {
 			rosters.remove(rosters.size()-1);
-			nextPageAnchor = rosters.get(rosters.size()-1).getId();
+			nextPageOffset = cmd.getPageOffset() + 1;
 		}
-		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
+		
+		Integer unConfirmCount = activityProvider.countActivityRoster(cmd.getActivityId(), new Integer(ConfirmStatus.UN_CONFIRMED.getCode()));
+		
+		return new ListSignupInfoResponse(nextPageOffset, unConfirmCount, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
 	@Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), null, 100000);
+		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 1, 0, 100000);
+		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), 2, 0, 100000);
+		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 0, 0, 100000);
+		
+		rosters.addAll(rostersConfirms);
+		rosters.addAll(rostersRejects);
+		rosters.addAll(rostersUnConfirms);
+		
 		if (rosters.size() > 0) {
 			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
 			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
-			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
-					"typeText", "sourceFlagText"));
-			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源"));
-			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20));
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("order", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText", "email",
+					"typeText", "signupTime", "sourceFlagText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "邮箱", "类型", "报名时间", "报名来源"));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 20));
 			
 			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
 				propertyNames.add("confirmFlagText");
@@ -719,6 +758,13 @@ public class ActivityServiceImpl implements ActivityService {
 				titleSizes.add(10);
 			}
 			
+			if(signupInfoDTOs.size() > 0){
+				signupInfoDTOs.get(0).setOrder("创建者");
+			}
+			for(int i=1; i<signupInfoDTOs.size(); i++){
+				signupInfoDTOs.get(i).setOrder(String.valueOf(i));
+			}
+			excelUtils.setNeedSequenceColumn(false);
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
 		}else {
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -732,7 +778,17 @@ public class ActivityServiceImpl implements ActivityService {
 		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag())==null?TrueOrFalseFlag.FALSE.getText():TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
 		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType())==null?UserAuthFlag.NOT_REGISTER.getText():UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
 		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
-		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		//signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		String configFlagText = "";
+		if(ConfirmStatus.CONFIRMED.getCode().equals(signupInfoDTO.getConfirmFlag())){
+			configFlagText = ConfirmStatus.CONFIRMED.getText();
+		}else if(ConfirmStatus.REJECT.getCode().equals(signupInfoDTO.getConfirmFlag())){
+			configFlagText = ConfirmStatus.REJECT.getText();
+		}else{
+			configFlagText = ConfirmStatus.UN_CONFIRMED.getText();
+		}
+		signupInfoDTO.setConfirmFlagText(configFlagText);
+		
 		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag())==null?CheckInStatus.UN_CHECKIN.getText():CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
 		return signupInfoDTO;
 	}
@@ -1215,7 +1271,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     private ActivityStatus getActivityStatus(ActivityRoster userRoster) {
         LOGGER.info("check roster the current roster is {}",userRoster);
-        if(userRoster==null){
+        if(userRoster==null || ConfirmStatus.REJECT.getCode().equals(userRoster.getConfirmFlag())){
             return ActivityStatus.UN_SIGNUP;
         }
         if (CheckInStatus.CHECKIN.getCode().equals(userRoster.getCheckinFlag())) {
@@ -1420,7 +1476,7 @@ public class ActivityServiceImpl implements ActivityService {
         int total = roster.getAdultCount() + roster.getChildCount();
         dbProvider.execute(status->{
             //need lock
-            activityProvider.deleteRoster(roster);
+//            activityProvider.deleteRoster(roster);
             if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
                 int result = activity.getCheckinAttendeeCount() - total;
                 activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
@@ -1437,6 +1493,10 @@ public class ActivityServiceImpl implements ActivityService {
             if(roster.getConfirmFamilyId()!=null)
                 activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
             activityProvider.updateActivity(activity);
+            
+            roster.setConfirmFlag(ConfirmStatus.REJECT.getCode());
+            activityProvider.updateRoster(roster);
+            
             return status;
         });
         
@@ -2982,7 +3042,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(orderByCreateTime) {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
@@ -3032,7 +3092,7 @@ public class ActivityServiceImpl implements ActivityService {
         } else {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
                 Post post = forumProvider.findPostById(activity.getPostId());
-                if (post == null) {
+                if (post == null || post.getStatus() == null || post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
                     return null;
                 }
                 if (activity.getPosterUri() == null) {
@@ -3078,7 +3138,7 @@ public class ActivityServiceImpl implements ActivityService {
                 return dto;
                 //全部查速度太慢，先把查出的部分排序 by xiongying20161208
              // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
-            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
+            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/filter(r -> r != null).collect(Collectors.toList());
 
             return activityDtos;
         }
