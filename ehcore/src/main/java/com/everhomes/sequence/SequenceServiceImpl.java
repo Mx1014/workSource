@@ -900,6 +900,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhApprovalOpRequests.class, Tables.EH_APPROVAL_OP_REQUESTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APPROVAL_OP_REQUESTS.ID.max()).from(Tables.EH_APPROVAL_OP_REQUESTS).fetchOne().value1();
         });
+        syncTableSequence(null, EhApprovalRangeStatistics.class, Tables.EH_APPROVAL_RANGE_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_APPROVAL_RANGE_STATISTICS.ID.max()).from(Tables.EH_APPROVAL_RANGE_STATISTICS).fetchOne().value1();
+        });
         syncTableSequence(null, EhRequestTemplates.class, Tables.EH_REQUEST_TEMPLATES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_REQUEST_TEMPLATES.ID.max()).from(Tables.EH_REQUEST_TEMPLATES).fetchOne().value1();
         });

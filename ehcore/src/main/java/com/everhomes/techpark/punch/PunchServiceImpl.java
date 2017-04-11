@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.antlr.runtime.misc.Stats;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
@@ -50,6 +51,8 @@ import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTime;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
+import com.everhomes.approval.ApprovalRangeStatistic;
+import com.everhomes.approval.ApprovalRangeStatisticProvider;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
@@ -62,14 +65,19 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OperationType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -85,6 +93,7 @@ import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ExceptionProcessStatus;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
+import com.everhomes.rest.techpark.punch.ExtDTO;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
@@ -208,7 +217,8 @@ public class PunchServiceImpl implements PunchService {
 	private PunchSchedulingProvider punchSchedulingProvider;
 	@Autowired
 	private UserProvider userProvider;
-
+	@Autowired
+	private ApprovalRangeStatisticProvider approvalRangeStatisticProvider;
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
 	@Autowired
@@ -235,6 +245,8 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	private ApprovalCategoryProvider approvalCategoryProvider;
 
+	@Autowired
+	private LocaleStringProvider localeStringProvider;
     
     @Autowired
     private CoordinationProvider coordinationProvider;
@@ -249,6 +261,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 	}
+	private static final String PUNCH_STATUS_SCOPE ="punch.status";
 	/**
 	 * <ul>审批后的状态
 	 *<li>HALFOUTWORK(13):  半天公出</li>
@@ -272,37 +285,42 @@ public class PunchServiceImpl implements PunchService {
 		if(null == status){
 			return "";
 		}
-		if(status.equals(ApprovalStatus.FORGOT.getCode()))
-			return "忘打卡";
-		if(status.equals(ApprovalStatus.HALFABSENCE.getCode()))
-			return "半天事假";
-		if(status.equals(ApprovalStatus.HALFEXCHANGE.getCode()))
-			return "半天调休";
-		if(status.equals(ApprovalStatus.HALFOUTWORK.getCode()))
-			return "半天公出";
-		if(status.equals(ApprovalStatus.HALFSICK.getCode()))
-			return "半天病假";
-		if(status.equals(ApprovalStatus.OVERTIME.getCode()))
-			return "加班";
-		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
-			return "事假";
-		if(status.equals(ApprovalStatus.EXCHANGE.getCode()))
-			return "调休";
-		if(status.equals(ApprovalStatus.OUTWORK.getCode()))
-			return "公出";
-		if(status.equals(ApprovalStatus.SICK.getCode()))
-			return "病假";
-		if(status.equals(ApprovalStatus.BELATE.getCode()))
-			return "迟到";
-		if(status.equals(ApprovalStatus.BLANDLE.getCode()))
-			return "迟到且早退";
-		if(status.equals(ApprovalStatus.UNPUNCH.getCode()))
-			return "缺勤";
-		if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()))
-			return "早退";
-		if(status.equals(ApprovalStatus.NORMAL.getCode()))
-			return "正常";
-		return "";
+		LocaleString localeString = localeStringProvider.find( PUNCH_STATUS_SCOPE, status.toString(),
+				UserContext.current().getUser().getLocale());
+		if(null == localeString)
+			return "";
+		return localeString.getText();
+//		if(status.equals(ApprovalStatus.FORGOT.getCode()))
+//			return "忘打卡";
+//		if(status.equals(ApprovalStatus.HALFABSENCE.getCode()))
+//			return "半天事假";
+//		if(status.equals(ApprovalStatus.HALFEXCHANGE.getCode()))
+//			return "半天调休";
+//		if(status.equals(ApprovalStatus.HALFOUTWORK.getCode()))
+//			return "半天公出";
+//		if(status.equals(ApprovalStatus.HALFSICK.getCode()))
+//			return "半天病假";
+//		if(status.equals(ApprovalStatus.OVERTIME.getCode()))
+//			return "加班";
+//		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
+//			return "事假";
+//		if(status.equals(ApprovalStatus.EXCHANGE.getCode()))
+//			return "调休";
+//		if(status.equals(ApprovalStatus.OUTWORK.getCode()))
+//			return "公出";
+//		if(status.equals(ApprovalStatus.SICK.getCode()))
+//			return "病假";
+//		if(status.equals(ApprovalStatus.BELATE.getCode()))
+//			return "迟到";
+//		if(status.equals(ApprovalStatus.BLANDLE.getCode()))
+//			return "迟到且早退";
+//		if(status.equals(ApprovalStatus.UNPUNCH.getCode()))
+//			return "缺勤";
+//		if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()))
+//			return "早退";
+//		if(status.equals(ApprovalStatus.NORMAL.getCode()))
+//			return "正常";
+//		return "";
 		
 	} 
 	
@@ -731,6 +749,27 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	private PunchLogsDay calculateDayLog(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
+		//对于已离职和未入职的判断
+		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
+		if(organizationMember == null ){
+			//找不到就是已离职
+			punchDayLog.setStatus(ApprovalStatus.RESIGNED.getCode());
+			pdl.setPunchStatus(ApprovalStatus.RESIGNED.getCode());
+			return pdl;
+		}else{
+			//查找是否未入职 --通过log的时间
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,companyId, OperationType.JOIN.getCode()) ;
+			if (null != memberLogs ){
+				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
+
+					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
+					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
+					return pdl;
+				}
+			}
+			
+		}
+		// 
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.get().format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
@@ -3863,7 +3902,43 @@ public class PunchServiceImpl implements PunchService {
 				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
 				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
 			}
-			
+
+			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+						SelectQuery<? extends Record> query) {  
+					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.PUNCH_MONTH.eq(cmd.getMonth()));  
+					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.USER_ID.eq(statistic.getUserId()));
+					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_ID.eq(statistic.getOwnerId()));
+					query.addConditions(Tables.EH_APPROVAL_RANGE_STATISTICS.OWNER_TYPE.eq(statistic.getOwnerType()));
+					
+					return null;
+				}
+			});
+			if(null != abscentStats && abscentStats.size()>0){
+				dto.setExts(new ArrayList<ExtDTO>());
+				for(ApprovalRangeStatistic abstat : abscentStats){
+					ExtDTO extDTO = new ExtDTO();
+					ApprovalCategory  category = approvalCategoryProvider.findApprovalCategoryById(abstat.getCategoryId());
+					extDTO.setName(category.getCategoryName());
+					StringBuffer timeCountBuffer = new StringBuffer();
+					String[] range = abstat.getActualResult().split(".");
+					if(!range[0].equals("0")){
+						timeCountBuffer.append(range[0]);
+						timeCountBuffer.append("天");
+					}
+					if(!range[1].equals("0")){
+						timeCountBuffer.append(range[1]);
+						timeCountBuffer.append("小时");
+					}
+					if(!range[2].equals("0")){
+						timeCountBuffer.append(range[2]);
+						timeCountBuffer.append("分钟");
+					}
+					extDTO.setTimeCount(timeCountBuffer.toString());
+					dto.getExts().add(extDTO);
+				}
+			}
 			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
@@ -3871,19 +3946,21 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchCountList(punchCountDTOList);
 		
 		//把请假的天数加在这里，add by tt, 20160921
-		Map<Long, List<AbsenceTimeDTO>> userAbsenceTimeMap = getUserAbsenceTimes(cmd.getMonth(), cmd.getOwnerType(), cmd.getOwnerId(), absenceUserIdList);
-		punchCountDTOList.forEach(p->{
-			List<AbsenceTimeDTO> list = userAbsenceTimeMap.get(p.getUserId());
-			if (ListUtils.isEmpty(list)) {
-				try {
-					list = getDefaultAbsenceStatistics(organizationService.getTopOrganizationId(cmd.getOwnerId()), new java.sql.Date(monthSF.get().parse(cmd.getMonth()).getTime()));
-				} catch (Exception e) {
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-							"parse month error");
-				}
-			}
-			p.setAbsenceTimeList(list);
-		});
+//		Map<Long, List<AbsenceTimeDTO>> userAbsenceTimeMap = getUserAbsenceTimes(cmd.getMonth(), cmd.getOwnerType(), cmd.getOwnerId(), absenceUserIdList);
+//		punchCountDTOList.forEach(p->{
+			
+//			List<AbsenceTimeDTO> list = userAbsenceTimeMap.get(p.getUserId());
+//			if (ListUtils.isEmpty(list)) {
+//				try {
+//					list = getDefaultAbsenceStatistics(organizationService.getTopOrganizationId(cmd.getOwnerId()), new java.sql.Date(monthSF.get().parse(cmd.getMonth()).getTime()));
+//				} catch (Exception e) {
+//					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//							"parse month error");
+//				}
+//			}
+//			p.setAbsenceTimeList(list);
+			
+//		});
 		
 		return response;
 	}
@@ -4329,7 +4406,9 @@ public class PunchServiceImpl implements PunchService {
 				if(null!= r.getAfternoonArriveTime())
 					dto.setAfternoonArriveTime(  convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
 				if(null!= r.getPunchDate())
-					dto.setPunchDate(r.getPunchDate().getTime());
+					dto.setPunchDate(r.getPunchDate().getTime());	
+				
+				
 				response.getPunchDayDetails().add(dto);
 			}
 			
@@ -4338,7 +4417,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	public PunchDayDetailDTO convertToPunchDayDetailDTO(PunchDayLog r ){
 		PunchDayDetailDTO dto =  ConvertHelper.convert(r,PunchDayDetailDTO.class);
-			
+			dto.setStatuString(statusToString(r.getStatus()));
 			if(null!= r.getArriveTime())
 				dto.setArriveTime(  convertTimeToGMTMillisecond(r.getArriveTime())  );
 

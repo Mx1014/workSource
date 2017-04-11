@@ -17,11 +17,26 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import javassist.runtime.DotClass;
 
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.joda.time.Hours;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
+
+
 
 
 
@@ -42,6 +57,7 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
@@ -51,6 +67,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.zxing.aztec.AztecWriter;
 
 /**
  * 
@@ -106,6 +123,8 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	@Autowired
 	private PunchService punchService;
 	
+	@Autowired
+	private ApprovalRangeStatisticProvider approvalRangeStatisticProvider;
 
 	@Autowired
 	private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
@@ -323,43 +342,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 //					//8. 得出公式，(endTime-fromTime)-deltaDay*deltaAcrossDayTime-noonRestTimes*deltaNoonRestTime-deltaNotWorkDay*deltaWorkTime=最终请假的时间，记为finalAbsentTime
 //					long finalAbsentTime = (endTime.getTime() - fromTime.getTime()) - deltaDay * deltaAcrossDayTime - noonRestTimes * deltaNoonRestTime - deltaNotWorkDay * deltaWorkTime;
 //					//9. 如果以上最终请假时间大于（不包含）deltaWorkTime，则finalAbsentTime/deltaWorkTime的结果即为天数，余数即为小时分钟数
-					 
-					MyDate myDate = new MyDate();
-					long finalAbsentTime = 0l;
-					Calendar startCalendar = Calendar.getInstance();
-					startCalendar.setTime(fromTime);
-					startCalendar.set(Calendar.HOUR_OF_DAY, 1);
-					Calendar endCalendar = Calendar.getInstance();
-					endCalendar.setTime(endTime);
-					endCalendar.set(Calendar.HOUR_OF_DAY, 2);
-					for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
-						PunchTimeRule dayPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), startCalendar.getTime()) ;
-						
-						PunchTimeRuleDTO dto = ConvertHelper.convert(dayPunchTimeRule, PunchTimeRuleDTO.class); 
-						dto.setAfternoonArriveTime(null!=dayPunchTimeRule.getAfternoonArriveTimeLong()?dayPunchTimeRule.getAfternoonArriveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getAfternoonArriveTime()));
-						dto.setNoonLeaveTime(null!=dayPunchTimeRule.getNoonLeaveTimeLong()?dayPunchTimeRule.getNoonLeaveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getNoonLeaveTime()));
-						dto.setStartEarlyTime(null!=dayPunchTimeRule.getStartEarlyTimeLong()?dayPunchTimeRule.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartEarlyTime()));
-						dto.setStartLateTime(null!=dayPunchTimeRule.getStartLateTimeLong()?dayPunchTimeRule.getStartLateTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartLateTime()));
-						
-						dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=dayPunchTimeRule.getWorkTimeLong()?dayPunchTimeRule.getWorkTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getWorkTime())));
-						dto.setDaySplitTime(null!=dayPunchTimeRule.getDaySplitTimeLong()?dayPunchTimeRule.getDaySplitTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getDaySplitTime()));
-						if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(fromTime))){
-							//如果是开始日 则计算小时分钟
-							
-							Long fromTimeLong = punchService.convertTimeToGMTMillisecond(new Time(fromTime.getTime())); 
-							caculateAbsentDate(myDate,fromTimeLong,dto);
-						}else if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(endTime))){
-							//如果是结束日 则计算小时分钟
-							Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime())); 
-							caculateAbsentDate(myDate,endTimeLong,dto);
-							
-						}else{
-							//如果非开始日和结束日,日期+1
-							int days = myDate.getDays()+1;
-							myDate.setDays(days);
-						}
-						
-					}
+					MyDate myDate = processMyDate(fromTime,endTime,punchRule);
 					a.setActualResult(myDate.toString());
 					
 				}
@@ -374,6 +357,45 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		return approvalDayActualTimeList;
 	}
 
+	private MyDate processMyDate(Date fromTime, Date endTime, PunchRule punchRule) {
+		MyDate myDate = new MyDate(); 
+		Calendar startCalendar = Calendar.getInstance();
+		startCalendar.setTime(fromTime);
+		startCalendar.set(Calendar.HOUR_OF_DAY, 1);
+		Calendar endCalendar = Calendar.getInstance();
+		endCalendar.setTime(endTime);
+		endCalendar.set(Calendar.HOUR_OF_DAY, 2);
+		for(;startCalendar.before(endCalendar);startCalendar.add(Calendar.DAY_OF_MONTH, 1)){
+			PunchTimeRule dayPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), startCalendar.getTime()) ;
+			if(null == dayPunchTimeRule)
+				continue;
+			PunchTimeRuleDTO dto = ConvertHelper.convert(dayPunchTimeRule, PunchTimeRuleDTO.class); 
+			dto.setAfternoonArriveTime(null!=dayPunchTimeRule.getAfternoonArriveTimeLong()?dayPunchTimeRule.getAfternoonArriveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getAfternoonArriveTime()));
+			dto.setNoonLeaveTime(null!=dayPunchTimeRule.getNoonLeaveTimeLong()?dayPunchTimeRule.getNoonLeaveTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getNoonLeaveTime()));
+			dto.setStartEarlyTime(null!=dayPunchTimeRule.getStartEarlyTimeLong()?dayPunchTimeRule.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartEarlyTime()));
+			dto.setStartLateTime(null!=dayPunchTimeRule.getStartLateTimeLong()?dayPunchTimeRule.getStartLateTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getStartLateTime()));
+			
+			dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=dayPunchTimeRule.getWorkTimeLong()?dayPunchTimeRule.getWorkTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getWorkTime())));
+			dto.setDaySplitTime(null!=dayPunchTimeRule.getDaySplitTimeLong()?dayPunchTimeRule.getDaySplitTimeLong():punchService.convertTimeToGMTMillisecond(dayPunchTimeRule.getDaySplitTime()));
+			if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(fromTime))){
+				//如果是开始日 则计算小时分钟
+				
+				Long fromTimeLong = punchService.convertTimeToGMTMillisecond(new Time(fromTime.getTime())); 
+				caculateAbsentDate(myDate,fromTimeLong,dto);
+			}else if(dateSF.get().format(startCalendar.getTime()).equals(dateSF.get().format(endTime))){
+				//如果是结束日 则计算小时分钟
+				Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime())); 
+				caculateAbsentDate(myDate,endTimeLong,dto);
+				
+			}else{
+				//如果非开始日和结束日,日期+1
+				int days = myDate.getDays()+1;
+				myDate.setDays(days);
+			}
+			
+		}
+		return myDate;
+	}
 	private void caculateAbsentDate(MyDate myDate, Long timeLong, PunchTimeRuleDTO dto) {
 		long actualLong = 0l;
 		if(timeLong<=dto.getStartLateTime()){
@@ -661,6 +683,15 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			this.hours = hours;
 			this.minutes = minutes;
 		}
+		public MyDate(String actual) {
+			super();
+			String[] strings = actual.split(".");
+			if(strings.length ==3){
+				days = Integer.valueOf(strings[0]);
+				hours = Integer.valueOf(strings[1]);
+				minutes = Integer.valueOf(strings[2]);
+			}
+		}
 		public int getDays() {
 			return days;
 		}
@@ -909,5 +940,86 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest));
 		return briefApprovalRequestDTO;
 	}
+	
+
+	@Override
+	public void calculateRangeStat(ApprovalRequest approvalRequest) { 
+		// 取到所有的ranges-目前一个request对应一个
+		List<ApprovalTimeRange>  timeRanges = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(approvalRequest.getId());
+		for(ApprovalTimeRange timeRange : timeRanges){
+			if(monthSF.get().format(timeRange.getFromTime()).equals(monthSF.get().format(timeRange.getEndTime()))){
+				// 1.如果不跨月:直接累加
+				MyDate myDate = new MyDate(timeRange.getActualResult());
+				createOrUpdateRangeStat(approvalRequest.getOwnerId(),approvalRequest.getOwnerType(),approvalRequest.getCreatorUid(),
+						monthSF.get().format(timeRange.getFromTime()),approvalRequest.getApprovalType(),approvalRequest.getCategoryId(),myDate);	
+				
+			}else{
+				// 2.如果跨月:分月累加
+				PunchRule punchRule = punchService.getPunchRule(approvalRequest.getOwnerType(), approvalRequest.getOwnerId(), approvalRequest.getCreatorUid());
+				Calendar startCalendar = Calendar.getInstance();
+				startCalendar.setTime(timeRange.getFromTime());
+				Calendar endCalendar = Calendar.getInstance();
+				endCalendar.setTime(timeRange.getEndTime()); 
+				for(;monthSF.get().format(startCalendar.getTime()).equals(monthSF.get().format(endCalendar.getTime()));){
+					Date fromTime = startCalendar.getTime();
+					startCalendar.add(Calendar.MONTH, 1);
+					startCalendar.set(Calendar.DAY_OF_MONTH, startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+					PunchTimeRule ptr = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), startCalendar.getTime()) ; 
+					Long startEarlyTimeLong = null!=ptr.getStartEarlyTimeLong()?ptr.getStartEarlyTimeLong():punchService.convertTimeToGMTMillisecond(ptr.getStartEarlyTime());
+					//把结束时间定位为下一个月第一天的上班时间前一小时
+					startCalendar.set(Calendar.HOUR,(int) (startEarlyTimeLong/3600000)-1);
+					MyDate myDate = processMyDate(fromTime, startCalendar.getTime(), punchRule);
+					createOrUpdateRangeStat(approvalRequest.getOwnerId(),approvalRequest.getOwnerType(),approvalRequest.getCreatorUid(),
+							monthSF.get().format(fromTime),approvalRequest.getApprovalType(),approvalRequest.getCategoryId(),myDate);	
+				}
+				MyDate myDate = processMyDate(startCalendar.getTime(),endCalendar.getTime(), punchRule);
+				createOrUpdateRangeStat(approvalRequest.getOwnerId(),approvalRequest.getOwnerType(),approvalRequest.getCreatorUid(),
+						monthSF.get().format(startCalendar.getTime()),approvalRequest.getApprovalType(),approvalRequest.getCategoryId(),myDate);	
+			}		
+		}
+		
+	}
+
+
+	private void createOrUpdateRangeStat(Long ownerId, String ownerType, Long creatorUid,
+			String punchMonth,Byte approvalType,Long categoryId , MyDate myDate) {
+		 
+		ApprovalRangeStatistic  statistic = approvalRangeStatisticProvider.getApprovalRangeStatisticByParams(punchMonth, ownerType, ownerId, creatorUid, approvalType, categoryId);
+		if(statistic == null ){
+			statistic = new ApprovalRangeStatistic();
+			statistic.setOwnerType(ownerType);
+			statistic.setOwnerId(ownerId);
+			statistic.setUserId(creatorUid);
+			statistic.setPunchMonth(punchMonth);
+			statistic.setApprovalType(approvalType);
+			statistic.setCategoryId(categoryId);
+			statistic.setActualResult(myDate.toString());
+			statistic.setCreatorUid(UserContext.current().getUser().getId());
+			statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			approvalRangeStatisticProvider.createApprovalRangeStatistic(statistic);
+		}else{
+			MyDate oldMyDate = new MyDate(statistic.getActualResult());
+			int minutes = oldMyDate.getMinutes()+ myDate.getMinutes();
+			int hours = oldMyDate.getHours() + myDate.getHours();
+			int days = oldMyDate.getDays() + myDate.getDays();
+			if(minutes > 60){
+				minutes -= 60;
+				hours += 1;
+			}
+			if(hours >24){
+				hours -= 60;
+				days += 1;
+				 
+			}
+			myDate.setMinutes(minutes);
+			myDate.setHours(hours);
+			myDate.setDays(days);
+			statistic.setActualResult(myDate.toString());
+			approvalRangeStatisticProvider.updateApprovalRangeStatistic(statistic);
+		}
+		
+		
+	}
+ 
 	
 }

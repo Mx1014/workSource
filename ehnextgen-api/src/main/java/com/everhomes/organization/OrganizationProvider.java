@@ -300,4 +300,7 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
+	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
+			Byte operationType);
 }
