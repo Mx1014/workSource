@@ -5059,7 +5059,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchWifiRule pwr = null;
-		if(pr.getLocationRuleId()==null){
+		if(pr.getWifiRuleId()==null){
 			pwr = new PunchWifiRule();
 			pwr.setOwnerType(cmd.getOwnerType());
 			pwr.setOwnerId(cmd.getOwnerId());
@@ -5093,7 +5093,7 @@ public class PunchServiceImpl implements PunchService {
 			return response;
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchWifiRule plr = null;
-		if(pr.getLocationRuleId()==null){
+		if(pr.getWifiRuleId()==null){
 			plr = new PunchWifiRule();
 			plr.setOwnerType(cmd.getOwnerType());
 			plr.setOwnerId(cmd.getOwnerId());
@@ -5106,7 +5106,7 @@ public class PunchServiceImpl implements PunchService {
 			punchProvider.updatePunchRule(pr);
 		}
 		else{
-			plr = punchProvider.getPunchWifiRuleById(pr.getLocationRuleId());
+			plr = punchProvider.getPunchWifiRuleById(pr.getWifiRuleId());
 		}
 		
 		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(cmd.getOwnerType(), cmd.getOwnerId(), plr.getId()) ;
