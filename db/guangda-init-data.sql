@@ -725,3 +725,7 @@ update eh_addresses set building_name = '光大We谷产业园1栋1号楼' where 
 update eh_addresses set building_name = '光大We谷产业园1栋2号楼' where building_name = '1栋2号楼' and namespace_id = 999979;
 update eh_addresses set building_name = '光大We谷产业园2栋1号楼' where building_name = '2栋3号楼' and namespace_id = 999979;
 update eh_addresses set building_name = '光大We谷产业园2栋2号楼' where building_name = '2栋4号楼' and namespace_id = 999979;
+
+update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203068&displayName=装修申请"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=装修申请"}' and namespace_id = 999979;
+update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203069&displayName=故障报修"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=故障报修"}' and namespace_id = 999979;
+update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203070&displayName=投诉建议"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议"}' and namespace_id = 999979;
