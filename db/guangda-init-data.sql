@@ -729,3 +729,9 @@ update eh_addresses set building_name = '光大We谷产业园2栋2号楼' where 
 update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203068&displayName=装修申请"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=装修申请"}' and namespace_id = 999979;
 update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203069&displayName=故障报修"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=故障报修"}' and namespace_id = 999979;
 update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=203070&displayName=投诉建议"}' where action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议"}' and namespace_id = 999979;
+
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('1', 999979, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修', '0');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('2', 999979, '月卡充值', 'zl://parking/query?displayName=停车', '0');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('3', 999979, '审批', 'zl://approval/create?approvalId={}&sourceId={}', '0');
+
+update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999979;
