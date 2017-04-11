@@ -4,3 +4,6 @@ ALTER TABLE `eh_activities` ADD COLUMN `all_day_flag` TINYINT DEFAULT '0' NULL C
    
 -- 设备表增加字段是否需要拍照 add by xiongying20170406
 ALTER TABLE `eh_equipment_inspection_equipments` ADD COLUMN `picture_flag` tinyint(4) DEFAULT '1' NULL COMMENT 'whether need to take a picture while report equipment task, 0 not, 1 yes';
+
+ALTER TABLE `eh_parking_lots` ADD COLUMN `lock_car_flag` TINYINT NOT NULL DEFAULT 0 COMMENT ' 1: support, 0: not ';
+
