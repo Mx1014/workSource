@@ -14,6 +14,8 @@ import com.everhomes.rest.parking.*;
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
 
+    GetParkingCardsResponse getParkingCards(GetParkingCardsCommand cmd);
+
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
     
     List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd);

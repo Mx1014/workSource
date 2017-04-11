@@ -88,13 +88,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
-    	
-    	KetuoCard card = getCard(plateNumber);
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
+		KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
@@ -114,7 +115,9 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+
+				return response;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
@@ -136,9 +139,12 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else {
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
+
 		}
         
-        return resultList;
+        return response;
     }
 
     @Override

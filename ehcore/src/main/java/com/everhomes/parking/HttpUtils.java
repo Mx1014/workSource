@@ -88,7 +88,7 @@ public class HttpUtils {
             close(response, httpclient);
         }
 
-        LOGGER.info("Result from third, result={}", result);
+        LOGGER.info("Result from third, url={}, result={}", url, result);
 
         return result;
     }
@@ -111,6 +111,8 @@ public class HttpUtils {
      * @return
      */
     public static String post(String url, Map<String, String> params, Map<String, String> headers) {
+
+        LOGGER.info("The request info, url={}, param={}", url, JSONObject.toJSONString(params));
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
@@ -152,7 +154,7 @@ public class HttpUtils {
         }finally {
             close(response, httpclient);
         }
-        LOGGER.info("Result from third, result={}", result);
+        LOGGER.info("Result from third, url={}, result={}", url, result);
 
         return result;
     }

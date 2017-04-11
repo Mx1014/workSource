@@ -1,11 +1,9 @@
 package com.everhomes.parking.bosigao;
 
-import java.util.List;
-
 public class BosigaoJsonEntity<T> {
 	
 	private String result;
-	private List<T> data;
+	private T data;
 
 	public String getResult() {
 		return result;
@@ -15,11 +13,11 @@ public class BosigaoJsonEntity<T> {
 		this.result = result;
 	}
 
-	public List<T> getData() {
+	public T getData() {
 		return data;
 	}
 
-	public void setData(List<T> data) {
+	public void setData(T data) {
 		this.data = data;
 	}
 

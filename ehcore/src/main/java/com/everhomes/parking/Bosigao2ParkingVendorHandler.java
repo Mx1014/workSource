@@ -85,11 +85,13 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
         Bosigao2ResultEntity result = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -111,7 +113,8 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+				return response;
 			}
 			
 			String userName = cardInfo.getUserName();
@@ -129,9 +132,12 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else {
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
+
 		}
         
-        return resultList;
+        return response;
     }
 
 	private Long strToLong2(String str) {

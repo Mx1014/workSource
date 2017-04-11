@@ -60,11 +60,13 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
-    	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	
+    	List<ParkingCardDTO> resultList = new ArrayList<>();
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
     	BosigaoCardInfo card = getCardInfo(plateNumber);
     	
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -84,7 +86,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(endTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+				return response;
 			}
 			
 //			String plateOwnerName = card.getUserName();
@@ -104,8 +107,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else{
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
 		}
-        return resultList;
+        return response;
     }
 
     private BosigaoCardInfo getCardInfo(String plateNumber){
@@ -119,7 +124,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		params.put("data", jsonParam.toString());
         String json = HttpUtils.post(url + "OISGetAccountCardCarZL", params);
 
-		BosigaoJsonEntity<BosigaoCardInfo> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<BosigaoCardInfo>>(){});
+		BosigaoJsonEntity<List<BosigaoCardInfo>> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<List<BosigaoCardInfo>>>(){});
 
         BosigaoCardInfo card = null;
         
@@ -140,15 +145,15 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
-//		BosigaoCardInfo card = getCardInfo(carNumber);
+		BosigaoCardInfo card = getCardInfo(order.getPlateNumber());
 
 		String url = configProvider.getValue("parking.techpark.url", "");
 		String cost = String.valueOf((order.getPrice().intValue() * 100));
 
 		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("CardID", order.getCardNumber());
-		jsonParam.put("ParkingID", ParkingID);
-		jsonParam.put("MonthNum", String.valueOf(order.getMonthCount()));
+		jsonParam.put("CardID", card.getCardID());
+		jsonParam.put("ParkingID", card.getParkingID());
+		jsonParam.put("MonthNum", String.valueOf(order.getMonthCount().intValue()));
 		jsonParam.put("Amount", cost);
 		jsonParam.put("PayWay", "10001".equals(order.getPaidType()) ? "3" : "2");
 		jsonParam.put("OnlineOrderID", order.getId());
@@ -192,24 +197,32 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private boolean payTempCardFee(ParkingRechargeOrder order){
-		String url = configProvider.getValue("parking.techpark.url", "");
-		String cost = String.valueOf((order.getPrice().intValue() * 100));
 
-		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("OrderID", order.getCardNumber());
-		jsonParam.put("PayWay", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "3" : "2");
-		jsonParam.put("Amount", cost);
-		jsonParam.put("ParkingID", ParkingID);
-		jsonParam.put("OnlineOrderID", order.getId());
-		jsonParam.put("PayDate", timestampToStr2(System.currentTimeMillis()));
+		//获取parkingID，没有其他作用，（此时在调一次，可能会产生新的临时费用，不能用这一次查询出来的费用）
+		BosigaoTempFee tempFee = getTempFee(order.getPlateNumber());
 
-		Map<String, String> params = new HashMap<>();
-		params.put("data", jsonParam.toString());
-		String json = HttpUtils.post(url + "OISTempPayAmount", params);
+		if (verifyParkingCar(order.getPlateNumber(), tempFee.getParkingID())) {
+			String url = configProvider.getValue("parking.techpark.url", "");
+			String cost = String.valueOf((order.getPrice().intValue() * 100));
 
-		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
+			JSONObject jsonParam = new JSONObject();
+			jsonParam.put("OrderID", order.getCardNumber());
+			jsonParam.put("PayWay", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "3" : "2");
+			jsonParam.put("Amount", cost);
+			jsonParam.put("ParkingID", tempFee.getParkingID());
+			jsonParam.put("OnlineOrderID", order.getId());
+			jsonParam.put("PayDate", timestampToStr2(System.currentTimeMillis()));
 
-		return entity.isSuccess();
+			Map<String, String> params = new HashMap<>();
+			params.put("data", jsonParam.toString());
+			String json = HttpUtils.post(url + "OISTempPayAmount", params);
+
+			BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
+
+			return entity.isSuccess();
+		}
+
+		return false;
 	}
 
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
@@ -223,7 +236,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		params.put("data", jsonParam.toString());
 		String json = HttpUtils.post(url + "OISGetCardType", params);
 
-		BosigaoJsonEntity<BosigaoCardType> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<BosigaoCardType>>(){});
+		BosigaoJsonEntity<List<BosigaoCardType>> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<List<BosigaoCardType>>>(){});
 
 		List<ParkingCardType> list = new ArrayList<>();
 		if(entity.isSuccess()) {
@@ -389,7 +402,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		dto.setPlateNumber(plateNumber);
 		long entranceDate = strToLong2(tempFee.getEntranceDate());
 		dto.setEntryTime(entranceDate);
-		dto.setPayTime(strToLong2(tempFee.getPayDate()));
+		dto.setPayTime(tempFee.getPayTime());
 		dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
 		dto.setDelayTime(tempFee.getOutTime());
 		dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100)));
@@ -446,14 +459,14 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		params.put("data", jsonParam.toString());
 		String json = HttpUtils.post(url + "OISGetAccountLockCar", params);
 
-		BosigaoJsonEntity<BosigaoCarLockInfo> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<BosigaoCarLockInfo>>(){});
+		BosigaoJsonEntity<List<BosigaoCarLockInfo>> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<List<BosigaoCarLockInfo>>>(){});
 
 		BosigaoCarLockInfo cardLockInfo = null;
 
 		if(entity.isSuccess()){
-			List<BosigaoCarLockInfo> cardLockInfos = entity.getData();
-			if (null != cardLockInfos && cardLockInfos.size() != 0) {
-				cardLockInfo = cardLockInfos.get(0);
+			List<BosigaoCarLockInfo> cars = entity.getData();
+			if (null != cars && cars.size() != 0) {
+				cardLockInfo = cars.get(0);
 			}
 		}
 		return cardLockInfo;
@@ -491,6 +504,22 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
 		BosigaoCardInfo card = null;
+
+		return entity.isSuccess();
+	}
+
+	private boolean verifyParkingCar(String plateNumber, String parkingID){
+		String url = configProvider.getValue("parking.techpark.url", "");
+
+		JSONObject jsonParam = new JSONObject();
+		jsonParam.put("ParkingID", parkingID);
+		jsonParam.put("PlateNumber", plateNumber);
+
+		Map<String, String> params = new HashMap<>();
+		params.put("data", jsonParam.toString());
+		String json = HttpUtils.post(url + "OISGetOrderState", params);
+
+		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
 		return entity.isSuccess();
 	}

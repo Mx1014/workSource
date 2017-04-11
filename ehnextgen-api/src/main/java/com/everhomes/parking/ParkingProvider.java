@@ -34,7 +34,7 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, String paidType, Long pageAnchor, Integer pageSize);
+    		Byte rechargeType, String paidType, String cardNumber, Long pageAnchor, Integer pageSize);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
