@@ -735,3 +735,5 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('3', 999979, '审批', 'zl://approval/create?approvalId={}&sourceId={}', '0');
 
 update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999979;
+update eh_launch_pad_items set delete_flag = 0 where item_label = '更多' and namespace_id = 999979;
+update eh_launch_pad_items set action_data = CONCAT('{\"url\": \"', @eh_core_serverURL, '/web/lib/html/rich_text_review.html?id=1&banner=1\"}') where item_label = '园区简介' and namespace_id = 999979;
