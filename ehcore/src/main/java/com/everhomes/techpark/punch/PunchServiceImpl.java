@@ -4980,6 +4980,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void updatePunchPoint(UpdatePunchPointCommand cmd) { 
 		PunchGeopoint punchGeopoint = punchProvider.findPunchGeopointById(cmd.getId());
+		punchGeopoint.setDescription(cmd.getDescription());
 		punchGeopoint.setLatitude(cmd.getLatitude());
 		punchGeopoint.setLongitude(cmd.getLongitude());
 		punchGeopoint.setDistance(cmd.getDistance());
