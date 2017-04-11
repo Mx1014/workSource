@@ -878,9 +878,9 @@ public class UserProviderImpl implements UserProvider {
                     .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 
             SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-            boolean orgQueryFlag = false;
+            byte orgQueryFlag = 0;
 
-            if (null != isAuth) {
+            if (null != isAuth && 0 != isAuth) {
                 if (1 == isAuth) {
                     orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
                 }else if (2 == isAuth){
@@ -888,7 +888,7 @@ public class UserProviderImpl implements UserProvider {
                             .or(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())));
 
                 }
-                orgQueryFlag = true;
+                orgQueryFlag = 1;
             }
 
             if (null != organizationId) {
@@ -896,11 +896,14 @@ public class UserProviderImpl implements UserProvider {
                 orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
                 orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
                 orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-                orgQueryFlag = true;
+                orgQueryFlag = 2;
 
 		    }
 
-		    if (orgQueryFlag) {
+            if (1 == orgQueryFlag) {
+                query.leftOuterJoin(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+            }
+		    if (2 == orgQueryFlag) {
                 query.join(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
 
             }
