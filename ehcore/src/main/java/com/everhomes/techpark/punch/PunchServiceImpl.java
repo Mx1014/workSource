@@ -2919,7 +2919,7 @@ public class PunchServiceImpl implements PunchService {
 			punchTimeRule.setNoonLeaveTimeLong(cmd.getNoonLeaveTime());
 			punchTimeRule.setStartLateTimeLong(cmd.getStartLateTime());
 			punchTimeRule.setDaySplitTimeLong(cmd.getDaySplitTime());
-			
+			punchTimeRule.setDescription(cmd.getDescription());
 			punchTimeRule.setOperatorUid(userId);
 			punchTimeRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
