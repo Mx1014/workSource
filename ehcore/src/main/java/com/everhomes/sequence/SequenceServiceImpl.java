@@ -1273,6 +1273,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOauth2ClientTokens.class, Tables.EH_OAUTH2_CLIENT_TOKENS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_OAUTH2_CLIENT_TOKENS.ID.max()).from(Tables.EH_OAUTH2_CLIENT_TOKENS).fetchOne().value1();
         });
+        syncTableSequence(null, EhPreviews.class, Tables.EH_PREVIEWS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PREVIEWS.ID.max()).from(Tables.EH_PREVIEWS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
