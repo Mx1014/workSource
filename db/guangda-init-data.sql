@@ -736,4 +736,11 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 
 update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999979;
 update eh_launch_pad_items set delete_flag = 0 where item_label = '更多' and namespace_id = 999979;
-update eh_launch_pad_items set action_data = CONCAT('{\"url\": \"', @eh_core_serverURL, '/web/lib/html/rich_text_review.html?id=1&banner=1\"}') where item_label = '园区简介' and namespace_id = 999979;
+update eh_launch_pad_items set action_data = CONCAT('{\"url\": \"', @eh_core_serverURL, '/park-introduction/index.html?hideNavigationBar=1&rtToken=OeNWCjQsp3PdpenapK5vZ5rUUFrGexFfjSXCMRgENdXznl_7nJxAZodAKJAH71SZPajFWbK6m46R9_rihdQDwAHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fmnEP68W0ueM_v2jvtvUSpk#sign_suffix"}') where item_label = '园区简介' and namespace_id = 999979;
+
+
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),50900,'', 'EhNamespaces', 999979,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40541,'', 'EhNamespaces', 999979,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40542,'', 'EhNamespaces', 999979,2);
