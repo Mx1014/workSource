@@ -82,16 +82,7 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,NOW(), 'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10079 ;
 
--- 海岸新增园区楼栋 add by sfyan 20170410
-SET @community_id = 240111044331054836; 
-SET @organization_id = 1000631;  	
-SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
-SET @forum_id = 179511;
-SET @feedback_forum_id = 179512; 
-SET @building1_id = 180301;
-SET @shi_id = 16090; 
-SET @qu_id = 16091; 
-
+-- 海岸新增园区楼栋 add by sfyan 20170410 已执行
 
 SET @community_id = 240111044331054836; 
 SET @organization_id = 1000631;  	
