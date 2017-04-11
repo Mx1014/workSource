@@ -133,4 +133,5 @@ public interface EquipmentProvider {
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey);
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
+	List<EquipmentInspectionEquipments> listEquipmentsById(List<Long> ids);
 }

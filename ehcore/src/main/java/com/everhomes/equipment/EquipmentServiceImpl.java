@@ -15,8 +15,12 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
 
 import com.everhomes.util.doc.DocUtil;
@@ -319,10 +323,6 @@ import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.videoconf.ConfOrders;
@@ -388,18 +388,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
     private AclProvider aclProvider;
-
-	@Autowired
-	private QualityService qualityService;
 	
 	@Autowired
 	private EquipmentStandardMapSearcher equipmentStandardMapSearcher;
 	
 	@Autowired
-	private UserProvider userProvider;
-	
-	@Autowired
 	private CommunityProvider communityProvider;
+
+	@Autowired
+	private AppUrlService appUrlService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -3802,58 +3799,69 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return response;
 	}
 
-	public HttpServletResponse exportEquipmentsCard(SearchEquipmentsCommand cmd, HttpServletResponse response) {
-		Integer pageSize = Integer.MAX_VALUE;
-		cmd.setPageSize(pageSize);
-
-		SearchEquipmentsResponse equipments = equipmentSearcher.queryEquipments(cmd);
-		List<EquipmentsDTO> dtos = equipments.getEquipment();
-
-//		URL rootPath = RentalServiceImpl.class.getResource("/");
-//		String filePath =rootPath.getPath() + this.downloadDir ;
-//		File file = new File(filePath);
-//		if(!file.exists())
-//			file.mkdirs();
-//		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
-//		//新建了一个文件
-//		this.createEquipmentsBook(filePath, dtos);
+	public void exportEquipmentsCard(ExportEquipmentsCardCommand cmd) {
+		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(cmd.getIds());
+		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
+			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
 
 		dtos.forEach(dto -> {
 			DocUtil docUtil=new DocUtil();
-			Map<String, Object> dataMap=new HashMap<String, Object>();
-			dataMap.put("sequenceNo", dto.getSequenceNo());
-			dataMap.put("versionNo", dto.getVersionNo());
-			dataMap.put("name", dto.getName());
-			dataMap.put("equipmentModel", dto.getEquipmentModel());
-			dataMap.put("parameter", dto.getParameter());
-			dataMap.put("customNumber", dto.getCustomNumber());
-			dataMap.put("manufacturer", dto.getManufacturer());
-			dataMap.put("manager", dto.getManager());
-			dataMap.put("status", dto.getStatus());
-			dataMap.put("shenyeLogo", docUtil.getImageStr("E:\\4d6193896405e960.jpg"));
+			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
+
+			GetAppInfoCommand command = new GetAppInfoCommand();
+			command.setNamespaceId(dto.getNamespaceId());
+			command.setOsType(OSType.Android.getCode());
+			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(appUrlDTO.getLogoUrl() != null) {
+				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
-				BufferedImage image = null;
-				ByteArrayOutputStream out = null;
-				try {
-					image = QRCodeEncoder.createQrCode(dto.getQrCodeToken(), 270, 270, null);
-					out = new ByteArrayOutputStream();
-					ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (WriterException e) {
-					e.printStackTrace();
-				}
-				BASE64Encoder encoder=new BASE64Encoder();
+				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
 				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
 				dataMap.put("qrCode", encoder.encode(data));
 			}
 
-			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
+			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
+//			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
+			docUtil.createDoc(dataMap, "shenye", savePath);
+			docUtil.closeHttpConn();
 		});
+		
 
-//		return download(filePath,response);
-		return null;
+	}
+
+	private ByteArrayOutputStream generateQRCode(String qrToken) {
+		ByteArrayOutputStream out = null;
+		try {
+			BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 270, 270, null);
+			out = new ByteArrayOutputStream();
+			ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WriterException e) {
+			e.printStackTrace();
+		}
+
+		return out;
+	}
+
+	private Map<String, Object> createEquipmentCardDoc(EquipmentsDTO dto) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		dataMap.put("sequenceNo", dto.getSequenceNo());
+		dataMap.put("versionNo", dto.getVersionNo());
+		dataMap.put("name", dto.getName());
+		dataMap.put("equipmentModel", dto.getEquipmentModel());
+		dataMap.put("parameter", dto.getParameter());
+		dataMap.put("customNumber", dto.getCustomNumber());
+		dataMap.put("manufacturer", dto.getManufacturer());
+		dataMap.put("manager", dto.getManager());
+		dataMap.put("status",EquipmentStatus.fromStatus(dto.getStatus()).getName());
+
+		return dataMap;
 	}
 
 }

@@ -46,6 +46,8 @@ import com.everhomes.util.StringHelper;
 public class EquipmentsDTO {
 	
 	private Long id;
+
+	private Integer namespaceId;
 	@NotNull
 	private Long ownerId;
 	
@@ -115,6 +117,14 @@ public class EquipmentsDTO {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public Long getOwnerId() {

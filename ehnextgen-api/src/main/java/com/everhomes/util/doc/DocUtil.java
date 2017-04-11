@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Map;
 
 import sun.misc.BASE64Encoder;
@@ -19,6 +21,8 @@ import freemarker.template.TemplateExceptionHandler;
 
 public class DocUtil {
     public Configuration configure=null;
+
+    private HttpURLConnection httpUrl = null;
     
     public DocUtil(){
         configure=new Configuration(Configuration.VERSION_2_3_23);
@@ -70,6 +74,59 @@ public class DocUtil {
         }
         BASE64Encoder encoder=new BASE64Encoder();
         return encoder.encode(data);
+    }
+    
+    public String getUrlImageStr(String destUrl){
+    	InputStream inputStream = saveToFile(destUrl);
+    	String str = GetImageStrByInput(inputStream);
+//    	httpUrl.disconnect();
+    	return str;
+    }
+
+    /**
+     * 从URL中读取图片,转换成流形式.
+     * @param destUrl
+     * @return
+     */
+    public InputStream saveToFile(String destUrl){
+
+        URL url = null;
+        InputStream in = null;
+        try{
+            url = new URL(destUrl);
+            httpUrl = (HttpURLConnection) url.openConnection();
+            httpUrl.connect();
+            httpUrl.getInputStream();
+            in = httpUrl.getInputStream();
+            return in;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 读取输入流,转换为Base64字符串
+     * @param input
+     * @return
+     */
+    public String GetImageStrByInput(InputStream input) {
+        byte[] data = null;
+        // 读取图片字节数组
+        try {
+            data = new byte[input.available()];
+            input.read(data);
+            input.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 对字节数组Base64编码
+        BASE64Encoder encoder = new BASE64Encoder();
+        return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+    }
+
+    public void closeHttpConn(){
+        httpUrl.disconnect();
     }
 }
 

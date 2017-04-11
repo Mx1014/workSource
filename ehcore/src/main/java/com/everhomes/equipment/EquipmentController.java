@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.equipment.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,59 +22,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
-import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
-import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
-import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
-import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
-import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
-import com.everhomes.rest.equipment.EquipmentParameterDTO;
-import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.ImportOwnerCommand;
-import com.everhomes.rest.equipment.InspectionItemDTO;
-import com.everhomes.rest.equipment.InspectionTemplateDTO;
-import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
-import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
-import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
-import com.everhomes.rest.equipment.ListTaskByIdCommand;
-import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListTasksByTokenCommand;
-import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
-import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
-import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
-import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
-import com.everhomes.rest.equipment.SearchEquipmentsResponse;
-import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentsCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -1012,7 +960,7 @@ public class EquipmentController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/statEquipmentTasks</b>
+	 * <b>URL: /equipment/statEquipmentTasks</b>
 	 * <p>任务数统计</p>
 	 */
 	@RequestMapping("statEquipmentTasks")
@@ -1022,6 +970,22 @@ public class EquipmentController extends ControllerBase {
 		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
 		
 		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/exportEquipmentsCard</b>
+	 * <p>导出设备卡</p>
+	 */
+	@RequestMapping("exportEquipmentsCard")
+	@RestReturn(value = String.class)
+	public RestResponse exportEquipmentsCard(ExportEquipmentsCardCommand cmd) {
+
+		equipmentService.exportEquipmentsCard(cmd);
+
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
