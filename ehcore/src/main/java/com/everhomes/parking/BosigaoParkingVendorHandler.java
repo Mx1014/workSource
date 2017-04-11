@@ -426,7 +426,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		}
 		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 		dto.setEntryTime(strToLong2(bosigaoCarLockInfo.getEntranceDate()));
-		dto.setLockCarTime(strToLong2(bosigaoCarLockInfo.getLockDate()));
+		long lockTime = strToLong2(bosigaoCarLockInfo.getLockDate());
+		if (lockTime > 0) {
+			dto.setLockCarTime(lockTime);
+		}
 		dto.setLockStatus(bosigaoCarLockInfo.getStatus().byteValue());
 		return dto;
 	}
