@@ -11,7 +11,7 @@ package com.everhomes.rest.aclink;
  *
  */
 public enum DoorAccessType {
-    ZLACLINK_WIFI((byte)0), ZLACLINK_NOWIFI((byte)1), ACLINK_ZL_GROUP((byte)5), ACLINK_LINGLING_GROUP((byte)6), ACLINK_LINGLING((byte)11);
+    ZLACLINK_WIFI((byte)0), ZLACLINK_NOWIFI((byte)1), ACLINK_ZL_GROUP((byte)5), ACLINK_LINGLING_GROUP((byte)6), ACLINK_LINGLING((byte)11), ACLINK_HUARUN_GROUP((byte)12);
     
     private byte code;
     
@@ -38,6 +38,8 @@ public enum DoorAccessType {
             return ACLINK_LINGLING_GROUP;
         case 11:
             return ACLINK_LINGLING;
+        case 12:
+        	return ACLINK_HUARUN_GROUP;
         }
         
         return null;

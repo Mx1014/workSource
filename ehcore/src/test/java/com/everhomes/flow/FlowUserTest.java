@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.After;
@@ -18,6 +20,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
+import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkHuarunVerifyUser;
+import com.everhomes.aclink.huarun.AclinkHuarunVerifyUserResp;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.entity.EntityType;
@@ -30,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.StringHelper;
 
 public class FlowUserTest extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -59,6 +67,9 @@ public class FlowUserTest extends LoginAuthTestCase {
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    AclinkHuarunService aclinkHuarunService;
     
     private User testUser1;
     private User testUser2;
@@ -140,6 +151,28 @@ public class FlowUserTest extends LoginAuthTestCase {
       redisTemplate2.setValueSerializer(jdkSerial);
       Object v2 = redisTemplate2.opsForValue().get("testhello");
       LOGGER.info("v=" + v);
+    }
+    
+    @Test
+    public void testTls() throws NoSuchAlgorithmException {
+    	String phone = "13800138000";
+    	AclinkHuarunVerifyUser user = new AclinkHuarunVerifyUser();
+    	user.setPhone(phone);
+    	AclinkHuarunVerifyUserResp resp = aclinkHuarunService.verifyUser(user);
+    	LOGGER.info("resp=" + resp);
+    	
+    	AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
+    	getCode.setAuth("1235");
+    	getCode.setPhone(phone);
+    	MessageDigest md = MessageDigest.getInstance("MD5");
+    	String md5 = "SA" + getCode.getAuth(); 
+    	md.update(md5.getBytes());
+    	getCode.setType("0");
+    	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
+    	getCode.setMd5(rlt);
+    	
+    	AclinkGetSimpleQRCodeResp resp2 = aclinkHuarunService.getSimpleQRCode(getCode);
+    	LOGGER.info("resp2=" + resp2);
     }
     
 }

@@ -312,6 +312,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 } else if(cmd.getGroupId().equals(-1l)) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())
                     .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_ZL_GROUP.getCode()))
+                    .or(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(DoorAccessType.ACLINK_HUARUN_GROUP.getCode()))
                     .or(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l)));
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
                 } else if(!cmd.getGroupId().equals(0l)) {
@@ -900,14 +901,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
         }
         
+        DoorAccess doorGroup = null;
         if(cmd.getGroupId() != null && (!cmd.getGroupId().equals(0l))) {
-            DoorAccess doorGroup = doorAccessProvider.getDoorAccessById(cmd.getGroupId());
+            doorGroup = doorAccessProvider.getDoorAccessById(cmd.getGroupId());
             if(doorGroup == null || doorGroup.getStatus().equals(DoorAccessStatus.INVALID.getCode())) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door group not found");
             }
         } else {
             cmd.setGroupId(null);
         }
+        final DoorAccess dg = doorGroup;
         
         doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
@@ -926,7 +929,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     return doorAcc;
                     }
                 
-                String aesKey = AclinkUtils.generateAESKey();
+                String aesKey = "";
+                if(dg != null) {
+                	aesKey = dg.getAesIv();
+                } else {
+                	aesKey = AclinkUtils.generateAESKey();	
+                }
+                
                 String aesIv = AclinkUtils.generateAESIV(aesKey);
                 
                 doorAcc = new DoorAccess();
@@ -1683,6 +1692,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAccessCapapilityDTO dto = new DoorAccessCapapilityDTO();
         dto.setIsSupportQR((byte)1);
         dto.setIsSupportSmart((byte)1);
+        if(cmd.getNamespaceId() == null) {
+        	cmd.setNamespaceId(UserContext.getCurrentNamespaceId(null));
+        }
         
         dto.setQrDriver(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode()));
         dto.setQrDriverExt(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode()));
@@ -1952,9 +1964,126 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         return resp;
         }
-    
+
     @Override
     public DoorAccessDTO createDoorAccessGroup(CreateDoorAccessGroup cmd) {
+    	DoorAccessDriverType driverType = getQrDriverType(UserContext.getCurrentNamespaceId(null));
+    	if(driverType == DoorAccessDriverType.LINGLING) {
+    		return createDoorAccessGroupLingling(cmd);
+    	} else if(driverType == DoorAccessDriverType.HUARUN_ANGUAN) {
+    		return createDoorAccessGroupHuarunAnGuan(cmd);
+    	} else {
+    		return createDoorAccessGroupZuolin(cmd);
+    	}
+    }
+
+    //安冠 SDK 没有设备或者门禁的概念，它直接通过手机好生成 4 个字节的二维码
+    private DoorAccessDTO createDoorAccessGroupHuarunAnGuan(CreateDoorAccessGroup cmd) {
+        User user = UserContext.current().getUser();
+        
+        String uuid = UUID.randomUUID().toString();
+        final String groupHardwareId = uuid.replace("-", "");
+        
+        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
+            @Override
+            public DoorAccess doInTransaction(TransactionStatus arg0) {
+                DoorAccess doorAcc = new DoorAccess();
+                
+                doorAcc.setName(cmd.getName());
+                doorAcc.setHardwareId(groupHardwareId);
+                doorAcc.setActiveUserId(user.getId());
+                doorAcc.setCreatorUserId(user.getId());
+                doorAcc.setOwnerId(cmd.getOwnerId());
+                doorAcc.setOwnerType(cmd.getOwnerType());
+                doorAcc.setAddress(cmd.getAddress());
+                doorAcc.setAvatar(cmd.getAddress());
+                doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                doorAcc.setDoorType(DoorAccessType.ACLINK_HUARUN_GROUP.getCode());
+                doorAcc.setUuid(groupHardwareId);
+                doorAcc.setAesIv("");
+                doorAccessProvider.createDoorAccess(doorAcc);
+                
+                OwnerDoor ownerDoor = new OwnerDoor();
+                ownerDoor.setDoorId(doorAcc.getId());
+                ownerDoor.setOwnerType(cmd.getOwnerType());
+                ownerDoor.setOwnerId(cmd.getOwnerId());
+                try {
+                    ownerDoorProvider.createOwnerDoor(ownerDoor);
+                } catch(Exception ex) {
+                    LOGGER.error("createOwnerDoor failed ", ex);
+                    return null;
+                    }
+                
+                Aclink aclink = new Aclink();
+                aclink.setManufacturer("anguan");
+                aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                aclink.setDoorId(doorAcc.getId());
+                aclink.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+                aclink.setDeviceName(cmd.getName());
+                aclink.setFirwareVer("");
+                aclinkProvider.createAclink(aclink);
+               
+                return doorAcc;
+            }
+        });
+        
+        return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);    	
+    }
+    
+    private DoorAccessDTO createDoorAccessGroupZuolin(CreateDoorAccessGroup cmd) {
+        User user = UserContext.current().getUser();
+        
+        String uuid = UUID.randomUUID().toString();
+        final String groupHardwareId = uuid.replace("-", "");
+        
+        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
+            @Override
+            public DoorAccess doInTransaction(TransactionStatus arg0) {
+                DoorAccess doorAcc = new DoorAccess();
+                String aesKey = AclinkUtils.generateAESKey();
+                
+                doorAcc.setName(cmd.getName());
+                doorAcc.setHardwareId(groupHardwareId);
+                doorAcc.setActiveUserId(user.getId());
+                doorAcc.setCreatorUserId(user.getId());
+                doorAcc.setOwnerId(cmd.getOwnerId());
+                doorAcc.setOwnerType(cmd.getOwnerType());
+                doorAcc.setAddress(cmd.getAddress());
+                doorAcc.setAvatar(cmd.getAddress());
+                doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                doorAcc.setUuid(groupHardwareId);
+                doorAcc.setAesIv(aesKey);//save the original aesKey, TODO save it to aes server key?
+                doorAccessProvider.createDoorAccess(doorAcc);
+                
+                OwnerDoor ownerDoor = new OwnerDoor();
+                ownerDoor.setDoorId(doorAcc.getId());
+                ownerDoor.setOwnerType(cmd.getOwnerType());
+                ownerDoor.setOwnerId(cmd.getOwnerId());
+                try {
+                    ownerDoorProvider.createOwnerDoor(ownerDoor);
+                } catch(Exception ex) {
+                    LOGGER.error("createOwnerDoor failed ", ex);
+                    return null;
+                    }
+                
+                Aclink aclink = new Aclink();
+                aclink.setManufacturer(Manufacturer);
+                aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                aclink.setDoorId(doorAcc.getId());
+                aclink.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+                aclink.setDeviceName(cmd.getName());
+                aclink.setFirwareVer("");
+                aclinkProvider.createAclink(aclink);
+               
+                return doorAcc;
+            }
+        });
+        
+        return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);    	
+    }
+    
+    private DoorAccessDTO createDoorAccessGroupLingling(CreateDoorAccessGroup cmd) {
         User user = UserContext.current().getUser();
         
         String uuid = UUID.randomUUID().toString();
