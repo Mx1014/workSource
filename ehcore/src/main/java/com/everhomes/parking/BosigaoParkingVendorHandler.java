@@ -418,14 +418,13 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	@Override
 	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
-		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 
 		BosigaoCarLockInfo bosigaoCarLockInfo = getCarLockInfo(cmd.getPlateNumber());
 
 		if (null == bosigaoCarLockInfo) {
-			return dto;
+			return null;
 		}
-
+		ParkingCarLockInfoDTO dto = new ParkingCarLockInfoDTO();
 		dto.setEntryTime(strToLong2(bosigaoCarLockInfo.getEntranceDate()));
 		dto.setLockCarTime(strToLong2(bosigaoCarLockInfo.getLockDate()));
 		dto.setLockStatus(bosigaoCarLockInfo.getStatus().byteValue());

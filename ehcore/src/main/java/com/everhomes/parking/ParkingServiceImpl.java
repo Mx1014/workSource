@@ -1493,26 +1493,29 @@ public class ParkingServiceImpl implements ParkingService {
 
 		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
 
-		dto.setOwnerId(cmd.getOwnerId());
-		dto.setOwnerType(cmd.getOwnerType());
-		dto.setParkingLotId(cmd.getParkingLotId());
-		dto.setPlateNumber(cmd.getPlateNumber());
-		dto.setParkingLotName(parkingLot.getName());
+		if (null != dto) {
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setPlateNumber(cmd.getPlateNumber());
+			dto.setParkingLotName(parkingLot.getName());
 
-		Long organizationId = cmd.getOrganizationId();
-		User user = UserContext.current().getUser();
-		Long userId = user.getId();
-		String plateOwnerName = user.getNickName();
+			Long organizationId = cmd.getOrganizationId();
+			User user = UserContext.current().getUser();
+			Long userId = user.getId();
+			String plateOwnerName = user.getNickName();
 
-		if(null != organizationId) {
-			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-			if(null != organizationMember) {
-				plateOwnerName = organizationMember.getContactName();
+			if(null != organizationId) {
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+				if(null != organizationMember) {
+					plateOwnerName = organizationMember.getContactName();
+				}
+			}
+			if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+				dto.setPlateOwnerName(plateOwnerName);
 			}
 		}
-		if(StringUtils.isBlank(dto.getPlateOwnerName())) {
-			dto.setPlateOwnerName(plateOwnerName);
-		}
+
 		return dto;
 	}
 
