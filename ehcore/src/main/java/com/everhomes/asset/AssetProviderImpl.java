@@ -351,4 +351,9 @@ public class AssetProviderImpl implements AssetProvider {
         }
         return records.get(0);
     }
+
+    @Override
+    public AssetVendor findAssetVendorByOwner(String ownerType, Long ownerId) {
+        return null;
+    }
 }

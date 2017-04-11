@@ -7,5 +7,6 @@ CREATE TABLE `eh_asset_vendor` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_asset_vendor_owner_id` (`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

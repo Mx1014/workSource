@@ -32,4 +32,6 @@ public interface AssetProvider {
     int countNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType, Timestamp startTime, Timestamp endTime);
 
     AssetBillNotifyRecords getLastAssetBillNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType);
+
+    AssetVendor findAssetVendorByOwner(String ownerType,Long ownerId);
 }

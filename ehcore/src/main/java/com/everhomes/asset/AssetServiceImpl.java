@@ -3,9 +3,11 @@ package com.everhomes.asset;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -54,6 +56,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,102 +147,54 @@ public class AssetServiceImpl implements AssetService {
         return dtos;
     }
 
+    private AssetVendor checkAssetVendor(String ownerType,Long ownerId){
+        if(null == ownerId) {
+            LOGGER.error("OwnerId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "OwnerId cannot be null.");
+        }
+
+        if(StringUtils.isBlank(ownerType)) {
+            LOGGER.error("OwnerType cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "OwnerType cannot be null.");
+        }
+
+        AssetVendor assetVendor = assetProvider.findAssetVendorByOwner(ownerType, ownerId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor ownerType={}, ownerId={}", ownerType, ownerId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
+
+        return assetVendor;
+    }
+
+    private AssetVendorHandler getAssetVendorHandler(String vendorName) {
+        AssetVendorHandler handler = null;
+
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = AssetVendorHandler.ASSET_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+
+        return handler;
+    }
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd) {
 
-        List<Long> tenantIds = new ArrayList<>();
-        String tenantType = null;
-        if(cmd.getTenant() != null) {
-            Community community = communityProvider.findCommunityById(cmd.getTargetId());
-            if(community != null) {
-                //园区 查公司表
-                if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                    tenantType = TenantType.ENTERPRISE.getCode();
-                    SearchOrganizationCommand command = new SearchOrganizationCommand();
-                    command.setKeyword(cmd.getTenant());
-                    command.setCommunityId(cmd.getTargetId());
-                    GroupQueryResult result = organizationSearcher.query(command);
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(), cmd.getOwnerId());
 
-                    if(result != null) {
-                        tenantIds.addAll(result.getIds());
-                    }
-                }
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
 
-                //小区 查用户所属家庭
-                else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                    tenantType = TenantType.FAMILY.getCode();
-                    List<User> users = userProvider.listUserByNickName(cmd.getTenant());
-
-                    if(users != null && users.size() > 0) {
-                        for(User user : users) {
-                            List<UserGroup> list = userProvider.listUserActiveGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
-                            if(list != null && list.size() > 0) {
-                                for(UserGroup userGroup : list) {
-                                    tenantIds.add(userGroup.getGroupId());
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            }
-        }
-
-        CrossShardListingLocator locator=new CrossShardListingLocator();
-        if(cmd.getPageAnchor()!=null){
-            locator.setAnchor(cmd.getPageAnchor());
-        }
-        
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        
-        List<AssetBill> bills  = assetProvider.listAssetBill(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
-                tenantIds, tenantType, cmd.getAddressId(), cmd.getStatus(), cmd.getStartTime(),cmd.getEndTime(), locator, pageSize + 1);
-
-
-        ListSimpleAssetBillsResponse response = new ListSimpleAssetBillsResponse();
-        if (bills.size() > pageSize) {
-            response.setNextPageAnchor(locator.getAnchor());
-            bills = bills.subList(0, pageSize);
-        }
-
-        List<SimpleAssetBillDTO> dtos = convertAssetBillToSimpleDTO(bills);
-        response.setBills(dtos);
+        ListSimpleAssetBillsResponse response = handler.listSimpleAssetBills(cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getAddressId(), cmd.getTenant(), cmd.getStatus(),
+                cmd.getStartTime(), cmd.getEndTime(), cmd.getPageAnchor(), cmd.getPageSize());
         return response;
-    }
 
-    private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
-        List<SimpleAssetBillDTO> dtos =  bills.stream().map(bill -> {
-            SimpleAssetBillDTO dto = ConvertHelper.convert(bill, SimpleAssetBillDTO.class);
-            Address address = addressProvider.findAddressById(bill.getAddressId());
-            if(address != null) {
-                dto.setBuildingName(address.getBuildingName());
-                dto.setApartmentName(address.getApartmentName());
-            }
 
-            BigDecimal totalAmount = bill.getPeriodAccountAmount();
-            // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
-            if(compareMonth(bill.getAccountPeriod()) == 0) {
-
-                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
-                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
-
-                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
-                    BigDecimal pastUnpaid = bill.getLateFee();
-                    for(BigDecimal unpaid : unpaidAmounts) {
-                        pastUnpaid = pastUnpaid.add(unpaid);
-                    }
-
-                    totalAmount.add(pastUnpaid);
-                    
-                }
-            }
-
-            dto.setPeriodAccountAmount(totalAmount);
-            return dto;
-        }).collect(Collectors.toList());
-
-        return dtos;
     }
 
     private int compareMonth(Timestamp compareValue) {

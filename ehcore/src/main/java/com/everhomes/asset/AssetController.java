@@ -4,8 +4,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -31,6 +33,9 @@ public class AssetController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AssetController.class);
     @Autowired
     private AssetService assetService;
+
+    @Autowired
+    private PmKeXingBillService keXingBillService;
 
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
@@ -259,6 +264,20 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取用户为管理员的公司列表</p>
+     * <b>URL: /asset/listOrganizationsByPmAdmin</b>
+     */
+    @RequestMapping("listOrganizationsByPmAdmin")
+    @RestReturn(value = ListOrganizationsByPmAdminDTO.class, collection = true)
+    public RestResponse listOrganizationsByPmAdmin() {
+
+        RestResponse response = new RestResponse(keXingBillService.listOrganizationsByPmAdmin());
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 //    脚本配置设置用户模板
