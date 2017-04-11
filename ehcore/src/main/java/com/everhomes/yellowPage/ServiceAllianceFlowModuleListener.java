@@ -173,6 +173,23 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		entities.add(e);
 		
+		//楼栋门牌
+		e = new FlowCaseEntity();
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_ADDRESS.getCode()); 
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			if(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class) != null){
+				e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+				entities.add(e);	
+			}
+		}else{
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_COMPANY.getCode()); 
+		}
+		
 		//申请类型
 		e = new FlowCaseEntity(); 
 		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(val.getApprovalId());
