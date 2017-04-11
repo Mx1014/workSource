@@ -107,4 +107,6 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 	VALUES(@building1_id, @community_id, '海岸环庆大厦', '海岸环庆大厦', 0, '0755-82738680', '深圳市福田区福田路24号', 103587.01, 114.084319, 22.540574, 'uxbpbzvxcryp', '海岸环庆大厦作为福田CBD国际甲级写字楼，是全深圳唯一的70年办公产权的写字楼，享受全深圳所有最顶级最成熟的配套资源。项目位于福田中心区福田南路24号，以中心公园为全景，由深圳市海岸融通投资有限公司开发，江苏建工集团承建。海岸城的缔造者，11年写字楼开发运营成熟经验，少数成功开发超过5座写字楼的地产企业，精工铸造超过同行的商务品质，海岸物业管理为资产保值增值提供保障。 
 海岸环庆大厦占地面积7343.11平方米，总建筑面积103587.01平方米，楼高225米，其中办公面积69657.59平方米；商业面积4613.59平方米。地面停车位133个，地下停车位335个，电梯采用日本三菱品牌，客梯12部（高中低区各4部），转乘梯3部，消防电梯2部，低区电梯速度为4M/秒，中高区电梯速度为6M/秒，电梯轿厢规格为2000*1700*3200.大堂面积580平方米，层高13.4米，地面采用浅灰色砂岩石，墙面采用米黄大理石，天花为玻璃天窗配采光遮阳百叶。外立面采用LOW-E玻璃幕墙，室内空调采用美国约克水冷中央空调。竣工验收已在2016年11月18日完成，计划于2016年12月28日入伙。世界500强企业进驻，全球金融企业总部聚集，共赢中心未来。 ', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999993);
 
+-- 上海星商汇 layout问题 add by sfyan
+update `eh_launch_pad_layouts` set version_code = 2017041101, `layout_json` = replace(`layout_json`, 'NewsFlash', 'News'), `layout_json` = replace(`layout_json`, '"versionCode":"2017011302"', '"versionCode":"2017041101"') where namespace_id = 999981 and `name` = 'ServiceMarketLayout';
 
