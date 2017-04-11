@@ -1505,6 +1505,11 @@ public class QualityProviderImpl implements QualityProvider {
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
 		 
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findSpecificationById, sql=" + query.getSQL());
+            LOGGER.debug("findSpecificationById, bindValues=" + query.getBindValues());
+        }
+		
 		List<QualityInspectionSpecifications> result = new ArrayList<QualityInspectionSpecifications>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
@@ -1554,6 +1559,10 @@ public class QualityProviderImpl implements QualityProvider {
         	SelectQuery<EhQualityInspectionStandardSpecificationMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.in(standardIds));
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Query StandardsSpecifications, sql=" + query.getSQL());
+                LOGGER.debug("Query StandardsSpecifications, bindValues=" + query.getBindValues());
+            }
             query.fetch().map((EhQualityInspectionStandardSpecificationMapRecord record) -> {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
                 assert(standard != null);
