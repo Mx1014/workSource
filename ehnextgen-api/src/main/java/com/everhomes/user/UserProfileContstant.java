@@ -35,4 +35,9 @@ public interface UserProfileContstant {
      * 是否启用摇一摇开门
      */
     public static final String SHAKE_OPEN_DOOR = "shake_open_door";
+    
+    /**
+     * 储能门禁的令令 ID
+     */
+    public static final String LINGLING_ID = "lingling_id";
 }

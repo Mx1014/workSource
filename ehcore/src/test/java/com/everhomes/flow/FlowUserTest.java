@@ -155,21 +155,21 @@ public class FlowUserTest extends LoginAuthTestCase {
     
     @Test
     public void testTls() throws NoSuchAlgorithmException {
-    	String phone = "13800138000";
+    	String phone = "13811138111";
     	AclinkHuarunVerifyUser user = new AclinkHuarunVerifyUser();
     	user.setPhone(phone);
     	AclinkHuarunVerifyUserResp resp = aclinkHuarunService.verifyUser(user);
     	LOGGER.info("resp=" + resp);
     	
     	AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
-    	getCode.setAuth("1235");
-    	getCode.setPhone(phone);
-    	MessageDigest md = MessageDigest.getInstance("MD5");
-    	String md5 = "SA" + getCode.getAuth(); 
-    	md.update(md5.getBytes());
-    	getCode.setType("0");
-    	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
-    	getCode.setMd5(rlt);
+//    	getCode.setAuth("1235");
+//    	getCode.setPhone(phone);
+//    	MessageDigest md = MessageDigest.getInstance("MD5");
+//    	String md5 = "SA" + getCode.getAuth(); 
+//    	md.update(md5.getBytes());
+//    	getCode.setType("0");
+//    	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
+//    	getCode.setMd5(rlt);
     	
     	AclinkGetSimpleQRCodeResp resp2 = aclinkHuarunService.getSimpleQRCode(getCode);
     	LOGGER.info("resp2=" + resp2);

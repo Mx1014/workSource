@@ -2,8 +2,10 @@ package com.everhomes.aclink.huarun;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -31,7 +33,8 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
     @Autowired
     private ConfigurationProvider  configProvider;
     
-    Gson gson = new Gson();
+    private Gson gson = new Gson();
+    private Random randomGenerator = new Random();
     
     private String getRestUri(String methodName) {
         String serverUrl = configProvider.getValue(AclinkHuarunConstant.HUARUN_SERVER, "https://120.237.113.218:53333");
@@ -83,6 +86,20 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
     @Override
     public AclinkGetSimpleQRCodeResp getSimpleQRCode(AclinkGetSimpleQRCode getCode) {
         try {
+        		String phone = "13811138111";
+        		int n = randomGenerator.nextInt(9999);
+        		if(n < 1000) {
+        			n = 9944;
+        		}
+	        	getCode.setAuth(String.valueOf(n));
+	        	getCode.setPhone(phone);
+	        	MessageDigest md = MessageDigest.getInstance("MD5");
+	        	String md5 = "SA" + getCode.getAuth(); 
+	        	md.update(md5.getBytes());
+	        	getCode.setType("0");
+	        	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
+	        	getCode.setMd5(rlt);
+        	
             ResponseEntity<String> future = this.restCall("/crland/getSimpleQRCode", getCode);
             String body = future.getBody();
             if(LOGGER.isDebugEnabled()) {

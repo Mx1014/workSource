@@ -24,6 +24,8 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.redis.JsonStringRedisSerializer;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.util.*;
@@ -48,6 +50,9 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import com.atomikos.util.DateHelper;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
+import com.everhomes.aclink.huarun.AclinkHuarunService;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
 import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
@@ -92,8 +97,11 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 
@@ -194,6 +202,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private CommunityProvider communityProvider;
+    
+    @Autowired
+    private AclinkHuarunService aclinkHuarunService;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -630,7 +644,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     //Set the auth driver type
                     if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                             || doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
-                        doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());    
+                        doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());
+                    } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
+                    		doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
                     } else {
                         doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                     }
@@ -661,7 +677,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             //Set the auth driver type
             if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                     || doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
-                doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());    
+                doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());  
+            } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
+        			doorAuth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
             } else {
                 doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
             }
@@ -694,6 +712,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING_GROUP.getCode()); 
+        } else if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
+        		sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_HUARUN_GROUP.getCode());
         } else {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
@@ -1713,6 +1733,18 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return DoorAccessDriverType.fromCode(t);
     }
     
+    private String getLinglingId() {
+	    User user = UserContext.current().getUser();
+	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.LINGLING_ID);
+        if(profile == null || null == profile.getItemValue()) {
+        		String linglingId = aclinkLinglingService.getLinglingId();
+            profile.setItemValue(linglingId);
+            userActivityProvider.updateUserProfile(profile);   
+        }
+        
+        return profile.getItemValue();
+    }
+    
     private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         List<String> hardwares = new ArrayList<String>();
@@ -1820,6 +1852,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<Long> storeyAuthList = new ArrayList<Long>();
         storeyAuthList.add(1l);
         extra.setStoreyAuthList(storeyAuthList);
+        extra.setLinglingId(getLinglingId());//one user one linglingId
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
@@ -1874,6 +1907,29 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         qrKeys.add(qr);
     }
+    
+    //do huarun qr
+    private void doHuarunQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCreatorUid(auth.getApproveUserId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setExpireTimeMs(auth.getKeyValidTime());
+        qr.setId(auth.getId());
+        qr.setQrDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+      
+        AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
+        AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
+        if(resp == null) {
+        	qr.setQrCodeKey("error");
+        } else {
+        	qr.setQrCodeKey(resp.getQrcode());
+        }
+        
+        
+        qrKeys.add(qr);
+    }
 
     /**
      * <ul> 获取二维码列表。 TODO 优化函数，太长了。
@@ -1911,6 +1967,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
             	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
                 doLinglingQRKey(user, doorAccess, auth, qrKeys);
+            } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
+            	doHuarunQRKey(user, doorAccess, auth, qrKeys);
             } else {
             	resp.setQrTimeout(this.getQrTimeout()/1000l);
                 doZuolinQRKey(user, doorAccess, auth, qrKeys);
