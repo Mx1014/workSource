@@ -4583,8 +4583,8 @@ public class PunchServiceImpl implements PunchService {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 						SelectQuery<? extends Record> query) { 
-//					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt((java.sql.Date) startCalendar.getTime()));
-					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal((java.sql.Date) endCalendar.getTime()));
+//					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date( endCalendar.getTime().getTime())));
 					query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 					return null;
 				}
@@ -5156,8 +5156,8 @@ public class PunchServiceImpl implements PunchService {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(cmd.getTargetId()));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(cmd.getTargetType()));
 				
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt((java.sql.Date) startCalendar.getTime()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt((java.sql.Date) endCalendar.getTime()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime().getTime())));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
 				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 				return null;
 			}
@@ -5372,7 +5372,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 			PunchScheduling ps = new PunchScheduling();
 			try {
-				ps.setRuleDate((java.sql.Date) dateSF.get().parse(r.getA()));
+				ps.setRuleDate(new java.sql.Date( dateSF.get().parse(r.getA()).getTime()));
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				LOGGER.error("excel A column date format wrong",e);
