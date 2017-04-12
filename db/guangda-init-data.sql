@@ -747,3 +747,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@eh_configurations := @eh_configurations + 1), 'video.official.support', '0', 'offical video support', 999979, NULL);
+
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('1', 999979, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修', '0');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('2', 999979, '月卡充值', 'zl://parking/query?displayName=停车', '0');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('3', 999979, '审批', 'zl://approval/create?approvalId={}&sourceId={}', '0');
