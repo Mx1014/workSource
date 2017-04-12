@@ -190,22 +190,9 @@ public class AssetServiceImpl implements AssetService {
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
 
         ListSimpleAssetBillsResponse response = handler.listSimpleAssetBills(cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getTargetId(), cmd.getTargetType(), cmd.getAddressId(), cmd.getTenant(), cmd.getStatus(),
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getOrganizationId(),  cmd.getAddressId(), cmd.getTenant(), cmd.getStatus(),
                 cmd.getStartTime(), cmd.getEndTime(), cmd.getPageAnchor(), cmd.getPageSize());
         return response;
-
-
-    }
-
-    private int compareMonth(Timestamp compareValue) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Timestamp(System.currentTimeMillis()));
-        int monthNow = c.get(Calendar.MONTH);
-
-        c.setTime(compareValue);
-        int monthCompare = c.get(Calendar.MONTH);
-
-        return (monthNow-monthCompare);
     }
 
     @Override
@@ -549,93 +536,13 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd) {
-        AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(), cmd.getOwnerId());
 
-        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
-        dto.setId(bill.getId());
-        dto.setNamespaceId(bill.getNamespaceId());
-        dto.setOwnerType(bill.getOwnerType());
-        dto.setOwnerId(bill.getOwnerId());
-        dto.setTargetType(bill.getTargetType());
-        dto.setTargetId(bill.getTargetId());
-        dto.setTemplateVersion(cmd.getTemplateVersion());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
 
-        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion());
-        if(templateFields != null && templateFields.size() > 0) {
-            List<FieldValueDTO> valueDTOs = new ArrayList<>();
-            Field[] fields = EhAssetBills.class.getDeclaredFields();
-            for(AssetBillTemplateFieldDTO fieldDTO : templateFields) {
-                if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(fieldDTO.getSelectedFlag()))) {
-                    FieldValueDTO valueDTO = new FieldValueDTO();
-                    if(fieldDTO.getFieldCustomName() != null) {
-                        valueDTO.setFieldDisplayName(fieldDTO.getFieldCustomName());
-                    } else {
-                        valueDTO.setFieldDisplayName(fieldDTO.getFieldDisplayName());
-                    }
-                    valueDTO.setFieldName(fieldDTO.getFieldName());
-                    valueDTO.setFieldType(fieldDTO.getFieldType());
-
-                    for (Field requestField : fields) {
-                        requestField.setAccessible(true);
-                        // private类型
-                        if (requestField.getModifiers() == 2) {
-                            if(requestField.getName().equals(fieldDTO.getFieldName())){
-                                // 字段值
-                                try {
-                                    if(requestField.get(bill) != null)
-                                        valueDTO.setFieldValue(requestField.get(bill).toString());
-
-                                    break;
-                                } catch (IllegalArgumentException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-
-                    valueDTOs.add(valueDTO);
-                }
-            }
-            
-            BigDecimal totalAmounts = bill.getPeriodAccountAmount();
-         // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
-            if(compareMonth(bill.getAccountPeriod()) == 0) {
-            	BigDecimal pastUnpaid = new BigDecimal(0);
-                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
-                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
-
-                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
-                    
-                    for(BigDecimal unpaid : unpaidAmounts) {
-                        pastUnpaid = pastUnpaid.add(unpaid);
-                    }
-
-                    FieldValueDTO unpaidAmountsDTO = new FieldValueDTO();
-                    unpaidAmountsDTO.setFieldDisplayName("往期欠费");
-                    unpaidAmountsDTO.setFieldType("BigDecimal");
-                    unpaidAmountsDTO.setFieldValue(pastUnpaid.toString());
-                    
-                    valueDTOs.add(unpaidAmountsDTO);
-                    
-                }
-                totalAmounts.add(pastUnpaid).add(bill.getLateFee());
-            }
-            
-            FieldValueDTO totalAmountsDTO = new FieldValueDTO();
-            totalAmountsDTO.setFieldDisplayName("总计应收");
-            totalAmountsDTO.setFieldType("BigDecimal");
-            totalAmountsDTO.setFieldValue(totalAmounts.toString());
-            
-            valueDTOs.add(totalAmountsDTO);
-            
-            dto.setDtos(valueDTOs);
-            	
-            	
-        }
+        AssetBillTemplateValueDTO dto = handler.findAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion());
         return dto;
     }
 

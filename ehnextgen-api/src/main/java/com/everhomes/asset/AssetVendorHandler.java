@@ -11,8 +11,8 @@ import javax.validation.constraints.NotNull;
 public interface AssetVendorHandler {
     String ASSET_VENDOR_PREFIX = "AssetVendor-";
 
-    ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long addressId,
-        String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
+    ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId,
+        Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
 
     AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
                                             Long templateVersion);

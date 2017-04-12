@@ -6,23 +6,25 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
-import com.everhomes.rest.asset.SimpleAssetBillDTO;
-import com.everhomes.rest.asset.TenantType;
+import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Component(AssetVendorHandler.ASSET_VENDOR_PREFIX + "ZUOLIN")
 public class ZuolinAssetVendorHandler implements AssetVendorHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZuolinAssetVendorHandler.class);
     @Autowired
     private AssetProvider assetProvider;
 
@@ -55,7 +57,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     private AddressProvider addressProvider;
 
     @Override
-    public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
+    public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
         List<Long> tenantIds = new ArrayList<>();
         String tenantType = null;
         if(tenant != null) {
@@ -119,7 +121,101 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion) {
-        return null;
+        AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+
+        AssetBill bill = assetProvider.findAssetBill(id, ownerId, ownerType, targetId, targetType);
+
+        if (bill == null) {
+            LOGGER.error("cannot find asset bill. bill: id = " + id + ", ownerId = " + ownerId
+                    + ", ownerType = " + ownerType + ", targetId = " + targetId + ", targetType = " + targetType);
+            throw RuntimeErrorException.errorWith(AssetServiceErrorCode.SCOPE,
+                    AssetServiceErrorCode.ASSET_BILL_NOT_EXIST,
+                    "账单不存在");
+        }
+
+        dto.setId(bill.getId());
+        dto.setNamespaceId(bill.getNamespaceId());
+        dto.setOwnerType(bill.getOwnerType());
+        dto.setOwnerId(bill.getOwnerId());
+        dto.setTargetType(bill.getTargetType());
+        dto.setTargetId(bill.getTargetId());
+        dto.setTemplateVersion(templateVersion);
+
+        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, templateVersion);
+        if(templateFields != null && templateFields.size() > 0) {
+            List<FieldValueDTO> valueDTOs = new ArrayList<>();
+            Field[] fields = EhAssetBills.class.getDeclaredFields();
+            for(AssetBillTemplateFieldDTO fieldDTO : templateFields) {
+                if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(fieldDTO.getSelectedFlag()))) {
+                    FieldValueDTO valueDTO = new FieldValueDTO();
+                    if(fieldDTO.getFieldCustomName() != null) {
+                        valueDTO.setFieldDisplayName(fieldDTO.getFieldCustomName());
+                    } else {
+                        valueDTO.setFieldDisplayName(fieldDTO.getFieldDisplayName());
+                    }
+                    valueDTO.setFieldName(fieldDTO.getFieldName());
+                    valueDTO.setFieldType(fieldDTO.getFieldType());
+
+                    for (Field requestField : fields) {
+                        requestField.setAccessible(true);
+                        // private类型
+                        if (requestField.getModifiers() == 2) {
+                            if(requestField.getName().equals(fieldDTO.getFieldName())){
+                                // 字段值
+                                try {
+                                    if(requestField.get(bill) != null)
+                                        valueDTO.setFieldValue(requestField.get(bill).toString());
+
+                                    break;
+                                } catch (IllegalArgumentException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+
+                    valueDTOs.add(valueDTO);
+                }
+            }
+
+            BigDecimal totalAmounts = bill.getPeriodAccountAmount();
+            // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
+            if(compareMonth(bill.getAccountPeriod()) == 0) {
+                BigDecimal pastUnpaid = new BigDecimal(0);
+                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
+                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
+
+                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
+
+                    for(BigDecimal unpaid : unpaidAmounts) {
+                        pastUnpaid = pastUnpaid.add(unpaid);
+                    }
+
+                    FieldValueDTO unpaidAmountsDTO = new FieldValueDTO();
+                    unpaidAmountsDTO.setFieldDisplayName("往期欠费");
+                    unpaidAmountsDTO.setFieldType("BigDecimal");
+                    unpaidAmountsDTO.setFieldValue(pastUnpaid.toString());
+
+                    valueDTOs.add(unpaidAmountsDTO);
+
+                }
+                totalAmounts.add(pastUnpaid).add(bill.getLateFee());
+            }
+
+            FieldValueDTO totalAmountsDTO = new FieldValueDTO();
+            totalAmountsDTO.setFieldDisplayName("总计应收");
+            totalAmountsDTO.setFieldType("BigDecimal");
+            totalAmountsDTO.setFieldValue(totalAmounts.toString());
+
+            valueDTOs.add(totalAmountsDTO);
+
+            dto.setDtos(valueDTOs);
+        }
+        return dto;
     }
 
     private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
