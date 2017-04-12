@@ -3683,12 +3683,12 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid target type or  Id parameter in the command");
 		}
-		if(null == cmd.getPunchRuleId()){
-			LOGGER.error("Invalid PunchRuleId parameter in the command");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid PunchRuleId parameter in the command");
-		}
-			
+//		if(null == cmd.getPunchRuleId()){
+//			LOGGER.error("Invalid PunchRuleId parameter in the command");
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"Invalid PunchRuleId parameter in the command");
+//		}
+//			
 		PunchRuleOwnerMap old = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),  cmd.getTargetType(), cmd.getTargetId());
 		PunchRuleOwnerMap obj = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
 		if( null == old ){
@@ -5030,16 +5030,17 @@ public class PunchServiceImpl implements PunchService {
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchLocationRule plr = null;
 		if(pr.getLocationRuleId()==null){
-			plr = new PunchLocationRule();
-			plr.setOwnerType(cmd.getOwnerType());
-			plr.setOwnerId(cmd.getOwnerId());
-			plr.setCreatorUid(UserContext.current().getUser().getId());
-			plr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			plr.setName("punch location rule "+cmd.getTargetId());
-			punchProvider.createPunchLocationRule(plr);
-			pr.setLocationRuleId(plr.getId());
-			punchProvider.updatePunchRule(pr);
+//			plr = new PunchLocationRule();
+//			plr.setOwnerType(cmd.getOwnerType());
+//			plr.setOwnerId(cmd.getOwnerId());
+//			plr.setCreatorUid(UserContext.current().getUser().getId());
+//			plr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//					.getTime()));
+//			plr.setName("punch location rule "+cmd.getTargetId());
+//			punchProvider.createPunchLocationRule(plr);
+//			pr.setLocationRuleId(plr.getId());
+//			punchProvider.updatePunchRule(pr);
+			return response ;
 		}
 		else{
 			plr = punchProvider.getPunchLocationRuleById(pr.getLocationRuleId());
@@ -5064,12 +5065,12 @@ public class PunchServiceImpl implements PunchService {
 			pwr = new PunchWifiRule();
 			pwr.setOwnerType(cmd.getOwnerType());
 			pwr.setOwnerId(cmd.getOwnerId());
-			pr.setCreatorUid(UserContext.current().getUser().getId());
-			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+			pwr.setCreatorUid(UserContext.current().getUser().getId());
+			pwr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			pwr.setName("punch location rule "+cmd.getTargetId());
 			punchProvider.createPunchWifiRule(pwr);
-			pr.setLocationRuleId(pwr.getId());
+			pr.setWifiRuleId(pwr.getId());
 			punchProvider.updatePunchRule(pr);
 		}
 		else{
@@ -5093,24 +5094,25 @@ public class PunchServiceImpl implements PunchService {
 		if(null == map)
 			return response;
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
-		PunchWifiRule plr = null;
+		PunchWifiRule pwr = null;
 		if(pr.getWifiRuleId()==null){
-			plr = new PunchWifiRule();
-			plr.setOwnerType(cmd.getOwnerType());
-			plr.setOwnerId(cmd.getOwnerId());
-			plr.setCreatorUid(UserContext.current().getUser().getId());
-			plr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			plr.setName("punch location rule "+cmd.getTargetId());
-			punchProvider.createPunchWifiRule(plr);
-			pr.setLocationRuleId(plr.getId());
-			punchProvider.updatePunchRule(pr);
+//			pwr = new PunchWifiRule();
+//			pwr.setOwnerType(cmd.getOwnerType());
+//			pwr.setOwnerId(cmd.getOwnerId());
+//			pwr.setCreatorUid(UserContext.current().getUser().getId());
+//			pwr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+//					.getTime()));
+//			pwr.setName("punch location rule "+cmd.getTargetId());
+//			punchProvider.createPunchWifiRule(pwr);
+//			pr.setWifiRuleId(pwr.getId());
+//			punchProvider.updatePunchRule(pr);
+			return response;
 		}
 		else{
-			plr = punchProvider.getPunchWifiRuleById(pr.getWifiRuleId());
+			pwr = punchProvider.getPunchWifiRuleById(pr.getWifiRuleId());
 		}
 		
-		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(cmd.getOwnerType(), cmd.getOwnerId(), plr.getId()) ;
+		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(cmd.getOwnerType(), cmd.getOwnerId(), pwr.getId()) ;
 		if(null != wifis){
 			response.setWifis(new ArrayList<PunchWiFiDTO>());
 			for(PunchWifi wifi : wifis){
@@ -5396,8 +5398,18 @@ public class PunchServiceImpl implements PunchService {
 	
 	@Override
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd) {
-		// TODO Auto-generated method stub
-		
+		  
+		PunchRuleOwnerMap old = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId()); 
+		if( null == old ){
+			//如果没有就新建
+			throw  RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"can not find this rule");
+		}else{
+			//有就更新
+			old.setTargetId(cmd.getTargetId());
+			old.setTargetType(cmd.getTargetType()); 
+			this.punchProvider.updatePunchRuleOwnerMap(old);
+		}
 	}
 	@Override
 	public void deletePunchPoint(DeleteCommonCommand cmd) {
