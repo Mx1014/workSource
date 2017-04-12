@@ -1,6 +1,5 @@
 package com.everhomes.techpark.park;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -17,7 +16,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.CreateRechargeOrderCommand;
 import com.everhomes.rest.techpark.park.ListCardTypeCommand;
@@ -44,9 +42,10 @@ import com.everhomes.rest.techpark.park.WaitingLine;
 @RestDoc(value = "Park controller", site = "ehcore")
 @RestController
 @RequestMapping("/techpark/park")
+@Deprecated
 public class ParkController extends ControllerBase{
 	
-//	@Autowired
+	@Autowired
 	private ParkService parkService;
 	
 	@Autowired

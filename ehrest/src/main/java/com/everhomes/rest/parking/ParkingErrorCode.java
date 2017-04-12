@@ -28,7 +28,7 @@ public interface ParkingErrorCode {
 
     static final int ERROR_RECHARGE_MONTH_COUNT = 10018;  //过期充值月数小于1
 
-    static final int NOT_SUPPORT_APPLY_CARD = 10019;  //不支持申请月卡，请升级客户端版本，
+    static final int NOT_SUPPORT_OLD_VERSION = 10019;  //版本过低，请更新App至最新版本
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
