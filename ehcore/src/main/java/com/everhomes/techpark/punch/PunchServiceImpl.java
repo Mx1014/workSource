@@ -4986,7 +4986,7 @@ public class PunchServiceImpl implements PunchService {
 		punchGeopoint.setDistance(cmd.getDistance());
 		punchGeopoint.setGeohash(GeoHashUtils.encode(
 				punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
-		punchProvider.createPunchGeopoint(punchGeopoint);
+		punchProvider.updatePunchGeopoint(punchGeopoint);
 		
 		
 	}
