@@ -67,7 +67,11 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
 	}
-
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
 	private final Long MILLISECONDGMT = 8 * 3600 * 1000L;
 
 	private Long convertTimeToGMTMillisecond(Time time) {
@@ -79,8 +83,8 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 	}
  
 	
-//	public void testListPunchTimeRules(){
-//
-//		
-//	}
+	public void testListPunchTimeRules(){
+
+		
+	}
 }

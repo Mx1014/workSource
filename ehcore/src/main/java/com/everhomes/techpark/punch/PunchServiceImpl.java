@@ -5178,6 +5178,7 @@ public class PunchServiceImpl implements PunchService {
 					dto.setTimeRuleDescription(timeRule.getDescription());
 				}
 			}
+			response.getSchedulings().add(dto);
 		}
 		return response;
 	} 
