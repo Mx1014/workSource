@@ -5180,6 +5180,10 @@ public class PunchServiceImpl implements PunchService {
 			}
 			response.getSchedulings().add(dto);
 		}
+		ListPunchRulesCommonCommand cmd2 = ConvertHelper.convert(cmd, ListPunchRulesCommonCommand.class);
+		cmd2.setPageSize(Integer.MAX_VALUE);
+		 
+		response.setTimeRules(listPunchTimeRuleList(cmd2).getTimeRules());
 		return response;
 	} 
 	@Override

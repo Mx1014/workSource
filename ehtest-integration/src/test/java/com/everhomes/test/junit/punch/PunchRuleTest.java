@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,10 +16,13 @@ import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleRestResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsRestResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
@@ -68,10 +72,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 
 	}
 	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
-	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
-	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
-	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
-	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String UPDATE_SCHEDULING_URI =  "/punch/updatePunchSchedulings"; 
 	private final Long MILLISECONDGMT = 8 * 3600 * 1000L;
 
 	private Long convertTimeToGMTMillisecond(Time time) {
@@ -81,7 +82,40 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		}
 		return null;
 	}
- 
+	@Test
+	public void testMain(){
+		testUpdateSchedulings();
+	}
+	public void testUpdateSchedulings(){
+		UpdatePunchSchedulingMonthCommand cmd = new UpdatePunchSchedulingMonthCommand();
+		List<PunchSchedulingDTO> schedulingList = new ArrayList<PunchSchedulingDTO>();
+		PunchSchedulingDTO dto1 =new PunchSchedulingDTO();
+		dto1.setOwnerType(ownerType);
+		dto1.setOwnerId(ownerId);
+		dto1.setTargetId(ownerId);
+		dto1.setTargetType(ownerType);
+		dto1.setRuleDate(1488412800000L);
+		dto1.setTimeRuleId(1L); 
+		schedulingList.add(dto1);
+
+		PunchSchedulingDTO dto2 =new PunchSchedulingDTO();
+		dto2.setOwnerType(ownerType);
+		dto2.setOwnerId(ownerId);
+		dto2.setTargetId(ownerId);
+		dto2.setTargetType(ownerType);
+		dto2.setRuleDate(1488499200000L);
+		dto2.setTimeRuleId(1L); 
+		schedulingList.add(dto2);
+		
+		cmd.setSchedulings(schedulingList);
+		
+		RestResponse response = httpClientService.restGet(UPDATE_SCHEDULING_URI, cmd,
+				RestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+	}
 	
 	public void testListPunchTimeRules(){
 
