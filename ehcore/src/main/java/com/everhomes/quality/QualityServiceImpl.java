@@ -1081,6 +1081,37 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
 			if(standard != null) {
 				dto.setStandardDescription(standard.getDescription());
+
+				if(standard.getExecutiveGroup() != null) {
+					standard.getExecutiveGroup().forEach((executiveGroup) -> {
+						StringBuilder sb = new StringBuilder();
+						Organization group = organizationProvider.findOrganizationById(executiveGroup.getGroupId());
+						OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(executiveGroup.getPositionId());
+						if(group != null) {
+							sb.append(group.getName());
+						}
+
+						if(position != null) {
+							if(sb != null && sb.length() > 0) {
+								sb.append("-");
+								sb.append(position.getName());
+							} else {
+								sb.append(position.getName());
+
+							}
+						}
+
+						if(sb != null && sb.length() > 0) {
+							if(dto.getGroupName() != null) {
+								dto.setGroupName(dto.getGroupName() + "," + sb.toString());
+							} else {
+								dto.setGroupName(sb.toString());
+							}
+						}
+
+					});
+				}
+
 			} 
         	
 //        	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
@@ -1095,25 +1126,25 @@ public class QualityServiceImpl implements QualityService {
 //					}
 //				}
 //			}
-			Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getExecutivePositionId());
-			if(group != null) {
-				dto.setGroupName(group.getName());
-				
-			} 
-			
-			if(position != null) {
-				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-				} else {
-					dto.setGroupName(position.getName());
+//			Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
+//			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getExecutivePositionId());
+//			if(group != null) {
+//				dto.setGroupName(group.getName());
+//				
+//			} 
+//			
+//			if(position != null) {
+//				if(dto.getGroupName() != null) {
+//					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+//				} else {
+//					dto.setGroupName(position.getName());
+//
+//				}
+//			}
+//			
+//			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
 
-				}
-			}
-			
-			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
-
-        	dto.setGroupUsers(groupUsers);
+//        	dto.setGroupUsers(groupUsers);
 
 			if(r.getRecord() != null) {
 	        	QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
