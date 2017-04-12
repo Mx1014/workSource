@@ -1112,6 +1112,16 @@ public class QualityServiceImpl implements QualityService {
 					});
 				}
 
+				//兼容之前specification没进到task里面的情况
+
+				if(category == null) {
+					QualityInspectionStandardSpecificationMap map = qualityProvider.getMapByStandardId(standard.getId());
+					if(map != null) {
+						QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(map.getSpecificationId());
+						r.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
+					}
+
+				}
 			} 
         	
 //        	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());

@@ -1073,6 +1073,15 @@ public class QualityProviderImpl implements QualityProvider {
 		return result[0];
 	}
 
+	@Override
+	public QualityInspectionStandardSpecificationMap getMapByStandardId(Long standardId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()))
+				.and(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.eq(standardId))
+				.fetchOneInto(QualityInspectionStandardSpecificationMap.class);
+	}
+
 
 	@Override
 	public QualityInspectionEvaluationFactors findQualityInspectionFactorByGroupIdAndCategoryId(
