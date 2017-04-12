@@ -54,6 +54,19 @@ public class AssetController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>获取公司物业账单统计信息</p>
+     * <b>URL: /asset/getAssetBillStat</b>
+     */
+    @RequestMapping("getAssetBillStat")
+    @RestReturn(AssetBillStatDTO.class)
+    public RestResponse getAssetBillStat(GetAssetBillStatCommand cmd) {
+        RestResponse response = new RestResponse(assetService.getAssetBillStat(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     //    搜索账单列表 list：owner_type owner_id address_id account_period status 企业名（园区场景）或家庭任一成员姓名（小区场景） 都关联到门牌 这里用search取得门牌addressId
     /**
      * <b>URL: /asset/listSimpleAssetBills</b>

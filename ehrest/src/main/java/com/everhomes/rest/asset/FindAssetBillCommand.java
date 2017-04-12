@@ -12,6 +12,8 @@ import javax.validation.constraints.NotNull;
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
  *     <li>templateVersion: 版本号</li>
+ *     <li>organizationId: 公司id</li>
+ *     <li>dateStr: 选择的日期 (eg: 2016-08)</li>
  * </ul>
  */
 public class FindAssetBillCommand {
@@ -31,6 +33,9 @@ public class FindAssetBillCommand {
     private String targetType;
 
     private Long templateVersion;
+
+    private Long organizationId;
+    private String dateStr;
 
     public Long getId() {
         return id;
@@ -78,6 +83,22 @@ public class FindAssetBillCommand {
 
     public void setTemplateVersion(Long templateVersion) {
         this.templateVersion = templateVersion;
+    }
+
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override

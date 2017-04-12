@@ -18,6 +18,7 @@ import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetVendorRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -354,6 +355,39 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public AssetVendor findAssetVendorByOwner(String ownerType, Long ownerId) {
-        return null;
+        return dbProvider.getDslContext(AccessSpec.readOnly()).selectFrom(Tables.EH_ASSET_VENDOR)
+                .where(Tables.EH_ASSET_VENDOR.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_ASSET_VENDOR.OWNER_ID.eq(ownerId)).fetchOneInto(AssetVendor.class);
+
+    }
+
+    @Override
+    public List<AssetBill> listUnpaidBills(String tenantType, Long tenantId, Long addressId) {
+        List<AssetBill> bills = new ArrayList<>();
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+
+        query.addConditions(Tables.EH_ASSET_BILLS.STATUS.eq(AssetBillStatus.UNPAID.getCode()));
+        if(addressId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
+        }
+
+        if(tenantId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_ID.eq(tenantId));
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_TYPE.eq(tenantType));
+        }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listUnpaidBills, sql=" + query.getSQL());
+            LOGGER.debug("listUnpaidBills, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhAssetBillsRecord record) -> {
+            bills.add(ConvertHelper.convert(record, AssetBill.class));
+            return null;
+        });
+
+        return bills;
     }
 }

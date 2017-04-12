@@ -184,7 +184,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd) {
 
-        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(), cmd.getOwnerId());
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
 
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
@@ -536,13 +536,13 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd) {
-        AssetVendor assetVendor = checkAssetVendor(cmd.getOwnerType(), cmd.getOwnerId());
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
 
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
 
         AssetBillTemplateValueDTO dto = handler.findAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
-                cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion());
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion(), cmd.getOrganizationId(), cmd.getDateStr());
         return dto;
     }
 
@@ -735,6 +735,17 @@ public class AssetServiceImpl implements AssetService {
             response.setLastNotifyTime(lastRecord.getCreateTime());
         }
         return response;
+    }
+
+    @Override
+    public AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
+
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+
+        AssetBillStatDTO dto = handler.getAssetBillStat(cmd.getTenantType(), cmd.getTenantId(), cmd.getAddressId());
+        return dto;
     }
 
     //获得本月第一天0点时间

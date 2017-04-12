@@ -1,6 +1,8 @@
 package com.everhomes.asset;
 
+import com.everhomes.rest.asset.AssetBillStatDTO;
 import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
+import com.everhomes.rest.asset.GetAssetBillStatCommand;
 import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
 
 import javax.validation.constraints.NotNull;
@@ -15,6 +17,8 @@ public interface AssetVendorHandler {
         Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize);
 
     AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                                            Long templateVersion);
+             Long templateVersion, Long organizationId, String dateStr);
+
+    AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId);
 
 }

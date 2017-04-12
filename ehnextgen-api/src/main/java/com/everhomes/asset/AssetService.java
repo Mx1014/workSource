@@ -27,4 +27,5 @@ public interface AssetService {
     Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
     NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
 
+    AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
 }

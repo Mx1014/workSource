@@ -27,9 +27,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -120,7 +118,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion) {
+    public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
+                    Long templateVersion, Long organizationId, String dateStr) {
         AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
 
         AssetBill bill = assetProvider.findAssetBill(id, ownerId, ownerType, targetId, targetType);
@@ -215,6 +214,22 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
             dto.setDtos(valueDTOs);
         }
+        return dto;
+    }
+
+    @Override
+    public AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId) {
+        List<AssetBill> bills = assetProvider.listUnpaidBills(tenantType, tenantId, addressId);
+        AssetBillStatDTO dto = new AssetBillStatDTO();
+        BigDecimal unpaidAmount = BigDecimal.ZERO;
+        Set<Timestamp> accountPeriod = new HashSet<>();
+        bills.forEach(bill -> {
+            unpaidAmount.add(bill.getPeriodUnpaidAccountAmount());
+            accountPeriod.add(bill.getAccountPeriod());
+        });
+        dto.setUnpaidAmount(unpaidAmount);
+        BigDecimal unpaidMonth = new BigDecimal(accountPeriod.size());
+        dto.setUnpaidMonth(unpaidMonth);
         return dto;
     }
 

@@ -1,13 +1,8 @@
 package com.everhomes.asset;
 
 import com.everhomes.pmkexing.PmKeXingBillService;
-import com.everhomes.rest.asset.AssetBillTemplateValueDTO;
-import com.everhomes.rest.asset.ListSimpleAssetBillsResponse;
-import com.everhomes.rest.asset.SimpleAssetBillDTO;
-import com.everhomes.rest.pmkexing.GetPmKeXingBillCommand;
-import com.everhomes.rest.pmkexing.ListPmKeXingBillsCommand;
-import com.everhomes.rest.pmkexing.ListPmKeXingBillsResponse;
-import com.everhomes.rest.pmkexing.PmKeXingBillDTO;
+import com.everhomes.rest.asset.*;
+import com.everhomes.rest.pmkexing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,14 +62,40 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
     }
 
     @Override
-    public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion) {
+    public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
+                    Long templateVersion, Long organizationId, String dateStr) {
         GetPmKeXingBillCommand command = new GetPmKeXingBillCommand();
+        command.setOrganizationId(organizationId);
+        command.setDateStr(dateStr);
         PmKeXingBillDTO bill = keXingBillService.getPmKeXingBill(command);
-        return null;
+        AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+        List<FieldValueDTO> dtos = new ArrayList<>();
+        if(bill.getItems() != null && bill.getItems().size() > 0) {
+            bill.getItems().forEach(item -> {
+                FieldValueDTO value = new FieldValueDTO();
+                value.setFieldDisplayName(item.getName());
+                value.setFieldValue(item.getAmount().toString());
+                dtos.add(value);
+            });
+        }
+        dto.setDtos(dtos);
+        return dto;
+    }
+
+    @Override
+    public AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId) {
+        GetPmKeXingBillStatCommand command = new GetPmKeXingBillStatCommand();
+        command.setOrganizationId(tenantId);
+        PmKeXingBillStatDTO statDTO = keXingBillService.getPmKeXingBillStat(command);
+
+        AssetBillStatDTO dto = new AssetBillStatDTO();
+        dto.setUnpaidAmount(statDTO.getUnpaidAmount());
+        dto.setUnpaidMonth(statDTO.getUnpaidMonth());
+        return dto;
     }
 
     private Timestamp covertStrToTimestamp(String str) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMM");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM");
         try {
             Date date=format.parse(str);
             return new Timestamp(date.getTime());
