@@ -3,6 +3,7 @@ package com.everhomes.aclink;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Security;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,10 +50,12 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import com.atomikos.util.DateHelper;
+import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
 import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkSimpleQRCodeInvitation;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
 import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
@@ -225,6 +228,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     private static final long KEY_TICK_ONE_HOUR = 3600*1000l;
     private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
     private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
+    private static Format huarunDateFormatter = FastDateFormat.getInstance("yyyy-MM-dd");
     
     @PostConstruct
     public void setup() {
@@ -2073,7 +2077,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     }
                 
                 Aclink aclink = new Aclink();
-                aclink.setManufacturer("anguan");
+                aclink.setManufacturer("huarun_anguan");
                 aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 aclink.setDoorId(doorAcc.getId());
                 aclink.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
@@ -2360,6 +2364,72 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return ConvertHelper.convert(auth, DoorAuthDTO.class);        
     }
     
+    //huarun device qr. normal visitor auth
+    private DoorAuthDTO createHuarunDeviceQr(CreateDoorVisitorCommand cmd) {
+        User user = UserContext.current().getUser();
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
+        
+        DoorAuth auth = new DoorAuth();
+        auth.setId(doorAuthProvider.getNextDoorAuth());
+        auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        auth.setApplyUserName(cmd.getUserName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.HUARUN_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
+        auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setValidFromMs(System.currentTimeMillis());
+        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setUserId(0l);
+        auth.setOwnerType(doorAccess.getOwnerType());
+        auth.setOwnerId(doorAccess.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setAuthMethod(cmd.getAuthMethod());
+        
+        AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
+        getCode.setPhone(cmd.getPhone());
+        AclinkSimpleQRCodeInvitation invitation = new AclinkSimpleQRCodeInvitation();
+        String dateNow = huarunDateFormatter.format(new Date());
+        invitation.setDate(dateNow);
+        invitation.setInvitee(cmd.getUserName());
+        getCode.setInvitation(invitation);
+        AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
+        if(resp != null) {
+        	auth.setQrKey(resp.getQrcode());	
+        } else {
+        	auth.setQrKey("error");
+        }
+        
+        doorAuthProvider.createDoorAuth(auth);
+        
+        String nickName = user.getNickName();
+        if(nickName == null || nickName.isEmpty()) {
+            nickName = user.getAccountName();
+        }
+        
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+        
+        return ConvertHelper.convert(auth, DoorAuthDTO.class);        
+    }
+    
     //TODO better for implements
     private DoorAuthDTO createZuolinPhoneQr(CreateDoorVisitorCommand cmd) {
         User user = UserContext.current().getUser();
@@ -2442,6 +2512,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
             return createLinglingVisitorAuth(cmd);
+        } else if(qrDriver.equals(DoorAccessDriverType.HUARUN_ANGUAN)) {
+        		return createHuarunDeviceQr(cmd);
         } else {
             if(qrDriverExt.equals(DoorAccessDriverType.ZUOLIN)) {
                 return createZuolinDeviceQr(cmd);
