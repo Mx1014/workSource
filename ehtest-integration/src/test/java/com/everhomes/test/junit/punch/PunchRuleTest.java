@@ -17,6 +17,8 @@ import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleRestResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsRestResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingRestResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
@@ -85,6 +87,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 	@Test
 	public void testMain(){
 		testUpdateSchedulings();
+		testListSchedulings();
 	}
 	public void testUpdateSchedulings(){
 		logon(null, userIdentifier, plainTexPassword);
@@ -118,7 +121,31 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 	}
-	
+
+	public void testListSchedulings(){
+		logon(null, userIdentifier, plainTexPassword);
+
+		ListPunchSchedulingMonthCommand cmd = new ListPunchSchedulingMonthCommand(); 
+		cmd.setOwnerType(ownerType);
+		cmd.setOwnerId(ownerId);
+		cmd.setTargetId(ownerId);
+		cmd.setTargetType(ownerType);
+		cmd.setQueryTime(1488412800000L); 
+ 
+		
+		ListPunchSchedulingRestResponse response = httpClientService.restGet(LIST_SCHEDULING_URI, cmd,
+				ListPunchSchedulingRestResponse.class, context);
+
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+		List<PunchSchedulingDTO> schedulings = response.getResponse().getSchedulings();
+		for(PunchSchedulingDTO sche : schedulings ){
+			if(sche.getRuleDate().equals(1488499200000L)){
+				assertEquals(1L, sche.getTimeRuleId().longValue());
+			}
+		}
+	}
 	public void testListPunchTimeRules(){
 
 		

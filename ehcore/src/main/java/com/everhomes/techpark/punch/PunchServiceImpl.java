@@ -5173,9 +5173,11 @@ public class PunchServiceImpl implements PunchService {
 			for(PunchScheduling punchScheduling : punchSchedulings){
 				if(dateSF.get().format(punchScheduling.getRuleDate()).equals(dateString)){
 					PunchTimeRule timeRule = punchProvider.findPunchTimeRuleById(punchScheduling.getTimeRuleId());
-					dto.setTimeRuleId(timeRule.getId());
-					dto.setTimeRuleName(timeRule.getName());
-					dto.setTimeRuleDescription(timeRule.getDescription());
+					if(null != timeRule){
+						dto.setTimeRuleId(timeRule.getId());
+						dto.setTimeRuleName(timeRule.getName());
+						dto.setTimeRuleDescription(timeRule.getDescription());
+					}
 				}
 			}
 			response.getSchedulings().add(dto);
