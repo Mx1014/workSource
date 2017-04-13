@@ -261,6 +261,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
             }
 
             dto.setPeriodAccountAmount(totalAmount);
+            if(AssetBillStatus.PAID.equals(AssetBillStatus.fromStatus(dto.getStatus()))) {
+                dto.setUnpaidPeriodAccountAmount(BigDecimal.ZERO);
+            }
+
+            if(AssetBillStatus.UNPAID.equals(AssetBillStatus.fromStatus(dto.getStatus()))) {
+                dto.setUnpaidPeriodAccountAmount(totalAmount);
+            }
+
             return dto;
         }).collect(Collectors.toList());
 

@@ -32,7 +32,14 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         ListPmKeXingBillsCommand command = new ListPmKeXingBillsCommand();
 
         command.setOrganizationId(organizationId);
-        command.setBillStatus(status);
+        Byte kexingStatus = null;
+        if(AssetBillStatus.PAID.equals(AssetBillStatus.fromStatus(status))) {
+            kexingStatus = PmKeXingBillStatus.PAID.getCode();
+        }
+        if(AssetBillStatus.UNPAID.equals(AssetBillStatus.fromStatus(status))) {
+            kexingStatus = PmKeXingBillStatus.UNPAID.getCode();
+        }
+        command.setBillStatus(kexingStatus);
         if(pageAnchor == null) {
             pageAnchor = 0L;
         }
@@ -50,8 +57,15 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
             keXingBills.getBills().forEach(bill -> {
                 SimpleAssetBillDTO dto = new SimpleAssetBillDTO();
                 dto.setAccountPeriod(covertStrToTimestamp(bill.getBillDate()));
-                dto.setStatus(Byte.parseByte(bill.getBillStatus()));
+
+                if(PmKeXingBillStatus.PAID.equals(PmKeXingBillStatus.fromCode(Byte.parseByte(bill.getBillStatus())))) {
+                    dto.setStatus(AssetBillStatus.PAID.getCode());
+                }
+                if(AssetBillStatus.UNPAID.equals(PmKeXingBillStatus.fromCode(Byte.parseByte(bill.getBillStatus())))) {
+                    dto.setStatus(AssetBillStatus.UNPAID.getCode());
+                }
                 dto.setPeriodAccountAmount(bill.getReceivableAmount());
+                dto.setUnpaidPeriodAccountAmount(bill.getUnpaidAmount());
 
                 dtos.add(dto);
             });
