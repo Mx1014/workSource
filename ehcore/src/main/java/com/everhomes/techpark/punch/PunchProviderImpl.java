@@ -1298,6 +1298,37 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 	
 
+	@Override
+	public List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType, Long targetId,CrossShardListingLocator locator, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchTimeRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
+		 
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.ne(-1L);
+		if(null != ownerType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId)); 
+		if(null != targetType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId)); 
+		if (null != locator && locator != null && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
+		query.addConditions(condition);
+		query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<PunchTimeRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
     @Override
     public Long createPunchLocationRule(PunchLocationRule obj) {
         String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchLocationRules.class);

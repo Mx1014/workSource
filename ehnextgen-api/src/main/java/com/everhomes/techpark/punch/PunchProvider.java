@@ -282,6 +282,9 @@ public interface PunchProvider {
 			java.sql.Date beginDate , java.sql.Date endDate);
 
 	PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType, Long targetId);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType,
+			Long targetId, CrossShardListingLocator locator, int pageSize);
  
  
  

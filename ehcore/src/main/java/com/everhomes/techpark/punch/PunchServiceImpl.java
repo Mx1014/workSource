@@ -27,15 +27,14 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.antlr.runtime.misc.Stats;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -74,7 +73,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalType;
-import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OperationType;
@@ -2952,7 +2950,7 @@ public class PunchServiceImpl implements PunchService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		 
-		List<PunchTimeRule> results = this.punchProvider.queryPunchTimeRuleList(cmd.getOwnerType(),cmd.getOwnerId(), locator, pageSize + 1 );
+		List<PunchTimeRule> results = this.punchProvider.queryPunchTimeRuleList(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(), locator, pageSize + 1 );
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;
@@ -5192,6 +5190,9 @@ public class PunchServiceImpl implements PunchService {
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response) {
 		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
+		if(null == targetTimeRules.get())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"have no time rule");
 		// TODO Auto-generated method stub
 
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
@@ -5262,7 +5263,7 @@ public class PunchServiceImpl implements PunchService {
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1; 
 		row.createCell(++i).setCellValue(dateSF.get().format(new Date(dto.getRuleDate())));
-		row.createCell(++i).setCellValue(getTimeRuleById(dto.getTimeRuleId()).getName());
+		row.createCell(++i).setCellValue(null == dto.getTimeRuleId()?"":getTimeRuleById(dto.getTimeRuleId()).getName());
 	}
 	/** 
      * 设置某些列的值只能输入预制的数据,显示下拉框. 
@@ -5285,14 +5286,13 @@ public class PunchServiceImpl implements PunchService {
             String[] textlist, int firstRow, int endRow, int firstCol,  
             int endCol) {  
         // 加载下拉列表内容  
-        DVConstraint constraint = DVConstraint  
-                .createExplicitListConstraint(textlist);  
+    	XSSFDataValidationConstraint constraint = new XSSFDataValidationConstraint(textlist);  
         // 设置数据有效性加载在哪个单元格上,四个参数分别是：起始行、终止行、起始列、终止列  
         CellRangeAddressList regions = new CellRangeAddressList(firstRow,  
                 endRow, firstCol, endCol);  
         // 数据有效性对象  
-        HSSFDataValidation data_validation_list = new HSSFDataValidation(  
-                regions, constraint);  
+        XSSFDataValidation data_validation_list = new XSSFDataValidation(  constraint,
+                regions, null );  
         sheet.addValidationData(data_validation_list);  
         return sheet;  
     }  

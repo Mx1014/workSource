@@ -55,7 +55,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
 		String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
-
+		initRuleData();
 	}
 
 	protected void initRuleData() {
@@ -100,7 +100,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		dto1.setTargetId(ownerId);
 		dto1.setTargetType(ownerType);
 		dto1.setRuleDate(1488412800000L);
-		dto1.setTimeRuleId(1L); 
+		dto1.setTimeRuleId(2L); 
 		schedulingList.add(dto1);
 
 		PunchSchedulingDTO dto2 =new PunchSchedulingDTO();
@@ -109,7 +109,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		dto2.setTargetId(ownerId);
 		dto2.setTargetType(ownerType);
 		dto2.setRuleDate(1488499200000L);
-		dto2.setTimeRuleId(1L); 
+		dto2.setTimeRuleId(2L); 
 		schedulingList.add(dto2);
 		
 		cmd.setSchedulings(schedulingList);
@@ -142,7 +142,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		List<PunchSchedulingDTO> schedulings = response.getResponse().getSchedulings();
 		for(PunchSchedulingDTO sche : schedulings ){
 			if(sche.getRuleDate().equals(1488499200000L)){
-				assertEquals(1L, sche.getTimeRuleId().longValue());
+				assertEquals(2L, sche.getTimeRuleId().longValue());
 			}
 		}
 	}
