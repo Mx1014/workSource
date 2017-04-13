@@ -56,7 +56,13 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
     public void deletePunchScheduling(PunchScheduling obj) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhPunchSchedulingsDao dao = new EhPunchSchedulingsDao(context.configuration());
-        dao.deleteById(obj.getId());
+        if(obj.getId() != null )
+        	dao.deleteById(obj.getId());
+        else{
+        	context.delete(Tables.EH_PUNCH_SCHEDULINGS).where(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(obj.getOwnerType()))
+        	.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(obj.getOwnerId())).and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(obj.getTargetId()))
+        	.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(obj.getTargetType())).and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(obj.getRuleDate())).execute();
+        }
     }
 
     @Override

@@ -5234,7 +5234,7 @@ public class PunchServiceImpl implements PunchService {
 			//设置格式
 			String[] a = {};
 			
-			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
+//			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
 			
 			for (PunchSchedulingDTO statistic : listPunchScheduling.getSchedulings() )
 				setNewPunchSchedulingsBookRow(sheet, statistic);
