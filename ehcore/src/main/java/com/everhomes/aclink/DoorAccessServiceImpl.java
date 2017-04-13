@@ -1924,6 +1924,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qr.setQrDriver(DoorAccessDriverType.HUARUN_ANGUAN.getCode());
       
         AclinkGetSimpleQRCode getCode = new AclinkGetSimpleQRCode();
+        UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
+        if(userInfo != null && userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+        	getCode.setPhone(userInfo.getPhones().get(0));
+        }
         AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
         if(resp == null) {
         	qr.setQrCodeKey("error");
@@ -2404,6 +2408,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String dateNow = huarunDateFormatter.format(new Date());
         invitation.setDate(dateNow);
         invitation.setInvitee(cmd.getUserName());
+        invitation.setInvitee_tel(cmd.getPhone());
         getCode.setInvitation(invitation);
         AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
         if(resp != null) {

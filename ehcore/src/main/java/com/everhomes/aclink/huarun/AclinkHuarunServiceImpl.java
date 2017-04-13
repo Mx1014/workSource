@@ -92,11 +92,10 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
         			n = 9944;
         		}
 	        	getCode.setAuth(String.valueOf(n));
+        		getCode.setPhone(phone);
 	        	if(getCode.getInvitation() == null) {
-	        		getCode.setPhone(phone);
 		        	getCode.setType("0");
 	        	} else {
-	        		getCode.getInvitation().setInvitee_tel(phone);
 		        	getCode.setType("1");
 	        	}
 	        	
