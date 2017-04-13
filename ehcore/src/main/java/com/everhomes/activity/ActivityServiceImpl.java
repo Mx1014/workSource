@@ -2578,7 +2578,7 @@ public class ActivityServiceImpl implements ActivityService {
     		 }
     	}
 		
-	    long startTime = System.currentTimeMillis();
+    	long startTime = System.currentTimeMillis();
 	    User user = UserContext.current().getUser();
 	    Long userId = user.getId();
 	    Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -2597,12 +2597,12 @@ public class ActivityServiceImpl implements ActivityService {
 	    switch(sceneType) {
 	    case DEFAULT:
 	    case PARK_TOURIST:
-	        resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId());
+	        resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId(), scope);
 	        break;
 	    case FAMILY:
 	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
 	        if(family != null) {
-	            resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, family.getCommunityId());
+	            resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, family.getCommunityId(), scope);
 	        } else {
 	            if(LOGGER.isWarnEnabled()) {
 	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
@@ -2614,7 +2614,7 @@ public class ActivityServiceImpl implements ActivityService {
 	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
             if(organization != null) {
                 Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+                resp = listActivitiesByScope(sceneTokenDto, cmd, geoCharCount, communityId, scope);
             }
             break;
 	    case PM_ADMIN:
@@ -2634,6 +2634,140 @@ public class ActivityServiceImpl implements ActivityService {
 	    }
 	    
 	    return resp;
+	}
+	
+	//华润要求只能看到当前小区的活动，因此增加一种位置范围-COMMUNITY。根据传来的范围参数，如果是小区使用新的方法，否则使用老方法。
+	private ListActivitiesReponse listActivitiesByScope(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
+	        int geoCharCount, Long communityId, ActivityLocationScope scope){
+		if(scope.getCode() == ActivityLocationScope.COMMUNITY.getCode()){
+			return listCommunityActivities(sceneTokenDto, cmd, communityId);
+		}else{
+			return listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+		}
+	}
+	
+	//根据小区获取活动
+	private ListActivitiesReponse listCommunityActivities(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, Long communityId){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		Long uid = user.getId();
+	    ListActivitiesReponse response = null;
+	    
+	    //前台参数没有officialFlag，在后面的代码中，本身就会被设成非官方 add by yanjun 20170413
+//		 if(999987L == namespaceId){
+//			 cmd.setOfficialFlag(OfficialFlag.NO.getCode());
+//         }
+	    
+		  // 旧版本查询活动时，只有officialFlag标记，新版本查询活动时有categoryId，当然更老的版本两者都没有
+        // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+        if (cmd.getCategoryId() == null) {
+//        	OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+//			if(officialFlag == null) officialFlag = OfficialFlag.NO;
+//			Long categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+//			cmd.setCategoryId(categoryId);
+        	cmd.setCategoryId(0L);
+		}
+        // 把officialFlag换成categoryId一个条件
+        Condition condition = Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId());
+        
+        if(namespaceId != null) {
+	        condition = condition.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId));
+	    }
+        
+        //增加活动主题分类，add by tt, 20170109
+        if (cmd.getContentCategoryId() != null) {
+        	ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getContentCategoryId());
+        	//如果没有查到分类或者分类的allFlag为是，则表示查询全部，不用加条件
+        	if (category != null && TrueOrFalseFlag.FALSE == TrueOrFalseFlag.fromCode(category.getAllFlag())) {
+        		condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(cmd.getContentCategoryId()));
+			}
+		}
+        
+        //根据园区或者园区对应组织机构查询
+        Condition communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(communityId));
+        //获取园区的组织机构
+        List<Long>  organizationIds = organizationService.getOrganizationIdsTreeUpToRoot(communityId);
+        if(organizationIds != null && organizationIds.size() > 0){
+        	 Condition regionCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+             regionCondition = regionCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(organizationIds));
+             communityCondition = communityCondition.or(regionCondition);
+        }
+        condition = condition.and(communityCondition);
+        
+        
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+        List<Activity> activities=new ArrayList<Activity>();
+
+
+        // 添加活动状态筛选     add by xq.tian  2017/01/24
+        if (cmd.getActivityStatusList() != null) {
+            Condition statusCondition = this.buildActivityProcessStatusCondition(cmd.getActivityStatusList());
+            if (statusCondition != null) {
+                condition = condition.and(statusCondition);
+            }
+        }
+
+        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
+
+        activities.addAll(ret);
+        List<ActivityDTO> activityDtos = activities.stream().map(activity->{
+            Post post = forumProvider.findPostById(activity.getPostId());
+            if (activity.getPosterUri() == null && post != null) {
+                this.forumProvider.populatePostAttachments(post);
+                List<Attachment> attachmentList = post.getAttachments();
+                if (attachmentList != null && attachmentList.size() != 0) {
+                    for (Attachment attachment : attachmentList) {
+                        if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                            activity.setPosterUri(attachment.getContentUri());
+                        break;
+                    }
+                }
+            }
+            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+            dto.setActivityId(activity.getId());
+            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+            dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
+            dto.setProcessStatus(getStatus(activity).getCode());
+            dto.setFamilyId(activity.getCreatorFamilyId());
+            dto.setStartTime(activity.getStartTime().toString());
+            dto.setStopTime(activity.getEndTime().toString());
+            dto.setSignupEndTime(getSignupEndTime(activity).toString());
+            dto.setGroupId(activity.getGroupId());
+//            dto.setPosterUrl(getActivityPosterUrl(activity));
+            String posterUrl = getActivityPosterUrl(activity);
+            dto.setPosterUrl(posterUrl);
+            if (post != null) {
+                dto.setForumId(post.getForumId());
+            }
+            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+            if (favorite == null || favorite.size() == 0) {
+                dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            } else {
+                dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+            }
+            //add UserActivityStatus by xiongying 20160628
+            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
+            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+            fixupVideoInfo(dto);//added by janson
+
+            return dto;
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+         // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/
+        collect(Collectors.toList());
+
+        Long nextPageAnchor = locator.getAnchor();
+
+        response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
+        return response;
 	}
 	
 	private ListActivitiesReponse listCommunityNearbyActivities(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
