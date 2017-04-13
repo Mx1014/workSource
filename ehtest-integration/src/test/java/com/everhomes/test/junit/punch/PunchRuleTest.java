@@ -87,6 +87,8 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		testUpdateSchedulings();
 	}
 	public void testUpdateSchedulings(){
+		logon(null, userIdentifier, plainTexPassword);
+
 		UpdatePunchSchedulingMonthCommand cmd = new UpdatePunchSchedulingMonthCommand();
 		List<PunchSchedulingDTO> schedulingList = new ArrayList<PunchSchedulingDTO>();
 		PunchSchedulingDTO dto1 =new PunchSchedulingDTO();

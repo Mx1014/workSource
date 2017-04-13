@@ -5432,6 +5432,7 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchSchedulingDTO dto : cmd.getSchedulings()){
 			PunchScheduling punchScheduling = ConvertHelper.convert(dto, PunchScheduling.class);
 			punchScheduling.setPunchRuleId(pr.getId());
+			punchScheduling.setRuleDate(new java.sql.Date(dto.getRuleDate()));
 			punchScheduling.setCreatorUid(UserContext.current().getUser().getId());
 			punchScheduling.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
