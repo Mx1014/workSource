@@ -22,10 +22,8 @@ import javax.validation.constraints.NotNull;
  */
 public class ListSimpleAssetBillsCommand {
 
-    @NotNull
     private Long ownerId;
 
-    @NotNull
     private String ownerType;
 
     @NotNull

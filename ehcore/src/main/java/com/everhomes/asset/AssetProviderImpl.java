@@ -193,11 +193,14 @@ public class AssetProviderImpl implements AssetProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
 
-
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_ASSET_BILLS.STATUS.ne(AssetBillStatus.INACTIVE.getCode()));
 
+        if(ownerId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        }
+        if(ownerType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+        }
         if(targetId != null) {
             query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         }
