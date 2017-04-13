@@ -1294,6 +1294,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEnergyMonthStatistics.class, Tables.EH_ENERGY_MONTH_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_MONTH_STATISTICS.ID.max()).from(Tables.EH_ENERGY_MONTH_STATISTICS).fetchOne().value1();
         });
+        syncTableSequence(null, EhExpressServiceAddresses.class, Tables.EH_EXPRESS_SERVICE_ADDRESSES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_SERVICE_ADDRESSES.ID.max()).from(Tables.EH_EXPRESS_SERVICE_ADDRESSES).fetchOne().value1();
+        });
 
     }
 
