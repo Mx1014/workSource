@@ -1081,7 +1081,7 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
 			if(standard != null) {
 				dto.setStandardDescription(standard.getDescription());
-
+				qualityProvider.populateStandardGroups(standard);
 				if(standard.getExecutiveGroup() != null) {
 					standard.getExecutiveGroup().forEach((executiveGroup) -> {
 						StringBuilder sb = new StringBuilder();
