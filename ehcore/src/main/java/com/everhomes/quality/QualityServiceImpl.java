@@ -1118,7 +1118,8 @@ public class QualityServiceImpl implements QualityService {
 					QualityInspectionStandardSpecificationMap map = qualityProvider.getMapByStandardId(standard.getId());
 					if(map != null) {
 						QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(map.getSpecificationId());
-						r.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
+						dto.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
+						dto.setCategoryId(specification.getId());
 					}
 
 				}
