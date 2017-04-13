@@ -1,0 +1,48 @@
+// @formatter:off
+package com.everhomes.express;
+
+import com.everhomes.rest.express.AddExpressUserCommand;
+import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.GetExpressOrderDetailCommand;
+import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.ListExpressCompanyCommand;
+import com.everhomes.rest.express.ListExpressCompanyResponse;
+import com.everhomes.rest.express.ListExpressOrderCommand;
+import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressUserCommand;
+import com.everhomes.rest.express.ListExpressUserResponse;
+import com.everhomes.rest.express.ListServiceAddressCommand;
+import com.everhomes.rest.express.ListServiceAddressResponse;
+import com.everhomes.rest.express.PrintExpressOrderCommand;
+import com.everhomes.rest.express.UpdatePaySummaryCommand;
+
+public interface ExpressService {
+
+
+	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd);
+
+
+	public ListExpressCompanyResponse listExpressCompany(ListExpressCompanyCommand cmd);
+
+
+	public ListExpressUserResponse listExpressUser(ListExpressUserCommand cmd);
+
+
+	public void addExpressUser(AddExpressUserCommand cmd);
+
+
+	public void deleteExpressUser(DeleteExpressUserCommand cmd);
+
+
+	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd);
+
+
+	public GetExpressOrderDetailResponse getExpressOrderDetail(GetExpressOrderDetailCommand cmd);
+
+
+	public void updatePaySummary(UpdatePaySummaryCommand cmd);
+
+
+	public void printExpressOrder(PrintExpressOrderCommand cmd);
+
+}

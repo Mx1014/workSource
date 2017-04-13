@@ -8,22 +8,26 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: 所属者id</li>
+ * <li>id: 快递id</li>
  * </ul>
  */
-public class ListServiceAddressCommand {
+public class PrintExpressOrderCommand {
 
 	private String ownerType;
 
 	private Long ownerId;
 
-	public ListServiceAddressCommand() {
+	private Long id;
+
+	public PrintExpressOrderCommand() {
 
 	}
 
-	public ListServiceAddressCommand(String ownerType, Long ownerId) {
+	public PrintExpressOrderCommand(String ownerType, Long ownerId, Long id) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.id = id;
 	}
 
 	public String getOwnerType() {
@@ -40,6 +44,14 @@ public class ListServiceAddressCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override

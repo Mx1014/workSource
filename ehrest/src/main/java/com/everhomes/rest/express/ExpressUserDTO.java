@@ -7,12 +7,22 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>id: id</li>
- * <li>name: 地址名称</li>
+ * <li>name: 快递人员名称</li>
+ * <li>phone: 快递人员手机号</li>
  * </ul>
  */
-public class ServiceAddressDTO {
+public class ExpressUserDTO {
 	private Long id;
 	private String name;
+	private String phone;
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public Long getId() {
 		return id;

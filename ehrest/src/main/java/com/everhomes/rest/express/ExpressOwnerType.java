@@ -5,10 +5,12 @@ package com.everhomes.rest.express;
  * 
  * <ul>
  * <li>COMMUNITY: community，园区</li>
+ * <li>NAMESPACE: namespace，园区</li>
  * </ul>
  */
 public enum ExpressOwnerType {
-	COMMUNITY("community");
+	COMMUNITY("community"), NAMESPACE("namespace");
+	
 	private String code;
 
 	private ExpressOwnerType(String code) {

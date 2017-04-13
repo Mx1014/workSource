@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.express;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -8,22 +11,27 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: 所属者id</li>
+ * <li>expressUsers: 添加的快递人员列表</li>
  * </ul>
  */
-public class ListServiceAddressCommand {
+public class AddExpressUserCommand {
 
 	private String ownerType;
 
 	private Long ownerId;
 
-	public ListServiceAddressCommand() {
+	@ItemType(CreateExpressUserDTO.class)
+	private List<CreateExpressUserDTO> expressUsers;
+
+	public AddExpressUserCommand() {
 
 	}
 
-	public ListServiceAddressCommand(String ownerType, Long ownerId) {
+	public AddExpressUserCommand(String ownerType, Long ownerId, List<CreateExpressUserDTO> expressUsers) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.expressUsers = expressUsers;
 	}
 
 	public String getOwnerType() {
@@ -40,6 +48,14 @@ public class ListServiceAddressCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public List<CreateExpressUserDTO> getExpressUsers() {
+		return expressUsers;
+	}
+
+	public void setExpressUsers(List<CreateExpressUserDTO> expressUsers) {
+		this.expressUsers = expressUsers;
 	}
 
 	@Override

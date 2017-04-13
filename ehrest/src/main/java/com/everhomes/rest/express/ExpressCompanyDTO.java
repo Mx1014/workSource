@@ -7,10 +7,10 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>id: id</li>
- * <li>name: 地址名称</li>
+ * <li>name: 快递公司名称</li>
  * </ul>
  */
-public class ServiceAddressDTO {
+public class ExpressCompanyDTO {
 	private Long id;
 	private String name;
 
