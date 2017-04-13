@@ -61,7 +61,8 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
         else{
         	context.delete(Tables.EH_PUNCH_SCHEDULINGS).where(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(obj.getOwnerType()))
         	.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(obj.getOwnerId())).and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(obj.getTargetId()))
-        	.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(obj.getTargetType())).and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(obj.getRuleDate())).execute();
+        	.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(obj.getTargetType())).and(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.eq(obj.getRuleDate()))
+        	.execute();
         }
     }
 
