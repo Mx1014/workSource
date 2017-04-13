@@ -2023,6 +2023,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 		User user  = UserContext.current().getUser();
 
+		long startTime = System.currentTimeMillis();
+
 		if(null == cmd.getCommunityId()){
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
@@ -2038,6 +2040,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		//权限控制
 		Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);
+
+		long getApartmentsTime = System.currentTimeMillis();
+		LOGGER.info("Get apartments time:{}", getApartmentsTime - startTime);
+
 		List<ApartmentDTO> aptList = apts.second();
 		for (ApartmentDTO apartmentDTO : aptList) {
 			PropFamilyDTO dto = new PropFamilyDTO();
@@ -2093,6 +2099,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 			list.add(dto);
 		}
+
+		long populateApartmentsTime = System.currentTimeMillis();
+		LOGGER.info("Populate apartmentDtos time:{}", populateApartmentsTime - getApartmentsTime);
+		LOGGER.info("The total time:{}", populateApartmentsTime - startTime);
+
 		return list;
 	}
 
