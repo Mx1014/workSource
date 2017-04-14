@@ -38,7 +38,6 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.junit.experimental.categories.Categories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
