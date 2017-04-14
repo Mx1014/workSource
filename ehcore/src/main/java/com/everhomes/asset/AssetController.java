@@ -34,9 +34,6 @@ public class AssetController extends ControllerBase {
     @Autowired
     private AssetService assetService;
 
-    @Autowired
-    private PmKeXingBillService keXingBillService;
-
 //    根据用户查关联模板字段列表（必填字段最前，关联表中最新version的字段按default_order和id排序）
     /**
      * <b>URL: /asset/listAssetBillTemplate</b>
@@ -288,7 +285,7 @@ public class AssetController extends ControllerBase {
     @RestReturn(value = ListOrganizationsByPmAdminDTO.class, collection = true)
     public RestResponse listOrganizationsByPmAdmin() {
 
-        RestResponse response = new RestResponse(keXingBillService.listOrganizationsByPmAdmin());
+        RestResponse response = new RestResponse(assetService.listOrganizationsByPmAdmin());
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;

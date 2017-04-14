@@ -1,6 +1,7 @@
 package com.everhomes.asset;
 
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,4 +29,5 @@ public interface AssetService {
     NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
 
     AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd);
+    List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin();
 }

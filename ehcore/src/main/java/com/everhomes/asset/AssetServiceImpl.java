@@ -4,6 +4,8 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cache.CacheAccessor;
+import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -22,8 +24,11 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupDiscriminator;
@@ -31,9 +36,8 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.user.MessageChannelType;
@@ -73,12 +77,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -132,6 +131,80 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private CacheProvider cacheProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Override
+    public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
+        List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
+
+        final Long userId = UserContext.current().getUser().getId();
+        // 拿到用户所在的公司列表
+        List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(),
+                userId, OrganizationGroupType.ENTERPRISE);
+
+        if (organizationList == null || organizationList.isEmpty()) {
+            return dtoList;
+        }
+
+        ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+        for (OrganizationDTO organization : organizationList) {
+            cmd.setOrganizationId(organization.getId());
+            // 获取当前用户为超级管理员的公司
+            List<OrganizationContactDTO> organizationAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+            if (organizationAdmins != null && organizationAdmins.size() > 0) {
+                boolean isAdmin = organizationAdmins.stream().mapToLong(OrganizationContactDTO::getTargetId).anyMatch(adminId -> adminId == userId);
+                if (isAdmin) {
+                    dtoList.add(toOrganizationsByPmAdminDTO(organization));
+                    continue;
+                }
+            }
+            // 获取当前用户为企业管理员的公司
+            List<OrganizationContactDTO> organizationPms = rolePrivilegeService.listOrganizationAdministrators(cmd);
+            if (organizationPms != null && organizationPms.size() > 0) {
+                boolean isPm = organizationPms.stream().mapToLong(OrganizationContactDTO::getTargetId).anyMatch(pmId -> pmId == userId);
+                if (isPm) {
+                    dtoList.add(toOrganizationsByPmAdminDTO(organization));
+                }
+            }
+        }
+        this.processLatestSelectedOrganization(dtoList);
+        return dtoList;
+    }
+
+    private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
+        CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
+        String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());
+        Long latestSelectedOrganizationId = accessor.get(key);
+        if (latestSelectedOrganizationId != null) {
+            dtoList.parallelStream()
+                    .filter(r -> Objects.equals(r.getOrganizationId(), latestSelectedOrganizationId))
+                    .forEach(r -> r.setLatestSelected(TrueOrFalseFlag.TRUE.getCode()));
+        }
+    }
+
+    private ListOrganizationsByPmAdminDTO toOrganizationsByPmAdminDTO(OrganizationDTO organization) {
+        ListOrganizationsByPmAdminDTO dto = new ListOrganizationsByPmAdminDTO();
+        dto.setOrganizationId(organization.getId());
+        dto.setOrganizationName(organization.getName());
+        dto.setAddresses(this.getOrganizationAddresses(organization.getId()));
+        return dto;
+    }
+
+    private List<AddressDTO> getOrganizationAddresses(Long organizationId) {
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+        if (organizationAddresses != null) {
+            return organizationAddresses.stream().map(r -> {
+                Address address = addressProvider.findAddressById(r.getAddressId());
+                return ConvertHelper.convert(address, AddressDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
 
@@ -181,6 +254,12 @@ public class AssetServiceImpl implements AssetService {
         return handler;
     }
 
+    private void putLatestSelectedOrganizationToCache(Long organizationId) {
+        CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
+        String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());
+        accessor.put(key, organizationId);
+    }
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd) {
 
@@ -188,7 +267,7 @@ public class AssetServiceImpl implements AssetService {
 
         String vendor = assetVendor.getVendorName();
         AssetVendorHandler handler = getAssetVendorHandler(vendor);
-
+        putLatestSelectedOrganizationToCache(cmd.getOrganizationId());
         ListSimpleAssetBillsResponse response = handler.listSimpleAssetBills(cmd.getOwnerId(), cmd.getOwnerType(),
                 cmd.getTargetId(), cmd.getTargetType(), cmd.getOrganizationId(),  cmd.getAddressId(), cmd.getTenant(), cmd.getStatus(),
                 cmd.getStartTime(), cmd.getEndTime(), cmd.getPageAnchor(), cmd.getPageSize());
