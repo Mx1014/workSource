@@ -3944,6 +3944,7 @@ public class PunchServiceImpl implements PunchService {
 			if(null != categories){
 				for(ApprovalCategory category : categories){
 					ExtDTO extDTO = new ExtDTO();
+					dto.getExts().add(extDTO);
 					extDTO.setName(category.getCategoryName());
 					if(null != abscentStats && abscentStats.size()>0){ 
 						for(ApprovalRangeStatistic abstat : abscentStats){
@@ -3963,7 +3964,6 @@ public class PunchServiceImpl implements PunchService {
 									timeCountBuffer.append("分钟");
 								}
 								extDTO.setTimeCount(timeCountBuffer.toString());
-								dto.getExts().add(extDTO);
 								break;
 							}
 						}
