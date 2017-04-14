@@ -22,6 +22,7 @@ import com.everhomes.server.schema.tables.records.EhAssetVendorRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
+import com.mysql.jdbc.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -423,11 +424,15 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
         }
 
+        if(StringUtils.isNullOrEmpty(dateStr)) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.like(dateStr + "%"));
+        }
+
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("findAssetBill, sql=" + query.getSQL());
             LOGGER.debug("findAssetBill, bindValues=" + query.getBindValues());
         }
 
-        return query.fetchOneInto(AssetBill.class);
+        return query.fetchAnyInto(AssetBill.class);
     }
 }
