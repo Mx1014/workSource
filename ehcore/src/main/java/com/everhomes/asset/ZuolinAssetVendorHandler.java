@@ -147,8 +147,13 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setTenantId(bill.getTenantId());
         dto.setTenantType(bill.getTenantType());
         dto.setAddressId(bill.getAddressId());
+        List<AssetBillTemplateFieldDTO> templateFields = null;
+        if(bill.getTemplateVersion() == 0L) {
+            dtos = assetProvider.findTemplateFieldByTemplateVersion(0L, cmd.getOwnerType(), 0L, cmd.getTargetType(), 0L);
+        } else {
+            templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, bill.getTemplateVersion());
+        }
 
-        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, bill.getTemplateVersion());
         if(templateFields != null && templateFields.size() > 0) {
             List<FieldValueDTO> valueDTOs = new ArrayList<>();
             Field[] fields = EhAssetBills.class.getDeclaredFields();
