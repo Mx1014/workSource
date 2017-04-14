@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -15,6 +16,8 @@ import java.util.List;
  *     <li>targetType：账单所属园区类型</li>
  *     <li>templateVersion: 版本号</li>
  *     <li>dtos: 账单字段列表 参考{@link com.everhomes.rest.asset.FieldValueDTO}</li>
+ *     <li>periodAccountAmount: 总计应收</li>
+ *     <li>unpaidPeriodAccountAmount: 待缴费用</li>
  * </ul>
  */
 public class AssetBillTemplateValueDTO {
@@ -38,6 +41,10 @@ public class AssetBillTemplateValueDTO {
     private Long addressId;
 
     private Long templateVersion;
+
+    private BigDecimal periodAccountAmount;
+
+    private BigDecimal unpaidPeriodAccountAmount;
 
     @ItemType(FieldValueDTO.class)
     private List<FieldValueDTO> dtos;
@@ -128,6 +135,22 @@ public class AssetBillTemplateValueDTO {
 
     public void setDtos(List<FieldValueDTO> dtos) {
         this.dtos = dtos;
+    }
+
+    public BigDecimal getPeriodAccountAmount() {
+        return periodAccountAmount;
+    }
+
+    public void setPeriodAccountAmount(BigDecimal periodAccountAmount) {
+        this.periodAccountAmount = periodAccountAmount;
+    }
+
+    public BigDecimal getUnpaidPeriodAccountAmount() {
+        return unpaidPeriodAccountAmount;
+    }
+
+    public void setUnpaidPeriodAccountAmount(BigDecimal unpaidPeriodAccountAmount) {
+        this.unpaidPeriodAccountAmount = unpaidPeriodAccountAmount;
     }
 
     @Override
