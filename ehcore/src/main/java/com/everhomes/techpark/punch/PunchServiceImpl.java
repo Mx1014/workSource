@@ -3723,7 +3723,8 @@ public class PunchServiceImpl implements PunchService {
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
-		results.forEach((other) -> {
+		 
+		for(PunchRuleOwnerMap other:results)  {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
 //			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
 //			if(pr == null)
@@ -3733,6 +3734,8 @@ public class PunchServiceImpl implements PunchService {
 //			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
 				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
+				if(null== member)
+					continue;
 				dto.setTargetName(member.getContactName());
 				OrganizationDTO dept =  this.findUserDepartment(other.getTargetId(), other.getOwnerId());
 				if(null != dept)
@@ -3746,7 +3749,7 @@ public class PunchServiceImpl implements PunchService {
 //				}
 //			}
 			response.getPunchRuleMaps().add(dto);
-		});
+		} 
 		return response;
 	}
 	/**找到用户的部门-多部门取最上级第一个*/
