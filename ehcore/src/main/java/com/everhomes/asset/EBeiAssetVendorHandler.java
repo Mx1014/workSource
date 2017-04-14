@@ -83,6 +83,8 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
         command.setDateStr(dateStr);
         PmKeXingBillDTO bill = keXingBillService.getPmKeXingBill(command);
         AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+        dto.setPeriodAccountAmount(bill.getReceivableAmount());
+        dto.setUnpaidPeriodAccountAmount(bill.getUnpaidAmount());
         List<FieldValueDTO> dtos = new ArrayList<>();
         if(bill.getItems() != null && bill.getItems().size() > 0) {
             bill.getItems().forEach(item -> {

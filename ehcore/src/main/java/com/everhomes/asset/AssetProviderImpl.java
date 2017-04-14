@@ -424,7 +424,7 @@ public class AssetProviderImpl implements AssetProvider {
             query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
         }
 
-        if(StringUtils.isNullOrEmpty(dateStr)) {
+        if(!StringUtils.isNullOrEmpty(dateStr)) {
             query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.like(dateStr + "%"));
         }
 
