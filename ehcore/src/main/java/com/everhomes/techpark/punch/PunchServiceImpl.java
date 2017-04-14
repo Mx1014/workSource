@@ -4322,6 +4322,8 @@ public class PunchServiceImpl implements PunchService {
 						pdl.setPunchStatus(dayLog.getStatus());
 						pdl.setAfternoonPunchStatus(dayLog.getAfternoonStatus());
 						pdl.setMorningPunchStatus(dayLog.getMorningStatus());
+						//TODO: 对于请假
+						pdl.setStatuString(statusToString(dayLog.getStatus()));
 						userMonthLogsDTO.getPunchLogsDayList().add(pdl);
 						if (dayLog.getExceptionStatus() != null && ExceptionStatus.EXCEPTION.equals(ExceptionStatus.fromCode(dayLog.getExceptionStatus()))){
 							exceptionStatus = ExceptionStatus.EXCEPTION;

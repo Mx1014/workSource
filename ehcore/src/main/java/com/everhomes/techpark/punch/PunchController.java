@@ -282,21 +282,21 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
  
-	/**
-	 * <b>URL: /techpark/punch/listPunchStatistics</b>
-	 * <p>
-	 * 查询公司打卡的统计结果
-	 * </p>
-	 */
-	@RequestMapping("listPunchStatistics")
-	@RestReturn(value = ListPunchStatisticsCommandResponse.class)
-	public RestResponse listPunchStatistics(@Valid ListPunchStatisticsCommand cmd) {
-		ListPunchStatisticsCommandResponse commandResponse = punchService.listPunchStatistics(cmd);
-		RestResponse response = new RestResponse(commandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/punch/listPunchStatistics</b>
+//	 * <p>
+//	 * 查询公司打卡的统计结果
+//	 * </p>
+//	 */
+//	@RequestMapping("listPunchStatistics")
+//	@RestReturn(value = ListPunchStatisticsCommandResponse.class)
+//	public RestResponse listPunchStatistics(@Valid ListPunchStatisticsCommand cmd) {
+//		ListPunchStatisticsCommandResponse commandResponse = punchService.listPunchStatistics(cmd);
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /techpark/punch/listPunchCount</b>
