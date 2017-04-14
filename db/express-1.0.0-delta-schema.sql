@@ -4,7 +4,7 @@ CREATE TABLE `eh_express_service_addresses` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
-  `name` VARCHAR(128) NOT NULL COMMENT 'the name of express service address',
+  `name` VARCHAR(128) COMMENT 'the name of express service address',
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -14,13 +14,14 @@ CREATE TABLE `eh_express_service_addresses` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- 快递公司表，add by tt, 20170413
+-- 快递公司表，左邻配一套全局的，各园区在此选择，add by tt, 20170413
 -- DROP TABLE IF EXISTS `eh_express_companies`;
 CREATE TABLE `eh_express_companies` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
-  `name` VARCHAR(128) NOT NULL COMMENT 'the name of express company name',
+  `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'parent id, the id of express company under zuolin',
+  `name` VARCHAR(128) COMMENT 'the name of express company name',
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -36,9 +37,60 @@ CREATE TABLE `eh_express_users` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
-  `organization_id` BIGINT NOT NULL COMMENT 'the id of organization',
-  `organization_member_id` BIGINT NOT NULL COMMENT 'the id of organization member',
+  `organization_id` BIGINT COMMENT 'the id of organization',
+  `organization_member_id` BIGINT COMMENT 'the id of organization member',
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 快递地址表，add by tt, 20170413
+-- DROP TABLE IF EXISTS `eh_express_addresses`;
+CREATE TABLE `eh_express_addresses` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `user_name` VARCHAR(128),
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(128),
+  `phone` VARCHAR(16),
+  `province` VARCHAR(64),
+  `city` VARCHAR(64),
+  `county` VARCHAR(64),
+  `detail_address` VARCHAR(512),
+  `default_falg` TINYINT COMMENT '0. false, 1 true',
+  `category` TINYINT COMMENT '1. send address, 2. receive address',
+  `status` TINYINT NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 快递订单表，add by tt, 20170413
+-- DROP TABLE IF EXISTS `eh_express_orders`;
+CREATE TABLE `eh_express_orders` (
+  `id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `order_no` VARCHAR(64) COMMENT 'order number',
+  `bill_no` VARCHAR(64) COMMENT 'bill number',
+  `send_address_id` BIGINT COMMENT 'send express address id',
+  `receive_address_id` BIGINT COMMENT 'receive express address id',
+  `express_company_id` BIGINT COMMENT 'express company id',
+  `send_type` TINYINT COMMENT '1. standard express',
+  `send_mode` TINYINT COMMENT '1. self send',
+  `pay_type` TINYINT COMMENT '1. cash',
+  `pay_summary` DECIMAL(10,2) COMMENT 'pay money',
+  `internal` VARCHAR(256) COMMENT 'internal things',
+  `insured_price` DECIMAL(10,2) COMMENT 'insured price',
+  `status` TINYINT NOT NULL COMMENT '1. waiting for pay, 2. paid, 3. printed, 4. cancelled',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,

@@ -9,6 +9,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.AddExpressUserCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
@@ -122,6 +124,16 @@ public class ExpressController extends ControllerBase {
 	public RestResponse printExpressOrder(PrintExpressOrderCommand cmd){
 		expressService.printExpressOrder(cmd);
 		return new RestResponse();
+	}
+
+	/**
+	 * <p>10.添加地址</p>
+	 * <b>URL: /express/createOrUpdateExpressAddress</b>
+	 */
+	@RequestMapping("createOrUpdateExpressAddress")
+	@RestReturn(CreateOrUpdateExpressAddressResponse.class)
+	public RestResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd){
+		return new RestResponse(expressService.createOrUpdateExpressAddress(cmd));
 	}
 
 }

@@ -2,6 +2,8 @@
 package com.everhomes.express;
 
 import com.everhomes.rest.express.AddExpressUserCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
+import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
@@ -44,5 +46,8 @@ public interface ExpressService {
 
 
 	public void printExpressOrder(PrintExpressOrderCommand cmd);
+
+
+	public CreateOrUpdateExpressAddressResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd);
 
 }

@@ -14,22 +14,30 @@ import com.everhomes.util.StringHelper;
  * <li>sendPhone: 寄件人手机</li>
  * <li>expressCompanyName: 快递公司</li>
  * <li>billNo: 快递单号</li>
- * <li>sendType: 寄件类型</li>
- * <li>payType: 付款方式</li>
- * <li>status: 订单状态</li>
+ * <li>sendType: 寄件类型，参考{@link com.everhomes.rest.express.ExpressSendType}</li>
+ * <li>payType: 付款方式，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
+ * <li>status: 订单，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
  * <li>paySummary: 付费总计</li>
  * <li>列表只包含以上字段</li>
  * <li>sendOrganization: 寄件人公司</li>
- * <li>sendAddress: 寄件地址</li>
+ * <li>sendProvince: 寄件省</li>
+ * <li>sendCity: 寄件市</li>
+ * <li>sendCounty: 寄件区县</li>
+ * <li>sendDetailAddress: 寄件详细地址</li>
  * <li>receiveName: 收件人姓名</li>
  * <li>receivePhone: 收件人手机</li>
  * <li>receiveOrganization: 收件人公司</li>
- * <li>receiveAddress: 收件人地址</li>
+ * <li>receiveProvince: 收件人省</li>
+ * <li>receiveCity: 收件人市</li>
+ * <li>receiveCounty: 收件人区县</li>
+ * <li>receiveDetailAddress: 收件人详细地址</li>
  * <li>orderNo: 订单编号</li>
  * <li>createTime: 订单时间</li>
+ * <li>sendMode: 寄件方式，参考{@link com.everhomes.rest.express.ExpressSendMode}</li>
  * <li>serviceAddress: 自寄地址</li>
  * <li>internal: 内件物品</li>
  * <li>insuredPrice: 保价金额</li>
+ * <li>logisticsStatus: 物流状态，参考{@link com.everhomes.rest.express.ExpressLogisticsStatus}</li>
  * </ul>
  */
 public class ExpressOrderDTO {
@@ -44,31 +52,102 @@ public class ExpressOrderDTO {
 	private BigDecimal paySummary;
 	
 	private String sendOrganization;
-	private String sendAddress;
+	private String sendProvince;
+	private String sendCity;
+	private String sendCounty;
+	private String sendDetailAddress;
 	private String receiveName;
 	private String receivePhone;
 	private String receiveOrganization;
-	private String receiveAddress;
+	private String receiveProvince;
+	private String receiveCity;
+	private String receiveCounty;
+	private String receiveDetailAddress;
 	private String orderNo;
 	private Timestamp createTime;
+	private Byte sendMode;
 	private String serviceAddress;
 	private String internal;
 	private BigDecimal insuredPrice;
-	
+
+	public String getSendProvince() {
+		return sendProvince;
+	}
+
+	public void setSendProvince(String sendProvince) {
+		this.sendProvince = sendProvince;
+	}
+
+	public String getSendCity() {
+		return sendCity;
+	}
+
+	public void setSendCity(String sendCity) {
+		this.sendCity = sendCity;
+	}
+
+	public String getSendCounty() {
+		return sendCounty;
+	}
+
+	public void setSendCounty(String sendCounty) {
+		this.sendCounty = sendCounty;
+	}
+
+	public String getSendDetailAddress() {
+		return sendDetailAddress;
+	}
+
+	public void setSendDetailAddress(String sendDetailAddress) {
+		this.sendDetailAddress = sendDetailAddress;
+	}
+
+	public String getReceiveProvince() {
+		return receiveProvince;
+	}
+
+	public void setReceiveProvince(String receiveProvince) {
+		this.receiveProvince = receiveProvince;
+	}
+
+	public String getReceiveCity() {
+		return receiveCity;
+	}
+
+	public void setReceiveCity(String receiveCity) {
+		this.receiveCity = receiveCity;
+	}
+
+	public String getReceiveCounty() {
+		return receiveCounty;
+	}
+
+	public void setReceiveCounty(String receiveCounty) {
+		this.receiveCounty = receiveCounty;
+	}
+
+	public String getReceiveDetailAddress() {
+		return receiveDetailAddress;
+	}
+
+	public void setReceiveDetailAddress(String receiveDetailAddress) {
+		this.receiveDetailAddress = receiveDetailAddress;
+	}
+
+	public Byte getSendMode() {
+		return sendMode;
+	}
+
+	public void setSendMode(Byte sendMode) {
+		this.sendMode = sendMode;
+	}
+
 	public String getSendOrganization() {
 		return sendOrganization;
 	}
 
 	public void setSendOrganization(String sendOrganization) {
 		this.sendOrganization = sendOrganization;
-	}
-
-	public String getSendAddress() {
-		return sendAddress;
-	}
-
-	public void setSendAddress(String sendAddress) {
-		this.sendAddress = sendAddress;
 	}
 
 	public String getReceiveName() {
@@ -93,14 +172,6 @@ public class ExpressOrderDTO {
 
 	public void setReceiveOrganization(String receiveOrganization) {
 		this.receiveOrganization = receiveOrganization;
-	}
-
-	public String getReceiveAddress() {
-		return receiveAddress;
-	}
-
-	public void setReceiveAddress(String receiveAddress) {
-		this.receiveAddress = receiveAddress;
 	}
 
 	public String getOrderNo() {
