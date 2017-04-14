@@ -4272,7 +4272,8 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-		
+		long daylogUseTime = 0L;
+
 		ListPunchMonthLogsResponse response = new ListPunchMonthLogsResponse();
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
@@ -4307,8 +4308,11 @@ public class PunchServiceImpl implements PunchService {
 						dept = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 					userMonthLogsDTO.setDeptName(dept.getName());
 					userMonthLogsDTO.setUserName(member.getContactName());
+					long beginDayLogTime = DateHelper.currentGMTTime().getTime();
 					List<PunchDayLog> punchDayLogs = punchProvider.listPunchDayLogs(member.getTargetId(),member.getOrganizationId(), dateSF.get().format(monthBegin.getTime()),
 							dateSF.get().format(monthEnd.getTime()) );
+					long endDayLogTime = DateHelper.currentGMTTime().getTime();
+					daylogUseTime+=endDayLogTime-beginDayLogTime;
 					if (null == punchDayLogs || punchDayLogs.isEmpty())
 						continue;
 					userMonthLogsDTO.setPunchLogsDayList(new ArrayList<PunchLogsDay>());
@@ -4342,6 +4346,7 @@ public class PunchServiceImpl implements PunchService {
 						ErrorCodes.ERROR_INVALID_PARAMETER,
 						"ParseException : punch month INVALID :  "+cmd.getPunchMonth()); 
 			}
+			LOGGER.debug("daylog use  :"+daylogUseTime +" ms");
 		}
 		return response;
 	}
