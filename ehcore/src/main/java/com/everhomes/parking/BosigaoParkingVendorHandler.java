@@ -88,8 +88,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Autowired
     private DbProvider dbProvider;
-	@Autowired
-	private CoordinationProvider coordinationProvider;
 
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -232,8 +230,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
     @Override
     public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order,String payStatus) {
-		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
 
 			if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
 				if (payStatus.toLowerCase().equals("fail")) {
@@ -260,8 +256,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 
-			return null;
-		});
+
     }
     
     
