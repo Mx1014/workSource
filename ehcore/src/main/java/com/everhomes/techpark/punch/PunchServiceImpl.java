@@ -38,6 +38,7 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.junit.experimental.categories.Categories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3725,12 +3726,12 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchRuleMaps(new ArrayList<PunchRuleMapDTO>()); 
 		results.forEach((other) -> {
 			PunchRuleMapDTO dto = ConvertHelper.convert(other, PunchRuleMapDTO.class);
-			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
-			if(pr == null)
-				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-						"have no punch rule");
-			dto.setPunchRuleName(pr.getName());
+//			PunchRule pr = this.punchProvider.getPunchRuleById(other.getPunchRuleId());
+//			if(pr == null)
+//				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+//						PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+//						"have no punch rule");
+//			dto.setPunchRuleName(pr.getName());
 			if(PunchOwnerType.User.getCode().equals(other.getTargetType())){
 				OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(other.getTargetId(), other.getOwnerId());
 				dto.setTargetName(member.getContactName());
@@ -3739,12 +3740,12 @@ public class PunchServiceImpl implements PunchService {
 					dto.setTargetDept(dept.getName());
 				
 			}
-			if (other.getReviewRuleId() != null) {
-				ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleById(other.getReviewRuleId());
-				if (approvalRule != null) {
-					dto.setReviewRuleName(approvalRule.getName());
-				}
-			}
+//			if (other.getReviewRuleId() != null) {
+//				ApprovalRule approvalRule = approvalRuleProvider.findApprovalRuleById(other.getReviewRuleId());
+//				if (approvalRule != null) {
+//					dto.setReviewRuleName(approvalRule.getName());
+//				}
+//			}
 			response.getPunchRuleMaps().add(dto);
 		});
 		return response;
@@ -3881,7 +3882,13 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
 				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
-		
+		response.setExtColumns(new ArrayList<>());
+		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
+		if(null != categories){
+			for(ApprovalCategory category : categories){
+				response.getExtColumns().add(category.getCategoryName());
+			}
+		}
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;
@@ -3920,7 +3927,7 @@ public class PunchServiceImpl implements PunchService {
 					ApprovalCategory  category = approvalCategoryProvider.findApprovalCategoryById(abstat.getCategoryId());
 					extDTO.setName(category.getCategoryName());
 					StringBuffer timeCountBuffer = new StringBuffer();
-					String[] range = abstat.getActualResult().split(".");
+					String[] range = abstat.getActualResult().split("\\.");
 					if(!range[0].equals("0")){
 						timeCountBuffer.append(range[0]);
 						timeCountBuffer.append("天");
@@ -5366,6 +5373,7 @@ public class PunchServiceImpl implements PunchService {
 			scheduling.setCreatorUid(UserContext.current().getUser().getId());
 			scheduling.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
+			punchSchedulingProvider.deletePunchScheduling(scheduling);
 			punchSchedulingProvider.createPunchScheduling(scheduling);
 		}
 	}

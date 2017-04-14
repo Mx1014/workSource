@@ -685,7 +685,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 		public MyDate(String actual) {
 			super();
-			String[] strings = actual.split(".");
+			String[] strings = actual.split("\\.");
 			if(strings.length ==3){
 				days = Integer.valueOf(strings[0]);
 				hours = Integer.valueOf(strings[1]);
