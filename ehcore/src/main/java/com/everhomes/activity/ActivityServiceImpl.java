@@ -2695,6 +2695,9 @@ public class ActivityServiceImpl implements ActivityService {
         }
         condition = condition.and(communityCondition);
         
+        if(!StringUtils.isEmpty(cmd.getTag())){
+            condition = condition.and(Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag()));
+        } 
         
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
