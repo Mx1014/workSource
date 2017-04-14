@@ -4981,6 +4981,18 @@ public class PunchServiceImpl implements PunchService {
 			this.punchProvider.createPunchRule(pr);
 			map.setPunchRuleId(pr.getId());
 			this.punchProvider.createPunchRuleOwnerMap(map);
+		}else if(null ==map.getPunchRuleId()){
+			PunchRule pr = new PunchRule();
+			pr.setOwnerId(ownerId);
+			pr.setOwnerType(ownerType);
+			pr.setName(targetId+"rule");
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			this.punchProvider.createPunchRule(pr);
+			map.setPunchRuleId(pr.getId());
+			this.punchProvider.createPunchRuleOwnerMap(map);
+			
 		}
 		return map;
 	}
@@ -5035,6 +5047,8 @@ public class PunchServiceImpl implements PunchService {
 		if(null == map)
 			return response;
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		if(null == pr)
+			return response;
 		PunchLocationRule plr = null;
 		if(pr.getLocationRuleId()==null){
 //			plr = new PunchLocationRule();
@@ -5101,6 +5115,8 @@ public class PunchServiceImpl implements PunchService {
 		if(null == map)
 			return response;
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		if(null == pr)
+			return response;
 		PunchWifiRule pwr = null;
 		if(pr.getWifiRuleId()==null){
 //			pwr = new PunchWifiRule();
@@ -5441,6 +5457,8 @@ public class PunchServiceImpl implements PunchService {
 		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getSchedulings().get(0).getOwnerType(), cmd.getSchedulings().get(0).getOwnerId(), 
 				cmd.getSchedulings().get(0).getTargetType(), cmd.getSchedulings().get(0).getTargetId());
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		if(null == pr)
+			return  ;
 		for(PunchSchedulingDTO dto : cmd.getSchedulings()){
 			
 			PunchScheduling punchScheduling = ConvertHelper.convert(dto, PunchScheduling.class);
