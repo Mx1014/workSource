@@ -3940,30 +3940,37 @@ public class PunchServiceImpl implements PunchService {
 					return null;
 				}
 			});
-			if(null != abscentStats && abscentStats.size()>0){
-				dto.setExts(new ArrayList<ExtDTO>());
-				for(ApprovalRangeStatistic abstat : abscentStats){
+			dto.setExts(new ArrayList<ExtDTO>());
+			if(null != categories){
+				for(ApprovalCategory category : categories){
 					ExtDTO extDTO = new ExtDTO();
-					ApprovalCategory  category = approvalCategoryProvider.findApprovalCategoryById(abstat.getCategoryId());
 					extDTO.setName(category.getCategoryName());
-					StringBuffer timeCountBuffer = new StringBuffer();
-					String[] range = abstat.getActualResult().split("\\.");
-					if(!range[0].equals("0")){
-						timeCountBuffer.append(range[0]);
-						timeCountBuffer.append("天");
+					if(null != abscentStats && abscentStats.size()>0){ 
+						for(ApprovalRangeStatistic abstat : abscentStats){
+							if(abstat.getCategoryId().equals(category.getId())){ 
+								StringBuffer timeCountBuffer = new StringBuffer();
+								String[] range = abstat.getActualResult().split("\\.");
+								if(!range[0].equals("0")){
+									timeCountBuffer.append(range[0]);
+									timeCountBuffer.append("天");
+								}
+								if(!range[1].equals("0")){
+									timeCountBuffer.append(range[1]);
+									timeCountBuffer.append("小时");
+								}
+								if(!range[2].equals("0")){
+									timeCountBuffer.append(range[2]);
+									timeCountBuffer.append("分钟");
+								}
+								extDTO.setTimeCount(timeCountBuffer.toString());
+								dto.getExts().add(extDTO);
+								break;
+							}
+						}
 					}
-					if(!range[1].equals("0")){
-						timeCountBuffer.append(range[1]);
-						timeCountBuffer.append("小时");
-					}
-					if(!range[2].equals("0")){
-						timeCountBuffer.append(range[2]);
-						timeCountBuffer.append("分钟");
-					}
-					extDTO.setTimeCount(timeCountBuffer.toString());
-					dto.getExts().add(extDTO);
 				}
 			}
+			
 			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
