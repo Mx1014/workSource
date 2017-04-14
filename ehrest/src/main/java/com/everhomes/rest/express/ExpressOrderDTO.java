@@ -12,11 +12,12 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>sendName: 寄件人姓名</li>
  * <li>sendPhone: 寄件人手机</li>
+ * <li>expressCompanyId: 快递公司id</li>
  * <li>expressCompanyName: 快递公司</li>
  * <li>billNo: 快递单号</li>
  * <li>sendType: 寄件类型，参考{@link com.everhomes.rest.express.ExpressSendType}</li>
  * <li>payType: 付款方式，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
- * <li>status: 订单，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
+ * <li>status: 订单状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
  * <li>paySummary: 付费总计</li>
  * <li>列表只包含以上字段</li>
  * <li>sendOrganization: 寄件人公司</li>
@@ -44,6 +45,7 @@ public class ExpressOrderDTO {
 	private Long id;
 	private String sendName;
 	private String sendPhone;
+	private Long expressCompanyId;
 	private String expressCompanyName;
 	private String billNo;
 	private Byte sendType;
@@ -69,6 +71,14 @@ public class ExpressOrderDTO {
 	private String serviceAddress;
 	private String internal;
 	private BigDecimal insuredPrice;
+
+	public Long getExpressCompanyId() {
+		return expressCompanyId;
+	}
+
+	public void setExpressCompanyId(Long expressCompanyId) {
+		this.expressCompanyId = expressCompanyId;
+	}
 
 	public String getSendProvince() {
 		return sendProvince;

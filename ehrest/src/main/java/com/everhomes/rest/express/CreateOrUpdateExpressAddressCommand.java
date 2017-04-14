@@ -6,7 +6,9 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
- * <li>id: id，更新时有，创建时无</li>
+ * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
+ * <li>ownerId: 所属者id</li>
+ * <li>id: 地址id，更新时有，创建时无</li>
  * <li>category: 类型，1寄件人地址，2收件人地址，参考{@link com.everhomes.rest.express.ExpressAddressCategory}</li>
  * <li>userName: 姓名</li>
  * <li>phone: 手机号</li>
@@ -20,6 +22,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOrUpdateExpressAddressCommand {
+
+	private String ownerType;
+
+	private Long ownerId;
 
 	private Long id;
 
@@ -47,8 +53,10 @@ public class CreateOrUpdateExpressAddressCommand {
 
 	}
 
-	public CreateOrUpdateExpressAddressCommand(Long id, Byte category, String userName, String phone, Long organizationId, String organizationName, String province, String city, String county, String detailAddress, Byte defaultFlag) {
+	public CreateOrUpdateExpressAddressCommand(String ownerType, Long ownerId, Long id, Byte category, String userName, String phone, Long organizationId, String organizationName, String province, String city, String county, String detailAddress, Byte defaultFlag) {
 		super();
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
 		this.id = id;
 		this.category = category;
 		this.userName = userName;
@@ -60,6 +68,22 @@ public class CreateOrUpdateExpressAddressCommand {
 		this.county = county;
 		this.detailAddress = detailAddress;
 		this.defaultFlag = defaultFlag;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Long getId() {

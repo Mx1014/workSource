@@ -2,17 +2,28 @@
 package com.everhomes.express;
 
 import com.everhomes.rest.express.AddExpressUserCommand;
+import com.everhomes.rest.express.CancelExpressOrderCommand;
+import com.everhomes.rest.express.CreateExpressOrderCommand;
+import com.everhomes.rest.express.CreateExpressOrderResponse;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
+import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
+import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.ListExpressAddressCommand;
+import com.everhomes.rest.express.ListExpressAddressResponse;
 import com.everhomes.rest.express.ListExpressCompanyCommand;
 import com.everhomes.rest.express.ListExpressCompanyResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
 import com.everhomes.rest.express.ListExpressUserCommand;
 import com.everhomes.rest.express.ListExpressUserResponse;
+import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
+import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
@@ -49,5 +60,29 @@ public interface ExpressService {
 
 
 	public CreateOrUpdateExpressAddressResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd);
+
+
+	public void deleteExpressAddress(DeleteExpressAddressCommand cmd);
+
+
+	public ListExpressAddressResponse listExpressAddress(ListExpressAddressCommand cmd);
+
+
+	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd);
+
+
+	public ListPersonalExpressOrderResponse listPersonalExpressOrder(ListPersonalExpressOrderCommand cmd);
+
+
+	public void cancelExpressOrder(CancelExpressOrderCommand cmd);
+
+
+	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(GetExpressLogisticsDetailCommand cmd);
+
+	
+	public ListExpressQueryHistoryResponse listExpressQueryHistory();
+
+
+	public void clearExpressQueryHistory();
 
 }

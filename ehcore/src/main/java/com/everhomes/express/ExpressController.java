@@ -9,17 +9,28 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.AddExpressUserCommand;
+import com.everhomes.rest.express.CancelExpressOrderCommand;
+import com.everhomes.rest.express.CreateExpressOrderCommand;
+import com.everhomes.rest.express.CreateExpressOrderResponse;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
+import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
+import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
+import com.everhomes.rest.express.ListExpressAddressCommand;
+import com.everhomes.rest.express.ListExpressAddressResponse;
 import com.everhomes.rest.express.ListExpressCompanyCommand;
 import com.everhomes.rest.express.ListExpressCompanyResponse;
 import com.everhomes.rest.express.ListExpressOrderCommand;
 import com.everhomes.rest.express.ListExpressOrderResponse;
+import com.everhomes.rest.express.ListExpressQueryHistoryResponse;
 import com.everhomes.rest.express.ListExpressUserCommand;
 import com.everhomes.rest.express.ListExpressUserResponse;
+import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
+import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
@@ -85,7 +96,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>6.快递订单列表</p>
+	 * <p>6.快递订单列表（后台）</p>
 	 * <b>URL: /express/listExpressOrder</b>
 	 */
 	@RequestMapping("listExpressOrder")
@@ -95,7 +106,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>7.快递订单列表</p>
+	 * <p>7.快递订单详情</p>
 	 * <b>URL: /express/getExpressOrderDetail</b>
 	 */
 	@RequestMapping("getExpressOrderDetail")
@@ -134,6 +145,89 @@ public class ExpressController extends ControllerBase {
 	@RestReturn(CreateOrUpdateExpressAddressResponse.class)
 	public RestResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd){
 		return new RestResponse(expressService.createOrUpdateExpressAddress(cmd));
+	}
+
+	/**
+	 * <p>11.删除地址</p>
+	 * <b>URL: /express/deleteExpressAddress</b>
+	 */
+	@RequestMapping("deleteExpressAddress")
+	@RestReturn(String.class)
+	public RestResponse deleteExpressAddress(DeleteExpressAddressCommand cmd){
+		expressService.deleteExpressAddress(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>12.地址列表</p>
+	 * <b>URL: /express/listExpressAddress</b>
+	 */
+	@RequestMapping("listExpressAddress")
+	@RestReturn(ListExpressAddressResponse.class)
+	public RestResponse listExpressAddress(ListExpressAddressCommand cmd){
+		return new RestResponse(expressService.listExpressAddress(cmd));
+	}
+
+	/**
+	 * <p>13.寄快递</p>
+	 * <b>URL: /express/createExpressOrder</b>
+	 */
+	@RequestMapping("createExpressOrder")
+	@RestReturn(CreateExpressOrderResponse.class)
+	public RestResponse createExpressOrder(CreateExpressOrderCommand cmd){
+		return new RestResponse(expressService.createExpressOrder(cmd));
+	}
+
+	/**
+	 * <p>14.快递订单列表（个人）</p>
+	 * <b>URL: /express/listPersonalExpressOrder</b>
+	 */
+	@RequestMapping("listPersonalExpressOrder")
+	@RestReturn(ListPersonalExpressOrderResponse.class)
+	public RestResponse listPersonalExpressOrder(ListPersonalExpressOrderCommand cmd){
+		return new RestResponse(expressService.listPersonalExpressOrder(cmd));
+	}
+
+	/**
+	 * <p>15.取消订单</p>
+	 * <b>URL: /express/cancelExpressOrder</b>
+	 */
+	@RequestMapping("cancelExpressOrder")
+	@RestReturn(String.class)
+	public RestResponse cancelExpressOrder(CancelExpressOrderCommand cmd){
+		expressService.cancelExpressOrder(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>16.查看物流详情</p>
+	 * <b>URL: /express/getExpressLogisticsDetail</b>
+	 */
+	@RequestMapping("getExpressLogisticsDetail")
+	@RestReturn(GetExpressLogisticsDetailResponse.class)
+	public RestResponse getExpressLogisticsDetail(GetExpressLogisticsDetailCommand cmd){
+		return new RestResponse(expressService.getExpressLogisticsDetail(cmd));
+	}
+
+	/**
+	 * <p>17.查询快递历史列表</p>
+	 * <b>URL: /express/listExpressQueryHistory</b>
+	 */
+	@RequestMapping("listExpressQueryHistory")
+	@RestReturn(ListExpressQueryHistoryResponse.class)
+	public RestResponse listExpressQueryHistory(){
+		return new RestResponse(expressService.listExpressQueryHistory());
+	}
+
+	/**
+	 * <p>18.清空快递查询历史</p>
+	 * <b>URL: /express/clearExpressQueryHistory</b>
+	 */
+	@RequestMapping("clearExpressQueryHistory")
+	@RestReturn(String.class)
+	public RestResponse clearExpressQueryHistory(){
+		expressService.clearExpressQueryHistory();
+		return new RestResponse();
 	}
 
 }

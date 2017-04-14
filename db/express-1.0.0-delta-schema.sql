@@ -98,3 +98,18 @@ CREATE TABLE `eh_express_orders` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 快递查询历史表，add by tt, 20170413
+-- DROP TABLE IF EXISTS `eh_express_query_histories`;
+CREATE TABLE `eh_express_query_histories` (
+  `id` BIGINT NOT NULL,
+  `express_company_id` BIGINT COMMENT 'express company id',
+  `bill_no` VARCHAR(64) COMMENT 'bill number',
+  `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
