@@ -128,6 +128,7 @@ import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
+import com.everhomes.rest.techpark.punch.PunchUserStatus;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
@@ -2207,6 +2208,23 @@ public class PunchServiceImpl implements PunchService {
 		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
 //		PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(member.getTargetId(), startCalendar.getTime());
 		PunchStatistic statistic = new PunchStatistic();
+
+		//对于已离职和未入职的判断
+		statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
+		if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
+			//找不到就是已离职
+			statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
+		}else{
+			//查找是否未入职 --通过log的时间
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),member.getOrganizationId(), OperationType.JOIN.getCode()) ;
+			if (null != memberLogs ){
+				if(memberLogs.get(0).getOperateTime().after( endCalendar.getTime())){
+
+					statistic.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+				}
+			}
+			
+		}
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
 		statistic.setOwnerId(orgId);
@@ -3884,13 +3902,13 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
 				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
-		response.setExtColumns(new ArrayList<>());
-		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
-		if(null != categories){
-			for(ApprovalCategory category : categories){
-				response.getExtColumns().add(category.getCategoryName());
-			}
-		}
+//		response.setExtColumns(new ArrayList<>());
+//		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
+//		if(null != categories){
+//			for(ApprovalCategory category : categories){
+//				response.getExtColumns().add(category.getCategoryName());
+//			}
+//		}
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;

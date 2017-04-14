@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>unPunchCount：未打卡天数</li>
  * <li>blandleCount：迟到且早退天数</li> 
  * <li>exts：附加请假exts {@link com.everhomes.rest.techpark.punch.ExtDTO}</li>
+ * <li>userStatus：用户状态{@link com.everhomes.rest.techpark.punch.PunchUserStatus} </li> 
  * </ul>
  */
 public class PunchCountDTO {
@@ -44,8 +45,7 @@ public class PunchCountDTO {
 	private List<AbsenceTimeDTO> absenceTimeList;
 	@ItemType(ExtDTO.class)
 	private List<ExtDTO> exts;
-	
-	
+	private Byte userStatus;
     public List<AbsenceTimeDTO> getAbsenceTimeList() {
 		return absenceTimeList;
 	}
@@ -164,5 +164,11 @@ public class PunchCountDTO {
 	}
 	public void setExts(List<ExtDTO> exts) {
 		this.exts = exts;
+	}
+	public Byte getUserStatus() {
+		return userStatus;
+	}
+	public void setUserStatus(Byte userStatus) {
+		this.userStatus = userStatus;
 	}
 }
