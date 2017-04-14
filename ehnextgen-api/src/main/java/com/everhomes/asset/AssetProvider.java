@@ -36,4 +36,6 @@ public interface AssetProvider {
     AssetVendor findAssetVendorByOwner(String ownerType,Long ownerId);
 
     List<AssetBill> listUnpaidBills(String tenantType, Long tenantId, Long addressId);
+
+    AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId);
 }

@@ -77,7 +77,7 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                    Long templateVersion, Long organizationId, String dateStr) {
+                    Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
         GetPmKeXingBillCommand command = new GetPmKeXingBillCommand();
         command.setOrganizationId(organizationId);
         command.setDateStr(dateStr);

@@ -119,10 +119,15 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType,
-                    Long templateVersion, Long organizationId, String dateStr) {
+                    Long templateVersion, Long organizationId, String dateStr, Long tenantId, String tenantType, Long addressId) {
         AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+        AssetBill bill = null;
+        if(id != null) {
+            bill = assetProvider.findAssetBill(id, ownerId, ownerType, targetId, targetType);
+        } else {
+            bill = assetProvider.findAssetBill(ownerId, ownerType, targetId, targetType, dateStr, tenantId, tenantType, addressId);
+        }
 
-        AssetBill bill = assetProvider.findAssetBill(id, ownerId, ownerType, targetId, targetType);
 
         if (bill == null) {
             LOGGER.error("cannot find asset bill. bill: id = " + id + ", ownerId = " + ownerId
@@ -139,8 +144,11 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setTargetType(bill.getTargetType());
         dto.setTargetId(bill.getTargetId());
         dto.setTemplateVersion(bill.getTemplateVersion());
+        dto.setTenantId(bill.getTenantId());
+        dto.setTenantType(bill.getTenantType());
+        dto.setAddressId(bill.getAddressId());
 
-        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, templateVersion);
+        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, bill.getTemplateVersion());
         if(templateFields != null && templateFields.size() > 0) {
             List<FieldValueDTO> valueDTOs = new ArrayList<>();
             Field[] fields = EhAssetBills.class.getDeclaredFields();

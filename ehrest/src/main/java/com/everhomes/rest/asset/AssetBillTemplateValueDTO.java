@@ -23,17 +23,19 @@ public class AssetBillTemplateValueDTO {
 
     private Integer namespaceId;
 
-    @NotNull
     private Long ownerId;
 
-    @NotNull
     private String ownerType;
 
-    @NotNull
     private Long targetId;
 
-    @NotNull
     private String targetType;
+
+    private Long tenantId;
+
+    private String tenantType;
+
+    private Long addressId;
 
     private Long templateVersion;
 
@@ -86,6 +88,30 @@ public class AssetBillTemplateValueDTO {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getTenantType() {
+        return tenantType;
+    }
+
+    public void setTenantType(String tenantType) {
+        this.tenantType = tenantType;
     }
 
     public Long getTemplateVersion() {

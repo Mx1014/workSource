@@ -393,4 +393,41 @@ public class AssetProviderImpl implements AssetProvider {
 
         return bills;
     }
+
+    @Override
+    public AssetBill findAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, String dateStr, Long tenantId, String tenantType, Long addressId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+        if(ownerId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        }
+        if(ownerType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+        }
+        if(targetId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
+        }
+        if(targetType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
+        }
+
+        if(tenantId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_ID.eq(tenantId));
+        }
+        if(tenantType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_TYPE.eq(tenantType));
+        }
+
+        if(addressId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
+        }
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findAssetBill, sql=" + query.getSQL());
+            LOGGER.debug("findAssetBill, bindValues=" + query.getBindValues());
+        }
+
+        return query.fetchOneInto(AssetBill.class);
+    }
 }
