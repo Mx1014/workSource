@@ -3902,13 +3902,13 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
 				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
-//		response.setExtColumns(new ArrayList<>());
-//		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
-//		if(null != categories){
-//			for(ApprovalCategory category : categories){
-//				response.getExtColumns().add(category.getCategoryName());
-//			}
-//		}
+		response.setExtColumns(new ArrayList<>());
+		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
+		if(null != categories){
+			for(ApprovalCategory category : categories){
+				response.getExtColumns().add(category.getCategoryName());
+			}
+		}
 		if (null == results)
 			return response;
 		Long nextPageAnchor = null;
