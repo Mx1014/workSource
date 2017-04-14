@@ -138,7 +138,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         dto.setOwnerId(bill.getOwnerId());
         dto.setTargetType(bill.getTargetType());
         dto.setTargetId(bill.getTargetId());
-        dto.setTemplateVersion(templateVersion);
+        dto.setTemplateVersion(bill.getTemplateVersion());
 
         List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(ownerId, ownerType, targetId, targetType, templateVersion);
         if(templateFields != null && templateFields.size() > 0) {
