@@ -1906,7 +1906,8 @@ public class QualityServiceImpl implements QualityService {
 	public void createTaskByStandardId(Long id) {
 		LOGGER.info("createTaskByStandardId:" + id);
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
-		if(standard != null &&standard.getStatus() != null && standard.getStatus() == QualityStandardStatus.ACTIVE.getCode()) {
+		if(standard != null &&standard.getStatus() != null
+				&& QualityStandardStatus.ACTIVE.equals(QualityStandardStatus.fromStatus(standard.getStatus()))) {
 			this.qualityProvider.populateStandardGroups(standard);
 			this.qualityProvider.populateStandardSpecifications(standard);
 			
