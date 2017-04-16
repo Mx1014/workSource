@@ -1,13 +1,16 @@
-SET @eh_core_serverURL = "http://10.1.10.135";
-SET @user_id = 254000; 
-SET @community_id = 240111044331056733; 
-SET @organization_id = 1003855;  	
+SET FOREIGN_KEY_CHECKS = 0;
+SET @eh_core_serverURL = "https://beta.zuolin.com"; -- 取具体环境连接core server的链接
+SET @user_id = 254000;  -- 需要取现网eh_users的ID的最大值再加一定余量
+SET @account_name='275585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
+SET @community_id = 240111044331056733; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @organization_id = 1003855;  	-- 需要取现网已有的物业公司“π星球爱特家”的ID
+SET @pi_community_id=240111044331053633; -- 需要取现网已有小区“π星球爱特家”的ID
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
-SET @feedback_forum_id = 188410; 
-SET @community_forum_id = 188400;
-SET @building_id = 182900;
-SET @shi_id = 14990; 
-SET @qu_id = 16150; 
+SET @feedback_forum_id = 188410;   -- 取eh_forums的ID最大值再加一定余量
+SET @community_forum_id = 188400;   -- 取eh_forums的ID最大值再加一定余量
+SET @building_id = 182900;   -- 取eh_buildings的ID最大值再加一定余量
+SET @shi_id = 14990;  -- 需要取现网已有城市“沈阳市”的ID
+SET @qu_id = 16150;    -- 取eh_regions的ID最大值再加一定余量
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
 SET @org_member_id = (SELECT MAX(id) FROM `eh_organization_members`); 
 SET @role_assignment_id = (SELECT MAX(id) FROM `eh_acl_role_assignments`); 
@@ -15,7 +18,6 @@ SET @user_identifier_id = (SELECT max(id) FROM `eh_user_identifiers`);
 SET @organization_address_mapping_id = (SELECT max(id) FROM `eh_organization_address_mappings`);
    
 
-UPDATE `eh_communities` SET `default_forum_id` = @community_forum_id, `feedback_forum_id` = @feedback_forum_id WHERE `id` = 240111044331053633;
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
 	VALUES (@qu_id, @shi_id, '浑南新区', 'HUNNANXINQU', 'HNXQ', '/辽宁/沈阳市/浑南新区', '3', '3', NULL, '024', '2', '0', '999988');
@@ -24,27 +26,97 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 	VALUES(@community_forum_id, UUID(), 999988, 2, 'EhGroups', 0,'π星球爱特家论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(@feedback_forum_id, UUID(), 999988, 2, 'EhGroups', 0,'π星球爱特家反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+UPDATE `eh_communities` SET `default_forum_id` = @community_forum_id, `feedback_forum_id` = @feedback_forum_id WHERE `id` = @pi_community_id;
 
+
+SET @user_id = @user_id + 1;
+SET @account_name = @account_name + 1;
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (@user_id, UUID(), '13889818001', '高秀真', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
-
+	VALUES (@user_id, UUID(), @account_name, '高秀真', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13889818001',  '221616',  3, UTC_TIMESTAMP(), 999988);
-	
-DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
+-- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
 	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '高秀真', 0, '13889818001', 3, 999988);	
-
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-	
 
+
+SET @user_id = @user_id + 1;
+SET @account_name = @account_name + 1;
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
+	VALUES (@user_id, UUID(), @account_name, '吴斌', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
+	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13840511693',  '221616',  3, UTC_TIMESTAMP(), 999988);
+-- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '吴斌', 0, '13840511693', 3, 999988);	
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
+
+	
+SET @user_id = @user_id + 1;
+SET @account_name = @account_name + 1;
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
+	VALUES (@user_id, UUID(), @account_name, '李政卿', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
+	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '15041389655',  '221616',  3, UTC_TIMESTAMP(), 999988);
+-- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '李政卿', 0, '15041389655', 3, 999988);	
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
+
+	
+SET @user_id = @user_id + 1; 
+SET @account_name = @account_name + 1;
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
+	VALUES (@user_id, UUID(), @account_name, '杜海然', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
+	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '18640333968',  '221616',  3, UTC_TIMESTAMP(), 999988);
+-- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '杜海然', 0, '18640333968', 3, 999988);	
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
+
+	
+SET @user_id = @user_id + 1; 
+SET @account_name = @account_name + 1;
+INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
+	VALUES (@user_id, UUID(), @account_name, '李雪莲', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
+	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13998192428',  '221616',  3, UTC_TIMESTAMP(), 999988);
+-- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '李雪莲', 0, '13998192428', 3, 999988);	
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
+
+	
+	
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾A', '伊丽雅特湾A', '浑南新区临波路10号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
+	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾', '', '浑南新区临波路10号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.744067, 123.449025, 'wxrv3pkbff0g');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id);
+	
+
+-- INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+-- 	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾C', '伊丽雅特湾C', '浑南新区临波路11号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
+-- INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+-- 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.743291, 123.447481, 'wxrv3p5sqc3q');
+-- INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+-- 	VALUES(@organization_id, @community_id);
+
+-- INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+-- 	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾B', '伊丽雅特湾B', '浑南区临波路15号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
+-- INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+-- 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.742897, 123.450538, 'wxrv3pjcypbz');
+-- INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+-- 	VALUES(@organization_id, @community_id);
+	
 	
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'A1', '伊丽雅特湾A1号楼', 0, '', '浑南新区临波路10号伊丽雅特湾A1号楼', NULL, 41.744067, 123.449025, 'wxrv3pkbff0g', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'A2', '伊丽雅特湾A2号楼', 0, '', '浑南新区临波路10号伊丽雅特湾A2号楼', NULL, 41.744067, 123.449025, 'wxrv3pkbff0g', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
@@ -96,6 +168,38 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'A48', '伊丽雅特湾A48号楼', 0, '', '浑南新区临波路10号伊丽雅特湾A48号楼', NULL, 41.744067, 123.449025, 'wxrv3pkbff0g', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'A49', '伊丽雅特湾A49号楼', 0, '', '浑南新区临波路10号伊丽雅特湾A49号楼', NULL, 41.744067, 123.449025, 'wxrv3pkbff0g', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'A50', '伊丽雅特湾A50号楼', 0, '', '浑南新区临波路10号伊丽雅特湾A50号楼', NULL, 41.744067, 123.449025, 'wxrv3pkbff0g', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B1', '伊丽雅特湾B1号楼', 0, '', '浑南区临波路15-1号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B2', '伊丽雅特湾B2号楼', 0, '', '浑南区临波路15-2号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B3', '伊丽雅特湾B3号楼', 0, '', '浑南区临波路15-3号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B4', '伊丽雅特湾B4号楼', 0, '', '浑南区临波路15-4号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B5', '伊丽雅特湾B5号楼', 0, '', '浑南区临波路15-5号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B6', '伊丽雅特湾B6号楼', 0, '', '浑南区临波路15-6号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B7', '伊丽雅特湾B7号楼', 0, '', '浑南区临波路15-7号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B8', '伊丽雅特湾B8号楼', 0, '', '浑南区临波路15-8号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B9', '伊丽雅特湾B9号楼', 0, '', '浑南区临波路15-9号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B10', '伊丽雅特湾B10号楼', 0, '', '浑南区临波路15-10号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B11', '伊丽雅特湾B11号楼', 0, '', '浑南区临波路15-11号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B12', '伊丽雅特湾B12号楼', 0, '', '浑南区临波路15-12号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B13', '伊丽雅特湾B13号楼', 0, '', '浑南区临波路15-13号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B14', '伊丽雅特湾B14号楼', 0, '', '浑南区临波路15-14号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B15', '伊丽雅特湾B15号楼', 0, '', '浑南区临波路15-15号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B16', '伊丽雅特湾B16号楼', 0, '', '浑南区临波路15-16号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B17', '伊丽雅特湾B17号楼', 0, '', '浑南区临波路15-17号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B18', '伊丽雅特湾B18号楼', 0, '', '浑南区临波路15-18号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B19', '伊丽雅特湾B19号楼', 0, '', '浑南区临波路15-19号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B20', '伊丽雅特湾B20号楼', 0, '', '浑南区临波路15-20号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+
+	
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C1', '伊丽雅特湾C1号楼', 0, '', '浑南新区临波路11-1号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C2', '伊丽雅特湾C2号楼', 0, '', '浑南新区临波路11-2号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C3', '伊丽雅特湾C3号楼', 0, '', '浑南新区临波路11-3号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C4', '伊丽雅特湾C4号楼', 0, '', '浑南新区临波路11-4号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C5', '伊丽雅特湾C5号楼', 0, '', '浑南新区临波路11-5号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C6', '伊丽雅特湾C6号楼', 0, '', '浑南新区临波路11-6号楼', NULL, 123.447481, 41.743291, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+
+
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387157510,UUID(),@community_id, @shi_id, '沈阳市',  @qu_id, '浑南新区' ,'A1-1-1/2-1','A1','1-1/2-1','2','0',UTC_TIMESTAMP(), 999988);
@@ -2829,49 +2933,6 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 
 
-SET @community_id = @community_id + 1; 
-SET @user_id = @user_id + 1; 
-
-INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (@user_id, UUID(), '15041389655', '李政卿', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
-
-INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '15041389655',  '221616',  3, UTC_TIMESTAMP(), 999988);
-	
-DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '李政卿', 0, '15041389655', 3, 999988);	
-
-INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-
-INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾B', '伊丽雅特湾B', '浑南区临波路15号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
-INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.742897, 123.450538, 'wxrv3pjcypbz');
-INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(@organization_id, @community_id);
-	
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B1', '伊丽雅特湾B1号楼', 0, '', '浑南区临波路15-1号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B2', '伊丽雅特湾B2号楼', 0, '', '浑南区临波路15-2号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B3', '伊丽雅特湾B3号楼', 0, '', '浑南区临波路15-3号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B4', '伊丽雅特湾B4号楼', 0, '', '浑南区临波路15-4号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B5', '伊丽雅特湾B5号楼', 0, '', '浑南区临波路15-5号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B6', '伊丽雅特湾B6号楼', 0, '', '浑南区临波路15-6号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B7', '伊丽雅特湾B7号楼', 0, '', '浑南区临波路15-7号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B8', '伊丽雅特湾B8号楼', 0, '', '浑南区临波路15-8号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B9', '伊丽雅特湾B9号楼', 0, '', '浑南区临波路15-9号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B10', '伊丽雅特湾B10号楼', 0, '', '浑南区临波路15-10号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B11', '伊丽雅特湾B11号楼', 0, '', '浑南区临波路15-11号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B12', '伊丽雅特湾B12号楼', 0, '', '浑南区临波路15-12号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B13', '伊丽雅特湾B13号楼', 0, '', '浑南区临波路15-13号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B14', '伊丽雅特湾B14号楼', 0, '', '浑南区临波路15-14号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B15', '伊丽雅特湾B15号楼', 0, '', '浑南区临波路15-15号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B16', '伊丽雅特湾B16号楼', 0, '', '浑南区临波路15-16号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B17', '伊丽雅特湾B17号楼', 0, '', '浑南区临波路15-17号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B18', '伊丽雅特湾B18号楼', 0, '', '浑南区临波路15-18号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B19', '伊丽雅特湾B19号楼', 0, '', '浑南区临波路15-19号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'B20', '伊丽雅特湾B20号楼', 0, '', '浑南区临波路15-20号楼', NULL, 41.742897, 123.450538, 'wxrv3pjcypbz', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387148193,UUID(),@community_id, @shi_id, '沈阳市',  @qu_id, '浑南新区' ,'B1-1-1-1','B1','1-1-1','2','0',UTC_TIMESTAMP(), 999988);
@@ -4714,1879 +4775,1847 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387149112,UUID(),@community_id, @shi_id, '沈阳市',  @qu_id, '浑南新区' ,'B22-D10','B22','D10','2','0',UTC_TIMESTAMP(), 999988);
 
+SET @organization_address_mapping_id = (SELECT max(id) FROM `eh_organization_address_mappings`);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148193, 'B1-1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148193, 'B1-1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148194, 'B1-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148194, 'B1-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148195, 'B1-1-2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148195, 'B1-1-2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148196, 'B1-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148196, 'B1-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148197, 'B1-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148197, 'B1-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148198, 'B1-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148198, 'B1-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148199, 'B1-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148199, 'B1-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148200, 'B1-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148200, 'B1-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148201, 'B1-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148201, 'B1-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148202, 'B1-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148202, 'B1-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148203, 'B1-1-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148203, 'B1-1-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148204, 'B1-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148204, 'B1-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148205, 'B1-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148205, 'B1-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148206, 'B1-1-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148206, 'B1-1-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148207, 'B1-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148207, 'B1-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148208, 'B1-2-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148208, 'B1-2-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148209, 'B1-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148209, 'B1-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148210, 'B1-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148210, 'B1-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148211, 'B1-2-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148211, 'B1-2-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148212, 'B1-2-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148212, 'B1-2-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148213, 'B1-2-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148213, 'B1-2-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148214, 'B1-2-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148214, 'B1-2-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148215, 'B1-2-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148215, 'B1-2-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148216, 'B1-2-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148216, 'B1-2-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148217, 'B1-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148217, 'B1-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148218, 'B1-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148218, 'B1-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148219, 'B1-3-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148219, 'B1-3-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148220, 'B1-3-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148220, 'B1-3-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148221, 'B1-3-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148221, 'B1-3-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148222, 'B1-3-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148222, 'B1-3-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148223, 'B1-3-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148223, 'B1-3-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148224, 'B1-3-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148224, 'B1-3-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148225, 'B1-3-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148225, 'B1-3-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148226, 'B1-3-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148226, 'B1-3-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148227, 'B1-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148227, 'B1-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148228, 'B1-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148228, 'B1-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148229, 'B1-4-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148229, 'B1-4-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148230, 'B1-4-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148230, 'B1-4-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148231, 'B1-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148231, 'B1-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148232, 'B1-4-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148232, 'B1-4-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148233, 'B1-4-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148233, 'B1-4-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148234, 'B1-4-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148234, 'B1-4-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148235, 'B1-4-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148235, 'B1-4-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148236, 'B1-4-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148236, 'B1-4-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148237, 'B2-1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148237, 'B2-1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148238, 'B2-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148238, 'B2-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148239, 'B2-1-2/3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148239, 'B2-1-2/3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148240, 'B2-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148240, 'B2-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148241, 'B2-1-4/5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148241, 'B2-1-4/5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148242, 'B2-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148242, 'B2-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148243, 'B2-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148243, 'B2-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148244, 'B2-2-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148244, 'B2-2-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148245, 'B2-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148245, 'B2-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148246, 'B2-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148246, 'B2-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148247, 'B2-4-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148247, 'B2-4-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148248, 'B2-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148248, 'B2-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148249, 'B2-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148249, 'B2-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148250, 'B2-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148250, 'B2-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148251, 'B2-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148251, 'B2-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148252, 'B2-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148252, 'B2-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148253, 'B2-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148253, 'B2-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148254, 'B2-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148254, 'B2-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148255, 'B2-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148255, 'B2-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148256, 'B2-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148256, 'B2-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148257, 'B2-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148257, 'B2-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148258, 'B2-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148258, 'B2-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148259, 'B2-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148259, 'B2-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148260, 'B2-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148260, 'B2-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148261, 'B3-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148261, 'B3-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148262, 'B3-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148262, 'B3-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148263, 'B3-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148263, 'B3-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148264, 'B3-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148264, 'B3-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148265, 'B3-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148265, 'B3-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148266, 'B3-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148266, 'B3-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148267, 'B3-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148267, 'B3-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148268, 'B3-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148268, 'B3-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148269, 'B3-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148269, 'B3-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148270, 'B3-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148270, 'B3-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148271, 'B3-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148271, 'B3-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148272, 'B3-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148272, 'B3-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148273, 'B3-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148273, 'B3-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148274, 'B3-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148274, 'B3-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148275, 'B3-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148275, 'B3-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148276, 'B3-3-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148276, 'B3-3-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148277, 'B3-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148277, 'B3-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148278, 'B3-3-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148278, 'B3-3-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148279, 'B4-1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148279, 'B4-1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148280, 'B4-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148280, 'B4-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148281, 'B4-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148281, 'B4-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148282, 'B4-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148282, 'B4-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148283, 'B4-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148283, 'B4-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148284, 'B4-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148284, 'B4-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148285, 'B4-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148285, 'B4-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148286, 'B4-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148286, 'B4-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148287, 'B4-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148287, 'B4-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148288, 'B4-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148288, 'B4-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148289, 'B4-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148289, 'B4-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148290, 'B4-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148290, 'B4-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148291, 'B4-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148291, 'B4-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148292, 'B4-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148292, 'B4-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148293, 'B4-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148293, 'B4-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148294, 'B4-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148294, 'B4-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148295, 'B4-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148295, 'B4-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148296, 'B4-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148296, 'B4-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148297, 'B4-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148297, 'B4-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148298, 'B4-4-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148298, 'B4-4-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148299, 'B4-4-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148299, 'B4-4-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148300, 'B4-4-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148300, 'B4-4-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148301, 'B4-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148301, 'B4-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148302, 'B4-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148302, 'B4-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148303, 'B5-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148303, 'B5-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148304, 'B5-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148304, 'B5-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148305, 'B5-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148305, 'B5-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148306, 'B5-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148306, 'B5-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148307, 'B5-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148307, 'B5-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148308, 'B5-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148308, 'B5-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148309, 'B5-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148309, 'B5-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148310, 'B5-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148310, 'B5-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148311, 'B5-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148311, 'B5-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148312, 'B5-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148312, 'B5-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148313, 'B5-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148313, 'B5-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148314, 'B5-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148314, 'B5-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148315, 'B5-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148315, 'B5-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148316, 'B5-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148316, 'B5-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148317, 'B5-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148317, 'B5-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148318, 'B5-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148318, 'B5-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148319, 'B5-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148319, 'B5-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148320, 'B5-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148320, 'B5-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148321, 'B5-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148321, 'B5-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148322, 'B5-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148322, 'B5-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148323, 'B5-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148323, 'B5-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148324, 'B5-4-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148324, 'B5-4-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148325, 'B5-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148325, 'B5-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148326, 'B5-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148326, 'B5-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148327, 'B6-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148327, 'B6-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148328, 'B6-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148328, 'B6-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148329, 'B6-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148329, 'B6-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148330, 'B6-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148330, 'B6-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148331, 'B6-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148331, 'B6-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148332, 'B6-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148332, 'B6-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148333, 'B6-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148333, 'B6-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148334, 'B6-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148334, 'B6-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148335, 'B6-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148335, 'B6-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148336, 'B6-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148336, 'B6-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148337, 'B6-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148337, 'B6-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148338, 'B6-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148338, 'B6-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148339, 'B6-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148339, 'B6-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148340, 'B6-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148340, 'B6-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148341, 'B6-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148341, 'B6-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148342, 'B6-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148342, 'B6-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148343, 'B6-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148343, 'B6-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148344, 'B6-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148344, 'B6-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148345, 'B7-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148345, 'B7-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148346, 'B7-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148346, 'B7-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148347, 'B7-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148347, 'B7-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148348, 'B7-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148348, 'B7-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148349, 'B7-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148349, 'B7-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148350, 'B7-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148350, 'B7-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148351, 'B7-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148351, 'B7-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148352, 'B7-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148352, 'B7-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148353, 'B7-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148353, 'B7-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148354, 'B7-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148354, 'B7-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148355, 'B7-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148355, 'B7-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148356, 'B7-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148356, 'B7-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148357, 'B7-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148357, 'B7-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148358, 'B7-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148358, 'B7-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148359, 'B7-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148359, 'B7-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148360, 'B7-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148360, 'B7-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148361, 'B7-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148361, 'B7-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148362, 'B7-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148362, 'B7-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148363, 'B7-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148363, 'B7-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148364, 'B7-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148364, 'B7-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148365, 'B7-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148365, 'B7-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148366, 'B7-4-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148366, 'B7-4-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148367, 'B7-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148367, 'B7-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148368, 'B7-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148368, 'B7-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148369, 'B8- 1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148369, 'B8- 1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148370, 'B8-1-2/3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148370, 'B8-1-2/3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148371, 'B8-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148371, 'B8-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148372, 'B8-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148372, 'B8-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148373, 'B8-1-4/5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148373, 'B8-1-4/5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148374, 'B8-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148374, 'B8-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148375, 'B8-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148375, 'B8-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148376, 'B8-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148376, 'B8-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148377, 'B8-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148377, 'B8-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148378, 'B8-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148378, 'B8-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148379, 'B8-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148379, 'B8-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148380, 'B8-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148380, 'B8-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148381, 'B8-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148381, 'B8-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148382, 'B8-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148382, 'B8-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148383, 'B8-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148383, 'B8-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148384, 'B8-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148384, 'B8-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148385, 'B8-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148385, 'B8-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148386, 'B8-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148386, 'B8-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148387, 'B9-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148387, 'B9-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148388, 'B9-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148388, 'B9-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148389, 'B9-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148389, 'B9-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148390, 'B9-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148390, 'B9-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148391, 'B9-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148391, 'B9-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148392, 'B9-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148392, 'B9-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148393, 'B9-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148393, 'B9-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148394, 'B9-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148394, 'B9-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148395, 'B9-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148395, 'B9-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148396, 'B9-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148396, 'B9-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148397, 'B9-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148397, 'B9-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148398, 'B9-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148398, 'B9-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148399, 'B9-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148399, 'B9-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148400, 'B9-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148400, 'B9-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148401, 'B9-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148401, 'B9-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148402, 'B9-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148402, 'B9-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148403, 'B9-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148403, 'B9-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148404, 'B9-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148404, 'B9-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148405, 'B10-1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148405, 'B10-1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148406, 'B10-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148406, 'B10-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148407, 'B10-1-2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148407, 'B10-1-2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148408, 'B10-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148408, 'B10-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148409, 'B10-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148409, 'B10-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148410, 'B10-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148410, 'B10-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148411, 'B10-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148411, 'B10-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148412, 'B10-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148412, 'B10-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148413, 'B10-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148413, 'B10-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148414, 'B10-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148414, 'B10-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148415, 'B10-1-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148415, 'B10-1-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148416, 'B10-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148416, 'B10-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148417, 'B10-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148417, 'B10-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148418, 'B10-1-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148418, 'B10-1-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148419, 'B10-1-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148419, 'B10-1-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148420, 'B10-1-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148420, 'B10-1-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148421, 'B10-1-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148421, 'B10-1-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148422, 'B10-2-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148422, 'B10-2-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148423, 'B10-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148423, 'B10-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148424, 'B10-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148424, 'B10-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148425, 'B10-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148425, 'B10-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148426, 'B10-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148426, 'B10-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148427, 'B10-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148427, 'B10-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148428, 'B10-2-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148428, 'B10-2-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148429, 'B10-2-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148429, 'B10-2-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148430, 'B10-2-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148430, 'B10-2-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148431, 'B10-2-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148431, 'B10-2-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148432, 'B10-2-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148432, 'B10-2-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148433, 'B10-2-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148433, 'B10-2-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148434, 'B10-3-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148434, 'B10-3-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148435, 'B10-3-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148435, 'B10-3-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148436, 'B10-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148436, 'B10-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148437, 'B10-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148437, 'B10-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148438, 'B10-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148438, 'B10-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148439, 'B10-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148439, 'B10-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148440, 'B10-3-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148440, 'B10-3-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148441, 'B10-3-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148441, 'B10-3-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148442, 'B10-3-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148442, 'B10-3-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148443, 'B10-3-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148443, 'B10-3-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148444, 'B10-3-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148444, 'B10-3-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148445, 'B10-3-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148445, 'B10-3-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148446, 'B10-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148446, 'B10-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148447, 'B10-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148447, 'B10-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148448, 'B10-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148448, 'B10-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148449, 'B10-4-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148449, 'B10-4-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148450, 'B10-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148450, 'B10-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148451, 'B10-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148451, 'B10-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148452, 'B10-4-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148452, 'B10-4-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148453, 'B10-4-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148453, 'B10-4-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148454, 'B10-4-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148454, 'B10-4-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148455, 'B10-4-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148455, 'B10-4-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148456, 'B10-4-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148456, 'B10-4-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148457, 'B10-4-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148457, 'B10-4-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148458, 'B10-5-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148458, 'B10-5-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148459, 'B10-5-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148459, 'B10-5-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148460, 'B10-5-2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148460, 'B10-5-2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148461, 'B10-5-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148461, 'B10-5-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148462, 'B10-5-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148462, 'B10-5-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148463, 'B10-5-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148463, 'B10-5-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148464, 'B10-5-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148464, 'B10-5-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148465, 'B10-5-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148465, 'B10-5-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148466, 'B10-5-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148466, 'B10-5-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148467, 'B10-5-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148467, 'B10-5-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148468, 'B10-5-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148468, 'B10-5-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148469, 'B10-5-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148469, 'B10-5-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148470, 'B10-5-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148470, 'B10-5-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148471, 'B10-5-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148471, 'B10-5-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148472, 'B10-5-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148472, 'B10-5-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148473, 'B10-5-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148473, 'B10-5-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148474, 'B10-5-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148474, 'B10-5-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148475, 'B11-1-1-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148475, 'B11-1-1-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148476, 'B11-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148476, 'B11-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148477, 'B11-1-2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148477, 'B11-1-2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148478, 'B11-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148478, 'B11-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148479, 'B11-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148479, 'B11-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148480, 'B11-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148480, 'B11-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148481, 'B11-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148481, 'B11-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148482, 'B11-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148482, 'B11-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148483, 'B11-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148483, 'B11-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148484, 'B11-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148484, 'B11-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148485, 'B11-1-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148485, 'B11-1-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148486, 'B11-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148486, 'B11-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148487, 'B11-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148487, 'B11-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148488, 'B11-1-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148488, 'B11-1-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148489, 'B11-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148489, 'B11-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148490, 'B11-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148490, 'B11-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148491, 'B11-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148491, 'B11-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148492, 'B11-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148492, 'B11-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148493, 'B11-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148493, 'B11-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148494, 'B11-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148494, 'B11-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148495, 'B11-2-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148495, 'B11-2-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148496, 'B11-2-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148496, 'B11-2-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148497, 'B11-2-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148497, 'B11-2-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148498, 'B11-2-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148498, 'B11-2-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148499, 'B11-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148499, 'B11-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148500, 'B11-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148500, 'B11-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148501, 'B11-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148501, 'B11-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148502, 'B11-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148502, 'B11-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148503, 'B11-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148503, 'B11-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148504, 'B11-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148504, 'B11-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148505, 'B11-3-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148505, 'B11-3-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148506, 'B11-3-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148506, 'B11-3-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148507, 'B11-3-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148507, 'B11-3-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148508, 'B11-3-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148508, 'B11-3-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148509, 'B12-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148509, 'B12-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148510, 'B12-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148510, 'B12-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148511, 'B12-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148511, 'B12-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148512, 'B12-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148512, 'B12-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148513, 'B12-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148513, 'B12-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148514, 'B12-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148514, 'B12-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148515, 'B12-1-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148515, 'B12-1-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148516, 'B12-1-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148516, 'B12-1-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148517, 'B12-1-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148517, 'B12-1-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148518, 'B12-1-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148518, 'B12-1-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148519, 'B12-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148519, 'B12-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148520, 'B12-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148520, 'B12-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148521, 'B12-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148521, 'B12-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148522, 'B12-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148522, 'B12-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148523, 'B12-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148523, 'B12-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148524, 'B12-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148524, 'B12-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148525, 'B12-2-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148525, 'B12-2-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148526, 'B12-2-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148526, 'B12-2-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148527, 'B12-2-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148527, 'B12-2-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148528, 'B12-2-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148528, 'B12-2-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148529, 'B12-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148529, 'B12-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148530, 'B12-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148530, 'B12-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148531, 'B12-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148531, 'B12-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148532, 'B12-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148532, 'B12-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148533, 'B12-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148533, 'B12-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148534, 'B12-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148534, 'B12-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148535, 'B12-3-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148535, 'B12-3-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148536, 'B12-3-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148536, 'B12-3-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148537, 'B12-3-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148537, 'B12-3-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148538, 'B12-3-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148538, 'B12-3-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148539, 'B12-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148539, 'B12-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148540, 'B12-4-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148540, 'B12-4-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148541, 'B12-4-2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148541, 'B12-4-2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148542, 'B12-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148542, 'B12-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148543, 'B12-4-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148543, 'B12-4-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148544, 'B12-4-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148544, 'B12-4-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148545, 'B12-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148545, 'B12-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148546, 'B12-4-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148546, 'B12-4-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148547, 'B12-4-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148547, 'B12-4-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148548, 'B12-4-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148548, 'B12-4-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148549, 'B12-4-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148549, 'B12-4-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148550, 'B12-4-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148550, 'B12-4-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148551, 'B12-4-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148551, 'B12-4-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148552, 'B12-4-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148552, 'B12-4-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148553, 'B13-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148553, 'B13-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148554, 'B13-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148554, 'B13-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148555, 'B13-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148555, 'B13-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148556, 'B13-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148556, 'B13-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148557, 'B13-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148557, 'B13-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148558, 'B13-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148558, 'B13-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148559, 'B13-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148559, 'B13-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148560, 'B13-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148560, 'B13-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148561, 'B13-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148561, 'B13-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148562, 'B13-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148562, 'B13-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148563, 'B13-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148563, 'B13-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148564, 'B13-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148564, 'B13-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148565, 'B13-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148565, 'B13-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148566, 'B13-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148566, 'B13-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148567, 'B13-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148567, 'B13-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148568, 'B13-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148568, 'B13-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148569, 'B13-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148569, 'B13-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148570, 'B13-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148570, 'B13-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148571, 'B13-4-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148571, 'B13-4-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148572, 'B13-4-2/3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148572, 'B13-4-2/3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148573, 'B13-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148573, 'B13-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148574, 'B13-4-4/5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148574, 'B13-4-4/5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148575, 'B13-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148575, 'B13-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148576, 'B13-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148576, 'B13-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148577, 'B14-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148577, 'B14-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148578, 'B14-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148578, 'B14-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148579, 'B14-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148579, 'B14-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148580, 'B14-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148580, 'B14-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148581, 'B14-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148581, 'B14-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148582, 'B14-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148582, 'B14-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148583, 'B14-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148583, 'B14-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148584, 'B14-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148584, 'B14-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148585, 'B14-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148585, 'B14-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148586, 'B14-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148586, 'B14-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148587, 'B14-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148587, 'B14-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148588, 'B14-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148588, 'B14-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148589, 'B14-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148589, 'B14-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148590, 'B14-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148590, 'B14-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148591, 'B14-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148591, 'B14-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148592, 'B14-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148592, 'B14-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148593, 'B14-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148593, 'B14-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148594, 'B14-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148594, 'B14-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148595, 'B14-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148595, 'B14-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148596, 'B14-4-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148596, 'B14-4-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148597, 'B14-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148597, 'B14-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148598, 'B14-4-2/3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148598, 'B14-4-2/3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148599, 'B14-4-4/5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148599, 'B14-4-4/5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148600, 'B14-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148600, 'B14-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148601, 'B15-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148601, 'B15-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148602, 'B15-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148602, 'B15-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148603, 'B15-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148603, 'B15-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148604, 'B15-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148604, 'B15-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148605, 'B15-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148605, 'B15-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148606, 'B15-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148606, 'B15-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148607, 'B15-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148607, 'B15-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148608, 'B15-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148608, 'B15-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148609, 'B15-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148609, 'B15-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148610, 'B15-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148610, 'B15-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148611, 'B15-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148611, 'B15-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148612, 'B15-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148612, 'B15-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148613, 'B15-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148613, 'B15-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148614, 'B15-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148614, 'B15-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148615, 'B15-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148615, 'B15-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148616, 'B15-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148616, 'B15-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148617, 'B15-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148617, 'B15-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148618, 'B15-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148618, 'B15-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148619, 'B15-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148619, 'B15-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148620, 'B15-4-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148620, 'B15-4-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148621, 'B15-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148621, 'B15-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148622, 'B15-4-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148622, 'B15-4-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148623, 'B15-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148623, 'B15-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148624, 'B15-4-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148624, 'B15-4-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148625, 'B15-5-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148625, 'B15-5-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148626, 'B15-5-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148626, 'B15-5-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148627, 'B15-5-2/3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148627, 'B15-5-2/3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148628, 'B15-5-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148628, 'B15-5-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148629, 'B15-5-4/5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148629, 'B15-5-4/5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148630, 'B15-5-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148630, 'B15-5-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148631, 'B16-1-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148631, 'B16-1-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148632, 'B16-1-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148632, 'B16-1-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148633, 'B16-1-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148633, 'B16-1-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148634, 'B16-1-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148634, 'B16-1-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148635, 'B16-1-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148635, 'B16-1-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148636, 'B16-1-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148636, 'B16-1-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148637, 'B16-1-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148637, 'B16-1-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148638, 'B16-1-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148638, 'B16-1-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148639, 'B16-1-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148639, 'B16-1-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148640, 'B16-1-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148640, 'B16-1-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148641, 'B16-1-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148641, 'B16-1-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148642, 'B16-1-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148642, 'B16-1-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148643, 'B16-2-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148643, 'B16-2-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148644, 'B16-2-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148644, 'B16-2-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148645, 'B16-2-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148645, 'B16-2-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148646, 'B16-2-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148646, 'B16-2-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148647, 'B16-2-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148647, 'B16-2-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148648, 'B16-2-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148648, 'B16-2-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148649, 'B16-2-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148649, 'B16-2-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148650, 'B16-2-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148650, 'B16-2-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148651, 'B16-2-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148651, 'B16-2-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148652, 'B16-2-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148652, 'B16-2-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148653, 'B16-2-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148653, 'B16-2-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148654, 'B16-2-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148654, 'B16-2-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148655, 'B16-3-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148655, 'B16-3-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148656, 'B16-3-1/2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148656, 'B16-3-1/2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148657, 'B16-3-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148657, 'B16-3-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148658, 'B16-3-3/4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148658, 'B16-3-3/4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148659, 'B16-3-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148659, 'B16-3-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148660, 'B16-3-5/6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148660, 'B16-3-5/6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148661, 'B16-3-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148661, 'B16-3-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148662, 'B16-3-7/8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148662, 'B16-3-7/8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148663, 'B16-3-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148663, 'B16-3-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148664, 'B16-3-9/10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148664, 'B16-3-9/10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148665, 'B16-3-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148665, 'B16-3-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148666, 'B16-3-11/12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148666, 'B16-3-11/12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148667, 'B16-4-1/2-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148667, 'B16-4-1/2-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148668, 'B16-4-1-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148668, 'B16-4-1-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148669, 'B16-4-2-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148669, 'B16-4-2-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148670, 'B16-4-3/4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148670, 'B16-4-3/4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148671, 'B16-4-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148671, 'B16-4-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148672, 'B16-4-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148672, 'B16-4-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148673, 'B16-4-5/6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148673, 'B16-4-5/6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148674, 'B16-4-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148674, 'B16-4-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148675, 'B16-4-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148675, 'B16-4-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148676, 'B16-4-7/8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148676, 'B16-4-7/8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148677, 'B16-4-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148677, 'B16-4-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148678, 'B16-4-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148678, 'B16-4-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148679, 'B16-4-9/10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148679, 'B16-4-9/10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148680, 'B16-4-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148680, 'B16-4-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148681, 'B16-4-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148681, 'B16-4-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148682, 'B16-4-11/12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148682, 'B16-4-11/12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148683, 'B16-4-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148683, 'B16-4-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148684, 'B17-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148684, 'B17-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148685, 'B17-1-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148685, 'B17-1-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148686, 'B17-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148686, 'B17-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148687, 'B17-1-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148687, 'B17-1-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148688, 'B17-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148688, 'B17-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148689, 'B17-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148689, 'B17-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148690, 'B17-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148690, 'B17-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148691, 'B17-1-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148691, 'B17-1-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148692, 'B17-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148692, 'B17-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148693, 'B17-1-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148693, 'B17-1-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148694, 'B17-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148694, 'B17-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148695, 'B17-1-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148695, 'B17-1-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148696, 'B17-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148696, 'B17-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148697, 'B17-1-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148697, 'B17-1-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148698, 'B17-1-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148698, 'B17-1-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148699, 'B17-1-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148699, 'B17-1-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148700, 'B17-1-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148700, 'B17-1-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148701, 'B17-1-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148701, 'B17-1-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148702, 'B17-1-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148702, 'B17-1-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148703, 'B17-1-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148703, 'B17-1-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148704, 'B17-1-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148704, 'B17-1-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148705, 'B17-1-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148705, 'B17-1-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148706, 'B17-2-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148706, 'B17-2-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148707, 'B17-2-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148707, 'B17-2-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148708, 'B17-2-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148708, 'B17-2-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148709, 'B17-2-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148709, 'B17-2-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148710, 'B17-2-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148710, 'B17-2-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148711, 'B17-2-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148711, 'B17-2-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148712, 'B17-2-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148712, 'B17-2-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148713, 'B17-2-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148713, 'B17-2-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148714, 'B17-2-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148714, 'B17-2-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148715, 'B17-2-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148715, 'B17-2-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148716, 'B17-2-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148716, 'B17-2-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148717, 'B17-2-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148717, 'B17-2-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148718, 'B17-2-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148718, 'B17-2-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148719, 'B17-2-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148719, 'B17-2-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148720, 'B17-2-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148720, 'B17-2-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148721, 'B17-2-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148721, 'B17-2-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148722, 'B17-2-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148722, 'B17-2-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148723, 'B17-2-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148723, 'B17-2-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148724, 'B17-2-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148724, 'B17-2-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148725, 'B17-2-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148725, 'B17-2-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148726, 'B17-2-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148726, 'B17-2-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148727, 'B17-2-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148727, 'B17-2-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148728, 'B17-3-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148728, 'B17-3-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148729, 'B17-3-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148729, 'B17-3-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148730, 'B17-3-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148730, 'B17-3-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148731, 'B17-3-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148731, 'B17-3-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148732, 'B17-3-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148732, 'B17-3-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148733, 'B17-3-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148733, 'B17-3-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148734, 'B17-3-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148734, 'B17-3-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148735, 'B17-3-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148735, 'B17-3-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148736, 'B17-3-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148736, 'B17-3-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148737, 'B17-3-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148737, 'B17-3-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148738, 'B17-3-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148738, 'B17-3-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148739, 'B17-3-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148739, 'B17-3-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148740, 'B17-3-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148740, 'B17-3-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148741, 'B17-3-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148741, 'B17-3-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148742, 'B17-3-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148742, 'B17-3-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148743, 'B17-3-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148743, 'B17-3-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148744, 'B17-3-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148744, 'B17-3-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148745, 'B17-3-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148745, 'B17-3-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148746, 'B17-3-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148746, 'B17-3-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148747, 'B17-3-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148747, 'B17-3-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148748, 'B17-3-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148748, 'B17-3-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148749, 'B17-3-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148749, 'B17-3-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148750, 'B17-3-14-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148750, 'B17-3-14-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148751, 'B17-3-14-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148751, 'B17-3-14-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148752, 'B17-3-15-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148752, 'B17-3-15-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148753, 'B17-3-15-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148753, 'B17-3-15-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148754, 'B17-3-16-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148754, 'B17-3-16-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148755, 'B17-3-16-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148755, 'B17-3-16-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148756, 'B17-3-17-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148756, 'B17-3-17-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148757, 'B17-3-17-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148757, 'B17-3-17-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148758, 'B17-3-18-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148758, 'B17-3-18-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148759, 'B17-3-18-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148759, 'B17-3-18-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148760, 'B18-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148760, 'B18-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148761, 'B18-1-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148761, 'B18-1-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148762, 'B18-1-3-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148762, 'B18-1-3-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148763, 'B18-1-3-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148763, 'B18-1-3-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148764, 'B18-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148764, 'B18-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148765, 'B18-1-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148765, 'B18-1-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148766, 'B18-1-4-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148766, 'B18-1-4-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148767, 'B18-1-4-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148767, 'B18-1-4-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148768, 'B18-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148768, 'B18-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148769, 'B18-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148769, 'B18-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148770, 'B18-1-5-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148770, 'B18-1-5-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148771, 'B18-1-5-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148771, 'B18-1-5-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148772, 'B18-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148772, 'B18-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148773, 'B18-1-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148773, 'B18-1-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148774, 'B18-1-6-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148774, 'B18-1-6-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148775, 'B18-1-6-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148775, 'B18-1-6-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148776, 'B18-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148776, 'B18-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148777, 'B18-1-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148777, 'B18-1-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148778, 'B18-1-7-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148778, 'B18-1-7-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148779, 'B18-1-7-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148779, 'B18-1-7-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148780, 'B18-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148780, 'B18-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148781, 'B18-1-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148781, 'B18-1-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148782, 'B18-1-8-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148782, 'B18-1-8-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148783, 'B18-1-8-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148783, 'B18-1-8-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148784, 'B18-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148784, 'B18-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148785, 'B18-1-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148785, 'B18-1-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148786, 'B18-1-9-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148786, 'B18-1-9-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148787, 'B18-1-9-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148787, 'B18-1-9-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148788, 'B18-1-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148788, 'B18-1-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148789, 'B18-1-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148789, 'B18-1-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148790, 'B18-1-10-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148790, 'B18-1-10-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148791, 'B18-1-10-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148791, 'B18-1-10-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148792, 'B18-1-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148792, 'B18-1-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148793, 'B18-1-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148793, 'B18-1-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148794, 'B18-1-11-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148794, 'B18-1-11-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148795, 'B18-1-11-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148795, 'B18-1-11-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148796, 'B18-1-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148796, 'B18-1-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148797, 'B18-1-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148797, 'B18-1-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148798, 'B18-1-12-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148798, 'B18-1-12-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148799, 'B18-1-12-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148799, 'B18-1-12-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148800, 'B18-1-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148800, 'B18-1-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148801, 'B18-1-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148801, 'B18-1-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148802, 'B18-1-13-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148802, 'B18-1-13-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148803, 'B18-1-13-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148803, 'B18-1-13-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148804, 'B18-1-14-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148804, 'B18-1-14-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148805, 'B18-1-14-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148805, 'B18-1-14-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148806, 'B18-1-14-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148806, 'B18-1-14-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148807, 'B18-1-14-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148807, 'B18-1-14-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148808, 'B18-1-15-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148808, 'B18-1-15-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148809, 'B18-1-15-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148809, 'B18-1-15-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148810, 'B18-1-15-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148810, 'B18-1-15-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148811, 'B18-1-15-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148811, 'B18-1-15-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148812, 'B18-1-16-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148812, 'B18-1-16-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148813, 'B18-1-16-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148813, 'B18-1-16-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148814, 'B18-1-16-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148814, 'B18-1-16-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148815, 'B18-1-16-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148815, 'B18-1-16-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148816, 'B18-1-17-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148816, 'B18-1-17-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148817, 'B18-1-17-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148817, 'B18-1-17-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148818, 'B18-1-17-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148818, 'B18-1-17-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148819, 'B18-1-17-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148819, 'B18-1-17-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148820, 'B18-1-18-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148820, 'B18-1-18-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148821, 'B18-1-18-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148821, 'B18-1-18-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148822, 'B18-1-18-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148822, 'B18-1-18-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148823, 'B18-1-18-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148823, 'B18-1-18-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148824, 'B18-1-19-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148824, 'B18-1-19-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148825, 'B18-1-19-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148825, 'B18-1-19-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148826, 'B18-1-19-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148826, 'B18-1-19-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148827, 'B18-1-19-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148827, 'B18-1-19-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148828, 'B18-1-20-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148828, 'B18-1-20-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148829, 'B18-1-20-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148829, 'B18-1-20-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148830, 'B18-1-20-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148830, 'B18-1-20-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148831, 'B18-1-20-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148831, 'B18-1-20-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148832, 'B18-1-21-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148832, 'B18-1-21-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148833, 'B18-1-21-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148833, 'B18-1-21-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148834, 'B18-1-21-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148834, 'B18-1-21-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148835, 'B18-1-21-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148835, 'B18-1-21-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148836, 'B18-1-22-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148836, 'B18-1-22-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148837, 'B18-1-22-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148837, 'B18-1-22-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148838, 'B18-1-22-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148838, 'B18-1-22-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148839, 'B18-1-22-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148839, 'B18-1-22-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148840, 'B18-1-23-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148840, 'B18-1-23-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148841, 'B18-1-23-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148841, 'B18-1-23-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148842, 'B18-1-23-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148842, 'B18-1-23-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148843, 'B18-1-23-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148843, 'B18-1-23-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148844, 'B18-1-24-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148844, 'B18-1-24-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148845, 'B18-1-24-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148845, 'B18-1-24-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148846, 'B18-1-24-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148846, 'B18-1-24-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148847, 'B18-1-24-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148847, 'B18-1-24-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148848, 'B18-1-25-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148848, 'B18-1-25-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148849, 'B18-1-25-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148849, 'B18-1-25-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148850, 'B18-1-25-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148850, 'B18-1-25-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148851, 'B18-1-25-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148851, 'B18-1-25-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148852, 'B18-1-26-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148852, 'B18-1-26-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148853, 'B18-1-26-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148853, 'B18-1-26-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148854, 'B18-1-26-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148854, 'B18-1-26-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148855, 'B18-1-26-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148855, 'B18-1-26-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148856, 'B18-1-27-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148856, 'B18-1-27-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148857, 'B18-1-27-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148857, 'B18-1-27-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148858, 'B18-1-27-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148858, 'B18-1-27-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148859, 'B18-1-27-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148859, 'B18-1-27-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148860, 'B18-1-28-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148860, 'B18-1-28-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148861, 'B18-1-28-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148861, 'B18-1-28-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148862, 'B18-1-28-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148862, 'B18-1-28-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148863, 'B18-1-28-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148863, 'B18-1-28-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148864, 'B18-1-29-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148864, 'B18-1-29-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148865, 'B18-1-29-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148865, 'B18-1-29-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148866, 'B18-1-29-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148866, 'B18-1-29-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148867, 'B18-1-29-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148867, 'B18-1-29-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148868, 'B18-1-30-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148868, 'B18-1-30-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148869, 'B18-1-30-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148869, 'B18-1-30-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148870, 'B18-1-30-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148870, 'B18-1-30-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148871, 'B18-1-30-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148871, 'B18-1-30-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148872, 'B19-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148872, 'B19-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148873, 'B19-1-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148873, 'B19-1-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148874, 'B19-1-3-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148874, 'B19-1-3-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148875, 'B19-1-3-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148875, 'B19-1-3-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148876, 'B19-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148876, 'B19-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148877, 'B19-1-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148877, 'B19-1-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148878, 'B19-1-4-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148878, 'B19-1-4-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148879, 'B19-1-4-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148879, 'B19-1-4-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148880, 'B19-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148880, 'B19-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148881, 'B19-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148881, 'B19-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148882, 'B19-1-5-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148882, 'B19-1-5-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148883, 'B19-1-5-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148883, 'B19-1-5-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148884, 'B19-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148884, 'B19-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148885, 'B19-1-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148885, 'B19-1-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148886, 'B19-1-6-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148886, 'B19-1-6-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148887, 'B19-1-6-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148887, 'B19-1-6-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148888, 'B19-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148888, 'B19-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148889, 'B19-1-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148889, 'B19-1-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148890, 'B19-1-7-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148890, 'B19-1-7-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148891, 'B19-1-7-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148891, 'B19-1-7-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148892, 'B19-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148892, 'B19-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148893, 'B19-1-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148893, 'B19-1-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148894, 'B19-1-8-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148894, 'B19-1-8-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148895, 'B19-1-8-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148895, 'B19-1-8-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148896, 'B19-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148896, 'B19-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148897, 'B19-1-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148897, 'B19-1-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148898, 'B19-1-9-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148898, 'B19-1-9-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148899, 'B19-1-9-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148899, 'B19-1-9-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148900, 'B19-1-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148900, 'B19-1-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148901, 'B19-1-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148901, 'B19-1-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148902, 'B19-1-10-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148902, 'B19-1-10-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148903, 'B19-1-10-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148903, 'B19-1-10-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148904, 'B19-1-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148904, 'B19-1-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148905, 'B19-1-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148905, 'B19-1-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148906, 'B19-1-11-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148906, 'B19-1-11-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148907, 'B19-1-11-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148907, 'B19-1-11-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148908, 'B19-1-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148908, 'B19-1-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148909, 'B19-1-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148909, 'B19-1-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148910, 'B19-1-12-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148910, 'B19-1-12-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148911, 'B19-1-12-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148911, 'B19-1-12-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148912, 'B19-1-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148912, 'B19-1-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148913, 'B19-1-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148913, 'B19-1-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148914, 'B19-13-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148914, 'B19-13-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148915, 'B19-1-13-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148915, 'B19-1-13-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148916, 'B19-1-14-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148916, 'B19-1-14-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148917, 'B19-1-14-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148917, 'B19-1-14-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148918, 'B19-1-14-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148918, 'B19-1-14-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148919, 'B19-1-14-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148919, 'B19-1-14-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148920, 'B19-1-15-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148920, 'B19-1-15-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148921, 'B19-1-15-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148921, 'B19-1-15-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148922, 'B19-1-15-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148922, 'B19-1-15-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148923, 'B19-1-15-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148923, 'B19-1-15-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148924, 'B19-1-16-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148924, 'B19-1-16-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148925, 'B19-1-16-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148925, 'B19-1-16-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148926, 'B19-1-16-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148926, 'B19-1-16-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148927, 'B19-1-16-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148927, 'B19-1-16-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148928, 'B19-1-17-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148928, 'B19-1-17-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148929, 'B19-1-17-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148929, 'B19-1-17-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148930, 'B19-1-17-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148930, 'B19-1-17-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148931, 'B19-1-17-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148931, 'B19-1-17-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148932, 'B19-1-18-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148932, 'B19-1-18-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148933, 'B19-1-18-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148933, 'B19-1-18-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148934, 'B19-1-18-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148934, 'B19-1-18-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148935, 'B19-1-18-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148935, 'B19-1-18-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148936, 'B19-1-19-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148936, 'B19-1-19-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148937, 'B19-1-19-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148937, 'B19-1-19-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148938, 'B19-1-19-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148938, 'B19-1-19-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148939, 'B19-1-19-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148939, 'B19-1-19-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148940, 'B19-1-20-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148940, 'B19-1-20-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148941, 'B19-1-20-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148941, 'B19-1-20-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148942, 'B19-1-20-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148942, 'B19-1-20-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148943, 'B19-1-20-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148943, 'B19-1-20-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148944, 'B19-1-21-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148944, 'B19-1-21-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148945, 'B19-1-21-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148945, 'B19-1-21-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148946, 'B19-1-21-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148946, 'B19-1-21-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148947, 'B19-1-21-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148947, 'B19-1-21-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148948, 'B19-1-22-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148948, 'B19-1-22-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148949, 'B19-1-22-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148949, 'B19-1-22-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148950, 'B19-1-22-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148950, 'B19-1-22-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148951, 'B19-1-22-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148951, 'B19-1-22-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148952, 'B19-1-23-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148952, 'B19-1-23-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148953, 'B19-1-23-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148953, 'B19-1-23-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148954, 'B19-1-23-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148954, 'B19-1-23-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148955, 'B19-23-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148955, 'B19-23-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148956, 'B19-1-24-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148956, 'B19-1-24-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148957, 'B19-1-24-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148957, 'B19-1-24-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148958, 'B19-1-24-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148958, 'B19-1-24-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148959, 'B19-1-24-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148959, 'B19-1-24-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148960, 'B19-1-25-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148960, 'B19-1-25-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148961, 'B19-1-25-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148961, 'B19-1-25-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148962, 'B19-1-25-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148962, 'B19-1-25-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148963, 'B19-25-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148963, 'B19-25-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148964, 'B19-1-26-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148964, 'B19-1-26-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148965, 'B19-1-26-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148965, 'B19-1-26-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148966, 'B19-1-26-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148966, 'B19-1-26-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148967, 'B19-1-26-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148967, 'B19-1-26-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148968, 'B19-1-27-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148968, 'B19-1-27-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148969, 'B19-1-27-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148969, 'B19-1-27-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148970, 'B19-1-27-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148970, 'B19-1-27-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148971, 'B19-1-27-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148971, 'B19-1-27-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148972, 'B19-1-28-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148972, 'B19-1-28-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148973, 'B19-1-28-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148973, 'B19-1-28-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148974, 'B19-1-28-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148974, 'B19-1-28-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148975, 'B19-1-28-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148975, 'B19-1-28-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148976, 'B19-1-29-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148976, 'B19-1-29-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148977, 'B19-1-29-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148977, 'B19-1-29-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148978, 'B19-1-29-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148978, 'B19-1-29-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148979, 'B19-1-29-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148979, 'B19-1-29-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148980, 'B19-1-30-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148980, 'B19-1-30-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148981, 'B19-1-30-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148981, 'B19-1-30-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148982, 'B19-1-30-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148982, 'B19-1-30-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148983, 'B19-1-30-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148983, 'B19-1-30-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148984, 'B20-1-3-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148984, 'B20-1-3-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148985, 'B20-1-3-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148985, 'B20-1-3-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148986, 'B20-1-3-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148986, 'B20-1-3-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148987, 'B20-1-3-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148987, 'B20-1-3-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148988, 'B20-1-4-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148988, 'B20-1-4-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148989, 'B20-1-4-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148989, 'B20-1-4-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148990, 'B20-1-4-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148990, 'B20-1-4-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148991, 'B20-1-4-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148991, 'B20-1-4-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148992, 'B20-1-5-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148992, 'B20-1-5-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148993, 'B20-1-5-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148993, 'B20-1-5-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148994, 'B20-1-5-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148994, 'B20-1-5-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148995, 'B20-1-5-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148995, 'B20-1-5-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148996, 'B20-1-6-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148996, 'B20-1-6-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148997, 'B20-1-6-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148997, 'B20-1-6-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148998, 'B20-1-6-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148998, 'B20-1-6-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387148999, 'B20-1-6-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387148999, 'B20-1-6-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149000, 'B20-1-7-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149000, 'B20-1-7-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149001, 'B20-1-7-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149001, 'B20-1-7-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149002, 'B20-1-7-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149002, 'B20-1-7-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149003, 'B20-1-7-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149003, 'B20-1-7-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149004, 'B20-1-8-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149004, 'B20-1-8-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149005, 'B20-1-8-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149005, 'B20-1-8-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149006, 'B20-1-8-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149006, 'B20-1-8-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149007, 'B20-1-8-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149007, 'B20-1-8-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149008, 'B20-1-9-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149008, 'B20-1-9-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149009, 'B20-1-9-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149009, 'B20-1-9-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149010, 'B20-1-9-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149010, 'B20-1-9-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149011, 'B20-1-9-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149011, 'B20-1-9-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149012, 'B20-1-10-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149012, 'B20-1-10-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149013, 'B20-1-10-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149013, 'B20-1-10-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149014, 'B20-1-10-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149014, 'B20-1-10-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149015, 'B20-1-10-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149015, 'B20-1-10-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149016, 'B20-1-11-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149016, 'B20-1-11-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149017, 'B20-1-11-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149017, 'B20-1-11-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149018, 'B20-1-11-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149018, 'B20-1-11-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149019, 'B20-1-11-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149019, 'B20-1-11-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149020, 'B20-1-12-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149020, 'B20-1-12-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149021, 'B20-1-12-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149021, 'B20-1-12-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149022, 'B20-1-12-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149022, 'B20-1-12-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149023, 'B20-1-12-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149023, 'B20-1-12-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149024, 'B20-1-13-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149024, 'B20-1-13-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149025, 'B20-1-13-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149025, 'B20-1-13-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149026, 'B20-1-13-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149026, 'B20-1-13-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149027, 'B20-1-13-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149027, 'B20-1-13-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149028, 'B20-1-14-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149028, 'B20-1-14-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149029, 'B20-1-14-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149029, 'B20-1-14-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149030, 'B20-1-14-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149030, 'B20-1-14-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149031, 'B20-1-14-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149031, 'B20-1-14-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149032, 'B20-1-15-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149032, 'B20-1-15-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149033, 'B20-1-15-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149033, 'B20-1-15-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149034, 'B20-1-15-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149034, 'B20-1-15-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149035, 'B20-1-15-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149035, 'B20-1-15-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149036, 'B20-1-16-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149036, 'B20-1-16-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149037, 'B20-1-16-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149037, 'B20-1-16-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149038, 'B20-1-16-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149038, 'B20-1-16-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149039, 'B20-1-16-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149039, 'B20-1-16-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149040, 'B20-1-17-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149040, 'B20-1-17-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149041, 'B20-1-17-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149041, 'B20-1-17-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149042, 'B20-1-17-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149042, 'B20-1-17-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149043, 'B20-1-17-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149043, 'B20-1-17-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149044, 'B20-1-18-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149044, 'B20-1-18-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149045, 'B20-1-18-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149045, 'B20-1-18-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149046, 'B20-1-18-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149046, 'B20-1-18-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149047, 'B20-1-18-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149047, 'B20-1-18-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149048, 'B20-1-19-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149048, 'B20-1-19-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149049, 'B20-1-19-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149049, 'B20-1-19-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149050, 'B20-1-19-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149050, 'B20-1-19-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149051, 'B20-1-19-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149051, 'B20-1-19-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149052, 'B20-1-20-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149052, 'B20-1-20-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149053, 'B20-1-20-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149053, 'B20-1-20-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149054, 'B20-1-20-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149054, 'B20-1-20-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149055, 'B20-1-20-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149055, 'B20-1-20-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149056, 'B20-1-21-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149056, 'B20-1-21-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149057, 'B20-1-21-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149057, 'B20-1-21-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149058, 'B20-1-21-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149058, 'B20-1-21-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149059, 'B20-1-21-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149059, 'B20-1-21-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149060, 'B20-1-22-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149060, 'B20-1-22-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149061, 'B20-1-22-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149061, 'B20-1-22-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149062, 'B20-1-22-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149062, 'B20-1-22-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149063, 'B20-1-22-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149063, 'B20-1-22-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149064, 'B20-1-23-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149064, 'B20-1-23-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149065, 'B20-1-23-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149065, 'B20-1-23-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149066, 'B20-1-23-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149066, 'B20-1-23-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149067, 'B20-1-23-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149067, 'B20-1-23-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149068, 'B20-1-24-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149068, 'B20-1-24-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149069, 'B20-1-24-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149069, 'B20-1-24-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149070, 'B20-1-24-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149070, 'B20-1-24-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149071, 'B20-1-24-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149071, 'B20-1-24-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149072, 'B20-1-25-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149072, 'B20-1-25-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149073, 'B20-1-25-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149073, 'B20-1-25-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149074, 'B20-1-25-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149074, 'B20-1-25-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149075, 'B20-1-25-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149075, 'B20-1-25-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149076, 'B20-1-26-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149076, 'B20-1-26-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149077, 'B20-1-26-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149077, 'B20-1-26-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149078, 'B20-1-26-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149078, 'B20-1-26-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149079, 'B20-1-26-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149079, 'B20-1-26-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149080, 'B20-1-27-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149080, 'B20-1-27-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149081, 'B20-1-27-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149081, 'B20-1-27-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149082, 'B20-1-27-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149082, 'B20-1-27-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149083, 'B20-1-27-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149083, 'B20-1-27-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149084, 'B20-1-28-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149084, 'B20-1-28-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149085, 'B20-1-28-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149085, 'B20-1-28-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149086, 'B20-1-28-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149086, 'B20-1-28-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149087, 'B20-1-28-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149087, 'B20-1-28-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149088, 'B20-1-29-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149088, 'B20-1-29-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149089, 'B20-1-29-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149089, 'B20-1-29-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149090, 'B20-1-29-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149090, 'B20-1-29-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149091, 'B20-1-29-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149091, 'B20-1-29-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149092, 'B20-1-30-1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149092, 'B20-1-30-1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149093, 'B20-1-30-2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149093, 'B20-1-30-2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149094, 'B20-1-30-3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149094, 'B20-1-30-3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149095, 'B20-1-30-4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149095, 'B20-1-30-4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149096, 'B21-A1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149096, 'B21-A1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149097, 'B21-A2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149097, 'B21-A2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149098, 'B21-A3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149098, 'B21-A3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149099, 'B21-A4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149099, 'B21-A4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149100, 'B21-A5', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149100, 'B21-A5', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149101, 'B21-A6', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149101, 'B21-A6', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149102, 'B21-A7', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149102, 'B21-A7', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149103, 'B22-D1', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149103, 'B22-D1', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149104, 'B22-D2', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149104, 'B22-D2', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149105, 'B22-D3', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149105, 'B22-D3', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149106, 'B22-D4', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149106, 'B22-D4', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149107, 'B22-D5', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149107, 'B22-D5', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149108, 'B22-D6', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149108, 'B22-D6', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149109, 'B22-D7', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149109, 'B22-D7', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149110, 'B22-D8', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149110, 'B22-D8', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149111, 'B22-D9', '0');
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149111, 'B22-D9', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
-	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), @organization_id, @community_id, 239825274387149112, 'B22-D10', '0');
-
-
-
-
-SET @community_id = @community_id + 1; 
-SET @user_id = @user_id + 1; 
-
-INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (@user_id, UUID(), '13840511693', '吴斌', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
-
-INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13840511693',  '221616',  3, UTC_TIMESTAMP(), 999988);
-	
-DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '吴斌', 0, '13840511693', 3, 999988);	
-
-INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-
-INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊丽雅特湾C', '伊丽雅特湾C', '浑南新区临波路11号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
-INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.743291, 123.447481, 'wxrv3p5sqc3q');
-INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(@organization_id, @community_id);
-	
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C1', '伊丽雅特湾C1号楼', 0, '', '浑南新区临波路11-1号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C2', '伊丽雅特湾C2号楼', 0, '', '浑南新区临波路11-2号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C3', '伊丽雅特湾C3号楼', 0, '', '浑南新区临波路11-3号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C4', '伊丽雅特湾C4号楼', 0, '', '浑南新区临波路11-4号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C5', '伊丽雅特湾C5号楼', 0, '', '浑南新区临波路11-5号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, 'C6', '伊丽雅特湾C6号楼', 0, '', '浑南新区临波路11-6号楼', NULL, 41.743291, 123.447481, 'wxrv3p5sqc3q', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
+	VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387149112, 'B22-D10', '0');
 
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
@@ -8519,23 +8548,8 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	
 	
 SET @community_id = @community_id + 1; 
-SET @user_id = @user_id + 1; 
-
-INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (@user_id, UUID(), '18640333968', '杜海然', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
-
-INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '18640333968',  '221616',  3, UTC_TIMESTAMP(), 999988);
-	
-DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '杜海然', 0, '18640333968', 3, 999988);	
-
-INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '', '', '浑南区朗日街19号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
+	VALUES(@community_id, UUID(), @shi_id, '沈阳市',  @qu_id, '浑南新区', '伊湾尊府', '', '浑南区朗日街19号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 682, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'0', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), 999988);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 41.739356, 123.487431, 'wxrv6n2v3eyk');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
@@ -11516,20 +11530,6 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 SET @community_id = @community_id + 1; 
 SET @qu_id = @qu_id + 1; 
-SET @user_id = @user_id + 1; 
-
-INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (@user_id, UUID(), '13998192428', '李雪莲', '', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999988);
-
-INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13998192428',  '221616',  3, UTC_TIMESTAMP(), 999988);
-	
-DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '李雪莲', 0, '13998192428', 3, 999988);	
-
-INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
 	VALUES (@qu_id, @shi_id, '皇姑区', 'HUANGGU', 'HGQ', '/辽宁/沈阳市/皇姑区', '3', '3', NULL, '024', '2', '0', '999988');
@@ -11547,9 +11547,7 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, '沈阳世纪龙苑2-1', '沈阳世纪龙苑2-1号楼', 0, '', '皇姑区陵园街12甲世纪龙苑2-1号楼', NULL, 41.843665, 123.455102, 'wxry133m02s0', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, '沈阳世纪龙苑3', '沈阳世纪龙苑3号楼', 0, '', '皇姑区陵园街12甲世纪龙苑3号楼', NULL, 41.843665, 123.455102, 'wxry133m02s0', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, '沈阳世纪龙苑3-1', '沈阳世纪龙苑3-1号楼', 0, '', '皇姑区陵园街12甲世纪龙苑3-1号楼', NULL, 41.843665, 123.455102, 'wxry133m02s0', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999988);
-	
-
-	
+		
 	
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387156640,UUID(),@community_id, @shi_id, '沈阳市',  @qu_id, '皇姑区' ,'1-1-3-1','1','1-3-1','2','0',UTC_TIMESTAMP(), 999988);
@@ -13089,11 +13087,11 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 	
 
-insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),'999988','0','0','0','/home','Bizs','QualityInspection','品质核查','cs://1/image/aW1hZ2UvTVRvd1pqWmxZekkxTVRRelpURmhPRFprTWpkalpUWmpOelk0WWpGa09USTFZUQ','1','1','44',CONCAT('{\"realm\":\"quality\",\"entryUrl\":\"', @eh_core_serverURL, '/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix\"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0');
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),999988,'0','0','0','/home','Bizs','QualityInspection','品质核查','cs://1/image/aW1hZ2UvTVRwalpXSTVORFEwTjJJMllqTmlNek5qTnpZMk4yUmlPREk0WkRSbVpqTmpaZw','1','1','44',CONCAT('{\"realm\":\"quality\",\"entryUrl\":\"', @eh_core_serverURL, '/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix\"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',NULL,NULL,'0');
 
-insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),'999988','0','0','0','/home','Bizs','Energy','能耗管理','cs://1/image/aW1hZ2UvTVRwaU16ZGtZVE0xTlRJM01tUm1NV0ZpTXpReU16RTRaV0l5T1RsaE1Ua3hZZw','1','1','13',CONCAT('{\"url\":\"', @eh_core_serverURL, '/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}'),'0','0','1','1',NULL,'0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0');
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),999988,'0','0','0','/home','Bizs','Energy','能耗管理','cs://1/image/aW1hZ2UvTVRvME1tSXhZV0prWWpaaVlqZzFNelV6WkRsbU1UazJNbU5pTXpnMk56TmhPUQ','1','1','13',CONCAT('{\"url\":\"', @eh_core_serverURL, '/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix\"}'),'0','0','1','1',NULL,'0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0');
 
-insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),'999988','0','0','0','/home','Bizs','PMInspection','物业巡检','cs://1/image/aW1hZ2UvTVRwalpUWm1ObUV3WVRnMVpXSmhPREF5WWpFMlpqSmtZalJsWVRjMk5ESTFNQQ','1','1','13',CONCAT('{"url":"', @eh_core_serverURL, '/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix"}'),'0','0','1','1',NULL,'0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0');
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@item_id := @item_id + 1),999988,'0','0','0','/home','Bizs','PMInspection','物业巡检','cs://1/image/aW1hZ2UvTVRwaVkyUTBNamRtTVRFell6azJOR0ppT0RnMk5UQTFZVFpsTkRZeU1UVXpaUQ','1','1','13',CONCAT('{"url":"', @eh_core_serverURL, '/equipment-inspection/dist/index.html?hideNavigationBar=1#sign_suffix"}'),'0','0','1','1',NULL,'0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0');
 
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -13124,7 +13122,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49120,'', 'EhNamespaces', 999988,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49130,'', 'EhNamespaces', 999988,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),49140,'', 'EhNamespaces', 999988,2);
-	
+
 	
 SET @service_module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes`(`id`, `module_id`,`module_name`, `namespace_id`, `apply_policy`) VALUES( @service_module_id := @service_module_id + 1,20600,'', 999988,2);
@@ -13141,3 +13139,5 @@ UPDATE `eh_organization_address_mappings` oam SET `organization_address` = (SELE
 -- 把帖子数据迁移到新的论坛下面 add by sfyan 20170411
 UPDATE `eh_forum_posts` SET `forum_id` = @community_forum_id WHERE `forum_id` = 1 AND `creator_uid` in (SELECT id FROM eh_users WHERE namespace_id = 999988);
 UPDATE `eh_forum_posts` SET `forum_id` = @feedback_forum_id WHERE `forum_id` = 2 AND `creator_uid` in (SELECT id FROM eh_users WHERE namespace_id = 999988);
+
+SET FOREIGN_KEY_CHECKS = 1;
