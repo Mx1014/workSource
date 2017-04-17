@@ -17,14 +17,13 @@ import javax.validation.constraints.NotNull;
  *     <li>status: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
+ *     <li>organizationId: 公司id</li>
  * </ul>
  */
 public class ListSimpleAssetBillsCommand {
 
-    @NotNull
     private Long ownerId;
 
-    @NotNull
     private String ownerType;
 
     @NotNull
@@ -46,6 +45,8 @@ public class ListSimpleAssetBillsCommand {
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    private Long organizationId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -133,6 +134,14 @@ public class ListSimpleAssetBillsCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
     @Override
