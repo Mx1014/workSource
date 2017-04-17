@@ -1,0 +1,1 @@
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (1, 0, '', 0, 0, 'ems', 2, 0, now(), now(), 0);

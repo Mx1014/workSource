@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -18,7 +19,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressCompaniesDao;
 import com.everhomes.server.schema.tables.pojos.EhExpressCompanies;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
@@ -33,6 +36,10 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	public void createExpressCompany(ExpressCompany expressCompany) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressCompanies.class));
 		expressCompany.setId(id);
+		expressCompany.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressCompany.setCreatorUid(UserContext.current().getUser().getId());
+		expressCompany.setUpdateTime(expressCompany.getCreateTime());
+		expressCompany.setOperatorUid(expressCompany.getCreatorUid());
 		getReadWriteDao().insert(expressCompany);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressCompanies.class, null);
 	}
@@ -40,6 +47,8 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	@Override
 	public void updateExpressCompany(ExpressCompany expressCompany) {
 		assert (expressCompany.getId() != null);
+		expressCompany.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressCompany.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(expressCompany);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressCompanies.class, expressCompany.getId());
 	}

@@ -8,11 +8,16 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.approval.ApprovalRequestHandler;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.express.AddExpressUserCommand;
 import com.everhomes.rest.express.CancelExpressOrderCommand;
 import com.everhomes.rest.express.CreateExpressOrderCommand;
@@ -24,9 +29,11 @@ import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressOrderDTO;
+import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
+import com.everhomes.rest.express.ExpressServiceErrorCode;
 import com.everhomes.rest.express.ExpressUserDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
@@ -74,6 +81,9 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
 	private ExpressOrderProvider expressOrderProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -202,32 +212,71 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	private String getExpressCompany(Long id) {
 		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(id);
-		if (expressCompany != null) {
-			return expressCompany.getName();
-		}
-		return null;
+		return expressCompany == null ? null : expressCompany.getName();
 	}
 	
 
 	@Override
 	public GetExpressOrderDetailResponse getExpressOrderDetail(GetExpressOrderDetailCommand cmd) {
-		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		return new GetExpressOrderDetailResponse();
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
+		if (expressOrder != null) {
+			return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
+		}
+		return null;
+	}
+
+	private ExpressOrderDTO convertToExpressOrderDTOForDetail(ExpressOrder expressOrder) {
+		ExpressOrderDTO expressOrderDTO = ConvertHelper.convert(expressOrder, ExpressOrderDTO.class);
+		expressOrderDTO.setExpressCompanyName(getExpressCompany(expressOrder.getExpressCompanyId()));
+		expressOrderDTO.setServiceAddress(getServiceAddress(expressOrder.getServiceAddressId()));
+		return expressOrderDTO;
+	}
+
+	private String getServiceAddress(Long id) {
+		ExpressServiceAddress expressServiceAddress = expressServiceAddressProvider.findExpressServiceAddressById(id);
+		return expressServiceAddress == null ? null : expressServiceAddress.getName();
 	}
 
 	@Override
 	public void updatePaySummary(UpdatePaySummaryCommand cmd) {
-		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
+			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+			}
+			expressOrder.setPaySummary(cmd.getPaySummary());
+			expressOrderProvider.updateExpressOrder(expressOrder);
+			return null;
+		});
 	}
 
 	@Override
 	public void printExpressOrder(PrintExpressOrderCommand cmd) {
-		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
+			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			ExpressOrderStatus status = ExpressOrderStatus.fromCode(expressOrder.getStatus());
+			if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.PRINTED) {
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be paid or printed");
+			}
+			if (expressOrder.getBillNo() == null) {
+				ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
+				if (handler != null) {
+					// 每个快递公司返回的快递单号通过各自的handler获取
+					String billNo = handler.handle(expressOrder);
+					expressOrder.setBillNo(billNo);
+				}
+				expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
+				expressOrderProvider.updateExpressOrder(expressOrder);
+			}
+			return null;
+		});
+	}
 
+	private ExpressHandler getExpressHandler(Long expressCompanyId) {
+		return PlatformContext.getComponent(ExpressHandler.EXPRESS_HANDLER_PREFIX+expressCompanyId);
 	}
 
 	@Override

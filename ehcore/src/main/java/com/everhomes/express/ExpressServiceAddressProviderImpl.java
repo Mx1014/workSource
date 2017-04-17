@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -18,7 +19,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressServiceAddressesDao;
 import com.everhomes.server.schema.tables.pojos.EhExpressServiceAddresses;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ExpressServiceAddressProviderImpl implements ExpressServiceAddressProvider {
@@ -33,6 +36,10 @@ public class ExpressServiceAddressProviderImpl implements ExpressServiceAddressP
 	public void createExpressServiceAddress(ExpressServiceAddress expressServiceAddress) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressServiceAddresses.class));
 		expressServiceAddress.setId(id);
+		expressServiceAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressServiceAddress.setCreatorUid(UserContext.current().getUser().getId());
+		expressServiceAddress.setUpdateTime(expressServiceAddress.getCreateTime());
+		expressServiceAddress.setOperatorUid(expressServiceAddress.getCreatorUid());
 		getReadWriteDao().insert(expressServiceAddress);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressServiceAddresses.class, null);
 	}
@@ -40,6 +47,8 @@ public class ExpressServiceAddressProviderImpl implements ExpressServiceAddressP
 	@Override
 	public void updateExpressServiceAddress(ExpressServiceAddress expressServiceAddress) {
 		assert (expressServiceAddress.getId() != null);
+		expressServiceAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressServiceAddress.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(expressServiceAddress);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressServiceAddresses.class, expressServiceAddress.getId());
 	}

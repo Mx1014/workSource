@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -20,7 +21,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressOrdersDao;
 import com.everhomes.server.schema.tables.pojos.EhExpressOrders;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ExpressOrderProviderImpl implements ExpressOrderProvider {
@@ -35,6 +38,10 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 	public void createExpressOrder(ExpressOrder expressOrder) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressOrders.class));
 		expressOrder.setId(id);
+		expressOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressOrder.setCreatorUid(UserContext.current().getUser().getId());
+		expressOrder.setUpdateTime(expressOrder.getCreateTime());
+		expressOrder.setOperatorUid(expressOrder.getCreatorUid());
 		getReadWriteDao().insert(expressOrder);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressOrders.class, null);
 	}
@@ -42,6 +49,8 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 	@Override
 	public void updateExpressOrder(ExpressOrder expressOrder) {
 		assert (expressOrder.getId() != null);
+		expressOrder.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressOrder.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(expressOrder);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressOrders.class, expressOrder.getId());
 	}

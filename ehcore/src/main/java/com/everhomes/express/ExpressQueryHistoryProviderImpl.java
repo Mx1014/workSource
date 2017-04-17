@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressQueryHistoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhExpressQueryHistories;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvider {
@@ -31,6 +34,10 @@ public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvi
 	public void createExpressQueryHistory(ExpressQueryHistory expressQueryHistory) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressQueryHistories.class));
 		expressQueryHistory.setId(id);
+		expressQueryHistory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressQueryHistory.setCreatorUid(UserContext.current().getUser().getId());
+		expressQueryHistory.setUpdateTime(expressQueryHistory.getCreateTime());
+		expressQueryHistory.setOperatorUid(expressQueryHistory.getCreatorUid());
 		getReadWriteDao().insert(expressQueryHistory);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressQueryHistories.class, null);
 	}
@@ -38,6 +45,8 @@ public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvi
 	@Override
 	public void updateExpressQueryHistory(ExpressQueryHistory expressQueryHistory) {
 		assert (expressQueryHistory.getId() != null);
+		expressQueryHistory.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressQueryHistory.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(expressQueryHistory);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressQueryHistories.class, expressQueryHistory.getId());
 	}

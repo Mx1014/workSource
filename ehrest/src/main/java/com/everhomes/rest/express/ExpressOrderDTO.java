@@ -38,7 +38,6 @@ import com.everhomes.util.StringHelper;
  * <li>serviceAddress: 自寄地址</li>
  * <li>internal: 内件物品</li>
  * <li>insuredPrice: 保价金额</li>
- * <li>logisticsStatus: 物流状态，参考{@link com.everhomes.rest.express.ExpressLogisticsStatus}</li>
  * </ul>
  */
 public class ExpressOrderDTO {

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressAddressesDao;
 import com.everhomes.server.schema.tables.pojos.EhExpressAddresses;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ExpressAddressProviderImpl implements ExpressAddressProvider {
@@ -31,6 +34,10 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 	public void createExpressAddress(ExpressAddress expressAddress) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressAddresses.class));
 		expressAddress.setId(id);
+		expressAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressAddress.setCreatorUid(UserContext.current().getUser().getId());
+		expressAddress.setUpdateTime(expressAddress.getCreateTime());
+		expressAddress.setOperatorUid(expressAddress.getCreatorUid());
 		getReadWriteDao().insert(expressAddress);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressAddresses.class, null);
 	}
@@ -38,6 +45,8 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 	@Override
 	public void updateExpressAddress(ExpressAddress expressAddress) {
 		assert (expressAddress.getId() != null);
+		expressAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		expressAddress.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(expressAddress);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressAddresses.class, expressAddress.getId());
 	}
