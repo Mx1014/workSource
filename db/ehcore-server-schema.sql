@@ -409,6 +409,7 @@ CREATE TABLE `eh_activity_roster` (
   `position` VARCHAR(64),
   `leader_flag` TINYINT,
   `source_flag` TINYINT,
+  `email` varchar(128) ,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_act_roster_uuid` (`uuid`),
@@ -4389,7 +4390,7 @@ CREATE TABLE `eh_links` (
   `create_time` DATETIME,
   `deleter_uid` BIGINT NOT NULL COMMENT 'deleter id',
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
-
+  `rich_content` longtext COMMENT 'rich_content',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -6350,6 +6351,16 @@ CREATE TABLE `eh_preferential_rules` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- 
+-- 储存预览内容 
+-- 
+DROP TABLE IF EXISTS `eh_previews`;
+CREATE TABLE `eh_previews` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `content` text,
+  `content_type` varchar(128) DEFAULT NULL COMMENT 'content type',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_punch_day_logs`;
 CREATE TABLE `eh_punch_day_logs` (
