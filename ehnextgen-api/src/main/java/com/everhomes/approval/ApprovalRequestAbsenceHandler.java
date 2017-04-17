@@ -415,16 +415,16 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				}else if(endTimeLong<=dto.getNoonLeaveTime()){
 					//1.最晚上班时间<x<=午休开始时间
 					// 请假时间-最晚上班
-					actualLong =  endTimeLong -dto.getStartLateTime();
+					actualLong = endTimeLong -dto.getStartLateTime();
 				}else if(endTimeLong<=dto.getAfternoonArriveTime()){
 					//2.午休开始时间<x<=午休结束时间  
-					//请假时间-下午上班+中午下班-最晚上班
-					actualLong =   endTimeLong -dto.getAfternoonArriveTime() + dto.getNoonLeaveTime()-dto.getStartLateTime();
+					// 中午下班-最晚上班
+					actualLong = dto.getNoonLeaveTime()-dto.getStartLateTime();
 
 				}else if(endTimeLong<=dto.getEndEarlyTime()){
-					//3.午休结束时间<x<=最早下班时间
-					//最早下班-请假时间
-					actualLong =   dto.getEndEarlyTime()-endTimeLong;
+					//3.午休结束时间<x<=最早下班时间 
+					//请假时间-下午上班+中午下班-最晚上班
+					actualLong = endTimeLong -dto.getAfternoonArriveTime() + dto.getNoonLeaveTime()-dto.getStartLateTime();
 				}else{
 					//4.最早下班时间<x
 					//请假日期+1
