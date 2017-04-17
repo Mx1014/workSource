@@ -67,25 +67,28 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 				.and(Tables.EH_EXPRESS_ORDERS.OWNER_ID.eq(condition.getOwnerId()));
 		
 		if (condition.getServiceAddressId() != null) {
-//			step.and(Tables.EH_EXPRESS_ORDERS.ser);/
+			step.and(Tables.EH_EXPRESS_ORDERS.SERVICE_ADDRESS_ID.eq(condition.getServiceAddressId()));
 		}
 		
+		if (condition.getExpressCompanyId() != null) {
+			step.and(Tables.EH_EXPRESS_ORDERS.EXPRESS_COMPANY_ID.eq(condition.getExpressCompanyId()));
+		}
 		
+		String keyword = condition.getKeyword();
+		if (keyword != null && !keyword.isEmpty()) {
+			keyword = keyword + "%";
+			step.and(Tables.EH_EXPRESS_ORDERS.SEND_NAME.like(keyword).or(Tables.EH_EXPRESS_ORDERS.SEND_PHONE.like(keyword)).or(Tables.EH_EXPRESS_ORDERS.BILL_NO.like(keyword)));
+		}
 		
+		if (condition.getStatus() != null) {
+			step.and(Tables.EH_EXPRESS_ORDERS.STATUS.eq(condition.getStatus()));
+		}
 		
-//		private Long serviceAddressId;
-//
-//		private Long expressCompanyId;
-//
-//		private Byte status;
-//
-//		private String keyword;
-//
-//		private Long pageAnchor;
-//
-//		private Integer pageSize;
-		
-		return null;
+		return step.and(condition.getPageAnchor() == null ? DSL.trueCondition() : Tables.EH_EXPRESS_ORDERS.ID.lt(condition.getPageAnchor()))
+				.orderBy(Tables.EH_EXPRESS_ORDERS.ID.desc())
+				.limit(condition.getPageSize()+1)
+				.fetch()
+				.map(r->ConvertHelper.convert(r, ExpressOrder.class));
 	}
 
 	private EhExpressOrdersDao getReadWriteDao() {

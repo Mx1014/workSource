@@ -1297,6 +1297,21 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhExpressServiceAddresses.class, Tables.EH_EXPRESS_SERVICE_ADDRESSES.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_EXPRESS_SERVICE_ADDRESSES.ID.max()).from(Tables.EH_EXPRESS_SERVICE_ADDRESSES).fetchOne().value1();
         });
+        syncTableSequence(null, EhExpressCompanies.class, Tables.EH_EXPRESS_COMPANIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_COMPANIES.ID.max()).from(Tables.EH_EXPRESS_COMPANIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressUsers.class, Tables.EH_EXPRESS_USERS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_USERS.ID.max()).from(Tables.EH_EXPRESS_USERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressAddresses.class, Tables.EH_EXPRESS_ADDRESSES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ADDRESSES.ID.max()).from(Tables.EH_EXPRESS_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressOrders.class, Tables.EH_EXPRESS_ORDERS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ORDERS.ID.max()).from(Tables.EH_EXPRESS_ORDERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressQueryHistories.class, Tables.EH_EXPRESS_QUERY_HISTORIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_QUERY_HISTORIES.ID.max()).from(Tables.EH_EXPRESS_QUERY_HISTORIES).fetchOne().value1();
+        });
 
     }
 

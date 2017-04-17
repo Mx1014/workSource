@@ -184,17 +184,35 @@ public class ExpressServiceImpl implements ExpressService {
 			expressOrders.remove(expressOrders.size()-1);
 			nextPageAnchor = expressOrders.get(expressOrders.size()-1).getId();
 		}
-		return new ListExpressOrderResponse(nextPageAnchor, expressOrders.stream().map(this::convertToExpressOrderDTOForWeb).collect(Collectors.toList()));
+		return new ListExpressOrderResponse(nextPageAnchor, expressOrders.stream().map(this::convertToExpressOrderDTOForWebList).collect(Collectors.toList()));
 	}
 
-	private ExpressOrderDTO convertToExpressOrderDTOForWeb(ExpressOrder expressOrder) {
+	private ExpressOrderDTO convertToExpressOrderDTOForWebList(ExpressOrder expressOrder) {
+		ExpressOrderDTO expressOrderDTO = new ExpressOrderDTO();
+		expressOrderDTO.setSendName(expressOrder.getSendName());
+		expressOrderDTO.setSendPhone(expressOrder.getSendPhone());
+		expressOrderDTO.setExpressCompanyName(getExpressCompany(expressOrder.getExpressCompanyId()));
+		expressOrderDTO.setBillNo(expressOrder.getBillNo());
+		expressOrderDTO.setSendType(expressOrder.getSendType());
+		expressOrderDTO.setPayType(expressOrder.getPayType());
+		expressOrderDTO.setStatus(expressOrder.getStatus());
+		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		return expressOrderDTO;
+	}
+	
+	private String getExpressCompany(Long id) {
+		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(id);
+		if (expressCompany != null) {
+			return expressCompany.getName();
+		}
 		return null;
 	}
 	
+
 	@Override
 	public GetExpressOrderDetailResponse getExpressOrderDetail(GetExpressOrderDetailCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
+		
 		return new GetExpressOrderDetailResponse();
 	}
 
