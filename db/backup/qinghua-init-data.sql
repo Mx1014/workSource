@@ -2510,5 +2510,5 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41500, 1, 10136, NULL, 0, UTC_TIMESTAMP());
 
 -- update 北环门禁 mac by janson
-update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"EE:F1:50:7C:60:D5\"}' where id=1112290;
-update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"EE:F1:50:7C:60:D5\"}' where id=1112291;
+update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"E8:9F:54:9D:A5:A8\"}' where id=1112290;
+update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"E8:9F:54:9D:A5:A8\"}' where id=1112291;
