@@ -571,7 +571,23 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /equipment/reviewEquipmentTasks</b>
+	 * <p>任务批量审阅</p>
+	 */
+	@RequestMapping("reviewEquipmentTasks")
+	@RestReturn(value = String.class)
+	public RestResponse reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+
+		equipmentService.reviewEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /equipment/createEquipmentTask</b>
 	 * <p>创建某设备的任务</p>

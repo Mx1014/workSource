@@ -2165,4 +2165,19 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		return result;
 	}
+
+	@Override
+	public List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.in(ids));
+
+		List<EquipmentInspectionTasks> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
+			return null;
+		});
+
+		return result;
+	}
 }

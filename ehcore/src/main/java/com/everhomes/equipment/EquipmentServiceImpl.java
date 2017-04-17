@@ -2025,7 +2025,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		updateEquipmentTasks(task, log, null);
 	}
-	
+
+	@Override
+	public void reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+		cmd.getTaskIds().forEach(taskId -> {
+			ReviewEquipmentTaskCommand command = new ReviewEquipmentTaskCommand();
+			command.setEndTime(cmd.getEndTime());
+			command.setOperatorId(cmd.getOperatorId());
+			command.setOperatorType(cmd.getOperatorType());
+			command.setOwnerId(cmd.getOwnerId());
+			command.setOwnerType(cmd.getOwnerType());
+			command.setReviewResult(cmd.getReviewResult());
+			command.setTaskId(taskId);
+			reviewEquipmentTask(command);
+		});
+	}
+
 	private void sendMessageToUser(Long userId, String content) {
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -3671,10 +3686,15 @@ public class EquipmentServiceImpl implements EquipmentService {
         	tasks.remove(tasks.size() - 1);
         	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
         }
-        
+		Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
     	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
+			//扫出来的任务要是当前时间能执行的任务 by xiongying20170417
+			if(ts.after(r.getExecutiveStartTime())
+					&& (ts.before(r.getExecutiveExpireTime()) || ts.before(r.getProcessExpireTime()))) {
+				EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+				return dto;
+			}
+        	return null;
         }).filter(r->r!=null).collect(Collectors.toList());
         
 		response.setTasks(dtos);
@@ -3735,26 +3755,13 @@ public class EquipmentServiceImpl implements EquipmentService {
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
         }
        
-//		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(taskIdlist);
-//		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
-//        for(QualityInspectionTasks task : tasks) {
-//        	QualityInspectionTaskRecords record = equipmentProvider.listLastRecordByTaskId(task.getId());
-//        	if(record != null) {
-//        		task.setRecord(record);
-//            	records.add(task.getRecord());
-//        	}
-//        	
-//        }
-//
-//		this.qualityProvider.populateRecordAttachments(records);
-//		this.qualityProvider.populateRecordItemResults(records);
-//
-//		for(QualityInspectionTaskRecords record : records) {
-//			populateRecordAttachements(record, record.getAttachments());
-//		}
-//        
-//		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
-//		response.setTasks(dtoList);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(taskIdlist);
+
+		List<EquipmentTaskDTO> dtoList = tasks.stream().map(task -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+		response.setTasks(dtoList);
 		return response;
 	}
 

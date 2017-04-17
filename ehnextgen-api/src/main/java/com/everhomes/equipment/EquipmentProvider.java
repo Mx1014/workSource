@@ -134,4 +134,6 @@ public interface EquipmentProvider {
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
 	List<EquipmentInspectionEquipments> listEquipmentsById(List<Long> ids);
+
+	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
 }

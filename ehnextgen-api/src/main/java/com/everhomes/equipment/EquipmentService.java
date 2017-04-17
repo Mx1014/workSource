@@ -29,6 +29,7 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listEquipmentTasks(ListEquipmentTasksCommand cmd);
 	EquipmentTaskDTO reportEquipmentTask(ReportEquipmentTaskCommand cmd);
 	void reviewEquipmentTask(ReviewEquipmentTaskCommand cmd);
+	void reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd);
 	void createEquipmentTask(DeleteEquipmentsCommand equipmentId);
 	VerifyEquipmentLocationResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd);
 	HttpServletResponse exportEquipmentTasks(SearchEquipmentTasksCommand cmd,HttpServletResponse response);
