@@ -180,7 +180,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
+		PmTaskDTO dto;
+		//TODO:为科兴与一碑对接
+		if(task.getNamespaceId() == 999983 &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			dto = handler.getTaskDetail(cmd);
+		}else {
+			dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
