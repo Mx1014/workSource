@@ -1783,7 +1783,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
 		}
 		
-		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID);
+		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID,
+				 Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID, Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID);
 		query.addLimit(offset, pageSize);
 		
 		if(LOGGER.isDebugEnabled()) {
