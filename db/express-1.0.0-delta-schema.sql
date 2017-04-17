@@ -100,6 +100,7 @@ CREATE TABLE `eh_express_orders` (
   `receive_city` VARCHAR(64),
   `receive_county` VARCHAR(64),
   `receive_detail_address` VARCHAR(512),
+  `service_address_id` BIGINT COMMENT 'service address id',
   `express_company_id` BIGINT COMMENT 'express company id',
   `send_type` TINYINT COMMENT '1. standard express',
   `send_mode` TINYINT COMMENT '1. self send',

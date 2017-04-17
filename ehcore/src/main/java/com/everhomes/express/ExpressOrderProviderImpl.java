@@ -4,6 +4,9 @@ package com.everhomes.express;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +15,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.express.ListExpressOrderCondition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressOrdersDao;
@@ -55,6 +59,35 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressOrder.class));
 	}
 	
+	@Override
+	public List<ExpressOrder> listExpressOrderByCondition(ListExpressOrderCondition condition) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ORDERS)
+				.where(Tables.EH_EXPRESS_ORDERS.NAMESPACE_ID.eq(condition.getNamespaceId()))
+				.and(Tables.EH_EXPRESS_ORDERS.OWNER_TYPE.eq(condition.getOwnerType()))
+				.and(Tables.EH_EXPRESS_ORDERS.OWNER_ID.eq(condition.getOwnerId()));
+		
+		if (condition.getServiceAddressId() != null) {
+//			step.and(Tables.EH_EXPRESS_ORDERS.ser);/
+		}
+		
+		
+		
+		
+//		private Long serviceAddressId;
+//
+//		private Long expressCompanyId;
+//
+//		private Byte status;
+//
+//		private String keyword;
+//
+//		private Long pageAnchor;
+//
+//		private Integer pageSize;
+		
+		return null;
+	}
+
 	private EhExpressOrdersDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

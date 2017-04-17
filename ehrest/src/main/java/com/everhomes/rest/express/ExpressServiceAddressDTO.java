@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 地址名称</li>
  * </ul>
  */
-public class ServiceAddressDTO {
+public class ExpressServiceAddressDTO {
 	private Long id;
 	private String name;
 

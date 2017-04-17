@@ -12,6 +12,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressServiceAddressesDao;
@@ -19,7 +21,7 @@ import com.everhomes.server.schema.tables.pojos.EhExpressServiceAddresses;
 import com.everhomes.util.ConvertHelper;
 
 @Component
-public class ExpressServiceAddresseProviderImpl implements ExpressServiceAddresseProvider {
+public class ExpressServiceAddressProviderImpl implements ExpressServiceAddressProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -28,33 +30,44 @@ public class ExpressServiceAddresseProviderImpl implements ExpressServiceAddress
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createExpressServiceAddresse(ExpressServiceAddresse expressServiceAddresse) {
+	public void createExpressServiceAddress(ExpressServiceAddress expressServiceAddress) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressServiceAddresses.class));
-		expressServiceAddresse.setId(id);
-		getReadWriteDao().insert(expressServiceAddresse);
+		expressServiceAddress.setId(id);
+		getReadWriteDao().insert(expressServiceAddress);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressServiceAddresses.class, null);
 	}
 
 	@Override
-	public void updateExpressServiceAddresse(ExpressServiceAddresse expressServiceAddresse) {
-		assert (expressServiceAddresse.getId() != null);
-		getReadWriteDao().update(expressServiceAddresse);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressServiceAddresses.class, expressServiceAddresse.getId());
+	public void updateExpressServiceAddress(ExpressServiceAddress expressServiceAddress) {
+		assert (expressServiceAddress.getId() != null);
+		getReadWriteDao().update(expressServiceAddress);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressServiceAddresses.class, expressServiceAddress.getId());
 	}
 
 	@Override
-	public ExpressServiceAddresse findExpressServiceAddresseById(Long id) {
+	public ExpressServiceAddress findExpressServiceAddressById(Long id) {
 		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressServiceAddresse.class);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressServiceAddress.class);
 	}
 	
 	@Override
-	public List<ExpressServiceAddresse> listExpressServiceAddresse() {
+	public List<ExpressServiceAddress> listExpressServiceAddress() {
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_SERVICE_ADDRESSES)
 				.orderBy(Tables.EH_EXPRESS_SERVICE_ADDRESSES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, ExpressServiceAddresse.class));
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressServiceAddress.class));
 	}
 	
+	@Override
+	public List<ExpressServiceAddress> listExpressServiceAddresseByOwner(ExpressOwner owner) {
+		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_SERVICE_ADDRESSES)
+				.where(Tables.EH_EXPRESS_SERVICE_ADDRESSES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+				.and(Tables.EH_EXPRESS_SERVICE_ADDRESSES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+				.and(Tables.EH_EXPRESS_SERVICE_ADDRESSES.OWNER_ID.eq(owner.getOwnerId()))
+				.and(Tables.EH_EXPRESS_SERVICE_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_EXPRESS_SERVICE_ADDRESSES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressServiceAddress.class));
+	}
+
 	private EhExpressServiceAddressesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

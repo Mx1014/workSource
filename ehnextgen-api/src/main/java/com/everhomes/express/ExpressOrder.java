@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class ExpressOrder extends EhExpressOrders {
 	
-	private static final long serialVersionUID = 2109046241051783902L;
+	private static final long serialVersionUID = -4795356810851460784L;
 	
 	@Override
 	public String toString() {

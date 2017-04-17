@@ -3,6 +3,8 @@ package com.everhomes.express;
 
 import java.util.List;
 
+import com.everhomes.rest.express.ExpressOwner;
+
 public interface ExpressCompanyProvider {
 
 	void createExpressCompany(ExpressCompany expressCompany);
@@ -12,5 +14,7 @@ public interface ExpressCompanyProvider {
 	ExpressCompany findExpressCompanyById(Long id);
 
 	List<ExpressCompany> listExpressCompany();
+
+	List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner);
 
 }

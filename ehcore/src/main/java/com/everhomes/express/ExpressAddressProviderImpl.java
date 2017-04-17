@@ -19,7 +19,7 @@ import com.everhomes.server.schema.tables.pojos.EhExpressAddresses;
 import com.everhomes.util.ConvertHelper;
 
 @Component
-public class ExpressAddresseProviderImpl implements ExpressAddresseProvider {
+public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -28,31 +28,31 @@ public class ExpressAddresseProviderImpl implements ExpressAddresseProvider {
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createExpressAddresse(ExpressAddresse expressAddresse) {
+	public void createExpressAddress(ExpressAddress expressAddress) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhExpressAddresses.class));
-		expressAddresse.setId(id);
-		getReadWriteDao().insert(expressAddresse);
+		expressAddress.setId(id);
+		getReadWriteDao().insert(expressAddress);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhExpressAddresses.class, null);
 	}
 
 	@Override
-	public void updateExpressAddresse(ExpressAddresse expressAddresse) {
-		assert (expressAddresse.getId() != null);
-		getReadWriteDao().update(expressAddresse);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressAddresses.class, expressAddresse.getId());
+	public void updateExpressAddress(ExpressAddress expressAddress) {
+		assert (expressAddress.getId() != null);
+		getReadWriteDao().update(expressAddress);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhExpressAddresses.class, expressAddress.getId());
 	}
 
 	@Override
-	public ExpressAddresse findExpressAddresseById(Long id) {
+	public ExpressAddress findExpressAddressById(Long id) {
 		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressAddresse.class);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressAddress.class);
 	}
 	
 	@Override
-	public List<ExpressAddresse> listExpressAddresse() {
+	public List<ExpressAddress> listExpressAddress() {
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_ADDRESSES)
 				.orderBy(Tables.EH_EXPRESS_ADDRESSES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, ExpressAddresse.class));
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressAddress.class));
 	}
 	
 	private EhExpressAddressesDao getReadWriteDao() {

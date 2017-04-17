@@ -9,28 +9,28 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>serviceAddressDTOs: 服务地址列表，参考{@link com.everhomes.rest.express.ServiceAddressDTO}</li>
+ * <li>serviceAddressDTOs: 服务地址列表，参考{@link com.everhomes.rest.express.ExpressServiceAddressDTO}</li>
  * </ul>
  */
 public class ListServiceAddressResponse {
 
-	@ItemType(ServiceAddressDTO.class)
-	private List<ServiceAddressDTO> serviceAddressDTOs;
+	@ItemType(ExpressServiceAddressDTO.class)
+	private List<ExpressServiceAddressDTO> serviceAddressDTOs;
 
 	public ListServiceAddressResponse() {
 
 	}
 
-	public ListServiceAddressResponse(List<ServiceAddressDTO> serviceAddressDTOs) {
+	public ListServiceAddressResponse(List<ExpressServiceAddressDTO> serviceAddressDTOs) {
 		super();
 		this.serviceAddressDTOs = serviceAddressDTOs;
 	}
 
-	public List<ServiceAddressDTO> getServiceAddressDTOs() {
+	public List<ExpressServiceAddressDTO> getServiceAddressDTOs() {
 		return serviceAddressDTOs;
 	}
 
-	public void setServiceAddressDTOs(List<ServiceAddressDTO> serviceAddressDTOs) {
+	public void setServiceAddressDTOs(List<ExpressServiceAddressDTO> serviceAddressDTOs) {
 		this.serviceAddressDTOs = serviceAddressDTOs;
 	}
 
