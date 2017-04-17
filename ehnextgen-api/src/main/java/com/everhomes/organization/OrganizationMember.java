@@ -17,6 +17,8 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	private java.lang.Long creatorUid;
 	
 	private boolean isCreate;
+
+	private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
 	
 	private static final long serialVersionUID = 2994038655987093227L;
 
@@ -54,8 +56,15 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	}
 
 
+    public String getApplyDescription() {
+        return applyDescription;
+    }
 
-	public void setInitial(String initial) {
+    public void setApplyDescription(String applyDescription) {
+        this.applyDescription = applyDescription;
+    }
+
+    public void setInitial(String initial) {
 		this.initial = initial;
 	}
 

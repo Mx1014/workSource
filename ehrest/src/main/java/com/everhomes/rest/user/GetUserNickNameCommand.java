@@ -3,14 +3,14 @@ package com.everhomes.rest.user;
 import com.everhomes.util.StringHelper;
 
 /**
+ * 获取用户昵称
  * <ul>
- *     <li>uid:用户ID</li>
- *     <li>uuid:用户唯一的标识</li>
+ * <li>uid: 用户id</li>
  * </ul>
  */
-public class GetUserSnapshotInfoCommand {
+public class GetUserNickNameCommand {
+
     private Long uid;
-    private String uuid;
 
     public Long getUid() {
         return uid;
@@ -18,14 +18,6 @@ public class GetUserSnapshotInfoCommand {
 
     public void setUid(Long uid) {
         this.uid = uid;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     @Override

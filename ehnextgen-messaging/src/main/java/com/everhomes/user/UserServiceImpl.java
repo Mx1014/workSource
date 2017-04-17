@@ -40,6 +40,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -93,7 +95,6 @@ import com.everhomes.rest.user.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -112,15 +113,15 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.sql.*;
+import java.nio.charset.Charset;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -257,6 +258,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private ConfigurationProvider configProvider;
 
+    @Autowired
+    private GroupProvider groupProvider;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -1931,11 +1934,22 @@ public class UserServiceImpl implements UserService {
 		user.setAvatarUri(avatarUri);
 		try{
 			String url=contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId());
-			user.setAvatarUrl(url);
+
+			// 用户的头像设置为固定的地址    add by xq.tian  2017/04/19
+            // String encode = encodeUrl("avatar/" + user.getId());
+            // url = url.replaceAll("image/.+?\\?", String.format("%s%s%s", "image/", encode, "?"));
+
+            user.setAvatarUrl(url);
 		}catch(Exception e){
 			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri, e);
 		}
 	}
+
+    public static String encodeUrl(String path) {
+        byte[] code = Base64.getEncoder().encode(path.getBytes(Charset.forName("utf-8")));
+        return new String(code, Charset.forName("utf-8")).replace("/", "_").replace("+", "-").replace("=", "");
+    }
+
 	@Override
 	public String getUserAvatarUriByGender(Long userId, Integer namespaceId, Byte gener) {
 		UserGender userGender = UserGender.fromCode(gener);
@@ -3596,7 +3610,124 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
-	private String getInitBizInfoDTOSign(InitBizInfoDTO response, String secretKey) {
+    @Override
+    public UserNotificationSettingDTO updateUserNotificationSetting(UpdateUserNotificationSettingCommand cmd) {
+        UserMuteNotificationFlag flag = UserMuteNotificationFlag.fromCode(cmd.getMuteFlag());
+        if (flag != null) {
+            User user = UserContext.current().getUser();
+            String lockFlag = CoordinationLocks.USER_NOTIFICATION_SETTING.getCode() + user.getId() + cmd.getTargetType() + cmd.getTargetId();
+            Tuple<UserNotificationSetting, Boolean> tuple = coordinationProvider.getNamedLock(lockFlag).enter(() -> {
+                UserNotificationSetting setting = userProvider.findUserNotificationSetting(EntityType.USER.getCode(), user.getId(), cmd.getTargetType(), cmd.getTargetId());
+                if (setting != null) {
+                    setting.setMuteFlag(cmd.getMuteFlag());
+                    setting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                    setting.setUpdateUid(user.getId());
+                    userProvider.updateUserNotificationSetting(setting);
+                } else {
+                    setting = new UserNotificationSetting();
+                    setting.setOwnerType(EntityType.USER.getCode());
+                    setting.setOwnerId(user.getId());
+                    setting.setTargetType(cmd.getTargetType());
+                    setting.setTargetId(cmd.getTargetId());
+                    setting.setMuteFlag(cmd.getMuteFlag());
+                    setting.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    setting.setAppId(AppConstants.APPID_DEFAULT);
+                    setting.setCreateTime(Timestamp.from(Instant.now()));
+                    setting.setCreatorUid(user.getId());
+                    userProvider.createUserNotificationSetting(setting);
+                }
+                return setting;
+            });
+            return tuple.second() ? toUserNotificationSettingDTO(tuple.first()) : new UserNotificationSettingDTO();
+        }
+        return new UserNotificationSettingDTO();
+    }
+
+    private UserNotificationSettingDTO toUserNotificationSettingDTO(UserNotificationSetting setting) {
+        if (setting != null) {
+            return ConvertHelper.convert(setting, UserNotificationSettingDTO.class);
+        }
+        return new UserNotificationSettingDTO();
+    }
+
+    @Override
+    public UserNotificationSettingDTO getUserNotificationSetting(GetUserNotificationSettingCommand cmd) {
+        User user = UserContext.current().getUser();
+        UserNotificationSetting setting = userProvider.findUserNotificationSetting(EntityType.USER.getCode(), user.getId(), cmd.getTargetType(), cmd.getTargetId());
+        return toUserNotificationSettingDTO(setting);
+    }
+
+    @Override
+    public String getUserNickName(GetUserNickNameCommand cmd) {
+        if (cmd.getUid() == null) {
+            LOGGER.error("Invalid cmd, {}", cmd.toString());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid cmd, %s", cmd.toString());
+        }
+        UserInfo userInfo = this.getUserSnapshotInfo(cmd.getUid());
+        if (userInfo != null) {
+            return userInfo.getNickName();
+        }
+        return null;
+    }
+
+    @Override
+    public MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd) {
+        MessageSessionInfoDTO dto = new MessageSessionInfoDTO();
+        com.everhomes.rest.common.EntityType targetType = com.everhomes.rest.common.EntityType.fromCode(cmd.getTargetType());
+        User user = UserContext.current().getUser();
+
+        UserNotificationSetting setting = userProvider.findUserNotificationSetting(
+                EntityType.USER.getCode(), user.getId(), cmd.getTargetType(), cmd.getTargetId());
+        if (setting != null) {
+            dto.setMuteFlag(setting.getMuteFlag());
+        } else {
+            dto.setMuteFlag(UserMuteNotificationFlag.NONE.getCode());
+        }
+
+        switch (targetType) {
+            case USER:
+                UserInfo userInfo = this.getUserSnapshotInfo(cmd.getTargetId());
+                if (userInfo != null) {
+                    dto.setName(userInfo.getNickName());
+                    dto.setAvatar(userInfo.getAvatarUrl());
+                    if (userInfo.getId() < User.MAX_SYSTEM_USER_ID) {
+                        dto.setMessageType(UserMessageType.NOTICE.getCode());
+                    } else {
+                        dto.setMessageType(UserMessageType.MESSAGE.getCode());
+                    }
+                } else {
+                    LOGGER.warn("userInfo are not founded, cmd={}", cmd.toString());
+                }
+                break;
+            case GROUP:
+                Group group = groupProvider.findGroupById(cmd.getTargetId());
+                if (group != null) {
+                    dto.setName(group.getName());
+                    dto.setMessageType(UserMessageType.MESSAGE.getCode());
+                    String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
+                    dto.setAvatar(avatar);
+                } else {
+                    LOGGER.warn("group are not founded, cmd={}", cmd.toString());
+                }
+                break;
+            default:
+                LOGGER.warn("targetType are not founded, cmd={}", cmd.toString());
+        }
+        return dto;
+    }
+
+    private String parseUri(String uri, String ownerType, Long ownerId) {
+        String avatar = null;
+        try {
+            avatar = contentServerService.parserUri(uri, ownerType, ownerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return avatar;
+    }
+
+    private String getInitBizInfoDTOSign(InitBizInfoDTO response, String secretKey) {
 		Map<String,String> params = new HashMap<String, String>();
 		params.put("label", response.getLabel());
 		params.put("namespaceId", response.getNamespaceId()+"");

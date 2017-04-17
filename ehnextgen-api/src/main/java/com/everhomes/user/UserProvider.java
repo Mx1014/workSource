@@ -8,7 +8,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
 
@@ -105,4 +104,27 @@ public interface UserProvider {
 
     List<User> listUserByNickName(String keyword);
     List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator);
+
+    /**
+     * 查询用户免打扰设置
+     * @param ownerType
+     * @param ownerId
+     * @param targetType
+     * @param targetId
+     * @return
+     */
+    UserNotificationSetting findUserNotificationSetting(String ownerType, Long ownerId, String targetType, Long targetId);
+
+    /**
+     * 修改免打扰设置
+     * @param setting
+     */
+    void updateUserNotificationSetting(UserNotificationSetting setting);
+
+    /**
+     * 创建免打扰记录
+     * @param setting
+     * @return  返回该记录的id
+     */
+    long createUserNotificationSetting(UserNotificationSetting setting);
 }

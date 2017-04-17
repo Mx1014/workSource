@@ -89,4 +89,6 @@ public interface BusinessService {
     void createBusinessPromotion(CreateBusinessPromotionCommand cmd);
 
     void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd);
+
+    void testTransaction();
 }

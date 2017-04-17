@@ -60,6 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.MemberApplyActionData;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -70,6 +71,7 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
@@ -101,8 +103,6 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -122,7 +122,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -4564,6 +4563,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setCreatorUid(user.getId());
 			member.setNickName(user.getNickName());
 			member.setAvatar(user.getAvatar());
+			member.setApplyDescription(cmd.getContactDescription());
 
 			return member;
 		});
@@ -6277,8 +6277,12 @@ System.out.println();
 		Map<String, String> map = new HashMap<String, String>();
 
         map.put("enterpriseName", org.getName());
-
         map.put("userName", member.getContactName());
+        if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
+            map.put("description", String.format("(%s)", member.getApplyDescription()));
+        } else {
+            map.put("description", "");
+        }
 
         String scope = EnterpriseNotifyTemplateCode.SCOPE;
 
@@ -6311,9 +6315,16 @@ System.out.println();
 
          includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
          if(includeList.size() > 0) {
+
              QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
-             sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant,
-                 MetaObjectType.ENTERPRISE_REQUEST_TO_JOIN, metaObject);
+             metaObject.setRequestInfo(notifyTextForApplicant);
+
+             MemberApplyActionData actionData = new MemberApplyActionData();
+             actionData.setMetaObject(metaObject);
+
+             String routerUri = Action2Router.action(ActionType.ENTERPRISE_MEMBER_APPLY, actionData, null);
+             sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant, routerUri);
+
              if(LOGGER.isDebugEnabled()) {
                  LOGGER.debug("Send waiting approval message to admin member in organization, userId=" + user.getId()
                      + ", organizationId=" + org.getId() + ", adminList=" + includeList);
@@ -6366,7 +6377,6 @@ System.out.println();
 		// 消息只发给公司的管理人员  by sfyan 20170213
 		includeList = this.includeOrgList(org, member.getTargetId());
 		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
-
 	}
 
 	private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -6463,6 +6473,42 @@ System.out.println();
 	   return includeList;
    }
 
+	private void sendRouterEnterpriseNotificationUseSystemUser(
+	        List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if (message != null && message.length() != 0) {
+			MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+            if (includeList != null && includeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.INCLUDE,
+						StringHelper.toJsonString(includeList));
+            }
+            if (excludeList != null && excludeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
+						StringHelper.toJsonString(excludeList));
+            }
+            RouterMetaObject mo = new RouterMetaObject();
+            mo.setUrl(routerUri);
+            messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            messageDto.getMeta().put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+
+            if (includeList != null && includeList.size() > 0) {
+                if (excludeList != null && excludeList.size() > 0) {
+                    includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+                }
+                includeList.forEach(targetId -> {
+                    messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                });
+            }
+        }
+	}
+
 	private void sendEnterpriseNotification(Long groupId,
 			List<Long> includeList, List<Long> excludeList, String message,
 			MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
@@ -6491,6 +6537,7 @@ System.out.println();
 				messageDto.getMeta().put(MessageMetaConstant.META_OBJECT,
 						StringHelper.toJsonString(metaObject));
 			}
+
 			messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
 					AppConstants.APPID_MESSAGING, channelType, channelToken,
 					messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());

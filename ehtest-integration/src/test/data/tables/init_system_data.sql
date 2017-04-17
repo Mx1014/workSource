@@ -411,6 +411,23 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `names
 	(4180, 32, '门禁管理', NULL, NULL, 999990, 'EhOrganizations', 1001132);
 /*!40000 ALTER TABLE `eh_acl_roles` ENABLE KEYS */;
 
+-- 正在导出表  ehcore_shenye.eh_acl_privileges 的数据：~69 rows (大约)
+/*!40000 ALTER TABLE `eh_acl_privileges` DISABLE KEYS */;
+-- truncate table `eh_acl_privileges`;
+ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, 'Visible');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(3, 0, 'Read');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(4, 0, 'Create');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(5, 0, 'Write');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(6, 0, 'Delete');
+
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(100, 2, 'forum.topic.new');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(101, 2, 'forum.topic.delete');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(102, 2, 'forum.reply.new');
+INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(103, 2, 'forum.reply.delete');
+/*!40000 ALTER TABLE `eh_acl_roles` ENABLE KEYS */;
+
 -- 正在导出表  ehcore_shenye.eh_acl_role_assignments 的数据：~33 rows (大约)
 /*!40000 ALTER TABLE `eh_acl_role_assignments` DISABLE KEYS */;
 -- truncate table `eh_acl_role_assignments`;
@@ -5776,7 +5793,7 @@ INSERT INTO `eh_users` (`id`, `uuid`, `account_name`, `nick_name`, `avatar`, `st
 	(247615, '8542019a-6f45-40c2-9241-ec45d0d61ad4', '19103795498', '刘帅', 'cs://1/image/aW1hZ2UvTVRwa05HVTVNR0UxWWpBM05qZ3hZemN6T1dVeFpEUmtZamxrTURWbU1XUm1aZw', NULL, 1, 0, 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'zh_CN', NULL, NULL, '2017-02-07 16:53:57', NULL, NULL, NULL, '117.136.40.221', NULL, 1, NULL, '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', 999992, '', NULL, NULL, NULL, NULL, '2017-02-07 16:54:23'),
 	(247626, '23595178-b191-4e4f-90e8-d42d51f95436', '19103795509', '。。。。。', NULL, NULL, 1, 0, 1, 1, NULL, NULL, NULL, 240111044331051300, NULL, NULL, NULL, NULL, NULL, 'zh_CN', NULL, NULL, '2017-02-07 20:29:18', NULL, NULL, NULL, '27.38.37.91', NULL, 1, NULL, '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', 999992, '', NULL, NULL, NULL, NULL, '2017-02-07 20:29:55'),
 	(247628, '1bc73992-aad3-446d-beee-bc81cbe1cb67', '19104795511', 'tt', NULL, NULL, 1, 0, 1, 1, NULL, NULL, NULL, 240111044331051300, NULL, NULL, NULL, NULL, NULL, 'zh_CN', NULL, NULL, '2017-02-09 17:05:50', NULL, NULL, NULL, '10.1.110.27', NULL, 1, NULL, 'd53b1af355315287b88b4403471e16f7', 'ea2a3975d8b4b9e5d240cea47e4ca8ffda816c1bb058b2c58be5ac9ea5aa604c', 999992, '', NULL, NULL, NULL, NULL, '2017-02-09 17:06:19');
-INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (11, 999995, UUID(), 'tt', '小彤彤', 1, 
+INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (11, 999992, UUID(), 'tt', '小彤彤', 1, 
     NOW(), '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');	
 
 /*!40000 ALTER TABLE `eh_users` ENABLE KEYS */;
@@ -6861,6 +6878,17 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	(1172, 20850, '', 'EhNamespaces', 999992, 2),
 	(1173, 33000, '', 'EhNamespaces', 999992, 2);
 /*!40000 ALTER TABLE `eh_web_menu_scopes` ENABLE KEYS */;
+
+
+INSERT INTO `eh_acl_role_assignments`(`id`, `owner_type`, `owner_id`, `target_type`, `target_id`, `role_id`, `creator_uid`, `create_time`)
+	VALUES(1, 'system', NULL, 'EhUsers', 1, 2, 1, '2015-09-28 17:03:22');
+
+INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
+	VALUES(1, 'system', NULL, 1, 1, 2, 0, 1, '2015-09-28 17:03:23');
+INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
+	VALUES(2, 'extension', NULL, 1, 2, 8, 0, 1, '2015-09-28 17:03:23');	
+
+
 SET foreign_key_checks = 1;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
