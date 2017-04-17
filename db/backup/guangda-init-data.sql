@@ -751,3 +751,9 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('1', 999979, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修', '0');
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('2', 999979, '月卡充值', 'zl://parking/query?displayName=停车', '0');
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ('3', 999979, '审批', 'zl://approval/create?approvalId={}&sourceId={}', '0');
+
+-- 产品把企业展厅服务联盟换成企业列表 add by xiongying20170417
+update eh_launch_pad_items set action_data = '{"type":3}' where item_label = '企业展厅';
+update eh_launch_pad_items set action_type = 34 where item_label = '企业展厅';
+delete from eh_service_alliance_categories where id = 200818;
+delete from eh_service_alliances where name = '企业展厅';
