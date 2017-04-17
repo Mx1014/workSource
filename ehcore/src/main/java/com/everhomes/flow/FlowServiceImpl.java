@@ -7,7 +7,6 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -21,36 +20,27 @@ import com.everhomes.news.AttachmentProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
-import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
-import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-
+import com.everhomes.util.*;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +52,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -1695,9 +1684,11 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		for(Long userId : users) {
-			
-			LOGGER.debug("flowtimeout tick message, text={}, userId={}", dataStr, userId);
-			
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("flowtimeout tick message, text={}, userId={}", dataStr, userId);
+            }
+
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
@@ -1706,6 +1697,22 @@ public class FlowServiceImpl implements FlowService {
 	        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 	        messageDto.setBody(dataStr);
 	        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+
+            FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
+            actionData.setFlowCaseId(flowCase.getId());
+            actionData.setFlowUserType(dto.getFlowUserType());
+            actionData.setModuleId(ctx.getModule().getModuleId());
+
+	        RouterMetaObject rmo = new RouterMetaObject();
+	        rmo.setUrl(Action2Router.action(ActionType.FLOW_CASE_DETAIL, actionData, null));
+
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, rmo.toString());
+            meta.put(MessageMetaConstant.MESSAGE_SUBJECT, ctx.getModuleName());
+
+            messageDto.setMeta(meta);
 	        
 	        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
 	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());

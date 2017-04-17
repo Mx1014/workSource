@@ -162,15 +162,29 @@ public class ContentServerManagerImpl implements ContentServerMananger {
     private void buildMetaData(MessageHandleRequest request) {
         String resourceId = Generator.decodeUrl(request.getObjectId());
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
-        request.setFilename(resource.getResourceName());
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("build object meta data {}", resource.getResourceName());
+        if (resource != null) {
+            request.setFilename(resource.getResourceName());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("build object meta data {}", resource.getResourceName());
+            }
         }
     }
 
     private String lookupInvoke(LoginToken login, String resourceId) {
         String orginResourceId = resourceId;
         resourceId = Generator.decodeUrl(resourceId);
+
+        // user的头像使用固定的链接，但是返回给contentserver的md5又不是固定的     add by xq.tian  2017/04/19
+        /*if (resourceId.startsWith("avatar/")) {
+            String uid = resourceId.substring(resourceId.indexOf("/") + 1, resourceId.length());
+            UserInfo userInfo = userService.getUserSnapshotInfo(Long.parseLong(uid));
+            String avatarUri = userInfo.getAvatarUri();
+            avatarUri = avatarUri.substring(avatarUri.lastIndexOf("/") + 1, avatarUri.length());
+            avatarUri = Generator.decodeUrl(avatarUri);
+            avatarUri = avatarUri.substring(avatarUri.lastIndexOf("/") + 1, avatarUri.length());
+            return avatarUri;
+        }*/
+
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
             LOGGER.error("Resource not found, orginResourceId=" + orginResourceId 
@@ -179,7 +193,6 @@ public class ContentServerManagerImpl implements ContentServerMananger {
                     "Resource file not found");
         }
         return resource.getResourceMd5();
-
     }
 
     private String deleteInvoke(LoginToken login, String resourceId) {

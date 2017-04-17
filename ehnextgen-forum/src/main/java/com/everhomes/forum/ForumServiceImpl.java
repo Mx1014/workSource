@@ -56,14 +56,8 @@ import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
 import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.messaging.InnerLinkBody;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaContent;
-import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
@@ -1850,9 +1844,11 @@ public class ForumServiceImpl implements ForumService {
 	
 	private String getPostNameUrl(Post post) {
 		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {
-			return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
+            return Action2Router.action(ActionType.ACTIVITY_DETAIL, new ActivityDetailActionData(post.getForumId(), post.getId()), null);
+            // return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
 		}
-		return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
+        return Action2Router.action(ActionType.POST_DETAILS, new PostDetailActionData(post.getForumId(), post.getId()), null);
+		// return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
 	}
 
 	private String getLocalTemplateString(Integer namespaceId, String scope, int code, String locale)	{
