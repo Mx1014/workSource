@@ -243,13 +243,12 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
     public AssetBillStatDTO getAssetBillStat(String tenantType, Long tenantId, Long addressId) {
         List<AssetBill> bills = assetProvider.listUnpaidBills(tenantType, tenantId, addressId);
         AssetBillStatDTO dto = new AssetBillStatDTO();
-        BigDecimal unpaidAmount = BigDecimal.ZERO;
+        dto.setUnpaidAmount(BigDecimal.ZERO);
         Set<Timestamp> accountPeriod = new HashSet<>();
         bills.forEach(bill -> {
-            unpaidAmount.add(bill.getPeriodUnpaidAccountAmount());
+        	dto.setUnpaidAmount(dto.getUnpaidAmount().add(bill.getPeriodAccountAmount()));
             accountPeriod.add(bill.getAccountPeriod());
         });
-        dto.setUnpaidAmount(unpaidAmount);
         BigDecimal unpaidMonth = new BigDecimal(accountPeriod.size());
         dto.setUnpaidMonth(unpaidMonth);
         return dto;
