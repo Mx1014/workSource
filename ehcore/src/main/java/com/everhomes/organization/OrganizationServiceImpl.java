@@ -8325,9 +8325,16 @@ System.out.println();
 			if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())){
 				User user = userProvider.findUserById(r.getTargetId());
 				if(null != user){
-					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+					String avatarUri = user.getAvatar();
+					if(StringUtils.isEmpty(avatarUri))
+						avatarUri = userService.getUserAvatarUriByGender(user.getId(),user.getNamespaceId(), user.getGender());
+
+					dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
 					dto.setNickName(dto.getNickName());
 				}
+			}else{
+				String avatarUri = userService.getUserAvatarUriByGender(0L,UserContext.getCurrentNamespaceId(), dto.getGender());
+				dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
 			}
 
 			// 是否展示手机号

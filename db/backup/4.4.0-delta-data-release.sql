@@ -57,8 +57,16 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('shake.open.door', '0', 'use shake open door function  0:not, 1:yes', '999983', NULL);
 
 -- add by sw 20170401
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
+	
+update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
+update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
+
+-- 华润招租管理 add by sw 20170405
+UPDATE eh_launch_pad_items SET action_type = 28, action_data = '' where item_label = '看房' and namespace_id = 999985;
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
-	VALUES ('3', '999985', '1', '1', '1', '1', '1');
+	VALUES ('3', '999985', '1', '1', '1', '1', '0');
 SET @eh_web_menu_scopes = (SELECT max(id) FROM eh_web_menu_scopes);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40100', '', 'EhNamespaces', '999985', '2');
@@ -69,8 +77,41 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@eh_web_menu_scopes := @eh_web_menu_scopes + 1), '40130', '', 'EhNamespaces', '999985', '2');	
 
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ('app.route.browser.outer.uri', 'zl://browser/i/%s', '', '0', NULL);
+-- 全志添加 文件管理菜单 add by sw 20170405
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (41500, '文件管理', 40000, NULL, 'react:/file-management/file-upload/41500', 0, 2, '/40000/41500', 'park', 390);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (10135, 0, '文件管理', '文件管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10135, 41500, '文件管理', 1, 1, '文件管理  全部权限', 202);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 10135, 1001, 'EhAclRoles', 0, 1, NOW());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41500, '', 'EhNamespaces', 999980, 2);
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES (41500, '文件管理', 40000, '/40000/41500', 0, 2, 2, 0, UTC_TIMESTAMP());
+
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41500, 1, 10135, NULL, '0', UTC_TIMESTAMP());
+
+SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999980, 41500, '文件管理', 'EhNamespaces', 999980, NULL, 2);
+
 	
 update eh_configurations set `value` = '/park-entry/dist/index.html#/rent_detail/%s' WHERE `name` = 'apply.entry.detail.url';
 update eh_configurations set `value` = '/park-entry/dist/index.html#/building_detail/%s' WHERE `name` = 'apply.entry.building.detail.url';
+
+-- 视频会议加入会议协议格式 by xiongying20170405
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('videoconf.notification', '4', 'zh_CN', '加入会议协议格式', 'cfcloud://www.confcloud.cn/join?confno=${meetingNo}', '0');
+

@@ -85,4 +85,8 @@ public interface ActivityProivider {
 	List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId);
 
 	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
+	
+	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer offset, int pageSize);
+	
+	Integer countActivityRoster(Long activityId, Integer status);
 }

@@ -307,7 +307,7 @@ public class AddressProviderImpl implements AddressProvider {
 	
 	 @Override
 	 public Address findAddressByCommunityAndAddress(Long cityId, Long areaId, Long communityId, String addressName) {
-		 int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		 int namespaceId = UserContext.getCurrentNamespaceId();
 		 List<Address> addresses = new ArrayList<Address>();
 	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
 	                (DSLContext context, Object reducingContext)-> {

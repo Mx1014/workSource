@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +88,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Autowired
     private DbProvider dbProvider;
-	
+
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
@@ -228,31 +230,33 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
     @Override
     public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order,String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("Parking pay failed, order={}", order);
-			}
-			else {
-				ResultHolder resultHolder = recharge(order);
-				if(resultHolder.isSuccess()){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
+
+			if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+				if (payStatus.toLowerCase().equals("fail")) {
+					LOGGER.error("Parking pay failed, order={}", order);
+				} else {
+					ResultHolder resultHolder = recharge(order);
+					if (resultHolder.isSuccess()) {
+						dbProvider.execute((TransactionStatus transactionStatus) -> {
+							order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+							order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+							parkingProvider.updateParkingRechargeOrder(order);
+
+							String key = "parking-recharge" + order.getId();
+							String value = String.valueOf(order.getId());
+							Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+							RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+
+							LOGGER.error("Delete parking order key, key={}", key);
+							redisTemplate.delete(key);
+
+							return null;
+						});
+					}
 				}
 			}
-		}
+
+
     }
     
     

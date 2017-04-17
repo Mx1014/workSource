@@ -6,10 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
-import com.everhomes.rest.techpark.expansion.LeaseIssuerType;
+import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
@@ -99,6 +96,8 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
+		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
+
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
