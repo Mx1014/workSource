@@ -3,6 +3,8 @@ package com.everhomes.parking;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +28,23 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
     @Autowired
     private ParkingProvider parkingProvider;
-    
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
 		
     	ParkingRechargeOrder order = onlinePayBillSuccess(cmd);
     	String venderName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-    	handler.notifyParkingRechargeOrderPayment(order,cmd.getPayStatus());
-		
+
+		//支付宝回调时，可能会同时回调多次，
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
+
+			handler.notifyParkingRechargeOrderPayment(order,cmd.getPayStatus());
+			return null;
+		});
 	}
 
 	@Override
