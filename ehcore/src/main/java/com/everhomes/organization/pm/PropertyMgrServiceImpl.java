@@ -107,7 +107,10 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -5534,24 +5537,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private java.sql.Date parseDate(String date) {
-		try {
-			return java.sql.Date.valueOf(date);
-		} catch (Exception e) {
-			LOGGER.error("Parse date error.", e);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_BIRTHDAY_ERROR,
-					"Parse date %s error.", date);
-		}
-	}
+        if (date != null) {
+            if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                TemporalAccessor accessor = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(date);
+                LocalDate ld = LocalDate.from(accessor);
+                return java.sql.Date.valueOf(ld);
+            } else if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
+                TemporalAccessor accessor = DateTimeFormatter.ofPattern("yyyy/MM/dd").parse(date);
+                LocalDate ld = LocalDate.from(accessor);
+                return java.sql.Date.valueOf(ld);
+            }
+        }
+        return null;
+    }
 
 	private Byte parseGender(String gender) {
 		LocaleString localeString = localeStringProvider.findByText(UserLocalStringCode.SCOPE, gender, currentLocale());
-		if (localeString == null) {
-			LOGGER.error("The gender {} is invalid.", gender);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The gender %s is invalid.", gender);
-		}
-		return Byte.valueOf(localeString.getCode());
-	}
+		if (localeString != null) {
+            return Byte.valueOf(localeString.getCode());
+        }
+        return UserGender.UNDISCLOSURED.getCode();
+    }
 
 	private Byte parseLivingStatus(String livingStatus) {
 		LocaleString localeString = localeStringProvider.findByText(
@@ -5579,9 +5585,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private Long parseOrgOwnerTypeId(String orgOwnerTypeName) {
 		OrganizationOwnerType type = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(orgOwnerTypeName);
 		if (type == null) {
-			LOGGER.error("The organization owner type {} is not exist.", type);
+			LOGGER.error("The organization owner type {} is not exist.", orgOwnerTypeName);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The organization owner type %s is not exist.", type);
+					"The organization owner type %s is not exist.", orgOwnerTypeName);
 		}
 		return type.getId();
 	}
