@@ -2,6 +2,7 @@
 -- DROP TABLE IF EXISTS `eh_express_service_addresses`;
 CREATE TABLE `eh_express_service_addresses` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `name` VARCHAR(128) COMMENT 'the name of express service address',
@@ -18,6 +19,7 @@ CREATE TABLE `eh_express_service_addresses` (
 -- DROP TABLE IF EXISTS `eh_express_companies`;
 CREATE TABLE `eh_express_companies` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'parent id, the id of express company under zuolin',
@@ -35,6 +37,7 @@ CREATE TABLE `eh_express_companies` (
 -- DROP TABLE IF EXISTS `eh_express_users`;
 CREATE TABLE `eh_express_users` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `organization_id` BIGINT COMMENT 'the id of organization',
@@ -52,6 +55,7 @@ CREATE TABLE `eh_express_users` (
 -- DROP TABLE IF EXISTS `eh_express_addresses`;
 CREATE TABLE `eh_express_addresses` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `user_name` VARCHAR(128),
@@ -77,12 +81,25 @@ CREATE TABLE `eh_express_addresses` (
 -- DROP TABLE IF EXISTS `eh_express_orders`;
 CREATE TABLE `eh_express_orders` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `order_no` VARCHAR(64) COMMENT 'order number',
   `bill_no` VARCHAR(64) COMMENT 'bill number',
-  `send_address_id` BIGINT COMMENT 'send express address id',
-  `receive_address_id` BIGINT COMMENT 'receive express address id',
+  `send_name` VARCHAR(128),
+  `send_phone` VARCHAR(16),
+  `send_organization` VARCHAR(128),
+  `send_province` VARCHAR(64),
+  `send_city` VARCHAR(64),
+  `send_county` VARCHAR(64),
+  `send_detail_address` VARCHAR(512),
+  `receive_name` VARCHAR(128),
+  `receive_phone` VARCHAR(16),
+  `receive_organization` VARCHAR(128),
+  `receive_province` VARCHAR(64),
+  `receive_city` VARCHAR(64),
+  `receive_county` VARCHAR(64),
+  `receive_detail_address` VARCHAR(512),
   `express_company_id` BIGINT COMMENT 'express company id',
   `send_type` TINYINT COMMENT '1. standard express',
   `send_mode` TINYINT COMMENT '1. self send',
@@ -99,10 +116,12 @@ CREATE TABLE `eh_express_orders` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
 -- 快递查询历史表，add by tt, 20170413
 -- DROP TABLE IF EXISTS `eh_express_query_histories`;
 CREATE TABLE `eh_express_query_histories` (
   `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `express_company_id` BIGINT COMMENT 'express company id',
   `bill_no` VARCHAR(64) COMMENT 'bill number',
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
