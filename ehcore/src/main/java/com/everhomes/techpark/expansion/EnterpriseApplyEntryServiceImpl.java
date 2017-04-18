@@ -327,7 +327,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private BuildingDTO proessBuildingDTO(Building building){
 		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class);
 		buildingDTO.setBuildingName(buildingDTO.getName());
-		buildingDTO.setName(org.springframework.util.StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
+		buildingDTO.setName(StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
 		return buildingDTO;
 	}
 
