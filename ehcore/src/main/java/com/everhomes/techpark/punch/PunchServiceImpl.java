@@ -778,20 +778,18 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
-		PunchTimeRule punchTimeRule = this.punchProvider.findPunchTimeRuleById(pr.getTimeRuleId());
-		 
-		
+
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
+		//没有规则就是没有排班,就是非工作日
 		if (null == punchTimeRule)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"公司还没有打卡规则 ");
+			return pdl;
 		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
-			if (!isWorkDay(logDay.getTime(),pr)|| dateSF.get().format(now).equals(dateSF.get().format(logDay.getTime()))) {
-				// 如果非工作日或者当天，不增pdl直接下一天
-				return null;
-			} 
+//			if (!isWorkDay(logDay.getTime(),pr)|| dateSF.get().format(now).equals(dateSF.get().format(logDay.getTime()))) {
+//				// 如果非工作日或者当天，不增pdl直接下一天
+//				return null;
+//			} 
 			pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.UNPUNCH.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.UNPUNCH.getCode());
@@ -813,14 +811,14 @@ public class PunchServiceImpl implements PunchService {
 				pdl.getPunchLogs().add(arriveLogDTO);
 				PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 				pdl.getPunchLogs().add(noPunchLogDTO2);
-				if (!isWorkDay(logDay.getTime(),pr)){
-					// 如果非工作日 NORMAL
-					pdl.setPunchStatus(PunchStatus.NORMAL.getCode()); 
-					pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
-					pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
-					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-					return pdl;
-				}
+//				if (!isWorkDay(logDay.getTime(),pr)){
+//					// 如果非工作日 NORMAL
+//					pdl.setPunchStatus(PunchStatus.NORMAL.getCode()); 
+//					pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+//					pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
+//					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//					return pdl;
+//				}
 				if (dateSF.get().format(now).equals(
 								dateSF.get().format(logDay.getTime()))) {
 					//今天的话,exception
@@ -1235,10 +1233,7 @@ public class PunchServiceImpl implements PunchService {
 		
 //				punchProvider.getPunchTimeRuleById(pr.getTimeRuleId());
 		PunchTimeRule ptr = getPunchTimeRuleByRuleIdAndDate(pr.getId(),punCalendar.getTime());
-		if (null == ptr  )
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡时间规则");
+		 
 		Calendar yesterday = Calendar.getInstance(); 
 		yesterday.setTime(punCalendar.getTime());
 		yesterday.add(Calendar.DATE, -1);
@@ -1248,15 +1243,15 @@ public class PunchServiceImpl implements PunchService {
 		Long yesterdaySplitTime =  5*3600*1000L;
 		
 		
-		if(null != ptr.getDaySplitTimeLong())
+		if(null != ptr && null != ptr.getDaySplitTimeLong())
 			splitTime = ptr.getDaySplitTimeLong();
-		else if(null != ptr.getDaySplitTime())
+		else if(null != ptr && null != ptr.getDaySplitTime())
 			splitTime = convertTimeToGMTMillisecond(ptr.getDaySplitTime());
 		
 
-		if(null != yesterdayPtr.getDaySplitTimeLong())
+		if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTimeLong())
 			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
-		else if(null != yesterdayPtr.getDaySplitTime())
+		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
 			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
 
 		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
@@ -1590,49 +1585,52 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public boolean isWorkDay(Date date1,PunchRule punchRule) {
-		if (date1 == null)
-			return false;
-//		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		int openWeekInt = 111110;
-		if(null != punchRule.getWorkdayRuleId()){
-			// 如果属于周末调班 返回工作日
-			List<PunchHoliday> workDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
-					punchRule.getWorkdayRuleId(),DateStatus.WORKDAY.getCode());
-			if (null != workDates) {
-				for (PunchHoliday workDate : workDates) {
-					if (dateSF.get().format(date1).equals(dateSF.get().format(workDate.getRuleDate())))
-						return true;
-				}
-			}
-			// 如果属于工作日休假 返回非工作日
-			List<PunchHoliday> weekenDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
-					punchRule.getWorkdayRuleId(),DateStatus.HOLIDAY.getCode());
-			if (null != weekenDates) {
-				for (PunchHoliday weekenDate : weekenDates) {
-					if (dateSF.get().format(date1).equals(dateSF.get().format(weekenDate.getRuleDate())))
-						return false;
-				}
-			}
-			PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(punchRule.getWorkdayRuleId());
-			openWeekInt = Integer.valueOf(workdayRule.getWorkWeekDates());
-		}
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date1);
-		 // 获取日期周几
-//		Locale.setDefault(Locale.US);
-		Integer weekDay = calendar.get(Calendar.DAY_OF_WEEK)-1;
-		//将七位0111110这样的代码转换成一个存储星期几的list
-		
-		List<Integer> workDays=new ArrayList<Integer>();
-        for(int i=0;i<7;i++){
-        		workDays.add(i);
-        		if(openWeekInt%10 == 1)
-        	openWeekInt = openWeekInt/10;
-        }
-        //如果这个DAY_OF_WEEK 在 工作日list中,则返回真
-        if(workDays.contains(weekDay))
-        	return true;
-        
+//		if (date1 == null)
+//			return false;
+////		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+//		int openWeekInt = 111110;
+//		if(null != punchRule.getWorkdayRuleId()){
+//			// 如果属于周末调班 返回工作日
+//			List<PunchHoliday> workDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
+//					punchRule.getWorkdayRuleId(),DateStatus.WORKDAY.getCode());
+//			if (null != workDates) {
+//				for (PunchHoliday workDate : workDates) {
+//					if (dateSF.get().format(date1).equals(dateSF.get().format(workDate.getRuleDate())))
+//						return true;
+//				}
+//			}
+//			// 如果属于工作日休假 返回非工作日
+//			List<PunchHoliday> weekenDates = this.punchProvider.queryPunchHolidaysByStatus(punchRule.getOwnerType(),punchRule.getOwnerId(),
+//					punchRule.getWorkdayRuleId(),DateStatus.HOLIDAY.getCode());
+//			if (null != weekenDates) {
+//				for (PunchHoliday weekenDate : weekenDates) {
+//					if (dateSF.get().format(date1).equals(dateSF.get().format(weekenDate.getRuleDate())))
+//						return false;
+//				}
+//			}
+//			PunchWorkdayRule workdayRule = this.punchProvider.getPunchWorkdayRuleById(punchRule.getWorkdayRuleId());
+//			openWeekInt = Integer.valueOf(workdayRule.getWorkWeekDates());
+//		}
+//		Calendar calendar = Calendar.getInstance();
+//		calendar.setTime(date1);
+//		 // 获取日期周几
+////		Locale.setDefault(Locale.US);
+//		Integer weekDay = calendar.get(Calendar.DAY_OF_WEEK)-1;
+//		//将七位0111110这样的代码转换成一个存储星期几的list
+//		
+//		List<Integer> workDays=new ArrayList<Integer>();
+//        for(int i=0;i<7;i++){
+//        		workDays.add(i);
+//        		if(openWeekInt%10 == 1)
+//        	openWeekInt = openWeekInt/10;
+//        }
+//        //如果这个DAY_OF_WEEK 在 工作日list中,则返回真
+//        if(workDays.contains(weekDay))
+//        	return true;
+
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(punchRule.getId(),date1);
+		if(null != punchTimeRule)
+			return true;
         return false;
 
 	}
