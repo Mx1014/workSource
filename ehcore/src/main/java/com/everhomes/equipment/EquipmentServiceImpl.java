@@ -3813,7 +3813,44 @@ public class EquipmentServiceImpl implements EquipmentService {
 			return dto;
 		}).collect(Collectors.toList());
 
-		dtos.forEach(dto -> {
+		for(int i = 0; i <dtos.size(); i = i+2) {
+			EquipmentsDTO dto1 = dtos.get(i);
+			EquipmentsDTO dto2 = dtos.get(i+1);
+			DocUtil docUtil=new DocUtil();
+			Map<String, Object> dataMap=createTwoEquipmentCardDoc(dto1, dto2);
+
+			GetAppInfoCommand command = new GetAppInfoCommand();
+			command.setNamespaceId(dto1.getNamespaceId());
+			command.setOsType(OSType.Android.getCode());
+			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(appUrlDTO.getLogoUrl() != null) {
+				dataMap.put("shenyeLogo1", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+				dataMap.put("shenyeLogo2", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+			}
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
+				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
+				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
+				dataMap.put("qrCode1", encoder.encode(data));
+			}
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
+				ByteArrayOutputStream out = generateQRCode(dto2.getQrCodeToken());
+				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
+				dataMap.put("qrCode2", encoder.encode(data));
+			}
+
+			String savePath = cmd.getFilePath() + dto1.getId()+ "-" + dto1.getName() +
+					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
+//			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
+			docUtil.createDoc(dataMap, "shenye2", savePath);
+			docUtil.closeHttpConn();
+		}
+
+		if(dtos.size() % 2 == 1) {
+			EquipmentsDTO dto = dtos.get(dtos.size() - 1);
 			DocUtil docUtil=new DocUtil();
 			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
 
@@ -3833,10 +3870,34 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
-//			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
 			docUtil.createDoc(dataMap, "shenye", savePath);
 			docUtil.closeHttpConn();
-		});
+		}
+
+//		dtos.forEach(dto -> {
+//			DocUtil docUtil=new DocUtil();
+//			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
+//
+//			GetAppInfoCommand command = new GetAppInfoCommand();
+//			command.setNamespaceId(dto.getNamespaceId());
+//			command.setOsType(OSType.Android.getCode());
+//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+//			if(appUrlDTO.getLogoUrl() != null) {
+//				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+//			}
+//
+//			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
+//				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
+//				byte[] data=out.toByteArray();
+//				BASE64Encoder encoder=new BASE64Encoder();
+//				dataMap.put("qrCode", encoder.encode(data));
+//			}
+//
+//			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
+////			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
+//			docUtil.createDoc(dataMap, "shenye", savePath);
+//			docUtil.closeHttpConn();
+//		});
 		
 
 	}
@@ -3867,6 +3928,31 @@ public class EquipmentServiceImpl implements EquipmentService {
 		dataMap.put("manufacturer", dto.getManufacturer());
 		dataMap.put("manager", dto.getManager());
 		dataMap.put("status",EquipmentStatus.fromStatus(dto.getStatus()).getName());
+
+		return dataMap;
+	}
+
+	private Map<String, Object> createTwoEquipmentCardDoc(EquipmentsDTO dto1, EquipmentsDTO dto2) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		dataMap.put("sequenceNo1", dto1.getSequenceNo());
+		dataMap.put("versionNo1", dto1.getVersionNo());
+		dataMap.put("name1", dto1.getName());
+		dataMap.put("equipmentModel1", dto1.getEquipmentModel());
+		dataMap.put("parameter1", dto1.getParameter());
+		dataMap.put("customNumber1", dto1.getCustomNumber());
+		dataMap.put("manufacturer1", dto1.getManufacturer());
+		dataMap.put("manager1", dto1.getManager());
+		dataMap.put("status1",EquipmentStatus.fromStatus(dto1.getStatus()).getName());
+
+		dataMap.put("sequenceNo2", dto2.getSequenceNo());
+		dataMap.put("versionNo2", dto2.getVersionNo());
+		dataMap.put("name2", dto2.getName());
+		dataMap.put("equipmentModel2", dto2.getEquipmentModel());
+		dataMap.put("parameter2", dto2.getParameter());
+		dataMap.put("customNumber2", dto2.getCustomNumber());
+		dataMap.put("manufacturer2", dto2.getManufacturer());
+		dataMap.put("manager2", dto2.getManager());
+		dataMap.put("status2",EquipmentStatus.fromStatus(dto2.getStatus()).getName());
 
 		return dataMap;
 	}
