@@ -5439,11 +5439,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
-                owner.setMaritalStatus(result.getJ());
-                owner.setJob(result.getK());
-                owner.setCompany(result.getL());
-                owner.setIdCardNumber(result.getM());
-                owner.setRegisteredResidence(result.getN());
+                owner.setMaritalStatus(RowResult.trimString(result.getJ()));
+                owner.setJob(RowResult.trimString(result.getK()));
+                owner.setCompany(RowResult.trimString(result.getL()));
+                owner.setIdCardNumber(RowResult.trimString(result.getM()));
+                owner.setRegisteredResidence(RowResult.trimString(result.getN()));
                 owner.setNamespaceId(currentNamespaceId());
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
