@@ -56,7 +56,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
-        List<Long> tenantIds = null;
+        List<Long> tenantIds = new ArrayList<>();
         String tenantType = null;
         if(tenant != null) {
             Community community = communityProvider.findCommunityById(targetId);
