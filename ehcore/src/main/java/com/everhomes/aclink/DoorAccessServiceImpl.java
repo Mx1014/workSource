@@ -1739,6 +1739,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     private String getLinglingId() {
 	    User user = UserContext.current().getUser();
+	    if(null == user) {
+	    	return aclinkLinglingService.getLinglingId();
+	    }
 	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.LINGLING_ID);
         if(profile == null || null == profile.getItemValue()) {
         		String linglingId = aclinkLinglingService.getLinglingId();
