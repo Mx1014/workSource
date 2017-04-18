@@ -78,10 +78,12 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
 
     	List<ParkingCardDTO> resultList = new ArrayList<>();
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
 
 		InnoSpringCardInfo card = getCard(plateNumber);
 
@@ -104,7 +106,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 
 			if(expireTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+				return response;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
@@ -121,9 +124,12 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 
 			resultList.add(parkingCardDTO);
+		}else {
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
+
 		}
 
-        return resultList;
+        return response;
     }
 
     @Override
@@ -567,5 +573,15 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
 	}
 }

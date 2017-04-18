@@ -757,3 +757,11 @@ update eh_launch_pad_items set action_data = '{"type":3}' where item_label = '�
 update eh_launch_pad_items set action_type = 34 where item_label = '企业展厅';
 delete from eh_service_alliance_categories where id = 200818;
 delete from eh_service_alliances where name = '企业展厅';
+
+-- 配工作流
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'pmtask.handler-999979', 'flow', '', '0', NULL);
+update eh_launch_pad_items set action_type = 50 where item_label = '最新活动';
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ('1', '999979', '', '0', '投票', 'poll', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ('2', '999979', '', '0', '活动', 'activity', '1', NULL, NULL);
+INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) VALUES ('3', '999979', '', '0', '话题', 'topic', '1', NULL, NULL);

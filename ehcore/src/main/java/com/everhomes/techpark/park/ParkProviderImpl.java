@@ -52,6 +52,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
+@Deprecated
 public class ParkProviderImpl implements ParkProvider {
 	
 	@Autowired

@@ -10,6 +10,7 @@ import com.everhomes.discover.ItemType;
  * 楼栋信息
  * <ul>
  *  <li>id:楼栋id</li>
+ *  <li>namespaceId: 域空间id</li>
  *  <li>communityId:楼栋所属园区or小区id</li>
  *  <li>name:楼栋名</li>
  *  <li>aliasName:楼栋别名</li>
@@ -41,6 +42,8 @@ import com.everhomes.discover.ItemType;
 public class BuildingDTO {
 
 	private Long id; 
+
+    private Integer namespaceId;
 	
 	private Long communityId;
 	
@@ -152,7 +155,15 @@ public class BuildingDTO {
 		this.id = id;
 	}
 
-	public Long getCommunityId() {
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
 		return communityId;
 	}
 
