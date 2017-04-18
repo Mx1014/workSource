@@ -748,6 +748,22 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	private PunchLogsDay calculateDayLog(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
+		 
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+				companyId, dateSF.get().format(logDay.getTime()),
+				ClockCode.SUCESS.getCode());
+		Date now = new Date();
+		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),companyId, userId );
+		if(null == pr)
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+					"have no punch rule");
+
+		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
+		//没有规则就是没有排班,就是非工作日
+		if (null == punchTimeRule)
+			return null;
+		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		//对于已离职和未入职的判断
 		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
 		if(organizationMember == null ){
@@ -768,22 +784,6 @@ public class PunchServiceImpl implements PunchService {
 			}
 			
 		}
-		// 
-		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
-				companyId, dateSF.get().format(logDay.getTime()),
-				ClockCode.SUCESS.getCode());
-		Date now = new Date();
-		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),companyId, userId );
-		if(null == pr)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
-					"have no punch rule");
-
-		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
-		//没有规则就是没有排班,就是非工作日
-		if (null == punchTimeRule)
-			return pdl;
-		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		// 如果零次打卡记录
 		if (null == punchLogs || punchLogs.size() == 0) {
 //			if (!isWorkDay(logDay.getTime(),pr)|| dateSF.get().format(now).equals(dateSF.get().format(logDay.getTime()))) {
