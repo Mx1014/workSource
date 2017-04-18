@@ -15,3 +15,10 @@ UPDATE eh_buildings set `name` = '华润置地大厦E座' where `name` = '华润
 -- added by Janson huarun aclink
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999985, 'aclink.qr_driver_type', 'huarun_anguan', 'anguan for huarun');
 
+-- 停车菜单 add by sw 20170418
+UPDATE `eh_web_menus` SET `data_type`='parking--park_setting' WHERE `id`='40810';
+UPDATE `eh_web_menus` SET `data_type`='parking--park_rules' WHERE `id`='40820';
+UPDATE `eh_web_menus` SET `data_type`='parking--park_card' WHERE `id`='40830';
+UPDATE `eh_web_menus` SET `data_type`='parking--park_recharge' WHERE `id`='40840';
+UPDATE `eh_web_menus` SET `data_type`='car--car_management' WHERE `id`='40900';
+

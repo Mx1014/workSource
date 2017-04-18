@@ -190,8 +190,8 @@ public class ParkController extends ControllerBase{
 	@RestReturn(value = String.class)
 	public RestResponse getRechargedPlate() {
 		
-		Set<String> plates = parkService.getRechargedPlate();
-		RestResponse response = new RestResponse(plates);
+//		Set<String> plates = parkService.getRechargedPlate();
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
