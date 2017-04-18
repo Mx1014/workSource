@@ -10,4 +10,6 @@ UPDATE eh_launch_pad_items SET action_data = REPLACE(action_data, '"scope":2', '
 -- 更新华润楼栋名称 add by sw 20170418
 UPDATE eh_buildings set `name` = '华润置地大厦E座' where `name` = '华润置地大厦' and community_id = 240111044331055035;
 
+-- added by Janson huarun aclink
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999985, 'aclink.qr_driver_type', 'huarun_anguan', 'anguan for huarun');
 
