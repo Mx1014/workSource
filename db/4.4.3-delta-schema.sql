@@ -11,3 +11,7 @@ CREATE TABLE `eh_asset_vendor` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_asset_vendor_owner_id` (`owner_type`,`owner_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- organizationowner 修改身份证号码字段长度  2017-04-18 add by xq.tian
+ALTER TABLE `eh_organization_owners` MODIFY COLUMN `id_card_number` VARCHAR(32) DEFAULT NULL COMMENT 'id card number';
