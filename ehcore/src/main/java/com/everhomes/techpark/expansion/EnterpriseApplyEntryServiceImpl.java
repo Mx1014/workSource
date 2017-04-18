@@ -1097,12 +1097,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
 
-			buildingDTOs.addAll(addresses.stream().map(a -> {
+			addresses.stream().map(a -> {
 				Address address = addressProvider.findAddressById(a.getAddressId());
 				com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
 						address.getCommunityId(), address.getBuildingName());
 				return ConvertHelper.convert(building, BuildingDTO.class);
-			}).collect(Collectors.toList()));
+			}).collect(Collectors.toList()).forEach(b -> {
+				if (null != b) {
+					buildingDTOs.add(b);
+				}
+			});
 		}
 
 		if (null != organizationId)  {
@@ -1111,12 +1115,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
 
-					buildingDTOs.addAll(organizationAddresses.stream().map(a -> {
+					organizationAddresses.stream().map(a -> {
 						Address address = addressProvider.findAddressById(a.getAddressId());
 						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
 								address.getCommunityId(), address.getBuildingName());
 						return ConvertHelper.convert(building, BuildingDTO.class);
-					}).collect(Collectors.toSet()));
+					}).collect(Collectors.toSet()).forEach(b -> {
+						if (null != b) {
+							buildingDTOs.add(b);
+						}
+					});
 				}
 			}
 		}
