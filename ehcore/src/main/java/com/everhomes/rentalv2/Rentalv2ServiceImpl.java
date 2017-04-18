@@ -37,11 +37,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -69,10 +72,13 @@ import net.greghaines.jesque.Job;
 
 
 
+
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -110,7 +116,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
+
+
 
 
 
@@ -321,6 +331,8 @@ import com.google.gson.reflect.TypeToken;
 
 
 
+
+
 import freemarker.core.ReturnInstruction.Return;
 
 
@@ -343,7 +355,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {  
         
     };  
-    private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
+    private ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
+    .setNameFormat("rentalv2-thr-%d").build();
+    private ExecutorService executorPool =  Executors.newFixedThreadPool(5, namedThreadFactory);
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
 			//从8点开始计算

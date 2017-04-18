@@ -108,6 +108,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -130,6 +131,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 @Component
@@ -139,7 +141,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
 
 
-	ExecutorService pool = Executors.newFixedThreadPool(3);
+	ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("org-thr-%d").build();
+	ExecutorService pool = Executors.newFixedThreadPool(3, namedThreadFactory);
 	@Autowired
 	private DbProvider dbProvider;
 
