@@ -56,7 +56,7 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
 
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(Long ownerId, String ownerType, Long targetId, String targetType, Long organizationId, Long addressId, String tenant, Byte status, Long startTime, Long endTime, Long pageAnchor, Integer pageSize) {
-        List<Long> tenantIds = new ArrayList<>();
+        List<Long> tenantIds = null;
         String tenantType = null;
         if(tenant != null) {
             Community community = communityProvider.findCommunityById(targetId);
@@ -101,7 +101,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
 
         pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
-        tenantIds.add(organizationId);
+        if(organizationId != null) {
+            tenantIds.add(organizationId);
+        }
+
         List<AssetBill> bills  = assetProvider.listAssetBill(ownerId, ownerType, targetId, targetType,
                 tenantIds, tenantType, addressId, status, startTime,endTime, locator, pageSize + 1);
 
