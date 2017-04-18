@@ -637,7 +637,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-		
+
+		long startTime = System.currentTimeMillis();
+
 		if(null != cmd.getCommunityId()){
 			cmd.setOwnerId(cmd.getCommunityId());
 		}else if(null != cmd.getOwnerId()){
@@ -668,6 +670,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 //        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
         List<ServiceAlliances> sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
         		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("getServiceAllianceEnterpriseList time: {}", time2 - startTime);
+
         if(null == sas || sas.size() == 0)
         	return response;
       
@@ -719,7 +725,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			response.getDtos().add(dto);
 
         }
-        return response;
+
+		long time3 = System.currentTimeMillis();
+		LOGGER.info("populate dto time: {}", time3 - time2);
+
+		LOGGER.info("getServiceAllianceEnterpriseList total time: {}", time3 - startTime);
+
+		return response;
 	}
 
 	private void processServiceUrl(ServiceAllianceDTO dto) {

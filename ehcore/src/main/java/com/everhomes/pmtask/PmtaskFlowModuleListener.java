@@ -204,15 +204,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
-		
-		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-			e.setKey("");
-			e.setValue(s.getContentUrl());
-			entities.add(e);
+
+		if (null != dto.getAttachments()) {
+			for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+				e.setKey("");
+				e.setValue(s.getContentUrl());
+				entities.add(e);
+			}
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("服务地点");
