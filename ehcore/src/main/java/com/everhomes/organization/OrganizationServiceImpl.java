@@ -141,8 +141,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private static final String ASSIGN_TASK_AUTO_SMS = "assign.task.auto.sms";
 
 
-	ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("org-thr-%d").build();
-	ExecutorService pool = Executors.newFixedThreadPool(3, namedThreadFactory);
+	ExecutorService pool = Executors.newFixedThreadPool(3);
 	@Autowired
 	private DbProvider dbProvider;
 

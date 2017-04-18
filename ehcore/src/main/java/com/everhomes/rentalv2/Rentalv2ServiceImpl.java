@@ -355,9 +355,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {  
         
     };  
-    private ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
-    .setNameFormat("rentalv2-thr-%d").build();
-    private ExecutorService executorPool =  Executors.newFixedThreadPool(5, namedThreadFactory);
+    private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
 			//从8点开始计算
