@@ -59,4 +59,6 @@ public interface DoorAuthProvider {
     Long countDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Integer namespaceId, Byte rightType);
 
 	DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId, Byte isRemote);
+
+	Long getNextDoorAuth();
 }
