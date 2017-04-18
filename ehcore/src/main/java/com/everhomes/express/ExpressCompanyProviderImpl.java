@@ -68,10 +68,17 @@ public class ExpressCompanyProviderImpl implements ExpressCompanyProvider {
 	
 	@Override
 	public List<ExpressCompany> listExpressCompanyByOwner(ExpressOwner owner) {
+		if (owner != null) {
+			return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
+					.where(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+					.and(Tables.EH_EXPRESS_COMPANIES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+					.and(Tables.EH_EXPRESS_COMPANIES.OWNER_ID.eq(owner.getOwnerId()))
+					.and(Tables.EH_EXPRESS_COMPANIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+					.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
+					.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));
+		}
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_COMPANIES)
-				.where(Tables.EH_EXPRESS_COMPANIES.NAMESPACE_ID.eq(owner.getNamespaceId()))
-				.and(Tables.EH_EXPRESS_COMPANIES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
-				.and(Tables.EH_EXPRESS_COMPANIES.OWNER_ID.eq(owner.getOwnerId()))
+				.where(Tables.EH_EXPRESS_COMPANIES.PARENT_ID.eq(0L))
 				.and(Tables.EH_EXPRESS_COMPANIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_EXPRESS_COMPANIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressCompany.class));

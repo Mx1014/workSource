@@ -114,7 +114,8 @@ CREATE TABLE `eh_express_orders` (
   `update_time` DATETIME,
   `operator_uid` BIGINT,
   
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `order_no` (`order_no`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 

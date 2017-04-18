@@ -19,7 +19,6 @@ import com.everhomes.util.StringHelper;
  * <li>payType: 付款方式，参考{@link com.everhomes.rest.express.ExpressPayType}</li>
  * <li>status: 订单状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
  * <li>paySummary: 付费总计</li>
- * <li>列表只包含以上字段</li>
  * <li>sendOrganization: 寄件人公司</li>
  * <li>sendProvince: 寄件省</li>
  * <li>sendCity: 寄件市</li>
@@ -51,7 +50,6 @@ public class ExpressOrderDTO {
 	private Byte payType;
 	private Byte status;
 	private BigDecimal paySummary;
-	
 	private String sendOrganization;
 	private String sendProvince;
 	private String sendCity;
@@ -70,6 +68,15 @@ public class ExpressOrderDTO {
 	private String serviceAddress;
 	private String internal;
 	private BigDecimal insuredPrice;
+	private String expressLogoUrl;
+
+	public String getExpressLogoUrl() {
+		return expressLogoUrl;
+	}
+
+	public void setExpressLogoUrl(String expressLogoUrl) {
+		this.expressLogoUrl = expressLogoUrl;
+	}
 
 	public Long getExpressCompanyId() {
 		return expressCompanyId;

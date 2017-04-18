@@ -13,4 +13,10 @@ public interface ExpressQueryHistoryProvider {
 
 	List<ExpressQueryHistory> listExpressQueryHistory();
 
+	List<ExpressQueryHistory> listExpressQueryHistoryByUser(Integer namespaecId, Long userId);
+
+	void clearExpressQueryHistory(Integer namespaecId, Long userId);
+
+	ExpressQueryHistory findExpressQueryHistory(Integer namespaceId, Long userId, Long expressCompanyId, String billNo);
+
 }

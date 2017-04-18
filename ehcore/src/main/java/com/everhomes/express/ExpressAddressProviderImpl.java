@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.express.ExpressOwner;
+import com.everhomes.rest.express.ExpressOwnerType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressAddressesDao;
@@ -52,11 +58,47 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 	}
 
 	@Override
+	public void updateOtherAddressToNotDefault(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId,
+			Long userId, Long currentId) {
+		getReadWriteContext().update(Tables.EH_EXPRESS_ADDRESSES)
+			.set(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG, (TrueOrFalseFlag.FALSE.getCode()))
+			.set(Tables.EH_EXPRESS_ADDRESSES.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+			.set(Tables.EH_EXPRESS_ADDRESSES.OPERATOR_UID, userId)
+			.where(Tables.EH_EXPRESS_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_TYPE.eq(ownerType.getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_ID.eq(ownerId))
+			.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(userId))
+			.and(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.ID.ne(currentId))
+			.execute();
+	}
+
+	@Override
 	public ExpressAddress findExpressAddressById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressAddress.class);
 	}
 	
+	@Override
+	public ExpressAddress findAnyExpressAddressByOwner(ExpressOwner owner, Byte category) {
+		return findAnyExpressAddressByOwner(owner, category, null);
+	}
+
+	@Override
+	public ExpressAddress findAnyExpressAddressByOwner(ExpressOwner owner, Byte category, Long currentId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_EXPRESS_ADDRESSES)
+			.where(Tables.EH_EXPRESS_ADDRESSES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_ID.eq(owner.getOwnerId()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.CATEGORY.eq(category))
+			.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(owner.getUserId()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(currentId==null?DSL.trueCondition():Tables.EH_EXPRESS_ADDRESSES.ID.ne(currentId))
+			.fetchAny();
+		return record == null ? null : ConvertHelper.convert(record, ExpressAddress.class);
+	}
+
 	@Override
 	public List<ExpressAddress> listExpressAddress() {
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_ADDRESSES)
@@ -64,6 +106,19 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressAddress.class));
 	}
 	
+	@Override
+	public List<ExpressAddress> listExpressAddressByOwner(ExpressOwner owner, Byte category) {
+		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_ADDRESSES)
+				.where(Tables.EH_EXPRESS_ADDRESSES.NAMESPACE_ID.eq(owner.getNamespaceId()))
+				.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_TYPE.eq(owner.getOwnerType().getCode()))
+				.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_ID.eq(owner.getOwnerId()))
+				.and(Tables.EH_EXPRESS_ADDRESSES.CATEGORY.eq(category))
+				.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(owner.getUserId()))
+				.orderBy(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG.desc(), Tables.EH_EXPRESS_ADDRESSES.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressAddress.class));
+	}
+
 	private EhExpressAddressesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

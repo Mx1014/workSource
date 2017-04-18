@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属者类型，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: 所属者id</li>
+ * <li>userId: 用户id</li>
  * <li>serviceAddressId: 自寄服务地址id</li>
  * <li>expressCompanyId: 快递公司id</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.express.ExpressOrderStatus}</li>
@@ -24,6 +25,8 @@ public class ListExpressOrderCondition {
 	private String ownerType;
 
 	private Long ownerId;
+	
+	private Long userId;
 
 	private Long serviceAddressId;
 
@@ -36,6 +39,14 @@ public class ListExpressOrderCondition {
 	private Long pageAnchor;
 
 	private Integer pageSize;
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
 	public Integer getNamespaceId() {
 		return namespaceId;

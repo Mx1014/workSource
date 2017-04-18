@@ -2,18 +2,19 @@
 package com.everhomes.express;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.approval.ApprovalRequestHandler;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -27,11 +28,13 @@ import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.ExpressAddressDTO;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressOwner;
 import com.everhomes.rest.express.ExpressOwnerType;
+import com.everhomes.rest.express.ExpressQueryHistoryDTO;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.ExpressServiceErrorCode;
 import com.everhomes.rest.express.ExpressUserDTO;
@@ -57,13 +60,16 @@ import com.everhomes.rest.express.ListServiceAddressResponse;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class ExpressServiceImpl implements ExpressService {
-
+	
+	private static final int ORDER_NO_LENGTH = 18;
+	
 	@Autowired
 	private ExpressServiceAddressProvider expressServiceAddressProvider;
 	
@@ -85,6 +91,15 @@ public class ExpressServiceImpl implements ExpressService {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+	private ExpressAddressProvider expressAddressProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
+	
+	@Autowired
+	private ExpressQueryHistoryProvider expressQueryHistoryProvider;
+	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -104,12 +119,17 @@ public class ExpressServiceImpl implements ExpressService {
 		if (expressOwnerType == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "owner type error");
 		}
-		return new ExpressOwner(UserContext.getCurrentNamespaceId(), expressOwnerType, ownerId);
+		return new ExpressOwner(UserContext.getCurrentNamespaceId(), expressOwnerType, ownerId, UserContext.current().getUser().getId());
 	}
 
 	@Override
 	public ListExpressCompanyResponse listExpressCompany(ListExpressCompanyCommand cmd) {
-		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		//如果是查快递接口过来的，不需要传owner
+		//ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOwner owner = null;
+		if (!StringUtils.isEmpty(cmd.getOwnerType())) {
+			owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		}
 		List<ExpressCompany> expressCompanies = expressCompanyProvider.listExpressCompanyByOwner(owner);
 		return new ListExpressCompanyResponse(expressCompanies.stream().map(this::convertToExpressCompanyDTO).collect(Collectors.toList()));
 	}
@@ -173,12 +193,14 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void deleteExpressUser(DeleteExpressUserCommand cmd) {
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressUser expressUser = expressUserProvider.findExpressUserById(cmd.getId());
-		if (expressUser != null) {
-			expressUser.setStatus(CommonStatus.INACTIVE.getCode());
-			expressUserProvider.updateExpressUser(expressUser);
+		if (expressUser == null || expressUser.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressUser.getOwnerType().equals(owner.getOwnerType())
+				|| expressUser.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
+		expressUser.setStatus(CommonStatus.INACTIVE.getCode());
+		expressUserProvider.updateExpressUser(expressUser);
 	}
 
 	@Override
@@ -214,7 +236,6 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(id);
 		return expressCompany == null ? null : expressCompany.getName();
 	}
-	
 
 	@Override
 	public GetExpressOrderDetailResponse getExpressOrderDetail(GetExpressOrderDetailCommand cmd) {
@@ -240,9 +261,13 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void updatePaySummary(UpdatePaySummaryCommand cmd) {
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType())
+					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+			}
 			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
 			}
@@ -254,9 +279,13 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void printExpressOrder(PrintExpressOrderCommand cmd) {
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType())
+					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+			}
 			ExpressOrderStatus status = ExpressOrderStatus.fromCode(expressOrder.getStatus());
 			if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.PRINTED) {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be paid or printed");
@@ -276,67 +305,294 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 
 	private ExpressHandler getExpressHandler(Long expressCompanyId) {
-		return PlatformContext.getComponent(ExpressHandler.EXPRESS_HANDLER_PREFIX+expressCompanyId);
+		ExpressCompany expressCompany = findTopExpressCompany(expressCompanyId);
+		return PlatformContext.getComponent(ExpressHandler.EXPRESS_HANDLER_PREFIX+expressCompany.getId());
 	}
+
+	private ExpressCompany findTopExpressCompany(Long expressCompanyId) {
+		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(expressCompanyId);
+		if (expressCompany.getParentId().longValue() != 0L) {
+			return findTopExpressCompany(expressCompany.getParentId());
+		}
+		return expressCompany;
+	}
+	
 
 	@Override
 	public CreateOrUpdateExpressAddressResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-		return new CreateOrUpdateExpressAddressResponse();
+		ExpressAddress address = dbProvider.execute(s->{
+			ExpressAddress expressAddress = null;
+			if (cmd.getId() == null) {
+				expressAddress = createExpressAddress(owner, cmd);
+			}else {
+				expressAddress = updateExpressAddress(owner, cmd);
+			}
+			if (TrueOrFalseFlag.fromCode(expressAddress.getDefaultFalg()) == TrueOrFalseFlag.TRUE) {
+				updateOtherAddressToNotDefault(owner, expressAddress.getId());
+			}
+			return expressAddress;
+		});
+		
+		return new CreateOrUpdateExpressAddressResponse(convertToExpressAddressDTO(address));
+	}
+
+	private ExpressAddress createExpressAddress(ExpressOwner owner, CreateOrUpdateExpressAddressCommand cmd) {
+		ExpressAddress expressAddress = new ExpressAddress();
+		expressAddress.setNamespaceId(owner.getNamespaceId());
+		expressAddress.setOwnerType(owner.getOwnerType().getCode());
+		expressAddress.setOwnerId(owner.getOwnerId());
+		expressAddress.setUserName(cmd.getUserName());
+		expressAddress.setOrganizationId(cmd.getOrganizationId());
+		expressAddress.setOrganizationName(cmd.getOrganizationName());
+		expressAddress.setPhone(cmd.getPhone());
+		expressAddress.setProvince(cmd.getProvince());
+		expressAddress.setCity(cmd.getCity());
+		expressAddress.setCounty(cmd.getCounty());
+		expressAddress.setDetailAddress(cmd.getDetailAddress());
+		expressAddress.setCategory(cmd.getCategory());
+		expressAddress.setStatus(CommonStatus.ACTIVE.getCode());
+		//第一个添加的地址自动设置为默认地址
+		ExpressAddress anyExpressAddress = expressAddressProvider.findAnyExpressAddressByOwner(owner, cmd.getCategory());
+		if (anyExpressAddress == null) {
+			expressAddress.setDefaultFalg(TrueOrFalseFlag.TRUE.getCode());
+		}else {
+			expressAddress.setDefaultFalg(cmd.getDefaultFlag());
+		}
+		expressAddressProvider.createExpressAddress(expressAddress);
+		return expressAddress;
+	}
+
+	private ExpressAddress updateExpressAddress(ExpressOwner owner, CreateOrUpdateExpressAddressCommand cmd) {
+		ExpressAddress expressAddress = expressAddressProvider.findExpressAddressById(cmd.getId());
+		if (expressAddress == null || !expressAddress.getOwnerType().equals(owner.getOwnerType().getCode()) || expressAddress.getOwnerId().longValue() != owner.getOwnerId().longValue()
+				|| expressAddress.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || expressAddress.getCreatorUid().longValue() != owner.getUserId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter");
+		}
+		expressAddress.setUserName(cmd.getUserName());
+		expressAddress.setOrganizationId(cmd.getOrganizationId());
+		expressAddress.setOrganizationName(cmd.getOrganizationName());
+		expressAddress.setPhone(cmd.getPhone());
+		expressAddress.setProvince(cmd.getProvince());
+		expressAddress.setCity(cmd.getCity());
+		expressAddress.setCounty(cmd.getCounty());
+		expressAddress.setDetailAddress(cmd.getDetailAddress());
+		expressAddress.setCategory(cmd.getCategory());
+		expressAddress.setStatus(CommonStatus.ACTIVE.getCode());
+		//更新地址时如果当前地址是默认地址，不能手动设置成非默认地址
+		if (TrueOrFalseFlag.fromCode(expressAddress.getDefaultFalg()) != TrueOrFalseFlag.TRUE) {
+			expressAddress.setDefaultFalg(cmd.getDefaultFlag());
+		}
+		expressAddressProvider.updateExpressAddress(expressAddress);
+		return expressAddress;
+	}
+
+	private void updateOtherAddressToNotDefault(ExpressOwner owner, Long currentId) {
+		expressAddressProvider.updateOtherAddressToNotDefault(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), currentId);
+	}
+
+	private ExpressAddressDTO convertToExpressAddressDTO(ExpressAddress expressAddress) {
+		return ConvertHelper.convert(expressAddress, ExpressAddressDTO.class);
 	}
 
 	@Override
 	public void deleteExpressAddress(DeleteExpressAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
+		ExpressAddress expressAddress = expressAddressProvider.findExpressAddressById(cmd.getId());
+		if (expressAddress == null || !expressAddress.getOwnerType().equals(owner.getOwnerType().getCode()) || expressAddress.getOwnerId().longValue() != owner.getOwnerId().longValue()
+				|| expressAddress.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || expressAddress.getCreatorUid().longValue() != owner.getUserId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter");
+		}
+		dbProvider.execute(s->{
+			expressAddress.setStatus(CommonStatus.INACTIVE.getCode());
+			expressAddressProvider.updateExpressAddress(expressAddress);
+			//如果删除的是默认地址，则自动把后面第一条设置为默认地址
+			if (TrueOrFalseFlag.fromCode(expressAddress.getDefaultFalg()) == TrueOrFalseFlag.TRUE) {
+				updateFirstToDefault(owner, expressAddress.getCategory());
+			}
+			return null;
+		});
+	}
 
+	private void updateFirstToDefault(ExpressOwner owner, Byte category) {
+		List<ExpressAddress> expressAddresses = expressAddressProvider.listExpressAddressByOwner(owner, category);
+		if (expressAddresses != null && expressAddresses.size() > 0) {
+			ExpressAddress expressAddress = expressAddresses.get(0);
+			expressAddress.setDefaultFalg(TrueOrFalseFlag.TRUE.getCode());
+			expressAddressProvider.updateExpressAddress(expressAddress);
+		}
 	}
 
 	@Override
 	public ListExpressAddressResponse listExpressAddress(ListExpressAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-		return new ListExpressAddressResponse();
+		List<ExpressAddress> expressAddresses = expressAddressProvider.listExpressAddressByOwner(owner, cmd.getCategory());
+		return new ListExpressAddressResponse(expressAddresses.stream().map(this::convertToExpressAddressDTO).collect(Collectors.toList()));
 	}
 
 	@Override
 	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-		return new CreateExpressOrderResponse();
+		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
+		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
+	}
+
+	private ExpressOrder createExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
+		ExpressOrder expressOrder = new ExpressOrder();
+		expressOrder.setNamespaceId(owner.getNamespaceId());
+		expressOrder.setOwnerType(owner.getOwnerType().getCode());
+		expressOrder.setOwnerId(owner.getOwnerId());
+		expressOrder.setOrderNo(getOrderNo(owner.getUserId()));
+		ExpressAddress sendAddress = expressAddressProvider.findExpressAddressById(cmd.getSendAddressId());
+		expressOrder.setSendName(sendAddress.getUserName());
+		expressOrder.setSendPhone(sendAddress.getPhone());
+		expressOrder.setSendOrganization(sendAddress.getOrganizationName());
+		expressOrder.setSendProvince(sendAddress.getProvince());
+		expressOrder.setSendCity(sendAddress.getCity());
+		expressOrder.setSendCounty(sendAddress.getCounty());
+		expressOrder.setSendDetailAddress(sendAddress.getDetailAddress());
+		ExpressAddress receiveAddress = expressAddressProvider.findExpressAddressById(cmd.getReceiveAddressId());
+		expressOrder.setReceiveName(receiveAddress.getUserName());
+		expressOrder.setReceivePhone(receiveAddress.getPhone());
+		expressOrder.setReceiveOrganization(receiveAddress.getOrganizationName());
+		expressOrder.setReceiveProvince(receiveAddress.getProvince());
+		expressOrder.setReceiveCity(receiveAddress.getCity());
+		expressOrder.setReceiveCounty(receiveAddress.getCounty());
+		expressOrder.setReceiveDetailAddress(receiveAddress.getDetailAddress());
+		expressOrder.setServiceAddressId(cmd.getServiceAddressId());
+		expressOrder.setExpressCompanyId(cmd.getExpressCompanyId());
+		expressOrder.setSendType(cmd.getSendType());
+		expressOrder.setSendMode(cmd.getSendMode());
+		expressOrder.setPayType(cmd.getPayType());
+		expressOrder.setInternal(cmd.getInternal());
+		expressOrder.setInsuredPrice(cmd.getInsuredPrice());
+		expressOrder.setStatus(ExpressOrderStatus.WAITING_FOR_PAY.getCode());
+		expressOrderProvider.createExpressOrder(expressOrder);
+		return expressOrder;
+	}
+
+	private String getOrderNo(Long userId) {
+		//订单编号生成规则，时间戳+userId+补全的随机码（3位），总位数大于或等于18位
+		StringBuilder sb = new StringBuilder(20);
+		sb.append(System.currentTimeMillis()/1000).append(userId);
+		int random = ThreadLocalRandom.current().nextInt(100, 1000);
+		if (sb.length() > ORDER_NO_LENGTH - 3) {
+			sb.append(random);
+		}else {
+			int randomLength = ORDER_NO_LENGTH - sb.length();
+			sb.append(String.format("%0"+randomLength+"d", random));
+		}
+		return sb.toString();
 	}
 
 	@Override
 	public ListPersonalExpressOrderResponse listPersonalExpressOrder(ListPersonalExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-		return new ListPersonalExpressOrderResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		ListExpressOrderCondition condition = ConvertHelper.convert(cmd, ListExpressOrderCondition.class);
+		condition.setPageSize(pageSize);
+		condition.setNamespaceId(owner.getNamespaceId());
+		condition.setUserId(owner.getUserId());
+		List<ExpressOrder> expressOrders = expressOrderProvider.listExpressOrderByCondition(condition);
+		Long nextPageAnchor = null;
+		if (expressOrders.size() > pageSize) {
+			expressOrders.remove(expressOrders.size()-1);
+			nextPageAnchor = expressOrders.get(expressOrders.size()-1).getId();
+		}
+		return new ListPersonalExpressOrderResponse(nextPageAnchor, expressOrders.stream().map(this::convertToExpressOrderDTOForClientList).collect(Collectors.toList()));
 	}
 
+	private ExpressOrderDTO convertToExpressOrderDTOForClientList(ExpressOrder expressOrder) {
+		ExpressOrderDTO expressOrderDTO = new ExpressOrderDTO();
+		expressOrderDTO.setBillNo(expressOrder.getBillNo());
+		expressOrderDTO.setSendCity(expressOrder.getSendCity());
+		expressOrderDTO.setSendName(expressOrder.getSendName());
+		expressOrderDTO.setStatus(expressOrder.getStatus());
+		expressOrderDTO.setReceiveCity(expressOrder.getReceiveCity());
+		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
+		expressOrderDTO.setCreateTime(expressOrder.getUpdateTime());
+		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
+		ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
+		if (handler != null) {
+			expressOrderDTO.setExpressLogoUrl(handler.getExpressLogoUrl());
+		}
+		return expressOrderDTO;
+	}
+	
 	@Override
 	public void cancelExpressOrder(CancelExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-	
-
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
+			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+			if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType())
+					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+			}
+			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY || expressOrder.getPaySummary() != null) {
+				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying and express user has not confirmed money");
+			}
+			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
+			expressOrderProvider.updateExpressOrder(expressOrder);
+			return null;
+		});
 	}
 
 	@Override
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(GetExpressLogisticsDetailCommand cmd) {
-	
-		return new GetExpressLogisticsDetailResponse();
+		ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
+		if (expressCompany.getId().longValue() == cmd.getExpressCompanyId().longValue()) {
+			putIntoHistory(cmd.getExpressCompanyId(), cmd.getBillNo());
+		}
+		ExpressHandler handler = getExpressHandler(expressCompany.getId());
+		return handler.getExpressLogisticsDetail(expressCompany, cmd.getBillNo());
 	}
+
+	private void putIntoHistory(Long expressCompanyId, String billNo) {
+		User user = UserContext.current().getUser();
+		if (user != null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			ExpressQueryHistory expressQueryHistory = expressQueryHistoryProvider.findExpressQueryHistory(namespaceId, user.getId(), expressCompanyId, billNo);
+			if (expressQueryHistory == null) {
+				expressQueryHistory = new ExpressQueryHistory();
+				expressQueryHistory.setNamespaceId(namespaceId);
+				expressQueryHistory.setExpressCompanyId(expressCompanyId);
+				expressQueryHistory.setBillNo(billNo);
+				expressQueryHistory.setStatus(CommonStatus.ACTIVE.getCode());
+				expressQueryHistoryProvider.createExpressQueryHistory(expressQueryHistory);
+			}else {
+				expressQueryHistoryProvider.updateExpressQueryHistory(expressQueryHistory);
+			}
+		}
+	}
+	
 
 	@Override
 	public ListExpressQueryHistoryResponse listExpressQueryHistory() {
+		User user = UserContext.current().getUser();
+		if (user != null) {
+			Integer namespaecId = UserContext.getCurrentNamespaceId();
+			List<ExpressQueryHistory> expressQueryHistories = expressQueryHistoryProvider.listExpressQueryHistoryByUser(namespaecId, user.getId());
+			return new ListExpressQueryHistoryResponse(expressQueryHistories.stream().map(this::convertToExpressQueryHistoryDTO).collect(Collectors.toList()));
+		}
+		return null;
+	}
 	
-		return new ListExpressQueryHistoryResponse();
+	private ExpressQueryHistoryDTO convertToExpressQueryHistoryDTO(ExpressQueryHistory expressQueryHistory) {
+		ExpressQueryHistoryDTO expressQueryHistoryDTO = ConvertHelper.convert(expressQueryHistory, ExpressQueryHistoryDTO.class);
+		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(expressQueryHistory.getExpressCompanyId());
+		if (expressCompany != null) {
+			expressQueryHistoryDTO.setExpressCompany(expressCompany.getName());
+		}
+		return expressQueryHistoryDTO;
 	}
 
 	@Override
 	public void clearExpressQueryHistory() {
-	
-
+		User user = UserContext.current().getUser();
+		if (user != null) {
+			Integer namespaecId = UserContext.getCurrentNamespaceId();
+			expressQueryHistoryProvider.clearExpressQueryHistory(namespaecId, user.getId());
+		}
 	}
 
 }

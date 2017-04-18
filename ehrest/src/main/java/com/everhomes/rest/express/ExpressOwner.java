@@ -6,24 +6,36 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 快递相关的ownerType，参考{@link com.everhomes.rest.express.ExpressOwnerType}</li>
  * <li>ownerId: ownerId</li>
+ * <li>userId: 用户id</li>
  * </ul>
  */
 public class ExpressOwner {
 	private Integer namespaceId;
 	private ExpressOwnerType ownerType;
 	private Long ownerId;
+	private Long userId;
 
 	public ExpressOwner() {
 		super();
 	}
 
-	public ExpressOwner(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId) {
+	public ExpressOwner(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId, Long userId) {
 		super();
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.userId = userId;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	public Integer getNamespaceId() {

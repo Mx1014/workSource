@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhExpressQueryHistoriesDao;
@@ -52,11 +54,35 @@ public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvi
 	}
 
 	@Override
+	public void clearExpressQueryHistory(Integer namespaceId, Long userId) {
+		getReadWriteContext().update(Tables.EH_EXPRESS_QUERY_HISTORIES)
+			.set(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS, CommonStatus.INACTIVE.getCode())
+			.set(Tables.EH_EXPRESS_QUERY_HISTORIES.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+			.set(Tables.EH_EXPRESS_QUERY_HISTORIES.OPERATOR_UID, userId)
+			.where(Tables.EH_EXPRESS_QUERY_HISTORIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_EXPRESS_QUERY_HISTORIES.CREATOR_UID.eq(userId))
+			.and(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.execute();
+	}
+
+	@Override
 	public ExpressQueryHistory findExpressQueryHistoryById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), ExpressQueryHistory.class);
 	}
 	
+	@Override
+	public ExpressQueryHistory findExpressQueryHistory(Integer namespaceId, Long userId, Long expressCompanyId, String billNo) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_EXPRESS_QUERY_HISTORIES)
+				.where(Tables.EH_EXPRESS_QUERY_HISTORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.EXPRESS_COMPANY_ID.eq(expressCompanyId))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.BILL_NO.eq(billNo))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.CREATOR_UID.eq(userId))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetchOne();
+		return record == null ? null : ConvertHelper.convert(record, ExpressQueryHistory.class);
+	}
+
 	@Override
 	public List<ExpressQueryHistory> listExpressQueryHistory() {
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_QUERY_HISTORIES)
@@ -64,6 +90,17 @@ public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvi
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressQueryHistory.class));
 	}
 	
+	@Override
+	public List<ExpressQueryHistory> listExpressQueryHistoryByUser(Integer namespaecId, Long userId) {
+		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_QUERY_HISTORIES)
+				.where(Tables.EH_EXPRESS_QUERY_HISTORIES.NAMESPACE_ID.eq(namespaecId))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.CREATOR_UID.eq(userId))
+				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_EXPRESS_QUERY_HISTORIES.UPDATE_TIME.desc())
+				.limit(10)
+				.fetch().map(r -> ConvertHelper.convert(r, ExpressQueryHistory.class));
+	}
+
 	private EhExpressQueryHistoriesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -4,14 +4,12 @@ package com.everhomes.rest.express;
 /**
  * 
  * <ul>
- * <li>WAITING_FOR_SENDING: 1，待收寄</li>
- * <li>IN_TRANSIT: 2，运送中</li>
- * <li>RECEIVED: 3，已签收</li>
- * <li>CANCELED: 4，已取消</li>
+ * <li>IN_TRANSIT: 1，运送中</li>
+ * <li>RECEIVED: 2，已签收</li>
  * </ul>
  */
 public enum ExpressLogisticsStatus {
-	WAITING_FOR_SENDING((byte)1), IN_TRANSIT((byte)2), RECEIVED((byte)3), CANCELED((byte)4);
+	IN_TRANSIT((byte)1), RECEIVED((byte)2);
 	
 	private byte code;
 	

@@ -74,6 +74,9 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 				.where(Tables.EH_EXPRESS_ORDERS.NAMESPACE_ID.eq(condition.getNamespaceId()))
 				.and(Tables.EH_EXPRESS_ORDERS.OWNER_TYPE.eq(condition.getOwnerType()))
 				.and(Tables.EH_EXPRESS_ORDERS.OWNER_ID.eq(condition.getOwnerId()));
+		if (condition.getUserId() != null) {
+			step.and(Tables.EH_EXPRESS_ORDERS.CREATOR_UID.eq(condition.getUserId()));
+		}
 		
 		if (condition.getServiceAddressId() != null) {
 			step.and(Tables.EH_EXPRESS_ORDERS.SERVICE_ADDRESS_ID.eq(condition.getServiceAddressId()));

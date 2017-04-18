@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.express;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>city: 市</li>
  * <li>county: 区县</li>
  * <li>detailAddress: 详细地址</li>
- * <li>defaultFlag: 是否默认，1是2否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>defaultFlag: 是否默认，1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ExpressAddressDTO {
