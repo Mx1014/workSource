@@ -108,6 +108,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -130,6 +131,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 @Component
@@ -8325,9 +8327,16 @@ System.out.println();
 			if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(r.getTargetType())){
 				User user = userProvider.findUserById(r.getTargetId());
 				if(null != user){
-					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+					String avatarUri = user.getAvatar();
+					if(StringUtils.isEmpty(avatarUri))
+						avatarUri = userService.getUserAvatarUriByGender(user.getId(),user.getNamespaceId(), user.getGender());
+
+					dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId()));
 					dto.setNickName(dto.getNickName());
 				}
+			}else{
+				String avatarUri = userService.getUserAvatarUriByGender(0L,UserContext.getCurrentNamespaceId(), dto.getGender());
+				dto.setAvatar(contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), 0L));
 			}
 
 			// 是否展示手机号

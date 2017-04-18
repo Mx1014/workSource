@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationName: 企业名称</li>
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
+ * <li>email: 邮箱</li>
  * </ul>
  */
 public class ManualSignupCommand {
@@ -25,6 +26,7 @@ public class ManualSignupCommand {
 	private String organizationName;
 	private String position;
 	private Byte leaderFlag;
+	private String email;
 
 	public Long getActivityId() {
 		return activityId;
@@ -88,6 +90,14 @@ public class ManualSignupCommand {
 
 	public void setLeaderFlag(Byte leaderFlag) {
 		this.leaderFlag = leaderFlag;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

@@ -158,20 +158,45 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e = new FlowCaseEntity();
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 				GeneralFormDataSourceType.USER_PHONE.getCode()); 
-		dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-		e.setKey(dto.getFieldDisplayName());
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-		entities.add(e);
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+			entities.add(e);
+		}
+		
 		//企业
 		e = new FlowCaseEntity();
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
 				GeneralFormDataSourceType.USER_COMPANY.getCode()); 
-		dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-		e.setKey(dto.getFieldDisplayName());
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-		entities.add(e);
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+			entities.add(e);
+		}
+		
+		//楼栋门牌
+		e = new FlowCaseEntity();
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_ADDRESS.getCode()); 
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			if(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class) != null){
+				e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+				entities.add(e);	
+			}
+		}
+		
+		//username是存在的防止空指针异常
+		if(val ==null){
+			val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+					GeneralFormDataSourceType.USER_NAME.getCode()); 
+		}
 		
 		//申请类型
 		e = new FlowCaseEntity(); 

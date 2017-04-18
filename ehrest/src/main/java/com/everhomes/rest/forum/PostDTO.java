@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  * <li>creatorAdminFlag: 创建者是否为圈的管理员</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>creatorCommunityName: 创建者小区名称</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
@@ -79,6 +80,8 @@ public class PostDTO {
     private Byte creatorAdminFlag;
     
     private String creatorTag;
+    
+    private String creatorCommunityName;
     
     private String targetTag;    
 
@@ -277,8 +280,16 @@ public class PostDTO {
     public void setCreatorTag(String creatorTag) {
         this.creatorTag = creatorTag;
     }
+    
+    public String getCreatorCommunityName() {
+		return creatorCommunityName;
+	}
 
-    public String getTargetTag() {
+	public void setCreatorCommunityName(String creatorCommunityName) {
+		this.creatorCommunityName = creatorCommunityName;
+	}
+
+	public String getTargetTag() {
         return targetTag;
     }
 
@@ -326,7 +337,7 @@ public class PostDTO {
         this.communityId = communityId;
     }
 
-    public Double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 

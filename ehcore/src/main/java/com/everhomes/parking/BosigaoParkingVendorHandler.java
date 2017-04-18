@@ -1,6 +1,26 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.net.URL;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
 import com.alibaba.fastjson.JSONObject;
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
@@ -17,21 +37,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
-import java.net.URL;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
 
 // "BOSIGAO"需与ParkingLotVendor.BOSIGAO的枚举值保持一致
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO")
@@ -191,32 +196,30 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     @Override
     public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
 
-			if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-				if (payStatus.toLowerCase().equals("fail")) {
-					LOGGER.error("Parking pay failed, order={}", order);
-				} else {
-					ResultHolder resultHolder = recharge(order);
-					if (resultHolder.isSuccess()) {
-						dbProvider.execute((TransactionStatus transactionStatus) -> {
-							order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-							order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-							parkingProvider.updateParkingRechargeOrder(order);
+		if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+			if (payStatus.toLowerCase().equals("fail")) {
+				LOGGER.error("Parking pay failed, order={}", order);
+			} else {
+				ResultHolder resultHolder = recharge(order);
+				if (resultHolder.isSuccess()) {
+					dbProvider.execute((TransactionStatus transactionStatus) -> {
+						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						parkingProvider.updateParkingRechargeOrder(order);
 
-							String key = "parking-recharge" + order.getId();
-							String value = String.valueOf(order.getId());
-							Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-							RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+						String key = "parking-recharge" + order.getId();
+						String value = String.valueOf(order.getId());
+						Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+						RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
 
-							LOGGER.error("Delete parking order key, key={}", key);
-							redisTemplate.delete(key);
+						LOGGER.error("Delete parking order key, key={}", key);
+						redisTemplate.delete(key);
 
-							return null;
-						});
-					}
+						return null;
+					});
 				}
 			}
-
-
+		}
     }
     
     
