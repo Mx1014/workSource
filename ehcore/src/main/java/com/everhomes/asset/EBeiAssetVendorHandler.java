@@ -33,13 +33,19 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
 
         command.setOrganizationId(organizationId);
         Byte kexingStatus = null;
-        if(AssetBillStatus.PAID.equals(AssetBillStatus.fromStatus(status))) {
+        if(status == null) {
+            kexingStatus = null;
+        }
+        else if(AssetBillStatus.PAID.equals(AssetBillStatus.fromStatus(status))) {
             kexingStatus = PmKeXingBillStatus.PAID.getCode();
         }
-        if(AssetBillStatus.UNPAID.equals(AssetBillStatus.fromStatus(status))) {
+        else if(AssetBillStatus.UNPAID.equals(AssetBillStatus.fromStatus(status))) {
             kexingStatus = PmKeXingBillStatus.UNPAID.getCode();
         }
-        command.setBillStatus(kexingStatus);
+        if(kexingStatus != null) {
+            command.setBillStatus(kexingStatus);
+        }
+
         if(pageAnchor == null) {
             pageAnchor = 0L;
         }
