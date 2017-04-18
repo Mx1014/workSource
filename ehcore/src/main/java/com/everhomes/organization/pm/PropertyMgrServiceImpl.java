@@ -4200,7 +4200,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         behavior.setOwnerId(ownerId);
         behavior.setBehaviorType(behaviorType.getCode());
         behavior.setNamespaceId(currentNamespaceId());
-        behavior.setBehaviorTime(new Timestamp(date));
+        if (date != null) {
+            behavior.setBehaviorTime(new Timestamp(date));
+        }
         behavior.setStatus(OrganizationOwnerBehaviorStatus.NORMAL.getCode());
         propertyMgrProvider.createOrganizationOwnerBehavior(behavior);
     }
@@ -5466,7 +5468,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             return ownerList;
         } else {
-			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
+			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
 		}
@@ -5519,7 +5521,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             return carList;
         } else {
-			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
+			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
 		}
