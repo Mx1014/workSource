@@ -1006,5 +1006,69 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /equipment/statTodayEquipmentTasks</b>
+	 * <p>当天任务数统计</p>
+	 */
+	@RequestMapping("statTodayEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statTodayEquipmentTasks(StatEquipmentTasksCommand cmd) {
+
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statLastDaysEquipmentTasks</b>
+	 * <p>最近几天任务数统计</p>
+	 */
+	@RequestMapping("statLastDaysEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statLastDaysEquipmentTasks(StatEquipmentTasksCommand cmd) {
+
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statIntervalAllEquipmentTasks</b>
+	 * <p>区间任务数统计</p>
+	 */
+	@RequestMapping("statIntervalAllEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statIntervalAllEquipmentTasks(StatEquipmentTasksCommand cmd) {
+
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /equipment/statItemResultsInEquipmentTasks</b>
+	 * <p>按设备-标准统计任务的细项</p>
+	 */
+	@RequestMapping("statItemResultsInEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statItemResultsInEquipmentTasks(StatEquipmentTasksCommand cmd) {
+
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse(stat);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
 }

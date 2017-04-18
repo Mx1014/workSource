@@ -3813,9 +3813,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			return dto;
 		}).collect(Collectors.toList());
 
+		DocUtil docUtil=new DocUtil();
 		if(dtos.size() % 2 == 1) {
 			EquipmentsDTO dto = dtos.get(dtos.size() - 1);
-			DocUtil docUtil=new DocUtil();
+			
 			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
 
 			GetAppInfoCommand command = new GetAppInfoCommand();
@@ -3835,7 +3836,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
 			docUtil.createDoc(dataMap, "shenye", savePath);
-			docUtil.closeHttpConn();
 
 			dtos.remove(dtos.size() - 1);
 		}
@@ -3843,7 +3843,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		for(int i = 0; i <dtos.size(); i = i+2) {
 			EquipmentsDTO dto1 = dtos.get(i);
 			EquipmentsDTO dto2 = dtos.get(i+1);
-			DocUtil docUtil=new DocUtil();
+//			DocUtil docUtil=new DocUtil();
 			Map<String, Object> dataMap=createTwoEquipmentCardDoc(dto1, dto2);
 
 			GetAppInfoCommand command = new GetAppInfoCommand();
@@ -3871,37 +3871,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			String savePath = cmd.getFilePath() + dto1.getId()+ "-" + dto1.getName() +
 					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
-//			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
 			docUtil.createDoc(dataMap, "shenye2", savePath);
-			docUtil.closeHttpConn();
 		}
-
-//		dtos.forEach(dto -> {
-//			DocUtil docUtil=new DocUtil();
-//			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
-//
-//			GetAppInfoCommand command = new GetAppInfoCommand();
-//			command.setNamespaceId(dto.getNamespaceId());
-//			command.setOsType(OSType.Android.getCode());
-//			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
-//			if(appUrlDTO.getLogoUrl() != null) {
-//				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
-//			}
-//
-//			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
-//				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
-//				byte[] data=out.toByteArray();
-//				BASE64Encoder encoder=new BASE64Encoder();
-//				dataMap.put("qrCode", encoder.encode(data));
-//			}
-//
-//			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
-////			docUtil.createDoc(dataMap, "shenye", "D:\\xy.doc");
-//			docUtil.createDoc(dataMap, "shenye", savePath);
-//			docUtil.closeHttpConn();
-//		});
-		
-
+		docUtil.closeHttpConn();
 	}
 
 	private ByteArrayOutputStream generateQRCode(String qrToken) {
