@@ -5437,7 +5437,7 @@ CREATE TABLE `eh_organization_owners` (
   `marital_status` VARCHAR(10),
   `job` VARCHAR(10) COMMENT 'job',
   `company` VARCHAR(100) COMMENT 'company',
-  `id_card_number` VARCHAR(18) COMMENT 'id card number',
+  `id_card_number` VARCHAR(32) DEFAULT NULL COMMENT 'id card number',
   `avatar` VARCHAR(1024) COMMENT 'avatar',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'delete: 0, normal: 1',
   PRIMARY KEY (`id`),
