@@ -56,6 +56,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         
     	List<ParkingCardDTO> resultList = new ArrayList<>();
 		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
 
 		BosigaoCardInfo card = getCardInfo(plateNumber);
     	
