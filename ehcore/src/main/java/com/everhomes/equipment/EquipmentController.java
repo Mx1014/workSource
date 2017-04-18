@@ -1013,9 +1013,9 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("statTodayEquipmentTasks")
 	@RestReturn(value = StatEquipmentTasksResponse.class)
-	public RestResponse statTodayEquipmentTasks(StatEquipmentTasksCommand cmd) {
+	public RestResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+		StatEquipmentTasksResponse stat = equipmentService.statTodayEquipmentTasks(cmd);
 
 		RestResponse response = new RestResponse(stat);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1029,9 +1029,9 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("statLastDaysEquipmentTasks")
 	@RestReturn(value = StatEquipmentTasksResponse.class)
-	public RestResponse statLastDaysEquipmentTasks(StatEquipmentTasksCommand cmd) {
+	public RestResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+		StatEquipmentTasksResponse stat = equipmentService.statLastDaysEquipmentTasks(cmd);
 
 		RestResponse response = new RestResponse(stat);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -1045,9 +1045,9 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("statIntervalAllEquipmentTasks")
 	@RestReturn(value = StatEquipmentTasksResponse.class)
-	public RestResponse statIntervalAllEquipmentTasks(StatEquipmentTasksCommand cmd) {
+	public RestResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+		StatEquipmentTasksResponse stat = equipmentService.statIntervalAllEquipmentTasks(cmd);
 
 		RestResponse response = new RestResponse(stat);
 		response.setErrorCode(ErrorCodes.SUCCESS);
