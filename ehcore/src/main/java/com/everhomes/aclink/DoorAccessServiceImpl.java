@@ -1743,7 +1743,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
 	    	return aclinkLinglingService.getLinglingId();
 	    }
 	    UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(user.getId(), UserProfileContstant.LINGLING_ID);
-        if(profile == null || null == profile.getItemValue()) {
+        if(profile == null || null == profile.getItemValue() || profile.getItemValue().isEmpty()) {
         		String linglingId = aclinkLinglingService.getLinglingId();
         		
         		profile = new UserProfile();
