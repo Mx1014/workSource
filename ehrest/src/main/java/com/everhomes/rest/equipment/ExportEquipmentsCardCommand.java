@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>ids: 下载设备卡的设备id</li>
+ *     <li>ids: 下载设备卡的设备id列表</li>
  *     <li>filePath: 下载路径</li>
  * </ul>
  * Created by ying.xiong on 2017/4/10.
