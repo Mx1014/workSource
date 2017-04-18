@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.parking.*;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -75,65 +76,6 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.AttachmentDescriptor;
-import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.GetParkingActivityCommand;
-import com.everhomes.rest.parking.GetParkingTempFeeCommand;
-import com.everhomes.rest.parking.GetRechargeResultCommand;
-import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.IsOrderDelete;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ListParkingCarSeriesCommand;
-import com.everhomes.rest.parking.ListParkingCarSeriesResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
-import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingActivityDTO;
-import com.everhomes.rest.parking.ParkingAttachmentDTO;
-import com.everhomes.rest.parking.ParkingAttachmentType;
-import com.everhomes.rest.parking.ParkingCarSerieDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardIssueFlag;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.parking.ParkingFlowConstant;
-import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRechargeType;
-import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
-import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
-import com.everhomes.rest.parking.ParkingRequestFlowType;
-import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
-import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.SetParkingActivityCommand;
-import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingLotConfigCommand;
-import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -176,47 +118,52 @@ public class ParkingServiceImpl implements ParkingService {
     @Autowired
     private FlowCaseProvider flowCaseProvider;
     @Autowired
-    private UserService userService;
-    @Autowired
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
-    	
-    	checkPlateNumber(cmd.getPlateNumber());
-        Long parkingLotId = cmd.getParkingLotId();
-        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-        String venderName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+		GetParkingCardsCommand getParkingCardsCommand = ConvertHelper.convert(cmd, GetParkingCardsCommand.class);
+		GetParkingCardsResponse response = getParkingCards(getParkingCardsCommand);
         
-        List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
-        
-        Long organizationId = cmd.getOrganizationId();
-        User user = UserContext.current().getUser();
-        Long userId = user.getId();
-        String plateOwnerName = user.getNickName();
-        
-        if(null != organizationId) {
-        	OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
-        	if(null != organizationMember) {
-        		plateOwnerName = organizationMember.getContactName();
-        	}
-        }
-        
-        for(ParkingCardDTO card: cardList) {
-        	
+        return response.getCards();
+    }
+
+	public GetParkingCardsResponse getParkingCards(GetParkingCardsCommand cmd) {
+
+		checkPlateNumber(cmd.getPlateNumber());
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String venderName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		GetParkingCardsResponse response = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+
+		Long organizationId = cmd.getOrganizationId();
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		String plateOwnerName = user.getNickName();
+
+		if(null != organizationId) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+			if(null != organizationMember) {
+				plateOwnerName = organizationMember.getContactName();
+			}
+		}
+
+		for(ParkingCardDTO card: response.getCards()) {
 			if(StringUtils.isBlank(card.getPlateOwnerName())) {
 				card.setPlateOwnerName(plateOwnerName);
 			}
-    	}
-        
-        return cardList;
-    }
-    
-    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		}
+
+		return response;
+	}
+
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	
     	Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
@@ -303,7 +250,7 @@ public class ParkingServiceImpl implements ParkingService {
 	    	
 	    	lots.forEach(l -> {
 	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(), 
-	    				null, null, null, startDate, endDate, null, null, null, null);
+	    				null, null, null, startDate, endDate, null, null, null, null, null);
 	    		BigDecimal totalAmount = new BigDecimal(0);
 	    		for(ParkingRechargeOrder o: orders) {
 	    			if(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
@@ -360,11 +307,11 @@ public class ParkingServiceImpl implements ParkingService {
 		
     	String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
-    	
-    	List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
+
+		GetParkingCardsResponse resp = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
         		cmd.getPlateNumber());
         User user = UserContext.current().getUser();
-        int cardListSize = cardList.size();
+        int cardListSize = resp.getCards().size();
 		if(cardListSize > 0){
 			LOGGER.error("PlateNumber card is existed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
@@ -753,7 +700,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getPageAnchor(), pageSize);
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
+				cmd.getPageAnchor(), pageSize);
     	int size = list.size(); 				
     	if(size > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -1169,7 +1117,8 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
+				cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -1531,5 +1480,55 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		
 	}
-	
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+
+		checkPlateNumber(cmd.getPlateNumber());
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String venderName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
+
+		if (null != dto) {
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setPlateNumber(cmd.getPlateNumber());
+			dto.setParkingLotName(parkingLot.getName());
+
+			Long organizationId = cmd.getOrganizationId();
+			User user = UserContext.current().getUser();
+			Long userId = user.getId();
+			String plateOwnerName = user.getNickName();
+
+			if(null != organizationId) {
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+				if(null != organizationMember) {
+					plateOwnerName = organizationMember.getContactName();
+				}
+			}
+			if(StringUtils.isBlank(dto.getPlateOwnerName())) {
+				dto.setPlateOwnerName(plateOwnerName);
+			}
+		}
+
+		return dto;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+		checkPlateNumber(cmd.getPlateNumber());
+		Long parkingLotId = cmd.getParkingLotId();
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+		String venderName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		handler.lockParkingCar(cmd);
+	}
+
 }

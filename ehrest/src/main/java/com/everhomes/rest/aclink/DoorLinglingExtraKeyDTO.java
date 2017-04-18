@@ -24,6 +24,8 @@ public class DoorLinglingExtraKeyDTO {
     private Long authStorey;
     
     private Long authLevel;
+    
+    private String linglingId;
 
     public List<String> getKeys() {
         return keys;
@@ -56,4 +58,14 @@ public class DoorLinglingExtraKeyDTO {
     public void setAuthLevel(Long authLevel) {
         this.authLevel = authLevel;
     }
+
+	public String getLinglingId() {
+		return linglingId;
+	}
+
+	public void setLinglingId(String linglingId) {
+		this.linglingId = linglingId;
+	}
+    
+
 }

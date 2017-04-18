@@ -34,7 +34,9 @@ public class ParkingLotDTO {
     private Byte rechargeType;
     
     private Integer flowMode;
-    
+
+    private Byte lockCarFlag;
+
     public ParkingLotDTO() {
     }
 
@@ -147,4 +149,11 @@ public class ParkingLotDTO {
 		this.flowMode = flowMode;
 	}
 
+    public Byte getLockCarFlag() {
+        return lockCarFlag;
+    }
+
+    public void setLockCarFlag(Byte lockCarFlag) {
+        this.lockCarFlag = lockCarFlag;
+    }
 }

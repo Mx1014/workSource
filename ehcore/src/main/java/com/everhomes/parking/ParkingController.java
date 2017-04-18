@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.parking.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,46 +19,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.GetParkingActivityCommand;
-import com.everhomes.rest.parking.GetParkingTempFeeCommand;
-import com.everhomes.rest.parking.GetRechargeResultCommand;
-import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingCarSeriesCommand;
-import com.everhomes.rest.parking.ListParkingCarSeriesResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
-import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingActivityDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
-import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.SetParkingActivityCommand;
-import com.everhomes.rest.parking.SetParkingLotConfigCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Parking controller", site="parking")
@@ -89,11 +50,26 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("listParkingCards")
     @RestReturn(value=ParkingCardDTO.class, collection=true)
+    @Deprecated
     public RestResponse listParkingCards(@Valid ListParkingCardsCommand cmd) {
-        List<ParkingCardDTO> parkingCardList = null;
+        List<ParkingCardDTO> parkingCardList;
         
         parkingCardList = parkingService.listParkingCards(cmd);
         RestResponse response = new RestResponse(parkingCardList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingCards</b>
+     * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
+     */
+    @RequestMapping("getParkingCards")
+    @RestReturn(value=GetParkingCardsResponse.class)
+    public RestResponse getParkingCards(GetParkingCardsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getParkingCards(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -529,6 +505,36 @@ public class ParkingController extends ControllerBase {
     public RestResponse synchronizedData(ListParkingCardRequestsCommand cmd) {
         
     	parkingService.synchronizedData(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/getParkingCarLockInfo</b>
+     * <p>查询指定车牌锁车信息</p>
+     */
+    @RequestMapping("getParkingCarLockInfo")
+    @RestReturn(value=ParkingCarLockInfoDTO.class)
+    public RestResponse getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+
+        ParkingCarLockInfoDTO dto = parkingService.getParkingCarLockInfo(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/lockParkingCar</b>
+     * <p>根据指定车牌锁车</p>
+     */
+    @RequestMapping("lockParkingCar")
+    @RestReturn(value=String.class)
+    public RestResponse lockParkingCar(LockParkingCarCommand cmd) {
+
+        parkingService.lockParkingCar(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

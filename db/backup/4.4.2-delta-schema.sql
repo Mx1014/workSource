@@ -1,13 +1,16 @@
--- ´¢´æÔ¤ÀÀÄÚÈİ  2017-04-06 add by yanjun
+-- å‚¨å­˜é¢„è§ˆå†…å®¹  2017-04-06 add by yanjun
 CREATE TABLE `eh_previews` (
-   `id` bigint(20) NOT NULL COMMENT 'id of the record',
-   `content` text,
-   `content_type` varchar(128) DEFAULT NULL COMMENT 'content type',
-   PRIMARY KEY (`id`)
- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
- 
--- Èç¹ûÊÇ¸»ÎÄ±¾µÄ»°rich_content´æ´¢Ô­Ê¼µÄcontent  2017-04-06 add by yanjun
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `content` text,
+  `content_type` varchar(128) DEFAULT NULL COMMENT 'content type',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- å¦‚æœæ˜¯å¯Œæ–‡æœ¬çš„è¯rich_contentå­˜å‚¨åŸå§‹çš„content  2017-04-06 add by yanjun
 ALTER TABLE `eh_links` ADD COLUMN `rich_content` longtext NULL COMMENT 'rich_content';
 
--- ±¨Ãû±íÀïÔö¼ÓÓÊÏä×Ö¶Î  2017-04-07 add by yanjun
+-- æŠ¥åè¡¨é‡Œå¢åŠ é‚®ç®±å­—æ®µ  2017-04-07 add by yanjun
 ALTER TABLE `eh_activity_roster`  ADD COLUMN `email` VARCHAR(128) NULL ;
+
+-- organizationowner ä¿®æ”¹èº«ä»½è¯å·ç å­—æ®µé•¿åº¦  2017-04-18 add by xq.tian
+ALTER TABLE `eh_organization_owners` MODIFY COLUMN `id_card_number` VARCHAR(32) DEFAULT NULL COMMENT 'id card number';

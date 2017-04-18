@@ -9,50 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.GetParkingActivityCommand;
-import com.everhomes.rest.parking.GetParkingTempFeeCommand;
-import com.everhomes.rest.parking.GetRechargeResultCommand;
-import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.ListParkingCarSeriesCommand;
-import com.everhomes.rest.parking.ListParkingCarSeriesResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestResponse;
-import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
-import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingActivityDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
-import com.everhomes.rest.parking.ParkingLotDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
-import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
-import com.everhomes.rest.parking.SetParkingActivityCommand;
-import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.rest.parking.SetParkingLotConfigCommand;
-import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
-import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
+import com.everhomes.rest.parking.*;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
+
+    GetParkingCardsResponse getParkingCards(GetParkingCardsCommand cmd);
 
     List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd);
     
@@ -114,4 +76,8 @@ public interface ParkingService {
     ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd);
     
     void synchronizedData(ListParkingCardRequestsCommand cmd);
+
+    ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd);
+
+    void lockParkingCar(LockParkingCarCommand cmd);
 }

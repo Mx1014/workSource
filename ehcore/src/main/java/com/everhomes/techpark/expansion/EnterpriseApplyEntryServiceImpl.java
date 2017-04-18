@@ -286,15 +286,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				});   
 				for(EnterpriseOpRequestBuilding opBuilding : opBuildings){
 					Building building = communityProvider.findBuildingById(opBuilding.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}
 				}
 			}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
 				//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
 				Building building = communityProvider.findBuildingById(dto.getSourceId());
 				if(null != building){
 					dto.setSourceName(building.getName());
-					dto.getBuildings().add(proessBuildingDTO(building));
-				}
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}				}
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
 				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
@@ -302,8 +305,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if(null != leasePromotion){
 					dto.setSourceName(leasePromotion.getSubject());
 					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
-				}
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}				}
 			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
 				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
@@ -311,8 +315,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					dto.setSourceName("创客申请");
 					if(yellowPage.getBuildingId()!=null){
 						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-						dto.getBuildings().add(proessBuildingDTO(building));
-					}
+						if (null != building) {
+							dto.getBuildings().add(proessBuildingDTO(building));
+						}					}
 				}
 			}
 		}
@@ -320,9 +325,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 	private BuildingDTO proessBuildingDTO(Building building){
-		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class); 
+		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class);
 		buildingDTO.setBuildingName(buildingDTO.getName());
-		buildingDTO.setName(org.springframework.util.StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
+		buildingDTO.setName(StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
 		return buildingDTO;
 	}
 
