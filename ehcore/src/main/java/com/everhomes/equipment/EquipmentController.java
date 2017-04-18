@@ -1012,7 +1012,7 @@ public class EquipmentController extends ControllerBase {
 	 * <p>当天任务数统计</p>
 	 */
 	@RequestMapping("statTodayEquipmentTasks")
-	@RestReturn(value = StatEquipmentTasksResponse.class)
+	@RestReturn(value = StatTodayEquipmentTasksResponse.class)
 	public RestResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 
 		StatEquipmentTasksResponse stat = equipmentService.statTodayEquipmentTasks(cmd);
@@ -1061,9 +1061,9 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("statItemResultsInEquipmentTasks")
 	@RestReturn(value = StatEquipmentTasksResponse.class)
-	public RestResponse statItemResultsInEquipmentTasks(StatEquipmentTasksCommand cmd) {
+	public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
+		StatEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
 
 		RestResponse response = new RestResponse(stat);
 		response.setErrorCode(ErrorCodes.SUCCESS);
