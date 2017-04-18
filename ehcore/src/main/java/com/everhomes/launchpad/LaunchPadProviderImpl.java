@@ -228,6 +228,42 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
 		return items;
 	}
+	
+	@Override
+	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, String itemLocation,String itemGroup, String keyword, int offset, int pageSize) {
+
+		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
+		
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(itemLocation));
+		
+		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+		Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ORGANIZATION.getCode());
+		scopeCondition = scopeCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode()));
+		condition = condition.and(scopeCondition);
+		
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+        
+		
+		if(keyword != null && !keyword.trim().equals("")){
+			Condition keyCondition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.like("%" + keyword + "%");
+			keyCondition = keyCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LABEL.like("%" + keyword + "%"));
+			condition = condition.and(keyCondition);
+		}
+		if(condition != null)
+			step.where(condition);
+
+		step.limit(pageSize).offset(offset).fetch().map((r) ->{
+			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
+			return null;
+		});
+
+		return items;
+	}
+	
 	@Override
 	public List<LaunchPadLayoutDTO> listLaunchPadLayoutByKeyword(int pageSize,long offset,String keyword) {
 

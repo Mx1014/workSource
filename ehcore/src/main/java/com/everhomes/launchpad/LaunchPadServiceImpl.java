@@ -41,6 +41,8 @@ import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.ui.user.LaunchPadItemSort;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scene.SceneService;
@@ -2380,5 +2382,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 			return null;
 		});
+	}
+
+
+	@Override
+	public SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd) {
+//		final Long userId = UserContext.current().getUser().getId();
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Integer namespaceId = sceneTokenDto.getNamespaceId();
+		String sceneType = sceneTokenDto.getScene();
+		
+		List<LaunchPadItem> items= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, "/home", ItemGroup.BIZS.getCode(), cmd.getKeyword(), 0, 20);
+		return null;
 	}
 }

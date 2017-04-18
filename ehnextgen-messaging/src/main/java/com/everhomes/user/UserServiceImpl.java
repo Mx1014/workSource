@@ -40,6 +40,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -256,6 +257,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+    @Autowired
+    private LaunchPadService launchPadService;
 
 
 	private static final String DEVICE_KEY = "device_login";
@@ -3190,6 +3194,13 @@ public class UserServiceImpl implements UserService {
 		case NEWS:
 			response = newsService.searchNewsByScene(cmd);
 			break;
+		case LAUNCHPADITEM:
+			response = launchPadService.searchLaunchPadItemByScene(cmd);
+			break;
+		case SHOP:
+			response = null;
+			break;
+			
 		case ALL:
 			int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 			cmd.setPageSize(pageSize);
@@ -3228,6 +3239,8 @@ public class UserServiceImpl implements UserService {
 					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
 				}
 			}
+			
+			response.getDtos().addAll(launchPadService.searchLaunchPadItemByScene(cmd).getDtos());
 
 			break;
 
