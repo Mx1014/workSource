@@ -399,6 +399,11 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		}
 
 		Pkorder pkorder = tempFee.getPkorder();
+
+		if(null == pkorder) {
+			return dto;
+		}
+
 		dto.setPlateNumber(plateNumber);
 		long entranceDate = strToLong2(tempFee.getEntranceDate());
 		dto.setEntryTime(entranceDate);
