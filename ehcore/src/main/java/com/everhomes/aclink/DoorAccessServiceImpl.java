@@ -2572,6 +2572,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
       
       if(childs == null) {
+    	  if(LOGGER.isInfoEnabled()) {
+    		  LOGGER.info("createLinglingVisitorAuth failed! childs is none");
+    	  }
           return null;
       }
         
@@ -2619,6 +2622,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setStatus(DoorAuthStatus.VALID.getCode());
         auth.setCurrStorey(cmd.getDoorNumber());
         doorAuthProvider.createDoorAuth(auth);
+        
+        if(LOGGER.isInfoEnabled()) {
+  		  LOGGER.info("createLinglingVisitorAuth begin send sms");
+  	  	}
         
         String nickName = user.getNickName();
         if(nickName == null || nickName.isEmpty()) {
