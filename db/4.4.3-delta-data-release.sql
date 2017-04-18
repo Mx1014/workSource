@@ -22,3 +22,4 @@ UPDATE `eh_web_menus` SET `data_type`='parking--park_card' WHERE `id`='40830';
 UPDATE `eh_web_menus` SET `data_type`='parking--park_recharge' WHERE `id`='40840';
 UPDATE `eh_web_menus` SET `data_type`='car--car_management' WHERE `id`='40900';
 
+update eh_launch_pad_items set action_data = '{"url":"http://core.zuolin.com/property-bill/index.html?hideNavigationBar=1&name=%e7%89%a9%e4%b8%9a%e6%9f%a5%e8%b4%b9#/verify_account#sign_suffix"}' where namespace_id = 999983 and item_label = "物业查费";
