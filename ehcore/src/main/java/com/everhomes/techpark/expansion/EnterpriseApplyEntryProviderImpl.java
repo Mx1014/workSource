@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,10 +115,10 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(leasePromotion.getIssuerType()));
 		}
 		if (null != leasePromotion.getStartRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.ge(leasePromotion.getStartRentArea()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.cast(BigDecimal.class).ge(leasePromotion.getStartRentArea()));
 		}
 		if (null != leasePromotion.getEndRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.le(leasePromotion.getEndRentArea()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.cast(BigDecimal.class).le(leasePromotion.getEndRentArea()));
 		}
 		if (null != leasePromotion.getStartRentAmount()) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.ge(leasePromotion.getStartRentAmount()));
