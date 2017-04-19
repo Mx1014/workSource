@@ -1312,6 +1312,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhExpressQueryHistories.class, Tables.EH_EXPRESS_QUERY_HISTORIES.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_EXPRESS_QUERY_HISTORIES.ID.max()).from(Tables.EH_EXPRESS_QUERY_HISTORIES).fetchOne().value1();
         });
+        syncTableSequence(null, ehExpressOrderLogs.class, Tables.EH_EXPRESS_ORDER_LOGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ORDER_LOGS.ID.max()).from(Tables.EH_EXPRESS_ORDER_LOGS).fetchOne().value1();
+        });
 
     }
 
