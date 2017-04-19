@@ -85,5 +85,5 @@ public interface PmTaskService {
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
 
-	void createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd);
+	PmTaskHistoryAddressDTO createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd);
 }

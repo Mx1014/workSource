@@ -2167,7 +2167,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public void createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
+	public PmTaskHistoryAddressDTO createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
 
 		if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid parameter, cmd={}", cmd);
@@ -2177,7 +2177,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		//addressId 为空，保存地址
-		dbProvider.execute((TransactionStatus transactionStatus) -> {
+		PmTaskHistoryAddressDTO dto = dbProvider.execute((TransactionStatus transactionStatus) -> {
 			PmTaskHistoryAddress pmTaskHistoryAddress = new PmTaskHistoryAddress();
 			pmTaskHistoryAddress.setNamespaceId(namespaceId);
 			pmTaskHistoryAddress.setOwnerId(cmd.getOwnerId());
@@ -2189,8 +2189,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.ACTIVE.getCode());
 			pmTaskProvider.createTaskHistoryAddress(pmTaskHistoryAddress);
 
-			return null;
+			return ConvertHelper.convert(pmTaskHistoryAddress, PmTaskHistoryAddressDTO.class);
 		});
 
+		return dto;
 	}
 }

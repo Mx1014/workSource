@@ -559,8 +559,7 @@ public class PmTaskController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
 
-        pmTaskService.createTaskHistoryAddress(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(pmTaskService.createTaskHistoryAddress(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
