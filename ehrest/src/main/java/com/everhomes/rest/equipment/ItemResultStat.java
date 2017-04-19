@@ -3,6 +3,15 @@ package com.everhomes.rest.equipment;
 import com.everhomes.util.StringHelper;
 
 /**
+ * <ul>
+ *  <li>itemId: 巡检项id</li>
+ *  <li>name: 巡检项名称</li>
+ *  <li>valueType: 巡检项类型0-none、1-two-tuple、2-range</li>
+ *  <li>valueJason: 值，包含参考值referenceValue和偏差范围offsetRange</li>
+ *  <li>averageValue: 巡检平均值</li>
+ *  <li>normalTimes: 正常次数</li>
+ *  <li>innormalTimes: 异常次数</li>
+ * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
 public class ItemResultStat {

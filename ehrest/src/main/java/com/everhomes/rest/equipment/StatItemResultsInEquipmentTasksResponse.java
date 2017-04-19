@@ -6,6 +6,12 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
+ * <ul>
+ *  <li>equipmentName: 设备名称  </li>
+ *  <li>customNumber: 对象自编号  </li>
+ *  <li>location: 位置</li>
+ *  <li>itemResultStat: 巡检参数统计 参考{@link com.everhomes.rest.equipment.ItemResultStat}</li>
+ * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
 public class StatItemResultsInEquipmentTasksResponse {

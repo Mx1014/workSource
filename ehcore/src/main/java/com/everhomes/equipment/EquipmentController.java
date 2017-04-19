@@ -1015,9 +1015,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = StatTodayEquipmentTasksResponse.class)
 	public RestResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statTodayEquipmentTasks(cmd);
+//		StatEquipmentTasksResponse stat = equipmentService.statTodayEquipmentTasks(cmd);
 
-		RestResponse response = new RestResponse(stat);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1031,9 +1031,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = StatLastDaysEquipmentTasksResponse.class)
 	public RestResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statLastDaysEquipmentTasks(cmd);
+//		StatEquipmentTasksResponse stat = equipmentService.statLastDaysEquipmentTasks(cmd);
 
-		RestResponse response = new RestResponse(stat);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1047,9 +1047,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = StatIntervalAllEquipmentTasksResponse.class)
 	public RestResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statIntervalAllEquipmentTasks(cmd);
+//		StatEquipmentTasksResponse stat = equipmentService.statIntervalAllEquipmentTasks(cmd);
 
-		RestResponse response = new RestResponse(stat);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1063,9 +1063,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
 	public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
 
-		StatEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
+//		StatEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
 
-		RestResponse response = new RestResponse(stat);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
