@@ -18,6 +18,8 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageDispatcher;
 import com.everhomes.bus.LocalBusMessageHandler;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.business.Business;
+import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -68,11 +70,13 @@ import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
@@ -260,6 +264,9 @@ public class UserServiceImpl implements UserService {
 	
     @Autowired
     private LaunchPadService launchPadService;
+    
+    @Autowired
+    private BusinessService businessService;
 
 
 	private static final String DEVICE_KEY = "device_login";
@@ -3198,15 +3205,18 @@ public class UserServiceImpl implements UserService {
 			response = launchPadService.searchLaunchPadItemByScene(cmd);
 			break;
 		case SHOP:
-			response = null;
+			response = businessService.searchShops(cmd);
 			break;
-			
 		case ALL:
 			int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 			cmd.setPageSize(pageSize);
 
 			List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
+			List<LaunchPadItemDTO> itemDtos = new ArrayList<LaunchPadItemDTO>();
+			List<ShopDTO> shopDtos = new ArrayList<ShopDTO>();
 			response.setDtos(dtos);
+			response.setLaunchPadItemDtos(itemDtos);
+			response.setShopDTOs(shopDtos);
 
 			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
 			if(searchType != null) {
@@ -3240,7 +3250,26 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 			
-			response.getDtos().addAll(launchPadService.searchLaunchPadItemByScene(cmd).getDtos());
+			//查询应用 add by yanjun 20170419
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+			if(searchType != null) {
+				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
+				if( tempResp != null 
+						&& tempResp.getLaunchPadItemDtos() != null) {
+					response.getLaunchPadItemDtos().addAll(tempResp.getLaunchPadItemDtos());
+				}
+			}
+			
+			//查询电商店铺 add by yanjun 20170419
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
+			if(searchType != null) {
+				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
+				if(tempResp != null 
+						&& tempResp.getShopDTOs() != null) {
+					response.getShopDTOs().addAll(tempResp.getShopDTOs());
+				}
+			}
+			
 
 			break;
 

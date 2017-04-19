@@ -36,8 +36,10 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.ui.launchpad.*;
+import com.everhomes.rest.ui.user.ContentBriefDTO;
 import com.everhomes.rest.ui.user.LaunchPadItemSort;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -2387,12 +2389,73 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd) {
-//		final Long userId = UserContext.current().getUser().getId();
+		final Long userId = UserContext.current().getUser().getId();
+		SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+		
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		Integer namespaceId = sceneTokenDto.getNamespaceId();
 		String sceneType = sceneTokenDto.getScene();
 		
-		List<LaunchPadItem> items= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, "/home", ItemGroup.BIZS.getCode(), cmd.getKeyword(), 0, 20);
-		return null;
+		//根据场景获取应用scope：配置为all和user的固定选择，配置为organization和community的根据场景sceneType获取 
+		//switch内的逻辑根据this.getLaunchPadItemsByScene方法改编
+		//add by yanjun 20170419
+		Map<Byte, Long> scopeMap = new HashMap<Byte, Long>();		
+		scopeMap.put(ScopeType.USER.getCode(), userId);
+		scopeMap.put(ScopeType.ALL.getCode(), 0L);
+		if(SceneType.fromCode(sceneType) != null){
+			switch(SceneType.fromCode(sceneType)) {
+			case DEFAULT:
+			case PARK_TOURIST:
+				scopeMap.put(ScopeType.COMMUNITY.getCode(), sceneTokenDto.getEntityId());
+				break;
+			case FAMILY:
+				FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+				if(family != null) {
+					scopeMap.put(ScopeType.COMMUNITY.getCode(), family.getCommunityId());
+				}
+				break;
+			case PM_ADMIN:// 无小区ID
+			case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+			case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+				scopeMap.put(ScopeType.ORGANIZATION.getCode(), sceneTokenDto.getEntityId());
+				OrganizationDTO org = organizationService.getOrganizationById(sceneTokenDto.getEntityId());
+				if(org != null) {
+					scopeMap.put(ScopeType.COMMUNITY.getCode(), org.getCommunityId());
+				} 
+				break;
+			}
+		}
+		
+		//SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+		SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(namespaceId, sceneType);
+		if(sceneInfo != null) {
+			sceneType = sceneInfo.getName();
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneTokenDto, sceneInfo.getName());
+			}
+		} else {
+			LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneTokenDto);
+		}
+
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
+		Integer offset = pageSize * Integer.valueOf(pageAnchor.intValue());
+		List<LaunchPadItem> launchPadItems= this.launchPadProvider.searchLaunchPadItemsByKeyword(namespaceId, sceneType, scopeMap, cmd.getKeyword(), offset, pageSize + 1);
+		// 处理分页
+		Long nextPageAnchor = null;
+		if (launchPadItems.size() > pageSize) {
+			launchPadItems.remove(launchPadItems.size() - 1);
+			nextPageAnchor = pageAnchor + 1;
+		}
+		
+		List<LaunchPadItemDTO> dtos = new ArrayList<LaunchPadItemDTO>();
+		launchPadItems.forEach(r ->{
+			LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+			itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+			dtos.add(itemDTO);
+		});
+		response.setLaunchPadItemDtos(dtos);
+		response.setNextPageAnchor(nextPageAnchor);
+		return response;
 	}
 }

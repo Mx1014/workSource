@@ -52,7 +52,10 @@ import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.region.*;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
@@ -2299,4 +2302,69 @@ public class BusinessServiceImpl implements BusinessService {
         dto.setInfoList(Collections.singletonList(infoDTO));
         return dto;
     }
+
+	@Override
+	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
+		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		Integer namespaceId = sceneTokenDto.getNamespaceId();;
+		
+		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
+
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+//        bizApi = "/zl-ec/rest/openapi/shop/listByKeyword";
+//        bizServer = "https://biz-beta.zuolin.com";
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+    	
+        Map<String, Object> param = new HashMap<>();
+        param.put("namespaceId", namespaceId);
+        param.put("keyword", String.valueOf(cmd.getKeyword()));
+//        param.put("shopNo", String.valueOf(searchShopsCommand.getShopNo()));
+//        param.put("shopName", String.valueOf(searchShopsCommand.getShopName()));
+        Integer pageNo = cmd.getPageAnchor() == null ? 1 : cmd.getPageAnchor().intValue();
+        Integer pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        param.put("pageNo", pageNo);
+        param.put("pageSize", pageSize);
+        SearchContentsBySceneReponse response = new SearchContentsBySceneReponse();
+        try {
+            String jsonStr = HttpUtils.postJson((bizServer + bizApi), StringHelper.toJsonString(param), 1000, "UTF-8");
+
+            SearchShopsResponse searchShopsResponse = (SearchShopsResponse) StringHelper.fromJsonString(jsonStr, SearchShopsResponse.class);
+
+            if(searchShopsResponse != null && searchShopsResponse.getResult() && searchShopsResponse.getBody() != null){
+            	response.setShopDTOs(searchShopsResponse.getBody().getRows());
+            	
+            	if(searchShopsResponse.getBody().getHasNext())
+            	response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            }
+//            if (resp != null) {
+//                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
+//                for (Commodity commodity : resp.commodities) {
+//                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+//                    // dto.setId(commodity.id);
+//                    dto.setSubject(commodity.commoName);
+//                    dto.setPosterUrl(commodity.defaultPic);
+//                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
+//                    dto.setInfoList(Collections.singletonList(infoDTO));
+//
+//                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
+//
+//                    dtoList.add(dto);
+//                }
+//                reponse.setEntities(dtoList);
+//            }
+            return response;
+        } catch (Exception e) {
+            // e.printStackTrace();
+            LOGGER.error("biz server response error", e);
+        }
+        return response;
+	}
+    
 }

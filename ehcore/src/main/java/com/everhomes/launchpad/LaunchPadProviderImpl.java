@@ -3,8 +3,10 @@ package com.everhomes.launchpad;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
 import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
 import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
@@ -230,19 +232,40 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 	
 	@Override
-	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, String itemLocation,String itemGroup, String keyword, int offset, int pageSize) {
-
+	public List<LaunchPadItem> searchLaunchPadItemsByKeyword(Integer namespaceId, String sceneType, Map<Byte, Long> scopeMap, String keyword, int offset, int pageSize) {
+		
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 		
-		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup);
-		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq(itemLocation));
+//		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(ItemGroup.BIZS.getCode());
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
 		
-		condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
-		Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ORGANIZATION.getCode());
-		scopeCondition = scopeCondition.or(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode()));
-		condition = condition.and(scopeCondition);
+		Condition scopeConditionAll = null;
+		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
+			if(entry.getValue() == null){
+				continue;
+			}
+			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(entry.getKey());
+			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(entry.getValue()));
+			if(scopeConditionAll == null){
+				scopeConditionAll = scopeCondition;
+			}else{
+				scopeConditionAll = scopeConditionAll.or(scopeCondition);
+			}
+		}
+		
+//		Condition scopeCondition
+//		Condition scopeConditionAll = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(ScopeType.ALL.getCode());
+//		scopeConditionAll = scopeConditionAll.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(0L));
+//		if(scopeCode != null && scopeId != null){
+//			Condition scopeCondition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode);
+//			scopeCondition = scopeCondition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
+//			scopeConditionAll = scopeConditionAll.or(scopeCondition);
+//		}
+		
+		
+		condition = condition.and(scopeConditionAll);
 		
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));

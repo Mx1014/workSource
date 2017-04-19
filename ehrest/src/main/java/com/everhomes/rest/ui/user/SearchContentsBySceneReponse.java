@@ -3,6 +3,8 @@ package com.everhomes.rest.ui.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.business.ShopDTO;
+import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -14,6 +16,14 @@ import com.everhomes.util.StringHelper;
 public class SearchContentsBySceneReponse {
 	@ItemType(ContentBriefDTO.class)
 	private List<ContentBriefDTO> dtos;
+	
+	@ItemType(LaunchPadItemDTO.class)
+	private List<LaunchPadItemDTO> launchPadItemDtos;
+	
+	@ItemType(ShopDTO.class)
+	private List<ShopDTO> shopDTOs;
+	
+	
 	
 	private Long nextPageAnchor;
 
@@ -31,6 +41,22 @@ public class SearchContentsBySceneReponse {
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public List<LaunchPadItemDTO> getLaunchPadItemDtos() {
+		return launchPadItemDtos;
+	}
+
+	public void setLaunchPadItemDtos(List<LaunchPadItemDTO> launchPadItemDtos) {
+		this.launchPadItemDtos = launchPadItemDtos;
+	}
+
+	public List<ShopDTO> getShopDTOs() {
+		return shopDTOs;
+	}
+
+	public void setShopDTOs(List<ShopDTO> shopDTOs) {
+		this.shopDTOs = shopDTOs;
 	}
 
 	@Override
