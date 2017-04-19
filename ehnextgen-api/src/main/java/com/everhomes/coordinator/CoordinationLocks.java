@@ -45,6 +45,7 @@ public enum CoordinationLocks {
     PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
     
     PARKING_STATISTICS("parking.statistics"),
+    PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
     PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),

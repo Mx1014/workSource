@@ -7,14 +7,16 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>activityId: 活动id</li>
+ * <li>status: 状态，0待确认、1已确认、2已驳回、不填则为全部</li>
  * <li>pageSize: 每页大小</li>
- * <li>pageAnchor: 锚点</li>
+ * <li>pageOffset: 页码</li>
  * </ul>
  */
 public class ListSignupInfoCommand {
 	private Long activityId;
+	private Integer status;
 	private Integer pageSize;
-	private Long pageAnchor;
+	private Integer pageOffset;
 
 	public Integer getPageSize() {
 		return pageSize;
@@ -24,12 +26,12 @@ public class ListSignupInfoCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Integer getPageOffset() {
+		return pageOffset;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
 	}
 
 	public Long getActivityId() {
@@ -40,6 +42,14 @@ public class ListSignupInfoCommand {
 		this.activityId = activityId;
 	}
 	
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

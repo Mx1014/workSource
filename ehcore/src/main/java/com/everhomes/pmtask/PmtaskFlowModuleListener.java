@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.flow.*;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -22,18 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphEvent;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowUserSelection;
-import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
@@ -96,15 +85,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		//当前节点已经变成上一个节点
-		FlowGraphNode currentNode = ctx.getPrefixNode();
+//		FlowGraphNode currentNode = ctx.getPrefixNode();
 
-		if (null == currentNode)
+		//业务的下一个节点是当前节点
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+
+		if (null == currentNode || currentNode instanceof FlowGraphNodeEnd)
 			return;
 
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
-		//业务的下一个节点是当前节点
-		FlowNode nextNode = ctx.getCurrentNode().getFlowNode();
+
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
@@ -152,6 +143,9 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}else if ("PROCESSING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
+			}else if ("COMPLETED".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 
@@ -186,7 +180,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
+		PmTaskDTO dto;
+		//TODO:为科兴与一碑对接
+		if(task.getNamespaceId() == 999983 &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			dto = handler.getTaskDetail(cmd);
+		}else {
+			dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
@@ -198,15 +204,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
-		
-		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-			e.setKey("");
-			e.setValue(s.getContentUrl());
-			entities.add(e);
+
+		if (null != dto.getAttachments()) {
+			for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+				e.setKey("");
+				e.setValue(s.getContentUrl());
+				entities.add(e);
+			}
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("服务地点");

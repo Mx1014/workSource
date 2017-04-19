@@ -1104,6 +1104,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		template.setId(id);
 		template.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		template.setStatus(Status.ACTIVE.getCode());
+		template.setNamespaceId(UserContext.getCurrentNamespaceId());
         
 		LOGGER.info("createEquipmentInspectionTemplates: " + template);
 		

@@ -54,6 +54,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.ItemType;
 import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.rest.RestResponse;
@@ -929,4 +930,15 @@ public class AdminController extends ControllerBase {
 //            }
 //        }
 //    }
+    
+    @RequestMapping("testSendMail")
+    @RestReturn(String.class)
+    @RequireAuthentication(false)
+    public RestResponse testSendMail(@RequestParam("toMail") String toMail){
+    	String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        handler.sendMail(999987, null, toMail, "the mail subject", "the mail body");
+    	return new RestResponse();
+    }
+    
 }
