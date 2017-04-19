@@ -166,13 +166,22 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void addExpressUser(AddExpressUserCommand cmd) {
+		if (cmd.getExpressCompanyId() == null || cmd.getServiceAddressId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if (cmd.getExpressUsers() != null) {
-			cmd.getExpressUsers().forEach(r->addExpressUser(owner, r));
+			dbProvider.execute(s->{
+				cmd.getExpressUsers().forEach(r->addExpressUser(owner, r));
+				return null;
+			});
 		}
 	}
 
 	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO) {
+		if (createExpressUserDTO.getOrganizationId() == null || createExpressUserDTO.getOrganizationMemberId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressUser expressUser = null;
 		if ((expressUser = checkExistsExpressUser(owner, createExpressUserDTO)) != null) {
 			expressUser.setStatus(CommonStatus.ACTIVE.getCode());
@@ -195,6 +204,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void deleteExpressUser(DeleteExpressUserCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressUser expressUser = expressUserProvider.findExpressUserById(cmd.getId());
 		if (expressUser == null || expressUser.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressUser.getOwnerType().equals(owner.getOwnerType())
@@ -320,7 +332,6 @@ public class ExpressServiceImpl implements ExpressService {
 		return expressCompany;
 	}
 	
-
 	@Override
 	public CreateOrUpdateExpressAddressResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());

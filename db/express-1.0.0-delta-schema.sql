@@ -40,6 +40,8 @@ CREATE TABLE `eh_express_users` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `service_address_id` BIGINT,
+  `express_company_id` BIGINT,
   `organization_id` BIGINT COMMENT 'the id of organization',
   `organization_member_id` BIGINT COMMENT 'the id of organization member',
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',

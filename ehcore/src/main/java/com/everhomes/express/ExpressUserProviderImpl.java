@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -84,15 +85,21 @@ public class ExpressUserProviderImpl implements ExpressUserProvider {
 	
 	@Override
 	public List<ExpressUser> listExpressUserByCondition(ListExpressUserCondition condition) {
-		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_USERS)
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_EXPRESS_USERS)
 				.where(Tables.EH_EXPRESS_USERS.NAMESPACE_ID.eq(condition.getNamespaceId()))
 				.and(Tables.EH_EXPRESS_USERS.OWNER_TYPE.eq(condition.getOwnerType()))
 				.and(Tables.EH_EXPRESS_USERS.OWNER_ID.eq(condition.getOwnerId()))
-				.and(condition.getPageAnchor()==null?DSL.trueCondition():Tables.EH_EXPRESS_USERS.ID.lt(condition.getPageAnchor()))
-				.and(Tables.EH_EXPRESS_USERS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.orderBy(Tables.EH_EXPRESS_USERS.ID.desc())
-				.limit(condition.getPageSize()+1)
-				.fetch().map(r -> ConvertHelper.convert(r, ExpressUser.class));
+				.and(Tables.EH_EXPRESS_USERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		
+		if (condition.getExpressCompanyId() != null) {
+//			step.and(Tables.EH_EXPRESS_USERS.e)
+		}
+		
+		
+		 return	step.and(condition.getPageAnchor()==null?DSL.trueCondition():Tables.EH_EXPRESS_USERS.ID.lt(condition.getPageAnchor()))
+					.orderBy(Tables.EH_EXPRESS_USERS.ID.desc())
+					.limit(condition.getPageSize()+1)
+					.fetch().map(r -> ConvertHelper.convert(r, ExpressUser.class));
 	}
 
 	private EhExpressUsersDao getReadWriteDao() {
