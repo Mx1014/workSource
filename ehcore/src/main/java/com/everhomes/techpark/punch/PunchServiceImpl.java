@@ -762,6 +762,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
 		//没有规则就是没有排班,就是非工作日
 		if (null == punchTimeRule){
+			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
 			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
 			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
