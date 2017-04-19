@@ -556,7 +556,7 @@ public class PmTaskController extends ControllerBase {
      * <p>添加物业服务历史地址</p>
      */
     @RequestMapping("createTaskHistoryAddress")
-    @RestReturn(value=String.class)
+    @RestReturn(value=PmTaskHistoryAddressDTO.class)
     public RestResponse createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
 
         RestResponse response = new RestResponse(pmTaskService.createTaskHistoryAddress(cmd));
