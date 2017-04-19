@@ -761,8 +761,13 @@ public class PunchServiceImpl implements PunchService {
 
 		PunchTimeRule punchTimeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(),logDay.getTime());
 		//没有规则就是没有排班,就是非工作日
-		if (null == punchTimeRule)
-			return null;
+		if (null == punchTimeRule){
+			pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+			pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+			pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
+			return pdl;
+		}
 		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
 		//对于已离职和未入职的判断
 		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
