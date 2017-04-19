@@ -1246,9 +1246,9 @@ public class PunchServiceImpl implements PunchService {
 		yesterday.setTime(punCalendar.getTime());
 		yesterday.add(Calendar.DATE, -1);
 		PunchTimeRule yesterdayPtr = getPunchTimeRuleByRuleIdAndDate(pr.getId(),yesterday.getTime());
-		//默认分界点是5点,如果timerule有设置就用设置的
-		Long splitTime = 5*3600*1000L;
-		Long yesterdaySplitTime =  5*3600*1000L;
+		//默认分界点是次日5点,如果timerule有设置就用设置的
+		Long splitTime = 86400000+5*3600*1000L;
+		Long yesterdaySplitTime = 86400000+ 5*3600*1000L;
 		
 		
 		if(null != ptr && null != ptr.getDaySplitTimeLong())
