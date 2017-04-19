@@ -3876,6 +3876,41 @@ public class EquipmentServiceImpl implements EquipmentService {
 		docUtil.closeHttpConn();
 	}
 
+	@Override
+	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
+
+		return null;
+	}
+
+	@Override
+	public StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ListEquipmentTasksResponse listInnormalTasks(ListInnormalTasksCommand cmd) {
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(cmd.getInnormalTaskIds());
+		if(tasks != null && tasks.size() > 0) {
+			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
+				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+				return dto;
+			}).collect(Collectors.toList());
+		}
+
+		return response;
+	}
+
 	private ByteArrayOutputStream generateQRCode(String qrToken) {
 		ByteArrayOutputStream out = null;
 		try {

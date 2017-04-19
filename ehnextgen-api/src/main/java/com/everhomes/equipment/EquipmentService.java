@@ -69,4 +69,10 @@ public interface EquipmentService {
 	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
 	void sendTaskMsg(Long startTime, Long endTime);
 	void exportEquipmentsCard(ExportEquipmentsCardCommand cmd);
+
+	StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd);
+	StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd);
+	StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd);
+	StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd);
+	ListEquipmentTasksResponse listInnormalTasks(ListInnormalTasksCommand cmd);
 }
