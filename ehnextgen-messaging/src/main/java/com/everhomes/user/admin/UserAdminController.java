@@ -205,7 +205,6 @@ public class UserAdminController extends ControllerBase {
 			
 			importDataResponse.setTotalCount((long)resultList.size()-1);
 			importDataResponse.setFailCount((long)errorDataLogs.size());
-			importDataResponse.setLogs(errorDataLogs);
 		} catch (IOException e) {
 			LOGGER.error("File can not be resolved...");
 			e.printStackTrace();
