@@ -35,3 +35,7 @@ ALTER TABLE `eh_organization_owners` MODIFY COLUMN `id_card_number` VARCHAR(32) 
 
 -- add by sw 20170418
 ALTER TABLE `eh_parking_lots` ADD COLUMN `lock_car_flag` TINYINT NOT NULL DEFAULT 0 COMMENT ' 1: support, 0: not ';
+
+ALTER TABLE `eh_lease_configs` ADD COLUMN `area_search_flag` TINYINT NOT NULL DEFAULT 0 COMMENT ' 1: support, 0: not ';
+
+ALTER TABLE `eh_lease_promotions` MODIFY COLUMN `rent_areas` VARCHAR(128);
