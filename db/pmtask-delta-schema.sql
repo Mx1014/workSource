@@ -4,6 +4,7 @@ CREATE TABLE `eh_pm_task_history_addresses` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `building_name` varchar(128) DEFAULT NULL,
   `address` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'detail address',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: wating, 2: active ',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
