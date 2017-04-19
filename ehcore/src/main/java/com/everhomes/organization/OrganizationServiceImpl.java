@@ -5458,17 +5458,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			RowResult r = (RowResult)o;
 			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
-			data.setName(r.getA().trim());
-			data.setDisplayName(r.getB().trim());
-			data.setAdminName(r.getC().trim());
-			data.setAdminToken(r.getD().trim());
-			data.setEmail(r.getE().trim());
-			data.setBuildingName(r.getF().trim());
-			data.setAddress(r.getG().trim());
-			data.setContact(r.getH().trim());
-			data.setNumber(r.getI().trim());
-			data.setCheckinDate(r.getJ().trim());
-			data.setDescription(r.getK().trim());
+			if(null != r.getA())
+				data.setName(r.getA().trim());
+			if(null != r.getB())
+				data.setDisplayName(r.getB().trim());
+			if(null != r.getC())
+				data.setAdminName(r.getC().trim());
+			if(null != r.getD())
+				data.setAdminToken(r.getD().trim());
+			if(null != r.getE())
+				data.setEmail(r.getE().trim());
+			if(null != r.getF())
+				data.setBuildingName(r.getF().trim());
+			if(null != r.getG())
+				data.setAddress(r.getG().trim());
+			if(null != r.getH())
+				data.setContact(r.getH().trim());
+			if(null != r.getI())
+				data.setNumber(r.getI().trim());
+			if(null != r.getJ())
+				data.setCheckinDate(r.getJ().trim());
+			if(null != r.getK())
+				data.setDescription(r.getK().trim());
 			datas.add(data);
 		}
 		return datas;
