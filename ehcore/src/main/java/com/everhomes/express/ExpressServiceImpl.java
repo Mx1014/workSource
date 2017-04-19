@@ -172,13 +172,13 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		if (cmd.getExpressUsers() != null) {
 			dbProvider.execute(s->{
-				cmd.getExpressUsers().forEach(r->addExpressUser(owner, r));
+				cmd.getExpressUsers().forEach(r->addExpressUser(owner, r, cmd));
 				return null;
 			});
 		}
 	}
 
-	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO) {
+	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
 		if (createExpressUserDTO.getOrganizationId() == null || createExpressUserDTO.getOrganizationMemberId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
@@ -191,6 +191,8 @@ public class ExpressServiceImpl implements ExpressService {
 			expressUser.setNamespaceId(owner.getNamespaceId());
 			expressUser.setOwnerType(owner.getOwnerType().getCode());
 			expressUser.setOwnerId(owner.getOwnerId());
+			expressUser.setServiceAddressId(cmd.getServiceAddressId());
+			expressUser.setExpressCompanyId(cmd.getExpressCompanyId());
 			expressUser.setOrganizationId(createExpressUserDTO.getOrganizationId());
 			expressUser.setOrganizationMemberId(createExpressUserDTO.getOrganizationMemberId());
 			expressUser.setStatus(CommonStatus.ACTIVE.getCode());
@@ -253,6 +255,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public GetExpressOrderDetailResponse getExpressOrderDetail(GetExpressOrderDetailCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if (expressOrder != null) {
@@ -275,6 +280,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void updatePaySummary(UpdatePaySummaryCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
@@ -293,6 +301,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void printExpressOrder(PrintExpressOrderCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
@@ -334,6 +345,10 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Override
 	public CreateOrUpdateExpressAddressResponse createOrUpdateExpressAddress(CreateOrUpdateExpressAddressCommand cmd) {
+		if (cmd.getCategory() == null || cmd.getUserName() == null || StringUtils.isEmpty(cmd.getPhone()) || StringUtils.isEmpty(cmd.getProvince())
+				|| StringUtils.isEmpty(cmd.getCity()) || StringUtils.isEmpty(cmd.getCounty()) || StringUtils.isEmpty(cmd.getDetailAddress()) || cmd.getDefaultFlag() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressAddress address = dbProvider.execute(s->{
 			ExpressAddress expressAddress = null;
@@ -411,6 +426,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void deleteExpressAddress(DeleteExpressAddressCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressAddress expressAddress = expressAddressProvider.findExpressAddressById(cmd.getId());
 		if (expressAddress == null || !expressAddress.getOwnerType().equals(owner.getOwnerType().getCode()) || expressAddress.getOwnerId().longValue() != owner.getOwnerId().longValue()
@@ -439,6 +457,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public ListExpressAddressResponse listExpressAddress(ListExpressAddressCommand cmd) {
+		if (cmd.getCategory() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		List<ExpressAddress> expressAddresses = expressAddressProvider.listExpressAddressByOwner(owner, cmd.getCategory());
 		return new ListExpressAddressResponse(expressAddresses.stream().map(this::convertToExpressAddressDTO).collect(Collectors.toList()));
@@ -446,6 +467,10 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd) {
+		if (cmd.getSendAddressId() == null || cmd.getReceiveAddressId() == null || cmd.getExpressCompanyId() == null || cmd.getSendType() == null 
+				|| cmd.getSendMode() == null || cmd.getServiceAddressId() == null || cmd.getPayType() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
@@ -535,6 +560,9 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Override
 	public void cancelExpressOrder(CancelExpressOrderCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + cmd.getId()).enter(() -> {
 			ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
@@ -553,6 +581,9 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(GetExpressLogisticsDetailCommand cmd) {
+		if (cmd.getExpressCompanyId() == null || StringUtils.isEmpty(cmd.getBillNo())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		ExpressCompany expressCompany = findTopExpressCompany(cmd.getExpressCompanyId());
 		if (expressCompany.getId().longValue() == cmd.getExpressCompanyId().longValue()) {
 			putIntoHistory(cmd.getExpressCompanyId(), cmd.getBillNo());

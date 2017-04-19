@@ -92,9 +92,12 @@ public class ExpressUserProviderImpl implements ExpressUserProvider {
 				.and(Tables.EH_EXPRESS_USERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 		
 		if (condition.getExpressCompanyId() != null) {
-//			step.and(Tables.EH_EXPRESS_USERS.e)
+			step.and(Tables.EH_EXPRESS_USERS.EXPRESS_COMPANY_ID.eq(condition.getExpressCompanyId()));
 		}
 		
+		if (condition.getServiceAddressId() != null) {
+			step.and(Tables.EH_EXPRESS_USERS.SERVICE_ADDRESS_ID.eq(condition.getServiceAddressId()));
+		}
 		
 		 return	step.and(condition.getPageAnchor()==null?DSL.trueCondition():Tables.EH_EXPRESS_USERS.ID.lt(condition.getPageAnchor()))
 					.orderBy(Tables.EH_EXPRESS_USERS.ID.desc())
