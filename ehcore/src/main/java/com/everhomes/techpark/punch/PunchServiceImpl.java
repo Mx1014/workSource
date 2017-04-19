@@ -752,6 +752,11 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.get().format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
+		if(null != punchLogs){
+			for (PunchLog log : punchLogs){
+				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
+			}
+		}
 		Date now = new Date();
 		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),companyId, userId );
 		if(null == pr)
@@ -804,9 +809,6 @@ public class PunchServiceImpl implements PunchService {
 			return pdl;
 		}
 
-		for (PunchLog log : punchLogs){
-			pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
-		}
 		//非工作日按照两次计算工作时长
 		if(!isWorkDay(logDay.getTime(),pr) || PunchTimesPerDay.TWICE.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			if (punchLogs.size() == 1) {
