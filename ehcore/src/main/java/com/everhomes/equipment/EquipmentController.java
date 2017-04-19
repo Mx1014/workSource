@@ -1028,7 +1028,7 @@ public class EquipmentController extends ControllerBase {
 	 * <p>最近几天任务数统计</p>
 	 */
 	@RequestMapping("statLastDaysEquipmentTasks")
-	@RestReturn(value = StatEquipmentTasksResponse.class)
+	@RestReturn(value = StatLastDaysEquipmentTasksResponse.class)
 	public RestResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
 
 		StatEquipmentTasksResponse stat = equipmentService.statLastDaysEquipmentTasks(cmd);
@@ -1044,7 +1044,7 @@ public class EquipmentController extends ControllerBase {
 	 * <p>区间任务数统计</p>
 	 */
 	@RequestMapping("statIntervalAllEquipmentTasks")
-	@RestReturn(value = StatEquipmentTasksResponse.class)
+	@RestReturn(value = StatIntervalAllEquipmentTasksResponse.class)
 	public RestResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
 
 		StatEquipmentTasksResponse stat = equipmentService.statIntervalAllEquipmentTasks(cmd);
@@ -1060,7 +1060,7 @@ public class EquipmentController extends ControllerBase {
 	 * <p>按设备-标准统计任务的细项</p>
 	 */
 	@RequestMapping("statItemResultsInEquipmentTasks")
-	@RestReturn(value = StatEquipmentTasksResponse.class)
+	@RestReturn(value = StatItemResultsInEquipmentTasksResponse.class)
 	public RestResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
 
 		StatEquipmentTasksResponse stat = equipmentService.statItemResultsInEquipmentTasks(cmd);
