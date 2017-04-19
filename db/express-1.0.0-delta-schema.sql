@@ -121,7 +121,6 @@ CREATE TABLE `eh_express_orders` (
   UNIQUE INDEX `order_no` (`order_no`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
 -- 快递查询历史表，add by tt, 20170413
 -- DROP TABLE IF EXISTS `eh_express_query_histories`;
 CREATE TABLE `eh_express_query_histories` (
@@ -134,6 +133,22 @@ CREATE TABLE `eh_express_query_histories` (
   `create_time` DATETIME,
   `update_time` DATETIME,
   `operator_uid` BIGINT,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 快递订单日志表，add by tt, 20170413
+-- DROP TABLE IF EXISTS `eh_express_order_logs`;
+CREATE TABLE `eh_express_order_logs` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'community',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
+  `order_id` BIGINT,
+  `action` VARCHAR(64),
+  `remark` VARCHAR(512),
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

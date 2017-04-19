@@ -29,6 +29,7 @@ import com.everhomes.rest.express.CreateOrUpdateExpressAddressCommand;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.ExpressActionEnum;
 import com.everhomes.rest.express.ExpressAddressDTO;
 import com.everhomes.rest.express.ExpressCompanyDTO;
 import com.everhomes.rest.express.ExpressOrderDTO;
@@ -476,6 +477,10 @@ public class ExpressServiceImpl implements ExpressService {
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
 	}
 
+	private void createExpressOrderLog(ExpressOwner owner, ExpressActionEnum action, ExpressOrder order) {
+		
+	}
+	
 	private ExpressOrder createExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
 		ExpressOrder expressOrder = new ExpressOrder();
 		expressOrder.setNamespaceId(owner.getNamespaceId());
