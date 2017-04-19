@@ -101,7 +101,10 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
         }
 
         pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
-        tenantIds.add(organizationId);
+        if(organizationId != null) {
+            tenantIds.add(organizationId);
+        }
+
         List<AssetBill> bills  = assetProvider.listAssetBill(ownerId, ownerType, targetId, targetType,
                 tenantIds, tenantType, addressId, status, startTime,endTime, locator, pageSize + 1);
 

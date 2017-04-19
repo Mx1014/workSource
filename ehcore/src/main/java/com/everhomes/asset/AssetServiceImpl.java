@@ -191,6 +191,16 @@ public class AssetServiceImpl implements AssetService {
         dto.setOrganizationId(organization.getId());
         dto.setOrganizationName(organization.getName());
         dto.setAddresses(this.getOrganizationAddresses(organization.getId()));
+        dto.setAreaSize(0.0);
+        if(dto.getAddresses() != null && dto.getAddresses().size() > 0) {
+            dto.getAddresses().forEach(address -> {
+                if(address != null && address.getAreaSize() != null) {
+                    dto.setAreaSize(address.getAreaSize()+dto.getAreaSize());
+                }
+            });
+
+        }
+
         return dto;
     }
 
