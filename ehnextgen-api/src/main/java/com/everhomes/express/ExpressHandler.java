@@ -7,7 +7,7 @@ public interface ExpressHandler {
 	
 	String EXPRESS_HANDLER_PREFIX = "express_handler_";
 
-	String handle(ExpressOrder expressOrder);
+	String getBillNo(ExpressOrder expressOrder);
 
 	String getExpressLogoUrl();
 

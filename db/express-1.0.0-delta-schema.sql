@@ -109,6 +109,7 @@ CREATE TABLE `eh_express_orders` (
   `internal` VARCHAR(256) COMMENT 'internal things',
   `insured_price` DECIMAL(10,2) COMMENT 'insured price',
   `status` TINYINT NOT NULL COMMENT '1. waiting for pay, 2. paid, 3. printed, 4. cancelled',
+  `print_time` DATETIME,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,

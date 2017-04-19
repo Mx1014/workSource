@@ -61,15 +61,93 @@ public class EmsHandler implements ExpressHandler {
 	private ContentServerService contentServerService;
 	
 	@Override
-	public String handle(ExpressOrder expressOrder) {
+	public String getBillNo(ExpressOrder expressOrder) {
 		String billNo = getBillNo(String.valueOf(expressOrder.getSendType()));
-		
-		
-		
-		
+		expressOrder.setBillNo(billNo);
+		updatePrintInfo(convertToEmsBill(expressOrder));
 		return billNo;
 	}
 	
+	private EmsBill convertToEmsBill(ExpressOrder expressOrder) {
+		EmsBill emsBill = new EmsBill();
+		emsBill.setBigAccountDataId(String.valueOf(expressOrder.getId()));
+		emsBill.setBusinessType(String.valueOf(expressOrder.getSendType()));
+		emsBill.setBillno(expressOrder.getBillNo());
+		
+		
+//		<billno></billno>	邮件号	VARCHAR2(20)	M	快递单号
+//		<dateType></dateType>	时间类型	VARCHAR2(1)	C	1:收寄时间
+//		2:打印时间
+//		2
+//		<procdate></procdate>	时间	VARCHAR2(16)	C	YYYY-MM-DD hh:mi:ss
+//		<scontactor></scontactor>	寄件人姓名	VARCHAR2(50)	M	
+//		<scustMobile></scustMobile>	寄件人电话1	VARCHAR2(20)	M	两个电话必填一项
+//		<scustTelplus></scustTelplus>	寄件人电话2	VARCHAR2(20)	C	
+//		<scustPost></scustPost>	寄件人邮编	VARCHAR2(6)	C	
+//		<scustAddr></scustAddr>	寄件人地址	VARCHAR2(200)	M	地址与公司名称必填一项
+//		<scustComp></scustComp>	寄件人公司名称	VARCHAR2(50)	C	
+//		<scustProvince></scustProvince>	寄件人所在省	VARCHAR2(20)	C	行政区划名称
+//		<scustCity></scustCity>	寄件人所在市	VARCHAR2(20)	C	行政区划名称
+//		<scustCounty></scustCounty>	寄件人所在区县	VARCHAR2(20)	C	行政区划名称
+//		<tcontactor></tcontactor>	收件人姓名	VARCHAR2(50)	M	
+//		<tcustMobile></tcustMobile>	收件人电话1	VARCHAR2(20)	M	两个电话必填一项
+//		<tcustTelplus></tcustTelplus>	收件人电话2	VARCHAR2(20)	C	
+//		<tcustPost></tcustPost>	收件人邮编	VARCHAR2(6)	C	
+//		<tcustAddr></tcustAddr>	收件人地址	VARCHAR2(200)	M	地址与公司名称必填一项
+//		<tcustComp></tcustComp>	收件人公司名称	VARCHAR2(50)	C	
+//		<tcustProvince></tcustProvince>	收件人所在省	VARCHAR2(20)	C	行政区划名称
+//		<tcustCity></tcustCity>	收件人所在市	VARCHAR2(20)	C	行政区划名称
+//		<tcustCounty></tcustCounty>	收件人所在区县	VARCHAR2(20)	C	行政区划名称
+//		<weight></weight>	货物重量	NUMBER(14,4)	C	单位：KG
+//		<length></length>	货物长度	NUMBER(14,4)	C	单位：CM
+//		<insure></insure>	保价金额	NUMBER(14,4)	C	单位：元
+//		<insurance></insurance>	保险金额	NUMBER(14,4)	C	单位：元
+//		<fee></fee>	货款金额	NUMBER(14,4)	C	单位：元
+//		<feeUppercase></feeUppercase>	大写货款金额	VARCHAR2(30)	C	
+//		<cargoDesc></cargoDesc>	内件信息	VARCHAR2(100)		
+//		<cargoType></cargoType>	内件类型	VARCHAR2(10)	C	传入文字：
+//		文件
+//		物品
+//		<deliveryclaim></deliveryclaim>	揽投员的投递要求	VARCHAR2(30)	C	
+//		<remark></remark>	备注	VARCHAR2(100)	C	
+//		<productCode></productCode>	邮件产品代码	VARCHAR2(20)	C	EMS内部定义的邮件产品代码
+//		<customerDn></customerDn>	订单号	VARCHAR2(30)	C	一票多件必填
+//		<subBillCount></subBillCount>	分单数	NUMBER(4)	C	>0时，含分单邮件
+//		<mainBillNo></mainBillNo>	主单邮件号	Varchar2(20)	C	分单对应的主单邮件号；主单邮件和普通邮件，该字段放空
+//		<mainBillFlag></mainBillFlag>	主分单标识	VARCHAR2(1)	C	1：普通(无分单时)
+//		2：主单
+//		3：分单
+//		<mainSubPayMode></mainSubPayMode>	一票多单计费方式	VARCHAR2(1)	C	1：集中主单计费
+//		2：平均重量计费
+//		3：分单免首重
+//		4：主分单单独计费
+//		<payMode></payMode>	付费类型	VARCHAR2(1)	C	1：现金(支票)
+//		2：记欠
+//		3：托收
+//		4：转帐
+//		9：其他
+//		<insureType></insureType>	所负责任	VARCHAR2(1)	C	2：保价
+//		3：保险
+//		<addser_dshk></addser_dshk>	代收货款（附加服务）	VARCHAR2(1)	C	1:代收货款
+//		0:非代收货款
+//		<addser_sjrff></addser_sjrff>	收件人付费(附加服务)	VARCHAR2(1)	C	1:收件人付费
+//		0:非收件人付费
+//		<blank1></blank1>	留白1	VARCHAR2(100)	C	
+//		<blank2></blank2>	留白2	VARCHAR2(100)	C	
+//		<blank3></blank3>			C	预留，不实际使用
+//		<blank4></blank4>			C	预留，不实际使用
+//		<blank5></blank5>			C	预留，不实际使用
+
+		
+		
+		
+		
+		
+		
+		
+		return null;
+	}
+
 	@Override
 	public String getExpressLogoUrl() {
 		try {
@@ -136,6 +214,7 @@ public class EmsHandler implements ExpressHandler {
 		try {
 			resultXmlBase64 = HttpUtils.get(url, null);
 		} catch (IOException e) {
+			LOGGER.error("get bill no from ems error: {}", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "get bill no from ems error");
 		}
 		
@@ -152,12 +231,11 @@ public class EmsHandler implements ExpressHandler {
 			}
 		}
 		
-		//如果程序运行到这里，说明未取得邮件号，招聘异常
+		//如果程序运行到这里，说明未取得邮件号，抛出异常
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "get bill no from ems error");
 	}
 	
-	private void updatePrintInfo() {
-		EmsBill emsBill = new EmsBill();
+	private void updatePrintInfo(EmsBill emsBill) {
 		String paramXml = getUpdatePrintInfoParamXml(emsBill);
 		if (LOGGER.isInfoEnabled()) {
 			LOGGER.info("update print info param is : {}", paramXml);
@@ -169,6 +247,7 @@ public class EmsHandler implements ExpressHandler {
 		try {
 			resultXmlBase64 = HttpUtils.get(url, null);
 		} catch (IOException e) {
+			LOGGER.error("update print info to ems error: {}", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "update print info to ems error");
 		}
 		

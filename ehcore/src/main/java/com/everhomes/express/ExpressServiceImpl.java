@@ -294,7 +294,7 @@ public class ExpressServiceImpl implements ExpressService {
 				ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
 				if (handler != null) {
 					// 每个快递公司返回的快递单号通过各自的handler获取
-					String billNo = handler.handle(expressOrder);
+					String billNo = handler.getBillNo(expressOrder);
 					expressOrder.setBillNo(billNo);
 				}
 				expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
