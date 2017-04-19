@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -63,6 +64,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -294,6 +296,7 @@ public class ExpressServiceImpl implements ExpressService {
 				ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
 				if (handler != null) {
 					// 每个快递公司返回的快递单号通过各自的handler获取
+					expressOrder.setPrintTime(new Timestamp(DateHelper.currentGMTTime().getTime())); //打印时间，需要传给ems
 					String billNo = handler.getBillNo(expressOrder);
 					expressOrder.setBillNo(billNo);
 				}

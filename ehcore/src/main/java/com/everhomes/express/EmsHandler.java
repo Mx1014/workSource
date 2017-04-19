@@ -3,6 +3,8 @@ package com.everhomes.express;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -17,6 +19,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -30,6 +33,7 @@ import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.TrackBillResponse;
 import com.everhomes.util.RuntimeErrorException;
 
+//后面的1为表eh_express_companies中父id为0的行的id
 @Component(ExpressHandler.EXPRESS_HANDLER_PREFIX+"1")
 public class EmsHandler implements ExpressHandler {
 
@@ -41,10 +45,6 @@ public class EmsHandler implements ExpressHandler {
 	private static final String UPDATE_PRINT_INFO_URL = "http://os.ems.com.cn:8081/zkweb/bigaccount/getBigAccountDataAction.do?method=updatePrintDatas&xml=#{xml}"; 
 	//跟踪运单信息
 	private static final String TRACK_BILL_URL = "http://211.156.193.140:8000/cotrackapi/api/track/mail/#{billno}"; 
-	//大客户号
-	private static final String SYS_ACCOUNT = "A1234567890Z";
-	//密码
-	private static final String PASS_WORD = "e10adc3949ba59abbe56e057f20f883e";
 	// APP KEY
 	private static final String APP_KEY = "T757620e368dA9904";
 	//获取数量
@@ -56,6 +56,13 @@ public class EmsHandler implements ExpressHandler {
 	
 	//java8新加的格式化时间类，是线程安全的
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	
+	//大客户号
+	@Value("${ems.sys.account:}")
+	private String sysAccount;
+	//密码
+	@Value("${ems.sys.password:}")
+	private String sysPassword;
 	
 	@Autowired
 	private ContentServerService contentServerService;
@@ -73,79 +80,33 @@ public class EmsHandler implements ExpressHandler {
 		emsBill.setBigAccountDataId(String.valueOf(expressOrder.getId()));
 		emsBill.setBusinessType(String.valueOf(expressOrder.getSendType()));
 		emsBill.setBillno(expressOrder.getBillNo());
-		
-		
-//		<billno></billno>	邮件号	VARCHAR2(20)	M	快递单号
-//		<dateType></dateType>	时间类型	VARCHAR2(1)	C	1:收寄时间
-//		2:打印时间
-//		2
-//		<procdate></procdate>	时间	VARCHAR2(16)	C	YYYY-MM-DD hh:mi:ss
-//		<scontactor></scontactor>	寄件人姓名	VARCHAR2(50)	M	
-//		<scustMobile></scustMobile>	寄件人电话1	VARCHAR2(20)	M	两个电话必填一项
-//		<scustTelplus></scustTelplus>	寄件人电话2	VARCHAR2(20)	C	
-//		<scustPost></scustPost>	寄件人邮编	VARCHAR2(6)	C	
-//		<scustAddr></scustAddr>	寄件人地址	VARCHAR2(200)	M	地址与公司名称必填一项
-//		<scustComp></scustComp>	寄件人公司名称	VARCHAR2(50)	C	
-//		<scustProvince></scustProvince>	寄件人所在省	VARCHAR2(20)	C	行政区划名称
-//		<scustCity></scustCity>	寄件人所在市	VARCHAR2(20)	C	行政区划名称
-//		<scustCounty></scustCounty>	寄件人所在区县	VARCHAR2(20)	C	行政区划名称
-//		<tcontactor></tcontactor>	收件人姓名	VARCHAR2(50)	M	
-//		<tcustMobile></tcustMobile>	收件人电话1	VARCHAR2(20)	M	两个电话必填一项
-//		<tcustTelplus></tcustTelplus>	收件人电话2	VARCHAR2(20)	C	
-//		<tcustPost></tcustPost>	收件人邮编	VARCHAR2(6)	C	
-//		<tcustAddr></tcustAddr>	收件人地址	VARCHAR2(200)	M	地址与公司名称必填一项
-//		<tcustComp></tcustComp>	收件人公司名称	VARCHAR2(50)	C	
-//		<tcustProvince></tcustProvince>	收件人所在省	VARCHAR2(20)	C	行政区划名称
-//		<tcustCity></tcustCity>	收件人所在市	VARCHAR2(20)	C	行政区划名称
-//		<tcustCounty></tcustCounty>	收件人所在区县	VARCHAR2(20)	C	行政区划名称
-//		<weight></weight>	货物重量	NUMBER(14,4)	C	单位：KG
-//		<length></length>	货物长度	NUMBER(14,4)	C	单位：CM
-//		<insure></insure>	保价金额	NUMBER(14,4)	C	单位：元
-//		<insurance></insurance>	保险金额	NUMBER(14,4)	C	单位：元
-//		<fee></fee>	货款金额	NUMBER(14,4)	C	单位：元
-//		<feeUppercase></feeUppercase>	大写货款金额	VARCHAR2(30)	C	
-//		<cargoDesc></cargoDesc>	内件信息	VARCHAR2(100)		
-//		<cargoType></cargoType>	内件类型	VARCHAR2(10)	C	传入文字：
-//		文件
-//		物品
-//		<deliveryclaim></deliveryclaim>	揽投员的投递要求	VARCHAR2(30)	C	
-//		<remark></remark>	备注	VARCHAR2(100)	C	
-//		<productCode></productCode>	邮件产品代码	VARCHAR2(20)	C	EMS内部定义的邮件产品代码
-//		<customerDn></customerDn>	订单号	VARCHAR2(30)	C	一票多件必填
-//		<subBillCount></subBillCount>	分单数	NUMBER(4)	C	>0时，含分单邮件
-//		<mainBillNo></mainBillNo>	主单邮件号	Varchar2(20)	C	分单对应的主单邮件号；主单邮件和普通邮件，该字段放空
-//		<mainBillFlag></mainBillFlag>	主分单标识	VARCHAR2(1)	C	1：普通(无分单时)
-//		2：主单
-//		3：分单
-//		<mainSubPayMode></mainSubPayMode>	一票多单计费方式	VARCHAR2(1)	C	1：集中主单计费
-//		2：平均重量计费
-//		3：分单免首重
-//		4：主分单单独计费
-//		<payMode></payMode>	付费类型	VARCHAR2(1)	C	1：现金(支票)
-//		2：记欠
-//		3：托收
-//		4：转帐
-//		9：其他
-//		<insureType></insureType>	所负责任	VARCHAR2(1)	C	2：保价
-//		3：保险
-//		<addser_dshk></addser_dshk>	代收货款（附加服务）	VARCHAR2(1)	C	1:代收货款
-//		0:非代收货款
-//		<addser_sjrff></addser_sjrff>	收件人付费(附加服务)	VARCHAR2(1)	C	1:收件人付费
-//		0:非收件人付费
-//		<blank1></blank1>	留白1	VARCHAR2(100)	C	
-//		<blank2></blank2>	留白2	VARCHAR2(100)	C	
-//		<blank3></blank3>			C	预留，不实际使用
-//		<blank4></blank4>			C	预留，不实际使用
-//		<blank5></blank5>			C	预留，不实际使用
+		emsBill.setDateType("2");
+		emsBill.setProcdate(DATE_TIME_FORMATTER.format(expressOrder.getPrintTime().toInstant()));
+		emsBill.setScontactor(expressOrder.getSendName());
+		emsBill.setScustMobile(expressOrder.getSendPhone());
+		emsBill.setScustAddr(getAddress(expressOrder.getSendProvince(), expressOrder.getSendCity(), expressOrder.getSendCounty(), expressOrder.getSendDetailAddress()));
+		emsBill.setScustComp(expressOrder.getSendOrganization());
+		emsBill.setScustProvince(expressOrder.getSendProvince());
+		emsBill.setScustCity(expressOrder.getSendCity());
+		emsBill.setScustCounty(expressOrder.getSendCounty());
+		emsBill.setTcontactor(expressOrder.getReceiveName());
+		emsBill.setTcustMobile(expressOrder.getReceivePhone());
+		emsBill.setTcustAddr(getAddress(expressOrder.getReceiveProvince(), expressOrder.getReceiveCity(), expressOrder.getReceiveCounty(), expressOrder.getReceiveDetailAddress()));
+		emsBill.setTcustComp(expressOrder.getReceiveOrganization());
+		emsBill.setTcustProvince(expressOrder.getReceiveProvince());
+		emsBill.setTcustCity(expressOrder.getReceiveCity());
+		emsBill.setTcustCounty(expressOrder.getReceiveCounty());
+		emsBill.setInsure(String.valueOf(expressOrder.getInsuredPrice()));
+		emsBill.setCargoDesc(expressOrder.getInternal());
+		return emsBill;
+	}
 
-		
-		
-		
-		
-		
-		
-		
-		return null;
+	private String getAddress(String province, String city, String county, String detailAddress) {
+		return formatString(province) + formatString(city) + formatString(county) + formatString(detailAddress);
+	}
+	
+	private String formatString(String string) {
+		return string == null ? "" : string;
 	}
 
 	@Override
@@ -274,6 +235,7 @@ public class EmsHandler implements ExpressHandler {
 		try {
 			result = HttpUtils.get(url, null);
 		} catch (IOException e) {
+			LOGGER.error("track bill from ems error: {}", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "track bill error");
 		}
 		if (result == null || result.isEmpty()) {
@@ -301,7 +263,7 @@ public class EmsHandler implements ExpressHandler {
 				"<billNoAmount>#{billNoAmount}</billNoAmount>"+
 				"</XMLInfo>";
 		
-		return paramXmlTemplate.replace("#{sysAccount}", SYS_ACCOUNT).replace("#{passWord}", PASS_WORD).replace("#{appKey}", APP_KEY)
+		return paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", sysPassword).replace("#{appKey}", APP_KEY)
 				.replace("#{businessType}", String.valueOf(businessType)).replace("#{billNoAmount}", BILL_NO_AMOUNT);
 	}
 	
@@ -313,63 +275,83 @@ public class EmsHandler implements ExpressHandler {
 				"<appKey>#{appKey}</appKey>"+
 				"<printDatas>"+
 				"<printData>"+
-				"<bigAccountDataId>#{bigAccountDataId}</bigAccountDataId>"+
-				"<businessType>#{businessType}</businessType>"+
-				"<billno>#{billno}</billno>"+
-				"<dateType>#{dateType}</dateType>"+
-				"<procdate>#{procdate}</procdate>"+
-				"<scontactor>#{scontactor}</scontactor>"+
-				"<scustMobile>#{scustMobile}</scustMobile>"+
-				"<scustTelplus>#{scustTelplus}</scustTelplus>"+
-				"<scustPost>#{scustPost}</scustPost>"+
-				"<scustAddr>#{scustAddr}</scustAddr>"+
-				"<scustComp>#{scustComp}</scustComp>"+
-				"<scustProvince>#{scustProvince}</scustProvince>"+
-				"<scustCity>#{scustCity}</scustCity>"+
-				"<scustCounty>#{scustCounty}</scustCounty>"+
-				"<tcontactor>#{tcontactor}</tcontactor>"+
-				"<tcustMobile>#{tcustMobile}</tcustMobile>"+
-				"<tcustTelplus>#{tcustTelplus}</tcustTelplus>"+
-				"<tcustPost>#{tcustPost}</tcustPost>"+
-				"<tcustAddr>#{tcustAddr}</tcustAddr>"+
-				"<tcustComp>#{tcustComp}</tcustComp>"+
-				"<tcustProvince>#{tcustProvince}</tcustProvince>"+
-				"<tcustCity>#{tcustCity}</tcustCity>"+
-				"<tcustCounty>#{tcustCounty}</tcustCounty>"+
-				"<weight>#{weight}</weight>"+
-				"<length>#{length}</length>"+
-				"<insure>#{insure}</insure>"+
-				"<insurance>#{insurance}</insurance>"+
-				"<fee>#{fee}</fee>"+
-				"<feeUppercase>#{feeUppercase}</feeUppercase>"+
-				"<cargoDesc>#{cargoDesc}</cargoDesc>"+
-				"<cargoType>#{cargoType}</cargoType>"+
-				"<deliveryclaim>#{deliveryclaim}</deliveryclaim>"+
-				"<remark>#{remark}</remark>"+
-				"<productCode>#{productCode}</productCode>"+
-				"<customerDn>#{customerDn}</customerDn>"+
-				"<subBillCount>#{subBillCount}</subBillCount>"+
-				"<mainBillNo>#{mainBillNo}</mainBillNo>"+
-				"<mainBillFlag>#{mainBillFlag}</mainBillFlag>"+
-				"<mainSubPayMode>#{mainSubPayMode}</mainSubPayMode>"+
-				"<payMode>#{payMode}</payMode>"+
-				"<insureType>#{insureType}</insureType>"+
-				"<addser_dshk>#{addser_dshk}</addser_dshk>"+
-				"<addser_sjrff>#{addser_sjrff}</addser_sjrff>"+
-				"<blank1>#{blank1}</blank1>"+
-				"<blank2>#{blank2}</blank2>"+
-				"<blank3>#{blank3}</blank3>"+
-				"<blank4>#{blank4}</blank4>"+
-				"<blank5>#{blank5}</blank5>"+
+				"<bigAccountDataId></bigAccountDataId>"+
+				"<businessType></businessType>"+
+				"<billno></billno>"+
+				"<dateType></dateType>"+
+				"<procdate></procdate>"+
+				"<scontactor></scontactor>"+
+				"<scustMobile></scustMobile>"+
+				"<scustTelplus></scustTelplus>"+
+				"<scustPost></scustPost>"+
+				"<scustAddr></scustAddr>"+
+				"<scustComp></scustComp>"+
+				"<scustProvince></scustProvince>"+
+				"<scustCity></scustCity>"+
+				"<scustCounty></scustCounty>"+
+				"<tcontactor></tcontactor>"+
+				"<tcustMobile></tcustMobile>"+
+				"<tcustTelplus></tcustTelplus>"+
+				"<tcustPost></tcustPost>"+
+				"<tcustAddr></tcustAddr>"+
+				"<tcustComp></tcustComp>"+
+				"<tcustProvince></tcustProvince>"+
+				"<tcustCity></tcustCity>"+
+				"<tcustCounty></tcustCounty>"+
+				"<weight></weight>"+
+				"<length></length>"+
+				"<insure></insure>"+
+				"<insurance></insurance>"+
+				"<fee></fee>"+
+				"<feeUppercase></feeUppercase>"+
+				"<cargoDesc></cargoDesc>"+
+				"<cargoType></cargoType>"+
+				"<deliveryclaim></deliveryclaim>"+
+				"<remark></remark>"+
+				"<productCode></productCode>"+
+				"<customerDn></customerDn>"+
+				"<subBillCount></subBillCount>"+
+				"<mainBillNo></mainBillNo>"+
+				"<mainBillFlag></mainBillFlag>"+
+				"<mainSubPayMode></mainSubPayMode>"+
+				"<payMode></payMode>"+
+				"<insureType></insureType>"+
+				"<addser_dshk></addser_dshk>"+
+				"<addser_sjrff></addser_sjrff>"+
+				"<blank1></blank1>"+
+				"<blank2></blank2>"+
+				"<blank3></blank3>"+
+				"<blank4></blank4>"+
+				"<blank5></blank5>"+
 				"</printData>"+
 				"</printDatas>"+
 				"</XMLInfo>";
 		
-		return paramXmlTemplate.replace("#{sysAccount}", SYS_ACCOUNT).replace("#{passWord}", PASS_WORD).replace("#{appKey}", APP_KEY)
+		paramXmlTemplate = paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", sysPassword).replace("#{appKey}", APP_KEY)
 				.replace("#{printKind}", PRINT_KIND);
+		
+		Method[] methods = emsBill.getClass().getMethods();
+		for (Method method : methods) {
+			String methodName = method.getName();
+			if (methodName.startsWith("get")) {
+				try {
+					String fieldName = uncapFirst(methodName.substring(3));
+					Object value = method.invoke(emsBill);
+					if (value != null) {
+						paramXmlTemplate = paramXmlTemplate.replaceAll("(<"+fieldName+">)(</"+fieldName+">)", "$1"+value.toString()+"$2");
+					}
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					LOGGER.error("get field value by reflect error: {}", e);
+				}
+			}
+		}
+		
+		return paramXmlTemplate;
 	}
 	
-	
+	private String uncapFirst(String string) {
+		return string.substring(0, 1).toLowerCase() + string.substring(1);
+	}
 	
 	
 	
