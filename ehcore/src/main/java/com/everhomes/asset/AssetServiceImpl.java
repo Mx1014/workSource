@@ -194,7 +194,9 @@ public class AssetServiceImpl implements AssetService {
         dto.setAreaSize(0.0);
         if(dto.getAddresses() != null && dto.getAddresses().size() > 0) {
             dto.getAddresses().forEach(address -> {
-                dto.setAreaSize(address.getAreaSize()+dto.getAreaSize());
+                if(address != null && address.getAreaSize() != null) {
+                    dto.setAreaSize(address.getAreaSize()+dto.getAreaSize());
+                }
             });
 
         }
