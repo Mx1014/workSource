@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.pmtask.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,47 +18,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AssignTaskCommand;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CloseTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesDTO;
-import com.everhomes.rest.pmtask.GetTaskLogCommand;
-import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
-import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
-import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetStatisticsCommand;
-import com.everhomes.rest.pmtask.GetStatisticsResponse;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.RevisitCommand;
-import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.CompleteTaskCommand;
-import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
-import com.everhomes.rest.pmtask.UpdateTaskCommand;
 
 @RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
@@ -570,6 +530,21 @@ public class PmTaskController extends ControllerBase {
     public RestResponse createStatistics() {
     	pmTaskService.createStatistics();
     	pmTaskService.createTaskTargetStatistics();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /pmtask/deleteTaskHistoryAddress</b>
+     * <p>删除物业服务历史地址</p>
+     */
+    @RequestMapping("deleteTaskHistoryAddress")
+    @RestReturn(value=String.class)
+    public RestResponse deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd) {
+
+        pmTaskService.deleteTaskHistoryAddress(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

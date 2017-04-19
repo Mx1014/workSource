@@ -1853,7 +1853,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		response.setOrganizationList(addressDTOs);
 	    	}
 	    }
-	    
+
+	    List<PmTaskHistoryAddress> addresses = pmTaskProvider.listTaskHistoryAddresses(namespaceId, PmTaskOwnerType.COMMUNITY.getCode(),
+				communityId, userId, null, null);
+
+		response.setHistoryAddresses(addresses.stream().map(r -> ConvertHelper.convert(r, PmTaskHistoryAddressDTO.class))
+				.collect(Collectors.toList()));
 		return response;
 	}
 
@@ -2148,5 +2153,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 
 	}
-	
+
+	@Override
+	public void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd) {
+		PmTaskHistoryAddress pmTaskHistoryAddress = pmTaskProvider.findTaskHistoryAddressById(cmd.getId());
+		if (null == pmTaskHistoryAddress) {
+			LOGGER.error("PmTaskHistoryAddress not found, id={}", cmd.getId());
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"PmTaskHistoryAddress not found.");
+		}
+		pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.INACTIVE.getCode());
+		pmTaskProvider.updateTaskHistoryAddress(pmTaskHistoryAddress);
+	}
 }

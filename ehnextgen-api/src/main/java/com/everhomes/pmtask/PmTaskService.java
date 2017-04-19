@@ -6,47 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AssignTaskCommand;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CloseTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesDTO;
-import com.everhomes.rest.pmtask.GetTaskLogCommand;
-import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
-import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
-import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetStatisticsCommand;
-import com.everhomes.rest.pmtask.GetStatisticsResponse;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.RevisitCommand;
-import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.CompleteTaskCommand;
-import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
-import com.everhomes.rest.pmtask.UpdateTaskCommand;
+import com.everhomes.rest.pmtask.*;
 
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
@@ -122,4 +82,6 @@ public interface PmTaskService {
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 
 	void synchronizedData(SearchTasksCommand cmd);
+
+	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
 }
