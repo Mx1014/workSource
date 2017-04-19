@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 
 import org.slf4j.Logger;
@@ -884,8 +885,8 @@ public class OrganizationAdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-        ImportDataResponse importDataResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
-        RestResponse response = new RestResponse(importDataResponse);
+        ImportFileResponse<ImportEnterpriseDataDTO> importFileResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
+        RestResponse response = new RestResponse(importFileResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

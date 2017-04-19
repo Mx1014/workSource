@@ -60,6 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -5382,9 +5383,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 	@Override
-	public ImportDataResponse importEnterpriseData(MultipartFile mfile,
-			Long userId, ImportEnterpriseDataCommand cmd) {
-		ImportDataResponse importDataResponse = new ImportDataResponse();
+	public ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
+												   Long userId, ImportEnterpriseDataCommand cmd) {
+		ImportFileResponse<ImportEnterpriseDataDTO> importDataResponse = new ImportFileResponse<>();
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
