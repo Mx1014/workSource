@@ -2159,10 +2159,38 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTaskHistoryAddress pmTaskHistoryAddress = pmTaskProvider.findTaskHistoryAddressById(cmd.getId());
 		if (null == pmTaskHistoryAddress) {
 			LOGGER.error("PmTaskHistoryAddress not found, id={}", cmd.getId());
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"PmTaskHistoryAddress not found.");
 		}
 		pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.INACTIVE.getCode());
 		pmTaskProvider.updateTaskHistoryAddress(pmTaskHistoryAddress);
+	}
+
+	@Override
+	public void createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
+
+		if (null == cmd.getOwnerId() || null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid parameter, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Invalid parameter.");
+		}
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		//addressId 为空，保存地址
+		dbProvider.execute((TransactionStatus transactionStatus) -> {
+			PmTaskHistoryAddress pmTaskHistoryAddress = new PmTaskHistoryAddress();
+			pmTaskHistoryAddress.setNamespaceId(namespaceId);
+			pmTaskHistoryAddress.setOwnerId(cmd.getOwnerId());
+			pmTaskHistoryAddress.setOwnerType(cmd.getOwnerType());
+			pmTaskHistoryAddress.setBuildingName(cmd.getBuildingName());
+			pmTaskHistoryAddress.setAddress(cmd.getAddress());
+			pmTaskHistoryAddress.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			pmTaskHistoryAddress.setCreatorUid(UserContext.current().getUser().getId());
+			pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.ACTIVE.getCode());
+			pmTaskProvider.createTaskHistoryAddress(pmTaskHistoryAddress);
+
+			return null;
+		});
+
 	}
 }

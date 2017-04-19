@@ -173,18 +173,6 @@ class PmTaskCommonServiceImpl {
                     task.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
                 }
             }
-        }else {
-            //addressId 为空，保存地址
-            PmTaskHistoryAddress pmTaskHistoryAddress = new PmTaskHistoryAddress();
-            pmTaskHistoryAddress.setNamespaceId(task.getNamespaceId());
-            pmTaskHistoryAddress.setOwnerId(task.getOwnerId());
-            pmTaskHistoryAddress.setOwnerType(task.getOwnerType());
-            pmTaskHistoryAddress.setBuildingName(task.getBuildingName());
-            pmTaskHistoryAddress.setAddress(task.getAddress());
-            pmTaskHistoryAddress.setCreateTime(new Timestamp(System.currentTimeMillis()));
-            pmTaskHistoryAddress.setCreatorUid(task.getCreatorUid());
-            pmTaskHistoryAddress.setStatus(PmTaskHistoryAddressStatus.ACTIVE.getCode());
-            pmTaskProvider.createTaskHistoryAddress(pmTaskHistoryAddress);
         }
         task.setAddressType(cmd.getAddressType());
         task.setAddressId(cmd.getAddressId());

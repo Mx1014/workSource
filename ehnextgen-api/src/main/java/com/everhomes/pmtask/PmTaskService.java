@@ -84,4 +84,6 @@ public interface PmTaskService {
 	void synchronizedData(SearchTasksCommand cmd);
 
 	void deleteTaskHistoryAddress(DeleteTaskHistoryAddressCommand cmd);
+
+	void createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd);
 }

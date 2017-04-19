@@ -550,4 +550,19 @@ public class PmTaskController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /pmtask/createTaskHistoryAddress</b>
+     * <p>添加物业服务历史地址</p>
+     */
+    @RequestMapping("createTaskHistoryAddress")
+    @RestReturn(value=String.class)
+    public RestResponse createTaskHistoryAddress(CreateTaskHistoryAddressCommand cmd) {
+
+        pmTaskService.createTaskHistoryAddress(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
