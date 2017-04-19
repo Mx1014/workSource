@@ -7,20 +7,32 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>scores: 参考 {@link ScoreGroupByTargetDTO}</li>
+ *  <li>targetSpecificationScores: 参考 {@link com.everhomes.rest.quality.ScoreGroupByTargetDTO}</li>
+ *  <li>specifications: 列名称列表 参考 {@link com.everhomes.rest.quality.CountScoresSpecificationDTO}</li>
  * </ul>
  */
 public class CountScoresResponse {
 
-	@ItemType(ScoreGroupByTargetDTO.class)
-	private List<ScoreGroupByTargetDTO> scores;
+	@ItemType(CountScoresSpecificationDTO.class)
+	private List<CountScoresSpecificationDTO> specifications;
 
-	public List<ScoreGroupByTargetDTO> getScores() {
-		return scores;
+	@ItemType(ScoreGroupByTargetDTO.class)
+	private List<ScoreGroupByTargetDTO> targetSpecificationScores;
+
+	public List<CountScoresSpecificationDTO> getSpecifications() {
+		return specifications;
 	}
 
-	public void setScores(List<ScoreGroupByTargetDTO> scores) {
-		this.scores = scores;
+	public void setSpecifications(List<CountScoresSpecificationDTO> specifications) {
+		this.specifications = specifications;
+	}
+
+	public List<ScoreGroupByTargetDTO> getTargetSpecificationScores() {
+		return targetSpecificationScores;
+	}
+
+	public void setTargetSpecificationScores(List<ScoreGroupByTargetDTO> targetSpecificationScores) {
+		this.targetSpecificationScores = targetSpecificationScores;
 	}
 
 	@Override

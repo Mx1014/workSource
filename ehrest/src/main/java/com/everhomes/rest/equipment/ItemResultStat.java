@@ -1,6 +1,9 @@
 package com.everhomes.rest.equipment;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -11,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>averageValue: 巡检平均值</li>
  *  <li>normalTimes: 正常次数</li>
  *  <li>innormalTimes: 异常次数</li>
+ *  <li>innormalTaskIds: 异常的任务id列表</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
@@ -29,6 +33,8 @@ public class ItemResultStat {
     private String valueJason;
 
     private Double averageValue;
+    @ItemType(Long.class)
+    private List<Long> innormalTaskIds;
 
     public Double getAverageValue() {
         return averageValue;
@@ -84,6 +90,14 @@ public class ItemResultStat {
 
     public void setValueType(Byte valueType) {
         this.valueType = valueType;
+    }
+
+    public List<Long> getInnormalTaskIds() {
+        return innormalTaskIds;
+    }
+
+    public void setInnormalTaskIds(List<Long> innormalTaskIds) {
+        this.innormalTaskIds = innormalTaskIds;
     }
 
     @Override

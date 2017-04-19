@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
- *  <li>isReview: 是否查审阅任务</li>
+ *  <li>isReview: 是否查审阅任务 0：执行任务；1：审核任务</li>
  * </ul>
  */
 public class ListEquipmentTasksCommand {

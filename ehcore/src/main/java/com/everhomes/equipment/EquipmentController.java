@@ -1070,5 +1070,20 @@ public class EquipmentController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
+
+	/**
+	 * <b>URL: /equipment/listInnormalTasks</b>
+	 * <p>查看异常任务列表</p>
+	 */
+	@RequestMapping("listInnormalTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listInnormalTasks(ListInnormalTasksCommand cmd) {
+
+//		ListEquipmentTasksResponse tasks = equipmentService.listEquipmentTasks(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
