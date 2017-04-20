@@ -3,6 +3,7 @@ package com.everhomes.express;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
@@ -227,8 +228,8 @@ public class ExpressController extends ControllerBase {
 	 */
 	@RequestMapping("listExpressQueryHistory")
 	@RestReturn(ListExpressQueryHistoryResponse.class)
-	public RestResponse listExpressQueryHistory(){
-		return new RestResponse(expressService.listExpressQueryHistory());
+	public RestResponse listExpressQueryHistory(@RequestParam("pageSize") Integer pageSize){
+		return new RestResponse(expressService.listExpressQueryHistory(pageSize));
 	}
 
 	/**

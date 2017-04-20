@@ -61,14 +61,14 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 	public void updateOtherAddressToNotDefault(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId,
 			Long userId, Long currentId) {
 		getReadWriteContext().update(Tables.EH_EXPRESS_ADDRESSES)
-			.set(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG, (TrueOrFalseFlag.FALSE.getCode()))
+			.set(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FLAG, (TrueOrFalseFlag.FALSE.getCode()))
 			.set(Tables.EH_EXPRESS_ADDRESSES.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 			.set(Tables.EH_EXPRESS_ADDRESSES.OPERATOR_UID, userId)
 			.where(Tables.EH_EXPRESS_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_TYPE.eq(ownerType.getCode()))
 			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_ID.eq(ownerId))
 			.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(userId))
-			.and(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
 			.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 			.and(Tables.EH_EXPRESS_ADDRESSES.ID.ne(currentId))
 			.execute();
@@ -115,7 +115,7 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 				.and(Tables.EH_EXPRESS_ADDRESSES.CATEGORY.eq(category))
 				.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(owner.getUserId()))
-				.orderBy(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FALG.desc(), Tables.EH_EXPRESS_ADDRESSES.ID.desc())
+				.orderBy(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FLAG.desc(), Tables.EH_EXPRESS_ADDRESSES.ID.desc())
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressAddress.class));
 	}
 

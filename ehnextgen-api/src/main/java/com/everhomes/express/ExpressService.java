@@ -83,7 +83,7 @@ public interface ExpressService {
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(GetExpressLogisticsDetailCommand cmd);
 
 	
-	public ListExpressQueryHistoryResponse listExpressQueryHistory();
+	public ListExpressQueryHistoryResponse listExpressQueryHistory(Integer pageSize);
 
 
 	public void clearExpressQueryHistory();

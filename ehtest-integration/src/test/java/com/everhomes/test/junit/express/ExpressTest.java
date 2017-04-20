@@ -29,7 +29,6 @@ import com.everhomes.rest.express.ExpressOrderDTO;
 import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
-import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.GetExpressLogisticsDetailRestResponse;
 import com.everhomes.rest.express.GetExpressOrderDetailCommand;
 import com.everhomes.rest.express.GetExpressOrderDetailResponse;
@@ -58,7 +57,6 @@ import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhExpressUsers;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
@@ -106,7 +104,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	private Integer namespaceId;
 	
 	//1. 自寄服务地址列表（已完成）
-//	@Test
+	//@Test
 	public void testListServiceAddress() {
 		String url = LIST_SERVICE_ADDRESS_URL;
 		logon();
@@ -131,7 +129,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//2. 快递公司列表（已完成）
-//	@Test
+	//@Test
 	public void testListExpressCompany() {
 		String url = LIST_EXPRESS_COMPANY_URL;
 		logon();
@@ -152,7 +150,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//3. 快递人员列表（已完成）
-//	@Test
+	//@Test
 	public void testListExpressUser() {
 		String url = LIST_EXPRESS_USER_URL;
 		logon();
@@ -179,7 +177,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//4. 添加快递人员（已完成）
-//	@Test
+	//@Test
 	public void testAddExpressUser() {
 		String url = ADD_EXPRESS_USER_URL;
 		logon();
@@ -211,7 +209,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//5. 删除快递人员（已完成）
-//	@Test
+	//@Test
 	public void testDeleteExpressUser() {
 		String url = DELETE_EXPRESS_USER_URL;
 		logon();
@@ -232,7 +230,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//6. 快递订单列表（后台）（已完成）
-//	@Test
+	//@Test
 	public void testListExpressOrder() {
 		String url = LIST_EXPRESS_ORDER_URL;
 		logon();
@@ -261,7 +259,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//7. 快递订单详情（已完成）
-//	@Test
+	//@Test
 	public void testGetExpressOrderDetail() {
 		String url = GET_EXPRESS_ORDER_DETAIL_URL;
 		logon();
@@ -286,7 +284,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//8. 修改付费总计（已完成）
-//	@Test
+	//@Test
 	public void testUpdatePaySummary() {
 		String url = UPDATE_PAY_SUMMARY_URL;
 		logon();
@@ -309,7 +307,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//9. 立即支付
-	//@Test
+	////@Test
 	public void testPayExpressOrder() {
 		String url = PAY_EXPRESS_ORDER_URL;
 		logon();
@@ -328,7 +326,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	}
 
 	//10. 出单（已完成）
-//	@Test
+	//@Test
 	public void testPrintExpressOrder() {
 		String url = PRINT_EXPRESS_ORDER_URL;
 		logon();
@@ -348,8 +346,8 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 	}
 
-	//11. 添加地址
-	@Test
+	//11. 添加地址（已完成）
+	//@Test
 	public void testCreateOrUpdateExpressAddress() {
 		String url = CREATE_OR_UPDATE_EXPRESS_ADDRESS_URL;
 		logon();
@@ -380,7 +378,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 	}
 
-	//12. 删除地址
+	//12. 删除地址（已完成）
 	//@Test
 	public void testDeleteExpressAddress() {
 		String url = DELETE_EXPRESS_ADDRESS_URL;
@@ -395,11 +393,13 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_ADDRESSES).where(Tables.EH_EXPRESS_ADDRESSES.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(CommonStatus.INACTIVE.getCode(), record.getValue(Tables.EH_EXPRESS_ADDRESSES.STATUS).byteValue());
 
 	}
 
-	//13. 地址列表
+	//13. 地址列表（已完成）
 	//@Test
 	public void testListExpressAddress() {
 		String url = LIST_EXPRESS_ADDRESS_URL;
@@ -416,11 +416,12 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListExpressAddressResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getExpressAddressDTOs());
+		assertEquals(3, myResponse.getExpressAddressDTOs().size());
 
 	}
 
-	//14. 寄快递
+	//14. 寄快递（已完成）
 	//@Test
 	public void testCreateExpressOrder() {
 		String url = CREATE_EXPRESS_ORDER_URL;
@@ -430,13 +431,13 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051300L);
 		cmd.setSendAddressId(1L);
-		cmd.setReceiveAddressId(1L);
-		cmd.setExpressCompanyId(1L);
+		cmd.setReceiveAddressId(4L);
+		cmd.setExpressCompanyId(11L);
 		cmd.setSendType((byte)1);
 		cmd.setSendMode((byte)1);
 		cmd.setServiceAddressId(1L);
 		cmd.setPayType((byte)1);
-		cmd.setInternal("");
+		cmd.setInternal("文件");
 		cmd.setInsuredPrice(new BigDecimal("10.23"));
 
 		CreateExpressOrderRestResponse response = httpClientService.restPost(url, cmd, CreateExpressOrderRestResponse.class);
@@ -445,11 +446,13 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		CreateExpressOrderResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getExpressOrderDTO());
+		assertNotNull(myResponse.getExpressOrderDTO().getSendName());
+		assertNotNull(myResponse.getExpressOrderDTO().getReceiveName());
 
 	}
 
-	//15. 快递订单列表（个人）
+	//15. 快递订单列表（个人）（已完成）
 	//@Test
 	public void testListPersonalExpressOrder() {
 		String url = LIST_PERSONAL_EXPRESS_ORDER_URL;
@@ -458,9 +461,9 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 		ListPersonalExpressOrderCommand cmd = new ListPersonalExpressOrderCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051300L);
-		cmd.setStatus((byte)1);
-		cmd.setPageAnchor(1L);
-		cmd.setPageSize(0);
+//		cmd.setStatus((byte)1);
+//		cmd.setPageAnchor(2L);
+		cmd.setPageSize(2);
 
 		ListPersonalExpressOrderRestResponse response = httpClientService.restPost(url, cmd, ListPersonalExpressOrderRestResponse.class);
 		assertNotNull(response);
@@ -468,11 +471,12 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListPersonalExpressOrderResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getExpressOrderDTOs());
 
 
 	}
 
-	//16. 取消订单
+	//16. 取消订单（已完成）
 	//@Test
 	public void testCancelExpressOrder() {
 		String url = CANCEL_EXPRESS_ORDER_URL;
@@ -481,17 +485,19 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 		CancelExpressOrderCommand cmd = new CancelExpressOrderCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051300L);
-		cmd.setId(1L);
+		cmd.setId(3L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_ORDERS).where(Tables.EH_EXPRESS_ORDERS.ID.eq(3L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(ExpressOrderStatus.CANCELLED.getCode(), record.getValue(Tables.EH_EXPRESS_ORDERS.STATUS));
+		
 	}
 
-	//17. 查看物流详情
+	//17. 查看物流详情（已完成）
 	//@Test
 	public void testGetExpressLogisticsDetail() {
 		String url = GET_EXPRESS_LOGISTICS_DETAIL_URL;
@@ -499,35 +505,38 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		GetExpressLogisticsDetailCommand cmd = new GetExpressLogisticsDetailCommand();
 		cmd.setExpressCompanyId(1L);
-		cmd.setBillNo("");
+		cmd.setBillNo("TEST105370795");
 
 		GetExpressLogisticsDetailRestResponse response = httpClientService.restPost(url, cmd, GetExpressLogisticsDetailRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		GetExpressLogisticsDetailResponse myResponse = response.getResponse();
-		assertNotNull(myResponse);
-
+//		GetExpressLogisticsDetailResponse myResponse = response.getResponse();
+//		assertNotNull(myResponse);
+		//这个没办法测，没有正常的EMS订单
 
 	}
 
-	//18. 查询快递历史列表
-	//@Test
+	//18. 查询快递历史列表（已完成）
+	@Test
 	public void testListExpressQueryHistory() {
 		String url = LIST_EXPRESS_QUERY_HISTORY_URL;
 		logon();
-
-		ListExpressQueryHistoryRestResponse response = httpClientService.restPost(url, null, ListExpressQueryHistoryRestResponse.class);
+		ListPersonalExpressOrderCommand cmd = new ListPersonalExpressOrderCommand();
+		cmd.setPageSize(4);
+		
+		ListExpressQueryHistoryRestResponse response = httpClientService.restPost(url, cmd, ListExpressQueryHistoryRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
 		ListExpressQueryHistoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getExpressQueryHistoryDTOs());
+		assertEquals(3, myResponse.getExpressQueryHistoryDTOs().size());
 
 	}
 
-	//19. 清空快递查询历史
+	//19. 清空快递查询历史（已完成）
 	//@Test
 	public void testClearExpressQueryHistory() {
 		String url = CLEAR_EXPRESS_QUERY_HISTORY_URL;
@@ -537,8 +546,9 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_QUERY_HISTORIES).where(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode())).fetch();
+		assertTrue(result == null || result.isEmpty());
+		
 	}
 
 
@@ -565,12 +575,6 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	@Override
 	protected void initCustomData() {
 		String jsonFilePath = "data/json/express-1.0.0-test-data-170420.txt";
-		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
-		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
-	}
-
-	private void initListData() {
-		String jsonFilePath = "data/json/1.0.0-approval-test-data-list-160907.txt";
 		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}

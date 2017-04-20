@@ -91,13 +91,16 @@ public class ExpressQueryHistoryProviderImpl implements ExpressQueryHistoryProvi
 	}
 	
 	@Override
-	public List<ExpressQueryHistory> listExpressQueryHistoryByUser(Integer namespaecId, Long userId) {
+	public List<ExpressQueryHistory> listExpressQueryHistoryByUser(Integer namespaecId, Long userId, Integer pageSize) {
+		if (pageSize == null) {
+			pageSize = 4;
+		}
 		return getReadOnlyContext().select().from(Tables.EH_EXPRESS_QUERY_HISTORIES)
 				.where(Tables.EH_EXPRESS_QUERY_HISTORIES.NAMESPACE_ID.eq(namespaecId))
 				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.CREATOR_UID.eq(userId))
 				.and(Tables.EH_EXPRESS_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_EXPRESS_QUERY_HISTORIES.UPDATE_TIME.desc())
-				.limit(10)
+				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, ExpressQueryHistory.class));
 	}
 

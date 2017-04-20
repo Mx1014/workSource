@@ -37,6 +37,7 @@ import com.everhomes.util.StringHelper;
  * <li>serviceAddress: 自寄地址</li>
  * <li>internal: 内件物品</li>
  * <li>insuredPrice: 保价金额</li>
+ * <li>paidFlag: 1是0否，表示是否点击过支付，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ExpressOrderDTO {
@@ -69,6 +70,15 @@ public class ExpressOrderDTO {
 	private String internal;
 	private BigDecimal insuredPrice;
 	private String expressLogoUrl;
+	private Byte paidFlag;
+
+	public Byte getPaidFlag() {
+		return paidFlag;
+	}
+
+	public void setPaidFlag(Byte paidFlag) {
+		this.paidFlag = paidFlag;
+	}
 
 	public String getExpressLogoUrl() {
 		return expressLogoUrl;
