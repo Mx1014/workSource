@@ -492,6 +492,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/aclink/getServerKey</b>
+     * <p>测试专用</p>
+     * @return 
+     */
+    @RequestMapping("getServerKey")
+    @RestReturn(value=AclinkGetServerKeyResponse.class)
+    public RestResponse getServerKey(@Valid AclinkGetServerKeyCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.getServerKey(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
 }
