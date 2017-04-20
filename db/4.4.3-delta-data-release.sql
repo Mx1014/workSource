@@ -23,3 +23,8 @@ UPDATE `eh_web_menus` SET `data_type`='parking--park_recharge' WHERE `id`='40840
 UPDATE `eh_web_menus` SET `data_type`='car--car_management' WHERE `id`='40900';
 
 update eh_launch_pad_items set action_data = '{"url":"http://core.zuolin.com/property-bill/index.html?hideNavigationBar=1&name=%e7%89%a9%e4%b8%9a%e6%9f%a5%e8%b4%b9#/verify_account#sign_suffix"}' where namespace_id = 999983 and item_label = "物业查费";
+
+-- 更新服务联盟模版 add by sw 20170419
+UPDATE `eh_locale_templates` SET `text`='您收到一条${categoryName}:${serviceAllianceName}的申请 \n 提交者信息：\n 预订人：${creatorName} \n 手机号：${creatorMobile} \n 公司名称：${creatorOrganization} \n \n 提交的信息：\n ${note} \n 您可以登录管理后台查看详情' WHERE  `scope`='serviceAlliance.request.notification' and `code`='1';
+
+

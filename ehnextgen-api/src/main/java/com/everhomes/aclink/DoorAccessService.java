@@ -123,4 +123,6 @@ public interface DoorAccessService {
 
 	public void remoteOpenDoor(String hardwareId);
 
+	AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
+
 }
