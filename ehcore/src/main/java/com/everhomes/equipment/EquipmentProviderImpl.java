@@ -2225,7 +2225,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
 			return null;
 		});
-
 		return resp;
+	}
+
+	@Override
+	public ReviewedTaskStat statTodayReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
+		return null;
 	}
 }
