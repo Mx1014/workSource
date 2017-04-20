@@ -1203,6 +1203,7 @@ public class PunchServiceImpl implements PunchService {
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
 
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 //		if (cmd.getLatitude() == null || cmd.getLatitude().equals(0))
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 //					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2157,7 +2158,10 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchLogsDay getDayPunchLogs(GetDayPunchLogsCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
+		
 		checkCompanyIdIsNull(cmd.getEnterpirseId());
+
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		Calendar logDay = Calendar.getInstance();
 
 		try {
@@ -2624,6 +2628,8 @@ public class PunchServiceImpl implements PunchService {
 			ListMonthPunchLogsCommand cmd) {
 
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
+
+		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
 		SimpleDateFormat yearSF = new SimpleDateFormat("yyyy");
 
 		ListMonthPunchLogsCommandResponse response = new ListMonthPunchLogsCommandResponse();
@@ -3775,6 +3781,16 @@ public class PunchServiceImpl implements PunchService {
 			response.getPunchRuleMaps().add(dto);
 		} 
 		return response;
+	}
+	private Long getTopEnterpriseId(Long organizationId){
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if(organization.getParentId() == null )
+			return organizationId;
+		else{
+			return Long.valueOf(organization.getPath().split("/")[1]);
+		}
+		
+		
 	}
 	/**找到用户的部门-多部门取最上级第一个*/
 	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
