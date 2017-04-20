@@ -4640,27 +4640,44 @@ public class PunchServiceImpl implements PunchService {
 			endCalendar.setTime(runDate); 
 			endCalendar.set(Calendar.SECOND, 0);
 			endCalendar.set(Calendar.MILLISECOND, 0);
+			//取昨天和今天的排班
 			List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 						SelectQuery<? extends Record> query) { 
 //					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
-					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date( endCalendar.getTime().getTime())));
+					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.between(new java.sql.Date(punCalendar.getTime().getTime()),
+							new java.sql.Date( endCalendar.getTime().getTime())));
+//					query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.equal(new java.sql.Date( endCalendar.getTime().getTime())));
 					query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 					return null;
 				}
 			});
 			
-			Calendar startCalendar = Calendar.getInstance();
-			startCalendar.setTime(runDate);
-			startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-			startCalendar.set(Calendar.MINUTE, 0);
-			startCalendar.set(Calendar.SECOND, 0);
-			startCalendar.set(Calendar.MILLISECOND, 0);
 			//1.计算targetType 为organization的所有用户,并且userid不存在于map表的targetId内的
 //			List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
 			for(PunchScheduling punchScheduling : punchSchedulings){
-				
+				//在15分钟+1分钟延迟内的进行计算, 不在此范围的continue
+				long endLong = runDate.getTime();
+				long beginLong = runDate.getTime() - 16*60*1000L;
+				if(null == punchScheduling.getTimeRuleId())
+					continue;
+				PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
+				long punchDateLong = punchScheduling.getRuleDate().getTime()+ptr.getDaySplitTimeLong(); 
+				if(punchDateLong > endLong || punchDateLong < beginLong)
+					continue;
+				//设置起止时间分别是排班的月初和当天
+				punCalendar.setTime(runDate); 
+				punCalendar.set(Calendar.HOUR_OF_DAY, 0);
+				punCalendar.set(Calendar.SECOND, 0);
+				punCalendar.set(Calendar.MILLISECOND, 0);
+				Calendar startCalendar = Calendar.getInstance();
+				startCalendar.setTime(punchScheduling.getRuleDate());
+				startCalendar.set(Calendar.HOUR_OF_DAY, 0);
+				startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+				startCalendar.set(Calendar.MINUTE, 0);
+				startCalendar.set(Calendar.SECOND, 0);
+				startCalendar.set(Calendar.MILLISECOND, 0);
 				if(punchScheduling.getTargetType().equals(PunchOwnerType.ORGANIZATION.getCode())){
 					List<PunchRuleOwnerMap> ownerMaps = punchProvider.queryPunchRuleOwnerMaps(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 						@Override
@@ -4705,11 +4722,7 @@ public class PunchServiceImpl implements PunchService {
 		try {
 			//刷新 daylog
 			this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
-			//刷月报
-			
-			//从计算日的月初计算到计算日当天
-			startCalendar.setTime(punCalendar.getTime());
-			startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+			//刷月报 
 			
 			addPunchStatistics(member, orgId, startCalendar, punCalendar);
 		} catch (Exception e) {
