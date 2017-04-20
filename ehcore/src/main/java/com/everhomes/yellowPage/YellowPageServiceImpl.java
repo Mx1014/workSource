@@ -649,6 +649,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 				cmd.setOwnerType("community");
 			}
 		}
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("get community Id time: {}", time2 - startTime);
+
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
@@ -656,12 +660,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(rule != null) {
 			response.setSkipType((byte) 1);
 		}
-		
+
+		long time3 = System.currentTimeMillis();
+		LOGGER.info("get rule time: {}", time3 - time2);
+
 		rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
 		if(rule != null) {
 			response.setSkipType((byte) 1);
 		}
-		
+
+		long time4 = System.currentTimeMillis();
+		LOGGER.info("get rule time: {}", time4 - time3);
+
 		response.setDtos(new ArrayList<ServiceAllianceDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -671,8 +681,8 @@ public class YellowPageServiceImpl implements YellowPageService {
         List<ServiceAlliances> sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
         		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
 
-		long time2 = System.currentTimeMillis();
-		LOGGER.info("getServiceAllianceEnterpriseList time: {}", time2 - startTime);
+		long time5 = System.currentTimeMillis();
+		LOGGER.info("getServiceAllianceEnterpriseList time: {}", time5 - time4);
 
         if(null == sas || sas.size() == 0)
         	return response;
@@ -726,10 +736,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 
         }
 
-		long time3 = System.currentTimeMillis();
-		LOGGER.info("populate dto time: {}", time3 - time2);
+		long time6 = System.currentTimeMillis();
+		LOGGER.info("populate dto time: {}", time6 - time5);
 
-		LOGGER.info("getServiceAllianceEnterpriseList total time: {}", time3 - startTime);
+		LOGGER.info("getServiceAllianceEnterpriseList total time: {}", time6 - startTime);
 
 		return response;
 	}
