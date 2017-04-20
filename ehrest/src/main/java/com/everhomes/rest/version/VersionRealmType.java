@@ -97,7 +97,9 @@ public enum VersionRealmType {
     ANDROID_KEXIN("Android_Kexin"),
     IOS_KEXIN("iOS_Kexin"),
     ANDROID_QUANZHI("Android_Quanzhi"),
-    IOS_QUANZHI("iOS_Quanzhi");
+    IOS_QUANZHI("iOS_Quanzhi"),
+    ANDROID_GUANGDA("Android_Guangda"),
+    IOS_GUANGDA("iOS_Guangda");
     
     private String code;
     private VersionRealmType(String code) {

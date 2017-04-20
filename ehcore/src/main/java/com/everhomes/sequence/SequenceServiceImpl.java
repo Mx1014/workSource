@@ -51,7 +51,7 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES).fetchOne().value1();
         });
-
+        
         syncTableSequence(EhAcls.class, EhAclRoles.class, com.everhomes.schema.Tables.EH_ACL_ROLES.getName(), (dbContext) -> {
             return dbContext.select(com.everhomes.schema.Tables.EH_ACL_ROLES.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACL_ROLES).fetchOne().value1();
@@ -1267,7 +1267,53 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhDockingMappings.class, Tables.EH_DOCKING_MAPPINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOCKING_MAPPINGS.ID.max()).from(Tables.EH_DOCKING_MAPPINGS).fetchOne().value1();
-
+        });
+        syncTableSequence(null, EhLeaseIssuers.class, Tables.EH_LEASE_ISSUERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_ISSUERS.ID.max()).from(Tables.EH_LEASE_ISSUERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhLeaseIssuerAddresses.class, Tables.EH_LEASE_ISSUER_ADDRESSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_ISSUER_ADDRESSES.ID.max()).from(Tables.EH_LEASE_ISSUER_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhLeaseConfigs.class, Tables.EH_LEASE_CONFIGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_LEASE_CONFIGS.ID.max()).from(Tables.EH_LEASE_CONFIGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceGolfRequests.class, Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceGymRequests.class, Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceServerRequests.class, Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhServiceAllianceServerRequests.class, Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhEnterpriseOpRequestBuildings.class, Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ID.max()).from(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhOauth2Servers.class, Tables.EH_OAUTH2_SERVERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_OAUTH2_SERVERS.ID.max()).from(Tables.EH_OAUTH2_SERVERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhOauth2ClientTokens.class, Tables.EH_OAUTH2_CLIENT_TOKENS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_OAUTH2_CLIENT_TOKENS.ID.max()).from(Tables.EH_OAUTH2_CLIENT_TOKENS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterPriceConfig.class, Tables.EH_ENERGY_METER_PRICE_CONFIG.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_PRICE_CONFIG.ID.max()).from(Tables.EH_ENERGY_METER_PRICE_CONFIG).fetchOne().value1();
+        });
+        syncTableSequence(null, EhActivityVideo.class, Tables.EH_ACTIVITY_VIDEO.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ACTIVITY_VIDEO.ID.max()).from(Tables.EH_ACTIVITY_VIDEO).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMeterDefaultSettings.class, Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS.ID.max()).from(Tables.EH_ENERGY_METER_DEFAULT_SETTINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEnergyMonthStatistics.class, Tables.EH_ENERGY_MONTH_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENERGY_MONTH_STATISTICS.ID.max()).from(Tables.EH_ENERGY_MONTH_STATISTICS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhPreviews.class, Tables.EH_PREVIEWS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PREVIEWS.ID.max()).from(Tables.EH_PREVIEWS).fetchOne().value1();
         });
     }
 

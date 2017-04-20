@@ -132,7 +132,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 		AuthorizationCommand cmd = WebTokenGenerator.getInstance().fromWebToken(viewState, AuthorizationCommand.class);
 
-		// double check in confirmation call to protect against tampering in confirmation callback
+		// double check in confirmation api to protect against tampering in confirmation callback
 		App app = this.appProvider.findAppByKey(cmd.getclient_id());
 		if(app == null) {
 			model.addAttribute("errorDescription", this.localeStringService.getLocalizedString(

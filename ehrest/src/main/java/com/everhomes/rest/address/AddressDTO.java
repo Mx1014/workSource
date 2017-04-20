@@ -40,6 +40,14 @@ public class AddressDTO {
     private Byte memberStatus;
     private Double areaSize;
 
+    public Double getAreaSize() {
+        return areaSize;
+    }
+
+    public void setAreaSize(Double areaSize) {
+        this.areaSize = areaSize;
+    }
+
     public AddressDTO() {
     }
 
@@ -195,14 +203,6 @@ public class AddressDTO {
 	public void setMemberStatus(Byte memberStatus) {
 		this.memberStatus = memberStatus;
 	}
-
-    public Double getAreaSize() {
-        return areaSize;
-    }
-
-    public void setAreaSize(Double areaSize) {
-        this.areaSize = areaSize;
-    }
 
     @Override
     public String toString(){

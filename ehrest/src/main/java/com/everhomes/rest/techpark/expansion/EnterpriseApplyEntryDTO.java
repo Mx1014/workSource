@@ -64,6 +64,62 @@ public class EnterpriseApplyEntryDTO {
 	private List<BuildingDTO> buildings;
 
 	private ContractDTO contract;
+
+	private String issuerType;
+	private Long buildingId;
+	private String buildingName;
+	private Long addressId;
+	private String apartmentName;
+	private Long flowcaseId;
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public Long getFlowcaseId() {
+		return flowcaseId;
+	}
+
+	public void setFlowcaseId(Long flowcaseId) {
+		this.flowcaseId = flowcaseId;
+	}
+
 	public Long getId() {
 		return id;
 	}

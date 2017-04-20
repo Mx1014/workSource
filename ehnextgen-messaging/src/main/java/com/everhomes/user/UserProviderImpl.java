@@ -846,11 +846,11 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		return listUserByKeyword(keyword, null, namespaceId, locator, pageSize);
+		return listUserByKeyword(null, null, null, keyword, null, namespaceId, locator, pageSize);
 	}
 	
 	@Override
-	public List<User> listUserByKeyword(String keyword, Byte executiveFlag,
+	public List<User> listUserByKeyword(Integer isAuth, Byte gender, Long organizationId, String keyword, Byte executiveFlag,
 			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
 
 		List<User> list = new ArrayList<User>();
@@ -865,13 +865,50 @@ public class UserProviderImpl implements UserProvider {
 			if(executiveFlag != null){ 
 				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
 			}
+
+            if(gender != null){
+                cond = cond.and(Tables.EH_USERS.GENDER.eq(gender));
+            }
 			 
 			if(locator.getAnchor() != null ) {
 				cond = cond.and(Tables.EH_USERS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
 		    }
-            context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
-            .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID))
-            .where(cond).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
+
+            SelectOnConditionStep query = context.select().from(Tables.EH_USERS).leftOuterJoin(Tables.EH_USER_IDENTIFIERS)
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
+
+            SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+            byte orgQueryFlag = 0;
+
+            if (null != isAuth && 0 != isAuth) {
+                if (1 == isAuth) {
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+                }else if (2 == isAuth){
+                    orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode())
+                            .or(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode())));
+
+                }
+                orgQueryFlag = 1;
+            }
+
+            if (null != organizationId) {
+
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+                orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+                orgQueryFlag = 2;
+
+		    }
+
+            if (1 == orgQueryFlag) {
+                query.leftOuterJoin(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+            }
+		    if (2 == orgQueryFlag) {
+                query.join(orgQuery.asTable(Tables.EH_ORGANIZATION_MEMBERS.getName())).on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID));
+
+            }
+
+            query.where(cond).groupBy(Tables.EH_USERS.ID).orderBy(Tables.EH_USERS.CREATE_TIME.desc())
             .limit(pageSize)
             .fetch().map(r -> {
             	User user = ConvertHelper.convert(r,User.class);

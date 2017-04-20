@@ -3,7 +3,8 @@ package com.everhomes.contentserver;
 import com.everhomes.util.Name;
 
 @Name(value = "contentserver.config.response")
-public class ConfigResponse {
+public class
+ConfigResponse {
     private String configName;
 
     private ResourceType configType;

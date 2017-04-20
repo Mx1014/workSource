@@ -18,6 +18,8 @@ import java.math.BigDecimal;
  *     <li>amountFormulaId: 用量计算公式</li>
  *     <li>startTime: 修改属性时选择的起始时间 </li>
  *     <li>endTime: 修改属性时选择的结束时间 </li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
+ *     <li>configId: 价格方案id </li>
  * </ul>
  */
 public class UpdateEnergyMeterCommand {
@@ -33,6 +35,9 @@ public class UpdateEnergyMeterCommand {
 
     private Long startTime;
     private Long endTime;
+
+    private Byte calculationType;
+    private Long configId;
 
     public Long getMeterId() {
         return meterId;
@@ -112,6 +117,22 @@ public class UpdateEnergyMeterCommand {
 
     public void setAmountFormulaId(Long amountFormulaId) {
         this.amountFormulaId = amountFormulaId;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public Long getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
     }
 
     @Override

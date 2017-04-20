@@ -673,6 +673,9 @@ public class UserActivityServiceImpl implements UserActivityService {
         		UserProfileContstant.RECEIVED_COUPON_COUNT);
         UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
         		UserProfileContstant.RECEIVED_ORDER_COUNT);
+        UserProfile shakeOpenDoorUser = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+          		UserProfileContstant.SHAKE_OPEN_DOOR);
+        
         if (item != null)
             rsp.setSharedCount(NumberUtils.toInt(item.getItemValue(), 0));
         if (fav != null)
@@ -706,6 +709,20 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         //设置活动列表的默认列表样式, add by tt, 20170116
         rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
+        
+        //设置用户的摇一摇开门是否开启
+        if(shakeOpenDoorUser != null){
+        	rsp.setShakeOpenDoorUser(Byte.parseByte(shakeOpenDoorUser.getItemValue()));
+        }else{
+        	rsp.setShakeOpenDoorUser(Byte.parseByte("0"));
+        }
+        String shakeOpenDoorNamespace = getShakeOpenDoor();
+        if(shakeOpenDoorNamespace != null){
+        	rsp.setShakeOpenDoorNamespace(Byte.parseByte(shakeOpenDoorNamespace));
+        }else{
+        	rsp.setShakeOpenDoorNamespace(Byte.parseByte("0"));
+        }
+        
         return rsp;
     }
     
@@ -1316,6 +1333,12 @@ public class UserActivityServiceImpl implements UserActivityService {
                 templateType = CustomRequestConstants.SETTLE_REQUEST_CUSTOM;
             } else if(templateType.startsWith(CustomRequestConstants.INVEST_REQUEST_CUSTOM)) {
                 templateType = CustomRequestConstants.INVEST_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GOLF_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GOLF_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GYM_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GYM_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SERVER_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SERVER_REQUEST_CUSTOM;
             }
             handler = PlatformContext.getComponent(handlerPrefix + templateType);
         }
@@ -1459,9 +1482,36 @@ public class UserActivityServiceImpl implements UserActivityService {
             return homeUrl;
         }
 	}
+	
+	private String getShakeOpenDoor() {
+		String shakeOpenDoor = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.SHAKE_OPEN_DOOR, "");
+		if(shakeOpenDoor.length() == 0) {
+            LOGGER.error("Invalid shake open door configuration, shakeOpenDoor=" + shakeOpenDoor);
+            return null;
+        } else {
+            return shakeOpenDoor;
+        }
+	}
+	
+	@Override
+	public void updateShakeOpenDoor(Byte shakeOpenDoor) {
+		String namespaceOpen = getShakeOpenDoor();
+		User user = UserContext.current().getUser();
+		
+		if("1".equals(namespaceOpen)){
+			updateUserProfile(user.getId(), UserProfileContstant.SHAKE_OPEN_DOOR, shakeOpenDoor.toString());
+		}else{
+			LOGGER.error("namespace configuration is false, then user configuration is prohibited");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_FORBIDDEN, "namespace configuration is false, then user configuration is prohibited");
+		}
+		
+	}
+	
 
     public static void main(String[] args) {
         System.out.println(ActivityType.fromString("logon").getCode());
         System.out.println(ActivityType.fromString("1").getCode());
     }
+
 }

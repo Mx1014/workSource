@@ -1,5 +1,6 @@
 package com.everhomes.openapi;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -579,7 +580,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				leasePromotion.setCommunityId(communityId);
 				leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
 				leasePromotion.setSubject(apartmentName);
-				leasePromotion.setRentAreas(String.valueOf(rentArea));
+				leasePromotion.setRentAreas(new BigDecimal(rentArea));
 				leasePromotion.setCreateUid(1L);
 				leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				leasePromotion.setUpdateTime(leasePromotion.getCreateTime());

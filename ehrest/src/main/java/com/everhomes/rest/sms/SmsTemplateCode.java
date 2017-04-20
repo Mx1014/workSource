@@ -55,12 +55,11 @@ public interface SmsTemplateCode {
     int PUSH_MESSAGE_TO_NEW_ORGANIZATION_WITH_SERVICE_USER_CODE = 21;//发送短信给新企业（有客服人员）：尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，欢迎入住${communityName}，有任何问题请随时与我联系。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
     int PUSH_MESSAGE_TO_NEW_ORGANIZATION_WITHOUT_SERVICE_USER_CODE = 22;//发送短信给新企业（无客服人员）：尊敬的客户您好，欢迎入住${communityName}。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
 
-    int ENTER_QUEQUEING = 23; // 进入排队节点
-    int CANCEL_QUEQUEING = 24; // 排队中 呗驳回
-    int ENTER_PROCESSING = 25; // 进入 待办理节点
-    int CANCEL_PROCESSING = 26; // 取消资格
-    int HANDLE_PROCESSING = 27; // 办理
- 
+    int PARKING_ENTER_QUEQUEING_NODE = 23; // 进入排队节点
+    int PARKING_CANCEL_QUEQUEING = 24; // 排队中 驳回
+    int PARKING_ENTER_PROCESSING_NODE = 25; // 进入 待办理节点
+    int PARKING_CANCEL_PROCESSING = 26; // 办理
+
     // 资源预约短信模板
     int RENTAL_APPLY_SUCCESS_CODE = 28; // 申请成功短信：【正中会】您申请预约的{使用时间}的{资源名称}已通过审批，为确保您成功预约，请尽快完成支付，支付方式支持：1. 请联系{收款人姓名}（{收款人手机号}）上门收费，2. 到{收银台地址}付款；感谢您的使用。
     int RENTAL_APPLY_FAILURE_CODE = 29; // 申请失败短信：【正在会】您申请预约的{使用时间}的{资源名称}没有通过审批，您可以申请预约其他空闲资源，由此给您造成的不便，敬请谅解，感谢您的使用。
@@ -83,6 +82,23 @@ public interface SmsTemplateCode {
     int APPLY_ENTRY_PROCESSING_BUTTON_ABSORT_CODE = 37;
     int APPLY_ENTRY_PROCESSING_BUTTON_REMINDER_CODE = 38;
     int APPLY_ENTRY_COMPLETED_CODE = 39;
+
+    //资源预约短信
+    int RENTAL_PROCESSING_NODE_CODE = 40;
+    int RENTAL_PROCESSING_NODE_SUPERVISE_CODE = 41;
+
+    int RENTAL_PROCESSING_BUTTON_APPROVE_CODE = 42;
+
+    int RENTAL_PROCESSING_BUTTON_ABSORT_CODE = 43;
+    int RENTAL_PROCESSING_BUTTON_REMINDER_CODE = 44;
+    int RENTAL_COMPLETED_CODE = 45;
+
+    //物业报修，工作流短信模版
+    int PM_TASK_ACCEPTING_NODE_SUPERVISE_CODE= 46;
+
+    int PM_TASK_ASSIGN_NODE_CODE= 47;
+    int PM_TASK_ASSIGN_NODE_SUPERVISE_CODE= 48;
+    int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49;
 
 
 }

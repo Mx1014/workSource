@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -13,18 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +28,11 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.parking.wanke.WankeCardInfo;
 import com.everhomes.parking.wanke.WankeCardType;
 import com.everhomes.parking.wanke.WankeJsonEntity;
-import com.everhomes.parking.wanke.WankeTemoFee;
+import com.everhomes.parking.wanke.WankeTempFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
@@ -67,7 +53,6 @@ import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -89,29 +74,16 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return super.clone();
 	}
 
-	private CloseableHttpClient httpclient = null;
-	
 	@Autowired
 	private ParkingProvider parkingProvider;
-	@Autowired
-	private LocaleStringService localeStringService;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
 	@Autowired
-    private UserProvider userProvider;
-	@Autowired
-	private OrderUtil commonOrderUtil;
-	@Autowired
     private BigCollectionProvider bigCollectionProvider;
 	@Autowired
     private DbProvider dbProvider;
-	
-	@PostConstruct
-	public void init() {
-		httpclient = HttpClients.createDefault();
-	}
 	
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -369,10 +341,11 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 	
 	private List<WankeCardType> getCardType() {
-		
+
+		String url = configProvider.getValue("parking.wanke.url", "");
 		List<WankeCardType> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		String json = postToWanke(param, GET_TYPES);
+		String json = HttpUtils.post(url + GET_TYPES, param);
 		
 		WankeJsonEntity<List<WankeCardType>> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<List<WankeCardType>>>(){});
 
@@ -385,15 +358,17 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	}
 	
 	private WankeCardInfo getCard(String plateNumber) {
+
+		String url = configProvider.getValue("parking.wanke.url", "");
+
 		WankeCardInfo card = null;
 		JSONObject param = new JSONObject();
 		
 		param.put("plateNo", plateNumber);
 		param.put("flag", "2");
-		String json = postToWanke(param, GET_CARD);
+		String json = HttpUtils.post(url + GET_CARD, param);
         
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		LOGGER.info("Result={}, param={}", json, param);
         
         WankeJsonEntity<WankeCardInfo> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeCardInfo>>(){});
 		if(entity.isSuccess()){
@@ -407,6 +382,8 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
+		String url = configProvider.getValue("parking.wanke.url", "");
+
 		JSONObject param = new JSONObject();
 
 		param.put("plateNo", order.getPlateNumber());
@@ -417,10 +394,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("payTime", sdf1.format(new Date()));
 	    param.put("sign", "");
 	    
-		String json = postToWanke(param, RECHARGE);
+		String json = HttpUtils.post(url + RECHARGE, param);
         
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		LOGGER.info("Result={}, param={}", json, param);
         
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();
@@ -438,15 +414,16 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
+		String url = configProvider.getValue("parking.wanke.url", "");
+
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
-		String json = postToWanke(param, PAY_TEMP_FEE);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = HttpUtils.post(url + PAY_TEMP_FEE, param);
+
+		LOGGER.info("Result={}, param={}", json, param);
         
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();
@@ -468,49 +445,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return payTempCardFee(order);
     }
 	
-	public String postToWanke(JSONObject param, String type) {
-		
-		
-		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.wanke.url", "") + type);
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		String json = null;
-		
-		CloseableHttpResponse response = null;
-		
-		try {
-			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
-			httpPost.setEntity(stringEntity);
-			response = httpclient.execute(httpPost);
-			
-			int status = response.getStatusLine().getStatusCode();
-			
-			if(LOGGER.isDebugEnabled())
-				LOGGER.debug("Data from wanke, status={}, param={}", status, param);
-			if(status == HttpStatus.SC_OK) {
-				HttpEntity entity = response.getEntity();
-				
-				if (entity != null) {
-					json = EntityUtils.toString(entity);
-				}
-			}
-			
-		} catch (IOException e) {
-			LOGGER.error("Parking request error, param={}", param, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Parking request error.");
-		}finally {
-            try {
-				response.close();
-			} catch (IOException e) {
-				LOGGER.error("Parking close instream, response error, param={}", param, e);
-			}
-        }
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from wanke, json={}", json);
-		
-		return json;
-	}
-	
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
@@ -523,17 +457,20 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		
 	}
 
-	private WankeTemoFee getTempFee(String plateNumber) {
-		WankeTemoFee tempFee = null;
+	private WankeTempFee getTempFee(String plateNumber) {
+
+		String url = configProvider.getValue("parking.wanke.url", "");
+
+		WankeTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		
-		String json = postToWanke(param, GET_TEMP_FEE);
+		String json = HttpUtils.post(url + GET_TEMP_FEE, param);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-        WankeJsonEntity<WankeTemoFee> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeTemoFee>>(){});
+        WankeJsonEntity<WankeTempFee> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeTempFee>>(){});
         
 		if(entity.isSuccess()){
 			tempFee = entity.getData();
@@ -545,7 +482,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
 		
-		WankeTemoFee tempFee = getTempFee(plateNumber);
+		WankeTempFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(null == tempFee)
@@ -558,17 +495,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		dto.setOrderToken(tempFee.getOrderNo());
 		dto.setPayTime(System.currentTimeMillis());
 		return dto;
-	}
-
-	@PreDestroy
-	public void destroy() {
-		if (null != httpclient) {
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				LOGGER.error("Close httpclient error.");
-			}
-		}
 	}
 
 	@Override

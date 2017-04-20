@@ -72,6 +72,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      */
     @Override
     public boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+
+        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == organizationId){
+            return false;
+        }
+
         List<RoleAssignment> roleAssignments = rolePrivilegeService.getUserAllOrgRoles(organizationId, userId);
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         for (RoleAssignment roleAssignment: roleAssignments) {
@@ -114,6 +119,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
     @Override
     public boolean checkSuperAdmin(Long userId, Long organizationId){
+        if(null == organizationId){
+            return false;
+        }
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
@@ -138,6 +146,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @return
      */
     private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == organizationId){
+            return false;
+        }
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
         if(null != organizationId){
@@ -147,7 +158,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
             LOGGER.debug("user organizations:{}", orgDTOs);
-
+            descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), organizationId));
             for (OrganizationDTO orgDTO: orgDTOs) {
                 descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId()));
             }

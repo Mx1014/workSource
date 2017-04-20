@@ -107,7 +107,10 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -2023,6 +2026,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 		User user  = UserContext.current().getUser();
 
+		long startTime = System.currentTimeMillis();
+
 		if(null == cmd.getCommunityId()){
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
@@ -2038,6 +2043,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		//权限控制
 		Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);
+
+		long getApartmentsTime = System.currentTimeMillis();
+		LOGGER.info("Get apartments time:{}", getApartmentsTime - startTime);
+
 		List<ApartmentDTO> aptList = apts.second();
 		for (ApartmentDTO apartmentDTO : aptList) {
 			PropFamilyDTO dto = new PropFamilyDTO();
@@ -2048,18 +2057,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(family.getAddressId());
 				dto.setId(family.getId());
-                // dto.setMemberCount(family.getMemberCount());
+				// dto.setMemberCount(family.getMemberCount());
                 List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
                         UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
                 dto.setMemberCount((long) organizationOwners.size());
-			}
+            }
 			else
 			{
 				dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(apartmentDTO.getAddressId());
 				dto.setId(0L);
-                // dto.setMemberCount(family.getMemberCount());
+				// dto.setMemberCount(0L);
                 List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
                         UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
                 dto.setMemberCount((long) organizationOwners.size());
@@ -2093,6 +2102,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 			list.add(dto);
 		}
+
+		long populateApartmentsTime = System.currentTimeMillis();
+		LOGGER.info("Populate apartmentDtos time:{}", populateApartmentsTime - getApartmentsTime);
+		LOGGER.info("The total time:{}", populateApartmentsTime - startTime);
+
 		return list;
 	}
 
@@ -4186,7 +4200,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         behavior.setOwnerId(ownerId);
         behavior.setBehaviorType(behaviorType.getCode());
         behavior.setNamespaceId(currentNamespaceId());
-        behavior.setBehaviorTime(new Timestamp(date));
+        if (date != null) {
+            behavior.setBehaviorTime(new Timestamp(date));
+        }
         behavior.setStatus(OrganizationOwnerBehaviorStatus.NORMAL.getCode());
         propertyMgrProvider.createOrganizationOwnerBehavior(behavior);
     }
@@ -5423,11 +5439,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
-                owner.setMaritalStatus(result.getJ());
-                owner.setJob(result.getK());
-                owner.setCompany(result.getL());
-                owner.setIdCardNumber(result.getM());
-                owner.setRegisteredResidence(result.getN());
+                owner.setMaritalStatus(RowResult.trimString(result.getJ()));
+                owner.setJob(RowResult.trimString(result.getK()));
+                owner.setCompany(RowResult.trimString(result.getL()));
+                owner.setIdCardNumber(RowResult.trimString(result.getM()));
+                owner.setRegisteredResidence(RowResult.trimString(result.getN()));
                 owner.setNamespaceId(currentNamespaceId());
                 owner.setCreatorUid(userId);
                 owner.setOrganizationId(organizationId);
@@ -5452,7 +5468,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             return ownerList;
         } else {
-			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
+			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
 		}
@@ -5505,7 +5521,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             }
             return carList;
         } else {
-			LOGGER.error("excel data format is not correct.rowCount=" +resultList.size());
+			LOGGER.error("excel data format is not correct.rowCount=" + resultList);
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"excel data format is not correct");
 		}
@@ -5523,24 +5539,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private java.sql.Date parseDate(String date) {
-		try {
-			return java.sql.Date.valueOf(date);
-		} catch (Exception e) {
-			LOGGER.error("Parse date error.", e);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT_BIRTHDAY_ERROR,
-					"Parse date %s error.", date);
-		}
-	}
+        if (date != null) {
+            if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                TemporalAccessor accessor = DateTimeFormatter.ofPattern("yyyy-MM-dd").parse(date);
+                LocalDate ld = LocalDate.from(accessor);
+                return java.sql.Date.valueOf(ld);
+            } else if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
+                TemporalAccessor accessor = DateTimeFormatter.ofPattern("yyyy/MM/dd").parse(date);
+                LocalDate ld = LocalDate.from(accessor);
+                return java.sql.Date.valueOf(ld);
+            }
+        }
+        return null;
+    }
 
 	private Byte parseGender(String gender) {
 		LocaleString localeString = localeStringProvider.findByText(UserLocalStringCode.SCOPE, gender, currentLocale());
-		if (localeString == null) {
-			LOGGER.error("The gender {} is invalid.", gender);
-			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The gender %s is invalid.", gender);
-		}
-		return Byte.valueOf(localeString.getCode());
-	}
+		if (localeString != null) {
+            return Byte.valueOf(localeString.getCode());
+        }
+        return UserGender.UNDISCLOSURED.getCode();
+    }
 
 	private Byte parseLivingStatus(String livingStatus) {
 		LocaleString localeString = localeStringProvider.findByText(
@@ -5568,9 +5587,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private Long parseOrgOwnerTypeId(String orgOwnerTypeName) {
 		OrganizationOwnerType type = propertyMgrProvider.findOrganizationOwnerTypeByDisplayName(orgOwnerTypeName);
 		if (type == null) {
-			LOGGER.error("The organization owner type {} is not exist.", type);
+			LOGGER.error("The organization owner type {} is not exist.", orgOwnerTypeName);
 			throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_IMPORT,
-					"The organization owner type %s is not exist.", type);
+					"The organization owner type %s is not exist.", orgOwnerTypeName);
 		}
 		return type.getId();
 	}

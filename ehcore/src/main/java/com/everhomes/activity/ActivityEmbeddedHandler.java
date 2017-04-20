@@ -1,6 +1,11 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +37,9 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.ActivityType;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
@@ -139,10 +146,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOldPostContent(ActivityDTO activityDTO){
-    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime())+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
-    				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    	return formatDate(activityDTO) + "\n"
+    			+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
+    			(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+
     }
     
     // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
@@ -153,6 +160,62 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     	return time;
     }
     
+	//    1 若活动发布时全天开关开启，则活动时间显示为： 
+	//    #活动开始时间# 年-月-日 ~ #活动结束时间# 年-月-日；
+	//     1.1 若为同一天，则简化为  年-月-日 
+	//     1.2 若为同年，则简化为  年-月-日 ~ 月-日
+	//  2. 若活动发布时全天开关关闭，则活动时间显示为： 
+	//       #活动开始时间# 年-月-日 时 : 分  ~ #活动结束时间# 年-月-日 时 : 分；
+	//     2.1 若开始时间与结束时间为同一天，则简化为：年-月-日  时 : 分  ~ 时 : 分 
+	//     2.2 若为同年，则简化  年-月-日  时 : 分  ~ 月-日   时 : 分  
+    private String formatDate(ActivityDTO activityDTO){
+    	
+    	//如果时间字符串有异常，保持原样
+    	if(activityDTO.getStartTime() == null || activityDTO.getStartTime().length() < 16 || 
+    			activityDTO.getStopTime() == null || activityDTO.getStartTime().length() < 16){
+    		
+    		return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
+    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime());
+    	}
+    	
+    	
+    	String startYear = activityDTO.getStartTime().substring(0, 4);
+    	String startMon = activityDTO.getStartTime().substring(5, 7);
+    	String startDay = activityDTO.getStartTime().substring(8, 10);
+    	String startHourAndMin = activityDTO.getStartTime().substring(11, 16);
+    	
+    	String stopYear = activityDTO.getStopTime().substring(0, 4);
+    	String stopMon = activityDTO.getStopTime().substring(5, 7);
+    	String stopDay = activityDTO.getStopTime().substring(8, 10);
+    	String stopHourAndMin = activityDTO.getStopTime().substring(11, 16);
+    	
+    	
+    	
+    	String res = "";
+    	String activityTimeStr = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_TIME);
+    	if(activityDTO.getAllDayFlag() != null && activityDTO.getAllDayFlag() == 1){
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " ~ " + stopMon + "-" + stopDay;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + "\n"
+    					+ getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + " ~ " + stopMon + "-" + stopDay;
+    		}
+    	}else{
+    		if(startYear.equals(stopYear) && startMon.equals(stopMon) && startDay.equals(stopDay)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopHourAndMin;
+    		}else if(startYear.equals(stopYear)){
+    			res = activityTimeStr + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin + " ~ " + stopMon + "-" + stopDay + " " + stopHourAndMin;
+    		}else{
+    			res = getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + startYear + "-" + startMon + "-" + startDay + " " + startHourAndMin +"\n"
+    					+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + stopYear + "-" + stopMon + "-" + stopDay + " "+ stopHourAndMin;
+    		}
+    	}
+
+    	return res;
+    }
+
     private boolean isOld(String versionString){
     	if (versionString == null || versionString.equals("")) {
 			return true;
@@ -251,6 +314,21 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         cmd.setTargetTag(post.getTargetTag());
         cmd.setVisibleRegionType(post.getVisibleRegionType());
         cmd.setVisibleRegionId(post.getVisibleRegionId());
+        
+        
+        //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
+        try {
+        	if(cmd.getOfficialFlag() == OfficialFlag.YES.getCode() && null != cmd.getStartTime()){
+        		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        		Date startTime= f.parse(cmd.getStartTime());
+            	if(startTime.before(DateHelper.currentGMTTime())){
+            		post.setCreateTime(new Timestamp(startTime.getTime() - 24*60*60*1000));
+            	}
+        	}
+        	
+        } catch (ParseException e) {
+        	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

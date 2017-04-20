@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.user.UserContext;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -125,8 +126,11 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
         FilterBuilder fb = null;
         FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentStandardStatus.INACTIVE.getCode());
     	fb = FilterBuilders.notFilter(nfb);
-    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+
+        // 改用namespaceId by xiongying20170328
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId()));
+//    	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         if(cmd.getStandardType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("standardType", cmd.getStandardType()));
         
@@ -197,6 +201,7 @@ public class EquipmentStandardSearcherImpl extends AbstractElasticSearch impleme
             b.field("standardType", standard.getStandardType());
             b.field("inspectionCategoryId", standard.getInspectionCategoryId());
             b.field("status", standard.getStatus());
+            b.field("namespaceId", standard.getNamespaceId());
 
             b.endObject();
             return b;

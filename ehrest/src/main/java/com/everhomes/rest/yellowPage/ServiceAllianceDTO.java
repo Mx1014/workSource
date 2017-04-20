@@ -96,6 +96,8 @@ public class ServiceAllianceDTO {
 	private Long discount;
 	
 	private String serviceUrl;
+
+	private String displayServiceUrl;
 	
 	private String discountDesc;
 	
@@ -119,7 +121,15 @@ public class ServiceAllianceDTO {
 	private Byte supportType;
 
 	private Long jumpId;
-	
+
+	public String getDisplayServiceUrl() {
+		return displayServiceUrl;
+	}
+
+	public void setDisplayServiceUrl(String displayServiceUrl) {
+		this.displayServiceUrl = displayServiceUrl;
+	}
+
 	public Long getId() {
 		return id;
 	}

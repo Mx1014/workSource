@@ -326,16 +326,16 @@ class PmTaskCommonServiceImpl {
         }
     }
 
-    Byte convertFlowStatus(String params) {
+    Byte convertFlowStatus(String nodeType) {
 
-        if(StringUtils.isBlank(params)) {
-            LOGGER.error("Invalid flowNode param.");
-            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-                    "Invalid flowNode param.");
-        }
-
-        JSONObject paramJson = JSONObject.parseObject(params);
-        String nodeType = paramJson.getString("nodeType");
+//        if(StringUtils.isBlank(params)) {
+//            LOGGER.error("Invalid flowNode param.");
+//            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+//                    "Invalid flowNode param.");
+//        }
+//
+//        JSONObject paramJson = JSONObject.parseObject(params);
+//        String nodeType = paramJson.getString("nodeType");
 
         switch (nodeType) {
             case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
@@ -461,5 +461,20 @@ class PmTaskCommonServiceImpl {
                     "PmTask not found.");
         }
         return pmTask;
+    }
+
+    String convertStatus(Byte status){
+        if(status == 1)
+            return "待处理";
+        else if(status == 2)
+            return "已分派";
+        else if(status == 3)
+            return "已完成";
+        else if(status == 4)
+            return "已关闭";
+        else if(status == 5)
+            return "已回访";
+        else
+            return "";
     }
 }

@@ -7,6 +7,13 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul> 用户选择项
+ * <li>selectType: 用户选择的类型 {@link com.everhomes.rest.flow.FlowUserSelectionType}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class FlowUserSelectionDTO {
 	private Long id;
 	private Integer namespaceId;

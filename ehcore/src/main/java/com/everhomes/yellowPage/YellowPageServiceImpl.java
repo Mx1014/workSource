@@ -594,7 +594,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(community != null) {
 			response.setNamespaceId(community.getNamespaceId());
 		}
-		
+
+		processServiceUrl(response);
 		return response;
 	}
 
@@ -636,7 +637,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public ServiceAllianceListResponse getServiceAllianceEnterpriseList(
 			GetServiceAllianceEnterpriseListCommand cmd) {
-		
+
+		long startTime = System.currentTimeMillis();
+
 		if(null != cmd.getCommunityId()){
 			cmd.setOwnerId(cmd.getCommunityId());
 		}else if(null != cmd.getOwnerId()){
@@ -667,6 +670,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 //        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
         List<ServiceAlliances> sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
         		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("getServiceAllianceEnterpriseList time: {}", time2 - startTime);
+
         if(null == sas || sas.size() == 0)
         	return response;
       
@@ -712,12 +719,42 @@ public class YellowPageServiceImpl implements YellowPageService {
 				dto.setButtonTitle(sa.getButtonTitle());
 			}
 
+			processServiceUrl(dto);
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
 
         }
-        return response;
+
+		long time3 = System.currentTimeMillis();
+		LOGGER.info("populate dto time: {}", time3 - time2);
+
+		LOGGER.info("getServiceAllianceEnterpriseList total time: {}", time3 - startTime);
+
+		return response;
+	}
+
+	private void processServiceUrl(ServiceAllianceDTO dto) {
+		if (null != dto.getServiceUrl()) {
+			try {
+				String serviceUrl = dto.getServiceUrl();
+				dto.setDisplayServiceUrl(dto.getServiceUrl());
+				String routeUri = configurationProvider.getValue(ConfigConstants.APP_ROUTE_BROWSER_OUTER_URI, "");
+
+				serviceUrl = String.format(routeUri, serviceUrl);
+				int index = serviceUrl.indexOf("?");
+				if (index != -1) {
+					String prefix = serviceUrl.substring(0, index + 1);
+					serviceUrl = serviceUrl.substring(index + 1, serviceUrl.length());
+					serviceUrl = URLEncoder.encode(serviceUrl, "utf8");
+					serviceUrl = prefix + serviceUrl;
+				}
+
+				dto.setServiceUrl(serviceUrl);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
@@ -833,7 +870,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			UpdateServiceAllianceEnterpriseCommand cmd) {
 		
 		ServiceAlliances serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliances.class);
-		
+
 		if(null != serviceAlliance.getCategoryId()) {
 			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(serviceAlliance.getCategoryId());
 			serviceAlliance.setServiceType(category.getName());

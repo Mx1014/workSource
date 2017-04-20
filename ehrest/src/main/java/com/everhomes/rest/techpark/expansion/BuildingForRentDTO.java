@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class BuildingForRentDTO {
 	private String   posterUri;
 	private String   posterUrl;
 	private String   subject;
-	private String   rentAreas;
+	private BigDecimal   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
 	private String   description;
@@ -50,6 +51,97 @@ public class BuildingForRentDTO {
 	private Timestamp createTime;
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
+
+	private Byte enterTimeFlag;
+	private Long addressId;
+	private String apartmentName;
+	private String orientation;
+	private BigDecimal rentAmount;
+	private String unit;
+	private String issuerType;
+	private String detailUrl;
+	private String buildingDetailUrl;
+	private Byte deleteFlag;
+
+	public String getBuildingDetailUrl() {
+		return buildingDetailUrl;
+	}
+
+	public void setBuildingDetailUrl(String buildingDetailUrl) {
+		this.buildingDetailUrl = buildingDetailUrl;
+	}
+
+	public Byte getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public BigDecimal getRentAmount() {
+		return rentAmount;
+	}
+
+	public void setRentAmount(BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
+
+	public Byte getEnterTimeFlag() {
+		return enterTimeFlag;
+	}
+
+	public void setEnterTimeFlag(Byte enterTimeFlag) {
+		this.enterTimeFlag = enterTimeFlag;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
 
 	public Long getId() {
 		return id;
@@ -132,11 +224,11 @@ public class BuildingForRentDTO {
 		this.subject = subject;
 	}
 
-	public String getRentAreas() {
+	public BigDecimal getRentAreas() {
 		return rentAreas;
 	}
 
-	public void setRentAreas(String rentAreas) {
+	public void setRentAreas(BigDecimal rentAreas) {
 		this.rentAreas = rentAreas;
 	}
 

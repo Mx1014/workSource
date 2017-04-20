@@ -64,6 +64,41 @@ public class EnergyStatTest extends BaseLoginAuthTestCase{
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
  
     }
+
+    @Test
+    public void testCaculateBlockTariffDayStat() throws ParseException {
+        logon();
+        EnergyStatCommand cmd = new EnergyStatCommand();
+        //2016年
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(daySF.parse("20161101"));
+        Calendar anchor = Calendar.getInstance();
+        anchor.setTime(daySF.parse("20161001"));
+        for(;anchor.compareTo(cal) <=0 ;anchor.add(Calendar.DAY_OF_MONTH, 1)){
+            cmd.setStatDate(anchor.getTime().getTime());
+            RestResponseBase response = httpClientService.restPost(CACULATE_DAY_STAT, cmd, RestResponseBase.class);
+            assertNotNull(response);
+            assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        }
+        //计算到最后一天刷月的(传11月刷前一月)
+        RestResponseBase response = httpClientService.restPost(CACULATE_MONTH_STAT, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        //2015 年
+        cal.setTime(daySF.parse("20151101"));
+        anchor.setTime(daySF.parse("20151001"));
+        for(;anchor.compareTo(cal) <=0 ;anchor.add(Calendar.DAY_OF_MONTH, 1)){
+            cmd.setStatDate(anchor.getTime().getTime());
+            response = httpClientService.restPost(CACULATE_DAY_STAT, cmd, RestResponseBase.class);
+            assertNotNull(response);
+            assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        }
+        //计算到最后一天刷月的(传11月刷前一月)
+        response = httpClientService.restPost(CACULATE_MONTH_STAT, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+    }
  
     private DSLContext context() {
         return dbProvider.getDslContext();

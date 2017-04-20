@@ -82,7 +82,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     		Long parkingLotId, String plateNumber) {
 
     	List<ParkingCardDTO> resultList = new ArrayList<>();
-    	//储能月卡车没有 归属地区分
 
 		InnoSpringCardInfo card = getCard(plateNumber);
 

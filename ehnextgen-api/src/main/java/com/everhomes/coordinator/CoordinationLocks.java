@@ -45,6 +45,7 @@ public enum CoordinationLocks {
     PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
     
     PARKING_STATISTICS("parking.statistics"),
+    PARKING_UPDATE_ORDER_STATUS("parking.update.order.status"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
     PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),
@@ -63,7 +64,8 @@ public enum CoordinationLocks {
     WARNING_EQUIPMENT_TASK("warning.equipment.task"),
     WARNING_QUALITY_TASK("warning.quality.task"),
 
-    OS_OBJECT("os.object");
+    OS_OBJECT("os.object"),
+    ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),;
 
 
     private String code;

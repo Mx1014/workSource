@@ -39,6 +39,7 @@ public class FlowCaseRecordMapper implements RecordMapper<Record, EhFlowCasesRec
 			o.setCaseType(r.getValue((Field<String>)r.field("case_type")));
 			o.setContent(r.getValue((Field<String>)r.field("content")));
 			o.setEvaluateScore(r.getValue((Field<Integer>)r.field("evaluate_score")));
+			o.setTitle(r.getValue((Field<String>)r.field("title")));
 			o.setStringTag1(r.getValue((Field<String>)r.field("string_tag1")));
 			o.setStringTag2(r.getValue((Field<String>)r.field("string_tag2")));
 			o.setStringTag3(r.getValue((Field<String>)r.field("string_tag3")));

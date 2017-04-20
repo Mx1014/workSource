@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
  * <li>checkinFlag: 是否签到，1是0否</li>
+ * <li>email: 邮箱</li>
  * </ul>
  */
 public class UpdateSignupInfoCommand {
@@ -26,6 +27,7 @@ public class UpdateSignupInfoCommand {
 	private String position;
 	private Byte leaderFlag;
 	private Byte checkinFlag;
+	private String email;
 
 	public Long getId() {
 		return id;
@@ -89,6 +91,14 @@ public class UpdateSignupInfoCommand {
 
 	public void setCheckinFlag(Byte checkinFlag) {
 		this.checkinFlag = checkinFlag;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

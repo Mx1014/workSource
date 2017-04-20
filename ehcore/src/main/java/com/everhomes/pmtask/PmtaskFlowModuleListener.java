@@ -6,14 +6,15 @@ import java.util.List;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.flow.*;
 import com.everhomes.rest.pmtask.*;
-
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,21 +23,10 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowGraphEvent;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowModuleInfo;
-import com.everhomes.flow.FlowModuleListener;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowUserSelection;
-import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
@@ -95,15 +85,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		//当前节点已经变成上一个节点
-		FlowGraphNode currentNode = ctx.getPrefixNode();
+//		FlowGraphNode currentNode = ctx.getPrefixNode();
 
-		if (null == currentNode)
+		//业务的下一个节点是当前节点
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+
+		if (null == currentNode || currentNode instanceof FlowGraphNodeEnd)
 			return;
 
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
-		//业务的下一个节点是当前节点
-		FlowNode nextNode = ctx.getCurrentNode().getFlowNode();
+
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
@@ -125,13 +117,13 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
 			if ("ACCEPTING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
-
+					LOGGER.debug("synchronizedTaskToTechpark, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 					if (null != logs && logs.size() != 0) {
 						for (PmTaskLog r: logs) {
@@ -144,12 +136,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 
 
 			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
+				pmTaskProvider.updateTask(task);
+			}else if ("COMPLETED".equals(nodeType)) {
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -185,7 +180,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
+		PmTaskDTO dto;
+		//TODO:为科兴与一碑对接
+		if(task.getNamespaceId() == 999983 &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			dto = handler.getTaskDetail(cmd);
+		}else {
+			dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
@@ -197,26 +204,30 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
-		
-		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-			e.setKey("");
-			e.setValue(s.getContentUrl());
-			entities.add(e);
+
+		if (null != dto.getAttachments()) {
+			for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+				e.setKey("");
+				e.setValue(s.getContentUrl());
+				entities.add(e);
+			}
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("服务地点");
 		e.setValue(dto.getAddress());
 		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("所属分类");
-		e.setValue(dto.getCategoryName());
-		entities.add(e);
+
+		if (StringUtils.isNotBlank(dto.getCategoryName())) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("所属分类");
+			e.setValue(dto.getCategoryName());
+			entities.add(e);
+		}
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -229,7 +240,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系电话");
 		e.setValue(dto.getRequestorPhone());
 		entities.add(e);
-		
+
+		//TODO:为科兴与一碑对接
+		if(dto.getNamespaceId() == 999983 &&
+				dto.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.LIST.getCode());
+			e.setKey("状态");
+			e.setValue(pmTaskCommonService.convertStatus(dto.getStatus()));
+			entities.add(e);
+		}
+
 		return entities;
 	}
 
@@ -261,26 +282,31 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-				FlowGraphEvent evt = ctx.getCurrentEvent();
-				if(evt != null && evt.getEntityId() != null
-						&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null) {
+						for(FlowEntitySel es : evt.getEntitySel()) {
+							//update by janson
+							if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
+								continue;
+							}
+							PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+							FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
+							Long targetId = sel.getSourceIdA();
 
-					PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-					FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-					Long targetId = sel.getSourceIdA();
+							PmTaskLog pmTaskLog = new PmTaskLog();
+							pmTaskLog.setNamespaceId(task.getNamespaceId());
+							pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+							pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+							pmTaskLog.setOwnerId(task.getOwnerId());
+							pmTaskLog.setOwnerType(task.getOwnerType());
+							pmTaskLog.setStatus(task.getStatus());
+							pmTaskLog.setTargetId(targetId);
+							pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+							pmTaskLog.setTaskId(task.getId());
+							pmTaskProvider.createTaskLog(pmTaskLog);							
+						}
 
-					PmTaskLog pmTaskLog = new PmTaskLog();
-					pmTaskLog.setNamespaceId(task.getNamespaceId());
-					pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-					pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-					pmTaskLog.setOwnerId(task.getOwnerId());
-					pmTaskLog.setOwnerType(task.getOwnerType());
-					pmTaskLog.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-					pmTaskLog.setTargetId(targetId);
-					pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-					pmTaskLog.setTaskId(task.getId());
-					pmTaskProvider.createTaskLog(pmTaskLog);
-				}
+					}
 			}
 		}
 
@@ -320,11 +346,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
+
 			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
 			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
-
+			//分配任务
 			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 
 			if (logs.size() != 0) {
@@ -338,6 +365,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
 				smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
 			}
+		}else if (SmsTemplateCode.PM_TASK_ACCEPTING_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_PROCESSING_BUTTON_APPROVE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
 	}

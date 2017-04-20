@@ -82,3 +82,39 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 select max(id) into @id from `eh_launch_pad_items`;
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES (@id:=@id+1, 999990, 0, 4, 1006090, '/home', 'Bizs', 'MEETINGROOM', '嗒嗒会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', 1, 1, 49, '{"resourceTypeId":60,"pageType":0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'park_tourist', 0, NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES (@id:=@id+1, 999990, 0, 4, 1006090, '/home', 'Bizs', 'MEETINGROOM', '嗒嗒会议室', 'cs://1/image/aW1hZ2UvTVRvME5HVTNZVEZsTXpNeU16VXhNbVF3Wm1GbU9UUTBPV0ZoTUdRNFpUSmpaQQ', 1, 1, 49, '{"resourceTypeId":60,"pageType":0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 1, 'pm_admin', 0, NULL, NULL);
+
+
+-- 添加新的服务类型，并更改banner跳转链接（现网已执行）, add by tt, 20170322
+SET @eh_service_alliance_categories = (SELECT max(id) FROM eh_service_alliance_categories);
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES ((@eh_service_alliance_categories := @eh_service_alliance_categories + 1), 'community', '240111044331051500', '0', '十乐生活合作介绍', '十乐生活合作介绍', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999990', '');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);    
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) 
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331051500', '十乐生活合作介绍', '十乐生活合作介绍', @eh_service_alliance_categories, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+
+SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999990', @eh_service_alliance_categories);
+update eh_banners set action_type = 33 where name in("十乐生活合作预告") and namespace_id = 999990;
+update eh_banners set action_data = concat('{"type":',@eh_service_alliance_categories,',"parentId":',@eh_service_alliance_categories,',"displayType": "list"}') where name = "十乐生活合作预告" and namespace_id = 999990;
+
+
+
+-- 更新现网菜单“我的申请”的data_type（现网已执行）, add by tt, 20170323
+update eh_web_menus set data_type = replace(data_type, 'service', 'apply') where id in (80120, 80220, 80320, 80420, 80520);
+
+
+-- 
+-- 删除正中会菜单（现网已执行）, add by tt, 20170323
+-- 1，删除运营服务及子菜单
+-- 2，删除内部管理的岗位管理和职级管理
+-- 3，系统管理下新增子菜单：管理员管理
+-- 4，删除园区服务下的厂房出租、公寓出租、医疗
+-- 5，删除园区服务-企业服务下的我的申请子菜单
+-- 
+delete from eh_acls where role_id = 1005 and privilege_id = 10145;
+
+delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = 999983 and menu_id in (50200, 50210, 50220, 50300, 80300, 80310, 80320, 80400, 80410,80420, 80500, 80510,80520, 80220);
+
+select max(id) into @id from `eh_web_menu_scopes`;
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id+1, 60400, '', 'EhNamespaces', 999983, 2);

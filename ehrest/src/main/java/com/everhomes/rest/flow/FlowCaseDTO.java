@@ -57,6 +57,7 @@ public class FlowCaseDTO {
     private String currNodeParams;
     private Integer rejectCount;
     private Long stepCount;
+    private String title;
     
 	public Long getId() {
 		return id;
@@ -288,6 +289,14 @@ public class FlowCaseDTO {
 
 	public void setStepCount(Long stepCount) {
 		this.stepCount = stepCount;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	@Override

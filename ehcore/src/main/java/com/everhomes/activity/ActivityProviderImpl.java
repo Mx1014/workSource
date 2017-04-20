@@ -3,7 +3,10 @@ package com.everhomes.activity;
 
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,6 +100,14 @@ public class ActivityProviderImpl implements ActivityProivider {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天  add by yanjun
+    	if(activity.getOfficialFlag() == OfficialFlag.YES.getCode() && null != activity.getStartTime()){
+        	if(activity.getStartTime().before(DateHelper.currentGMTTime())){
+        		activity.setCreateTime(new Timestamp(activity.getStartTime().getTime() - 24*60*60*1000));
+        	}
+    	}
+        
         activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
@@ -264,7 +275,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId) {
-       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.ne(ConfirmStatus.REJECT.getCode()));
     }
     
     
@@ -853,6 +864,32 @@ public class ActivityProviderImpl implements ActivityProivider {
 		.limit(pageSize)
 		.fetch()
 		.map(r->ConvertHelper.convert(r, ActivityRoster.class));
+	}
+	
+	@Override
+	public List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer pageOffset, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<EhActivityRosterRecord>  query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+		query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+		if(status != null){
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(status.byteValue()));
+		}
+		query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.abs());
+		query.addLimit(pageOffset, pageSize);
+		return query.fetch().map(r->ConvertHelper.convert(r, ActivityRoster.class));
+	}
+	@Override
+	public Integer countActivityRoster(Long activityId, Integer status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		SelectQuery<EhActivityRosterRecord>  query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+		query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
+		if(status != null){
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(status.byteValue()));
+		}
+		
+		return query.fetchCount();
 	}
 	
 }

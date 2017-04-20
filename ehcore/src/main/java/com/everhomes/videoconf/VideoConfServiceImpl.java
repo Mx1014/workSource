@@ -1743,15 +1743,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 				response.setJoinUrl(conf.getJoinUrl());
 				response.setCondId(conf.getMeetingNo()+"");
 				response.setPassword(conf.getConfHostKey());
+			} else {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("meetingNo", cmd.getConfId());
+
+				String scope = VideoconfNotificationTemplateCode.SCOPE;
+				int code = VideoconfNotificationTemplateCode.VIDEOCONF_JOINURL_TEMPLATE;
+
+				String joinUrl = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
+				response.setJoinUrl(joinUrl);
+				//没有的话原样返回会议号 by xiongying20170406
+				response.setCondId(cmd.getConfId());
 			}
 			
-			else {
-				LOGGER.error("conf id is wrong!");
-				throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_CONF_ID,
-						localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-								String.valueOf(ConfServiceErrorCode.ERROR_INVALID_CONF_ID),
-								UserContext.current().getUser().getLocale(),"conf id is wrong!"));
-			}
+//			else {
+//				LOGGER.error("conf id is wrong!");
+//				throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_CONF_ID,
+//						localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE),
+//								String.valueOf(ConfServiceErrorCode.ERROR_INVALID_CONF_ID),
+//								UserContext.current().getUser().getLocale(),"conf id is wrong!"));
+//			}
 		}
 		
 		else {
