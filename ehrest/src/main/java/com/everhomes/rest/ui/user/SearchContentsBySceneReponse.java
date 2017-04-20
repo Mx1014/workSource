@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
 /**
  *<ul>
  * <li>dtos: 查询的帖子的结果列表，{@link com.everhomes.rest.ui.user.ContentBriefDTO}</li>
+ * <li>launchPadItemDtos: 查询应用的结果列表，{@link com.everhomes.rest.launchpad.LaunchPadItemDTO}</li>
+ * <li>shopDTOs: 查询商家的结果列表，{@link com.everhomes.rest.business.ShopDTO}</li>
  * <li>nextPageAnchor: 下一页的锚点</li>
  *</ul>
  */
