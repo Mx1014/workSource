@@ -5558,6 +5558,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterpriseCommand.setNamespaceId(namespaceId);
 			enterpriseCommand.setCommunityId(cmd.getCommunityId());
 			enterpriseCommand.setEmailDomain(data.getEmail());
+			enterpriseCommand.setCheckinDate(data.getCheckinDate());
 			if(!StringUtils.isEmpty(data.getNumber())){
 				enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
 			}
