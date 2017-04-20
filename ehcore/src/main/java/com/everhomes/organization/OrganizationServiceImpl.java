@@ -5553,6 +5553,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterpriseCommand.setContactor(data.getAdminName());
 			enterpriseCommand.setNamespaceId(namespaceId);
 			enterpriseCommand.setCommunityId(cmd.getCommunityId());
+			enterpriseCommand.setCheckinDate(data.getCheckinDate());
+			enterpriseCommand.setEmailDomain(data.getEmail());
+			if(null != data.getNumber()){
+				enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
+			}
 
 			Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
 
