@@ -230,22 +230,22 @@ public class AssetServiceImpl implements AssetService {
         return dtos;
     }
 
-    private AssetVendor checkAssetVendor(String ownerType,Long ownerId){
-        if(null == ownerId) {
-            LOGGER.error("OwnerId cannot be null.");
+    private AssetVendor checkAssetVendor(String targetType,Long targetId){
+        if(null == targetId) {
+            LOGGER.error("checkAssetVendor targetId cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "OwnerId cannot be null.");
+                    "checkAssetVendor targetId cannot be null.");
         }
 
-        if(StringUtils.isBlank(ownerType)) {
-            LOGGER.error("OwnerType cannot be null.");
+        if(StringUtils.isBlank(targetType)) {
+            LOGGER.error("checkAssetVendor targetType cannot be null.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "OwnerType cannot be null.");
+                    "checkAssetVendor targetType cannot be null.");
         }
 
-        AssetVendor assetVendor = assetProvider.findAssetVendorByOwner(ownerType, ownerId);
+        AssetVendor assetVendor = assetProvider.findAssetVendorByOwner(targetType, targetId);
         if(null == assetVendor) {
-            LOGGER.error("assetVendor not found, assetVendor ownerType={}, ownerId={}", ownerType, ownerId);
+            LOGGER.error("assetVendor not found, assetVendor targetType={}, targetId={}", targetType, targetId);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "assetVendor not found");
         }
