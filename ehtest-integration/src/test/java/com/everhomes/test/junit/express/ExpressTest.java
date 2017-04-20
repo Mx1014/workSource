@@ -5,12 +5,15 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Record;
+import org.jooq.Result;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.express.AddExpressUserCommand;
 import com.everhomes.rest.express.CancelExpressOrderCommand;
 import com.everhomes.rest.express.CreateExpressOrderCommand;
@@ -22,6 +25,8 @@ import com.everhomes.rest.express.CreateOrUpdateExpressAddressResponse;
 import com.everhomes.rest.express.CreateOrUpdateExpressAddressRestResponse;
 import com.everhomes.rest.express.DeleteExpressAddressCommand;
 import com.everhomes.rest.express.DeleteExpressUserCommand;
+import com.everhomes.rest.express.ExpressOrderDTO;
+import com.everhomes.rest.express.ExpressOrderStatus;
 import com.everhomes.rest.express.ExpressServiceAddressDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailCommand;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
@@ -52,6 +57,8 @@ import com.everhomes.rest.express.ListServiceAddressRestResponse;
 import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhExpressUsers;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
@@ -98,8 +105,8 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 	@Value("${namespace.id}")
 	private Integer namespaceId;
 	
-	//1. 自寄服务地址列表
-	@Test
+	//1. 自寄服务地址列表（已完成）
+//	@Test
 	public void testListServiceAddress() {
 		String url = LIST_SERVICE_ADDRESS_URL;
 		logon();
@@ -123,15 +130,15 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 	}
 
-	//2. 快递公司列表
-	//@Test
+	//2. 快递公司列表（已完成）
+//	@Test
 	public void testListExpressCompany() {
 		String url = LIST_EXPRESS_COMPANY_URL;
 		logon();
 
 		ListExpressCompanyCommand cmd = new ListExpressCompanyCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 
 		ListExpressCompanyRestResponse response = httpClientService.restPost(url, cmd, ListExpressCompanyRestResponse.class);
 		assertNotNull(response);
@@ -139,23 +146,24 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListExpressCompanyResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getExpressCompanyDTOs());
+		assertEquals(2, myResponse.getExpressCompanyDTOs().size());
 
 	}
 
-	//3. 快递人员列表
-	//@Test
+	//3. 快递人员列表（已完成）
+//	@Test
 	public void testListExpressUser() {
 		String url = LIST_EXPRESS_USER_URL;
 		logon();
 
 		ListExpressUserCommand cmd = new ListExpressUserCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setServiceAddressId(1L);
-		cmd.setExpressCompanyId(1L);
-		cmd.setPageAnchor(1L);
-		cmd.setPageSize(0);
+		cmd.setExpressCompanyId(11L);
+//		cmd.setPageAnchor(2L);
+		cmd.setPageSize(2);
 
 		ListExpressUserRestResponse response = httpClientService.restPost(url, cmd, ListExpressUserRestResponse.class);
 		assertNotNull(response);
@@ -163,70 +171,81 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListExpressUserResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getExpressUserDTOs());
+		assertNotNull(myResponse.getNextPageAnchor());
+		assertEquals(2, myResponse.getExpressUserDTOs().size());
 
 
 	}
 
-	//4. 添加快递人员
-	//@Test
+	//4. 添加快递人员（已完成）
+//	@Test
 	public void testAddExpressUser() {
 		String url = ADD_EXPRESS_USER_URL;
 		logon();
 
 		AddExpressUserCommand cmd = new AddExpressUserCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setServiceAddressId(1L);
-		cmd.setExpressCompanyId(1L);
+		cmd.setExpressCompanyId(11L);
 		List<CreateExpressUserDTO> createExpressUserDTOList = new ArrayList<>();
 		CreateExpressUserDTO createExpressUserDTO = new CreateExpressUserDTO();
-		createExpressUserDTO.setOrganizationId(1L);
-		createExpressUserDTO.setOrganizationMemberId(1L);
+		createExpressUserDTO.setOrganizationId(1000760L);
+		createExpressUserDTO.setOrganizationMemberId(2101442L);
 		createExpressUserDTOList.add(createExpressUserDTO);
+		CreateExpressUserDTO createExpressUserDTO2 = new CreateExpressUserDTO();
+		createExpressUserDTO2.setOrganizationId(1000760L);
+		createExpressUserDTO2.setOrganizationMemberId(2101440L);
+		createExpressUserDTOList.add(createExpressUserDTO2);
 		cmd.setExpressUsers(createExpressUserDTOList);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Result<Record> records = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_USERS).where(Tables.EH_EXPRESS_USERS.ORGANIZATION_ID.eq(1000760L)).fetch();
+		assertNotNull(records);
+		assertEquals(2, records.size());
+		
 	}
 
-	//5. 删除快递人员
-	//@Test
+	//5. 删除快递人员（已完成）
+//	@Test
 	public void testDeleteExpressUser() {
 		String url = DELETE_EXPRESS_USER_URL;
 		logon();
 
 		DeleteExpressUserCommand cmd = new DeleteExpressUserCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Result<Record> records = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_USERS).where(Tables.EH_EXPRESS_USERS.ID.eq(1L)).fetch();
+		assertNotNull(records);
+		assertEquals(CommonStatus.INACTIVE.getCode(), records.get(0).getValue(Tables.EH_EXPRESS_USERS.STATUS).byteValue());
 
 	}
 
-	//6. 快递订单列表（后台）
-	//@Test
+	//6. 快递订单列表（后台）（已完成）
+//	@Test
 	public void testListExpressOrder() {
 		String url = LIST_EXPRESS_ORDER_URL;
 		logon();
 
 		ListExpressOrderCommand cmd = new ListExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setServiceAddressId(1L);
-		cmd.setExpressCompanyId(1L);
+		cmd.setExpressCompanyId(11L);
 		cmd.setStatus((byte)1);
-		cmd.setKeyword("");
-		cmd.setPageAnchor(1L);
-		cmd.setPageSize(0);
+		cmd.setKeyword("t");
+//		cmd.setPageAnchor(2L);
+		cmd.setPageSize(2);
 
 		ListExpressOrderRestResponse response = httpClientService.restPost(url, cmd, ListExpressOrderRestResponse.class);
 		assertNotNull(response);
@@ -234,19 +253,22 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListExpressOrderResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getExpressOrderDTOs());
+		assertNotNull(myResponse.getNextPageAnchor());
+		assertEquals(2, myResponse.getExpressOrderDTOs().size());
 
 
 	}
 
-	//7. 快递订单详情
-	//@Test
+	//7. 快递订单详情（已完成）
+//	@Test
 	public void testGetExpressOrderDetail() {
 		String url = GET_EXPRESS_ORDER_DETAIL_URL;
 		logon();
 
 		GetExpressOrderDetailCommand cmd = new GetExpressOrderDetailCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
 
 		GetExpressOrderDetailRestResponse response = httpClientService.restPost(url, cmd, GetExpressOrderDetailRestResponse.class);
@@ -255,28 +277,35 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		GetExpressOrderDetailResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		ExpressOrderDTO dto = myResponse.getExpressOrderDTO();
+		assertNotNull(dto);
+		assertNotNull(dto.getId());
+		assertNotNull(dto.getOrderNo());
 
 
 	}
 
-	//8. 修改付费总计
-	//@Test
+	//8. 修改付费总计（已完成）
+//	@Test
 	public void testUpdatePaySummary() {
 		String url = UPDATE_PAY_SUMMARY_URL;
 		logon();
 
 		UpdatePaySummaryCommand cmd = new UpdatePaySummaryCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
-		cmd.setPaySummary(new BigDecimal("10.23"));
+		cmd.setPaySummary(new BigDecimal("111.23"));
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_ORDERS).where(Tables.EH_EXPRESS_ORDERS.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(new BigDecimal("111.23"), record.getValue(Tables.EH_EXPRESS_ORDERS.PAY_SUMMARY));
+		
+		
 	}
 
 	//9. 立即支付
@@ -287,7 +316,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		PayExpressOrderCommand cmd = new PayExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -298,45 +327,46 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 	}
 
-	//10. 出单
-	//@Test
+	//10. 出单（已完成）
+//	@Test
 	public void testPrintExpressOrder() {
 		String url = PRINT_EXPRESS_ORDER_URL;
 		logon();
 
 		PrintExpressOrderCommand cmd = new PrintExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
-		cmd.setId(1L);
+		cmd.setOwnerId(240111044331051300L);
+		cmd.setId(4L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_EXPRESS_ORDERS).where(Tables.EH_EXPRESS_ORDERS.ID.eq(4L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(ExpressOrderStatus.PRINTED.getCode(), record.getValue(Tables.EH_EXPRESS_ORDERS.STATUS));
 
 	}
 
 	//11. 添加地址
-	//@Test
+	@Test
 	public void testCreateOrUpdateExpressAddress() {
 		String url = CREATE_OR_UPDATE_EXPRESS_ADDRESS_URL;
 		logon();
 
 		CreateOrUpdateExpressAddressCommand cmd = new CreateOrUpdateExpressAddressCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
-		cmd.setId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setCategory((byte)1);
-		cmd.setUserName("");
-		cmd.setPhone("");
-		cmd.setOrganizationId(1L);
-		cmd.setOrganizationName("");
-		cmd.setProvince("");
-		cmd.setCity("");
-		cmd.setCounty("");
-		cmd.setDetailAddress("");
-		cmd.setDefaultFlag((byte)1);
+		cmd.setUserName("tt1");
+		cmd.setPhone("13265767393");
+		cmd.setOrganizationId(1000750L);
+		cmd.setOrganizationName("深业集团（深圳）物业管理有限公司");
+		cmd.setProvince("广东省");
+		cmd.setCity("深圳市");
+		cmd.setCounty("南山区");
+		cmd.setDetailAddress("金融基地2栋7F");
+		cmd.setDefaultFlag((byte)0);
 
 		CreateOrUpdateExpressAddressRestResponse response = httpClientService.restPost(url, cmd, CreateOrUpdateExpressAddressRestResponse.class);
 		assertNotNull(response);
@@ -344,6 +374,8 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		CreateOrUpdateExpressAddressResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getExpressAddressDTO());
+		assertEquals("tt1", myResponse.getExpressAddressDTO().getUserName());
 
 
 	}
@@ -356,7 +388,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		DeleteExpressAddressCommand cmd = new DeleteExpressAddressCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -375,7 +407,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListExpressAddressCommand cmd = new ListExpressAddressCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setCategory((byte)1);
 
 		ListExpressAddressRestResponse response = httpClientService.restPost(url, cmd, ListExpressAddressRestResponse.class);
@@ -396,7 +428,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		CreateExpressOrderCommand cmd = new CreateExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setSendAddressId(1L);
 		cmd.setReceiveAddressId(1L);
 		cmd.setExpressCompanyId(1L);
@@ -425,7 +457,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		ListPersonalExpressOrderCommand cmd = new ListPersonalExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setStatus((byte)1);
 		cmd.setPageAnchor(1L);
 		cmd.setPageSize(0);
@@ -448,7 +480,7 @@ public class ExpressTest extends BaseLoginAuthTestCase{
 
 		CancelExpressOrderCommand cmd = new CancelExpressOrderCommand();
 		cmd.setOwnerType("community");
-		cmd.setOwnerId(1L);
+		cmd.setOwnerId(240111044331051300L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);

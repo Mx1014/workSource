@@ -55,7 +55,7 @@ public class EmsHandler implements ExpressHandler {
 	private static final String LOGO_URI = "cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw";
 	
 	//java8新加的格式化时间类，是线程安全的
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
 	
 	//大客户号
 	@Value("${ems.sys.account:}")
