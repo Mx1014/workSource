@@ -556,47 +556,48 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		populateServiceAlliance(sa);
 		
-		ServiceAllianceDTO response = null;
+		ServiceAllianceDTO dto = null;
 		
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-		if(response.getJumpType() != null) {
+		dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+		if(dto.getJumpType() != null) {
 			
-			if(JumpType.TEMPLATE.equals(JumpType.fromCode(response.getJumpType()))) {
-				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+			if(JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 				if(template != null) {
-					response.setTemplateName(template.getName());
-					response.setButtonTitle(template.getButtonTitle());
+					dto.setTemplateName(template.getName());
+					dto.setButtonTitle(template.getButtonTitle());
 				}
-			} else if(JumpType.MODULE.equals(JumpType.fromCode(response.getJumpType()))) {
-				response.setTemplateName(response.getTemplateType());
-				response.setButtonTitle("我要申请");
+			} else if(JumpType.MODULE.equals(JumpType.fromCode(dto.getJumpType()))) {
+				dto.setTemplateName(dto.getTemplateType());
+				dto.setButtonTitle("我要申请");
 			}
 		} else {
 			//兼容以前只有模板跳转时jumptype字段为null的情况
-			if(response.getTemplateType() != null) {
-				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+			if(dto.getTemplateType() != null) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 				if(template != null) {
-					response.setTemplateName(template.getName());
-					response.setButtonTitle(template.getButtonTitle());
+					dto.setTemplateName(template.getName());
+					dto.setButtonTitle(template.getButtonTitle());
 				}
 			}
 			
 		}
 
 		if (!StringUtils.isEmpty(sa.getButtonTitle())) {
-			response.setButtonTitle(sa.getButtonTitle());
+			dto.setButtonTitle(sa.getButtonTitle());
 		}
 
-		this.processDetailUrl(response);
+		this.processDetailUrl(dto);
 //		response.setDisplayName(serviceAlliance.getNickName());
-		Community community = communityProvider.findCommunityById(response.getOwnerId());
-		if(community != null) {
-			response.setNamespaceId(community.getNamespaceId());
-		}
+//		Community community = communityProvider.findCommunityById(dto.getOwnerId());
+//		if(community != null) {
+//			dto.setNamespaceId(community.getNamespaceId());
+//		}
+		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
-		processServiceUrl(response);
-		return response;
+		processServiceUrl(dto);
+		return dto;
 	}
 
 	@Override
