@@ -2193,11 +2193,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		completeWaitingForApprovalCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 		final Field<Byte> completeWaitingForApproval = DSL.decode().when(completeWaitingForApprovalCondition, ReviewResult.NONE.getCode());
 
-		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID,
-				Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID,
-				Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID, DSL.count().as("taskCount"),
-				DSL.count(waitingForExecuting).as("waitingForExecuting"), DSL.count(needMaintance).as("needMaintance"), DSL.count(inMaintance).as("inMaintance"),
-				DSL.count(completeInspection).as("completeInspection"),DSL.count(completeMaintance).as("completeMaintance"),DSL.count(completeWaitingForApproval).as("completeWaitingForApproval")};
+		final Field<?>[] fields = {DSL.count(waitingForExecuting).as("waitingForExecuting"), DSL.count(inMaintance).as("inMaintance"),
+				DSL.count(needMaintance).as("needMaintance"), DSL.count(completeWaitingForApproval).as("completeWaitingForApproval"),
+				DSL.count(completeInspection).as("completeInspection"), DSL.count(completeMaintance).as("completeMaintance")};
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
@@ -2218,18 +2216,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
 		}
 		query.fetchAny().map((r) -> {
-//			resp
-//			dto.setTargetId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID));
-//			dto.setInspectionCategoryId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID));
-//			dto.setEquipmentId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID));
-//			dto.setStandardId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID));
-//			dto.setTaskCount(r.getValue("taskCount", Long.class));
-//			dto.setToExecuted(r.getValue("toExecuted", Long.class));
-//			dto.setInMaintance(r.getValue("inMaintance", Long.class));
-//			dto.setNeedMaintance(r.getValue("needMaintance", Long.class));
-//			dto.setCompleteInspection(r.getValue("completeInspection", Long.class));
-//			dto.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
-//			dto.setDelay(r.getValue("delay", Long.class));
+			resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
+			resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
+			resp.setComplete(resp.getCompleteInspection()+resp.getCompleteMaintance());
+			resp.setCompleteWaitingForApproval(r.getValue("completeWaitingForApproval", Long.class));
+			resp.setInMaintance(r.getValue("inMaintance", Long.class));
+			resp.setNeedMaintanceWaitingForApproval(r.getValue("needMaintance", Long.class));
+			resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
 			return null;
 		});
 

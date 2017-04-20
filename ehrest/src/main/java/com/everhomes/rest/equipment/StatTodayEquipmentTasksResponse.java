@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *     <li>waitingForExecuting: 待执行</li>
  *     <li>inMaintance: 整改中</li>
  *     <li>complete: 完成</li>
+ *     <li>completeMaintance: 整改完成</li>
+ *     <li>completeInspection: 巡检完成</li>
  *     <li>completeWaitingForApproval: 完成待审核</li>
  *     <li>needMaintanceWaitingForApproval: 需整改待审核</li>
  *     <li>reviewQualified: 审核通过</li>
@@ -21,6 +23,10 @@ public class StatTodayEquipmentTasksResponse {
     private Long inMaintance;
 
     private Long complete;
+
+    private Long completeMaintance;
+
+    private Long completeInspection;
 
     private Long completeWaitingForApproval;
 
@@ -86,7 +92,24 @@ public class StatTodayEquipmentTasksResponse {
         this.waitingForExecuting = waitingForExecuting;
     }
 
+    public Long getCompleteInspection() {
+        return completeInspection;
+    }
+
+    public void setCompleteInspection(Long completeInspection) {
+        this.completeInspection = completeInspection;
+    }
+
+    public Long getCompleteMaintance() {
+        return completeMaintance;
+    }
+
+    public void setCompleteMaintance(Long completeMaintance) {
+        this.completeMaintance = completeMaintance;
+    }
+
     @Override
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }
