@@ -5029,7 +5029,7 @@ public class PunchServiceImpl implements PunchService {
 					.getTime()));
 			this.punchProvider.createPunchRule(pr);
 			map.setPunchRuleId(pr.getId());
-			this.punchProvider.createPunchRuleOwnerMap(map);
+			this.punchProvider.updatePunchRuleOwnerMap(map);
 			
 		}
 		return map;
