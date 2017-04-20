@@ -5564,7 +5564,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				continue;
 			}
 
-			Address address = addressProvider.findAddressByCommunityAndAddress(community.getCityId(), community.getAreaId(), community.getId(), data.getBuildingName() + "-" + data.getAddress());
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, community.getId(), data.getBuildingName(), data.getAddress());
 
 			if(null == address){
 				LOGGER.error("address Non-existent, address = {}", data.getAddress());
