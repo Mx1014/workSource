@@ -239,7 +239,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 		
 //		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(ItemGroup.BIZS.getCode());
-		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
+		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId);
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+//		Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_LOCATION.eq("/home");
 		
 		Condition scopeConditionAll = null;
 		for(Map.Entry<Byte, Long> entry: scopeMap.entrySet()){
@@ -267,8 +269,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		
 		condition = condition.and(scopeConditionAll);
 		
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
-        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+        
         
 		
 		if(keyword != null && !keyword.trim().equals("")){
