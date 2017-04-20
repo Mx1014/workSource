@@ -3219,6 +3219,9 @@ public class UserServiceImpl implements UserService {
 			response.setShopDTOs(shopDtos);
 
 			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.ACTIVITY.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
 						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
@@ -3227,6 +3230,9 @@ public class UserServiceImpl implements UserService {
 			}
 
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.POLL.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
 						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
@@ -3235,6 +3241,9 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.TOPIC.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
 						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
@@ -3243,6 +3252,9 @@ public class UserServiceImpl implements UserService {
 			}
 
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.NEWS.getCode());
+			}
 			if(searchType != null) {
 				if(newsService.searchNewsByScene(cmd) != null 
 						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
@@ -3252,6 +3264,9 @@ public class UserServiceImpl implements UserService {
 			
 			//查询应用 add by yanjun 20170419
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.LAUNCHPADITEM.getCode());
+			}
 			if(searchType != null) {
 				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
 				if( tempResp != null 
@@ -3262,6 +3277,9 @@ public class UserServiceImpl implements UserService {
 			
 			//查询电商店铺 add by yanjun 20170419
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
+			}
 			if(searchType != null) {
 				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
 				if(tempResp != null 
