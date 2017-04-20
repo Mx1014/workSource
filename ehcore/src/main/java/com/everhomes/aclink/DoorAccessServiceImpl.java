@@ -3283,6 +3283,27 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    public AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd) {
+    	DoorAccess door = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+    	AclinkGetServerKeyResponse resp = ConvertHelper.convert(door, AclinkGetServerKeyResponse.class);
+    	DoorAccessType accessType = DoorAccessType.fromCode(door.getDoorType());
+    	if(accessType == DoorAccessType.ACLINK_ZL_GROUP) {
+    		resp.setKey0(door.getAesIv());
+    	} else if(DoorAccessType.ZLACLINK_WIFI == accessType || DoorAccessType.ZLACLINK_NOWIFI == accessType) {
+    		AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(door.getId());
+         if(aesServerKey != null) {
+        	 if(aesServerKey.getDeviceVer().equals((byte)0)) {
+        		 resp.setKey0(aesServerKey.getSecret()); 
+        	 } else {
+        		 resp.setKey1(aesServerKey.getSecret());
+        	 }
+            }
+    	}
+    	
+    	return resp;
+    }
+    
+    @Override
     public void test() {
         try {
             String aesServerKey = "s87SHk+R/IOw6dV7QkX/pA==";
