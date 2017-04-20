@@ -1,6 +1,5 @@
 package com.everhomes.equipment;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -74,5 +73,5 @@ public interface EquipmentService {
 	StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd);
 	StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd);
 	StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd);
-	ListEquipmentTasksResponse listInnormalTasks(ListInnormalTasksCommand cmd);
+	ListEquipmentTasksResponse listAbnormalTasks(ListAbnormalTasksCommand cmd);
 }

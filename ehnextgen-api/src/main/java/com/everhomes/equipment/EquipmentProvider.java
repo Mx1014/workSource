@@ -12,6 +12,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.StatTodayEquipmentTasksResponse;
 import com.everhomes.rest.equipment.TaskCountDTO;
 
 
@@ -136,4 +137,6 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listEquipmentsById(List<Long> ids);
 
 	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
+
+	StatTodayEquipmentTasksResponse statTodayEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
 }

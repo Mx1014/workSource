@@ -13,8 +13,8 @@ import java.util.List;
  *  <li>valueJason: 值，包含参考值referenceValue和偏差范围offsetRange</li>
  *  <li>averageValue: 巡检平均值</li>
  *  <li>normalTimes: 正常次数</li>
- *  <li>innormalTimes: 异常次数</li>
- *  <li>innormalTaskIds: 异常的任务id列表</li>
+ *  <li>abnormalTimes: 异常次数</li>
+ *  <li>abnormalTaskIds: 异常的任务id列表</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
@@ -28,13 +28,13 @@ public class ItemResultStat {
 
     private Long normalTimes;
 
-    private Long innormalTimes;
+    private Long abnormalTimes;
 
     private String valueJason;
 
     private Double averageValue;
     @ItemType(Long.class)
-    private List<Long> innormalTaskIds;
+    private List<Long> abnormalTaskIds;
 
     public Double getAverageValue() {
         return averageValue;
@@ -42,14 +42,6 @@ public class ItemResultStat {
 
     public void setAverageValue(Double averageValue) {
         this.averageValue = averageValue;
-    }
-
-    public Long getInnormalTimes() {
-        return innormalTimes;
-    }
-
-    public void setInnormalTimes(Long innormalTimes) {
-        this.innormalTimes = innormalTimes;
     }
 
     public Long getItemId() {
@@ -92,12 +84,20 @@ public class ItemResultStat {
         this.valueType = valueType;
     }
 
-    public List<Long> getInnormalTaskIds() {
-        return innormalTaskIds;
+    public List<Long> getAbnormalTaskIds() {
+        return abnormalTaskIds;
     }
 
-    public void setInnormalTaskIds(List<Long> innormalTaskIds) {
-        this.innormalTaskIds = innormalTaskIds;
+    public void setAbnormalTaskIds(List<Long> abnormalTaskIds) {
+        this.abnormalTaskIds = abnormalTaskIds;
+    }
+
+    public Long getAbnormalTimes() {
+        return abnormalTimes;
+    }
+
+    public void setAbnormalTimes(Long abnormalTimes) {
+        this.abnormalTimes = abnormalTimes;
     }
 
     @Override

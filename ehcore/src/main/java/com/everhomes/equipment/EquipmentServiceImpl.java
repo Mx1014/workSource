@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import com.everhomes.appurl.AppUrlService;
-import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
@@ -26,7 +25,6 @@ import com.everhomes.util.*;
 import com.everhomes.util.doc.DocUtil;
 import com.google.zxing.WriterException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,209 +33,15 @@ import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -246,10 +50,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -259,30 +61,19 @@ import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.quality.QualityInspectionCategories;
-import com.everhomes.quality.QualityInspectionStandardGroupMap;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.quality.QualityInspectionTaskAttachments;
-import com.everhomes.quality.QualityInspectionTaskRecords;
-import com.everhomes.quality.QualityInspectionTasks;
-import com.everhomes.quality.QualityService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
@@ -290,30 +81,14 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
 import com.everhomes.rest.organization.OrganizationNaviFlag;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.quality.CountTasksResponse;
-import com.everhomes.rest.quality.EvaluationDTO;
-import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.rest.quality.QualityInspectionTaskDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskResult;
-import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
-import com.everhomes.rest.quality.QualityInspectionTaskStatus;
-import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.quality.QualityStandardsDTO;
-import com.everhomes.rest.quality.QualityTaskType;
-import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;import com.everhomes.search.EquipmentAccessoriesSearcher;
@@ -325,7 +100,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.everhomes.videoconf.ConfOrders;
 import sun.misc.BASE64Encoder;
 
 @Component
@@ -3900,16 +3674,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public ListEquipmentTasksResponse listInnormalTasks(ListInnormalTasksCommand cmd) {
+	public ListEquipmentTasksResponse listAbnormalTasks(ListAbnormalTasksCommand cmd) {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(cmd.getInnormalTaskIds());
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(cmd.getAbnormalTaskIds());
 		if(tasks != null && tasks.size() > 0) {
 			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
 				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
 				return dto;
 			}).collect(Collectors.toList());
-		}
 
+			response.setTasks(dtos);
+		}
 		return response;
 	}
 

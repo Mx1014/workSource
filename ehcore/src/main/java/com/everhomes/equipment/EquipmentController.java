@@ -1072,14 +1072,14 @@ public class EquipmentController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /equipment/listInnormalTasks</b>
+	 * <b>URL: /equipment/listAbnormalTasks</b>
 	 * <p>查看异常任务列表</p>
 	 */
-	@RequestMapping("listInnormalTasks")
+	@RequestMapping("listAbnormalTasks")
 	@RestReturn(value = ListEquipmentTasksResponse.class)
-	public RestResponse listInnormalTasks(ListInnormalTasksCommand cmd) {
+	public RestResponse listAbnormalTasks(ListAbnormalTasksCommand cmd) {
 
-		ListEquipmentTasksResponse tasks = equipmentService.listInnormalTasks(cmd);
+		ListEquipmentTasksResponse tasks = equipmentService.listAbnormalTasks(cmd);
 
 		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
