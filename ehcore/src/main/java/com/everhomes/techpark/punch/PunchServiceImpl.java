@@ -5226,9 +5226,10 @@ public class PunchServiceImpl implements PunchService {
 	public void deletePunchWiFi(PunchWiFiDTO cmd) { 
 		PunchWifi punchWifi = punchProvider.getPunchWifiById(cmd.getId());
 		punchProvider.deletePunchWifi(punchWifi);
-	}
+	} 
 	@Override
-	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd) { 
+	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd) {
+		PunchRuleOwnerMap map = getUsefulRuleMap(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
 		startCalendar.setTime(new Date(cmd.getQueryTime())); 
@@ -5243,10 +5244,10 @@ public class PunchServiceImpl implements PunchService {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(cmd.getOwnerType()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(cmd.getOwnerId()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(cmd.getTargetId()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(cmd.getTargetType()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(map.getOwnerType()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(map.getOwnerId()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(map.getTargetId()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(map.getTargetType()));
 				
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime().getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
@@ -5278,6 +5279,26 @@ public class PunchServiceImpl implements PunchService {
 		response.setTimeRules(listPunchTimeRuleList(cmd2).getTimeRules());
 		return response;
 	} 
+	private PunchRuleOwnerMap getUsefulRuleMap(String ownerType, Long ownerId, String targetType,
+			Long targetId) {
+		// TODO Auto-generated method stub
+		PunchRuleOwnerMap map = null;
+		if(targetType.equals(PunchOwnerType.User.getCode())){
+			//如果有个人规则就返回个人规则
+			map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, targetType, targetId);
+			if (null != map && map.getPunchRuleId() != null) 
+				return map;
+			//如果没有就按照部门来找规则
+			OrganizationDTO deptDTO = findUserDepartment(targetId, ownerId);
+			targetId=deptDTO.getId();
+		}
+		
+		int loopMax = 10;
+		Organization dept =  organizationProvider.findOrganizationById(targetId);
+		map = getPunchRule(null ,dept,loopMax);
+		return map;
+	}
+
 	@Override
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response) {
