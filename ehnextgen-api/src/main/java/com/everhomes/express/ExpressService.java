@@ -26,8 +26,11 @@ import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
 import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
+import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
 
 public interface ExpressService {
 
@@ -84,5 +87,14 @@ public interface ExpressService {
 
 
 	public void clearExpressQueryHistory();
+
+
+	public CommonOrderDTO payExpressOrder(PayExpressOrderCommand cmd);
+
+
+	public void paySuccess(PayCallbackCommand cmd);
+
+
+	public void payFail(PayCallbackCommand cmd);
 
 }

@@ -33,8 +33,10 @@ import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
 import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
+import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
 
 @RestController
 @RequestMapping("/express")
@@ -125,9 +127,19 @@ public class ExpressController extends ControllerBase {
 		expressService.updatePaySummary(cmd);
 		return new RestResponse();
 	}
+	
+	/**
+	 * <p>9.立即支付</p>
+	 * <b>URL: /express/payExpressOrder</b>
+	 */
+	@RequestMapping("payExpressOrder")
+	@RestReturn(CommonOrderDTO.class)
+	public RestResponse payExpressOrder(PayExpressOrderCommand cmd){
+		return new RestResponse(expressService.payExpressOrder(cmd));
+	}
 
 	/**
-	 * <p>9.出单</p>
+	 * <p>10.出单</p>
 	 * <b>URL: /express/printExpressOrder</b>
 	 */
 	@RequestMapping("printExpressOrder")
@@ -138,7 +150,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>10.添加地址</p>
+	 * <p>11.添加地址</p>
 	 * <b>URL: /express/createOrUpdateExpressAddress</b>
 	 */
 	@RequestMapping("createOrUpdateExpressAddress")
@@ -148,7 +160,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>11.删除地址</p>
+	 * <p>12.删除地址</p>
 	 * <b>URL: /express/deleteExpressAddress</b>
 	 */
 	@RequestMapping("deleteExpressAddress")
@@ -159,7 +171,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>12.地址列表</p>
+	 * <p>13.地址列表</p>
 	 * <b>URL: /express/listExpressAddress</b>
 	 */
 	@RequestMapping("listExpressAddress")
@@ -169,7 +181,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>13.寄快递</p>
+	 * <p>14.寄快递</p>
 	 * <b>URL: /express/createExpressOrder</b>
 	 */
 	@RequestMapping("createExpressOrder")
@@ -179,7 +191,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>14.快递订单列表（个人）</p>
+	 * <p>15.快递订单列表（个人）</p>
 	 * <b>URL: /express/listPersonalExpressOrder</b>
 	 */
 	@RequestMapping("listPersonalExpressOrder")
@@ -189,7 +201,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>15.取消订单</p>
+	 * <p>16.取消订单</p>
 	 * <b>URL: /express/cancelExpressOrder</b>
 	 */
 	@RequestMapping("cancelExpressOrder")
@@ -200,7 +212,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>16.查看物流详情</p>
+	 * <p>17.查看物流详情</p>
 	 * <b>URL: /express/getExpressLogisticsDetail</b>
 	 */
 	@RequestMapping("getExpressLogisticsDetail")
@@ -210,7 +222,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>17.查询快递历史列表</p>
+	 * <p>18.查询快递历史列表</p>
 	 * <b>URL: /express/listExpressQueryHistory</b>
 	 */
 	@RequestMapping("listExpressQueryHistory")
@@ -220,7 +232,7 @@ public class ExpressController extends ControllerBase {
 	}
 
 	/**
-	 * <p>18.清空快递查询历史</p>
+	 * <p>19.清空快递查询历史</p>
 	 * <b>URL: /express/clearExpressQueryHistory</b>
 	 */
 	@RequestMapping("clearExpressQueryHistory")

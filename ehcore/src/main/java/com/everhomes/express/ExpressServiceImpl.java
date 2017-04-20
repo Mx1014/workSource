@@ -16,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -59,14 +60,20 @@ import com.everhomes.rest.express.ListPersonalExpressOrderCommand;
 import com.everhomes.rest.express.ListPersonalExpressOrderResponse;
 import com.everhomes.rest.express.ListServiceAddressCommand;
 import com.everhomes.rest.express.ListServiceAddressResponse;
+import com.everhomes.rest.express.PayExpressOrderCommand;
 import com.everhomes.rest.express.PrintExpressOrderCommand;
 import com.everhomes.rest.express.UpdatePaySummaryCommand;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class ExpressServiceImpl implements ExpressService {
@@ -102,6 +109,12 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
 	private ExpressQueryHistoryProvider expressQueryHistoryProvider;
+	
+	@Autowired
+	private ExpressOrderLogProvider expressOrderLogProvider;
+	
+	@Autowired
+	private OrderUtil orderUtil;
 	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
@@ -279,6 +292,7 @@ public class ExpressServiceImpl implements ExpressService {
 		return expressServiceAddress == null ? null : expressServiceAddress.getName();
 	}
 
+
 	@Override
 	public void updatePaySummary(UpdatePaySummaryCommand cmd) {
 		if (cmd.getId() == null) {
@@ -294,12 +308,83 @@ public class ExpressServiceImpl implements ExpressService {
 			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
 				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
 			}
+			ExpressActionEnum action = null;
+			if (expressOrder.getPaySummary() == null) {
+				action = ExpressActionEnum.CONFIRM_MONEY;
+			}else {
+				action = ExpressActionEnum.UPDATE_MONEY;
+			}
 			expressOrder.setPaySummary(cmd.getPaySummary());
 			expressOrderProvider.updateExpressOrder(expressOrder);
+			createExpressOrderLog(owner, action, expressOrder, expressOrder.getPaySummary().toString());
 			return null;
 		});
 	}
 
+	@Override
+	public CommonOrderDTO payExpressOrder(PayExpressOrderCommand cmd) {
+		if (cmd.getId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOrder expressOrder= expressOrderProvider.findExpressOrderById(cmd.getId());
+		if (expressOrder == null || expressOrder.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressOrder.getOwnerType().equals(owner.getOwnerType())
+				|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue() || expressOrder.getCreatorUid().longValue() != owner.getUserId().longValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
+		if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY) {
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+		}
+		if (expressOrder.getPaySummary() == null) {
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+		}
+		
+		createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, null);
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(expressOrder.getSendName());
+		orderCmd.setOrderNo(expressOrder.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		orderCmd.setSubject("快递订单简要描述");
+		orderCmd.setTotalFee(expressOrder.getPaySummary());
+		CommonOrderDTO dto = null;
+		try {
+			dto = orderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+	}
+	
+	@Override
+	public void paySuccess(PayCallbackCommand cmd) {
+		Long orderId = Long.valueOf(cmd.getOrderNo());
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
+			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
+			if (expressOrder == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order");
+			}
+			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
+			expressOrderProvider.updateExpressOrder(expressOrder);
+			ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
+			createExpressOrderLog(owner, ExpressActionEnum.PAID, expressOrder, "pay success: " + StringHelper.toJsonString(cmd));
+			return null;
+		});
+	}
+
+	@Override
+	public void payFail(PayCallbackCommand cmd) {
+		Long orderId = Long.valueOf(cmd.getOrderNo());
+		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
+		if (expressOrder == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order");
+		}
+		ExpressOwner owner = new ExpressOwner(expressOrder.getNamespaceId(), ExpressOwnerType.fromCode(expressOrder.getOwnerType()), expressOrder.getOwnerId(), expressOrder.getCreatorUid());
+		createExpressOrderLog(owner, ExpressActionEnum.PAYING, expressOrder, "pay fail: " + StringHelper.toJsonString(cmd));
+	}
+	
 	@Override
 	public void printExpressOrder(PrintExpressOrderCommand cmd) {
 		if (cmd.getId() == null) {
@@ -327,6 +412,7 @@ public class ExpressServiceImpl implements ExpressService {
 				expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
 				expressOrderProvider.updateExpressOrder(expressOrder);
 			}
+			createExpressOrderLog(owner, ExpressActionEnum.PRINT, expressOrder, null);
 			return null;
 		});
 	}
@@ -474,11 +560,19 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = createExpressOrder(owner, cmd);
+		createExpressOrderLog(owner, ExpressActionEnum.CREATE, expressOrder, null);
 		return new CreateExpressOrderResponse(convertToExpressOrderDTOForDetail(expressOrder));
 	}
 
-	private void createExpressOrderLog(ExpressOwner owner, ExpressActionEnum action, ExpressOrder order) {
-		
+	private void createExpressOrderLog(ExpressOwner owner, ExpressActionEnum action, ExpressOrder expressOrder, String remark) {
+		ExpressOrderLog expressOrderLog = new ExpressOrderLog();
+		expressOrderLog.setNamespaceId(owner.getNamespaceId());
+		expressOrderLog.setOwnerType(owner.getOwnerType().getCode());
+		expressOrderLog.setOwnerId(owner.getOwnerId());
+		expressOrderLog.setOrderId(expressOrder.getId());
+		expressOrderLog.setAction(action.getCode());
+		expressOrderLog.setRemark(remark);
+		expressOrderLogProvider.createExpressOrderLog(expressOrderLog);
 	}
 	
 	private ExpressOrder createExpressOrder(ExpressOwner owner, CreateExpressOrderCommand cmd) {
@@ -580,6 +674,7 @@ public class ExpressServiceImpl implements ExpressService {
 			}
 			expressOrder.setStatus(ExpressOrderStatus.CANCELLED.getCode());
 			expressOrderProvider.updateExpressOrder(expressOrder);
+			createExpressOrderLog(owner, ExpressActionEnum.CANCEL, expressOrder, null);
 			return null;
 		});
 	}
@@ -615,7 +710,6 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 	}
 	
-
 	@Override
 	public ListExpressQueryHistoryResponse listExpressQueryHistory() {
 		User user = UserContext.current().getUser();

@@ -9,12 +9,13 @@ package com.everhomes.rest.express;
  * <li>CONFIRM_MONEY: 确定金额</li>
  * <li>UPDATE_MONEY: 修改金额</li>
  * <li>PRINT: 打印订单</li>
- * <li>PAY: 支付订单</li>
+ * <li>PAYING: 支付中</li>
+ * <li>PAID: 支付完成</li>
  * </ul>
  */
 public enum ExpressActionEnum {
 	CREATE("create"), CANCEL("cancel"), CONFIRM_MONEY("confirm_money"), 
-		UPDATE_MONEY("update_money"), PRINT("print"), PAY("pay"); 
+		UPDATE_MONEY("update_money"), PRINT("print"), PAYING("paying"), PAID("paid"); 
 
 	private String code;
 
