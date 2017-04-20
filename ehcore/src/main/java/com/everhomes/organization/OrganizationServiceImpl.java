@@ -96,6 +96,7 @@ import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -5553,9 +5554,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterpriseCommand.setContactor(data.getAdminName());
 			enterpriseCommand.setNamespaceId(namespaceId);
 			enterpriseCommand.setCommunityId(cmd.getCommunityId());
-			enterpriseCommand.setCheckinDate(data.getCheckinDate());
+			if(!StringUtils.isEmpty(data.getCheckinDate())){
+				data.setCheckinDate(data.getCheckinDate().replaceAll("/", "-"));
+				if(data.getCheckinDate().indexOf("-") > 0 && data.getCheckinDate().length() == 10){
+					data.setCheckinDate(data.getCheckinDate() + "00:00:00");
+				}
+				enterpriseCommand.setCheckinDate(data.getCheckinDate());
+			}
 			enterpriseCommand.setEmailDomain(data.getEmail());
-			if(null != data.getNumber()){
+			if(!StringUtils.isEmpty(data.getNumber())){
 				enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
 			}
 
