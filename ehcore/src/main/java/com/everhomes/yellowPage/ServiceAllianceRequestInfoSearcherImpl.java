@@ -1,17 +1,28 @@
 package com.everhomes.yellowPage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -31,11 +42,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.user.GetRequestInfoCommand;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.wifi.WifiOwnerType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
@@ -55,6 +73,9 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+	@Autowired
+	private UserActivityService userActivityService;
 	
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -347,6 +368,107 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         
 		return response;
 	}
+	
+	@Override
+	public void exportRequestInfo(SearchRequestInfoCommand cmd, HttpServletResponse httpResponse) {
+		SearchRequestInfoResponse response = searchRequestInfo(cmd);
+		List<RequestInfoDTO> list = response.getDtos();
+		GetRequestInfoCommand command = new GetRequestInfoCommand();
+		//获取模板名称到map中
+		List<RequestTemplateDTO> templateList =  userActivityService.getCustomRequestTemplateByNamespace();
+		Map<String, String> templateMap = new HashMap<String,String>();
+		for (RequestTemplateDTO requestTemplate : templateList) {
+			templateMap.put(requestTemplate.getTemplateType(), requestTemplate.getName());
+		}
+		
+		//key = templateName,Value = [requests List,templateInfos List]
+		//map存 （模板名称，[模板下申请集合，模板下附加属性集合]）
+		Map<String,List[]> requestsInfoMap = new HashMap<String, List[]>();
+		for (RequestInfoDTO requestInfo : list) {
+			command.setId(requestInfo.getId());
+			command.setTemplateType(requestInfo.getTemplateType());
+			GetRequestInfoResponse getRequestInfoResponse = userActivityService.getCustomRequestInfo(command);
+			List[] lists = requestsInfoMap.get(requestInfo.getTemplateType());
+			if(lists==null){
+				lists = new List[2];
+				lists[0] = new ArrayList<RequestInfoDTO>();
+				lists[1] = new ArrayList<GetRequestInfoResponse>();
+			}
+			lists[0].add(requestInfo);
+			lists[1].add(getRequestInfoResponse);
+		}
+		
+		XSSFWorkbook wb = new XSSFWorkbook();
+		for (Map.Entry<String, List[]> entry : requestsInfoMap.entrySet()) {
+			createXSSFWorkbook(wb, templateMap.get(entry.getKey()), entry.getValue());
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+		    DownloadUtil.download(out, httpResponse);
+		} catch (Exception e) {
+			LOGGER.error("export error, e = {}", e);
+		} finally{
+			try {
+				wb.close();
+				out.close();
+			} catch (IOException e) {
+				LOGGER.error("close error", e);
+			}
+		}
+	}
+	
+    private void createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos){
+		XSSFSheet sheet = wb.createSheet(templateName);
+		XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+
+        row1.createCell(0).setCellValue("序号");
+        row1.createCell(1).setCellValue("用户姓名");
+        row1.createCell(2).setCellValue("手机号码");
+        row1.createCell(3).setCellValue("企业");
+        row1.createCell(4).setCellValue("服务机构");
+        row1.createCell(5).setCellValue("提交时间");
+        
+        if(requestInfos[1].size()>0){
+        	GetRequestInfoResponse response = (GetRequestInfoResponse)requestInfos[1].get(0);
+        	for (int i = 0; i < response.getDtos().size(); i++) {
+        		 row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+        	}
+        	
+        	for (int i = 0; i < requestInfos[0].size(); i++) {
+        		RequestInfoDTO requestInfoDTO = (RequestInfoDTO)requestInfos[0].get(i);
+        		GetRequestInfoResponse getRequestInfoResponse = (GetRequestInfoResponse)requestInfos[1].get(i);
+        		XSSFRow row = sheet.createRow(rowNum ++);
+        		row.setRowStyle(style);
+        		row.createCell(0).setCellValue(i+1);
+        		row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
+        		row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
+        		row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
+        		row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
+        		row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+        		
+        		response = (GetRequestInfoResponse)requestInfos[1].get(i);
+        		for (int j = 0; j < response.getDtos().size(); j++) {
+        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
+        		}
+			}
+        }
+    }
 
     @Override
     public SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd) {
