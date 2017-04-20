@@ -34,6 +34,8 @@ import com.everhomes.util.StringHelper;
  * <li>scaleType: 图标是否需要裁剪0-不需要，1-需要</li>
  * <li>deleteFlag: 是否可删除,0-不可删除,1-可删除,详情{@link com.everhomes.rest.launchpad.DeleteFlagType}</li>
  * <li>editFlag: 是否可编辑,0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
+ * <li>aliasIconUri: 图标别名uri。现在用于搜索结果页面，原有iconUri有圆形、方形等，展现风格不一致。应对这样的场景增加aliasIconUri，存储圆形默认图片。搜索功能模块当它不为空时用它替换iconUri， 返回客户端的是统一风格的iconUri。 add by yanjun 20170420</li>
+ * <li>aliasIconUrl:  图标别名url。逻辑同aliasIconUri</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -64,6 +66,8 @@ public class LaunchPadItemDTO {
     private Byte deleteFlag;
     private Byte editFlag;
     private Integer moreOrder;
+    private String  aliasIconUri;
+    private String  aliasIconUrl;
 
     public String getSelectedIconUri() {
 		return selectedIconUri;
@@ -273,14 +277,28 @@ public class LaunchPadItemDTO {
         this.moreOrder = moreOrder;
     }
 
-    public Byte getEditFlag() {
+	public Byte getEditFlag() {
 		return editFlag;
 	}
 
 	public void setEditFlag(Byte editFlag) {
 		this.editFlag = editFlag;
 	}
+	public String getAliasIconUri() {
+		return aliasIconUri;
+	}
 
+	public void setAliasIconUri(String aliasIconUri) {
+		this.aliasIconUri = aliasIconUri;
+	}
+
+	public String getAliasIconUrl() {
+		return aliasIconUrl;
+	}
+
+	public void setAliasIconUrl(String aliasIconUrl) {
+		this.aliasIconUrl = aliasIconUrl;
+	}
 	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this,new String[]{"id","scopeType","scopeId","applyPolicy"} );

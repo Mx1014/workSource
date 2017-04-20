@@ -2450,8 +2450,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		
 		List<LaunchPadItemDTO> dtos = new ArrayList<LaunchPadItemDTO>();
 		launchPadItems.forEach(r ->{
+			//如果item有别名AliasIconUri，则使用别名替换IconUri，得到统一的圆形风格图标
 			LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+			if(itemDTO.getAliasIconUri() != null && !itemDTO.getAliasIconUri().equals("")){
+				itemDTO.setIconUri(itemDTO.getAliasIconUri());
+			}
 			itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+			itemDTO.setAliasIconUrl(parserUri(itemDTO.getAliasIconUri(),EntityType.USER.getCode(),userId));
 			dtos.add(itemDTO);
 		});
 		response.setLaunchPadItemDtos(dtos);
