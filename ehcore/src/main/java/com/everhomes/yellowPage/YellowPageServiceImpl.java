@@ -640,15 +640,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		long startTime = System.currentTimeMillis();
 
-		if(null != cmd.getCommunityId()){
+		if(null != cmd.getCommunityId()) {
 			cmd.setOwnerId(cmd.getCommunityId());
-		}else if(null != cmd.getOwnerId()){
-			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
-			if(null != communities && 0 != communities.size()){
-				cmd.setOwnerId(communities.get(0).getId());
-				cmd.setOwnerType("community");
-			}
+			cmd.setOwnerType("community");
 		}
+//		else if(null != cmd.getOwnerId()){
+//
+////			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
+////			if(null != communities && 0 != communities.size()){
+////				cmd.setOwnerId(communities.get(0).getId());
+////				cmd.setOwnerType("community");
+////			}
+//		}
 
 		long time2 = System.currentTimeMillis();
 		LOGGER.info("get community Id time: {}", time2 - startTime);
