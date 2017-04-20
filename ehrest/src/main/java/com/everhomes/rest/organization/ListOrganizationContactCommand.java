@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态:1-待认证 3-已同意 0-已拒绝</li>
  * <li>pageAnchor: 页码</li>
  * <li>pageSize: 每页大小</li>
+ * <li>targetType: 是否注册{@link com.everhomes.rest.organization.OrganizationMemberTargetType} </li>
+ * <li>filterScopeType: 过滤范围类型{@link com.everhomes.rest.organization.FilterOrganizationContactScopeType}</li>
  * </ul>
  */
 public class ListOrganizationContactCommand {
@@ -26,6 +28,10 @@ public class ListOrganizationContactCommand {
 	private String keywords;
 
 	private Byte visibleFlag;
+
+	private String targetType;
+
+	private String filterScopeType;
 	
 	public ListOrganizationContactCommand() {
     }
