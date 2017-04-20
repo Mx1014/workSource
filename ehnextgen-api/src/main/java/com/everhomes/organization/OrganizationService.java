@@ -315,7 +315,7 @@ public interface OrganizationService {
 	 * @param organizationId
      * @return
      */
-	OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId);
+	OrganizationDTO getMemberTopDepartment(List<String> groupTypes, String token, Long organizationId);
 	
 	/**
 	 * 获取机构下面所有人员

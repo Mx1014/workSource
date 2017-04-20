@@ -3819,7 +3819,10 @@ public class PunchServiceImpl implements PunchService {
 			LOGGER.debug("userIdentifier is null...userId = " +userId);
 			return null;
 		}else{
-			return this.organizationService.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT,
+			List<String> groupTypes = new ArrayList<String>();
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			return this.organizationService.getMemberTopDepartment(groupTypes,
 					userIdentifier.getIdentifierToken(), organizationId);
 			}
 		 

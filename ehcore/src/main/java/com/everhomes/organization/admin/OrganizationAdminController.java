@@ -1126,9 +1126,10 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse getMemberTopDepartment(@Valid GetMemberTopDepartmentCommand cmd) {
 
-        OrganizationGroupType groupType = OrganizationGroupType.fromCode(cmd.getGroupType());
-
-        RestResponse response = new RestResponse(organizationService.getMemberTopDepartment(groupType, cmd.getContactToken(), cmd.getOrganizationId()));
+//        OrganizationGroupType groupType = OrganizationGroupType.fromCode(cmd.getGroupType());
+        List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(cmd.getGroupType()); 
+        RestResponse response = new RestResponse(organizationService.getMemberTopDepartment(groupTypes, cmd.getContactToken(), cmd.getOrganizationId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
