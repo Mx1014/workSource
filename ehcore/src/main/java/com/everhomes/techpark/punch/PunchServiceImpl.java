@@ -2161,7 +2161,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		checkCompanyIdIsNull(cmd.getEnterpirseId());
 
-		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
+		cmd.setEnterpirseId(getTopEnterpriseId(cmd.getEnterpirseId()));
 		Calendar logDay = Calendar.getInstance();
 
 		try {
