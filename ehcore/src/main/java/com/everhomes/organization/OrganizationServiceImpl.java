@@ -871,7 +871,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setAvatar(cmd.getAvatar());
 			enterprise.setCreateTime(organization.getCreateTime());
 			if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-				enterprise.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+				java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+				if(null != checkinDate){
+					enterprise.setCheckinDate(new Timestamp(checkinDate.getTime()));
+				}
 			}
 			enterprise.setContact(cmd.getContactsPhone());
 			enterprise.setDisplayName(cmd.getDisplayName());
@@ -5554,13 +5557,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterpriseCommand.setContactor(data.getAdminName());
 			enterpriseCommand.setNamespaceId(namespaceId);
 			enterpriseCommand.setCommunityId(cmd.getCommunityId());
-			if(!StringUtils.isEmpty(data.getCheckinDate())){
-				data.setCheckinDate(data.getCheckinDate().replaceAll("/", "-"));
-				if(data.getCheckinDate().indexOf("-") > 0 && data.getCheckinDate().length() == 10){
-					data.setCheckinDate(data.getCheckinDate() + "00:00:00");
-				}
-				enterpriseCommand.setCheckinDate(data.getCheckinDate());
-			}
 			enterpriseCommand.setEmailDomain(data.getEmail());
 			if(!StringUtils.isEmpty(data.getNumber())){
 				enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
