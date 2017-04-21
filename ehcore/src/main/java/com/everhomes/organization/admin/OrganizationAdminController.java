@@ -876,7 +876,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入企业信息</p>
      */
     @RequestMapping("importEnterpriseData")
-    @RestReturn(value = ImportDataResponse.class)
+    @RestReturn(value = ImportFileResponse.class)
     public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
@@ -897,12 +897,11 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入机构成员信息</p>
      */
     @RequestMapping("importOrganizationPersonnelData")
-    @RestReturn(value = ImportOrganizationPersonnelDataResponse.class)
+    @RestReturn(value = ImportFileResponse.class)
     public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         if (null == files || null == files[0]) {
             LOGGER.error("files is null, userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,

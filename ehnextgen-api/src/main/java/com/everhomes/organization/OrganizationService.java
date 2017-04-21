@@ -206,7 +206,7 @@ public interface OrganizationService {
 	List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd);
 	ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
 																	 Long userId, ImportEnterpriseDataCommand cmd);
-	ImportOrganizationPersonnelDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+	ImportFileResponse<ImportOrganizationContactDataDTO> importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
