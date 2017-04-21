@@ -393,6 +393,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				lists = new List[2];
 				lists[0] = new ArrayList<RequestInfoDTO>();
 				lists[1] = new ArrayList<GetRequestInfoResponse>();
+				requestsInfoMap.put(requestInfo.getTemplateType(), lists);
 			}
 			lists[0].add(requestInfo);
 			lists[1].add(getRequestInfoResponse);
