@@ -1,10 +1,9 @@
-package com.everhomes.rest.user.admin;
-
-import java.util.List;
+package com.everhomes.rest.common;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.organization.ImportEnterpriseDataDTO;
 import com.everhomes.rest.organization.ImportFileResultLog;
+
+import java.util.List;
 
 
 /**
@@ -15,14 +14,14 @@ import com.everhomes.rest.organization.ImportFileResultLog;
  * </ul>
  */
 
-public class ImportDataResponse {
+public class ImportFileResponse<T> {
 	
 	private Long totalCount;
 		
 	private Long failCount;
 	
-	@ItemType(String.class)
-	private List<String> logs;
+	@ItemType(ImportFileResultLog.class)
+	private List<ImportFileResultLog<T>> logs;
 
 	public Long getTotalCount() {
 		return totalCount;
@@ -40,11 +39,11 @@ public class ImportDataResponse {
 		this.failCount = failCount;
 	}
 
-	public List<String> getLogs() {
+	public List<ImportFileResultLog<T>> getLogs() {
 		return logs;
 	}
 
-	public void setLogs(List<String> logs) {
+	public void setLogs(List<ImportFileResultLog<T>> logs) {
 		this.logs = logs;
 	}
 }

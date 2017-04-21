@@ -300,4 +300,6 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
+
+	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 }

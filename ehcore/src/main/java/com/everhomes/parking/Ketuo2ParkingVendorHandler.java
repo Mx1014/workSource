@@ -683,7 +683,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			httpPost.addHeader("pwd", pwd);
 			response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
-			
+
+			LOGGER.info("Data from ketuo, status={}", response.getStatusLine().getStatusCode());
+
 			if (entity != null) {
 				instream = entity.getContent();
 				BufferedReader reader = null;
@@ -700,15 +702,19 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     				"Parking request error.");
 		}finally {
             try {
-            	instream.close();
-				response.close();
+            	if (null != instream) {
+					instream.close();
+				}
+				if (null != response) {
+					response.close();
+				}
 			} catch (IOException e) {
 				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
 			}
         }
 		String json = result.toString();
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from ketuo, json={}", json);
+
+		LOGGER.info("Data from ketuo, json={}", json);
 		
 		return json;
 	}

@@ -27,4 +27,9 @@ update eh_launch_pad_items set action_data = '{"url":"http://core.zuolin.com/pro
 -- 更新服务联盟模版 add by sw 20170419
 UPDATE `eh_locale_templates` SET `text`='您收到一条${categoryName}:${serviceAllianceName}的申请 \n 提交者信息：\n 预订人：${creatorName} \n 手机号：${creatorMobile} \n 公司名称：${creatorOrganization} \n \n 提交的信息：\n ${note} \n 您可以登录管理后台查看详情' WHERE  `scope`='serviceAlliance.request.notification' and `code`='1';
 
+-- 停车 add by sw 20170421
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('parking', '10019', 'zh_CN', '版本过低，请更新App至最新版本。');
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.techpark.url', 'http://112.74.77.141:8086/AppApi/', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.techpark.companyId', '175c8e26-ea36-4993-b113-a7320114e370', NULL, '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('parking.techpark.parkingId', '6e517beb-c295-4837-99ed-a73201157e2e', NULL, '0', NULL);
 
