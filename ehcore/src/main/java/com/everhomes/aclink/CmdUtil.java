@@ -332,6 +332,23 @@ public class CmdUtil {
         }
         return null;
     }
+    
+    public static byte[] setServerKeyCmd(byte oldVer, byte[] oldServerKey, byte[] newServerKey) {
+        if (null != oldServerKey && null != newServerKey) {
+            byte cmd = 0x3;
+            try {
+                byte[] serverkeyEncryptPaddingResult = AESUtil.encrypt(newServerKey, oldServerKey);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = oldVer;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            } catch (Exception e) {
+                LOGGER.error("setServerKeyCmd()..." + e.toString());
+            }
+        }
+        return null;
+    }
 
     public static short getCheckSum(byte[] data) {
         short sum = 0;

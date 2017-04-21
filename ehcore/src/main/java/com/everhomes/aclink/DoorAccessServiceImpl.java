@@ -3285,6 +3285,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd) {
     	DoorAccess door = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+    	if(null == door) {
+    		return null;
+    	}
     	AclinkGetServerKeyResponse resp = ConvertHelper.convert(door, AclinkGetServerKeyResponse.class);
     	DoorAccessType accessType = DoorAccessType.fromCode(door.getDoorType());
     	if(accessType == DoorAccessType.ACLINK_ZL_GROUP) {

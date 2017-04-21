@@ -147,4 +147,10 @@ public class AclinkUtils {
         
         return false;
     }
+    
+    public static String packSetServerKeyCmd(Byte ver, String oldKey, String newKey) {
+    	byte[] key0 = Base64.decodeBase64(oldKey);
+    	byte[] key1 = Base64.decodeBase64(newKey);
+    	return Base64.encodeBase64String(CmdUtil.setServerKeyCmd(ver, key0, key1));
+    }
 }
