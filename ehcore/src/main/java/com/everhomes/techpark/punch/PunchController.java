@@ -96,7 +96,7 @@ public class PunchController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/punch/checkPunchAdmin</b>
 	 * <p>
-	 * 查询某人在本月/打卡第一天 到昨天是否有异常
+	 * 查询当前用户是否为该公司考勤的管理员(目前是企业管理员)
 	 * </p>
 	 */
 	@RequestMapping("checkPunchAdmin")
