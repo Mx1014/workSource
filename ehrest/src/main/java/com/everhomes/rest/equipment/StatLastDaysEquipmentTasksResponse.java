@@ -5,6 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>complete: 完成</li>
+ *     <li>completeMaintance: 整改完成</li>
+ *     <li>completeInspection: 巡检完成</li>
  *     <li>reviewQualified: 审核通过</li>
  *     <li>reviewUnqualified: 审核不通过</li>
  * </ul>
@@ -13,6 +15,10 @@ import com.everhomes.util.StringHelper;
 public class StatLastDaysEquipmentTasksResponse {
 
     private Long complete;
+
+    private Long completeMaintance;
+
+    private Long completeInspection;
 
     private Long reviewQualified;
 
@@ -40,6 +46,22 @@ public class StatLastDaysEquipmentTasksResponse {
 
     public void setReviewUnqualified(Long reviewUnqualified) {
         this.reviewUnqualified = reviewUnqualified;
+    }
+
+    public Long getCompleteInspection() {
+        return completeInspection;
+    }
+
+    public void setCompleteInspection(Long completeInspection) {
+        this.completeInspection = completeInspection;
+    }
+
+    public Long getCompleteMaintance() {
+        return completeMaintance;
+    }
+
+    public void setCompleteMaintance(Long completeMaintance) {
+        this.completeMaintance = completeMaintance;
     }
 
     @Override

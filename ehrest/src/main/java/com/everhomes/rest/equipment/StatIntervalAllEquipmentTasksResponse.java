@@ -5,10 +5,10 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>totalTasks: 任务总数</li>
- *     <li>waitingForExecutingTasks: 待执行任务</li>
- *     <li>inMaintanceTasks: 整改中任务</li>
- *     <li>completeTasks: 已执行完成任务</li>
- *     <li>delayTasks: 已延误任务</li>
+ *     <li>waitingForExecuting: 待执行任务</li>
+ *     <li>inMaintance: 整改中任务</li>
+ *     <li>complete: 已执行完成任务</li>
+ *     <li>delay: 已延误任务</li>
  *     <li>reviewTasks: 审核任务总数</li>
  *     <li>unReviewedTasks: 待审核任务</li>
  *     <li>reviewedTasks: 已审核任务</li>
@@ -22,13 +22,13 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     private Long totalTasks;
 
-    private Long waitingForExecutingTasks;
+    private Long waitingForExecuting;
 
-    private Long inMaintanceTasks;
+    private Long inMaintance;
 
-    private Long completeTasks;
+    private Long complete;
 
-    private Long delayTasks;
+    private Long delay;
 
     private Long reviewTasks;
 
@@ -38,32 +38,32 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     private Long reviewDelayTasks;
 
-    private Long reviewQualifiedTasks;
+    private Long reviewQualified;
 
-    private Long reviewUnqualifiedTasks;
+    private Long reviewUnqualified;
 
-    public Long getCompleteTasks() {
-        return completeTasks;
+    public Long getComplete() {
+        return complete;
     }
 
-    public void setCompleteTasks(Long completeTasks) {
-        this.completeTasks = completeTasks;
+    public void setComplete(Long complete) {
+        this.complete = complete;
     }
 
-    public Long getDelayTasks() {
-        return delayTasks;
+    public Long getDelay() {
+        return delay;
     }
 
-    public void setDelayTasks(Long delayTasks) {
-        this.delayTasks = delayTasks;
+    public void setDelay(Long delay) {
+        this.delay = delay;
     }
 
-    public Long getInMaintanceTasks() {
-        return inMaintanceTasks;
+    public Long getInMaintance() {
+        return inMaintance;
     }
 
-    public void setInMaintanceTasks(Long inMaintanceTasks) {
-        this.inMaintanceTasks = inMaintanceTasks;
+    public void setInMaintance(Long inMaintance) {
+        this.inMaintance = inMaintance;
     }
 
     public Long getReviewDelayTasks() {
@@ -82,12 +82,12 @@ public class StatIntervalAllEquipmentTasksResponse {
         this.reviewedTasks = reviewedTasks;
     }
 
-    public Long getReviewQualifiedTasks() {
-        return reviewQualifiedTasks;
+    public Long getReviewQualified() {
+        return reviewQualified;
     }
 
-    public void setReviewQualifiedTasks(Long reviewQualifiedTasks) {
-        this.reviewQualifiedTasks = reviewQualifiedTasks;
+    public void setReviewQualified(Long reviewQualified) {
+        this.reviewQualified = reviewQualified;
     }
 
     public Long getReviewTasks() {
@@ -98,12 +98,12 @@ public class StatIntervalAllEquipmentTasksResponse {
         this.reviewTasks = reviewTasks;
     }
 
-    public Long getReviewUnqualifiedTasks() {
-        return reviewUnqualifiedTasks;
+    public Long getReviewUnqualified() {
+        return reviewUnqualified;
     }
 
-    public void setReviewUnqualifiedTasks(Long reviewUnqualifiedTasks) {
-        this.reviewUnqualifiedTasks = reviewUnqualifiedTasks;
+    public void setReviewUnqualified(Long reviewUnqualified) {
+        this.reviewUnqualified = reviewUnqualified;
     }
 
     public Long getTotalTasks() {
@@ -122,12 +122,12 @@ public class StatIntervalAllEquipmentTasksResponse {
         this.unReviewedTasks = unReviewedTasks;
     }
 
-    public Long getWaitingForExecutingTasks() {
-        return waitingForExecutingTasks;
+    public Long getWaitingForExecuting() {
+        return waitingForExecuting;
     }
 
-    public void setWaitingForExecutingTasks(Long waitingForExecutingTasks) {
-        this.waitingForExecutingTasks = waitingForExecutingTasks;
+    public void setWaitingForExecuting(Long waitingForExecuting) {
+        this.waitingForExecuting = waitingForExecuting;
     }
 
     @Override

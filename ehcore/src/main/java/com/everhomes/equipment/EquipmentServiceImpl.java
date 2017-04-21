@@ -3652,7 +3652,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		docUtil.closeHttpConn();
 	}
 
-	private Timestamp getDayBegin(Calendar cal) {
+	private Timestamp getDayBegin(Calendar cal, int period) {
+		cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MINUTE, 0);
@@ -3660,7 +3661,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return new Timestamp(cal.getTimeInMillis());
 	}
 
-	private Timestamp getDayEnd(Calendar cal) {
+	private Timestamp getDayEnd(Calendar cal, int period) {
+		cal.add(Calendar.DATE, period);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.SECOND, 59);
 		cal.set(Calendar.MINUTE, 59);
@@ -3672,21 +3674,58 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		StatTodayEquipmentTasksResponse response = equipmentProvider.statTodayEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
-				cmd.getInspectionCategoryId(), getDayBegin(cal), getDayEnd(cal));
-//		reviewQualified: 审核通过
-//		reviewUnqualified: 审核不通过
+
+		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		return response;
 	}
 
 	@Override
 	public StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
-		return null;
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+
+		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
+		response.setComplete(statTasks.getComplete());
+		response.setCompleteInspection(statTasks.getCompleteInspection());
+		response.setCompleteMaintance(statTasks.getCompleteMaintance());
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+
+		return response;
 	}
 
 	@Override
 	public StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
-		return null;
+		Timestamp begin = null;
+		Timestamp end = null;
+		if(cmd.getStartTime() != null) {
+			begin = new Timestamp(cmd.getStartTime());
+		}
+		if(cmd.getEndTime() != null) {
+			end = new Timestamp((cmd.getEndTime()));
+		}
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), begin, end);
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), begin, end);
+
+		StatIntervalAllEquipmentTasksResponse response = ConvertHelper.convert(statTasks, StatIntervalAllEquipmentTasksResponse.class);
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+		response.setReviewedTasks(response.getReviewUnqualified() + response.getReviewQualified());
+		response.setUnReviewedTasks(statTasks.getNeedMaintanceWaitingForApproval() + statTasks.getCompleteWaitingForApproval());
+		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
+		return response;
 	}
 
 	@Override

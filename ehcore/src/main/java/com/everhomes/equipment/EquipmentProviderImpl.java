@@ -1738,7 +1738,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
 		
-		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NONE.getCode()), EquipmentTaskStatus.NONE.getCode());
+		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
 		final Field<Byte> toExecuted = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()), EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		final Field<Byte> needMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()), EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
@@ -2175,27 +2175,45 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
+	public TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		StatTodayEquipmentTasksResponse resp = new StatTodayEquipmentTasksResponse();
+		TasksStatData resp = new TasksStatData();
 
+		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
+		final Field<Byte> reviewDelay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.REVIEW_DELAY.getCode()), ReviewResult.REVIEW_DELAY.getCode());
 		final Field<Byte> waitingForExecuting = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()), EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		final Field<Byte> needMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()), EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 		Condition completeMaintanceCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
-		completeMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.between(startTime, endTime));
+		if(startTime != null && endTime != null) {
+			completeMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.between(startTime, endTime));
+		} else if(startTime == null && endTime != null) {
+			completeMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.le(endTime));
+		} else if(startTime != null && endTime == null) {
+			completeMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.ge(startTime));
+		}
+
 		final Field<Byte> completeMaintance = DSL.decode().when(completeMaintanceCondition, EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
 		Condition completeInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(EquipmentTaskResult.COMPLETE_OK.getCode());
-		completeInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+		if(startTime != null && endTime != null) {
+			completeInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
+		} else if(startTime == null && endTime != null) {
+			completeInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.le(endTime));
+		} else if(startTime != null && endTime == null) {
+			completeInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startTime));
+		}
+
 		final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskResult.COMPLETE_OK.getCode());
 		Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode(),EquipmentTaskResult.COMPLETE_OK.getCode());
 		completeWaitingForApprovalCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 		final Field<Byte> completeWaitingForApproval = DSL.decode().when(completeWaitingForApprovalCondition, ReviewResult.NONE.getCode());
 
-		final Field<?>[] fields = {DSL.count(waitingForExecuting).as("waitingForExecuting"), DSL.count(inMaintance).as("inMaintance"),
-				DSL.count(needMaintance).as("needMaintance"), DSL.count(completeWaitingForApproval).as("completeWaitingForApproval"),
-				DSL.count(completeInspection).as("completeInspection"), DSL.count(completeMaintance).as("completeMaintance")};
+		final Field<?>[] fields = {DSL.count().as("total"),DSL.count(waitingForExecuting).as("waitingForExecuting"),
+				DSL.count(inMaintance).as("inMaintance"), DSL.count(needMaintance).as("needMaintance"),
+				DSL.count(completeInspection).as("completeInspection"), DSL.count(completeMaintance).as("completeMaintance"),
+				DSL.count(completeWaitingForApproval).as("completeWaitingForApproval"), DSL.count(delay).as("delay"),
+				DSL.count(reviewDelay).as("reviewDelay")};
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
@@ -2223,13 +2241,31 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			resp.setInMaintance(r.getValue("inMaintance", Long.class));
 			resp.setNeedMaintanceWaitingForApproval(r.getValue("needMaintance", Long.class));
 			resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
+			resp.setTotalTasks(r.getValue("total", Long.class));
+			resp.setDelay(r.getValue("delay", Long.class));
+			resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
 			return null;
 		});
 		return resp;
 	}
 
 	@Override
-	public ReviewedTaskStat statTodayReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
-		return null;
+	public ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		ReviewedTaskStat stat = new ReviewedTaskStat();
+		final Field<Byte> qualifiedTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode()), EquipmentTaskProcessResult.REVIEW_QUALIFIED.getCode());
+		final Field<Byte> unqualifiedTasks = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_RESULT.eq(EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode()), EquipmentTaskProcessResult.REVIEW_UNQUALIFIED.getCode());
+		final Field<?>[] fields = {DSL.count(qualifiedTasks).as("qualifiedTasks"), DSL.count(unqualifiedTasks).as("unqualifiedTasks")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.co.in(ids));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
+		query.fetchAny().map((r) -> {
+			stat.setQualifiedTasks(r.getValue("qualifiedTasks", Long.class));
+			stat.setUnqualifiedTasks(r.getValue("unqualifiedTasks", Long.class));
+			return null;
+		});
+		return stat;
 	}
 }
