@@ -24,6 +24,7 @@ CREATE TABLE `eh_express_companies` (
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'community id',
   `parent_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'parent id, the id of express company under zuolin',
   `name` VARCHAR(128) COMMENT 'the name of express company name',
+  `logo` VARCHAR(512),
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
