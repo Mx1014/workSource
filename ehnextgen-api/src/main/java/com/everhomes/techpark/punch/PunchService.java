@@ -13,6 +13,8 @@ import com.everhomes.approval.ApprovalRule;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
 import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
@@ -228,5 +230,7 @@ public interface PunchService {
 	boolean isWorkTime(Time time, PunchRule punchRule, Date date);
 
 	Long convertTimeToGMTMillisecond(Time time);
+
+	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd);
 
 }

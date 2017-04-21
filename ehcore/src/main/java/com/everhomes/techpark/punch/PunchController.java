@@ -1,6 +1,5 @@
 package com.everhomes.techpark.punch;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -17,8 +16,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
 import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
-import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
 import com.everhomes.rest.techpark.punch.GetDayPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommand;
 import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
@@ -31,8 +31,6 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionApprovalCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommand;
-import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommand;
 import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
@@ -94,7 +92,24 @@ public class PunchController extends ControllerBase {
 		return response;
 	}
 
-	
+
+	/**
+	 * <b>URL: /techpark/punch/checkPunchAdmin</b>
+	 * <p>
+	 * 查询某人在本月/打卡第一天 到昨天是否有异常
+	 * </p>
+	 */
+	@RequestMapping("checkPunchAdmin")
+	@RestReturn(value = CheckPunchAdminResponse.class)
+	public RestResponse checkPunchAdmin(@Valid CheckPunchAdminCommand cmd) {
+		// 打卡返回打卡时间
+		CheckPunchAdminResponse res = punchService.checkPunchAdmin(cmd);
+		RestResponse response = new RestResponse(res); 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 
 	/**
 	 * <b>URL: /techpark/punch/getPunchNewException</b>
@@ -177,6 +192,8 @@ public class PunchController extends ControllerBase {
 	 * 添加公司打卡规则
 	 * </p>
 	 */
+
+	@Deprecated
 	@RequestMapping("addPunchRule")
 	@RestReturn(value = String.class)
 	public RestResponse addPunchRule(@Valid AddPunchRuleCommand cmd) {
@@ -193,6 +210,8 @@ public class PunchController extends ControllerBase {
 	 * 修改公司打卡规则
 	 * </p>
 	 */
+
+	@Deprecated
 	@RequestMapping("updatePunchRule")
 	@RestReturn(value = String.class)
 	public RestResponse updatePunchRule(@Valid UpdatePunchRuleCommand cmd) {
@@ -209,6 +228,8 @@ public class PunchController extends ControllerBase {
 	 * 删除公司打卡规则
 	 * </p>
 	 */
+
+	@Deprecated
 	@RequestMapping("deletePunchRule")
 	@RestReturn(value = String.class)
 	public RestResponse deletePunchRule(@Valid DeletePunchRuleCommand cmd) {
@@ -225,6 +246,8 @@ public class PunchController extends ControllerBase {
 	 * 查询公司打卡规则
 	 * </p>
 	 */
+
+	@Deprecated
 	@RequestMapping("getPunchRule")
 	@RestReturn(value = GetPunchRuleCommandResponse.class)
 	public RestResponse getPunchRule(@Valid GetPunchRuleCommand cmd) {
