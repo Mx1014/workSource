@@ -2327,7 +2327,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
-       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode())))
        		 .fetch().map(r ->{
        			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
        		});
@@ -2690,6 +2690,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
 				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
+
+	@Override
+	public Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+				.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.fetchOne();
 		if(r != null)
 			return ConvertHelper.convert(r, Organization.class);
 		return null;

@@ -260,7 +260,9 @@ public class YellowPageProviderImpl implements YellowPageProvider {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
 		}
         query.addLimit(pageSize);
-       
+
+        LOGGER.info(query.toString());
+
         query.fetch().map((r) -> {
         	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
             return null;

@@ -41,8 +41,8 @@ import com.everhomes.util.RuntimeErrorException;
 public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao3ParkingVendorHandler.class);
 
-	private String ParkingID = "6e517beb-c295-4837-99ed-a73201157e2e";
-	private String CompanyID = "175c8e26-ea36-4993-b113-a7320114e370";
+//	private String ParkingID = "6e517beb-c295-4837-99ed-a73201157e2e";
+//	private String CompanyID = "175c8e26-ea36-4993-b113-a7320114e370";
 
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -115,9 +115,10 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
     private BosigaoCardInfo getCardInfo(String plateNumber){
 		String url = configProvider.getValue("parking.techpark.url", "");
+		String companyId = configProvider.getValue("parking.techpark.companyId", "");
 
 		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("CompanyID", CompanyID);
+		jsonParam.put("CompanyID", companyId);
 		jsonParam.put("listPlateNumber", new String[]{plateNumber});
 
 		Map<String, String> params = new HashMap<>();
@@ -172,10 +173,11 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 		BosigaoTempFee tempFee = null;
 
 		String url = configProvider.getValue("parking.techpark.url", "");
+		String companyId = configProvider.getValue("parking.techpark.companyId", "");
 
 		JSONObject jsonParam = new JSONObject();
 		jsonParam.put("PlateNumber", plateNumber);
-		jsonParam.put("CompanyID", CompanyID);
+		jsonParam.put("CompanyID", companyId);
 		long now = System.currentTimeMillis();
 		String calculatDate = timestampToStr2(now);
 		jsonParam.put("CalculatDate", calculatDate);
@@ -229,8 +231,10 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
 
 		String url = configProvider.getValue("parking.techpark.url", "");
+		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
+
 		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("ParkingID", ParkingID);
+		jsonParam.put("ParkingID", parkingId);
 
 		Map<String, String> params = new HashMap<>();
 		params.put("data", jsonParam.toString());
@@ -457,9 +461,10 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 	private BosigaoCarLockInfo getCarLockInfo(String plateNumber){
 		String url = configProvider.getValue("parking.techpark.url", "");
+		String companyId = configProvider.getValue("parking.techpark.companyId", "");
 
 		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("CompanyID", CompanyID);
+		jsonParam.put("CompanyID", companyId);
 		jsonParam.put("listPlateNumber", new String[]{plateNumber});
 
 		Map<String, String> params = new HashMap<>();

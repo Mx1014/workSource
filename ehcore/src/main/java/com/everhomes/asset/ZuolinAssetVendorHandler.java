@@ -218,7 +218,8 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                     valueDTOs.add(unpaidAmountsDTO);
 
                 }
-                totalAmounts.add(pastUnpaid).add(bill.getLateFee());
+                totalAmounts = totalAmounts.add(pastUnpaid);
+                totalAmounts = totalAmounts.add(bill.getLateFee());
             }
 
             FieldValueDTO totalAmountsDTO = new FieldValueDTO();
