@@ -101,6 +101,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		if(category != null) {
 			categoryName = (category.getName() == null) ? "" : category.getName();
 		}
+
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -111,6 +114,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		notifyMap.put("creatorName", creatorName);
 		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", getNote(request));
+		notifyMap.put("serviceAllianceName", serviceOrg.getName());
+
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
 		String creatorOrganization = "";
 		if(org != null) {
@@ -121,7 +126,6 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		if(serviceOrg != null) {
 //			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
 //			if(orgContact != null) {

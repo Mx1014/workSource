@@ -2047,10 +2047,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		long getApartmentsTime = System.currentTimeMillis();
 		LOGGER.info("Get apartments time:{}", getApartmentsTime - startTime);
 
+		StringBuilder strBuilder = new StringBuilder("");
 		List<ApartmentDTO> aptList = apts.second();
 		for (ApartmentDTO apartmentDTO : aptList) {
+			if(strBuilder.length() > 0) {
+				strBuilder.append(", ");
+			}
 			PropFamilyDTO dto = new PropFamilyDTO();
+			long familyStartTime = System.currentTimeMillis();
 			Family family = familyProvider.findFamilyByAddressId(apartmentDTO.getAddressId());
+			long familyEndTime = System.currentTimeMillis();
+			strBuilder.append("family-").append(familyEndTime - familyStartTime);
+			long orgOwnerStartTime = System.currentTimeMillis();
 			if(family != null )
 			{
 				dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
@@ -2073,7 +2081,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                         UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
                 dto.setMemberCount((long) organizationOwners.size());
 			}
-			
+			long orgOwnerEndTime = System.currentTimeMillis();
+			strBuilder.append("#owner-").append(orgOwnerEndTime - orgOwnerStartTime);
+
+			long addressMappingStartTime = System.currentTimeMillis();
 			if (apartmentDTO.getLivingStatus() != null) {
 				dto.setLivingStatus(apartmentDTO.getLivingStatus());
 			}else {
@@ -2085,7 +2096,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
 				}
 			}
+			long addressMappingEndTime = System.currentTimeMillis();
+			strBuilder.append("#mapping-").append(addressMappingEndTime - addressMappingStartTime);
 
+
+			long billStartTime = System.currentTimeMillis();
 			//判断公寓是否欠费
 			CommunityPmBill bill =  this.propertyMgrProvider.findNewestBillByAddressId(dto.getAddressId());
 			if(bill != null){
@@ -2098,13 +2113,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			else
 				dto.setOwed(OwedType.NO_OWED.getCode());
+
+			long billEndTime = System.currentTimeMillis();
+			strBuilder.append("#bill-").append(billEndTime - billStartTime);
 			dto.setAreaSize(apartmentDTO.getAreaSize());
 			dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 			list.add(dto);
 		}
 
 		long populateApartmentsTime = System.currentTimeMillis();
-		LOGGER.info("Populate apartmentDtos time:{}", populateApartmentsTime - getApartmentsTime);
+		LOGGER.info("Populate apartmentDtos time:{}, detail time: {}", populateApartmentsTime - getApartmentsTime, strBuilder.toString());
 		LOGGER.info("The total time:{}", populateApartmentsTime - startTime);
 
 		return list;

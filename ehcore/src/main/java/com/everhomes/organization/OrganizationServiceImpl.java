@@ -60,6 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -96,6 +97,7 @@ import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -109,6 +111,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -131,6 +134,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 @Component
@@ -937,7 +941,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setAvatar(cmd.getAvatar());
 			enterprise.setCreateTime(organization.getCreateTime());
 			if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-				enterprise.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+				java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+				if(null != checkinDate){
+					enterprise.setCheckinDate(new Timestamp(checkinDate.getTime()));
+				}
 			}
 			enterprise.setContact(cmd.getContactsPhone());
 			enterprise.setDisplayName(cmd.getDisplayName());
@@ -5543,9 +5550,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 	@Override
-	public ImportDataResponse importEnterpriseData(MultipartFile mfile,
-			Long userId, ImportEnterpriseDataCommand cmd) {
-		ImportDataResponse importDataResponse = new ImportDataResponse();
+	public ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
+												   Long userId, ImportEnterpriseDataCommand cmd) {
+		ImportFileResponse<ImportEnterpriseDataDTO> importDataResponse = new ImportFileResponse<>();
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
@@ -5557,15 +5564,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			LOGGER.debug("Start import data...,total:" + resultList.size());
 			//导入数据，返回导入错误的日志数据集
-			List<String> errorDataLogs = importEnterprise(convertToStrList(resultList), userId, cmd);
+			List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = importEnterprise(handleImportEnterpriseData(resultList), userId, cmd);
 			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
 			if(null == errorDataLogs || errorDataLogs.isEmpty()){
 				LOGGER.debug("Data import all success...");
-			}else{
-				//记录导入错误日志
-				for (String log : errorDataLogs) {
-					LOGGER.error(log);
-				}
 			}
 
 			importDataResponse.setTotalCount((long)resultList.size()-1);
@@ -5613,60 +5615,170 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return importDataResponse;
 	}
 
+	private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list){
+		List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
+		int row = 1;
+		for (Object o : list) {
+			if(row < 3){
+				row ++;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+			if(null != r.getA())
+				data.setName(r.getA().trim());
+			if(null != r.getB())
+				data.setDisplayName(r.getB().trim());
+			if(null != r.getC())
+				data.setAdminName(r.getC().trim());
+			if(null != r.getD())
+				data.setAdminToken(r.getD().trim());
+			if(null != r.getE())
+				data.setEmail(r.getE().trim());
+			if(null != r.getF())
+				data.setBuildingName(r.getF().trim());
+			if(null != r.getG())
+				data.setAddress(r.getG().trim());
+			if(null != r.getH())
+				data.setContact(r.getH().trim());
+			if(null != r.getI())
+				data.setNumber(r.getI().trim());
+			if(null != r.getJ())
+				data.setCheckinDate(r.getJ().trim());
+			if(null != r.getK())
+				data.setDescription(r.getK().trim());
+			datas.add(data);
+		}
+		return datas;
+	}
 
 	private List<String> convertToStrList(List list) {
 		List<String> result = new ArrayList<String>();
-		boolean firstRow = true;
+		int row = 1;
 		for (Object o : list) {
-			if(firstRow){
-				firstRow = false;
+			if(row < 3){
+				row ++;
 				continue;
 			}
 			RowResult r = (RowResult)o;
 			StringBuffer sb = new StringBuffer();
-			sb.append(r.getA()).append("||");
-			sb.append(r.getB()).append("||");
-			sb.append(r.getC()).append("||");
-			sb.append(r.getD()).append("||");
-			sb.append(r.getE()).append("||");
-			sb.append(r.getF()).append("||");
-			sb.append(r.getG()).append("||");
-			sb.append(r.getH());
+			sb.append(r.getA().trim()).append("||");
+			sb.append(r.getB().trim()).append("||");
+			sb.append(r.getC().trim()).append("||");
+			sb.append(r.getD().trim()).append("||");
+			sb.append(r.getE().trim()).append("||");
+			sb.append(r.getF().trim()).append("||");
+			sb.append(r.getG().trim()).append("||");
+			sb.append(r.getH().trim()).append("||");
+			sb.append(r.getI().trim()).append("||");
+			sb.append(r.getJ().trim()).append("||");
+			sb.append(r.getK().trim());
 			result.add(sb.toString().replace("null", ""));
 		}
 		return result;
 	}
 
-	private List<String> importEnterprise(List<String> list, Long userId, ImportEnterpriseDataCommand cmd){
-		List<String> errorDataLogs = new ArrayList<String>();
+	private List<ImportFileResultLog<ImportEnterpriseDataDTO>> importEnterprise(List<ImportEnterpriseDataDTO> list, Long userId, ImportEnterpriseDataCommand cmd){
+		User user = UserContext.current().getUser();
+
+		List<ImportFileResultLog<ImportEnterpriseDataDTO>> errorDataLogs = new ArrayList<>();
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
-		for (String str : list) {
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
-			String[] s = str.split("\\|\\|");
-
-			if(s.length < 8){
-				LOGGER.debug("import enterprise data error. str = {}", str);
+		for (ImportEnterpriseDataDTO data : list) {
+			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
+			ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>();
+			if(StringUtils.isEmpty(data.getName())){
+				LOGGER.error("enterprise name is null");
+				log.setData(data);
+				log.setLog("enterprise name is null");
+				errorDataLogs.add(log);
 				continue;
 			}
 
-			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
-			enterpriseCommand.setName(s[0]);
-			enterpriseCommand.setDisplayName(s[1]);
-			enterpriseCommand.setAddress(s[2]);
-			enterpriseCommand.setContactsPhone(s[3]);
-			enterpriseCommand.setDescription(s[7]);
-			enterpriseCommand.setContactor(s[5]);
+			if(StringUtils.isEmpty(data.getBuildingName())){
+				LOGGER.error("building name is null");
+				log.setData(data);
+				log.setLog("building name is null");
+				errorDataLogs.add(log);
+				continue;
+			}
+
+			if(StringUtils.isEmpty(data.getAddress())){
+				LOGGER.error("address name is null");
+				log.setData(data);
+				log.setLog("address name is null");
+				errorDataLogs.add(log);
+				continue;
+			}
+			enterpriseCommand.setName(data.getName());
+			enterpriseCommand.setDisplayName(data.getDisplayName());
+			enterpriseCommand.setContactsPhone(data.getContact());
+			enterpriseCommand.setDescription(data.getDescription());
+			enterpriseCommand.setContactor(data.getAdminName());
 			enterpriseCommand.setNamespaceId(namespaceId);
 			enterpriseCommand.setCommunityId(cmd.getCommunityId());
-			OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
+			enterpriseCommand.setEmailDomain(data.getEmail());
+			enterpriseCommand.setCheckinDate(data.getCheckinDate());
+			if(!StringUtils.isEmpty(data.getNumber())){
+				enterpriseCommand.setMemberCount(Long.parseLong(data.getNumber().toString()));
+			}
 
+			Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), data.getBuildingName());
 
+			if(null == building){
+				LOGGER.error("building Non-existent, buildingName = {}", data.getBuildingName());
+				log.setData(data);
+				log.setLog("building Non-existent");
+				errorDataLogs.add(log);
+				continue;
+			}
+
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, community.getId(), data.getBuildingName(), data.getAddress());
+
+			if(null == address){
+				LOGGER.error("address Non-existent, address = {}", data.getAddress());
+				log.setData(data);
+				log.setLog("address Non-existent");
+				errorDataLogs.add(log);
+				continue;
+			}
+
+			OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
+
+			if(null != orgAddress){
+				LOGGER.error("address has been checked in, address = {}", data.getAddress());
+				log.setData(data);
+				log.setLog("address has been checked in");
+				errorDataLogs.add(log);
+				continue;
+			}
+
+			Organization org = organizationProvider.findOrganizationByName(data.getName(), OrganizationGroupType.ENTERPRISE.getCode(), 0L, namespaceId);
+
+			if(null == org){
+				OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
+				org = ConvertHelper.convert(dto, Organization.class);
+			}
+
+			//添加门牌入住
+			orgAddress = new OrganizationAddress();
+			orgAddress.setBuildingName(building.getName());
+			orgAddress.setBuildingId(building.getId());
+			orgAddress.setAddressId(address.getId());
+			orgAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+			orgAddress.setOrganizationId(org.getId());
+			orgAddress.setCreatorUid(user.getId());
+			orgAddress.setOperatorUid(user.getId());
+			organizationProvider.createOrganizationAddress(orgAddress);
+
+			//添加管理员
 			CreateOrganizationAccountCommand accountCommand = new CreateOrganizationAccountCommand();
-			accountCommand.setOrganizationId(dto.getId());
-			accountCommand.setAccountPhone(s[6]);
-			accountCommand.setAccountName(s[5]);
+			accountCommand.setOrganizationId(org.getId());
+			accountCommand.setAccountPhone(data.getAdminToken());
+			accountCommand.setAccountName(data.getAdminName());
 			if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
 				this.createOrganizationAccount(accountCommand, RoleConstants.ENTERPRISE_SUPER_ADMIN);
 			}
@@ -7518,7 +7630,6 @@ System.out.println();
 
 				importDataResponse.setTotalCount((long)resultList.size()-1);
 				importDataResponse.setFailCount((long)errorDataLogs.size());
-				importDataResponse.setLogs(errorDataLogs);
 			} catch (IOException e) {
 				LOGGER.error("File can not be resolved...");
 				e.printStackTrace();

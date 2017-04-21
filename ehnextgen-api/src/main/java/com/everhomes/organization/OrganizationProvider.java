@@ -302,4 +302,6 @@ public interface OrganizationProvider {
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
+
+	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
 }
