@@ -590,11 +590,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		this.processDetailUrl(dto);
 //		response.setDisplayName(serviceAlliance.getNickName());
-//		Community community = communityProvider.findCommunityById(dto.getOwnerId());
-//		if(community != null) {
-//			dto.setNamespaceId(community.getNamespaceId());
-//		}
-		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
+		Community community = communityProvider.findCommunityById(dto.getOwnerId());
+		if(community != null) {
+			dto.setNamespaceId(community.getNamespaceId());
+		}
+//		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 		processServiceUrl(dto);
 		return dto;
