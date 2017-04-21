@@ -2259,7 +2259,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.co.in(ids));
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS..in(ids));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
 		query.fetchAny().map((r) -> {
 			stat.setQualifiedTasks(r.getValue("qualifiedTasks", Long.class));
