@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -112,6 +113,9 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Autowired
 	private ExpressOrderLogProvider expressOrderLogProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
 	
 	@Autowired
 	private OrderUtil orderUtil;
@@ -662,13 +666,24 @@ public class ExpressServiceImpl implements ExpressService {
 		expressOrderDTO.setReceiveName(expressOrder.getReceiveName());
 		expressOrderDTO.setCreateTime(expressOrder.getUpdateTime());
 		expressOrderDTO.setPaySummary(expressOrder.getPaySummary());
-		ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
-		if (handler != null) {
-			expressOrderDTO.setExpressLogoUrl(handler.getExpressLogoUrl());
-		}
+		expressOrderDTO.setExpressLogoUrl(getUrl(getExpressCompanyLogo(expressOrder.getExpressCompanyId())));
 		return expressOrderDTO;
 	}
 	
+	private String getExpressCompanyLogo(Long expressCompanyId) {
+		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(expressCompanyId);
+		if (expressCompany != null) {
+			String logo = expressCompany.getLogo();
+			if (logo != null) {
+				return logo;
+			}
+			if (expressCompany.getParentId().longValue() != 0L) {
+				return getExpressCompanyLogo(expressCompany.getParentId());
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public void cancelExpressOrder(CancelExpressOrderCommand cmd) {
 		if (cmd.getId() == null) {
@@ -704,6 +719,16 @@ public class ExpressServiceImpl implements ExpressService {
 		return handler.getExpressLogisticsDetail(expressCompany, cmd.getBillNo());
 	}
 
+	@Override
+	public String getUrl(String uri) {
+		try {
+			return contentServerService.parserUri(uri, "", null);
+		} catch (Exception e) {
+
+		}
+		return "";
+	}
+	
 	private void putIntoHistory(Long expressCompanyId, String billNo) {
 		User user = UserContext.current().getUser();
 		if (user != null) {
@@ -735,10 +760,7 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	private ExpressQueryHistoryDTO convertToExpressQueryHistoryDTO(ExpressQueryHistory expressQueryHistory) {
 		ExpressQueryHistoryDTO expressQueryHistoryDTO = ConvertHelper.convert(expressQueryHistory, ExpressQueryHistoryDTO.class);
-		ExpressCompany expressCompany = expressCompanyProvider.findExpressCompanyById(expressQueryHistory.getExpressCompanyId());
-		if (expressCompany != null) {
-			expressQueryHistoryDTO.setExpressCompany(expressCompany.getName());
-		}
+		expressQueryHistoryDTO.setExpressCompany(getUrl(getExpressCompanyLogo(expressQueryHistory.getExpressCompanyId())));
 		return expressQueryHistoryDTO;
 	}
 

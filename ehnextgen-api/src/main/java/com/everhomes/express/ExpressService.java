@@ -97,4 +97,7 @@ public interface ExpressService {
 
 	public void payFail(PayCallbackCommand cmd);
 
+
+	String getUrl(String uri);
+
 }

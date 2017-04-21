@@ -51,8 +51,6 @@ public class EmsHandler implements ExpressHandler {
 	private static final String BILL_NO_AMOUNT = "1";
 	//打印类型，1:预制详情单	2:热敏标签式详情单，我们都是2
 	private static final String PRINT_KIND = "2";
-	//ems公司logo的uri
-	private static final String LOGO_URI = "cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw";
 	
 	//java8新加的格式化时间类，是线程安全的
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.systemDefault());
@@ -65,7 +63,7 @@ public class EmsHandler implements ExpressHandler {
 	private String sysPassword;
 	
 	@Autowired
-	private ContentServerService contentServerService;
+	private ExpressService expressService;
 	
 	@Override
 	public String getBillNo(ExpressOrder expressOrder) {
@@ -110,16 +108,6 @@ public class EmsHandler implements ExpressHandler {
 	}
 
 	@Override
-	public String getExpressLogoUrl() {
-		try {
-			return contentServerService.parserUri(LOGO_URI, "", null);
-		} catch (Exception e) {
-
-		}
-		return "";
-	}
-
-	@Override
 	public GetExpressLogisticsDetailResponse getExpressLogisticsDetail(ExpressCompany expressCompany, String billNo) {
 		TrackBillResponse trackBillResponse = trackBill(billNo);
 		List<ExpressTraceDTO> traces = null;
@@ -127,7 +115,7 @@ public class EmsHandler implements ExpressHandler {
 			GetExpressLogisticsDetailResponse response = new GetExpressLogisticsDetailResponse();
 			response.setExpressCompany(expressCompany.getName());
 			response.setBillNo(billNo);
-			response.setExpressLogo(getExpressLogoUrl());
+			response.setExpressLogo(expressService.getUrl(expressCompany.getLogo()));
 			response.setTraces(traces);
 			
 			String tracesString = JSON.toJSONString(traces);

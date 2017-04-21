@@ -1,1 +1,1 @@
-INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (1, 0, '', 0, 0, 'ems', 2, 0, now(), now(), 0);
+INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `logo`, `status`, `creator_uid`, `create_time`, `update_time`, `operator_uid`) VALUES (1, 0, '', 0, 0, 'ems', 'cs://1/image/aW1hZ2UvTVRwak9XSTJOVFJqWXpjMVkyTmtNVGt4WW1NNU1qaGlNR0k1WlRNelpXRTJNdw', 2, 0, now(), now(), 0);

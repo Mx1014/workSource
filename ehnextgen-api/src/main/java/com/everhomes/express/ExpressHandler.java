@@ -9,8 +9,6 @@ public interface ExpressHandler {
 
 	String getBillNo(ExpressOrder expressOrder);
 
-	String getExpressLogoUrl();
-
 	GetExpressLogisticsDetailResponse getExpressLogisticsDetail(ExpressCompany expressCompany, String billNo);
 	
 }
