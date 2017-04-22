@@ -435,4 +435,6 @@ public interface OrganizationService {
 	ContractDTO processContract(Contract contract);
 
 	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
+
+	void exportImportFileFialResult(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 }

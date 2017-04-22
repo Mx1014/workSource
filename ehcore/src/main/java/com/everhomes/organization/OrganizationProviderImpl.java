@@ -1754,8 +1754,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
-		
-		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
@@ -1792,8 +1793,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
-		
-		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 
 		if(!StringUtils.isEmpty(keyworks)){
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyworks + "%"));
@@ -3158,7 +3160,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
 		}
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+//		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
