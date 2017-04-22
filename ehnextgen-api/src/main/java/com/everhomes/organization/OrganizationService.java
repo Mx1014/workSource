@@ -206,7 +206,7 @@ public interface OrganizationService {
 	List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd);
 	ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
 																	 Long userId, ImportEnterpriseDataCommand cmd);
-	ImportFileResponse<ImportOrganizationContactDataDTO> importOrganizationPersonnelData(MultipartFile mfile,
+	ImportFileTaskDTO importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
@@ -433,4 +433,6 @@ public interface OrganizationService {
 	List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
+
+	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
 }

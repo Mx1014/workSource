@@ -304,4 +304,11 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
 
 	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
+	void createImportFileTask(ImportFileTask importFileTask);
+
+	void updateImportFileTask(ImportFileTask importFileTask);
+
+	ImportFileTask findImportFileTaskById(Long id);
+
 }

@@ -897,7 +897,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入机构成员信息</p>
      */
     @RequestMapping("importOrganizationPersonnelData")
-    @RestReturn(value = ImportFileResponse.class)
+    @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
 
         User manaUser = UserContext.current().getUser();
@@ -1146,4 +1146,18 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/org/getImportFileResult</b>
+     * <p>查询导入的文件结果</p>
+     */
+    @RequestMapping("getImportFileResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportFileResult(@Valid GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.getImportFileResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>importStatus: 导入状态{@link com.everhomes.rest.organization.ImportFileTaskStatus}</li>
  * <li>totalCount: 导入数据的总记录数</li>
  * <li>failCount: 导入失败记录数</li>
  * <li>logs: 导入失败日志</li>
@@ -15,7 +16,9 @@ import java.util.List;
  */
 
 public class ImportFileResponse<T> {
-	
+
+	private Byte importStatus;
+
 	private Long totalCount;
 		
 	private Long failCount;
@@ -45,5 +48,13 @@ public class ImportFileResponse<T> {
 
 	public void setLogs(List<ImportFileResultLog<T>> logs) {
 		this.logs = logs;
+	}
+
+	public Byte getImportStatus() {
+		return importStatus;
+	}
+
+	public void setImportStatus(Byte importStatus) {
+		this.importStatus = importStatus;
 	}
 }

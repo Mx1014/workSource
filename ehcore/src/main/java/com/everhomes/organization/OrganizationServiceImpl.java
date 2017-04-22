@@ -245,6 +245,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private DoorAccessService doorAccessService;
 
+	@Autowired
+	private ImportFileService importFileService;
+
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
 
@@ -5580,9 +5583,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public ImportFileResponse<ImportOrganizationContactDataDTO> importOrganizationPersonnelData(MultipartFile mfile,
+	public ImportFileTaskDTO importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd) {
-		ImportFileResponse<ImportOrganizationContactDataDTO> response = new ImportFileResponse<>();
+		ImportFileTask task = new ImportFileTask();
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
@@ -5592,27 +5595,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
 						"File content is empty");
 			}
-			LOGGER.debug("Start import data...,total:" + resultList.size());
-			//导入数据，返回导入错误的日志数据集
-			List<ImportOrganizationMemberDTO> errorDataLogs = importOrganizationPersonnel(handleImportOrganizationContactData(resultList), userId, cmd);
-			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
-			if(null == errorDataLogs || errorDataLogs.isEmpty()){
-				LOGGER.debug("Data import all success...");
-			}else{
-				//记录导入错误日志
-				for (ImportOrganizationMemberDTO log : errorDataLogs) {
-					LOGGER.error(log.getDescription());
+			task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			task.setOwnerId(cmd.getOrganizationId());
+			task.setType(ImportFileTaskType.ORGANIZATION_CONTACT.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+				@Override
+				public ImportFileResponse importFile() {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportOrganizationContactDataDTO> datas = handleImportOrganizationContactData(resultList);
+					List<ImportFileResultLog<ImportOrganizationContactDataDTO>> results = importOrganizationPersonnel(datas, userId, cmd);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
 				}
-			}
+			}, task);
 
-			importDataResponse.setTotalCount((long)resultList.size()-1);
-			importDataResponse.setFailCount((long)errorDataLogs.size());
-			importDataResponse.setLogs(errorDataLogs);
 		} catch (IOException e) {
 			LOGGER.error("File can not be resolved...");
 			e.printStackTrace();
 		}
-		return importDataResponse;
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
 	}
 
 	private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list){
@@ -5716,11 +5720,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		for (ImportEnterpriseDataDTO data : list) {
 			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
-			ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>();
+			ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
 			if(StringUtils.isEmpty(data.getName())){
 				LOGGER.error("enterprise name is null, data = {}", data);
 				log.setData(data);
-				log.setLog("enterprise name is null");
+				log.setErrorLog("enterprise name is null");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5728,7 +5732,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(StringUtils.isEmpty(data.getBuildingName())){
 				LOGGER.error("building name is null, data = {}", data);
 				log.setData(data);
-				log.setLog("building name is null");
+				log.setErrorLog("building name is null");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5736,7 +5740,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(StringUtils.isEmpty(data.getAddress())){
 				LOGGER.error("address name is null, data = {}", data);
 				log.setData(data);
-				log.setLog("address name is null");
+				log.setErrorLog("address name is null");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5758,7 +5762,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == building){
 				LOGGER.error("building Non-existent, buildingName = {}", data.getBuildingName());
 				log.setData(data);
-				log.setLog("building Non-existent");
+				log.setErrorLog("building Non-existent");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5768,7 +5772,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == address){
 				LOGGER.error("address Non-existent, address = {}", data.getAddress());
 				log.setData(data);
-				log.setLog("address Non-existent");
+				log.setErrorLog("address Non-existent");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5778,7 +5782,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != orgAddress){
 				LOGGER.error("address has been checked in, address = {}", data.getAddress());
 				log.setData(data);
-				log.setLog("address has been checked in");
+				log.setErrorLog("address has been checked in");
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5835,20 +5839,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		outer:
 		for (ImportOrganizationContactDataDTO data : list) {
-			ImportFileResultLog<ImportOrganizationContactDataDTO> log = new ImportFileResultLog<>();
-
+			ImportFileResultLog<ImportOrganizationContactDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
 			if(StringUtils.isEmpty(data.getContactName())){
-				LOGGER.debug("Organization member contactName is null. data = {}",  data);
+				LOGGER.warn("Organization member contactName is null. data = {}",  data);
 				log.setData(data);
-				log.setLog("Organization member contactName is null");
+				log.setErrorLog("Organization member contactName is null");
+				log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
 				errorDataLogs.add(log);
 				continue outer;
 			}
 
 			if(StringUtils.isEmpty(data.getContactToken())){
-				LOGGER.debug("Organization member contactToken is null. data = {}",  data);
+				LOGGER.warn("Organization member contactToken is null. data = {}",  data);
 				log.setData(data);
-				log.setLog("Organization member contactToken is null");
+				log.setErrorLog("Organization member contactToken is null");
+				log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
 				errorDataLogs.add(log);
 				continue outer;
 			}
@@ -5876,7 +5881,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					if(null == dept){
 						LOGGER.debug("Organization member department Non-existent. departmentName = {}", deptName);
 						log.setData(data);
-						log.setLog("Organization member department Non-existent.");
+						log.setErrorLog("Organization member department Non-existent.");
+						log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
 						errorDataLogs.add(log);
 						continue outer;
 					}
@@ -5893,7 +5899,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					if(null == jobPosition){
 						LOGGER.debug("Organization member jobPosition Non-existent. jobPositionName = {}", jobPositionName);
 						log.setData(data);
-						log.setLog("Organization member jobPosition Non-existent.");
+						log.setErrorLog("Organization member jobPosition Non-existent.");
+						log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
 						errorDataLogs.add(log);
 						continue outer;
 					}
@@ -5910,7 +5917,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					if(null == jobLevel){
 						LOGGER.debug("Organization member jobLevel Non-existent. jobLevelName = {}", jobLevelName);
 						log.setData(data);
-						log.setLog("Organization member jobLevel Non-existent.");
+						log.setErrorLog("Organization member jobLevel Non-existent.");
+						log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
 						errorDataLogs.add(log);
 						continue outer;
 					}
@@ -5927,10 +5935,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			VerifyPersonnelByPhoneCommandResponse verifyRes = null;
 			try {
 				verifyRes = this.verifyPersonnelByPhone(verifyCommand);
-			} catch (Exception e) {
+			} catch (RuntimeErrorException e) {
 				LOGGER.debug(e.getMessage());
 				log.setData(data);
-				log.setLog(e.getMessage());
+				log.setErrorLog(e.getMessage());
+				log.setCode(e.getErrorCode());
+				log.setScope(e.getErrorScope());
 				errorDataLogs.add(log);
 				continue outer;
 			}
@@ -9254,6 +9264,11 @@ System.out.println();
 			}
 		}
 		return dtos;
+	}
+
+	@Override
+	public ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd) {
+		return importFileService.getImportFileResult(cmd.getTaskId());
 	}
 }
 

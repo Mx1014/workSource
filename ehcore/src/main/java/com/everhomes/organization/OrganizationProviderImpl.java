@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -64,44 +66,6 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionMapsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
@@ -3363,5 +3327,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return orgAddr.get(0);
+	}
+
+	@Override
+	public void createImportFileTask(ImportFileTask importFileTask) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhImportFileTasks.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		importFileTask.setId(id);
+		importFileTask.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(importFileTask);
+	}
+
+	@Override
+	public void updateImportFileTask(ImportFileTask importFileTask) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		importFileTask.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(importFileTask);
+	}
+
+	@Override
+	public ImportFileTask findImportFileTaskById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ImportFileTask.class);
 	}
 }
