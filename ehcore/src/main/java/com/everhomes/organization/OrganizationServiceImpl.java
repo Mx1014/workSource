@@ -8320,6 +8320,20 @@ System.out.println();
 				enterpriseIds.add(cmd.getOrganizationId());
 			}
 
+			// 先把把成员从公司所有部门都删除掉
+//			for (Organization organization : childOrganizations) {
+//				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
+//				if(null != groupMember){
+//					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
+//				}
+//			}
+
+			// 先把把成员从公司所有机构都删除掉
+			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
+			for (OrganizationMember member: members) {
+				organizationProvider.deleteOrganizationMemberById(member.getId());
+			}
+
 			for (Long enterpriseId: enterpriseIds) {
 
 				OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), enterpriseId);
@@ -8337,20 +8351,6 @@ System.out.println();
 					organizationMember.setId(desOrgMember.getId());
 					organizationProvider.updateOrganizationMember(organizationMember);
 				}
-			}
-
-			// 先把把成员从公司所有部门都删除掉
-//			for (Organization organization : childOrganizations) {
-//				OrganizationMember groupMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organization.getId());
-//				if(null != groupMember){
-//					organizationProvider.deleteOrganizationMemberById(groupMember.getId());
-//				}
-//			}
-
-			// 先把把成员从公司所有机构都删除掉
-			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
-			for (OrganizationMember member: members) {
-				organizationProvider.deleteOrganizationMemberById(member.getId());
 			}
 
 			//没有部门要添加
