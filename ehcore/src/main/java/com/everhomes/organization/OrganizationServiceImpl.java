@@ -4923,9 +4923,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 
 				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+				List<String> groupTypes = new ArrayList<>();
 				if(null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0){
 					Condition cond = null;
-					List<String> groupTypes = new ArrayList<>();
+
 					if(cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())){
 						cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
 					}
@@ -4950,6 +4951,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 					query.addConditions(cond);
 				}else{
+					groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+					groupTypes.add(OrganizationGroupType.GROUP.getCode());
+					groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
 					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
 				}
 
@@ -4966,6 +4971,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%"+keywords+"%")));
 				}
 
+				query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+				query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME);
 				return query;
 			}
 		});
