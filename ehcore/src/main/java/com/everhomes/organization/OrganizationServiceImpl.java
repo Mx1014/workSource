@@ -4972,7 +4972,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 
 				query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-				query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME);
+				query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN;
 				return query;
 			}
 		});
