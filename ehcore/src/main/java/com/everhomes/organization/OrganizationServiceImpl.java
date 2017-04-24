@@ -8308,7 +8308,9 @@ System.out.println();
 			if(null != departmentIds){
 				for (Long departmentId : departmentIds) {
 					Organization o = checkOrganization(departmentId);
-					if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(o.getGroupType())){
+					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())){
+						enterpriseIds.add(departmentId);
+					}else{
 						if(!enterpriseIds.contains(o.getDirectlyEnterpriseId())){
 							enterpriseIds.add(o.getDirectlyEnterpriseId());
 						}

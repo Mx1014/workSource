@@ -110,15 +110,17 @@ public class ImportFileServiceImpl implements ImportFileService{
                 XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
                 titleStyle.setFont(font);
                 titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-                int rowNum = 3;
+                int rowNum = 2;
                 for (ImportFileResultLog log: logs) {
-                    XSSFRow row = sheet.createRow(rowNum);
+                    XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
                     Map<String, String> data = (Map<String, String>) log.getData();
                     int cellNum = 0;
+                    row.createCell(cellNum ++).setCellValue(log.getErrorDescription());
                     for (Map.Entry<String, String> entry : data.entrySet()) {
                         row.createCell(cellNum ++).setCellValue(entry.getValue());
                     }
+
                 }
                 out = new ByteArrayOutputStream();
                 wb.write(out);
