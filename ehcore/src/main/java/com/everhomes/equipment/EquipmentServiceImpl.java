@@ -3730,7 +3730,30 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
-		return null;
+		StatItemResultsInEquipmentTasksResponse response = new StatItemResultsInEquipmentTasksResponse();
+//		itemResultStat: 巡检参数统计 参考ItemResultStat
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		response.setEquipmentName(equipment.getName());
+		response.setCustomNumber(equipment.getCustomNumber());
+		response.setLocation(equipment.getLocation());
+
+		Timestamp begin = null;
+		Timestamp end = null;
+		if(cmd.getStartTime() != null) {
+			begin = new Timestamp(cmd.getStartTime());
+		}
+		if(cmd.getEndTime() != null) {
+			end = new Timestamp((cmd.getEndTime()));
+		}
+		List<ItemResultStat> results = equipmentProvider.statItemResults(cmd.getEquipmentId(), cmd.getStandardId(),
+				begin, end);
+		results.forEach(result -> {
+			EquipmentInspectionItems item = equipmentProvider.findEquipmentInspectionItem(result.getItemId());
+			result.setValueJason(item.getValueJason());
+			result.setValueType(item.getValueType());
+		});
+		response.setItemResultStat(results);
+		return response;
 	}
 
 	@Override

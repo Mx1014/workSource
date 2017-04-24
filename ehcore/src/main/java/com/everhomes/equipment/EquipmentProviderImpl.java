@@ -1,5 +1,6 @@
 package com.everhomes.equipment;
 
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -2259,13 +2260,83 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
-//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.co.in(ids));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.COMMUNITY_ID.eq(communityId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
+
+		if(startTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.ge(startTime));
+		}
+
+		if(endTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.le(endTime));
+		}
+
+
 		query.fetchAny().map((r) -> {
 			stat.setQualifiedTasks(r.getValue("qualifiedTasks", Long.class));
 			stat.setUnqualifiedTasks(r.getValue("unqualifiedTasks", Long.class));
 			return null;
 		});
 		return stat;
+	}
+
+	@Override
+	public List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ItemResultStat> results = new ArrayList<>();
+
+		final Field<Byte> abnormalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.ABNORMAL.getCode()), ItemResultNormalFlag.ABNORMAL.getCode());
+		final Field<Byte> normalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.NORMAL.getCode()), ItemResultNormalFlag.NORMAL.getCode());
+		final Field<Double> averageValue = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE_TYPE.eq(ItemValueType.RANGE.getCode()), Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE == null ? 0.0 : Double.valueOf(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()));
+		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_NAME,
+				DSL.count(abnormalTimes).as("abnormalTimes"), DSL.count(normalTimes).as("normalTimes"),
+				DSL.avg(averageValue).as("averageValue"),DSL.groupConcat(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.TASK_ID).as("taskIds")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS);
+
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.EQUIPMENT_ID.eq(equipmentId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.STANDARD_ID.eq(standardId));
+
+
+
+		if(startTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.CREATE_TIME.ge(startTime));
+		}
+
+		if(endTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.CREATE_TIME.le(endTime));
+		}
+
+		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("statItemResults, sql=" + query.getSQL());
+			LOGGER.debug("statItemResults, bindValues=" + query.getBindValues());
+		}
+		query.fetch().map((r) -> {
+			ItemResultStat result = new ItemResultStat();
+			result.setItemId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID));
+			result.setItemName(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_NAME));
+			result.setAbnormalTimes(r.getValue("abnormalTimes", Long.class));
+			result.setAverageValue(r.getValue("averageValue", Double.class));
+			result.setNormalTimes(r.getValue("normalTimes", Long.class));
+			String taskIds = r.getValue("taskIds", String.class);
+			String[] ids = taskIds.split(",");
+			if(ids != null && ids.length > 0) {
+				List<Long> tasks = new ArrayList<Long>();
+				for (String id : ids) {
+					if(!StringUtils.isNullOrEmpty(id)) {
+						tasks.add(Long.valueOf(id));
+					}
+				}
+				result.setAbnormalTaskIds(tasks);
+			}
+			results.add(result);
+			return null;
+		});
+
+		return results;
 	}
 }
