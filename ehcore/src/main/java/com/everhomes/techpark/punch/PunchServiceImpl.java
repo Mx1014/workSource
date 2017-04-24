@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.AbstractDocument.Content;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -55,6 +56,7 @@ import com.everhomes.approval.ApprovalRangeStatisticProvider;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -86,6 +88,8 @@ import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
 import com.everhomes.rest.techpark.punch.ApprovalStatus;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminCommand;
+import com.everhomes.rest.techpark.punch.CheckPunchAdminResponse;
 import com.everhomes.rest.techpark.punch.ClockCode;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.DeletePunchRuleCommand;
@@ -173,6 +177,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
@@ -5569,5 +5574,20 @@ public class PunchServiceImpl implements PunchService {
 			
 		}
 		
+	}
+
+	@Override
+	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd) {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		CheckPunchAdminResponse response = new CheckPunchAdminResponse();
+		response.setIsAdminFlag(NormalFlag.NO.getCode());
+		try{
+			if(resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+				response.setIsAdminFlag(NormalFlag.YES.getCode());
+		}
+		catch(Exception e){
+			LOGGER.error("there is a error when check org admin ",e);
+		}
+		return response;
 	}
 }
