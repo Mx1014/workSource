@@ -8220,13 +8220,8 @@ System.out.println();
 			for (OrganizationMember m: members) {
 				deleteOrganizationMember(m);
 			}
-
 			return null;
 		});
-
-		//Remove door auth, by Janon 2016-12-15
-		if(dbLog != null) {
-		}
 	}
 
 	@Override
@@ -8267,7 +8262,7 @@ System.out.println();
 		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
 		List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
 		List<OrganizationDTO> jobLevels = new ArrayList<OrganizationDTO>();
-
+		List<Long> enterpriseIds = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
 
 			List<Long> departmentIds = cmd.getDepartmentIds();
@@ -8288,7 +8283,7 @@ System.out.println();
 //				organizationProvider.createOrganizationMember(organizationMember);
 //				return null;
 //			}
-			List<Long> enterpriseIds = new ArrayList<>();
+
 			if(null != departmentIds){
 				for (Long departmentId : departmentIds) {
 					Organization o = checkOrganization(departmentId);
@@ -8412,28 +8407,29 @@ System.out.println();
 			return null;
 		});
 
-		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			organizationMember.setOrganizationId(dto.getOrganizationId());
-			userSearcher.feedDoc(organizationMember);
+		for (Long enterpriseId: enterpriseIds) {
+			if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+				organizationMember.setOrganizationId(enterpriseId);
+				userSearcher.feedDoc(organizationMember);
 
-			// 如果是往公司添加新成员就需要发消息
-			if(organizationMember.isCreate()){
-				sendMessageForContactApproved(organizationMember);
+				// 如果是往公司添加新成员就需要发消息
+				if(organizationMember.isCreate()){
+					sendMessageForContactApproved(organizationMember);
+				}
 			}
+
+			//记录新增 log
+			OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
+			orgLog.setOrganizationId(enterpriseId);
+			orgLog.setContactName(cmd.getContactName());
+			orgLog.setContactToken(cmd.getContactToken());
+			orgLog.setUserId(organizationMember.getTargetId());
+			orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			orgLog.setOperationType(OperationType.JOIN.getCode());
+			orgLog.setRequestType(RequestType.ADMIN.getCode());
+			orgLog.setOperatorUid(UserContext.current().getUser().getId());
+			this.organizationProvider.createOrganizationMemberLog(orgLog);
 		}
-
-    	//记录新增 log
-    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
-    	orgLog.setOrganizationId(dto.getOrganizationId());
-    	orgLog.setContactName(cmd.getContactName());
-    	orgLog.setContactToken(cmd.getContactToken());
-    	orgLog.setUserId(organizationMember.getTargetId());
-    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    	orgLog.setOperationType(OperationType.JOIN.getCode());
-    	orgLog.setRequestType(RequestType.ADMIN.getCode());
-    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationMemberLog(orgLog);
-
 		return dto;
 	}
 
