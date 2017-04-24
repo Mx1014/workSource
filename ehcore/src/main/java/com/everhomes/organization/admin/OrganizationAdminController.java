@@ -1161,13 +1161,13 @@ public class OrganizationAdminController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /admin/org/exportImportFileFialResult</b>
+     * <b>URL: /admin/org/exportImportFileFailResultXls</b>
      * <p>查询导入的文件结果</p>
      */
-    @RequestMapping("exportImportFileFialResult")
+    @RequestMapping("exportImportFileFailResultXls")
     @RestReturn(value = String.class)
-    public RestResponse exportImportFileFialResult(@Valid GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-        organizationService.exportImportFileFialResult(cmd, httpResponse);
+    public RestResponse exportImportFileFailResultXls(@Valid GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        organizationService.exportImportFileFailResultXls(cmd, httpResponse);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

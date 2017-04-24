@@ -436,5 +436,5 @@ public interface OrganizationService {
 
 	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
 
-	void exportImportFileFialResult(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 }

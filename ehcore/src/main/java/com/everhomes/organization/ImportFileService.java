@@ -14,6 +14,6 @@ public interface ImportFileService {
 
     ImportFileResponse getImportFileResult(Long taskId);
 
-    void exportImportFileFialResult(HttpServletResponse httpResponse, Long taskId);
+    void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId);
 
 }

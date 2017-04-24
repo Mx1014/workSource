@@ -8334,12 +8334,10 @@ System.out.println();
 				organizationProvider.deleteOrganizationMemberById(member.getId());
 			}
 
+			//加入到公司
 			for (Long enterpriseId: enterpriseIds) {
-
 				OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), enterpriseId);
-
 				Organization enterprise = checkOrganization(enterpriseId);
-				// 公司没有此通讯录，则添加 by sfyan 20160829
 				organizationMember.setOrganizationId(enterpriseId);
 				organizationMember.setGroupType(enterprise.getGroupType());
 				organizationMember.setGroupPath(enterprise.getPath());
@@ -9310,8 +9308,8 @@ System.out.println();
 	}
 
 	@Override
-	public void exportImportFileFialResult(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-		importFileService.exportImportFileFialResult(httpResponse, cmd.getTaskId());
+	public void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
 }
 

@@ -93,7 +93,7 @@ public class ImportFileServiceImpl implements ImportFileService{
     }
 
     @Override
-    public void exportImportFileFialResult(HttpServletResponse httpResponse, Long taskId){
+    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId){
         ImportFileResponse result  = getImportFileResult(taskId);
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
