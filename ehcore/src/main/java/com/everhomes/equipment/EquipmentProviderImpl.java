@@ -2309,7 +2309,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		final Field<Byte> abnormalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.ABNORMAL.getCode()), ItemResultNormalFlag.ABNORMAL.getCode());
 		final Field<Byte> normalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.NORMAL.getCode()), ItemResultNormalFlag.NORMAL.getCode());
-		final Field<Double> averageValue = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE_TYPE.eq(ItemValueType.RANGE.getCode()), Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE == null ? 0.0 : Double.valueOf(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()));
+		final Field<Double> averageValue = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE_TYPE.eq(ItemValueType.RANGE.getCode()), StringUtils.isNullOrEmpty(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()) ? 0.0 : Double.valueOf(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()));
 		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_NAME,
 				DSL.count(abnormalTimes).as("abnormalTimes"), DSL.count(normalTimes).as("normalTimes"),
 				DSL.avg(averageValue).as("averageValue"),DSL.groupConcat(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.TASK_ID).as("taskIds")};
