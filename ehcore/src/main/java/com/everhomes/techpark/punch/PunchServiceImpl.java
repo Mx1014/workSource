@@ -779,7 +779,10 @@ public class PunchServiceImpl implements PunchService {
 		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
 		if(organizationMember == null ){
 			//找不到就是已离职
+			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
 			punchDayLog.setStatus(ApprovalStatus.RESIGNED.getCode());
+			pdl.setMorningPunchStatus(PunchStatus.RESIGNED.getCode());
+			pdl.setAfternoonPunchStatus(PunchStatus.RESIGNED.getCode());
 			pdl.setPunchStatus(ApprovalStatus.RESIGNED.getCode());
 			return pdl;
 		}else{
@@ -788,6 +791,9 @@ public class PunchServiceImpl implements PunchService {
 			if (null != memberLogs ){
 				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
 
+					pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
+					pdl.setMorningPunchStatus(PunchStatus.NONENTRY.getCode());
+					pdl.setAfternoonPunchStatus(PunchStatus.NONENTRY.getCode());
 					punchDayLog.setStatus(ApprovalStatus.NONENTRY.getCode());
 					pdl.setPunchStatus(ApprovalStatus.NONENTRY.getCode());
 					return pdl;
@@ -827,14 +833,14 @@ public class PunchServiceImpl implements PunchService {
 //					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 //					return pdl;
 //				}
-				if (dateSF.get().format(now).equals(
-								dateSF.get().format(logDay.getTime()))) {
-					//今天的话,exception
-					pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
-					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-				 
-					return pdl;
-				}
+//				if (dateSF.get().format(now).equals(
+//								dateSF.get().format(logDay.getTime()))) {
+//					//今天的话,exception
+//					pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
+//					pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//				 
+//					return pdl;
+//				}
 //				//工作日忘打卡
 //				pdl.setPunchStatus(PunchStatus.FORGOT.getCode());
 //				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
