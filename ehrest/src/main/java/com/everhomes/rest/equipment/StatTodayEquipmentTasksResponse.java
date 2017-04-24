@@ -4,12 +4,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>currentWaitingForExecuting: 当前待执行</li>
+ *     <li>currentWaitingForApproval: 当前待审核</li>
  *     <li>waitingForExecuting: 待执行</li>
  *     <li>inMaintance: 整改中</li>
- *     <li>complete: 完成</li>
+ *     <li>complete: 当日已完成</li>
+ *     <li>reviewed: 当日已审核</li>
  *     <li>completeMaintance: 整改完成</li>
  *     <li>completeInspection: 巡检完成</li>
- *     <li>completeWaitingForApproval: 完成待审核</li>
+ *     <li>completeWaitingForApproval: 巡检完成待审核任务数</li>
+ *     <li>completeMaintanceWaitingForApproval;: 整改完成待审核任务数</li>
  *     <li>needMaintanceWaitingForApproval: 需整改待审核</li>
  *     <li>reviewQualified: 审核通过</li>
  *     <li>reviewUnqualified: 审核不通过</li>
@@ -18,11 +22,17 @@ import com.everhomes.util.StringHelper;
  */
 public class StatTodayEquipmentTasksResponse {
 
+    private Long currentWaitingForExecuting;
+
+    private Long currentWaitingForApproval;
+
     private Long waitingForExecuting;
 
     private Long inMaintance;
 
     private Long complete;
+
+    private Long reviewed;
 
     private Long completeMaintance;
 
@@ -30,11 +40,21 @@ public class StatTodayEquipmentTasksResponse {
 
     private Long completeWaitingForApproval;
 
+    private Long completeMaintanceWaitingForApproval;
+
     private Long needMaintanceWaitingForApproval;
 
     private Long reviewQualified;
 
     private Long reviewUnqualified;
+
+    public Long getCurrentWaitingForExecuting() {
+        return currentWaitingForExecuting;
+    }
+
+    public void setCurrentWaitingForExecuting(Long currentWaitingForExecuting) {
+        this.currentWaitingForExecuting = currentWaitingForExecuting;
+    }
 
     public Long getComplete() {
         return complete;
@@ -106,6 +126,30 @@ public class StatTodayEquipmentTasksResponse {
 
     public void setCompleteMaintance(Long completeMaintance) {
         this.completeMaintance = completeMaintance;
+    }
+
+    public Long getCurrentWaitingForApproval() {
+        return currentWaitingForApproval;
+    }
+
+    public void setCurrentWaitingForApproval(Long currentWaitingForApproval) {
+        this.currentWaitingForApproval = currentWaitingForApproval;
+    }
+
+    public Long getReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(Long reviewed) {
+        this.reviewed = reviewed;
+    }
+
+    public Long getCompleteMaintanceWaitingForApproval() {
+        return completeMaintanceWaitingForApproval;
+    }
+
+    public void setCompleteMaintanceWaitingForApproval(Long completeMaintanceWaitingForApproval) {
+        this.completeMaintanceWaitingForApproval = completeMaintanceWaitingForApproval;
     }
 
     @Override

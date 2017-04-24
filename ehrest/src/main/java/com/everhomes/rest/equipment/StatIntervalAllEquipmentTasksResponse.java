@@ -8,7 +8,11 @@ import com.everhomes.util.StringHelper;
  *     <li>waitingForExecuting: 待执行任务</li>
  *     <li>inMaintance: 整改中任务</li>
  *     <li>complete: 已执行完成任务</li>
+ *     <li>completeInspection: 巡检完成</li>
+ *     <li>completeMaintance: 整改完成任务</li>
  *     <li>delay: 已延误任务</li>
+ *     <li>delayInspection: 巡检延误任务</li>
+ *     <li>delayMaintance: 整改延误任务</li>
  *     <li>reviewTasks: 审核任务总数</li>
  *     <li>unReviewedTasks: 待审核任务</li>
  *     <li>reviewedTasks: 已审核任务</li>
@@ -28,7 +32,15 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     private Long complete;
 
+    private Long completeInspection;
+
+    private Long completeMaintance;
+
     private Long delay;
+
+    private Long delayInspection;
+
+    private Long delayMaintance;
 
     private Long reviewTasks;
 
@@ -128,6 +140,38 @@ public class StatIntervalAllEquipmentTasksResponse {
 
     public void setWaitingForExecuting(Long waitingForExecuting) {
         this.waitingForExecuting = waitingForExecuting;
+    }
+
+    public Long getCompleteInspection() {
+        return completeInspection;
+    }
+
+    public void setCompleteInspection(Long completeInspection) {
+        this.completeInspection = completeInspection;
+    }
+
+    public Long getCompleteMaintance() {
+        return completeMaintance;
+    }
+
+    public void setCompleteMaintance(Long completeMaintance) {
+        this.completeMaintance = completeMaintance;
+    }
+
+    public Long getDelayInspection() {
+        return delayInspection;
+    }
+
+    public void setDelayInspection(Long delayInspection) {
+        this.delayInspection = delayInspection;
+    }
+
+    public Long getDelayMaintance() {
+        return delayMaintance;
+    }
+
+    public void setDelayMaintance(Long delayMaintance) {
+        this.delayMaintance = delayMaintance;
     }
 
     @Override

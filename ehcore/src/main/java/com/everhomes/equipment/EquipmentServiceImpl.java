@@ -3682,6 +3682,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting() + response.getInMaintance());
+		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval() + response.getCompleteMaintanceWaitingForApproval() + response.getNeedMaintanceWaitingForApproval());
+		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
 		return response;
 	}
 
@@ -3700,7 +3703,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		response.setCompleteMaintance(statTasks.getCompleteMaintance());
 		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
 		response.setReviewQualified(reviewStat.getQualifiedTasks());
-
+		response.setReviewed(response.getReviewQualified()+response.getReviewUnqualified());
 		return response;
 	}
 

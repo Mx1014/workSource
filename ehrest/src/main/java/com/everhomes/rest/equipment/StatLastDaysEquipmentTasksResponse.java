@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>completeInspection: 巡检完成</li>
  *     <li>reviewQualified: 审核通过</li>
  *     <li>reviewUnqualified: 审核不通过</li>
+ *     <li>reviewed: 审核任务</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
@@ -23,6 +24,8 @@ public class StatLastDaysEquipmentTasksResponse {
     private Long reviewQualified;
 
     private Long reviewUnqualified;
+    
+    private Long reviewed;
 
     public Long getComplete() {
         return complete;
@@ -64,7 +67,15 @@ public class StatLastDaysEquipmentTasksResponse {
         this.completeMaintance = completeMaintance;
     }
 
-    @Override
+    public Long getReviewed() {
+		return reviewed;
+	}
+
+	public void setReviewed(Long reviewed) {
+		this.reviewed = reviewed;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

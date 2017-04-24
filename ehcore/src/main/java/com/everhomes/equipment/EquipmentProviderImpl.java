@@ -2182,10 +2182,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		TasksStatData resp = new TasksStatData();
 
 		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode()), EquipmentTaskStatus.DELAY.getCode());
+
+		Condition delayInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode());
+		delayInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.COMPLETE_DELAY.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_DELAY.getCode()));
+		final Field<Byte> delayInspection = DSL.decode().when(delayInspectionCondition, EquipmentTaskStatus.DELAY.getCode());
+
+		Condition delayMaintanceCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.DELAY.getCode());
+		delayMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_DELAY.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode()));
+		final Field<Byte> delayMaintance = DSL.decode().when(delayMaintanceCondition, EquipmentTaskStatus.DELAY.getCode());
+
 		final Field<Byte> reviewDelay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.REVIEW_DELAY.getCode()), ReviewResult.REVIEW_DELAY.getCode());
 		final Field<Byte> waitingForExecuting = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()), EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		final Field<Byte> needMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()), EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+
 		Condition completeMaintanceCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
 		if(startTime != null && endTime != null) {
 			completeMaintanceCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_TIME.between(startTime, endTime));
@@ -2196,6 +2206,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 		final Field<Byte> completeMaintance = DSL.decode().when(completeMaintanceCondition, EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+
 		Condition completeInspectionCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(EquipmentTaskResult.COMPLETE_OK.getCode());
 		if(startTime != null && endTime != null) {
 			completeInspectionCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_TIME.between(startTime, endTime));
@@ -2206,15 +2217,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 		final Field<Byte> completeInspection = DSL.decode().when(completeInspectionCondition, EquipmentTaskResult.COMPLETE_OK.getCode());
-		Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode(),EquipmentTaskResult.COMPLETE_OK.getCode());
+
+		Condition completeWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(EquipmentTaskResult.COMPLETE_OK.getCode());
 		completeWaitingForApprovalCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-		final Field<Byte> completeWaitingForApproval = DSL.decode().when(completeWaitingForApprovalCondition, ReviewResult.NONE.getCode());
+		final Field<Byte> completeInspectionWaitingForApproval = DSL.decode().when(completeWaitingForApprovalCondition, ReviewResult.NONE.getCode());
+
+		Condition completeMaintanceWaitingForApprovalCondition = Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+		completeMaintanceWaitingForApprovalCondition.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
+		final Field<Byte> completeMaintanceWaitingForApproval = DSL.decode().when(completeMaintanceWaitingForApprovalCondition, ReviewResult.NONE.getCode());
 
 		final Field<?>[] fields = {DSL.count().as("total"),DSL.count(waitingForExecuting).as("waitingForExecuting"),
 				DSL.count(inMaintance).as("inMaintance"), DSL.count(needMaintance).as("needMaintance"),
 				DSL.count(completeInspection).as("completeInspection"), DSL.count(completeMaintance).as("completeMaintance"),
-				DSL.count(completeWaitingForApproval).as("completeWaitingForApproval"), DSL.count(delay).as("delay"),
-				DSL.count(reviewDelay).as("reviewDelay")};
+				DSL.count(completeInspectionWaitingForApproval).as("completeInspectionWaitingForApproval"),
+				DSL.count(completeMaintanceWaitingForApproval).as("completeMaintanceWaitingForApproval"),
+				DSL.count(delay).as("delay"), DSL.count(reviewDelay).as("reviewDelay"),
+				DSL.count(delayInspection).as("delayInspection"), DSL.count(delayMaintance).as("delayMaintance")};
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
@@ -2238,13 +2256,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			resp.setCompleteInspection(r.getValue("completeInspection", Long.class));
 			resp.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
 			resp.setComplete(resp.getCompleteInspection()+resp.getCompleteMaintance());
-			resp.setCompleteWaitingForApproval(r.getValue("completeWaitingForApproval", Long.class));
+			resp.setCompleteWaitingForApproval(r.getValue("completeInspectionWaitingForApproval", Long.class));
+			resp.setCompleteMaintanceWaitingForApproval(r.getValue("completeMaintanceWaitingForApproval", Long.class));
 			resp.setInMaintance(r.getValue("inMaintance", Long.class));
 			resp.setNeedMaintanceWaitingForApproval(r.getValue("needMaintance", Long.class));
 			resp.setWaitingForExecuting(r.getValue("waitingForExecuting", Long.class));
 			resp.setTotalTasks(r.getValue("total", Long.class));
 			resp.setDelay(r.getValue("delay", Long.class));
 			resp.setReviewDelayTasks(r.getValue("reviewDelay", Long.class));
+			resp.setDelayInspection(r.getValue("delayInspection", Long.class));
+			resp.setDelayMaintance(r.getValue("delayMaintance", Long.class));
 			return null;
 		});
 		return resp;
