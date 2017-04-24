@@ -5585,6 +5585,9 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd) {
+
+		checkCompanyIdIsNull(cmd.getOrganizationId());
+		cmd.setOrganizationId(getTopEnterpriseId(cmd.getOrganizationId()));
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		CheckPunchAdminResponse response = new CheckPunchAdminResponse();
 		response.setIsAdminFlag(NormalFlag.NO.getCode());
