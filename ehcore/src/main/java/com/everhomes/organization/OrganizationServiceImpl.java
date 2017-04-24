@@ -1994,7 +1994,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("organization member is not found.contactId=" + cmd.getId() + ",userId=" + user.getId());
 		}
 		else{
-			Long enterpriseId = member.getOrganizationId();
 			List<OrganizationMember> members = new ArrayList<>();
 
 			//查询出人员在这个组织架构的所有关系
@@ -2003,7 +2002,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(path.indexOf("/", 1) > 0){
 					path = path.substring(0, path.indexOf("/", 1));
 				}
-				enterpriseId = Long.valueOf(path.substring(1));
 				 members.addAll(organizationProvider.listOrganizationMemberByPath(path, null, member.getContactToken()));
 			//查询当前节点的机构所属公司的所有机构跟人员的关系
 			}else if(DeleteOrganizationContactScopeType.CHILD_ENTERPRISE == DeleteOrganizationContactScopeType.fromCode(cmd.getScopeType())){
@@ -2011,7 +2009,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
 					org = checkOrganization(org.getDirectlyEnterpriseId());
 				}
-				enterpriseId = org.getId();
 				members.addAll(organizationProvider.listOrganizationMemberByPath(org.getPath(), null, member.getContactToken()));
 			//人员跟当前节点机构的关系
 			}else{
@@ -8219,10 +8216,27 @@ System.out.println();
 
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
+		List<OrganizationMember> members = new ArrayList<>();
+		String path = "";
+		//查询出人员在这个组织架构的所有关系
+		if(DeleteOrganizationContactScopeType.ALL_NOTE == DeleteOrganizationContactScopeType.fromCode(cmd.getScopeType())){
+			if(path.indexOf("/", 1) > 0){
+				path = path.substring(0, path.indexOf("/", 1));
+			}
+			members.addAll(organizationProvider.listOrganizationMemberByPath(path, null, cmd.getContactToken()));
+			//查询当前节点的机构所属公司的所有机构跟人员的关系
+		}else if(DeleteOrganizationContactScopeType.CHILD_ENTERPRISE == DeleteOrganizationContactScopeType.fromCode(cmd.getScopeType())){
+			if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(organization.getGroupType())){
+				organization = checkOrganization(organization.getDirectlyEnterpriseId());
+				path = organization.getPath();
+			}
+			//人员跟当前节点机构的关系
+		}else{
+			path = organization.getPath();
+		}
+		members.addAll(organizationProvider.listOrganizationMemberByPath(path, null, cmd.getContactToken()));
 
-		OrganizationMemberLog dbLog = dbProvider.execute((TransactionStatus status) -> {
-
-			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(organization.getPath(), null, cmd.getContactToken());
+		dbProvider.execute((TransactionStatus status) -> {
 
 			for (OrganizationMember m: members) {
 				deleteOrganizationMember(m);
