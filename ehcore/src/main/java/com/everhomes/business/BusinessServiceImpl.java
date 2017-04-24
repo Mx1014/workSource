@@ -51,6 +51,7 @@ import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.region.*;
+import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
@@ -2307,6 +2308,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd) {
 		SceneTokenDTO sceneTokenDto = WebTokenGenerator.getInstance().fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		Integer namespaceId = sceneTokenDto.getNamespaceId();;
+		SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
 		
 		String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_SEARCH_SHOPS_API, "");
 
@@ -2338,6 +2340,11 @@ public class BusinessServiceImpl implements BusinessService {
             SearchShopsResponse searchShopsResponse = (SearchShopsResponse) StringHelper.fromJsonString(jsonStr, SearchShopsResponse.class);
 
             if(searchShopsResponse != null && searchShopsResponse.getResult() && searchShopsResponse.getBody() != null){
+            	searchShopsResponse.getBody().getRows().forEach(r ->{
+            		r.setSearchTypeId(searchType.getId());
+        			r.setSearchTypeName(searchType.getName());
+        			r.setContentType(searchType.getContentType());
+            	});
             	response.setShopDTOs(searchShopsResponse.getBody().getRows());
             	
             	if(searchShopsResponse.getBody().getHasNext())
@@ -2359,6 +2366,8 @@ public class BusinessServiceImpl implements BusinessService {
 //                }
 //                reponse.setEntities(dtoList);
 //            }
+            
+            
             return response;
         } catch (Exception e) {
             // e.printStackTrace();

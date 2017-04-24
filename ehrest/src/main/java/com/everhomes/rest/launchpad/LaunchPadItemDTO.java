@@ -36,6 +36,9 @@ import com.everhomes.util.StringHelper;
  * <li>editFlag: 是否可编辑,0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
  * <li>aliasIconUri: 图标别名uri。现在用于搜索结果页面，原有iconUri有圆形、方形等，展现风格不一致。应对这样的场景增加aliasIconUri，存储圆形默认图片。搜索功能模块当它不为空时用它替换iconUri， 返回客户端的是统一风格的iconUri。 add by yanjun 20170420</li>
  * <li>aliasIconUrl:  图标别名url。逻辑同aliasIconUri</li>
+ * <li>searchTypeId: 内容类型id</li>
+ * <li>searchTypeName: 内容类型名称</li>
+ * <li>contentType: 内容类型</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -68,6 +71,10 @@ public class LaunchPadItemDTO {
     private Integer moreOrder;
     private String  aliasIconUri;
     private String  aliasIconUrl;
+    
+    private Long searchTypeId;
+	private String searchTypeName;
+	private String contentType;
 
     public String getSelectedIconUri() {
 		return selectedIconUri;
@@ -299,6 +306,31 @@ public class LaunchPadItemDTO {
 	public void setAliasIconUrl(String aliasIconUrl) {
 		this.aliasIconUrl = aliasIconUrl;
 	}
+	
+	public Long getSearchTypeId() {
+		return searchTypeId;
+	}
+
+	public void setSearchTypeId(Long searchTypeId) {
+		this.searchTypeId = searchTypeId;
+	}
+
+	public String getSearchTypeName() {
+		return searchTypeName;
+	}
+
+	public void setSearchTypeName(String searchTypeName) {
+		this.searchTypeName = searchTypeName;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
 	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this,new String[]{"id","scopeType","scopeId","applyPolicy"} );
