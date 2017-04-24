@@ -30,6 +30,7 @@ import javax.swing.text.AbstractDocument.Content;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -39,6 +40,9 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataValidation;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataValidations;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataValidationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5417,9 +5421,12 @@ public class PunchServiceImpl implements PunchService {
         // 设置数据有效性加载在哪个单元格上,四个参数分别是：起始行、终止行、起始列、终止列  
         CellRangeAddressList regions = new CellRangeAddressList(firstRow,  
                 endRow, firstCol, endCol);  
-        // 数据有效性对象  
+        // 数据有效性对象    
+        CTDataValidation newDataValidation = CTDataValidation.Factory.newInstance();
+        newDataValidation.setType(STDataValidationType.LIST);
+        newDataValidation.setFormula1(constraint.getFormula1());
         XSSFDataValidation data_validation_list = new XSSFDataValidation(  constraint,
-                regions, null );  
+                regions, newDataValidation );  
         sheet.addValidationData(data_validation_list);  
         return sheet;  
     }  
@@ -5582,7 +5589,8 @@ public class PunchServiceImpl implements PunchService {
 		CheckPunchAdminResponse response = new CheckPunchAdminResponse();
 		response.setIsAdminFlag(NormalFlag.NO.getCode());
 		try{
-			if(resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
+			if(resolver.checkSuperAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()) 
+					|| resolver.checkOrganizationAdmin(UserContext.current().getUser().getId(), cmd.getOrganizationId()))
 				response.setIsAdminFlag(NormalFlag.YES.getCode());
 		}
 		catch(Exception e){
