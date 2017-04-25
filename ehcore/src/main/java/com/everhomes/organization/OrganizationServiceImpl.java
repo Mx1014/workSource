@@ -4946,7 +4946,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 						cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "/%");
 						cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
 					}
-					query.addConditions(cond);
+					if(null != cond)
+						query.addConditions(cond);
 				}else{
 					groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 					groupTypes.add(OrganizationGroupType.GROUP.getCode());
