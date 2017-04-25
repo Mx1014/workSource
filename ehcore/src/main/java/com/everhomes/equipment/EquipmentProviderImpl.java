@@ -16,6 +16,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateUtils;
 
+import org.hibernate.criterion.Distinct;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -2347,7 +2348,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			String taskIds = r.getValue("taskIds", String.class);
 			String[] ids = taskIds.split(",");
 			if(ids != null && ids.length > 0) {
-				List<Long> tasks = new ArrayList<Long>();
+				Set<Long> tasks = new HashSet<Long>();
 				for (String id : ids) {
 					if(!StringUtils.isNullOrEmpty(id)) {
 						tasks.add(Long.valueOf(id));

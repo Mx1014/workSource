@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <ul>
@@ -34,7 +35,7 @@ public class ItemResultStat {
 
     private Double averageValue;
     @ItemType(Long.class)
-    private List<Long> abnormalTaskIds;
+    private Set<Long> abnormalTaskIds;
 
     public Double getAverageValue() {
         return averageValue;
@@ -84,11 +85,11 @@ public class ItemResultStat {
         this.valueType = valueType;
     }
 
-    public List<Long> getAbnormalTaskIds() {
+    public Set<Long> getAbnormalTaskIds() {
         return abnormalTaskIds;
     }
 
-    public void setAbnormalTaskIds(List<Long> abnormalTaskIds) {
+    public void setAbnormalTaskIds(Set<Long> abnormalTaskIds) {
         this.abnormalTaskIds = abnormalTaskIds;
     }
 
