@@ -45,6 +45,7 @@ CREATE TABLE `eh_express_users` (
   `express_company_id` BIGINT,
   `organization_id` BIGINT COMMENT 'the id of organization',
   `organization_member_id` BIGINT COMMENT 'the id of organization member',
+  `user_id` BIGINT,
   `status` TINYINT(4) NOT NULL COMMENT '0. inactive, 1. waiting for approval, 2. active',
   `creator_uid` BIGINT,
   `create_time` DATETIME,

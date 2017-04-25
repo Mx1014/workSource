@@ -240,6 +240,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkPrivilege(owner);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		ListExpressOrderCondition condition = ConvertHelper.convert(cmd, ListExpressOrderCondition.class);
 		condition.setPageSize(pageSize);
@@ -251,6 +252,11 @@ public class ExpressServiceImpl implements ExpressService {
 			nextPageAnchor = expressOrders.get(expressOrders.size()-1).getId();
 		}
 		return new ListExpressOrderResponse(nextPageAnchor, expressOrders.stream().map(this::convertToExpressOrderDTOForWebList).collect(Collectors.toList()));
+	}
+
+	private void checkPrivilege(ExpressOwner owner) {
+		//检查该用户是否在权限列表中
+		
 	}
 
 	private ExpressOrderDTO convertToExpressOrderDTOForWebList(ExpressOrder expressOrder) {
