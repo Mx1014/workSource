@@ -5524,7 +5524,8 @@ public class PunchServiceImpl implements PunchService {
 						"excel is wrong format.");
 			} 
 			PunchTimeRule timeRule = getTimeRuleByName(r.getB());
-			ps.setPunchRuleId(timeRule.getId());
+			if(null != timeRule)
+				ps.setPunchRuleId(timeRule.getId());
 //			ps.(this.setAreaName(r.getB()));
 //			ps.setOrgName(this.getOrgName(r.getC()));
 //			ps.setOrgType(this.getOrgType(r.getD()));
