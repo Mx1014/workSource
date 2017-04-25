@@ -17,6 +17,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.express.ExpressOwnerType;
 import com.everhomes.rest.express.ListExpressUserCondition;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -73,6 +74,21 @@ public class ExpressUserProviderImpl implements ExpressUserProvider {
 			.and(Tables.EH_EXPRESS_USERS.ORGANIZATION_MEMBER_ID.eq(organizationMemberId))
 			.fetchOne();
 			
+		return record == null ? null : ConvertHelper.convert(record, ExpressUser.class);
+	}
+
+	@Override
+	public ExpressUser findExpressUserByUserId(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId,
+			Long userId, Long serviceAddressId, Long expressCompanyId) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_EXPRESS_USERS)
+				.where(Tables.EH_EXPRESS_USERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_EXPRESS_USERS.OWNER_TYPE.eq(ownerType.getCode()))
+				.and(Tables.EH_EXPRESS_USERS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_EXPRESS_USERS.USER_ID.eq(userId))
+				.and(Tables.EH_EXPRESS_USERS.SERVICE_ADDRESS_ID.eq(serviceAddressId))
+				.and(Tables.EH_EXPRESS_USERS.EXPRESS_COMPANY_ID.eq(expressCompanyId))
+				.fetchOne();
+				
 		return record == null ? null : ConvertHelper.convert(record, ExpressUser.class);
 	}
 

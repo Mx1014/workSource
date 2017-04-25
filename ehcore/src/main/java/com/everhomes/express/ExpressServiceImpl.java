@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.security.acl.Owner;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,6 +19,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -68,9 +70,11 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -188,6 +192,7 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkAdmin(owner);
 		if (cmd.getExpressUsers() != null) {
 			dbProvider.execute(s->{
 				cmd.getExpressUsers().forEach(r->addExpressUser(owner, r, cmd));
@@ -196,12 +201,22 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 	}
 
+	private boolean checkAdmin(ExpressOwner owner) {
+		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(owner.getOwnerId());
+		if (organizationCommunityList != null && !organizationCommunityList.isEmpty()) {
+			Long organizationId = organizationCommunityList.get(0).getOrganizationId();
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			return resolver.checkSuperAdmin(owner.getUserId(), organizationId);
+		}
+		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error");
+	}
+	
 	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
 		if (createExpressUserDTO.getOrganizationId() == null || createExpressUserDTO.getOrganizationMemberId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressUser expressUser = null;
-		if ((expressUser = checkExistsExpressUser(owner, createExpressUserDTO)) != null) {
+		if ((expressUser = checkExistsExpressUser(owner, createExpressUserDTO, cmd)) != null) {
 			expressUser.setStatus(CommonStatus.ACTIVE.getCode());
 			expressUserProvider.updateExpressUser(expressUser);
 		}else {
@@ -213,13 +228,18 @@ public class ExpressServiceImpl implements ExpressService {
 			expressUser.setExpressCompanyId(cmd.getExpressCompanyId());
 			expressUser.setOrganizationId(createExpressUserDTO.getOrganizationId());
 			expressUser.setOrganizationMemberId(createExpressUserDTO.getOrganizationMemberId());
+			expressUser.setUserId(owner.getUserId());
 			expressUser.setStatus(CommonStatus.ACTIVE.getCode());
 			expressUserProvider.createExpressUser(expressUser);
 		}
 	}
 	
-	private ExpressUser checkExistsExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO) {
-		return expressUserProvider.findExpressUserByOrganizationMember(owner.getNamespaceId(), owner.getOwnerType().getCode(), owner.getOwnerId(), createExpressUserDTO.getOrganizationId(), createExpressUserDTO.getOrganizationMemberId());
+	private ExpressUser checkExistsExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
+		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), cmd.getServiceAddressId(), cmd.getExpressCompanyId());
+		if (expressUser.getOrganizationId().longValue() != createExpressUserDTO.getOrganizationId().longValue() || expressUser.getOrganizationMemberId().longValue() != createExpressUserDTO.getOrganizationMemberId().longValue()) {
+			return null;
+		}
+		return expressUser;
 	}
 
 	@Override
@@ -228,6 +248,7 @@ public class ExpressServiceImpl implements ExpressService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkAdmin(owner);
 		ExpressUser expressUser = expressUserProvider.findExpressUserById(cmd.getId());
 		if (expressUser == null || expressUser.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || !expressUser.getOwnerType().equals(owner.getOwnerType().getCode())
 				|| expressUser.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
@@ -240,7 +261,7 @@ public class ExpressServiceImpl implements ExpressService {
 	@Override
 	public ListExpressOrderResponse listExpressOrder(ListExpressOrderCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
-		checkPrivilege(owner);
+		checkPrivilege(owner, cmd.getServiceAddressId(), cmd.getExpressCompanyId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		ListExpressOrderCondition condition = ConvertHelper.convert(cmd, ListExpressOrderCondition.class);
 		condition.setPageSize(pageSize);
@@ -254,9 +275,14 @@ public class ExpressServiceImpl implements ExpressService {
 		return new ListExpressOrderResponse(nextPageAnchor, expressOrders.stream().map(this::convertToExpressOrderDTOForWebList).collect(Collectors.toList()));
 	}
 
-	private void checkPrivilege(ExpressOwner owner) {
+	private boolean checkPrivilege(ExpressOwner owner, Long serviceAddressId, Long expressCompanyId) {
 		//检查该用户是否在权限列表中
-		
+		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), serviceAddressId, expressCompanyId);
+		if (expressUser == null || CommonStatus.fromCode(expressUser.getStatus()) != CommonStatus.ACTIVE) {
+			//检查是否为管理员
+			return checkAdmin(owner);
+		}
+		return true;
 	}
 
 	private ExpressOrderDTO convertToExpressOrderDTOForWebList(ExpressOrder expressOrder) {
@@ -283,10 +309,12 @@ public class ExpressServiceImpl implements ExpressService {
 		if (cmd.getId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if (expressOrder != null) {
-			return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
+			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId()) || expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue()) {
+				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
+			}
 		}
 		return null;
 	}
@@ -303,7 +331,6 @@ public class ExpressServiceImpl implements ExpressService {
 		return expressServiceAddress == null ? null : expressServiceAddress.getName();
 	}
 
-
 	@Override
 	public void updatePaySummary(UpdatePaySummaryCommand cmd) {
 		if (cmd.getId() == null) {
@@ -316,18 +343,20 @@ public class ExpressServiceImpl implements ExpressService {
 					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 			}
-			if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY || TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) == TrueOrFalseFlag.TRUE) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
+				if (ExpressOrderStatus.fromCode(expressOrder.getStatus()) != ExpressOrderStatus.WAITING_FOR_PAY || TrueOrFalseFlag.fromCode(expressOrder.getPaidFlag()) == TrueOrFalseFlag.TRUE) {
+					throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be waiting for paying");
+				}
+				ExpressActionEnum action = null;
+				if (expressOrder.getPaySummary() == null) {
+					action = ExpressActionEnum.CONFIRM_MONEY;
+				}else {
+					action = ExpressActionEnum.UPDATE_MONEY;
+				}
+				expressOrder.setPaySummary(cmd.getPaySummary());
+				expressOrderProvider.updateExpressOrder(expressOrder);
+				createExpressOrderLog(owner, action, expressOrder, expressOrder.getPaySummary().toString());
 			}
-			ExpressActionEnum action = null;
-			if (expressOrder.getPaySummary() == null) {
-				action = ExpressActionEnum.CONFIRM_MONEY;
-			}else {
-				action = ExpressActionEnum.UPDATE_MONEY;
-			}
-			expressOrder.setPaySummary(cmd.getPaySummary());
-			expressOrderProvider.updateExpressOrder(expressOrder);
-			createExpressOrderLog(owner, action, expressOrder, expressOrder.getPaySummary().toString());
 			return null;
 		});
 	}
@@ -413,22 +442,24 @@ public class ExpressServiceImpl implements ExpressService {
 					|| expressOrder.getOwnerId().longValue() != owner.getOwnerId().longValue()) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 			}
-			ExpressOrderStatus status = ExpressOrderStatus.fromCode(expressOrder.getStatus());
-			if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.PRINTED) {
-				throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be paid or printed");
-			}
-			if (expressOrder.getBillNo() == null) {
-				ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
-				if (handler != null) {
-					// 每个快递公司返回的快递单号通过各自的handler获取
-					expressOrder.setPrintTime(new Timestamp(DateHelper.currentGMTTime().getTime())); //打印时间，需要传给ems
-					String billNo = handler.getBillNo(expressOrder);
-					expressOrder.setBillNo(billNo);
+			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
+				ExpressOrderStatus status = ExpressOrderStatus.fromCode(expressOrder.getStatus());
+				if (status != ExpressOrderStatus.PAID && status != ExpressOrderStatus.PRINTED) {
+					throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.STATUS_ERROR, "order status must be paid or printed");
 				}
-				expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
-				expressOrderProvider.updateExpressOrder(expressOrder);
+				if (expressOrder.getBillNo() == null) {
+					ExpressHandler handler = getExpressHandler(expressOrder.getExpressCompanyId());
+					if (handler != null) {
+						// 每个快递公司返回的快递单号通过各自的handler获取
+						expressOrder.setPrintTime(new Timestamp(DateHelper.currentGMTTime().getTime())); //打印时间，需要传给ems
+						String billNo = handler.getBillNo(expressOrder);
+						expressOrder.setBillNo(billNo);
+					}
+					expressOrder.setStatus(ExpressOrderStatus.PRINTED.getCode());
+					expressOrderProvider.updateExpressOrder(expressOrder);
+				}
+				createExpressOrderLog(owner, ExpressActionEnum.PRINT, expressOrder, null);
 			}
-			createExpressOrderLog(owner, ExpressActionEnum.PRINT, expressOrder, null);
 			return null;
 		});
 	}
