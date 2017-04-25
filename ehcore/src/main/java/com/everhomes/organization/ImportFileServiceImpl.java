@@ -88,8 +88,8 @@ public class ImportFileServiceImpl implements ImportFileService{
                 for (ImportFileResultLog log: logs) {
                     log.setErrorDescription(localeStringService.getLocalizedString(log.getScope(), log.getCode().toString(), user.getLocale(), ""));
                 }
-                response.setImportStatus(task.getStatus());
             }
+            response.setImportStatus(task.getStatus());
         }
 
         return response;
