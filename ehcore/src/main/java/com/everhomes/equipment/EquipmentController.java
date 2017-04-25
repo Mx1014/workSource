@@ -997,14 +997,14 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("exportEquipmentsCard")
 	@RestReturn(value = String.class)
-	public RestResponse exportEquipmentsCard(ExportEquipmentsCardCommand cmd) {
+	public RestResponse exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response) {
 
-		equipmentService.exportEquipmentsCard(cmd);
+		equipmentService.exportEquipmentsCard(cmd, response);
 
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
+		RestResponse resp = new RestResponse();
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
 	}
 
 	/**

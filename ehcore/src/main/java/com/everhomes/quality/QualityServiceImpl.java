@@ -2733,6 +2733,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
 		CountScoresResponse response = new CountScoresResponse();
+		//查列 add by xiongying 20170425
+
 		List<ScoreGroupByTargetDTO> scoresByTarget= new ArrayList<ScoreGroupByTargetDTO>();
 		
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();

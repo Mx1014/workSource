@@ -2311,10 +2311,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		final Field<Byte> abnormalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.ABNORMAL.getCode()), ItemResultNormalFlag.ABNORMAL.getCode());
 		final Field<Byte> normalTimes = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.NORMAL_FLAG.eq(ItemResultNormalFlag.NORMAL.getCode()), ItemResultNormalFlag.NORMAL.getCode());
-		final Field<Double> averageValue = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE_TYPE.eq(ItemValueType.RANGE.getCode()), StringUtils.isNullOrEmpty(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()) ? 0.0 : Double.valueOf(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE.toString()));
+		final Field<String> averageValue = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE_TYPE.eq(ItemValueType.RANGE.getCode()), Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_VALUE);
 		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_NAME,
 				DSL.count(abnormalTimes).as("abnormalTimes"), DSL.count(normalTimes).as("normalTimes"),
-				DSL.avg(averageValue).as("averageValue"),DSL.groupConcat(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.TASK_ID).as("taskIds")};
+				DSL.groupConcat(averageValue).as("averageValue"),DSL.groupConcat(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.TASK_ID).as("taskIds")};
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS);
@@ -2343,7 +2343,6 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			result.setItemId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_ID));
 			result.setItemName(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ITEM_NAME));
 			result.setAbnormalTimes(r.getValue("abnormalTimes", Long.class));
-			result.setAverageValue(r.getValue("averageValue", Double.class));
 			result.setNormalTimes(r.getValue("normalTimes", Long.class));
 			String taskIds = r.getValue("taskIds", String.class);
 			String[] ids = taskIds.split(",");
@@ -2356,6 +2355,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				}
 				result.setAbnormalTaskIds(tasks);
 			}
+			String value = r.getValue("averageValue", String.class);
+			String[] values = value.split(",");
+			if(values != null && values.length > 0) {
+				Double average = 0.0;
+				for(String v : values) {
+					average = average + Double.valueOf(v);
+				}
+
+				average = average/values.length + average%values.length;
+				result.setAverageValue(average);
+			}
+
 			results.add(result);
 			return null;
 		});

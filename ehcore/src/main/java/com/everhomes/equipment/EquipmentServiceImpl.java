@@ -3583,12 +3583,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return response;
 	}
 
-	public void exportEquipmentsCard(ExportEquipmentsCardCommand cmd) {
+	public void exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response) {
 		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(cmd.getIds());
 		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
 			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
 			return dto;
 		}).collect(Collectors.toList());
+
+		String filePath = cmd.getFilePath();
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			URL rootPath = EquipmentServiceImpl.class.getResource("/");
+			filePath = rootPath.getPath() + this.downloadDir ;
+			File file = new File(filePath);
+			if(!file.exists())
+				file.mkdirs();
+
+		}
+
+//		return download(filePath,response);
 
 		DocUtil docUtil=new DocUtil();
 		if(dtos.size() % 2 == 1) {
@@ -3611,9 +3623,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 				dataMap.put("qrCode", encoder.encode(data));
 			}
 
-			String savePath = cmd.getFilePath() + dto.getId()+ "-" + dto.getName() + ".doc";
+			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
+//			String realPath = request.getSession().getServletContext().getRealPath("/")+"/";
 			docUtil.createDoc(dataMap, "shenye", savePath);
 
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+				download(filePath,response);
+			}
 			dtos.remove(dtos.size() - 1);
 		}
 
@@ -3646,9 +3662,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 				dataMap.put("qrCode2", encoder.encode(data));
 			}
 
-			String savePath = cmd.getFilePath() + dto1.getId()+ "-" + dto1.getName() +
+			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
 					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
 			docUtil.createDoc(dataMap, "shenye2", savePath);
+
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+				download(filePath,response);
+			}
 		}
 		docUtil.closeHttpConn();
 	}
@@ -3753,8 +3773,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				begin, end);
 		results.forEach(result -> {
 			EquipmentInspectionItems item = equipmentProvider.findEquipmentInspectionItem(result.getItemId());
-			result.setValueJason(item.getValueJason());
-			result.setValueType(item.getValueType());
+			if(item != null) {
+				result.setValueJason(item.getValueJason());
+				result.setValueType(item.getValueType());
+			}
 		});
 		response.setItemResultStat(results);
 		return response;
