@@ -30,6 +30,9 @@ import javax.swing.text.AbstractDocument.Content;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.apache.poi.hssf.usermodel.DVConstraint;
+import org.apache.poi.hssf.usermodel.HSSFDataValidation;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -194,6 +197,11 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Service
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="\\download\\";
+	private static final String PUNCH_STATUS_SCOPE ="punch.status";
+	private static final String PUNCH_EXCEL_SCOPE ="punch.excel";
+	private static final String EXCEL_SCHEDULE = "schedule";
+	private static final String EXCEL_RULE = "rule";
+	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
  
@@ -270,7 +278,6 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 	}
-	private static final String PUNCH_STATUS_SCOPE ="punch.status";
 	/**
 	 * <ul>审批后的状态
 	 *<li>HALFOUTWORK(13):  半天公出</li>
@@ -3798,7 +3805,8 @@ public class PunchServiceImpl implements PunchService {
 		} 
 		return response;
 	}
-	private Long getTopEnterpriseId(Long organizationId){
+	@Override
+	public Long getTopEnterpriseId(Long organizationId){
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
 		if(organization.getParentId() == null )
 			return organizationId;
@@ -5360,7 +5368,7 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub
 			if (null == listPunchScheduling ||  listPunchScheduling.getSchedulings().size() == 0)
 				return;
-			Workbook wb = new XSSFWorkbook();
+			Workbook wb = new HSSFWorkbook();
 			Sheet sheet = wb.createSheet("sheet1");
 			
 			this.createPunchSchedulingsBookSheetHead(sheet );
@@ -5368,13 +5376,14 @@ public class PunchServiceImpl implements PunchService {
 			for(PunchTimeRule rule : targetTimeRules.get()){
 				textlist.add(rule.getName());
 			}
+			textlist.add("");
 			//设置格式
 			String[] a = {};
 			
-//			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
 			
 			for (PunchSchedulingDTO statistic : listPunchScheduling.getSchedulings() )
-				setNewPunchSchedulingsBookRow(sheet, statistic);
+				setNewPunchSchedulingsBookRow(sheet, statistic,textlist);
+			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
 			try {
 				
 				FileOutputStream out = new FileOutputStream(filePath);
@@ -5392,14 +5401,28 @@ public class PunchServiceImpl implements PunchService {
 		 
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
-		 
-		row.createCell(++i).setCellValue("date");
-		row.createCell(++i).setCellValue("rule");
+
+		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
+				UserContext.current().getUser().getLocale());
+
+		LocaleString ruleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_RULE ,
+				UserContext.current().getUser().getLocale());
+		row.createCell(++i).setCellValue(scheduleLocaleString==null?"":scheduleLocaleString.getText());
+		row.createCell(++i).setCellValue(ruleLocaleString==null?"":ruleLocaleString.getText());
 	}
-	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingDTO dto) { 
+	private void setNewPunchSchedulingsBookRow(Sheet sheet, PunchSchedulingDTO dto, ArrayList<String> textlist) { 
 		Row row = sheet.createRow(sheet.getLastRowNum()+1);
 		int i = -1; 
 		row.createCell(++i).setCellValue(dateSF.get().format(new Date(dto.getRuleDate())));
+//		Label subLabel = new Label(t, td, "");  
+//        WritableCellFeatures wcf = new WritableCellFeatures();  
+//        List angerlist = new ArrayList();  
+//        angerlist.add("电话");//可从数据库中取出  
+//        angerlist.add("手机");  
+//        angerlist.add("呼机");  
+//        wcf.setDataValidationList(angerlist);  
+//        subLabel.setCellFeatures(wcf);  
+//        ws.addCell(subLabel);  
 		row.createCell(++i).setCellValue(null == dto.getTimeRuleId()?"":getTimeRuleById(dto.getTimeRuleId()).getName());
 	}
 	/** 
@@ -5422,19 +5445,31 @@ public class PunchServiceImpl implements PunchService {
     public static Sheet setHSSFValidation(Sheet sheet,  
             String[] textlist, int firstRow, int endRow, int firstCol,  
             int endCol) {  
-        // 加载下拉列表内容  
-    	XSSFDataValidationConstraint constraint = new XSSFDataValidationConstraint(textlist);  
-        // 设置数据有效性加载在哪个单元格上,四个参数分别是：起始行、终止行、起始列、终止列  
-        CellRangeAddressList regions = new CellRangeAddressList(firstRow,  
-                endRow, firstCol, endCol);  
-        // 数据有效性对象    
-        CTDataValidation newDataValidation = CTDataValidation.Factory.newInstance();
-        newDataValidation.setType(STDataValidationType.LIST);
-        newDataValidation.setFormula1(constraint.getFormula1());
-        XSSFDataValidation data_validation_list = new XSSFDataValidation(  constraint,
-                regions, newDataValidation );  
-        sheet.addValidationData(data_validation_list);  
-        return sheet;  
+//        // 加载下拉列表内容  
+//    	XSSFDataValidationConstraint constraint = new XSSFDataValidationConstraint(textlist);  
+//        // 设置数据有效性加载在哪个单元格上,四个参数分别是：起始行、终止行、起始列、终止列  
+//        CellRangeAddressList regions = new CellRangeAddressList(firstRow,  
+//                endRow, firstCol, endCol);  
+//        // 数据有效性对象    
+//        CTDataValidation newDataValidation = CTDataValidation.Factory.newInstance();
+//        newDataValidation.setType(STDataValidationType.LIST);
+//        newDataValidation.setFormula1(constraint.getFormula1());
+//        XSSFDataValidation data_validation_list = new XSSFDataValidation(  constraint,
+//                regions, newDataValidation );  
+//        sheet.addValidationData(data_validation_list);  
+//        return sheet;  
+        // 构造constraint对象
+        DVConstraint constraint = DVConstraint
+                .createCustomFormulaConstraint("BB1");
+        // 四个参数分别是：起始行、终止行、起始列、终止列
+        CellRangeAddressList regions = new CellRangeAddressList(firstRow,
+                endRow, firstCol, endCol);
+        // 数据有效性对象
+        HSSFDataValidation data_validation_view = new HSSFDataValidation(
+                regions, constraint);
+        data_validation_view.createPromptBox("title", "content");
+        sheet.addValidationData(data_validation_view);
+        return sheet;
     }  
   
     
@@ -5532,7 +5567,7 @@ public class PunchServiceImpl implements PunchService {
 			} 
 			PunchTimeRule timeRule = getTimeRuleByName(r.getB());
 			if(null != timeRule)
-				ps.setPunchRuleId(timeRule.getId());
+				ps.setTimeRuleId(timeRule.getId());
 //			ps.(this.setAreaName(r.getB()));
 //			ps.setOrgName(this.getOrgName(r.getC()));
 //			ps.setOrgType(this.getOrgType(r.getD()));

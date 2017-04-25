@@ -430,7 +430,21 @@ public class PunchAdminController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse importPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "attachment") MultipartFile[] files) {
     	punchService.importPunchScheduling(cmd , files);
-        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /punch/testimportPunchScheduling</b>
+     * <p>导入某个月的班次</p>
+     */
+    @RequestMapping("testimportPunchScheduling")
+    @RestReturn(value = String.class)
+    public RestResponse testimportPunchScheduling(@Valid ListPunchRulesCommonCommand cmd , @RequestParam(value = "_attachment_file") MultipartFile[] files) {
+    	punchService.importPunchScheduling(cmd , files);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
