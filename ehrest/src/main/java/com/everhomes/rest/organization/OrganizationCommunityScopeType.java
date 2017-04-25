@@ -4,13 +4,13 @@ package com.everhomes.rest.organization;
  * <p>入住节点范围</p>
  * <ul>
  * <li>CURRENT("current"): 当前节点</li>
- * <li>CURRENT_CHILD("curent_child"): 当前节点以及子节点</li>
- * <li>CURRENT_LEVEL_CHILD("curent_level_child"): 当前节点、同级节以及子节点</li>
+ * <li>CURRENT_CHILD("current_child"): 当前节点以及子节点</li>
+ * <li>CURRENT_LEVEL_CHILD("current_level_child"): 当前节点、同级节以及子节点</li>
  * </ul>
  */
 public enum OrganizationCommunityScopeType {
 
-    CURRENT("current"), CURRENT_CHILD("curent_child"), CURRENT_LEVEL_CHILD("curent_level_child");
+    CURRENT("current"), CURRENT_CHILD("current_child"), CURRENT_LEVEL_CHILD("current_level_child");
 
 	private String code;
 
