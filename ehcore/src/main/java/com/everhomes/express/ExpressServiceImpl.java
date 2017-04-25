@@ -255,6 +255,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	private ExpressOrderDTO convertToExpressOrderDTOForWebList(ExpressOrder expressOrder) {
 		ExpressOrderDTO expressOrderDTO = new ExpressOrderDTO();
+		expressOrderDTO.setId(expressOrder.getId());
 		expressOrderDTO.setSendName(expressOrder.getSendName());
 		expressOrderDTO.setSendPhone(expressOrder.getSendPhone());
 		expressOrderDTO.setExpressCompanyName(getExpressCompany(expressOrder.getExpressCompanyId()));
@@ -658,6 +659,7 @@ public class ExpressServiceImpl implements ExpressService {
 
 	private ExpressOrderDTO convertToExpressOrderDTOForClientList(ExpressOrder expressOrder) {
 		ExpressOrderDTO expressOrderDTO = new ExpressOrderDTO();
+		expressOrderDTO.setId(expressOrder.getId());
 		expressOrderDTO.setBillNo(expressOrder.getBillNo());
 		expressOrderDTO.setSendCity(expressOrder.getSendCity());
 		expressOrderDTO.setSendName(expressOrder.getSendName());
