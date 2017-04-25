@@ -1045,9 +1045,9 @@ long id = sequenceProvider.getNextSequence(key);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		  
+		  // modify by wh 2017-4-25 order by punch date asc
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
-				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc()).fetch()
  				.map((r) -> {
  		            return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
  		        });

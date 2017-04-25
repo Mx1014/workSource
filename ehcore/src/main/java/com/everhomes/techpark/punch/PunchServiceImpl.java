@@ -176,6 +176,7 @@ import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
@@ -4382,7 +4383,12 @@ public class PunchServiceImpl implements PunchService {
 						continue;
 					userMonthLogsDTO.setPunchLogsDayList(new ArrayList<PunchLogsDay>());
 					ExceptionStatus exceptionStatus = ExceptionStatus.NORMAL;
+					userMonthLogsDTO.setUserStatus(PunchUserStatus.NORMAL.getCode());
 					for(PunchDayLog dayLog : punchDayLogs){
+						if(dayLog.getStatus().equals(PunchStatus.NONENTRY.getCode()) )
+							userMonthLogsDTO.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+						if(dayLog.getStatus().equals(PunchStatus.RESIGNED.getCode()) )
+							userMonthLogsDTO.setUserStatus(PunchUserStatus.RESIGNED.getCode());
 						PunchLogsDay pdl = ConvertHelper.convert(dayLog, PunchLogsDay.class);
 						Calendar logDay = Calendar.getInstance();
 						logDay.setTime(dayLog.getPunchDate());
