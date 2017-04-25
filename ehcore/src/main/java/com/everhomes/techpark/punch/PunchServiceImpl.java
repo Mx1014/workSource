@@ -4393,10 +4393,12 @@ public class PunchServiceImpl implements PunchService {
 					ExceptionStatus exceptionStatus = ExceptionStatus.NORMAL;
 					userMonthLogsDTO.setUserStatus(PunchUserStatus.NORMAL.getCode());
 					for(PunchDayLog dayLog : punchDayLogs){
-						if(dayLog.getStatus().equals(PunchStatus.NONENTRY.getCode()) )
-							userMonthLogsDTO.setUserStatus(PunchUserStatus.NONENTRY.getCode());
-						if(dayLog.getStatus().equals(PunchStatus.RESIGNED.getCode()) )
-							userMonthLogsDTO.setUserStatus(PunchUserStatus.RESIGNED.getCode());
+						if(null != dayLog.getStatus()){
+							if(dayLog.getStatus().equals(PunchStatus.NONENTRY.getCode()) )
+								userMonthLogsDTO.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+							if(dayLog.getStatus().equals(PunchStatus.RESIGNED.getCode()) )
+								userMonthLogsDTO.setUserStatus(PunchUserStatus.RESIGNED.getCode());
+						}
 						PunchLogsDay pdl = ConvertHelper.convert(dayLog, PunchLogsDay.class);
 						Calendar logDay = Calendar.getInstance();
 						logDay.setTime(dayLog.getPunchDate());
