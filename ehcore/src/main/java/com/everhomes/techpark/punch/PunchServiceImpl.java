@@ -5469,6 +5469,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void importPunchScheduling(ListPunchRulesCommonCommand cmd ,MultipartFile[] files) {
 		// TODO Auto-generated method stub
+		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
 		ArrayList resultList = new ArrayList();
 		String rootPath = System.getProperty("user.dir");
 		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
