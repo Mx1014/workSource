@@ -1416,6 +1416,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionItemResults.class));
 		
 		result.setId(id);
+		result.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
 		LOGGER.info("createEquipmentInspectionItemResults: " + result);
 		
@@ -2364,7 +2365,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 					average = average + Double.valueOf(v);
 				}
 
-				average = average/values.length + average%values.length;
+				average = average/values.length;
 				result.setAverageValue(average);
 			}
 

@@ -1475,9 +1475,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentTaskDTO dto = updateEquipmentTasks(task, log, cmd.getAttachments());
 			List<InspectionItemResult> itemResults = cmd.getItemResults();
 			if(itemResults != null && itemResults.size() > 0) {
+
 				for(InspectionItemResult itemResult : itemResults) {
 					EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
 					result.setTaskLogId(log.getId());
+					result.setCommunityId(task.getTargetId());
+					result.setStandardId(task.getStandardId());
+					result.setEquipmentId(task.getEquipmentId());
+					result.setInspectionCategoryId(task.getInspectionCategoryId());
+//					result.setNamespaceId(task.getNamespaceId());
 					equipmentProvider.createEquipmentInspectionItemResults(result);
 				}
 			}
@@ -1497,6 +1503,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		equipmentProvider.updateEquipmentTask(task);
 		equipmentTasksSearcher.feedDoc(task);
+
+		log.setInspectionCategoryId(task.getInspectionCategoryId());
+		log.setCommunityId(task.getTargetId());
+//		log.setNamespaceId(task.getNamespaceId());
 		equipmentProvider.createEquipmentInspectionTasksLogs(log);
 		
 		User user = UserContext.current().getUser();
