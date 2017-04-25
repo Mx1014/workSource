@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.ActivityRoster;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -369,6 +370,72 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         dao.insert(feedback);
     }
 
+    @Override
+	public List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte status, int pageSize) {
+    	final List<Feedback> feedbacks = new ArrayList<>();
+
+        if(locator.getShardIterator() == null) {
+		    AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+		    ShardIterator shardIterator = new ShardIterator(accessSpec);
+		    locator.setShardIterator(shardIterator);
+        }
+
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+        	SelectQuery<EhFeedbacksRecord> query = context.selectQuery(Tables.EH_FEEDBACKS);
+        	Condition condition = Tables.EH_FEEDBACKS.NAMESPACE_ID.eq(namespaceId);
+        	if(status != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.STATUS.eq(status));
+        	}
+        	if(locator.getAnchor() != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.ID.lt(locator.getAnchor()));
+        	}
+        	query.addConditions(condition);
+        	query.addOrderBy(Tables.EH_FEEDBACKS.ID.desc());
+        	query.addLimit(pageSize);
+        	query.fetch().map((r) -> {
+        		feedbacks.add(ConvertHelper.convert(r, Feedback.class));
+        		return null;
+        	});
+        	if(feedbacks.size() >= pageSize) {
+        		locator.setAnchor(feedbacks.get(feedbacks.size() - 1).getId());
+        		return AfterAction.done;
+        	}
+        	return AfterAction.next;
+        });
+
+        return feedbacks;
+	}
+    
+    @Override
+	public void updateFeedback(Feedback feedback) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhUsers.class, feedback.getOwnerUid()));
+    	EhFeedbacksDao dao = new EhFeedbacksDao(context.configuration());
+    	dao.update(feedback);
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFeedbacksDao.class, feedback.getId());
+	}
+    
+    @Override
+    public Feedback findFeedbackById(Long id) {
+    	List<Feedback> feedbackList = new ArrayList<Feedback>();
+    	dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), feedbackList, (DSLContext context, Object reducingContext) -> {
+    		List<Feedback> list = context.select().from(Tables.EH_FEEDBACKS)
+    				.where(Tables.EH_FEEDBACKS.ID.eq(id))
+    				.fetch().map((r) -> {
+    					return ConvertHelper.convert(r, Feedback.class);
+    				});
+
+    		if (list != null && !list.isEmpty()) {
+    			feedbackList.add(list.get(0));
+    		}
+    		return true;
+    	});
+
+    	if(feedbackList.size() > 0){
+    		return feedbackList.get(0);
+    	}
+    	return null;
+    }
+    
     @Override
     public List<UserFavoriteDTO> findFavorite(Long uid) {
         //TODO

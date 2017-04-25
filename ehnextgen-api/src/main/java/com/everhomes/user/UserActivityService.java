@@ -21,6 +21,8 @@ import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListBusinessTreasureResponse;
+import com.everhomes.rest.user.ListFeedbacksCommand;
+import com.everhomes.rest.user.ListFeedbacksResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -35,6 +37,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.UpdateFeedbackCommand;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.Tuple;
 
@@ -57,7 +60,11 @@ public interface UserActivityService {
 
     List<UserContact> listUserRetainIdentifiers(String identifer);
 
-    void updateFeedback(FeedbackCommand cmd);
+    void addFeedback(FeedbackCommand cmd);
+    
+    ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd);
+    
+    void updateFeedback(UpdateFeedbackCommand cmd);
     
     void cancelFavorite(CancelUserFavoriteCommand cmd);
 

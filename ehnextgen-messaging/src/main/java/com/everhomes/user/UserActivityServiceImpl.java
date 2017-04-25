@@ -90,6 +90,9 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FeedbackDTO;
+import com.everhomes.rest.user.FeedbackHandleType;
+import com.everhomes.rest.user.FeedbackTargetType;
 import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldTemplateDTO;
 import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
@@ -99,6 +102,8 @@ import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
 import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListBusinessTreasureResponse;
+import com.everhomes.rest.user.ListFeedbacksCommand;
+import com.everhomes.rest.user.ListFeedbacksResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -114,6 +119,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.UpdateFeedbackCommand;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -488,9 +494,12 @@ public class UserActivityServiceImpl implements UserActivityService {
     }
 
     @Override
-    public void updateFeedback(FeedbackCommand cmd) {
+    public void addFeedback(FeedbackCommand cmd) {
         User user = UserContext.current().getUser();
+        
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
+        feedback.setNamespaceId(UserContext.getCurrentNamespaceId());
+        feedback.setStatus(Byte.parseByte("0"));
         if (user == null) {
             feedback.setOwnerUid(1L);
         } else {
@@ -526,6 +535,57 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
     }
 
+    @Override
+    public ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd) {
+    	ListFeedbacksResponse response = new ListFeedbacksResponse();
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), cmd.getStatus(), pageSize + 1);
+    	if (null == results)
+    		return response;
+    	Long nextPageAnchor = null;
+    	if (results != null && results.size() > pageSize) {
+    		results.remove(results.size() - 1);
+    		nextPageAnchor = results.get(results.size() - 1).getId();
+    	}
+    	
+    	List<FeedbackDTO> feedbackDtos = new ArrayList<FeedbackDTO>();
+    	results.forEach(r -> {
+    		FeedbackDTO feedbackDto = ConvertHelper.convert(r, FeedbackDTO.class);
+    		User user = userProvider.findUserById(feedbackDto.getOwnerUid());
+    		if(user != null){
+    			feedbackDto.setOwnerNickName(user.getNickName());
+    		}
+    		feedbackDtos.add(feedbackDto);
+    	});
+    	response.setNextPageAnchor(nextPageAnchor); 
+    	response.setFeedbackDtos(feedbackDtos);
+    	return response;
+    }
+
+	@Override
+	public void updateFeedback(UpdateFeedbackCommand cmd) {
+		Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
+		if(feedback == null){
+			LOGGER.error("feedback is not exist");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_PARAMS, "feedback is not exist");
+		}
+		feedback.setStatus(cmd.getStatus());
+		feedback.setVerifyType(cmd.getVerifyType());
+		feedback.setHandleType(cmd.getHandleType());
+		userActivityProvider.updateFeedback(feedback);
+		
+		//当前只对post类型的举报做实际处理，处理的方式只有删除
+		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+			 Post post = forumProvider.findPostById(feedback.getTargetId());
+			 if(post != null){
+				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+			 }
+		}
+	}
+	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {
     	
