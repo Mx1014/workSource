@@ -74,6 +74,8 @@ public class JMailHandler implements MailHandler {
     
     /**  
      * 根据传入的 Seesion 对象创建混合型的 MIME消息  
+     * modify by dengs, 20170424 以字符串"<!DOCTYPE html"开头，且包含 "<html>"  "</html>"标签的，做html邮件处理
+     * 否则 就是文字邮件
      */ 
     private MimeMessage createMessage(Session session, String from, String to, String subject, String body, List<String> attachmentList) throws Exception {  
         MimeMessage msg = new MimeMessage(session); 
@@ -87,7 +89,13 @@ public class JMailHandler implements MailHandler {
         MimeMultipart multiPart = new MimeMultipart("mixed");  
         
         body = (body == null) ? "" : body;
-        MimeBodyPart bodyPart = createContent(body);
+        MimeBodyPart bodyPart = null ;
+        //modify by dengs 
+        if(body.startsWith("<!DOCTYPE html") && body.contains("<html>") && body.contains("</html>")){
+        	bodyPart = createContent(body,true);
+        }else{
+        	bodyPart = createContent(body);
+        }
         multiPart.addBodyPart(bodyPart);  
           
         // 创建邮件的各个 MimeBodyPart 部分  
@@ -113,7 +121,7 @@ public class JMailHandler implements MailHandler {
     /**  
      * 根据传入的邮件正文body和文件路径创建图文并茂的正文部分  
      */ 
-    private MimeBodyPart createContent(String content) throws Exception {
+    private MimeBodyPart createContent(String content,boolean isHtmlEmail) throws Exception {
         // 用于保存最终正文部分  
         MimeBodyPart contentBody = new MimeBodyPart();  
         // 用于组合文本和图片，"related"型的MimeMultipart对象  
@@ -121,13 +129,20 @@ public class JMailHandler implements MailHandler {
  
         // 正文的文本部分  
         MimeBodyPart textBody = new MimeBodyPart();  
-        //textBody.setContent(content, "text/html;charset=utf8");  
-        textBody.setText(content);
+        if(isHtmlEmail){
+        	textBody.setContent(content, "text/html;charset=utf8"); 
+        }else{
+        	textBody.setText(content);
+        }
         contentMulti.addBodyPart(textBody);  
  
         // 将上面"related"型的 MimeMultipart 对象作为邮件的正文  
         contentBody.setContent(contentMulti);  
         return contentBody;  
+    } 
+    
+    private MimeBodyPart createContent(String content) throws Exception {
+    	return createContent(content, false);
     }  
     
     /**  
