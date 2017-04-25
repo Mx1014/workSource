@@ -128,7 +128,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
-	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(Long inspectionCategoryId,
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey);
 
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);

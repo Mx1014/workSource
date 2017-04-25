@@ -2,7 +2,10 @@ package com.everhomes.rest.equipment;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -14,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageSize: 页面大小</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>isReview: 是否查审阅任务 0：执行任务；1：审核任务</li>
+ *  <li>taskStatus: 任务状态列表 参考 {@link com.everhomes.rest.equipment.EquipmentTaskStatus}</li>
  * </ul>
  */
 public class ListEquipmentTasksCommand {
@@ -34,7 +38,9 @@ public class ListEquipmentTasksCommand {
 	private Long inspectionCategoryId;
 	
 	private Byte isReview;
-	
+	@ItemType(Byte.class)
+	private List<Byte> taskStatus;
+
 	public Byte getIsReview() {
 		return isReview;
 	}
@@ -97,6 +103,14 @@ public class ListEquipmentTasksCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public List<Byte> getTaskStatus() {
+		return taskStatus;
+	}
+
+	public void setTaskStatus(List<Byte> taskStatus) {
+		this.taskStatus = taskStatus;
 	}
 
 	@Override

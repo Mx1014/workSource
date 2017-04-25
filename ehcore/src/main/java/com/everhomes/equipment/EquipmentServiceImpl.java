@@ -2637,10 +2637,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		}
 
 		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					null, null, offset, userId);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					null, null, offset, pageSize + 1, cacheKey);
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, null, null, offset, userId);
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey);
 
 		}
 		if(!isAdmin) {
@@ -2662,11 +2662,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executeStandardIds, reviewStandardIds, offset, userId);
 
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
 
 		}
 
@@ -2723,7 +2723,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 
-	private String convertListEquipmentInspectionTasksCache(Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
+	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
 				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
@@ -2741,7 +2741,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(targetId != null && targetId.size() > 0) {
 			sb.append(targetId.get(0));
 		}
-
+		sb.append(taskStatus);
+		sb.append("-");
 		sb.append(inspectionCategoryId);
 		sb.append("-");
 		sb.append(offset);
