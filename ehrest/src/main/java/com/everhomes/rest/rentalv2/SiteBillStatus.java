@@ -14,6 +14,8 @@ package com.everhomes.rest.rentalv2;
  * <li>REFUNDING(9): 退款中</li>
  * <li>REFUNDED(10): 已退款</li>
  * <li>OFFLINE_PAY(11): 线下支付</li>
+ * <li>INACTIVE(12): 无效订单(点击下一步产生的订单，还没有预约)</li>
+ * <li>APPROVING(13): 待审批)</li>
  * </ul>
  */
 public enum SiteBillStatus {
@@ -30,7 +32,9 @@ public enum SiteBillStatus {
 	OVERTIME((byte)8,"已过期"),
 	REFUNDING((byte)9,"退款中"),
 	REFUNDED((byte)10,"已退款"),
-	OFFLINE_PAY((byte)11,"线下支付");
+	OFFLINE_PAY((byte)11,"线下支付"),
+    INACTIVE((byte)12, "无效订单"),
+    APPROVING((byte)13, "待审批");
 	
     
     private byte code;

@@ -1148,8 +1148,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter ResourceTypeId OwnerId OwnerType cant be null");
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 
-		if(cmd.getAnchor() == null)
-			cmd.setAnchor(Long.MAX_VALUE); 
+//		if(cmd.getAnchor() == null)
+//			cmd.setAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getAnchor());
@@ -1678,11 +1678,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//		} else {
 				// 在支付时间之后 为待支付全款
 	//		}
-			if(rentalBill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode()))
+			//订单开始状态设置为INACTIVE
+			if(rentalBill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())) {
+//				rentalBill.setStatus(SiteBillStatus.OFFLINE_PAY.getCode());
 				rentalBill.setStatus(SiteBillStatus.OFFLINE_PAY.getCode());
-			else
-				rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
-				
+			}else {
+//				rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
+				rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
+			}
+
 			SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
 			SimpleDateFormat bigenDateSF = new SimpleDateFormat("MM-dd");
 			SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
@@ -4753,8 +4757,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
-		if(cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(Long.MAX_VALUE); 
+//		if(cmd.getPageAnchor() == null)
+//			cmd.setPageAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());

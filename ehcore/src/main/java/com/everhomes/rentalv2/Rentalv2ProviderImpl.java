@@ -946,7 +946,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
         if(locator.getAnchor() != null)
-        	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.ID.lt(locator.getAnchor()));
+        	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.ID.gt(locator.getAnchor()));
 
         if(communityId  != null)
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
@@ -954,10 +954,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
 		else
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
-		step.where(condition);
 
-		List<RentalResource> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCES.ID.desc()).limit(pageSize).fetch().map((r) -> {
+		List<RentalResource> result = step.where(condition)
+				.orderBy(Tables.EH_RENTALV2_RESOURCES.ID.asc()).limit(pageSize).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalResource.class);
 				});
 		if(result.size()==0)
