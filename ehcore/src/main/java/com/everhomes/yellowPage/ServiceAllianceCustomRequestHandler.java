@@ -1,24 +1,17 @@
 package com.everhomes.yellowPage;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.activation.FileDataSource;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -77,8 +70,6 @@ import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
@@ -204,7 +195,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			if(member != null) {
 				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			//邮件附件生成
+			//modify by dengs 20170425  邮件附件生成
 			List<File> attementList = createAttachmentList(title, notifyMap, request);
 			List<String> stringAttementList = new ArrayList<String>();
 			attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
@@ -337,65 +328,13 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		return null;
 	}
 	
-//	private String replaceUrlWithImg(String title,String notifyTextForOrg,List<RequestAttachments> attachementList){
-//		for (RequestAttachments attachement : attachementList) {
-//			if(notifyTextForOrg.contains(attachement.getContentUri().trim())){
-//				String replacement = "<img src='"+attachement.getContentUri().trim()+"' width='20%' height='20%'>";
-//				notifyTextForOrg = notifyTextForOrg.replace(attachement.getContentUri().trim(), replacement);
-//			}
-//		}
-//		StringBuffer demo = new StringBuffer();  
-//		demo.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">")  
-//		.append("<html>")  
-//		.append("<head>")  
-//		.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">")  
-//		.append("<title>")
-//		.append(title)
-//		.append("</title>")  
-//		.append("<style type=\"text/css\">")  
-//		.append(".test{font-family:\"Microsoft Yahei\";font-size: 18px;}")  
-//		.append("</style>")  
-//		.append("</head>")  
-//		.append("<body>")  
-//		.append("<p class=\"test\">")
-//		.append(notifyTextForOrg.replace("\n", "</p><p>"))
-//		.append("</p>")  
-//		.append("</body>")  
-//		.append("</html>");  
-//		return demo.toString();
-//	}
 	private List<File> createAttachmentList(String title,Map notifyMap,ServiceAllianceRequests request){
-//		List<String[]> contents = new ArrayList<String[]>();
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_TO_PDF;
 		//固定字段
 		String fixedContent = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), notifyMap, "");
 		//不定字段
 		List<Object[]> unCertainContents = changeRequestToPDF(request);
-//		String creatorName = (String)notifyMap.get("creatorName");
-//		String creatorMobile = (String)notifyMap.get("creatorMobile");
-//		String categoryName = (String)notifyMap.get("categoryName");
-//		String creatorOrganization = (String)notifyMap.get("creatorOrganization");
-//		contents.add(new String[]{"content",
-//				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-//						ServiceAllianceRequestNotificationTemplateCode.RESERVE_PEOPLE, UserContext.current().getUser().getLocale(), "")
-//							+creatorName});
-//		contents.add(new String[]{"content",
-//				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-//						ServiceAllianceRequestNotificationTemplateCode.PHONE, UserContext.current().getUser().getLocale(), "")+creatorMobile});
-//		contents.add(new String[]{"content",
-//				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-//						ServiceAllianceRequestNotificationTemplateCode.ORGANIZATION_NAME, UserContext.current().getUser().getLocale(), "")+creatorOrganization});
-//		contents.add(new String[]{"content",
-//				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-//						ServiceAllianceRequestNotificationTemplateCode.SERVICE_NAME, UserContext.current().getUser().getLocale(), "")+categoryName});
-//		for (Object[] unCertainContent: unCertainContents) {
-//			FieldContentType key = (FieldContentType)unCertainContent[0];
-//			String value = unCertainContent[1].toString();
-//			if(key == FieldContentType.IMAGE){
-//				
-//			}
-//		}
 		List<File> list = new ArrayList<File>();
 		list.add(createAttachementPdf(title,fixedContent,unCertainContents));
 		return list;
@@ -415,29 +354,22 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			 //设置字体
             BaseFont bfChinese = BaseFont.createFont("ttf/SIMYOU.TTF", BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
       
-//            com.itextpdf.text.Font FontChinese24 = new com.itextpdf.text.Font(bfChinese, 24, com.itextpdf.text.Font.BOLD);
-//            com.itextpdf.text.Font FontChinese18 = new com.itextpdf.text.Font(bfChinese, 18, com.itextpdf.text.Font.BOLD); 
             com.itextpdf.text.Font FontChinese16 = new com.itextpdf.text.Font(bfChinese, 16, com.itextpdf.text.Font.BOLD);
-//            com.itextpdf.text.Font FontChinese12 = new com.itextpdf.text.Font(bfChinese, 12, com.itextpdf.text.Font.NORMAL);
-//            com.itextpdf.text.Font FontChinese11Bold = new com.itextpdf.text.Font(bfChinese, 11, com.itextpdf.text.Font.BOLD);
-//            com.itextpdf.text.Font FontChinese11 = new com.itextpdf.text.Font(bfChinese, 11, com.itextpdf.text.Font.ITALIC);
             com.itextpdf.text.Font FontChinese11Normal = new com.itextpdf.text.Font(bfChinese, 11, com.itextpdf.text.Font.NORMAL);
 			document.open();
 			//标题
-			Font chapterFont = FontFactory.getFont(FontFactory.HELVETICA, 16, Font.BOLD);
-			Font paragraphFont = FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL);
 			Chunk chunk = new Chunk(title, FontChinese16);
 			Paragraph ptitle = new Paragraph(chunk);
 			ptitle.setAlignment(Element.ALIGN_CENTER);//居中
 			Chapter chapter = new Chapter(ptitle, 1);
 			chapter.setNumberDepth(0);
-			
 			document.add(chapter);
+			//固定内容
 			String[] fixedContents = (fixedContent==null?"":fixedContent).split("\n");
 			for (int i = 0; i < fixedContents.length; i++) {
 				document.add(new Paragraph(fixedContents[i],FontChinese11Normal));
 			}
-			//内容
+			//不定内容
 			for (int i = 0; i < unCertainContents.size(); i++) {
 				Object[] unCertainContent = unCertainContents.get(i);
 				FieldContentType key = (FieldContentType)unCertainContent[0];
@@ -482,19 +414,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	}
 	/**
 	 *
-	 * uri获取图片
+	 * url获取图片
 	 */
     public byte[] getImageFromNetByUrl(String strUrl) throws IOException{ 
-//    	String s = "http://10.1.10.84:5000/image/aW1hZ2UvTVRwak5UZ3pOalZqTTJRNU9EazNaRFZqWm1JNVlUQTNaVFppWTJFd1pUVmhPQQ?ownerType=EhUsers&ownerId=195506&token=XwJps2-bgqtP4sqlbJeYyRQFeZLq7sUAxQBdH2Q3UAPn8_S9gGuxmk_g_uux6f5Nje_LMI7geEo_B_IYnzhwyo39wQ267UDRCZTWgyRIvZYrSw-ygm-OdARpSXEfirTy&pxw=366&pxh=330";
-//            URL url = new URL(strUrl);  
-//            HttpURLConnection conn = (HttpURLConnection)url.openConnection();  
-////            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0");
-////            conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-////            conn.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3");
-////            conn.setRequestProperty("Accept-Encoding", "gzip, deflate");
-//            conn.setRequestMethod("GET");  
-//            conn.setConnectTimeout(20 * 1000);  
-//            InputStream inStream = conn.getInputStream();//通过输入流获取图片数据 
     	CloseableHttpClient httpclient = HttpClients.createDefault();
     	HttpGet url = new HttpGet(strUrl);
 		CloseableHttpResponse response = null;
@@ -508,15 +430,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			}
 
 		}
-				
-//            ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
-//            byte[] buffer = new byte[1024];  
-//            int len = 0;  
-//            while( (len=inStream.read(buffer)) != -1 ){  
-//                outStream.write(buffer, 0, len);  
-//            }  
-//            inStream.close();  
-        return null;  
+        return new byte[]{};  
     }
     
 	@Override
