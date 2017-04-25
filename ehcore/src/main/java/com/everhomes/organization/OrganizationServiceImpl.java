@@ -8216,6 +8216,12 @@ System.out.println();
 
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
+
+		if(StringUtils.isEmpty(cmd.getContactToken())){
+			LOGGER.error("contactToken is null");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+		}
+
 		List<OrganizationMember> members = new ArrayList<>();
 		String path = "";
 		//查询出人员在这个组织架构的所有关系
@@ -8248,6 +8254,11 @@ System.out.println();
 	@Override
 	public OrganizationMemberDTO addOrganizationPersonnel(AddOrganizationPersonnelCommand cmd) {
 		User user = UserContext.current().getUser();
+
+		if(StringUtils.isEmpty(cmd.getContactToken())){
+			LOGGER.error("contactToken is null");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+		}
 
 		Organization org = checkOrganization(cmd.getOrganizationId());
 
