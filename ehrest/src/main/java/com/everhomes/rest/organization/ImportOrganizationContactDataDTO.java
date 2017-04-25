@@ -5,17 +5,17 @@ import com.everhomes.util.StringHelper;
 
 public class ImportOrganizationContactDataDTO {
 	
-	private String contactName;
+	private String contactName = "";
 
-	private String contactToken;
+	private String contactToken = "";
 
-	private String gender;
+	private String gender = "";
 
-	private String orgnaizationPath;
+	private String orgnaizationPath = "";
 
-	private String jobPosition;
+	private String jobPosition = "";
 
-	private String jobLevel;
+	private String jobLevel = "";
 
 	public String getContactName() {
 		return contactName;

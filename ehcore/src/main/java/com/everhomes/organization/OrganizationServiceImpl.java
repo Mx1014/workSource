@@ -6382,6 +6382,7 @@ System.out.println();
 
 		Long startTime1 = System.currentTimeMillis();
 		dto = this.getOrganizationMenu(rganizationDTOs, dto);
+		dto = processOrganizationCommunity(dto);
 		res.setOrganizationMenu(dto);
 		Long endTime = System.currentTimeMillis();
 
@@ -8219,7 +8220,7 @@ System.out.println();
 
 		if(StringUtils.isEmpty(cmd.getContactToken())){
 			LOGGER.error("contactToken is null");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
 		}
 
 		List<OrganizationMember> members = new ArrayList<>();
@@ -8257,7 +8258,7 @@ System.out.println();
 
 		if(StringUtils.isEmpty(cmd.getContactToken())){
 			LOGGER.error("contactToken is null");
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
 		}
 
 		Organization org = checkOrganization(cmd.getOrganizationId());
@@ -9320,7 +9321,14 @@ System.out.println();
 
 	@Override
 	public void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
+		Map<String, String> titleMap = new HashMap<>();
+		titleMap.put("contactName", "姓名");
+		titleMap.put("contactToken", "手机号");
+		titleMap.put("gender", "性别");
+		titleMap.put("orgnaizationPath", "部门");
+		titleMap.put("jobPosition", "岗位");
+		titleMap.put("jobLevel", "职级");
+		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId(), titleMap);
 	}
 }
 

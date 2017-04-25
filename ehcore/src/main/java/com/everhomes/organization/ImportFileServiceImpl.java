@@ -11,7 +11,9 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -93,7 +95,7 @@ public class ImportFileServiceImpl implements ImportFileService{
     }
 
     @Override
-    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId){
+    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId, Map<String, String> titleMap){
         ImportFileResponse result  = getImportFileResult(taskId);
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
@@ -102,25 +104,64 @@ public class ImportFileServiceImpl implements ImportFileService{
             try{
                 String sheetName = "错误数据";
                 XSSFSheet sheet = wb.createSheet(sheetName);
+
                 XSSFCellStyle style = wb.createCellStyle();// 样式对象
                 Font font = wb.createFont();
                 font.setFontHeightInPoints((short)20);
-                font.setFontName("Courier New");
+                font.setFontName("黑体");
                 style.setFont(font);
+                style.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+
+                XSSFCellStyle centerStyle = wb.createCellStyle();// 样式对象
+                centerStyle.setFont(font);
+                centerStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
                 XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
-                titleStyle.setFont(font);
+                Font titleFont = wb.createFont();
+                titleFont.setFontHeightInPoints((short)20);
+                titleFont.setFontName("黑体");
+                titleFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+                titleStyle.setFont(titleFont);
                 titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
-                int rowNum = 2;
+
+                for (int i = 0; i <= titleMap.size(); i ++ ) {
+                    sheet.setColumnWidth(i, 20 * 256);
+                }
+
+                int cellNum = 0;
+                int rowNum = 0;
+                XSSFRow errorRow = sheet.createRow(rowNum ++);
+                errorRow.setRowStyle(centerStyle);
+                errorRow.createCell(cellNum).setCellValue("导入失败的错误数据");
+                sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, titleMap.size()));
+                if(logs.size() > 0){
+                    cellNum = 0;
+                    XSSFRow titleRow = sheet.createRow(rowNum ++);
+                    titleRow.setRowStyle(titleStyle);
+                    ImportFileResultLog log = logs.get(0);
+                    Map<String, String> data = (Map<String, String>) log.getData();
+                    if(data.size() > 0){
+                        for (Map.Entry<String, String> entry : data.entrySet()) {
+                            titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
+                        }
+                    }else{
+                        for (Map.Entry<String, String> entry : titleMap.entrySet()) {
+
+                            titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getValue()));
+                        }
+                    }
+                    titleRow.createCell(cellNum ++).setCellValue("错误原因");
+                }
+
                 for (ImportFileResultLog log: logs) {
+                    cellNum = 0;
+                    Map<String, String> data = (Map<String, String>) log.getData();
                     XSSFRow row = sheet.createRow(rowNum ++);
                     row.setRowStyle(style);
-                    Map<String, String> data = (Map<String, String>) log.getData();
-                    int cellNum = 0;
-                    row.createCell(cellNum ++).setCellValue(log.getErrorDescription());
                     for (Map.Entry<String, String> entry : data.entrySet()) {
                         row.createCell(cellNum ++).setCellValue(entry.getValue());
                     }
-
+                    row.createCell(titleMap.size()).setCellValue(log.getErrorDescription());
                 }
                 out = new ByteArrayOutputStream();
                 wb.write(out);
