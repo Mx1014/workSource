@@ -44,3 +44,12 @@ UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.name
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 999992 AND item_group IN ('Coupons') ; 
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 999993 AND item_group IN ('Coupons') ; 
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 999999 AND item_group IN ('MakerBanners', 'MakerSpaces') ; 
+
+
+-- 增加一个排序字段，用于客户端显示顺序，顺序为活动、话题、投票、快讯、应用和商店
+UPDATE eh_search_types s SET s.order = 1 WHERE s.content_type = 'activity';
+UPDATE eh_search_types s SET s.order = 2 WHERE s.content_type = 'topic';
+UPDATE eh_search_types s SET s.order = 3 WHERE s.content_type = 'poll';
+UPDATE eh_search_types s SET s.order = 4 WHERE s.content_type = 'news';
+UPDATE eh_search_types s SET s.order = 5 WHERE s.content_type = 'launchpaditem';
+UPDATE eh_search_types s SET s.order = 6 WHERE s.content_type = 'shop';
