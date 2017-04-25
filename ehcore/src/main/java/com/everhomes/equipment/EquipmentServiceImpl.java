@@ -3749,6 +3749,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		response.setReviewedTasks(response.getReviewUnqualified() + response.getReviewQualified());
 		response.setUnReviewedTasks(statTasks.getNeedMaintanceWaitingForApproval() + statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
+
+		Double maintanceRate = (double)response.getCompleteMaintance()/(double)response.getComplete();
+		response.setMaintanceRate(maintanceRate);
+		Double delayRate = (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
+		response.setDelayRate(delayRate);
+		Double reviewQualifiedRate = (double)response.getReviewQualified()/(double)response.getReviewedTasks();
+		response.setReviewQualifiedRate(reviewQualifiedRate);
+		Double reviewDalayRate = (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
+		response.setReviewDalayRate(reviewDalayRate);
 		return response;
 	}
 
