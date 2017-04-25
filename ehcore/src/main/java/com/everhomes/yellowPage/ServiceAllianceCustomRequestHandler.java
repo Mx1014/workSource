@@ -185,22 +185,16 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+		//modify by dengs 20170425  邮件附件生成
+		List<File> attementList = createAttachmentList(title, notifyMap, request);
+		List<String> stringAttementList = new ArrayList<String>();
+		attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
 		if(serviceOrg != null) {
-//			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
-//			if(orgContact != null) {
-//				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
-//			}
-			
 			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
 			if(member != null) {
 				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			//modify by dengs 20170425  邮件附件生成
-			List<File> attementList = createAttachmentList(title, notifyMap, request);
-			List<String> stringAttementList = new ArrayList<String>();
-			attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
 			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg,stringAttementList);
-			attementList.stream().forEach(file->{file.delete();});
 		}
 		
 		//发消息给服务联盟机构管理员
@@ -226,10 +220,13 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
-					sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin,null);
+					//modify by dengs ,20170425, 给管理员发送也使用html邮件
+					sendEmail(email.getContactToken(), category.getName(), notifyTextForOrg,stringAttementList);
 				}
 			}
 		}
+		//删除生成的pdf文件，附件
+		attementList.stream().forEach(file->{file.delete();});
 	}
 	
 	/**
@@ -250,7 +247,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 					if(field.getFieldValue()!=null){
 						String[] imagesrcs = field.getFieldValue().split(",");
 						for (int i = 0; i < imagesrcs.length; i++) {
-							sb.append("<img style=\"height:200px;margin-right:8px;\" src=\"");
+							sb.append("<img height=\"200px\" width=\"200px\" style=\"margin-right:8px;\" src=\"");
 							sb.append(imagesrcs[i]);
 							sb.append("\">");
 						}
