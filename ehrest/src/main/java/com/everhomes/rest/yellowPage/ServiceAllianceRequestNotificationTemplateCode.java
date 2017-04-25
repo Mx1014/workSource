@@ -9,6 +9,7 @@ public interface ServiceAllianceRequestNotificationTemplateCode {
     static final int REQUEST_MAIL_SUBJECT = 3; // 提交申请通知给机构
     static final int REQUEST_MAIL_ORG_ADMIN_IN_HTML = 4; // 提交申请通知给机构和管理员，通过html方式，不是文字邮件的方式
     static final int REQUEST_MAIL_TO_PDF = 5; // 邮件内容生成pdf
+    static final int REQUEST_MAIL_TO_PDF_SUBJECT = 6; // 邮件内容生成pdf的主题
     
     //add by dengs 20170425 纯文字，放到eh_locale_strings表的
     static final String AN_APPLICATION_FORM = "10001"; // 的申请单

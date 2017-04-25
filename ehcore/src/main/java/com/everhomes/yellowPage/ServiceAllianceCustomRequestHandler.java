@@ -1,11 +1,7 @@
 package com.everhomes.yellowPage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,12 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +31,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldType;
 import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
@@ -64,17 +53,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.itextpdf.text.BadElementException;
-import com.itextpdf.text.Chapter;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.mysql.jdbc.StringUtils;
 
 @Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)
@@ -176,15 +154,19 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			creatorOrganization = org.getName();
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
-		String title = categoryName+localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
+		if(serviceOrg != null) {
+			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			title = serviceOrg.getName() + title;
+		}
 		notifyMap.put("title", title);
 		//modify by dengs,20170425  更换模板，发送html邮件
 //		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_ORG_ADMIN_IN_HTML;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		//modify by dengs 20170425  邮件附件生成
 		List<File> attementList = createAttachmentList(title, notifyMap, request);
 		List<String> stringAttementList = new ArrayList<String>();
@@ -194,7 +176,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			if(member != null) {
 				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg,stringAttementList);
+			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
 		}
 		
 		//发消息给服务联盟机构管理员
@@ -221,79 +203,14 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
 					//modify by dengs ,20170425, 给管理员发送也使用html邮件
-					sendEmail(email.getContactToken(), category.getName(), notifyTextForOrg,stringAttementList);
+					sendEmail(email.getContactToken(), title, notifyTextForOrg,stringAttementList);
 				}
 			}
 		}
 		//删除生成的pdf文件，附件
 		attementList.stream().forEach(file->{file.delete();});
 	}
-	
-	/**
-	 * add by dengs 20170425 自定义字段转html
-	 */
-	private String changeRequestToHtml(ServiceAllianceRequests request) {
-		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
-		//此处格式参考邮件模型  ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_ORG_ADMIN_IN_HTML
-		if(fieldList != null && fieldList.size() > 0) {
-			StringBuilder sb = new StringBuilder();
-			for(RequestFieldDTO field : fieldList) {
-				sb.append("<p>");
-				sb.append(field.getFieldName());
-				FieldContentType fieldContentType = FieldContentType.fromCode(field.getFieldContentType());
-				//FieldContentType.AUDIO,FieldContentType.FILE,FieldContentType.VIDEO 如何处理？
-				if(fieldContentType == FieldContentType.IMAGE){
-					sb.append(":</p>");
-					if(field.getFieldValue()!=null){
-						String[] imagesrcs = field.getFieldValue().split(",");
-						for (int i = 0; i < imagesrcs.length; i++) {
-							sb.append("<img height=\"200px\" width=\"200px\" style=\"margin-right:8px;\" src=\"");
-							sb.append(imagesrcs[i]);
-							sb.append("\">");
-						}
-					}
-				}else{// FieldContentType.TEXT可以做此处理
-					sb.append(":");
-					sb.append(field.getFieldValue()==null?"":field.getFieldValue());
-					sb.append("</p>");
-				}
-			}
-			return sb.toString();
-		}
-		return "";
 		
-	}
-	
-	/**
-	 * add by dengs 20170425 自定义字段转PDF
-	 * 返回有序key-value对
-	 * 		key为类型，参考 {@link com.everhomes.rest.user.FieldContentType}
-	 * 		value为内容，或字符串，或url
-	 */
-	private List<Object[]> changeRequestToPDF(ServiceAllianceRequests request) {
-		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
-		List<Object[]> returnList = new ArrayList<Object[]>();
-		if(fieldList != null && fieldList.size() > 0) {
-			for(RequestFieldDTO field : fieldList) {
-				FieldContentType fieldContentType = FieldContentType.fromCode(field.getFieldContentType());
-				//FieldContentType.AUDIO,FieldContentType.FILE,FieldContentType.VIDEO 如何处理？
-				if(fieldContentType == FieldContentType.IMAGE){
-					returnList.add(new Object[]{FieldContentType.TEXT,field.getFieldName()+":"});
-					if(field.getFieldValue()!=null){
-						String[] imagesrcs = field.getFieldValue().split(",");
-						for (int i = 0; i < imagesrcs.length; i++) {
-							Object[] objects = new Object[]{FieldContentType.IMAGE,imagesrcs[i]}; 
-							returnList.add(objects);
-						}
-					}
-				}else{// FieldContentType.TEXT可以做此处理
-					returnList.add(new Object[]{FieldContentType.TEXT,field.getFieldName()+":"+(field.getFieldValue()==null?"":field.getFieldValue())});
-				}
-			}
-		}
-		return returnList;
-		
-	}
 
 	private String getNote(ServiceAllianceRequests request) {
 		
@@ -325,111 +242,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		return null;
 	}
 	
-	private List<File> createAttachmentList(String title,Map notifyMap,ServiceAllianceRequests request){
-		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
-		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_TO_PDF;
-		//固定字段
-		String fixedContent = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), notifyMap, "");
-		//不定字段
-		List<Object[]> unCertainContents = changeRequestToPDF(request);
-		List<File> list = new ArrayList<File>();
-		list.add(createAttachementPdf(title,fixedContent,unCertainContents));
-		return list;
-	}
-	
-	private File createAttachementPdf(String title,String fixedContent, List<Object[]> unCertainContents){
-	    StringBuffer nameBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
-	    String tempPdfName = nameBuffer.append(File.separator+title+".pdf").toString();
-	    File filePdf = new File(tempPdfName);
-	    if(filePdf.exists()){
-	    	filePdf.delete();
-	    }
-	    Document document = new Document();
-        try {
-			PdfWriter.getInstance(document, new FileOutputStream(filePdf));
-			
-			 //设置字体
-            BaseFont bfChinese = BaseFont.createFont("ttf/SIMYOU.TTF", BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
-      
-            com.itextpdf.text.Font FontChinese16 = new com.itextpdf.text.Font(bfChinese, 16, com.itextpdf.text.Font.BOLD);
-            com.itextpdf.text.Font FontChinese11Normal = new com.itextpdf.text.Font(bfChinese, 11, com.itextpdf.text.Font.NORMAL);
-			document.open();
-			//标题
-			Chunk chunk = new Chunk(title, FontChinese16);
-			Paragraph ptitle = new Paragraph(chunk);
-			ptitle.setAlignment(Element.ALIGN_CENTER);//居中
-			Chapter chapter = new Chapter(ptitle, 1);
-			chapter.setNumberDepth(0);
-			document.add(chapter);
-			//固定内容
-			String[] fixedContents = (fixedContent==null?"":fixedContent).split("\n");
-			for (int i = 0; i < fixedContents.length; i++) {
-				document.add(new Paragraph(fixedContents[i],FontChinese11Normal));
-			}
-			//不定内容
-			for (int i = 0; i < unCertainContents.size(); i++) {
-				Object[] unCertainContent = unCertainContents.get(i);
-				FieldContentType key = (FieldContentType)unCertainContent[0];
-				String value = unCertainContent[1]==null?"":unCertainContent[1].toString();
-				if(key == FieldContentType.IMAGE){
-					try {
-						Image image = Image.getInstance(getImageFromNetByUrl(value));
-						PdfPTable table = new PdfPTable(1);
-						table.getDefaultCell().setBorder(0);
-						table.addCell(image);
-						document.add(table);
-					} catch (BadElementException e) {
-						// TODO Auto-generated catch block
-						LOGGER.error("create pdf file error, e = {}", e);
-					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
-						LOGGER.error("create pdf file error, e = {}", e);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						LOGGER.error("create pdf file error, e = {}", e);
-					}
-				}else{
-					document.add(new Paragraph(value,FontChinese11Normal));
-				}
-			}
-			
-		} catch (FileNotFoundException e) {
-			LOGGER.error("create pdf file error, e = {}", e);
-		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("create pdf file error, e = {}", e);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("create pdf file error, e = {}", e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			LOGGER.error("create pdf file error, e = {}", e);
-		}finally {
-			document.close();
-		}
-		return filePdf;
-	}
-	/**
-	 *
-	 * url获取图片
-	 */
-    public byte[] getImageFromNetByUrl(String strUrl) throws IOException{ 
-    	CloseableHttpClient httpclient = HttpClients.createDefault();
-    	HttpGet url = new HttpGet(strUrl);
-		CloseableHttpResponse response = null;
-		response = httpclient.execute(url);
-		int status = response.getStatusLine().getStatusCode();
-		if(status == 200) {
-			HttpEntity entity = response.getEntity();
 
-			if(null != entity) {
-				return EntityUtils.toByteArray(entity);
-			}
-
-		}
-        return new byte[]{};  
-    }
-    
 	@Override
 	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 
@@ -452,22 +265,6 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		return response;
 	}
 	
-	private void sendEmail(String emailAddress, String categoryName, String content,List<String> attachementList) {
-		if(!StringUtils.isNullOrEmpty(emailAddress)) {
-			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
-	        MailHandler handler = PlatformContext.getComponent(handlerName);
-	        
-	        String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
-			String locale = "zh_CN";
-			int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_SUBJECT;
-			Map<String, Object> notifyMap = new HashMap<String, Object>();
-			notifyMap.put("categoryName", categoryName);
-			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-			
-	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content,attachementList);
-		}
-	}
-	
 	private void sendMessageToUser(Long userId, String content) {
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -483,8 +280,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	}
 	
 	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceRequests field) {
-		
+	public List<RequestFieldDTO> toFieldDTOList(Object requestObject) {
+		ServiceAllianceRequests field = (ServiceAllianceRequests)requestObject;
 		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
 		command.setTemplateType(field.getTemplateType());
 		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
@@ -541,6 +338,14 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		}
 		
 		return list;
+	}
+
+
+	@Override
+	public String getFixedContent(Object notifyMap, String defaultValue) {
+		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_TO_PDF;
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), notifyMap, "");
 	}
 
 }

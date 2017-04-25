@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
@@ -65,6 +67,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	@Autowired
 	private UserActivityService userActivityService;
 	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
 		ServiceAllianceApartmentRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceApartmentRequests.class);
@@ -110,7 +115,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		notifyMap.put("categoryName", categoryName);
 		notifyMap.put("creatorName", creatorName);
 		notifyMap.put("creatorMobile", creatorMobile);
-		notifyMap.put("note", getNote(request));
+		notifyMap.put("note", changeRequestToHtml(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         String creatorOrganization = "";
 		if(org != null) {
@@ -118,10 +123,23 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
 		
-		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
+		if(serviceOrg != null) {
+			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			title = serviceOrg.getName() + title;
+		}
+		notifyMap.put("title", title);
+		//modify by dengs,20170425  更换模板，发送html邮件
+//		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_ORG_ADMIN_IN_HTML;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+		//modify by dengs 20170425  邮件附件生成
+		List<File> attementList = createAttachmentList(title, notifyMap, request);
+		List<String> stringAttementList = new ArrayList<String>();
+		attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
 		if(serviceOrg != null) {
 //			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
 //			if(orgContact != null) {
@@ -131,7 +149,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 			if(member != null) {
 				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
+			sendEmail(serviceOrg.getEmail(), title, notifyTextForOrg,stringAttementList);
 			
 		}
 		
@@ -158,7 +176,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
-					sendEmail(email.getContactToken(), categoryName, notifyTextForAdmin);
+					sendEmail(email.getContactToken(), title, notifyTextForAdmin,stringAttementList);
 				}
 			}
 		}
@@ -202,21 +220,6 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 	
-	private void sendEmail(String emailAddress, String categoryName, String content) {
-		if(!StringUtils.isNullOrEmpty(emailAddress)) {
-			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
-	        MailHandler handler = PlatformContext.getComponent(handlerName);
-	        
-	        String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
-			String locale = "zh_CN";
-			int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_SUBJECT;
-			Map<String, Object> notifyMap = new HashMap<String, Object>();
-			notifyMap.put("categoryName", categoryName);
-			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-			
-	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
-		}
-	}
 
 	@Override
 	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
@@ -237,7 +240,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 
 
 	
-	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceApartmentRequests field) {
+	public List<RequestFieldDTO> toFieldDTOList(Object requestObject) {
+		ServiceAllianceApartmentRequests field = (ServiceAllianceApartmentRequests)requestObject;
 		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
 		command.setTemplateType(field.getTemplateType());
 		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
@@ -312,6 +316,15 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 //		list.add(dto);
 		
 		return list;
+	}
+
+
+	@Override
+	public String getFixedContent(Object notifyMap, String defaultValue) {
+		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_TO_PDF;
+		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), notifyMap, "");
+	
 	}
 
 }
