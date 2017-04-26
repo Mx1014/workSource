@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import com.everhomes.util.StringHelper;
 
 /**
- * @author 
  * <ul>
  *   <li>id: id</li>
  *   <li>ownerUid: 举报人ID</li>

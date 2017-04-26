@@ -6,8 +6,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * @author 
  * <ul>
  *  <li>feedbackDtos: 举报列表 参考{@link com.everhomes.rest.user.FeedbackDTO}</li>
  *  <li>nextPageAnchor: 下页锚点</li>
