@@ -210,7 +210,7 @@ public class UserActivityController extends ControllerBase {
     /**
      * 用户反馈 <b>url:/user/feedback</b>
      * 
-     * @param cmd {@link FeedbackCommand}
+     * @param cmd {@link com.everhomes.rest.user.FeedbackCommand}
      */
     @RequestMapping("feedback")
     @RequireAuthentication(false)
@@ -221,7 +221,7 @@ public class UserActivityController extends ControllerBase {
     }
 
     /**
-     * 用户反馈 <b>url:/user/listFeedbacks</b>
+     * 获取用户反馈 <b>url:/user/listFeedbacks</b>
      * 
      * @param cmd {@link ListFeedbacksCommand}
      */
@@ -237,7 +237,7 @@ public class UserActivityController extends ControllerBase {
     }
     
     /**
-     * 用户反馈 <b>url:/user/updateFeedback</b>
+     * 更新用户反馈 <b>url:/user/updateFeedback</b>
      * 
      * @param cmd {@link UpdateFeedbackCommand}
      */

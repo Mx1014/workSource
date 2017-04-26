@@ -3,8 +3,6 @@ package com.everhomes.rest.user;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * @author 
  * <ul>
  *  <li>status: 处理状态， 0-未处理， 1-已处理
  *  <li>pageAnchor: 锚点</li>
