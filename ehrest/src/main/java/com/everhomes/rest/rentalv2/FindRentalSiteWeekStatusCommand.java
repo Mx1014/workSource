@@ -15,7 +15,7 @@ public class FindRentalSiteWeekStatusCommand {
 	@NotNull
 	private Long siteId;
 	@NotNull
-	private Long ruleDate; 
+	private Long ruleDate;
 	
 	@Override
     public String toString() {

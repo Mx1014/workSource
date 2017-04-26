@@ -24,7 +24,12 @@ public class AddRentalBillItemCommand {
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
 	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> rentalAttachments; 
+	private List<AttachmentDTO> rentalAttachments;
+
+	@ItemType(Long.class)
+	private List<Long> recommendUsers;
+	@ItemType(Long.class)
+	private List<Long> goodItems;
 
 	@Override
 	public String toString() {

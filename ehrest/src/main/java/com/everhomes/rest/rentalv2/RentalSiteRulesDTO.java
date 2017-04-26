@@ -1,6 +1,9 @@
 package com.everhomes.rest.rentalv2;
 
 import com.everhomes.util.StringHelper;
+
+import java.math.BigDecimal;
+
 /**
  * <ul>
  * <li>id：id</li>
@@ -48,8 +51,14 @@ public class RentalSiteRulesDTO {
 	private Long ruleDate; 
 	private Byte status;
 	private String siteNumber;
-	
-	
+
+	private BigDecimal orgMemberOriginalPrice;
+	private BigDecimal orgMemberPrice;
+
+	private BigDecimal approvingUserOriginalPrice;
+	private BigDecimal approvingUserPrice;
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

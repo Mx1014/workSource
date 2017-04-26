@@ -5719,14 +5719,50 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			this.rentalv2Provider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 			//config attachments
-			if(null!=cmd.getAttachments())
-				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:cmd.getAttachments()){
-					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
-					rca.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
-					rca.setOwnerId(defaultRule.getId());
-					this.rentalv2Provider.createRentalConfigAttachment(rca);
-				}
+//			if (null != cmd.getAttachments()) {
+//				for(com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO attachmentDTO:cmd.getAttachments()){
+//					RentalConfigAttachment rca =ConvertHelper.convert(attachmentDTO, RentalConfigAttachment.class);
+//					rca.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
+//					rca.setOwnerId(defaultRule.getId());
+//					this.rentalv2Provider.createRentalConfigAttachment(rca);
+//				}
+//			}
+			createRentalConfigAttachment(cmd.getAttachments(), defaultRule.getId(), EhRentalv2DefaultRules.class.getSimpleName());
 			return null;
 		});
+	}
+
+	private void createRentalConfigAttachment(List<AttachmentConfigDTO> attachments, Long ownerId, String ownerType) {
+		if (null != attachments) {
+			attachments.forEach(a -> {
+
+				RentalConfigAttachment rca = ConvertHelper.convert(a, RentalConfigAttachment.class);
+				rca.setOwnerType(ownerType);
+				rca.setOwnerId(ownerId);
+				this.rentalv2Provider.createRentalConfigAttachment(rca);
+
+				if (a.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
+					List<AttachmentConfigDTO> goodItems = a.getGoodItems();
+					if (null != goodItems) {
+						goodItems.forEach(g -> {
+							RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
+							gg.setOwnerType(AttachmentType.GOOD_ITEM.name());
+							gg.setOwnerId(rca.getId());
+							this.rentalv2Provider.createRentalConfigAttachment(gg);
+						});
+					}
+				}else if (a.getAttachmentType().equals(AttachmentType.RECOMMEND_USER.getCode())) {
+					List<AttachmentConfigDTO> recommendUsers = a.getRecommendUsers();
+					if (null != recommendUsers) {
+						recommendUsers.forEach(u -> {
+							RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
+							uu.setOwnerType(AttachmentType.RECOMMEND_USER.name());
+							uu.setOwnerId(rca.getId());
+							this.rentalv2Provider.createRentalConfigAttachment(uu);
+						});
+					}
+				}
+			});
+		}
 	}
 }

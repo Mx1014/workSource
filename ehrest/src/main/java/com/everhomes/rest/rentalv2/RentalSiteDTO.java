@@ -51,7 +51,7 @@ import com.everhomes.util.StringHelper;
  * <li>	siteNumbers：资源编号列表 {String}</li>
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
- * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
+ * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.rentalv2.admin.SiteOwnerDTO}</li>
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>offlineCashierAddress: 线下支付收银地址</li>

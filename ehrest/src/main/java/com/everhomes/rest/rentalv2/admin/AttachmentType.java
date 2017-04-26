@@ -8,10 +8,13 @@ import com.everhomes.util.StringHelper;
  * <li>LICENSE_NUMBER:1 车牌</li>
  * <li>SHOW_CONTENT:2 显示内容</li>
  * <li>ATTACHMENT:3 附件</li>
+ * <li>GOOD_ITEM:4 物资</li>
+ * <li>RECOMMEND_USER:5 推荐员</li>
  * </ul>
  */
 public enum AttachmentType {
-	TEXT_REMARK((byte) 0), LICENSE_NUMBER((byte) 1), SHOW_CONTENT((byte) 2), ATTACHMENT((byte) 3);
+	TEXT_REMARK((byte) 0), LICENSE_NUMBER((byte) 1), SHOW_CONTENT((byte) 2), ATTACHMENT((byte) 3)
+	, GOOD_ITEM((byte) 4), RECOMMEND_USER((byte) 5);
 	private Byte code;
 
 	private AttachmentType(Byte code) {

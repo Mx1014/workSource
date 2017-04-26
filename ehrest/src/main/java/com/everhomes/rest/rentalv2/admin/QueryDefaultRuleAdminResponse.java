@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>needPay: 是否需要支付</li>
  * <li>multiTimeInterval: 是否允许预约多个时段</li>
  * <li>attachments: 预约需要提交的信息</li>
- * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.admin.RentalType}</li>
+ * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.rentalv2.RentalType}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>timeStep: 最短可预约时长</li>
@@ -27,8 +27,8 @@ import com.everhomes.util.StringHelper;
  * <li>endDate: 开放日期终</li>
  * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天</li>
  * <li>closeDates: 关闭日期</li>
- * <li>workdayPrice: 工作日价格</li>
- * <li>weekendPrice: 周末价格</li>
+ * <li>workdayPrice: 园区客户工作日价格</li>
+ * <li>weekendPrice: 园区客户节假日价格</li>
  * <li>siteCounts: 可预约个数</li>
  * <li>siteNumbers: 用户填写的可预约个数个场所编号{@link com.everhomes.rest.rentalv2.admin.SiteNumberDTO}}</li>
  * <li>cancelTime: 至少提前取消时间</li>
@@ -37,7 +37,14 @@ import com.everhomes.util.StringHelper;
  * <li>discountType: 状态，0不打折1满钱减钱优惠 2满天减钱 3 比例 参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li> 
  * <li>fullPrice: 满多少钱</li>
  * <li>cutPrice: 减多少钱</li> 
- * <li>discountRatio: 折扣比例</li> 
+ * <li>discountRatio: 折扣比例</li>
+ * <li>rentalStartTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalEndTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>orgMemberWorkdayPrice: 企业内部工作日价格</li>
+ * <li>orgMemberWeekendPrice: 企业内部节假日价格</li>
+ * <li>approvingUserWorkdayPrice: 外部客户工作日价格</li>
+ * <li>approvingUserWeekendPrice: 外部客户节假日价格</li>
+ * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
  * </ul>
  */
 public class QueryDefaultRuleAdminResponse {
@@ -50,6 +57,7 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
 	private Byte rentalType;
+
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Double timeStep;
@@ -63,6 +71,7 @@ public class QueryDefaultRuleAdminResponse {
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
+
 	private Double siteCounts;
 
 	@ItemType(SiteNumberDTO.class)
@@ -78,6 +87,17 @@ public class QueryDefaultRuleAdminResponse {
 	private java.math.BigDecimal cutPrice;
 
     private Double discountRatio;
+
+	private Byte rentalStartTimeFlag;
+	private Byte rentalEndTimeFlag;
+	private BigDecimal orgMemberWorkdayPrice;
+	private BigDecimal orgMemberWeekendPrice;
+
+	private BigDecimal approvingUserWorkdayPrice;
+	private BigDecimal approvingUserWeekendPrice;
+
+	@ItemType(TimeIntervalDTO.class)
+	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
 	@Override
     public String toString() {
@@ -285,6 +305,61 @@ public class QueryDefaultRuleAdminResponse {
 	}
 	public void setDiscountRatio(Double discountRatio) {
 		this.discountRatio = discountRatio;
-	} 
+	}
 
+	public Byte getRentalStartTimeFlag() {
+		return rentalStartTimeFlag;
+	}
+
+	public void setRentalStartTimeFlag(Byte rentalStartTimeFlag) {
+		this.rentalStartTimeFlag = rentalStartTimeFlag;
+	}
+
+	public Byte getRentalEndTimeFlag() {
+		return rentalEndTimeFlag;
+	}
+
+	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
+		this.rentalEndTimeFlag = rentalEndTimeFlag;
+	}
+
+	public BigDecimal getOrgMemberWorkdayPrice() {
+		return orgMemberWorkdayPrice;
+	}
+
+	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
+		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
+	}
+
+	public BigDecimal getOrgMemberWeekendPrice() {
+		return orgMemberWeekendPrice;
+	}
+
+	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
+		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
+	}
+
+	public BigDecimal getApprovingUserWorkdayPrice() {
+		return approvingUserWorkdayPrice;
+	}
+
+	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
+		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
+	}
+
+	public BigDecimal getApprovingUserWeekendPrice() {
+		return approvingUserWeekendPrice;
+	}
+
+	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
+		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
+	}
+
+	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
+		return halfDayTimeIntervals;
+	}
+
+	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
+		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
 }
