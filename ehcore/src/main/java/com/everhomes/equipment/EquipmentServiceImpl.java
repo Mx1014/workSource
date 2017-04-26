@@ -1483,7 +1483,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					result.setStandardId(task.getStandardId());
 					result.setEquipmentId(task.getEquipmentId());
 					result.setInspectionCategoryId(task.getInspectionCategoryId());
-//					result.setNamespaceId(task.getNamespaceId());
+					result.setNamespaceId(task.getNamespaceId());
 					equipmentProvider.createEquipmentInspectionItemResults(result);
 				}
 			}
@@ -1506,7 +1506,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		log.setInspectionCategoryId(task.getInspectionCategoryId());
 		log.setCommunityId(task.getTargetId());
-//		log.setNamespaceId(task.getNamespaceId());
+		log.setNamespaceId(task.getNamespaceId());
 		equipmentProvider.createEquipmentInspectionTasksLogs(log);
 		
 		User user = UserContext.current().getUser();

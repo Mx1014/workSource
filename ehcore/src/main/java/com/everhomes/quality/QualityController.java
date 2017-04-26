@@ -539,9 +539,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = CountScoresResponse.class)
 	public RestResponse countScores(CountScoresCommand cmd) {
 		
-//		CountScoresResponse scores = qualityService.countScores(cmd);
+		CountScoresResponse scores = qualityService.countScores(cmd);
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(scores);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

@@ -27,13 +27,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
-
-
-
-
-
-
-
+import com.everhomes.rest.quality.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -91,77 +85,6 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.quality.CountScoresCommand;
-import com.everhomes.rest.quality.CountScoresResponse;
-import com.everhomes.rest.quality.CountTasksCommand;
-import com.everhomes.rest.quality.CountTasksResponse;
-import com.everhomes.rest.quality.CreatQualityStandardCommand;
-import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
-import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
-import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
-import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
-import com.everhomes.rest.quality.DeleteQualityStandardCommand;
-import com.everhomes.rest.quality.DeleteFactorCommand;
-import com.everhomes.rest.quality.EvaluationDTO;
-import com.everhomes.rest.quality.ExecuteGroupAndPosition;
-import com.everhomes.rest.quality.FactorsDTO;
-import com.everhomes.rest.quality.GetQualitySpecificationCommand;
-import com.everhomes.rest.quality.GroupUserDTO;
-import com.everhomes.rest.quality.ListEvaluationsCommand;
-import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
-import com.everhomes.rest.quality.ListQualityCategoriesCommand;
-import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
-import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
-import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
-import com.everhomes.rest.quality.ListQualityStandardsCommand;
-import com.everhomes.rest.quality.ListQualityStandardsResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
-import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
-import com.everhomes.rest.quality.ListFactorsCommand;
-import com.everhomes.rest.quality.ListFactorsResponse;
-import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
-import com.everhomes.rest.quality.OwnerType;
-import com.everhomes.rest.quality.ProcessType;
-import com.everhomes.rest.quality.QualityCategoriesDTO;
-import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
-import com.everhomes.rest.quality.QualityInspectionLogDTO;
-import com.everhomes.rest.quality.QualityInspectionLogProcessType;
-import com.everhomes.rest.quality.QualityInspectionLogType;
-import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
-import com.everhomes.rest.quality.QualityInspectionSpecificationItemResultsDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskResult;
-import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
-import com.everhomes.rest.quality.QualityInspectionTaskStatus;
-import com.everhomes.rest.quality.QualityNotificationTemplateCode;
-import com.everhomes.rest.quality.QualityStandardStatus;
-import com.everhomes.rest.quality.QualityStandardsDTO;
-import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.quality.QualityTaskType;
-import com.everhomes.rest.quality.ReportRectifyResultCommand;
-import com.everhomes.rest.quality.ReportSpecificationItemResultsDTO;
-import com.everhomes.rest.quality.ReportVerificationResultCommand;
-import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
-import com.everhomes.rest.quality.ReviewVerificationResultCommand;
-import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
-import com.everhomes.rest.quality.SpecificationApplyPolicy;
-import com.everhomes.rest.quality.SpecificationInspectionType;
-import com.everhomes.rest.quality.SpecificationScopeCode;
-import com.everhomes.rest.quality.StandardGroupDTO;
-import com.everhomes.rest.quality.TaskCountDTO;
-import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
-import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
-import com.everhomes.rest.quality.UpdateQualityStandardCommand;
-import com.everhomes.rest.quality.UpdateFactorCommand;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -2638,14 +2561,14 @@ public class QualityServiceImpl implements QualityService {
 		if(cmd.getParentId() == null || cmd.getParentId() == 0) {
 			parent.setId(0L);
 			parent.setReferId(0L);
-			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, cmd.getInspectionType());
+			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}
 		
 		} else {
 			parent = verifiedSpecificationById(cmd.getParentId(), cmd.getOwnerType(), cmd.getOwnerId());
-			specifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, cmd.getInspectionType());
+			specifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, cmd.getInspectionType());
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
 				scopeSpecifications = qualityProvider.listAllChildrenSpecifications(parent.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId(), cmd.getScopeCode(), cmd.getScopeId(), cmd.getInspectionType());
 			}
@@ -2729,22 +2652,74 @@ public class QualityServiceImpl implements QualityService {
 		
 		return dto;
 	}
+
+	private List<CountScoresSpecificationDTO> listChildSpecificationDTOs(CountScoresCommand cmd) {
+		List<CountScoresSpecificationDTO> dtos = new ArrayList<>();
+
+		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
+		//查第一级的子结点
+		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, null);
+		} else {
+			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, parent.getId(), null);
+		}
+		//只查一个小区时
+		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() == 1) {
+			List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
+
+			if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+				scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(),SpecificationScopeCode.COMMUNITY.getCode(), cmd.getTargetIds().get(0), 0L, null);
+			} else {
+				scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), cmd.getTargetIds().get(0), cmd.getSpecificationId(), null);
+			}
+
+			dealWithScopeSpecifications(specifications, scopeSpecifications).forEach(scopeSpecification -> {
+				CountScoresSpecificationDTO dto = new CountScoresSpecificationDTO();
+				dto.setSpecificationId(scopeSpecification.getId());
+				dto.setSpecificationName(scopeSpecification.getName());
+				dto.setSpecificationInspectionType(scopeSpecification.getInspectionType());
+				dto.setSpecificationDescription(scopeSpecification.getDescription());
+				dto.setSpecificationScore(scopeSpecification.getScore());
+				dto.setSpecificationWeight(scopeSpecification.getWeight());
+
+				dtos.add(dto);
+			});
+
+		} else {
+			List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listAddAndModifyChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), cmd.getTargetIds(), cmd.getSpecificationId(), null);
+			specifications.addAll(scopeSpecifications);
+			specifications.forEach(specification -> {
+				CountScoresSpecificationDTO dto = new CountScoresSpecificationDTO();
+				dto.setSpecificationId(specification.getId());
+				dto.setSpecificationName(specification.getName());
+				dto.setSpecificationInspectionType(specification.getInspectionType());
+				dto.setSpecificationDescription(specification.getDescription());
+				dto.setSpecificationScore(specification.getScore());
+				dto.setSpecificationWeight(specification.getWeight());
+
+				dtos.add(dto);
+			});
+		}
+		return dtos;
+	}
 	
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
 		CountScoresResponse response = new CountScoresResponse();
 		//查列 add by xiongying 20170425
-
+		List<CountScoresSpecificationDTO> specificationDTOs = listChildSpecificationDTOs(cmd);
+		response.setSpecifications(specificationDTOs);
 		List<ScoreGroupByTargetDTO> scoresByTarget= new ArrayList<ScoreGroupByTargetDTO>();
 		
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
 		
 		//查第一级的子结点
 		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
-			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, 0L, null);
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, null);
 		} else {
 			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
-			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, parent.getId(), null);
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, parent.getId(), null);
 		}
 
 		Map<Long,List<QualityInspectionSpecificationDTO>> targetSpecifitionTree = new HashMap<Long,List<QualityInspectionSpecificationDTO>>();
@@ -2754,9 +2729,9 @@ public class QualityServiceImpl implements QualityService {
 				List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
 				
 				if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
-					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, target, 0L, null);
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), target, 0L, null);
 				} else {
-					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, target, cmd.getSpecificationId(), null);
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), target, cmd.getSpecificationId(), null);
 				}
 
 				//获得每个项目的specification tree
