@@ -5862,6 +5862,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<String> groupTypes = new ArrayList<>();
 		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
 		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypes);
 		List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%",
 				Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()));
@@ -6215,7 +6216,12 @@ System.out.println();
 							}
 						}
 					}
-					r.setPathName(pathName);
+					if ("start".equals(pathName) && directlyEnterprise.getParentId() != 0L) {
+						r.setPathName(directlyEnterprise.getName());
+					}else {
+						r.setPathName(pathName);
+					}
+
 					return r;
 				}).collect(Collectors.toList());
 				dto.setDepartments(departments);
@@ -8330,9 +8336,8 @@ System.out.println();
 				for (Long departmentId : departmentIds) {
 					Organization o = checkOrganization(departmentId);
 					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())){
-						enterpriseIds.add(departmentId);
 					}else{
-						if(!enterpriseIds.contains(o.getDirectlyEnterpriseId())){
+						if(!enterpriseIds.contains(o.getDirectlyEnterpriseId()) && !departmentIds.contains(o.getDirectlyEnterpriseId())){
 							enterpriseIds.add(o.getDirectlyEnterpriseId());
 						}
 					}
