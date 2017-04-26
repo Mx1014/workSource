@@ -446,28 +446,14 @@ public class UserProviderImpl implements UserProvider {
         final List<UserIdentifier> result = new ArrayList<>();
         
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), result, (DSLContext context, Object reducingContext) -> {
-//            context.select().from(EH_USER_IDENTIFIERS)
-//                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
-//                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
-//                .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
-//                .fetch().map((r) -> {
-//                    result.add(ConvertHelper.convert(r, UserIdentifier.class));
-//                    return null;
-//                });
-            
-            // for test
-            SelectConditionStep query = context.select().from(EH_USER_IDENTIFIERS)
-            .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
-            .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
-            .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId));
-            if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Query user identifiers by forum, sql=" + query.getSQL());
-                LOGGER.debug("Query user identifiers by forum, bindValues=" + query.getBindValues());
-            }
-            query.fetch().map((r) -> {
-                result.add(ConvertHelper.convert(r, UserIdentifier.class));
-                return null;
-            });
+            context.select().from(EH_USER_IDENTIFIERS)
+                .where(EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(identifierToken))
+                .and(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()))
+                .and(EH_USER_IDENTIFIERS.NAMESPACE_ID.eq(namespaceId))
+                .fetch().map((r) -> {
+                    result.add(ConvertHelper.convert(r, UserIdentifier.class));
+                    return null;
+                });
             
             return true;
         });
