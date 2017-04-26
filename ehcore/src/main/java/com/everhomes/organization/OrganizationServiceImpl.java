@@ -568,8 +568,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}else if(OrganizationCommunityScopeType.CURRENT_LEVEL_CHILD == OrganizationCommunityScopeType.fromCode(cmd.getScopeType())){
 					//修改所有子节点
 					updateChildOrganizationCommunityRequest(user.getId(), parOrg.getPath(), cmd.getCommunityId());
-					//修改同级节点包括当前节点
-					updateLevenOrganizationCommunityRequest(user.getId(), parOrg.getParentId(), cmd.getCommunityId());
+
+					//如果修改的是根节点，则不需要修改同级只需要修改当前节点
+					if(0L != parOrg.getParentId()){
+						//修改同级节点包括当前节点
+						updateLevenOrganizationCommunityRequest(user.getId(), parOrg.getParentId(), cmd.getCommunityId());
+					}else{
+						//修改当前节点
+						updateCurrentOrganziationCommunityReqeust(user.getId(), parOrg.getId(), cmd.getCommunityId());
+					}
 				}
 			}else{
 				LOGGER.warn("communityId is null");
