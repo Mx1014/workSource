@@ -3686,7 +3686,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		if(StringUtils.isEmpty(cmd.getFilePath())) {
 			if(files.size() > 1) {
-				String zipPath = filePath + "EquipmentCard.zip";
+				String zipPath = filePath + System.currentTimeMillis() + "EquipmentCard.zip";
 				DownloadUtils.writeZip(files, zipPath);
 				download(zipPath,response);
 			} else if(files.size() == 1) {
