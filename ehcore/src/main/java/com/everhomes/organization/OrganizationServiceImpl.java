@@ -8239,7 +8239,7 @@ System.out.println();
 		}
 
 		List<OrganizationMember> members = new ArrayList<>();
-		String path = "";
+		String path = organization.getPath();
 		//查询出人员在这个组织架构的所有关系
 		if(DeleteOrganizationContactScopeType.ALL_NOTE == DeleteOrganizationContactScopeType.fromCode(cmd.getScopeType())){
 			if(path.indexOf("/", 1) > 0){
@@ -8252,9 +8252,6 @@ System.out.println();
 				organization = checkOrganization(organization.getDirectlyEnterpriseId());
 				path = organization.getPath();
 			}
-			//人员跟当前节点机构的关系
-		}else{
-			path = organization.getPath();
 		}
 		members.addAll(organizationProvider.listOrganizationMemberByPath(path, null, cmd.getContactToken()));
 
