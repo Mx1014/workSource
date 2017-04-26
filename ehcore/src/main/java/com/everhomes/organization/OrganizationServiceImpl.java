@@ -6290,18 +6290,19 @@ System.out.println();
 	@Override
 	public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath){
 		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
-		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypes);
-		List<Long> deptIds = new ArrayList<Long>();
-		for (Organization organization : depts) {
-			deptIds.add(organization.getId());
-		}
-		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(token, deptIds);
+//		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypes);
+//		List<Long> deptIds = new ArrayList<Long>();
+//		for (Organization organization : depts) {
+//			deptIds.add(organization.getId());
+//		}
+		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(orgPath, groupTypes, token);
 		for (OrganizationMember member : members) {
 			Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
 			if(null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE){
 				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
 			}
 		}
+
 		return groups;
 	}
 
