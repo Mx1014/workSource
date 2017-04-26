@@ -1,5 +1,6 @@
 package com.everhomes.rest.rentalv2.admin;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -27,8 +28,9 @@ public class AttachmentConfigDTO {
 	private Byte mustOptions;
 
 	private String content;
+	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> goodItems;
-
+	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> recommendUsers;
 
 	private String userName;

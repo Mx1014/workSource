@@ -93,8 +93,9 @@ public class RentalBillDTO {
 	private Byte toastFlag;
 	private String confirmationPrompt;
 
+	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> goodItems;
-
+	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> recommendUsers;
 	
 	@Override
