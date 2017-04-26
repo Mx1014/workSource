@@ -701,12 +701,12 @@ public class Rentalv2Controller extends ControllerBase {
 
 	/**
 	 *
-	 * <b>URL: /rental/getResourceRule<b>
+	 * <b>URL: /rental/getResourceRuleById<b>
 	 * <p>
 	 * 查询资源的规则
 	 * </p>
 	 */
-	@RequestMapping("getResourceRule")
+	@RequestMapping("getResourceRuleById")
 	@RestReturn(QueryDefaultRuleAdminResponse.class)
 	public RestResponse getResourceRule(@Valid GetResourceRuleAdminCommand cmd) {
 		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.getResourceRule(cmd);
