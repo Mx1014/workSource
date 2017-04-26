@@ -6195,9 +6195,9 @@ System.out.println();
 //				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), directlyEnterprise.getPath())); //已经跟部门子公司放入一起
 
 				List<OrganizationDTO> departments = new ArrayList<>();
-				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
-					departments.add(orgDTO);
-				}
+//				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
+//					departments.add(orgDTO);
+//				}
 				departments.addAll(this.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
 				departments = departments.stream().map(r -> {
 					String[] pathStrs = r.getPath().split("/");
@@ -6298,7 +6298,7 @@ System.out.println();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(orgPath, groupTypes, token);
 		for (OrganizationMember member : members) {
 			Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE){
+			if(null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE && group.getParentId() != 0L){
 				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
 			}
 		}
