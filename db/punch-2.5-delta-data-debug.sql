@@ -20,7 +20,8 @@ INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@i
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.status','16','zh_CN','未入职'); 
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.excel','schedule','zh_CN','排班表'); 
 INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.excel','rule','zh_CN','排班');  
-
+INSERT INTO `eh_locale_strings` (`id`,`scope`,`code`,`locale`,`text`)VALUES ((@id:=@id+1),'punch.push','1','zh_CN','考勤提醒：还有5分钟就要上班了，别忘记打卡哦');  
+ 
 
 -- 考勤排班的菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES('50670','排班表查询','50600',NULL,'punch--viewScheduling','0','2','/50000/50600/50670','park',561,NULL);
