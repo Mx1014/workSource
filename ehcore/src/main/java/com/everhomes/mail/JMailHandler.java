@@ -106,8 +106,10 @@ public class JMailHandler implements MailHandler {
                     LOGGER.error("File not found, from=" + from  + ", to=" + to + ", filePath=" + filePath);
                     continue;
                 }
-                MimeBodyPart attachmentPart = createAttachment(filePath);
-                multiPart.addBodyPart(attachmentPart);
+                if(file.isFile()){
+	                MimeBodyPart attachmentPart = createAttachment(filePath);
+	                multiPart.addBodyPart(attachmentPart);
+                }
             }
         }
  

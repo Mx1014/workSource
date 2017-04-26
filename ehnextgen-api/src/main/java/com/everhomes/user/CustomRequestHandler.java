@@ -135,16 +135,31 @@ public interface CustomRequestHandler {
 	}
 	
 	default List<File> createAttachementPdf(String title,String fixedContent, List<Object[]> unCertainContents){
+		//附件在临时目录的列表，最后一项存附件所在临时目录
 		List<File> list = new ArrayList<File>();
-	    StringBuffer nameBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
-	    String tempPdfName = nameBuffer.append(File.separator+title+".pdf").toString();
-	    File filePdf = new File(tempPdfName);
-	    if(filePdf.exists()){
-	    	filePdf.delete();
+	    StringBuffer tmpdirBuffer = new StringBuffer(System.getProperty("java.io.tmpdir"));
+	    Long currentMillisecond = System.currentTimeMillis();
+	    tmpdirBuffer.append(File.separator);
+	    tmpdirBuffer.append(currentMillisecond);
+	    //附件目录
+	    String tmpdir= tmpdirBuffer.toString();
+	    File baseDir = new File(tmpdirBuffer.toString());
+	    if(!baseDir.exists()){
+	    	baseDir.mkdirs();
 	    }
+	    tmpdirBuffer.append(File.separator);
+	    tmpdirBuffer.append(title);
+	    tmpdirBuffer.append(".pdf");
+	    String tempPdfName = tmpdirBuffer.toString();
+	    //pdf附件
+	    File filePdf = new File(tempPdfName);
 	    list.add(filePdf);
 	    Document document = new Document();
         try {
+        	if(filePdf.exists()){
+        		filePdf.delete();
+        	}
+        	filePdf.createNewFile();
 			PdfWriter.getInstance(document, new FileOutputStream(filePdf));
 			
 			 //设置字体
@@ -170,13 +185,18 @@ public interface CustomRequestHandler {
 				Object[] unCertainContent = unCertainContents.get(i);
 				FieldContentType key = (FieldContentType)unCertainContent[0];
 				String value = unCertainContent[1]==null?"":unCertainContent[1].toString();
+				FileOutputStream outstream = null;
 				if(key == FieldContentType.IMAGE){
 					try {
-						//图片附件即发送到pdf，也作为附件 by dengs 20170425
+						//图片附件即发送到pdf，也作为附件 by dengs 20170425,考虑到图片大小偶限制，不做边读边写。
 						byte[] bytes = getImageFromNetByUrl(value);
 						Image image = Image.getInstance(bytes);
-						File file = new File(System.getProperty("java.io.tmpdir")+File.separator+System.currentTimeMillis()+".jpg");
-						FileOutputStream outstream = new FileOutputStream(file);
+						StringBuffer imgBuffer = new StringBuffer(tmpdir);
+						imgBuffer.append(File.separator);
+						imgBuffer.append(System.currentTimeMillis());
+						imgBuffer.append(".jpg");//格式怎么拿。我也不知道。所以定了.jpg格式
+						File file = new File(imgBuffer.toString());
+						outstream = new FileOutputStream(file);
 						outstream.write(bytes);
 						list.add(file);
 						PdfPTable table = new PdfPTable(1);
@@ -192,6 +212,9 @@ public interface CustomRequestHandler {
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						LOGGER.error("create pdf file error, e = {}", e);
+					}finally{
+						if(outstream!=null)
+							outstream.close();
 					}
 				}else{
 					document.add(new Paragraph(value,FontChinese11Normal));
@@ -212,6 +235,7 @@ public interface CustomRequestHandler {
 		}finally {
 			document.close();
 		}
+        list.add(baseDir);
 		return list;
 	}
 	/**
