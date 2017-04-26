@@ -3,6 +3,7 @@ package com.everhomes.rentalv2;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import org.slf4j.Logger;
@@ -16,31 +17,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.rentalv2.AddRentalBillCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommandResponse;
-import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommand;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.techpark.punch.PunchController;
 
 /**
@@ -178,6 +154,23 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /rental/findRentalSiteById</b>
+	 * <p>
+	 * 根据id查询某园区某图标下的资源
+	 * </p>
+	 */
+	@RequestMapping("findRentalSiteById")
+	@RestReturn(value = RentalSiteDTO.class)
+	public RestResponse findRentalSiteById(@Valid FindRentalSiteByIdCommand cmd) {
+		//:TODO
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
 	 * <p>

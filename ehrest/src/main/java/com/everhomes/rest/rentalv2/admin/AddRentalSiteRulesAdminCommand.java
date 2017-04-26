@@ -329,6 +329,60 @@ public class AddRentalSiteRulesAdminCommand {
 	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
 	}
-	
-	
+
+	public Byte getRentalStartTimeFlag() {
+		return rentalStartTimeFlag;
+	}
+
+	public void setRentalStartTimeFlag(Byte rentalStartTimeFlag) {
+		this.rentalStartTimeFlag = rentalStartTimeFlag;
+	}
+
+	public Byte getRentalEndTimeFlag() {
+		return rentalEndTimeFlag;
+	}
+
+	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
+		this.rentalEndTimeFlag = rentalEndTimeFlag;
+	}
+
+	public BigDecimal getOrgMemberWorkdayPrice() {
+		return orgMemberWorkdayPrice;
+	}
+
+	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
+		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
+	}
+
+	public BigDecimal getOrgMemberWeekendPrice() {
+		return orgMemberWeekendPrice;
+	}
+
+	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
+		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
+	}
+
+	public BigDecimal getApprovingUserWorkdayPrice() {
+		return approvingUserWorkdayPrice;
+	}
+
+	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
+		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
+	}
+
+	public BigDecimal getApprovingUserWeekendPrice() {
+		return approvingUserWeekendPrice;
+	}
+
+	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
+		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
+	}
+
+	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
+		return halfDayTimeIntervals;
+	}
+
+	public void setHalfDayTimeIntervals(List<TimeIntervalDTO> halfDayTimeIntervals) {
+		this.halfDayTimeIntervals = halfDayTimeIntervals;
+	}
 }
