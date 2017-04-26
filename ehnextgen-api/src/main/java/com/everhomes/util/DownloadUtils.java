@@ -45,7 +45,7 @@ public class DownloadUtils {
             for ( String filename : files ) {
                 File file = new File( filename );
                 if ( !file.isFile() ) {
-                	LOGGER.info("filename:{} is not a file");
+                	LOGGER.info("filename:{} is not a file", filename);
                 	continue;
                 }
                 ZipEntry ze = new ZipEntry( file.getName() );
