@@ -1,6 +1,8 @@
 package com.everhomes.rest.rentalv2.admin;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.rentalv2.RentalGoodItem;
+import com.everhomes.rest.rentalv2.RentalRecommendUser;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -12,8 +14,8 @@ import java.util.List;
  * <li>attachmentType: 类型，参考
  * {@link com.everhomes.rest.rentalv2.admin.AttachmentType}</li>
  * <li>mustOptions: 是否必选，1是0否</li>
- * <li>goodItems: 物资列表  attachmentType: GOOD_ITEM(4)时使用  {@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
- * <li>recommendUsers: 推荐员列表  attachmentType: RECOMMEND_USER(5)时使用 {@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
+ * <li>goodItems: 物资列表  attachmentType: GOOD_ITEM(4)时使用  {@link com.everhomes.rest.rentalv2.RentalGoodItem}</li>
+ * <li>recommendUsers: 推荐员列表  attachmentType: RECOMMEND_USER(5)时使用 {@link com.everhomes.rest.rentalv2.RentalRecommendUser}</li>
  * <li>content: 内容</li>
  * <li>userName: 推荐员姓名</li>
  * <li>mobile: 推荐员手机号</li>
@@ -28,54 +30,24 @@ public class AttachmentConfigDTO {
 	private Byte mustOptions;
 
 	private String content;
-	@ItemType(AttachmentConfigDTO.class)
-	private List<AttachmentConfigDTO> goodItems;
-	@ItemType(AttachmentConfigDTO.class)
-	private List<AttachmentConfigDTO> recommendUsers;
+	@ItemType(RentalGoodItem.class)
+	private List<RentalGoodItem> goodItems;
+	@ItemType(RentalRecommendUser.class)
+	private List<RentalRecommendUser> recommendUsers;
 
-	private String userName;
-	private String mobile;
-	private String iconUri;
-	private String iconUrl;
-
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
-
-	public String getIconUri() {
-		return iconUri;
-	}
-
-	public void setIconUri(String iconUri) {
-		this.iconUri = iconUri;
-	}
-
-	public List<AttachmentConfigDTO> getGoodItems() {
+	public List<RentalGoodItem> getGoodItems() {
 		return goodItems;
 	}
 
-	public void setGoodItems(List<AttachmentConfigDTO> goodItems) {
+	public void setGoodItems(List<RentalGoodItem> goodItems) {
 		this.goodItems = goodItems;
 	}
 
-	public List<AttachmentConfigDTO> getRecommendUsers() {
+	public List<RentalRecommendUser> getRecommendUsers() {
 		return recommendUsers;
 	}
 
-	public void setRecommendUsers(List<AttachmentConfigDTO> recommendUsers) {
+	public void setRecommendUsers(List<RentalRecommendUser> recommendUsers) {
 		this.recommendUsers = recommendUsers;
 	}
 
@@ -110,14 +82,6 @@ public class AttachmentConfigDTO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getIconUrl() {
-		return iconUrl;
-	}
-
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
 	}
 
 	@Override

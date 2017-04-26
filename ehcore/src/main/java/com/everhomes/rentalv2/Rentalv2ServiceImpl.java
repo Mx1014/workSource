@@ -5741,27 +5741,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rca.setOwnerId(ownerId);
 				this.rentalv2Provider.createRentalConfigAttachment(rca);
 
-				if (a.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
-					List<AttachmentConfigDTO> goodItems = a.getGoodItems();
-					if (null != goodItems) {
-						goodItems.forEach(g -> {
-							RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
-							gg.setOwnerType(AttachmentType.GOOD_ITEM.name());
-							gg.setOwnerId(rca.getId());
-							this.rentalv2Provider.createRentalConfigAttachment(gg);
-						});
-					}
-				}else if (a.getAttachmentType().equals(AttachmentType.RECOMMEND_USER.getCode())) {
-					List<AttachmentConfigDTO> recommendUsers = a.getRecommendUsers();
-					if (null != recommendUsers) {
-						recommendUsers.forEach(u -> {
-							RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
-							uu.setOwnerType(AttachmentType.RECOMMEND_USER.name());
-							uu.setOwnerId(rca.getId());
-							this.rentalv2Provider.createRentalConfigAttachment(uu);
-						});
-					}
-				}
+//				if (a.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
+//					List<AttachmentConfigDTO> goodItems = a.getGoodItems();
+//					if (null != goodItems) {
+//						goodItems.forEach(g -> {
+//							RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
+//							gg.setOwnerType(AttachmentType.GOOD_ITEM.name());
+//							gg.setOwnerId(rca.getId());
+//							this.rentalv2Provider.createRentalConfigAttachment(gg);
+//						});
+//					}
+//				}else if (a.getAttachmentType().equals(AttachmentType.RECOMMEND_USER.getCode())) {
+//					List<AttachmentConfigDTO> recommendUsers = a.getRecommendUsers();
+//					if (null != recommendUsers) {
+//						recommendUsers.forEach(u -> {
+//							RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
+//							uu.setOwnerType(AttachmentType.RECOMMEND_USER.name());
+//							uu.setOwnerId(rca.getId());
+//							this.rentalv2Provider.createRentalConfigAttachment(uu);
+//						});
+//					}
+//				}
 			});
 		}
 	}
