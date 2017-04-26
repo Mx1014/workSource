@@ -17,6 +17,8 @@ import com.everhomes.util.StringHelper;
  *     <li>completeWaitingForApproval: 巡检完成待审核任务数</li>
  *     <li>completeMaintanceWaitingForApproval: 整改完成待审核任务数</li>
  *     <li>needMaintanceWaitingForApproval: 需整改待审核任务数</li>
+ *     <li>needMaintanceReviewDelay: 整改审核延误</li>
+ *     <li>completeReviewDelay: 巡检核查延误</li>
  * </ul>
  * Created by ying.xiong on 2017/4/20.
  */
@@ -46,6 +48,8 @@ public class TasksStatData {
     private Long needMaintanceWaitingForApproval;
 
     private Long reviewDelayTasks;
+    private Long needMaintanceReviewDelay;
+    private Long completeReviewDelay;
 
     public Long getDelayInspection() {
         return delayInspection;
@@ -149,6 +153,22 @@ public class TasksStatData {
 
     public void setCompleteMaintanceWaitingForApproval(Long completeMaintanceWaitingForApproval) {
         this.completeMaintanceWaitingForApproval = completeMaintanceWaitingForApproval;
+    }
+
+    public Long getCompleteReviewDelay() {
+        return completeReviewDelay;
+    }
+
+    public void setCompleteReviewDelay(Long completeReviewDelay) {
+        this.completeReviewDelay = completeReviewDelay;
+    }
+
+    public Long getNeedMaintanceReviewDelay() {
+        return needMaintanceReviewDelay;
+    }
+
+    public void setNeedMaintanceReviewDelay(Long needMaintanceReviewDelay) {
+        this.needMaintanceReviewDelay = needMaintanceReviewDelay;
     }
 
     @Override

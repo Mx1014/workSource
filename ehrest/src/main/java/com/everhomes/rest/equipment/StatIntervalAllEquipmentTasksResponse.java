@@ -23,6 +23,8 @@ import com.everhomes.util.StringHelper;
  *     <li>delayRate: 延误率</li>
  *     <li>reviewQualifiedRate: 审核通过率</li>
  *     <li>reviewDalayRate: 审核延误率</li>
+ *     <li>needMaintanceReviewDelay: 整改审核延误</li>
+ *     <li>completeReviewDelay: 巡检核查延误</li>
  * </ul>
  * Created by ying.xiong on 2017/4/19.
  */
@@ -65,6 +67,25 @@ public class StatIntervalAllEquipmentTasksResponse {
     private Double reviewQualifiedRate;
 
     private Double reviewDalayRate;
+
+    private Long needMaintanceReviewDelay;
+    private Long completeReviewDelay;
+
+    public Long getCompleteReviewDelay() {
+        return completeReviewDelay;
+    }
+
+    public void setCompleteReviewDelay(Long completeReviewDelay) {
+        this.completeReviewDelay = completeReviewDelay;
+    }
+
+    public Long getNeedMaintanceReviewDelay() {
+        return needMaintanceReviewDelay;
+    }
+
+    public void setNeedMaintanceReviewDelay(Long needMaintanceReviewDelay) {
+        this.needMaintanceReviewDelay = needMaintanceReviewDelay;
+    }
 
     public Double getDelayRate() {
         return delayRate;

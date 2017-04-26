@@ -467,8 +467,9 @@ public class EquipmentServiceImpl implements EquipmentService {
             
             // 读取完成删除文件
             if (file.isFile() && file.exists()) {  
-                file.delete();  
+                file.delete();
             } 
+            file.isFile();
         } catch (IOException ex) { 
  			LOGGER.error(ex.getMessage());
  			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
@@ -3613,6 +3614,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		return download(filePath,response);
 
 		DocUtil docUtil=new DocUtil();
+		List<String> files = new ArrayList<>();
 		if(dtos.size() % 2 == 1) {
 			EquipmentsDTO dto = dtos.get(dtos.size() - 1);
 			
@@ -3638,7 +3640,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			docUtil.createDoc(dataMap, "shenye", savePath);
 
 			if(StringUtils.isEmpty(cmd.getFilePath())) {
-				download(filePath,response);
+//				download(savePath,response);
+				files.add(savePath);
 			}
 			dtos.remove(dtos.size() - 1);
 		}
@@ -3677,9 +3680,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 			docUtil.createDoc(dataMap, "shenye2", savePath);
 
 			if(StringUtils.isEmpty(cmd.getFilePath())) {
-				download(filePath,response);
+//				download(savePath,response);
+				files.add(savePath);
 			}
 		}
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			if(files.size() > 1) {
+				String zipPath = filePath + "EquipmentCard.zip";
+				DownloadUtils.writeZip(files, zipPath);
+				download(zipPath,response);
+			} else if(files.size() == 1) {
+				download(files.get(0),response);
+			}
+
+		}
+
 		docUtil.closeHttpConn();
 	}
 

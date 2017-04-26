@@ -5,10 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class DownloadUtils {
 
@@ -35,4 +35,38 @@ public class DownloadUtils {
         }
         return response;
     }
+
+    public static String writeZip(List<String> files, String zipName) {
+        try {
+            OutputStream os = new BufferedOutputStream( new FileOutputStream(zipName) );
+            ZipOutputStream zos = new ZipOutputStream( os );
+            byte[] buf = new byte[8192];
+            int len;
+            for ( String filename : files ) {
+                File file = new File( filename );
+                if ( !file.isFile() ) continue;
+                ZipEntry ze = new ZipEntry( file.getName() );
+                zos.putNextEntry( ze );
+                BufferedInputStream bis = new BufferedInputStream( new FileInputStream( file ) );
+                while ( ( len = bis.read( buf ) ) > 0 ) {
+                    zos.write( buf, 0, len );
+                }
+                zos.closeEntry();
+                bis.close();
+                // 读取完成删除文件
+                if (file.isFile() && file.exists()) {
+                    file.delete();
+                }
+            }
+            zos.close();
+            
+            return zipName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+
+    }
+
 }
