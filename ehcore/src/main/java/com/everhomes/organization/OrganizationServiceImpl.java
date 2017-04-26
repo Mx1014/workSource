@@ -5903,9 +5903,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			memberCommand.setContactName(data.getContactName());
 			Byte gender = 0;
 			if(!StringUtils.isEmpty(data.getGender())){
-				if(data.getGender().equals("男")){
+				if(data.getGender().trim().equals("男")){
 					gender = 1;
-				}else if(data.getGender().equals("女")){
+				}else if(data.getGender().trim().equals("女")){
 					gender = 2;
 				}
 			}
