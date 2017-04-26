@@ -3775,14 +3775,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		response.setUnReviewedTasks(statTasks.getNeedMaintanceWaitingForApproval() + statTasks.getCompleteWaitingForApproval());
 		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
 
-		Double maintanceRate = (double)response.getCompleteMaintance()/(double)response.getComplete();
+		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
 		response.setMaintanceRate(maintanceRate);
-		Double delayRate = (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
+		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
 		response.setDelayRate(delayRate);
-		Double reviewQualifiedRate = (double)response.getReviewQualified()/(double)response.getReviewedTasks();
+		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
 		response.setReviewQualifiedRate(reviewQualifiedRate);
-		Double reviewDalayRate = (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
+		Double reviewDalayRate = response.getReviewTasks().equals(0L) ? 0.00 : (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
 		response.setReviewDalayRate(reviewDalayRate);
+
 		return response;
 	}
 
