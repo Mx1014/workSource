@@ -1167,6 +1167,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 		this.createEquipmentsBook(filePath, dtos);
+		LOGGER.info("filePath:{}", filePath);
 		
 		return download(filePath,response);
 	}
