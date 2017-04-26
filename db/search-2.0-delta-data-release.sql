@@ -32,7 +32,7 @@ SELECT MAX(id) INTO @id FROM eh_configurations;
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'biz.search.shops.api','/zl-ec/rest/openapi/shop/listByKeyword','搜索电商商家API','0',NULL);
 
 -- 当item对应的layout是方形时给它一个默认的icon，现在用于搜索时的icon展现。以下的图片路径需要根据上线时实际的图片路径作修改。
-SELECT 'cs://1/image/aW1hZ2UvTVRwaU5XWmtPREJoWVdGbU5UWTFOalkzTkdGbE5HUTNZbVprTm1WaU5tTmhNQQ' INTO @alias_icon_uri FROM DUAL;
+SELECT 'cs://1/image/aW1hZ2UvTVRwak5tTmtNREpqT0dJM01XSmhabVJoT1dJNFpEYzFOelUyTURJNE1EY3hZZw' INTO @alias_icon_uri FROM DUAL;
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 0 AND item_group IN ('Bizs') ; 
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 999980 AND item_group IN ('Gallery', 'Coupons') ; 
 UPDATE eh_launch_pad_items a SET a.alias_icon_uri = @alias_icon_uri WHERE a.namespace_id = 999982 AND item_group IN ('Gallery') ; 
