@@ -4712,7 +4712,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 3.查询所有现在+86400000(一天)开始到15分钟后的最晚上班时间的timerule
 	 * 4.通过timerule找昨天的schedule然后找到部门用户推送
 	 * */
-	@Scheduled(cron = "1 10/15 * * * ? *") 
+	@Scheduled(cron = "1 10/15 * * * ?") 
 	public void scheduledSendPushToUsers(){
 		 
 		
