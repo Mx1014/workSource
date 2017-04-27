@@ -19,3 +19,10 @@ CREATE TABLE `eh_import_file_tasks` (
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+-- 增加一个icon别名。现在用于搜索结果页面，原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。搜索功能模块当它不为空时用它替换icon_uri add by yanjun 20170420
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `alias_icon_uri` VARCHAR(1024) NULL COMMENT '原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。' ;
+
+-- 增加一个排序字段，用于客户端显示顺序 add by yanjun 20170427 search-2.0
+ALTER TABLE `eh_search_types` ADD COLUMN `order` TINYINT(4) NULL;
