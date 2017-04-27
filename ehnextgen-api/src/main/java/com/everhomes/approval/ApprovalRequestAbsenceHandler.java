@@ -261,8 +261,8 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			return true;
 		Calendar yesterday = Calendar.getInstance();
 		yesterday.setTime(date);
-		PunchTimeRuleDTO yesterdayRuleDTO = processTimeRuleDTO(punchRule.getId(), yesterday.getTime());
-		if(yesterdayRuleDTO.getEndEarlyTime() > DAY_MILLISECONDGMT)
+		PunchTimeRuleDTO yesterdayRuleDTO = processTimeRuleDTO(punchRule.getId(), yesterday.getTime()); 
+		if(null != yesterdayRuleDTO && yesterdayRuleDTO.getEndEarlyTime() > DAY_MILLISECONDGMT)
 			return true;
 		return false;
 	}
