@@ -1,12 +1,12 @@
--- »ú¹¹±íÀïÔö¼Ó×Ö¶Î ¼ÇÂ¼²Ù×÷ÈË  2017-04-20 add by sfyan
+-- æœºæ„è¡¨é‡Œå¢åŠ å­—æ®µ è®°å½•æ“ä½œäºº  2017-04-20 add by sfyan
 ALTER TABLE `eh_organizations` ADD COLUMN `creator_uid` BIGINT;
 ALTER TABLE `eh_organizations` ADD COLUMN `operator_uid` BIGINT;
 
--- »ú¹¹ÈËÔ±±íÀïÔö¼Ó×Ö¶Î ¼ÇÂ¼²Ù×÷ÈË  2017-04-20 add by sfyan
+-- æœºæ„äººå‘˜è¡¨é‡Œå¢åŠ å­—æ®µ è®°å½•æ“ä½œäºº  2017-04-20 add by sfyan
 ALTER TABLE `eh_organization_members` ADD COLUMN `creator_uid` BIGINT;
 ALTER TABLE `eh_organization_members` ADD COLUMN `operator_uid` BIGINT;
 
--- µ¼ÈëÎÄ¼şÈÎÎñ  2017-04-20 add by sfyan
+-- å¯¼å…¥æ–‡ä»¶ä»»åŠ¡  2017-04-20 add by sfyan
 CREATE TABLE `eh_import_file_tasks` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '',

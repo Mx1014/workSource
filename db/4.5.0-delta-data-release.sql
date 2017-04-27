@@ -1,4 +1,7 @@
--- ÌáÊ¾ĞÅÏ¢ add by sfyan 20170427
-insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','100010','zh_CN','ÊÖ»úºÅÂëÒÑ´æÔÚ');
-insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','700000','zh_CN','ĞÕÃû²»ÄÜÎª¿Õ');
-insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','700001','zh_CN','µç»°ºÅÂë²»ÄÜÎª¿Õ');
+-- æç¤ºä¿¡æ¯ add by sfyan 20170427
+insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','100010','zh_CN','æ‰‹æœºå·ç å·²å­˜åœ¨');
+insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','700000','zh_CN','å§“åä¸èƒ½ä¸ºç©º');
+insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','700001','zh_CN','ç”µè¯å·ç ä¸èƒ½ä¸ºç©º');
+
+-- æŠŠeh_organization_membersçš„ä¸¤ä¸ªå­—æ®µæ›´æ–°å¯¹åº”åˆ°eh_organizationä¸¤ä¸ªå­—æ®µçš„å€¼ add by sfyan 20170427
+update `eh_organization_members` om set `group_path` = (select path from eh_organizations where id = om.organization_id), `group_type` = (select `group_type` from eh_organizations where id = om.organization_id), `update_time` = now();
