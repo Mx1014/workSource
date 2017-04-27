@@ -43,11 +43,11 @@ public class DownloadUtils {
             byte[] buf = new byte[8192];
             int len;
             for ( String filename : files ) {
-                File file = new File( filename );
-                if ( !file.isFile() ) {
-                	LOGGER.info("filename:{} is not a file", filename);
-                	continue;
-                }
+                File file = new File(filename);
+//                if ( !file.isFile() ) {
+//                	LOGGER.info("filename:{} is not a file", filename);
+//                	continue;
+//                }
                 ZipEntry ze = new ZipEntry( file.getName() );
                 zos.putNextEntry( ze );
                 BufferedInputStream bis = new BufferedInputStream( new FileInputStream( file ) );

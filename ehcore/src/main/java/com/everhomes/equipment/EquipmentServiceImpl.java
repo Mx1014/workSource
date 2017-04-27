@@ -444,6 +444,9 @@ public class EquipmentServiceImpl implements EquipmentService {
         try {
             // path是指欲下载的文件的路径。
             File file = new File(path);
+			if ( !file.isFile() ) {
+				LOGGER.info("filename:{} is not a file", path);
+			}
             // 取得文件名。
             String filename = file.getName();
             // 取得文件的后缀名。
@@ -469,7 +472,7 @@ public class EquipmentServiceImpl implements EquipmentService {
             if (file.isFile() && file.exists()) {  
                 file.delete();
             } 
-            file.isFile();
+
         } catch (IOException ex) { 
  			LOGGER.error(ex.getMessage());
  			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
