@@ -2253,7 +2253,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(targetId != null) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
 		}
-		if(StringUtils.isNullOrEmpty(targetType)) {
+		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
 		}
 

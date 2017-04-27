@@ -58,6 +58,38 @@ public class DocUtil {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 根据Doc模板生成word文件
+     * @param dataMap 需要填入模板的数据
+     * @param downloadType 文件名称
+     * @param savePath 服务器路径
+     */
+    public void createDocOnServer(Map<String,Object> dataMap,String downloadType,String savePath){
+        try {
+            //加载需要装填的模板
+            Template template=null;
+            //设置模板装置方法和路径，FreeMarker支持多种模板装载方法。可以重servlet，classpath,数据库装载。
+            //加载模板文件
+            configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
+            //设置对象包装器
+//            configure.setObjectWrapper(new DefaultObjectWrapper());
+            //设置异常处理器
+            configure.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+            //定义Template对象，注意模板类型名字与downloadType要一致
+            template=configure.getTemplate(downloadType+".xml");
+
+            FileOutputStream out = new FileOutputStream(savePath);
+            Writer outWriter=new BufferedWriter(new OutputStreamWriter(out, "utf-8"));
+            template.process(dataMap, outWriter);
+            out.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TemplateException e) {
+            e.printStackTrace();
+        }
+    }
     
     public String getImageStr(String imgFile){
         InputStream in=null;

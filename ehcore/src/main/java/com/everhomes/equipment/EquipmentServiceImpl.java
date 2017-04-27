@@ -3794,9 +3794,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		StatItemResultsInEquipmentTasksResponse response = new StatItemResultsInEquipmentTasksResponse();
 //		itemResultStat: 巡检参数统计 参考ItemResultStat
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
-		response.setEquipmentName(equipment.getName());
-		response.setCustomNumber(equipment.getCustomNumber());
-		response.setLocation(equipment.getLocation());
+		if(equipment != null) {
+			response.setEquipmentName(equipment.getName());
+			response.setCustomNumber(equipment.getCustomNumber());
+			response.setLocation(equipment.getLocation());
+		}
 
 		Timestamp begin = null;
 		Timestamp end = null;
