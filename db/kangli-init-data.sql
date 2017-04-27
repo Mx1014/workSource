@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 SET @namespace_id=999978;
-SET @eh_core_serverURL = "http://alpha.lab.everhomes.com"; -- 取具体环境连接core server的链接
-SET @eh_biz_serverURL = "biz-alpha.lab.everhomes.com"; -- 取具体环境连接core server的链接
+SET @eh_core_serverURL = "http://core.zuolin.com"; -- 取具体环境连接core server的链接
+SET @eh_biz_serverURL = "biz.zuolin.com"; -- 取具体环境连接core server的链接
 SET @user_id = 264000;  -- 需要取现网eh_users的ID的最大值再加一定余量
 SET @account_name='285585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
 SET @community_id = 240111044331057733; -- 需要取现网eh_communities的ID的最大值再加一定余量
@@ -17,7 +17,7 @@ SET @region_id = 17151;  -- 需要取现网已有城市“深圳市”的ID
 SET @shi_id = 17151;  -- 需要取现网已有城市“深圳市”的ID
 SET @qu_id = 17151;  -- 需要取现网已有城市“龙岗区”的ID
 
-SET @group_id = 1010469; 
+SET @group_id = 1011478; 
 SET @forum_id = 189423; 
 
 SET @rental_res_id = 10712; 
