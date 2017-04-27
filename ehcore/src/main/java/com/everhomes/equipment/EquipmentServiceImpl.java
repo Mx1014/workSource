@@ -3603,12 +3603,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	public void exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response) {
 		List<Long> equipmentIds = new ArrayList<>();
-		if(StringUtils.isEmpty(cmd.getIds())) {
+		if(!StringUtils.isEmpty(cmd.getIds())) {
 			String[] ids = cmd.getIds().split(",");
 			for(String id : ids) {
 				equipmentIds.add(Long.valueOf(id));
 			}
 		}
+		LOGGER.info("equipmentIds: {}", equipmentIds);
 		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(equipmentIds);
 		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
 			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
