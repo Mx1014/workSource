@@ -13,4 +13,5 @@ public interface ServiceAllianceRequestNotificationTemplateCode {
     
     //add by dengs 20170425 纯文字，放到eh_locale_strings表的
     static final String AN_APPLICATION_FORM = "10001"; // 的申请单
+    static final String SEE_MAIL_ATTACHMENT = "10002"; // 见邮件附件
 }

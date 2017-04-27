@@ -150,8 +150,8 @@ public class JMailHandler implements MailHandler {
     /**  
      * 根据传入的文件路径创建附件并返回  
      */ 
-    public MimeBodyPart createAttachment(String filePath) throws Exception {  
-        MimeBodyPart attachmentPart = new MimeBodyPart();  
+    public MimeBodyPart createAttachment(String filePath) throws Exception {
+        MimeBodyPart attachmentPart = new MimeBodyPart(); 
         FileDataSource fds = new FileDataSource(filePath);  
         attachmentPart.setDataHandler(new DataHandler(fds));  
         attachmentPart.setFileName(fds.getName());  

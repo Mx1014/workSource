@@ -184,7 +184,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
-				request.getType(), locator, Integer.MAX_VALUE);
+				request.getCategoryId(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
 				if(target.getStatus().byteValue() == 1) {
