@@ -8562,7 +8562,7 @@ System.out.println();
 			organizationMember.setOrganizationId(enterpriseId);
 			userSearcher.feedDoc(organizationMember);
 			//是往公司添加新成员就需要发消息
-			if(joinEnterpriseMap.get(enterpriseId)){
+			if(null != joinEnterpriseMap.get(enterpriseId) && joinEnterpriseMap.get(enterpriseId)){
 				if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 					sendMessageForContactApproved(organizationMember);
 				}
