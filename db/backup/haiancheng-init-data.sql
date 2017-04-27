@@ -2629,3 +2629,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
 	VALUES ('112727', '999993', '0', '0', '0', '/home', 'Bizs', '加时空调', '加时空调', 'cs://1/image/aW1hZ2UvTVRvNE1UY3pZek15Tm1RNFl6VTVOR1EwTXpRd05EZGlNMkUyTWpOaE1tTmlZdw', '1', '1', '49', '{\"resourceTypeId\":10450,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1', NULL);
 
+SELECT MAX(id) FROM `eh_locale_templates` INTO @max_id;
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES (@max_id := @max_id + 1, 'sms.default.yzx', 8, 'zh_CN', '门禁-海岸', '42958', 999993);
