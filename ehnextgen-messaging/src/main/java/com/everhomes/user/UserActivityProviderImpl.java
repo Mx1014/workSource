@@ -679,7 +679,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
 		query.addConditions(Tables.EH_SEARCH_TYPES.NAMESPACE_ID.eq(namespaceId));
 		
 		query.addConditions(Tables.EH_SEARCH_TYPES.STATUS.eq(SearchTypesStatus.ACTIVE.getCode()));
-		 
+		query.addOrderBy(Tables.EH_SEARCH_TYPES.ORDER.asc());
 		List<SearchTypes> result = new ArrayList<SearchTypes>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, SearchTypes.class));
