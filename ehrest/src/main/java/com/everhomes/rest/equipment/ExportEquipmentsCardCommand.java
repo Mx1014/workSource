@@ -7,15 +7,16 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>ids: 下载设备卡的设备id列表</li>
+ *     <li>ids: 下载设备卡的设备id列表(web用get请求，不能传数组，暂时用逗号隔开id)</li>
  *     <li>filePath: 下载路径</li>
  * </ul>
  * Created by ying.xiong on 2017/4/10.
  */
 public class ExportEquipmentsCardCommand {
-    @ItemType(Long.class)
-    private List<Long> ids;
+//    @ItemType(Long.class)
+//    private List<Long> ids;
 
+    private String ids;
     private String filePath;
 
     public String getFilePath() {
@@ -26,11 +27,11 @@ public class ExportEquipmentsCardCommand {
         this.filePath = filePath;
     }
 
-    public List<Long> getIds() {
+    public String getIds() {
         return ids;
     }
 
-    public void setIds(List<Long> ids) {
+    public void setIds(String ids) {
         this.ids = ids;
     }
 
