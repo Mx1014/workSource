@@ -39,7 +39,8 @@ public interface EquipmentProvider {
 	void updateEquipmentAccessoryMap(EquipmentInspectionAccessoryMap map);
 	void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment);
 	void deleteEquipmentAttachmentById(Long id);
-	
+	List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId);
+
 	List<EquipmentStandardMap> findByStandardId(Long standardId);
 	List<EquipmentStandardMap> findByTarget(Long targetId, String targetType);
 	

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import com.everhomes.appurl.AppUrlService;
+import com.everhomes.forum.Attachment;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
@@ -826,7 +827,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 						eqAccessoryMap.add(map);
 					}
 				}
-				
+
+				deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
 				if(cmd.getAttachments() != null) {
 					for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
 						attachment.setEquipmentId(equipment.getId());
@@ -1033,15 +1035,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.updateEquipmentAccessoryMap(map);
 		}
 	}
-	
+
+	private void deleteEquipmentAttachmentsByEquipmentId(Long equipmentId) {
+		List<EquipmentInspectionEquipmentAttachments> attachments = equipmentProvider.findEquipmentAttachmentsByEquipmentId(equipmentId);
+		if(attachments != null && attachments.size() > 0) {
+			attachments.forEach(attachment -> {
+				equipmentProvider.deleteEquipmentAttachmentById(attachment.getId());
+			});
+		}
+	}
+
 	private void updateEquipmentAttachment(EquipmentAttachmentDTO dto, Long uid) {
 		
 		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto, 
 				EquipmentInspectionEquipmentAttachments.class);
 		
-		if(dto.getId() != null) {
-			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
-		} 
+//		if(dto.getId() != null) {
+//			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
+//		}
 
 		attachment.setCreatorUid(uid);
 		equipmentProvider.creatEquipmentAttachment(attachment);

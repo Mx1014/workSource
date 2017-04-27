@@ -385,6 +385,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
+	public List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.EQUIPMENT_ID.eq(equipmentId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.ATTACHMENT_TYPE.eq((byte)1));
+		List<EquipmentInspectionEquipmentAttachments> attachments = new ArrayList<>();
+		query.fetch().map((r) -> {
+			attachments.add(ConvertHelper.convert(r, EquipmentInspectionEquipmentAttachments.class));
+			return null;
+		});
+
+		return attachments;
+	}
+
+	@Override
 	public List<EquipmentStandardMap> findByStandardId(
 			Long standardId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
