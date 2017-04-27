@@ -192,11 +192,13 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="\\download\\";
 	private static final String PUNCH_STATUS_SCOPE ="punch.status";
+	private static final String PUNCH_DEFAULT_SCOPE ="punch.default";
 	private static final String PUNCH_PUSH_SCOPE ="punch.push";
 	private static final String PUNCH_EXCEL_SCOPE ="punch.excel";
 	private static final String EXCEL_SCHEDULE = "schedule";
 	private static final String EXCEL_RULE = "rule";
 	private static final String PUNCH_REMINDER ="1";
+	private static final String PUNCH_TIME_RULE_NAME = "timeRuleName";
 
 	@Autowired
 	private MessagingService messagingService;
@@ -5438,6 +5440,10 @@ public class PunchServiceImpl implements PunchService {
 						dto.setTimeRuleId(timeRule.getId());
 						dto.setTimeRuleName(timeRule.getName());
 						dto.setTimeRuleDescription(timeRule.getDescription());
+					}else{
+
+						LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_DEFAULT_SCOPE, PUNCH_TIME_RULE_NAME,"zh_CN");
+						dto.setTimeRuleName( scheduleLocaleString==null?"":scheduleLocaleString.getText());
 					}
 				}
 			}
