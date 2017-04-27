@@ -3709,7 +3709,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		}
 
-		docUtil.closeHttpConn();
 	}
 
 	private Timestamp getDayBegin(Calendar cal, int period) {
