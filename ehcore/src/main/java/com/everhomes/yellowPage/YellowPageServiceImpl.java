@@ -590,11 +590,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		this.processDetailUrl(dto);
 //		response.setDisplayName(serviceAlliance.getNickName());
-//		Community community = communityProvider.findCommunityById(dto.getOwnerId());
-//		if(community != null) {
-//			dto.setNamespaceId(community.getNamespaceId());
-//		}
-		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
+		Community community = communityProvider.findCommunityById(dto.getOwnerId());
+		if(community != null) {
+			dto.setNamespaceId(community.getNamespaceId());
+		}
+//		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 		processServiceUrl(dto);
 		return dto;
@@ -645,6 +645,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType("community");
 		}
+		// ownerId 一般传入小区、园区id，这里的ownerId当作域空间来使用，暂时屏蔽掉，不知道会不会引发其他的问题 modify by sw 20170421
 //		else if(null != cmd.getOwnerId()){
 //
 ////			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());

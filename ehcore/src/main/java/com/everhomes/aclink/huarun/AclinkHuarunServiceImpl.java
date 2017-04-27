@@ -78,7 +78,7 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
             AclinkHuarunVerifyUserResp resp = (AclinkHuarunVerifyUserResp)StringHelper.fromJsonString(body, AclinkHuarunVerifyUserResp.class);
             return resp;
         } catch (Exception e) {
-            LOGGER.error("request error", e);
+            LOGGER.error("huarun request error", e);
             return null;
         }
     }
@@ -114,7 +114,7 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
             AclinkGetSimpleQRCodeResp resp = (AclinkGetSimpleQRCodeResp)StringHelper.fromJsonString(body, AclinkGetSimpleQRCodeResp.class);
             return resp;
         } catch (Exception e) {
-            LOGGER.error("request error", e);
+            LOGGER.error("huarun request error", e);
             return null;
         }    	
     }

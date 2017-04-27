@@ -275,9 +275,14 @@ public class ZuolinAssetVendorHandler implements AssetVendorHandler {
                         bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
 
                 if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
-                    BigDecimal pastUnpaid = bill.getLateFee();
+                    BigDecimal pastUnpaid = BigDecimal.ZERO;
+                    if(bill.getLateFee() != null) {
+                        pastUnpaid = bill.getLateFee();
+                    }
                     for(BigDecimal unpaid : unpaidAmounts) {
-                        pastUnpaid = pastUnpaid.add(unpaid);
+                        if(unpaid != null) {
+                            pastUnpaid = pastUnpaid.add(unpaid);
+                        }
                     }
 
                     totalAmount.add(pastUnpaid);
