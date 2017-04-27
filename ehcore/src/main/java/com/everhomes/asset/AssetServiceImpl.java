@@ -3,9 +3,13 @@ package com.everhomes.asset;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cache.CacheAccessor;
+import com.everhomes.cache.CacheProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -20,8 +24,11 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.group.GroupDiscriminator;
@@ -29,9 +36,8 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.user.MessageChannelType;
@@ -54,6 +60,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +77,7 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -129,6 +131,90 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private CacheProvider cacheProvider;
+
+    @Autowired
+    private OrganizationService organizationService;
+
+    @Override
+    public List<ListOrganizationsByPmAdminDTO> listOrganizationsByPmAdmin() {
+        List<ListOrganizationsByPmAdminDTO> dtoList = new ArrayList<>();
+
+        final Long userId = UserContext.current().getUser().getId();
+        // 拿到用户所在的公司列表
+        List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(),
+                userId, OrganizationGroupType.ENTERPRISE);
+
+        if (organizationList == null || organizationList.isEmpty()) {
+            return dtoList;
+        }
+
+        ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+        for (OrganizationDTO organization : organizationList) {
+            cmd.setOrganizationId(organization.getId());
+            // 获取当前用户为超级管理员的公司
+            List<OrganizationContactDTO> organizationAdmins = rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+            if (organizationAdmins != null && organizationAdmins.size() > 0) {
+                boolean isAdmin = organizationAdmins.stream().mapToLong(OrganizationContactDTO::getTargetId).anyMatch(adminId -> adminId == userId);
+                if (isAdmin) {
+                    dtoList.add(toOrganizationsByPmAdminDTO(organization));
+                    continue;
+                }
+            }
+            // 获取当前用户为企业管理员的公司
+            List<OrganizationContactDTO> organizationPms = rolePrivilegeService.listOrganizationAdministrators(cmd);
+            if (organizationPms != null && organizationPms.size() > 0) {
+                boolean isPm = organizationPms.stream().mapToLong(OrganizationContactDTO::getTargetId).anyMatch(pmId -> pmId == userId);
+                if (isPm) {
+                    dtoList.add(toOrganizationsByPmAdminDTO(organization));
+                }
+            }
+        }
+        this.processLatestSelectedOrganization(dtoList);
+        return dtoList;
+    }
+
+    private void processLatestSelectedOrganization(List<ListOrganizationsByPmAdminDTO> dtoList) {
+        CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
+        String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());
+        Long latestSelectedOrganizationId = accessor.get(key);
+        if (latestSelectedOrganizationId != null) {
+            dtoList.parallelStream()
+                    .filter(r -> Objects.equals(r.getOrganizationId(), latestSelectedOrganizationId))
+                    .forEach(r -> r.setLatestSelected(TrueOrFalseFlag.TRUE.getCode()));
+        }
+    }
+
+    private ListOrganizationsByPmAdminDTO toOrganizationsByPmAdminDTO(OrganizationDTO organization) {
+        ListOrganizationsByPmAdminDTO dto = new ListOrganizationsByPmAdminDTO();
+        dto.setOrganizationId(organization.getId());
+        dto.setOrganizationName(organization.getName());
+        dto.setAddresses(this.getOrganizationAddresses(organization.getId()));
+        dto.setAreaSize(0.0);
+        if(dto.getAddresses() != null && dto.getAddresses().size() > 0) {
+            dto.getAddresses().forEach(address -> {
+                if(address != null && address.getAreaSize() != null) {
+                    dto.setAreaSize(address.getAreaSize()+dto.getAreaSize());
+                }
+            });
+
+        }
+
+        return dto;
+    }
+
+    private List<AddressDTO> getOrganizationAddresses(Long organizationId) {
+        List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+        if (organizationAddresses != null) {
+            return organizationAddresses.stream().map(r -> {
+                Address address = addressProvider.findAddressById(r.getAddressId());
+                return ConvertHelper.convert(address, AddressDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
 
@@ -144,113 +230,58 @@ public class AssetServiceImpl implements AssetService {
         return dtos;
     }
 
+    private AssetVendor checkAssetVendor(String targetType,Long targetId){
+        if(null == targetId) {
+            LOGGER.error("checkAssetVendor targetId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor targetId cannot be null.");
+        }
+
+        if(StringUtils.isBlank(targetType)) {
+            LOGGER.error("checkAssetVendor targetType cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "checkAssetVendor targetType cannot be null.");
+        }
+
+        AssetVendor assetVendor = assetProvider.findAssetVendorByOwner(targetType, targetId);
+        if(null == assetVendor) {
+            LOGGER.error("assetVendor not found, assetVendor targetType={}, targetId={}", targetType, targetId);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                    "assetVendor not found");
+        }
+
+        return assetVendor;
+    }
+
+    private AssetVendorHandler getAssetVendorHandler(String vendorName) {
+        AssetVendorHandler handler = null;
+
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = AssetVendorHandler.ASSET_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+
+        return handler;
+    }
+
+    private void putLatestSelectedOrganizationToCache(Long organizationId) {
+        CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
+        String key = String.format("pmbill:kexing:latest-selected-organization: %s:%s", UserContext.getCurrentNamespaceId(), UserContext.current().getUser().getId());
+        accessor.put(key, organizationId);
+    }
+
     @Override
     public ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd) {
 
-        List<Long> tenantIds = new ArrayList<>();
-        String tenantType = null;
-        if(cmd.getTenant() != null) {
-            Community community = communityProvider.findCommunityById(cmd.getTargetId());
-            if(community != null) {
-                //园区 查公司表
-                if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                    tenantType = TenantType.ENTERPRISE.getCode();
-                    SearchOrganizationCommand command = new SearchOrganizationCommand();
-                    command.setKeyword(cmd.getTenant());
-                    command.setCommunityId(cmd.getTargetId());
-                    GroupQueryResult result = organizationSearcher.query(command);
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
 
-                    if(result != null) {
-                        tenantIds.addAll(result.getIds());
-                    }
-                }
-
-                //小区 查用户所属家庭
-                else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
-                    tenantType = TenantType.FAMILY.getCode();
-                    List<User> users = userProvider.listUserByNickName(cmd.getTenant());
-
-                    if(users != null && users.size() > 0) {
-                        for(User user : users) {
-                            List<UserGroup> list = userProvider.listUserActiveGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
-                            if(list != null && list.size() > 0) {
-                                for(UserGroup userGroup : list) {
-                                    tenantIds.add(userGroup.getGroupId());
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            }
-        }
-
-        CrossShardListingLocator locator=new CrossShardListingLocator();
-        if(cmd.getPageAnchor()!=null){
-            locator.setAnchor(cmd.getPageAnchor());
-        }
-        
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        
-        List<AssetBill> bills  = assetProvider.listAssetBill(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
-                tenantIds, tenantType, cmd.getAddressId(), cmd.getStatus(), cmd.getStartTime(),cmd.getEndTime(), locator, pageSize + 1);
-
-
-        ListSimpleAssetBillsResponse response = new ListSimpleAssetBillsResponse();
-        if (bills.size() > pageSize) {
-            response.setNextPageAnchor(locator.getAnchor());
-            bills = bills.subList(0, pageSize);
-        }
-
-        List<SimpleAssetBillDTO> dtos = convertAssetBillToSimpleDTO(bills);
-        response.setBills(dtos);
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+        putLatestSelectedOrganizationToCache(cmd.getOrganizationId());
+        ListSimpleAssetBillsResponse response = handler.listSimpleAssetBills(cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getOrganizationId(),  cmd.getAddressId(), cmd.getTenant(), cmd.getStatus(),
+                cmd.getStartTime(), cmd.getEndTime(), cmd.getPageAnchor(), cmd.getPageSize());
         return response;
-    }
-
-    private List<SimpleAssetBillDTO> convertAssetBillToSimpleDTO(List<AssetBill> bills) {
-        List<SimpleAssetBillDTO> dtos =  bills.stream().map(bill -> {
-            SimpleAssetBillDTO dto = ConvertHelper.convert(bill, SimpleAssetBillDTO.class);
-            Address address = addressProvider.findAddressById(bill.getAddressId());
-            if(address != null) {
-                dto.setBuildingName(address.getBuildingName());
-                dto.setApartmentName(address.getApartmentName());
-            }
-
-            BigDecimal totalAmount = bill.getPeriodAccountAmount();
-            // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
-            if(compareMonth(bill.getAccountPeriod()) == 0) {
-
-                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
-                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
-
-                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
-                    BigDecimal pastUnpaid = bill.getLateFee();
-                    for(BigDecimal unpaid : unpaidAmounts) {
-                        pastUnpaid = pastUnpaid.add(unpaid);
-                    }
-
-                    totalAmount.add(pastUnpaid);
-                    
-                }
-            }
-
-            dto.setPeriodAccountAmount(totalAmount);
-            return dto;
-        }).collect(Collectors.toList());
-
-        return dtos;
-    }
-
-    private int compareMonth(Timestamp compareValue) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Timestamp(System.currentTimeMillis()));
-        int monthNow = c.get(Calendar.MONTH);
-
-        c.setTime(compareValue);
-        int monthCompare = c.get(Calendar.MONTH);
-
-        return (monthNow-monthCompare);
     }
 
     @Override
@@ -594,93 +625,14 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd) {
-        AssetBillTemplateValueDTO dto = new AssetBillTemplateValueDTO();
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
 
-        AssetBill bill = getAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
-        dto.setId(bill.getId());
-        dto.setNamespaceId(bill.getNamespaceId());
-        dto.setOwnerType(bill.getOwnerType());
-        dto.setOwnerId(bill.getOwnerId());
-        dto.setTargetType(bill.getTargetType());
-        dto.setTargetId(bill.getTargetId());
-        dto.setTemplateVersion(cmd.getTemplateVersion());
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
 
-        List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion());
-        if(templateFields != null && templateFields.size() > 0) {
-            List<FieldValueDTO> valueDTOs = new ArrayList<>();
-            Field[] fields = EhAssetBills.class.getDeclaredFields();
-            for(AssetBillTemplateFieldDTO fieldDTO : templateFields) {
-                if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(fieldDTO.getSelectedFlag()))) {
-                    FieldValueDTO valueDTO = new FieldValueDTO();
-                    if(fieldDTO.getFieldCustomName() != null) {
-                        valueDTO.setFieldDisplayName(fieldDTO.getFieldCustomName());
-                    } else {
-                        valueDTO.setFieldDisplayName(fieldDTO.getFieldDisplayName());
-                    }
-                    valueDTO.setFieldName(fieldDTO.getFieldName());
-                    valueDTO.setFieldType(fieldDTO.getFieldType());
-
-                    for (Field requestField : fields) {
-                        requestField.setAccessible(true);
-                        // private类型
-                        if (requestField.getModifiers() == 2) {
-                            if(requestField.getName().equals(fieldDTO.getFieldName())){
-                                // 字段值
-                                try {
-                                    if(requestField.get(bill) != null)
-                                        valueDTO.setFieldValue(requestField.get(bill).toString());
-
-                                    break;
-                                } catch (IllegalArgumentException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                } catch (IllegalAccessException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-
-                    valueDTOs.add(valueDTO);
-                }
-            }
-            
-            BigDecimal totalAmounts = bill.getPeriodAccountAmount();
-         // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
-            if(compareMonth(bill.getAccountPeriod()) == 0) {
-            	BigDecimal pastUnpaid = new BigDecimal(0);
-                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
-                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
-
-                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
-                    
-                    for(BigDecimal unpaid : unpaidAmounts) {
-                        pastUnpaid = pastUnpaid.add(unpaid);
-                    }
-
-                    FieldValueDTO unpaidAmountsDTO = new FieldValueDTO();
-                    unpaidAmountsDTO.setFieldDisplayName("往期欠费");
-                    unpaidAmountsDTO.setFieldType("BigDecimal");
-                    unpaidAmountsDTO.setFieldValue(pastUnpaid.toString());
-                    
-                    valueDTOs.add(unpaidAmountsDTO);
-                    
-                }
-                totalAmounts.add(pastUnpaid).add(bill.getLateFee());
-            }
-            
-            FieldValueDTO totalAmountsDTO = new FieldValueDTO();
-            totalAmountsDTO.setFieldDisplayName("总计应收");
-            totalAmountsDTO.setFieldType("BigDecimal");
-            totalAmountsDTO.setFieldValue(totalAmounts.toString());
-            
-            valueDTOs.add(totalAmountsDTO);
-            
-            dto.setDtos(valueDTOs);
-            	
-            	
-        }
+        AssetBillTemplateValueDTO dto = handler.findAssetBill(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion(), cmd.getOrganizationId(), cmd.getDateStr(),
+                cmd.getTenantId(), cmd.getTenantType(), cmd.getAddressId());
         return dto;
     }
 
@@ -873,6 +825,17 @@ public class AssetServiceImpl implements AssetService {
             response.setLastNotifyTime(lastRecord.getCreateTime());
         }
         return response;
+    }
+
+    @Override
+    public AssetBillStatDTO getAssetBillStat(GetAssetBillStatCommand cmd) {
+        AssetVendor assetVendor = checkAssetVendor(cmd.getTargetType(), cmd.getTargetId());
+
+        String vendor = assetVendor.getVendorName();
+        AssetVendorHandler handler = getAssetVendorHandler(vendor);
+
+        AssetBillStatDTO dto = handler.getAssetBillStat(cmd.getTenantType(), cmd.getTenantId(), cmd.getAddressId());
+        return dto;
     }
 
     //获得本月第一天0点时间

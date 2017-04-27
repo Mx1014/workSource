@@ -42,6 +42,8 @@ public class Post extends EhForumPosts {
     private String shareUrl;
     
     private Long communityId;
+
+    private Integer namespaceId;
     
     public Post() {
     }
@@ -172,7 +174,15 @@ public class Post extends EhForumPosts {
         this.communityId = communityId;
     }
 
-	public String toString() {
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String toString() {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writeValueAsString(this);

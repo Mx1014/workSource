@@ -19,7 +19,9 @@ import com.everhomes.util.StringHelper;
 public class GetUserRelatedAddressByCommunityResponse {
     @ItemType(FamilyDTO.class)
     private List<FamilyDTO> familyList;
-    
+    @ItemType(PmTaskHistoryAddressDTO.class)
+    private List<PmTaskHistoryAddressDTO> historyAddresses;
+
     public List<OrgAddressDTO> getOrganizationList() {
 		return organizationList;
 	}
@@ -40,7 +42,14 @@ public class GetUserRelatedAddressByCommunityResponse {
         this.familyList = familyList;
     }
 
-    
+    public List<PmTaskHistoryAddressDTO> getHistoryAddresses() {
+        return historyAddresses;
+    }
+
+    public void setHistoryAddresses(List<PmTaskHistoryAddressDTO> historyAddresses) {
+        this.historyAddresses = historyAddresses;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

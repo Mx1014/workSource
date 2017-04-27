@@ -807,12 +807,14 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(userIdentifier == null) {
-				LOGGER.warn("Unable to find identifier record of " + userIdentifierToken);
+				LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+				        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
 				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
 			} else {
 				user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
 				if(user == null) {
-					LOGGER.error("Unable to find owner user of identifier record: " + userIdentifierToken);
+					LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+                        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
 				}
 			}

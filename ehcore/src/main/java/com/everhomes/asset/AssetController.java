@@ -4,8 +4,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.pmkexing.PmKeXingBillService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
+import com.everhomes.rest.pmkexing.ListOrganizationsByPmAdminDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -44,6 +46,19 @@ public class AssetController extends ControllerBase {
         List<AssetBillTemplateFieldDTO> dtos = this.assetService.listAssetBillTemplate(cmd);
 
         RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取公司物业账单统计信息</p>
+     * <b>URL: /asset/getAssetBillStat</b>
+     */
+    @RequestMapping("getAssetBillStat")
+    @RestReturn(AssetBillStatDTO.class)
+    public RestResponse getAssetBillStat(GetAssetBillStatCommand cmd) {
+        RestResponse response = new RestResponse(assetService.getAssetBillStat(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -259,6 +274,20 @@ public class AssetController extends ControllerBase {
         RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取用户为管理员的公司列表</p>
+     * <b>URL: /asset/listOrganizationsByPmAdmin</b>
+     */
+    @RequestMapping("listOrganizationsByPmAdmin")
+    @RestReturn(value = ListOrganizationsByPmAdminDTO.class, collection = true)
+    public RestResponse listOrganizationsByPmAdmin() {
+
+        RestResponse response = new RestResponse(assetService.listOrganizationsByPmAdmin());
+        response.setErrorDescription("OK");
+        response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
 //    脚本配置设置用户模板

@@ -1929,8 +1929,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void sendErrorMessage(Exception e) {
-        String xiaoqiang = "xq.tian@zuolin.com";
-        String wuhan = "han.wu@zuolin.com";
+        String xiongying = "ying.xiong@zuolin.com";
         String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
         String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
@@ -1940,13 +1939,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         {
             e.printStackTrace(stream);
             String message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiaoqiang, "calculateEnergyDayStat error", message);
-            handler.sendMail(0, account, wuhan, "calculateEnergyDayStat error", message);
+            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error", message);
             // out.reset();
             e.getCause().printStackTrace(stream);
             message = out.toString("UTF-8");
-            handler.sendMail(0, account, xiaoqiang, "calculateEnergyDayStat error cause", message);
-            handler.sendMail(0, account, wuhan, "calculateEnergyDayStat error cause", message);
+            handler.sendMail(0, account, xiongying, "calculateEnergyDayStat error cause", message);
 
         } catch (Exception ignored) {
             //
