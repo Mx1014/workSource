@@ -89,15 +89,15 @@ web.location: /resources/
 # Redis configuration
 #
 redis.bus.host: redis-server
-redis.bus.port: 6379
+redis.bus.port: 6380
 redis.store.master.host: redis-server
-redis.store.master.port: 6379
+redis.store.master.port: 6380
 
 #
 # Database configuration
 #
 db.driver: com.mysql.jdbc.Driver
-db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore_20160922?characterEncoding=UTF-8&encrypted=0
+db.master: jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore?characterEncoding=UTF-8&encrypted=0
 db.conn.pool: 8
 db.conn.borrow.timeout: 60
 db.jta: true
