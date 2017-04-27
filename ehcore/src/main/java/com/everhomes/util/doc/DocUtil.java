@@ -53,8 +53,18 @@ public class DocUtil {
             //定义Template对象，注意模板类型名字与downloadType要一致
             template=configure.getTemplate(downloadType+".xml");
             File outFile=new File(savePath);
-            Writer out=null;
-            out=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
+            if (outFile.exists()) {
+                LOGGER.info("文件存在：{}", savePath);
+            } else {
+                LOGGER.info("文件不存在，正在创建...：{}", savePath);
+                if (outFile.createNewFile()) {
+                    LOGGER.info("文件创建成功！：{}", savePath);
+                } else {
+                    LOGGER.info("文件创建失败！：{}", savePath);
+                }
+            }
+            Writer out=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
+//            out=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
             template.process(dataMap, out);
             out.close();
         } catch (IOException e) {
