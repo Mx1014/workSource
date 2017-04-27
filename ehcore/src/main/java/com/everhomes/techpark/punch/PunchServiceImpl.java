@@ -4767,7 +4767,9 @@ public class PunchServiceImpl implements PunchService {
 			for(PunchScheduling scheduling : punchSchedulings){
 				if(scheduling.getTargetType().equals(PunchOwnerType.User.getCode())){
 					//对于对个人排班的
-					sendPunsUserList.add(scheduling.getTargetId());
+					//如果没有打卡 添加到推送列表
+					if(!checkUserPunch(scheduling.getRuleDate(),scheduling.getTargetId(),scheduling.getOwnerId()))
+						sendPunsUserList.add(scheduling.getTargetId());
 				}else{
 					//对于按机构排班的
 					List<String> groupTypeList = new ArrayList<String>();
@@ -4782,7 +4784,9 @@ public class PunchServiceImpl implements PunchService {
 								//找到用户的rule 
 								PunchRule punchRule = getPunchRule(scheduling.getOwnerType(), scheduling.getOwnerId(), memberDTO.getTargetId());
 								//保证用户的rule 和schedule一致(也就是他使用的确实是这个排班而不是用别部门或者单独设置的排班)
-								if(null != punchRule && punchRule.getId().equals(scheduling.getPunchRuleId()) )
+								if(null != punchRule && punchRule.getId().equals(scheduling.getPunchRuleId()) &&
+										//如果没有打卡 添加到推送列表
+										!checkUserPunch(scheduling.getRuleDate(),memberDTO.getTargetId(),scheduling.getOwnerId())) 
 									sendPunsUserList.add(memberDTO.getTargetId());
 							}
 						}
@@ -4790,6 +4794,15 @@ public class PunchServiceImpl implements PunchService {
 				}
 			}
 		}
+	}
+	private boolean checkUserPunch(java.sql.Date ruleDate, Long userId,Long companyId) {
+		// TODO Auto-generated method stub
+		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
+				companyId, dateSF.get().format(ruleDate),
+				ClockCode.SUCESS.getCode());
+		if(null == punchLogs || punchLogs.size() ==0)
+			return false;
+		return true;
 	}
 	/**
 	 * 每15分轮询刷打卡记录
