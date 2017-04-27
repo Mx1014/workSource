@@ -5443,9 +5443,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 }
                 // 检查手机号的唯一性
                 if (contactTokenList.contains(RowResult.trimString(result.getC()))) {
-                    LOGGER.error("Import organization owner contactToken repeat, contactToken = {}.", result.getC().trim());
-                    throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CONTACT_TOKEN_REPEAT,
-                            "Import organization owner contactToken repeat, contactToken = %s.", result.getC().trim());
+                	// 支持同一个人导入多行，但只能生成一个业主信息，add by tt, 170427
+                	String contactToken = RowResult.trimString(result.getC());
+                	List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(currentNamespaceId(), communityId, contactToken);
+                	if (pmOwners != null && !pmOwners.isEmpty()) {
+                		CommunityPmOwner pmOwner = pmOwners.get(0);
+                		Address address = parseAddress(currentNamespaceId(), communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
+                		Byte livingStatus = parseLivingStatus(RowResult.trimString(result.getF()));
+        				createOrganizationOwnerAddress(address.getId(), livingStatus, currentNamespaceId(), pmOwner.getId(), OrganizationOwnerAddressAuthType.INACTIVE);
+        				if (StringUtils.hasLength(result.getG())) {
+        					long time = parseDate(RowResult.trimString(result.getG())).getTime();
+        					createOrganizationOwnerBehavior(pmOwner.getId(), address.getId(), time, OrganizationOwnerBehaviorType.IMMIGRATION);
+        				}
+					}
+                	continue;
+                	// comment by tt, 170427
+//                    LOGGER.error("Import organization owner contactToken repeat, contactToken = {}.", result.getC().trim());
+//                    throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CONTACT_TOKEN_REPEAT,
+//                            "Import organization owner contactToken repeat, contactToken = %s.", result.getC().trim());
                 }
                 contactTokenList.add(RowResult.trimString(result.getC()));
                 checkContactTokenUnique(communityId, RowResult.trimString(result.getC()));
@@ -5453,7 +5468,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 CommunityPmOwner owner = new CommunityPmOwner();
                 owner.setContactName(RowResult.trimString(result.getA()));
                 owner.setContactToken(RowResult.trimString(result.getC()));
-                Address address = parseAddress(currentNamespaceId(), communityId, result.getD(), result.getE());
+                Address address = parseAddress(currentNamespaceId(), communityId, RowResult.trimString(result.getD()), RowResult.trimString(result.getE()));
                 owner.setGender(parseGender(RowResult.trimString(result.getH())));
                 owner.setBirthday(parseDate(RowResult.trimString(result.getI())));
                 owner.setOrgOwnerTypeId(parseOrgOwnerTypeId(RowResult.trimString(result.getB())));
