@@ -7942,13 +7942,13 @@ System.out.println();
         row1.createCell(2).setCellValue("性别");
         row1.createCell(3).setCellValue("手机号");
         row1.createCell(4).setCellValue("部门");
-        row1.createCell(5).setCellValue("职级");
-        row1.createCell(6).setCellValue("岗位");
+        row1.createCell(5).setCellValue("岗位");
+        row1.createCell(6).setCellValue("职级");
 
         for (OrganizationMemberDTO member : members) {
         	XSSFRow row = sheet.createRow(rowNum ++);
         	row.setRowStyle(style);
-        	row.createCell(0).setCellValue(String.valueOf(member.getEmployeeNo()));
+        	row.createCell(0).setCellValue(StringUtils.isEmpty(member.getEmployeeNo()) ? "" : String.valueOf(member.getEmployeeNo()));
         	row.createCell(1).setCellValue(member.getContactName());
         	row.createCell(2).setCellValue(null==member.getGender()?"":member.getGender()==1?"男":"女");
             row.createCell(3).setCellValue(member.getContactToken());
