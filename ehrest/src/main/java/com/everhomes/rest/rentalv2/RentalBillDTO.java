@@ -41,8 +41,8 @@ import com.everhomes.util.StringHelper;
  * <li>billAttachments：订单附加信息</li> 
  * <li>unpayCancelTime：未支付取消时间</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
- * <li>goodItems: 物资列表 {@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
- * <li>recommendUsers: 推荐员列表 {@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
+ * <li>goodItems: 物资列表 {@link com.everhomes.rest.rentalv2.RentalGoodItem}</li>
+ * <li>recommendUsers: 推荐员列表 {@link com.everhomes.rest.rentalv2.RentalRecommendUser}</li>
  * </ul>
  */
 public class RentalBillDTO {
