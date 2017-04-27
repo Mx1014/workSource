@@ -1,6 +1,6 @@
 SET FOREIGN_KEY_CHECKS = 0;
-SET @core_server_url = "alpha.lab.everhomes.com"; -- 取具体环境连接core server的链接
-SET @biz_url = 'biz-alpha.lab.everhomes.com'; -- 取具体环境的电商服务器连接，注意有两个域名要修改
+SET @core_server_url = "core.zuolin.com"; -- 取具体环境连接core server的链接
+SET @biz_url = 'biz.zuolin.com'; -- 取具体环境的电商服务器连接，注意有两个域名要修改
 SET @namespace_id=1;
 SET @user_id = 265000;  -- 需要取现网eh_users的ID的最大值再加一定余量
 SET @account_name='286585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
@@ -30,9 +30,9 @@ SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
 SET @configuration_id = (SELECT max(id) FROM `eh_configurations`);
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT('http://', @core_server_url, '/mobile/static/app_agreements/agreements.html?ns=1'), 'the relative path for volgo app agreements', @namespace_id, NULL);	   
+	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT('https://', @core_server_url, '/mobile/static/app_agreements/agreements.html?ns=1'), 'the relative path for volgo app agreements', @namespace_id, NULL);	   
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('http://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for volgo', @namespace_id, NULL);	   
+	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for volgo', @namespace_id, NULL);	   
 
 INSERT INTO `eh_version_realm` VALUES (101, 'Android_OA', null, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_version_realm` VALUES (102, 'iOS_OA', null, UTC_TIMESTAMP(), @namespace_id);
@@ -723,9 +723,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'VIDEO_MEETING', '视频会议', 'cs://1/image/aW1hZ2UvTVRveE4yVmpORFZoT0RBNE9HVXpNekJtTmpKaE5UaGpPVEZtWWpjeFpXUmxOUQ', '1', '1', '27', '', 60, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
---    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'PRINT', '打印', 'cs://1/image/aW1hZ2UvTVRvMVl6aGlOekkxT0dGbVlXSTBZbVZtTURjMU5EQmtOMkU0WmpCbU1tSXpOdw', '1', '1', '14', '{"url": "http://core.zuolin.com/mobile/static/coming_soon/index.html"}', 70, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+--    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'PRINT', '打印', 'cs://1/image/aW1hZ2UvTVRvMVl6aGlOekkxT0dGbVlXSTBZbVZtTURjMU5EQmtOMkU0WmpCbU1tSXpOdw', '1', '1', '14', '{"url": "https://core.zuolin.com/mobile/static/coming_soon/index.html"}', 70, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'OPPushBiz', 'Biz', '能量加油站', '', '1', '1', '14', CONCAT('{"url": "http://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}'), 80, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'OPPushBiz', 'Biz', '能量加油站', '', '1', '1', '14', CONCAT('{"url": "https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}'), 80, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
 	
 -- 园区游客
@@ -750,9 +750,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'VIDEO_MEETING', '视频会议', 'cs://1/image/aW1hZ2UvTVRveE4yVmpORFZoT0RBNE9HVXpNekJtTmpKaE5UaGpPVEZtWWpjeFpXUmxOUQ', '1', '1', '27', '', 60, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
---     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'PRINT', '打印', 'cs://1/image/aW1hZ2UvTVRvMVl6aGlOekkxT0dGbVlXSTBZbVZtTURjMU5EQmtOMkU0WmpCbU1tSXpOdw', '1', '1', '14', '{"url": "http://core.zuolin.com/mobile/static/coming_soon/index.html"}', 70, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+--     VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'Bizs', 'PRINT', '打印', 'cs://1/image/aW1hZ2UvTVRvMVl6aGlOekkxT0dGbVlXSTBZbVZtTURjMU5EQmtOMkU0WmpCbU1tSXpOdw', '1', '1', '14', '{"url": "https://core.zuolin.com/mobile/static/coming_soon/index.html"}', 70, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'OPPushBiz', 'Biz', '能量加油站', '', '1', '1', '14', CONCAT('{"url": "http://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}'), 80, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '0', '0', '/home', 'OPPushBiz', 'Biz', '能量加油站', '', '1', '1', '14', CONCAT('{"url": "https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}'), 80, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
