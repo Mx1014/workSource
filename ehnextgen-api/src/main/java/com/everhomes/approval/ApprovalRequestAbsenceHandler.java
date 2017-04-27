@@ -244,8 +244,8 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private boolean checkNotInWorkTime(List<TimeRange> timeRangeList, PunchRule punchRule) {
 		for (TimeRange timeRange : timeRangeList) {
-			if (!punchService.isWorkDay(new Date(timeRange.getFromTime()), punchRule)
-					|| !punchService.isWorkDay(new Date(timeRange.getEndTime()), punchRule)
+			if (!isWorkDay(new Date(timeRange.getFromTime()), punchRule)
+					|| !isWorkDay(new Date(timeRange.getEndTime()), punchRule)
 					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule,new Date(timeRange.getFromTime()))
 					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule,new Date(timeRange.getEndTime()))
 					|| punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
@@ -254,6 +254,19 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 		return false;
 	}
+
+	private boolean isWorkDay(Date date, PunchRule punchRule) {
+		PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), date);
+		if(dto != null)
+			return true;
+		Calendar yesterday = Calendar.getInstance();
+		yesterday.setTime(date);
+		PunchTimeRuleDTO yesterdayRuleDTO = processTimeRuleDTO(punchRule.getId(), yesterday.getTime());
+		if(yesterdayRuleDTO.getEndEarlyTime() > DAY_MILLISECONDGMT)
+			return true;
+		return false;
+	}
+
 
 	//检查是否包含已请假时间
 	//timeRangeList为传输对象，approvalTimeRangeList为数据库表对应的对象
@@ -380,7 +393,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				//拿前一天的timerule判断是否有班次.班次的结束时间>请假开始时间?日期+1:不变
 				if(dto != null ){
 					//拿前一天的timerule进行计算
-					Long fromTimeLong = punchService.convertTimeToGMTMillisecond(new Time(fromTime.getTime()))+24*60*60*1000L; 
+					Long fromTimeLong = punchService.convertTimeToGMTMillisecond(new Time(fromTime.getTime()))+DAY_MILLISECONDGMT; 
 					calculateAbsentBeginDate(myDate, dto, fromTimeLong);					
 				} 
 				//计算当日的   
@@ -397,7 +410,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				if(dto != null ){
 					//拿前一天的timerule进行计算 
 					//前一天班次的最晚下班时间>请假开始时间?日期-1:不变 
-					Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime()))+24*60*60*1000L; 
+					Long endTimeLong = punchService.convertTimeToGMTMillisecond(new Time(endTime.getTime()))+DAY_MILLISECONDGMT; 
 					if(dto.getEndEarlyTime()>endTimeLong){
 						int days = myDate.getDays()-1;
 						myDate.setDays(days);
@@ -574,7 +587,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				break;
 			}
 			//如果是工作日，则表示是完整天
-			if (punchService.isWorkDay(date, punchRule)) {
+			if ( isWorkDay(date, punchRule)) {
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
 				actualTime.setTimeDate(new java.sql.Date(date.getTime()));
@@ -630,7 +643,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				}
 				break;
 			}else {
-				if (punchService.isWorkDay(date, punchRule)) {
+				if (isWorkDay(date, punchRule)) {
 					ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 					actualTime.setUserId(userId);
 					actualTime.setTimeDate(new java.sql.Date(date.getTime()));
@@ -673,7 +686,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		}
 		long result = 0;
 		for(long i = 1; i < deltaDay; i++){
-			if (!punchService.isWorkDay(new Date(fromTime.getTime() + i*DAY_MILLISECONDGMT), punchRule)) {
+			if (!isWorkDay(new Date(fromTime.getTime() + i*DAY_MILLISECONDGMT), punchRule)) {
 				result++;
 			}
 		}

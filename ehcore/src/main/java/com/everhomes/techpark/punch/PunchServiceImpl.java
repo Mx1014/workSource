@@ -26,26 +26,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.AbstractDocument.Content;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddressList;
-import org.apache.poi.xssf.usermodel.XSSFDataValidation;
-import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataValidation;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDataValidations;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.STDataValidationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +48,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
-import com.everhomes.approval.ApprovalDayActualTime;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
 import com.everhomes.approval.ApprovalRangeStatistic;
 import com.everhomes.approval.ApprovalRangeStatisticProvider;
@@ -82,7 +73,6 @@ import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalOwnerType;
 import com.everhomes.rest.approval.ApprovalType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -96,7 +86,6 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.techpark.punch.AbsenceTimeDTO;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ApprovalPunchExceptionCommand;
@@ -129,7 +118,6 @@ import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchClockResponse;
 import com.everhomes.rest.techpark.punch.PunchCountDTO;
-import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionDTO;
 import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.rest.techpark.punch.PunchGeoPointDTO;
@@ -186,7 +174,6 @@ import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -196,13 +183,10 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-import freemarker.core.ReturnInstruction.Return;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -408,7 +392,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchLogsMonthList pml = null;
 		while (start.before(end)) {
 
-			Date date = start.getTime();
+//			Date date = start.getTime();
 			// start.setTime(date);
 			// if not workday continue
 
@@ -486,7 +470,7 @@ public class PunchServiceImpl implements PunchService {
 		pdl.setWorkTime(convertTimeToGMTMillisecond(punchDayLog.getWorkTime()));
 		// Long endrefreshPunchDayLogTimeLong =
 		// DateHelper.currentGMTTime().getTime();
-		Date now = new Date();
+//		Date now = new Date();
 		if(punchDayLog.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
 			pdl.setPunchStatus(punchDayLog.getStatus());
 			 
@@ -788,7 +772,7 @@ public class PunchServiceImpl implements PunchService {
 				pdl.getPunchLogs().add(ConvertHelper.convert(log,PunchLogDTO.class ));
 			}
 		}
-		Date now = new Date();
+//		Date now = new Date();
 		PunchRule pr = this.getPunchRule(PunchOwnerType.ORGANIZATION.getCode(),companyId, userId );
 		if(null == pr)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -1347,7 +1331,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private ClockCode verifyPunchClock(PunchClockCommand cmd) {
 		//获取打卡规则
-		ClockCode code = ClockCode.SUCESS;
+//		ClockCode code = ClockCode.SUCESS;
 		Long userId = UserContext.current().getUser().getId(); 
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		if (null == pr  )
@@ -1475,20 +1459,20 @@ public class PunchServiceImpl implements PunchService {
 //			}
 //		}
 	}
-	
-	private void createPunchGeopoints(Long userId, List<PunchGeoPointDTO> punchGeoPoints,
-		String ownerType,	Long ownerId) { 
-		for (PunchGeoPointDTO punchGeopointDTO : punchGeoPoints) {
-			PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
-			punchGeopoint.setOwnerType(ownerType);
-			punchGeopoint.setOwnerId(ownerId); 
-			punchGeopoint.setCreatorUid(userId);
-			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			punchGeopoint.setGeohash(GeoHashUtils.encode(
-					punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
-			punchProvider.createPunchGeopoint(punchGeopoint);
-		}
-	}
+//	
+//	private void createPunchGeopoints(Long userId, List<PunchGeoPointDTO> punchGeoPoints,
+//		String ownerType,	Long ownerId) { 
+//		for (PunchGeoPointDTO punchGeopointDTO : punchGeoPoints) {
+//			PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+//			punchGeopoint.setOwnerType(ownerType);
+//			punchGeopoint.setOwnerId(ownerId); 
+//			punchGeopoint.setCreatorUid(userId);
+//			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			punchGeopoint.setGeohash(GeoHashUtils.encode(
+//					punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+//			punchProvider.createPunchGeopoint(punchGeopoint);
+//		}
+//	}
 
 	private void convertTime(PunchTimeRule punchRule, Long startEarlyTime,
 			Long startLastTime, Long endEarlyTime) {
@@ -1513,12 +1497,12 @@ public class PunchServiceImpl implements PunchService {
 		return format.format(date);
 	}
 
-	private Time convertTime(String TimeStr) {
-		if (!StringUtils.isEmpty(TimeStr)) {
-			return Time.valueOf(TimeStr);
-		}
-		return null;
-	}
+//	private Time convertTime(String TimeStr) {
+//		if (!StringUtils.isEmpty(TimeStr)) {
+//			return Time.valueOf(TimeStr);
+//		}
+//		return null;
+//	}
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
 			//从8点开始计算
@@ -1562,21 +1546,21 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
-	private String calculateEndTime(String dateFormat, String startEarlyTime,
-			String workTime) {
-		DateFormat format = new SimpleDateFormat(dateFormat);
-		format.setTimeZone(TimeZone.getTimeZone("GMT"));// 设置
-														// DateFormat的时间区域为GMT
-
-		long endTime = 0;
-		try {
-			endTime = format.parse(startEarlyTime).getTime()
-					+ format.parse(workTime).getTime();
-		} catch (ParseException e) {
-			LOGGER.error("the time format is error.", e);
-		}
-		return getGMTtimeString("HH:mm;ss", endTime);
-	}
+//	private String calculateEndTime(String dateFormat, String startEarlyTime,
+//			String workTime) {
+//		DateFormat format = new SimpleDateFormat(dateFormat);
+//		format.setTimeZone(TimeZone.getTimeZone("GMT"));// 设置
+//														// DateFormat的时间区域为GMT
+//
+//		long endTime = 0;
+//		try {
+//			endTime = format.parse(startEarlyTime).getTime()
+//					+ format.parse(workTime).getTime();
+//		} catch (ParseException e) {
+//			LOGGER.error("the time format is error.", e);
+//		}
+//		return getGMTtimeString("HH:mm;ss", endTime);
+//	}
 
 	@Override
 	public void deletePunchRule(DeletePunchRuleCommand cmd) {
@@ -2184,7 +2168,7 @@ public class PunchServiceImpl implements PunchService {
 		GetPunchNewExceptionCommandResponse response = new GetPunchNewExceptionCommandResponse();
 		response.setExceptionCode(ExceptionStatus.NORMAL.getCode());
 		// TODO：从本月初，或者第一次打卡开始
-		Calendar start = Calendar.getInstance();
+//		Calendar start = Calendar.getInstance();
 		// 月初
 		Calendar monthStart = Calendar.getInstance(); 
 		monthStart.add(Calendar.DAY_OF_MONTH, -30);
@@ -2621,59 +2605,59 @@ public class PunchServiceImpl implements PunchService {
 				-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
 	}
 	 
-	// 创建每个user的打卡map信息
-	private Map<Long, List<PunchStatisticsDTO>> buildUserPunchCountMap(
-			List<PunchStatisticsDTO> punchDayLogDTOList) {
-		Map<Long, List<PunchStatisticsDTO>> map = new HashMap<Long, List<PunchStatisticsDTO>>();
-		if (punchDayLogDTOList != null && punchDayLogDTOList.size() > 0) {
-			for (PunchStatisticsDTO punchDayLogDTO : punchDayLogDTOList) {
-				Long userId = punchDayLogDTO.getUserId();
-				if (map.containsKey(userId)) {
-					List<PunchStatisticsDTO> list = map.get(userId);
-					list.add(punchDayLogDTO);
-				} else {
-					List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
-					list.add(punchDayLogDTO);
-					map.put(userId, list);
-				}
-			}
-		}
-		return map;
-	}
+//	// 创建每个user的打卡map信息
+//	private Map<Long, List<PunchStatisticsDTO>> buildUserPunchCountMap(
+//			List<PunchStatisticsDTO> punchDayLogDTOList) {
+//		Map<Long, List<PunchStatisticsDTO>> map = new HashMap<Long, List<PunchStatisticsDTO>>();
+//		if (punchDayLogDTOList != null && punchDayLogDTOList.size() > 0) {
+//			for (PunchStatisticsDTO punchDayLogDTO : punchDayLogDTOList) {
+//				Long userId = punchDayLogDTO.getUserId();
+//				if (map.containsKey(userId)) {
+//					List<PunchStatisticsDTO> list = map.get(userId);
+//					list.add(punchDayLogDTO);
+//				} else {
+//					List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
+//					list.add(punchDayLogDTO);
+//					map.put(userId, list);
+//				}
+//			}
+//		}
+//		return map;
+//	}
 
-	// 计算user的每个打卡状态的总数
-	private Integer processListCount(List<PunchDayLogDTO> list, Byte status) {
-		Integer count = 0;
-		for (PunchDayLogDTO punchDayLogDTO : list) {
-			if (punchDayLogDTO.getApprovalStatus() != null) {
-				if (status == punchDayLogDTO.getApprovalStatus()) {
-					count++;
-				}
-			} else {
-				if (status == punchDayLogDTO.getStatus()) {
-					count++;
-				}
-			}
-		}
-		return count;
-	}
+//	// 计算user的每个打卡状态的总数
+//	private Integer processListCount(List<PunchDayLogDTO> list, Byte status) {
+//		Integer count = 0;
+//		for (PunchDayLogDTO punchDayLogDTO : list) {
+//			if (punchDayLogDTO.getApprovalStatus() != null) {
+//				if (status == punchDayLogDTO.getApprovalStatus()) {
+//					count++;
+//				}
+//			} else {
+//				if (status == punchDayLogDTO.getStatus()) {
+//					count++;
+//				}
+//			}
+//		}
+//		return count;
+//	}
 
-	// 计算user的每个打卡状态的总数
-	private Long processListTimeSum (List<PunchDayLogDTO> list, Byte status) {
-		Long timeSum = 0L;
-		for (PunchDayLogDTO punchDayLogDTO : list) {
-			if (punchDayLogDTO.getApprovalStatus() != null) {
-				if (status == punchDayLogDTO.getApprovalStatus()) {
-					timeSum += punchDayLogDTO.getWorkTime();
-				}
-			} else {
-				if (status == punchDayLogDTO.getStatus()) {
-					timeSum += punchDayLogDTO.getWorkTime();
-				}
-			}
-		}
-		return timeSum;
-	}
+//	// 计算user的每个打卡状态的总数
+//	private Long processListTimeSum (List<PunchDayLogDTO> list, Byte status) {
+//		Long timeSum = 0L;
+//		for (PunchDayLogDTO punchDayLogDTO : list) {
+//			if (punchDayLogDTO.getApprovalStatus() != null) {
+//				if (status == punchDayLogDTO.getApprovalStatus()) {
+//					timeSum += punchDayLogDTO.getWorkTime();
+//				}
+//			} else {
+//				if (status == punchDayLogDTO.getStatus()) {
+//					timeSum += punchDayLogDTO.getWorkTime();
+//				}
+//			}
+//		}
+//		return timeSum;
+//	}
 
 	@Override
 	public ListMonthPunchLogsCommandResponse listMonthPunchLogs(
@@ -2869,7 +2853,7 @@ public class PunchServiceImpl implements PunchService {
             // 取得文件名。
             String filename = file.getName();
             // 取得文件的后缀名。
-            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+//            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
 
             // 以流的形式下载文件。
             InputStream fis = new BufferedInputStream(new FileInputStream(path));
@@ -4116,105 +4100,105 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return userIds;
 }
-	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
-		Long userId = UserContext.current().getUser().getId();
-		Long organizationId = organizationService.getTopOrganizationId(ownerId);
-		try {
-			java.sql.Date fromDate = new java.sql.Date(monthSF.get().parse(month).getTime());
-			java.sql.Date toDate = new java.sql.Date(getNextMonth(month).getTime());
-			
-			List<ApprovalDayActualTime> approvalDayActualTimeList = approvalDayActualTimeProvider.listApprovalDayActualTimeByUserIds(fromDate, toDate, ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), absenceUserIdList);
-			if (ListUtils.isEmpty(approvalDayActualTimeList)) {
-				return new HashMap<Long, List<AbsenceTimeDTO>>();
-			}
-			//需要把 针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据 排除掉
-			Map<Long, Map<Long, List<ApprovalDayActualTime>>> map = approvalDayActualTimeList.stream().map(a->{
-				if (approvalRequestProvider.checkExcludeAbsenceRequest(userId, a.getOwnerId(), a.getTimeDate())) {
-					return null;
-				}
-				return a;
-			}).filter(a->a!=null).collect(Collectors.groupingBy(ApprovalDayActualTime::getUserId, Collectors.groupingBy(ApprovalDayActualTime::getCategoryId)));
-			
-			Map<Long, List<AbsenceTimeDTO>> resultMap = new HashMap<>();
-			List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
-			//key1 userId, key2 categoryId
-			map.forEach((key1, value1)->{
-				List<AbsenceTimeDTO> absenceTimeList = approvalCategoryList.stream().map(a->{
-					List<ApprovalDayActualTime> value2 = value1.get(a.getId());
-					AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
-					absenceTimeDTO.setCategoryId(a.getId());
-					absenceTimeDTO.setCategoryName(a.getCategoryName());
-					if (ListUtils.isEmpty(value2)) {
-						absenceTimeDTO.setActualResult("0.0.0");
-					}else {
-						absenceTimeDTO.setActualResult("");
-						value2.forEach(v->{
-							absenceTimeDTO.setActualResult(calculateTimeTotal(absenceTimeDTO.getActualResult(), v.getActualResult()));
-						});
-					}
-					return absenceTimeDTO;
-				}).collect(Collectors.toList());
-				
-				resultMap.put(key1, absenceTimeList);
-			});
-			
-			return resultMap;
-		} catch (ParseException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"parse month error");
-		}
-	}
-
-	private List<AbsenceTimeDTO> getDefaultAbsenceStatistics(Long organizationId, java.sql.Date fromDate){
-		List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
-		return approvalCategoryList.stream().map(a->{
-			AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
-			absenceTimeDTO.setCategoryId(a.getId());
-			absenceTimeDTO.setCategoryName(a.getCategoryName());
-			absenceTimeDTO.setActualResult("0.0.0");
-			return absenceTimeDTO;
-		}).collect(Collectors.toList());
-	}
+//	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
+//		Long userId = UserContext.current().getUser().getId();
+//		Long organizationId = organizationService.getTopOrganizationId(ownerId);
+//		try {
+//			java.sql.Date fromDate = new java.sql.Date(monthSF.get().parse(month).getTime());
+//			java.sql.Date toDate = new java.sql.Date(getNextMonth(month).getTime());
+//			
+//			List<ApprovalDayActualTime> approvalDayActualTimeList = approvalDayActualTimeProvider.listApprovalDayActualTimeByUserIds(fromDate, toDate, ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), absenceUserIdList);
+//			if (ListUtils.isEmpty(approvalDayActualTimeList)) {
+//				return new HashMap<Long, List<AbsenceTimeDTO>>();
+//			}
+//			//需要把 针对同一天既有请假申请，又有忘打卡申请，已最后提交的申请为依据 排除掉
+//			Map<Long, Map<Long, List<ApprovalDayActualTime>>> map = approvalDayActualTimeList.stream().map(a->{
+//				if (approvalRequestProvider.checkExcludeAbsenceRequest(userId, a.getOwnerId(), a.getTimeDate())) {
+//					return null;
+//				}
+//				return a;
+//			}).filter(a->a!=null).collect(Collectors.groupingBy(ApprovalDayActualTime::getUserId, Collectors.groupingBy(ApprovalDayActualTime::getCategoryId)));
+//			
+//			Map<Long, List<AbsenceTimeDTO>> resultMap = new HashMap<>();
+//			List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
+//			//key1 userId, key2 categoryId
+//			map.forEach((key1, value1)->{
+//				List<AbsenceTimeDTO> absenceTimeList = approvalCategoryList.stream().map(a->{
+//					List<ApprovalDayActualTime> value2 = value1.get(a.getId());
+//					AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
+//					absenceTimeDTO.setCategoryId(a.getId());
+//					absenceTimeDTO.setCategoryName(a.getCategoryName());
+//					if (ListUtils.isEmpty(value2)) {
+//						absenceTimeDTO.setActualResult("0.0.0");
+//					}else {
+//						absenceTimeDTO.setActualResult("");
+//						value2.forEach(v->{
+//							absenceTimeDTO.setActualResult(calculateTimeTotal(absenceTimeDTO.getActualResult(), v.getActualResult()));
+//						});
+//					}
+//					return absenceTimeDTO;
+//				}).collect(Collectors.toList());
+//				
+//				resultMap.put(key1, absenceTimeList);
+//			});
+//			
+//			return resultMap;
+//		} catch (ParseException e) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"parse month error");
+//		}
+//	}
+//
+//	private List<AbsenceTimeDTO> getDefaultAbsenceStatistics(Long organizationId, java.sql.Date fromDate){
+//		List<ApprovalCategory> approvalCategoryList = approvalCategoryProvider.listApprovalCategoryForStatistics(UserContext.getCurrentNamespaceId(), ApprovalOwnerType.ORGANIZATION.getCode(), organizationId, ApprovalType.ABSENCE.getCode(), fromDate);
+//		return approvalCategoryList.stream().map(a->{
+//			AbsenceTimeDTO absenceTimeDTO = new AbsenceTimeDTO();
+//			absenceTimeDTO.setCategoryId(a.getId());
+//			absenceTimeDTO.setCategoryName(a.getCategoryName());
+//			absenceTimeDTO.setActualResult("0.0.0");
+//			return absenceTimeDTO;
+//		}).collect(Collectors.toList());
+//	}
 	
-	private String calculateTimeTotal(String timeTotal, String actualResult) {
-		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
-		if (StringUtils.isBlank(timeTotal)) {
-			return actualResult;
-		}
-		
-		String[] times = timeTotal.split("\\.");
-		String[] actuals = actualResult.split("\\.");
-		
-		int days = Integer.parseInt(times[0]) + Integer.parseInt(actuals[0]);
-		int hours = Integer.parseInt(times[1]) + Integer.parseInt(actuals[1]);
-		int minutes = Integer.parseInt(times[2]) + Integer.parseInt(actuals[2]);
-		
-		hours = hours + minutes / 60;
-		minutes = minutes % 60;
-		
-		return days + "." + hours + "." + minutes;
-	}
+//	private String calculateTimeTotal(String timeTotal, String actualResult) {
+//		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
+//		if (StringUtils.isBlank(timeTotal)) {
+//			return actualResult;
+//		}
+//		
+//		String[] times = timeTotal.split("\\.");
+//		String[] actuals = actualResult.split("\\.");
+//		
+//		int days = Integer.parseInt(times[0]) + Integer.parseInt(actuals[0]);
+//		int hours = Integer.parseInt(times[1]) + Integer.parseInt(actuals[1]);
+//		int minutes = Integer.parseInt(times[2]) + Integer.parseInt(actuals[2]);
+//		
+//		hours = hours + minutes / 60;
+//		minutes = minutes % 60;
+//		
+//		return days + "." + hours + "." + minutes;
+//	}
 	
-	private String getCategoryName(Long categoryId){
-		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(categoryId);
-		if (category != null) {
-			return category.getCategoryName();
-		}
-		return "";
-	}
-	
-	private Date getNextMonth(String month) {
-		try {
-			Date date = monthSF.get().parse(month);
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(date);
-			calendar.add(Calendar.MONTH, 1);
-			return calendar.getTime();
-		} catch (ParseException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-					"parse month error");
-		}
-	}
+//	private String getCategoryName(Long categoryId){
+//		ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(categoryId);
+//		if (category != null) {
+//			return category.getCategoryName();
+//		}
+//		return "";
+//	}
+//	
+//	private Date getNextMonth(String month) {
+//		try {
+//			Date date = monthSF.get().parse(month);
+//			Calendar calendar = Calendar.getInstance();
+//			calendar.setTime(date);
+//			calendar.add(Calendar.MONTH, 1);
+//			return calendar.getTime();
+//		} catch (ParseException e) {
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"parse month error");
+//		}
+//	}
 	/**
 	 * 打卡2.0 的考勤详情
 	 * */
@@ -4389,7 +4373,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
-			Organization org = this.checkOrganization(cmd.getOwnerId());
+//			Organization org = this.checkOrganization(cmd.getOwnerId());
 			List<String> groupTypeList = new ArrayList<String>();
 			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -5499,8 +5483,8 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
-		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
-		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
+//		List<PunchDayDetailDTO> dtos = new ArrayList<PunchDayDetailDTO>();
+//		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
 		 
 		
 		URL rootPath = PunchServiceImpl.class.getResource("/");
