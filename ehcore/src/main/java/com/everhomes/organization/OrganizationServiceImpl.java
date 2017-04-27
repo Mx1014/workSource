@@ -8357,7 +8357,13 @@ System.out.println();
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
 		}
 
+
 		Organization org = checkOrganization(cmd.getOrganizationId());
+
+		if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
+			LOGGER.error("organization type not enterprise. organizationId = {}", cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "organization type not enterprise");
+		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
@@ -8394,6 +8400,8 @@ System.out.println();
 		List<Long> enterpriseIds = new ArrayList<>();
 
 		Map<Long, Boolean> joinEnterpriseMap = new HashMap<>();
+
+
 		dbProvider.execute((TransactionStatus status) -> {
 
 			List<Long> departmentIds = cmd.getDepartmentIds();
@@ -8415,18 +8423,23 @@ System.out.println();
 //				return null;
 //			}
 
+			enterpriseIds.add(org.getId());
+
 			if(null != departmentIds){
 				for (Long departmentId : departmentIds) {
 					Organization o = checkOrganization(departmentId);
 					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())){
+						if(!enterpriseIds.contains(o.getId())){
+							enterpriseIds.add(o.getId());
+						}
 					}else{
-						if(!enterpriseIds.contains(o.getDirectlyEnterpriseId()) && !departmentIds.contains(o.getDirectlyEnterpriseId())){
+						if(!enterpriseIds.contains(o.getDirectlyEnterpriseId())){
 							enterpriseIds.add(o.getDirectlyEnterpriseId());
 						}
 					}
 				}
 			}else{
-				enterpriseIds.add(cmd.getOrganizationId());
+
 			}
 
 			// 先把把成员从公司所有部门都删除掉
@@ -8460,21 +8473,24 @@ System.out.println();
 				}
 			}
 
-			//没有部门要添加
+			//添加除公司之外的机构成员
 			if(null != departmentIds){
 				// 重新把成员添加到公司多个部门
 				for (Long departmentId : departmentIds) {
-					Organization group = checkOrganization(departmentId);
+					//排除掉上面已添加的公司机构成员
+					if(!enterpriseIds.contains(departmentId)){
+						Organization group = checkOrganization(departmentId);
 
-					organizationMember.setGroupPath(group.getPath());
+						organizationMember.setGroupPath(group.getPath());
 
-					organizationMember.setGroupType(group.getGroupType());
+						organizationMember.setGroupType(group.getGroupType());
 
-					organizationMember.setOrganizationId(departmentId);
+						organizationMember.setOrganizationId(departmentId);
 
-					organizationProvider.createOrganizationMember(organizationMember);
+						organizationProvider.createOrganizationMember(organizationMember);
 
-					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+						departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+					}
 				}
 			}
 
