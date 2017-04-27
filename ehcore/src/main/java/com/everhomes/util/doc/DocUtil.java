@@ -13,6 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Encoder;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -20,6 +22,9 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 public class DocUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocUtil.class);
+
+
     public Configuration configure=null;
 
     private HttpURLConnection httpUrl = null;
@@ -79,10 +84,20 @@ public class DocUtil {
             //定义Template对象，注意模板类型名字与downloadType要一致
             template=configure.getTemplate(downloadType+".xml");
 
-            FileOutputStream out = new FileOutputStream(savePath);
-            Writer outWriter=new BufferedWriter(new OutputStreamWriter(out, "utf-8"));
+            File outFile=new File(savePath);
+            if (outFile.exists()) {
+                LOGGER.info("文件存在：{}", savePath);
+            } else {
+                LOGGER.info("文件不存在，正在创建...：{}", savePath);
+                if (outFile.createNewFile()) {
+                    LOGGER.info("文件创建成功！：{}", savePath);
+                } else {
+                    LOGGER.info("文件创建失败！：{}", savePath);
+                }
+            }
+            Writer outWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
             template.process(dataMap, outWriter);
-            out.close();
+            outWriter.close();
 
         } catch (IOException e) {
             e.printStackTrace();
