@@ -557,6 +557,14 @@ public class UserActivityServiceImpl implements UserActivityService {
     		if(user != null){
     			feedbackDto.setOwnerNickName(user.getNickName());
     		}
+    		//获取被举报对象的标题，默认取post，其他类型不管。
+    		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
+    			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
+        		if(post != null){
+        			feedbackDto.setTargetSubject(post.getSubject());
+        		}
+    		}
+    		
     		feedbackDtos.add(feedbackDto);
     	});
     	response.setNextPageAnchor(nextPageAnchor); 
@@ -575,7 +583,13 @@ public class UserActivityServiceImpl implements UserActivityService {
 		feedback.setStatus(cmd.getStatus());
 		feedback.setVerifyType(cmd.getVerifyType());
 		feedback.setHandleType(cmd.getHandleType());
+		//更新自己的状态
 		userActivityProvider.updateFeedback(feedback);
+		
+		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+		}
 		
 		//当前只对post类型的举报做实际处理，处理的方式只有删除
 		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){

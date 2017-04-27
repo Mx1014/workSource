@@ -63,6 +63,8 @@ public interface UserActivityProvider {
     
     void updateFeedback(Feedback feedback);
     
+    void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType);
+    
     Feedback findFeedbackById(Long id);
 
     List<UserFavoriteDTO> findFavorite(Long uid);

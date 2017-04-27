@@ -17,12 +17,14 @@ import com.everhomes.util.StringHelper;
  *   <li>feedbackType:1-举报、2-投诉、3-纠正</li>
  *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子</li>
  *   <li>targetId:所针对的目标对应的ID（如地址对应address id、帖子内容则是post id)</li>
+ *   <li>targetSubject: 目标的标题名称</li>
  *   <li>proofResourceUri:图片链接</li>
  *   <li>contentCategory:内容类别：0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13
  *         -暴力色情、14-诈骗和虚假信息、15-骚扰；21-谣言、22-恶意营销、23-诱导分享；31-政治</li>
  *   <li>status: 处理状态  0-未处理,</li>
  *   <li>verifyType: 核实情况  0-不属实， 1-属实</li>
  *   <li>handleType: 处理方式 0-无， 1-删除</li>
+ *   <li>namespaceId: 域空间id</li>
  *   <li>namespaceId: 域空间id</li>
  *   
  * </ul>
@@ -38,8 +40,9 @@ public class FeedbackDTO {
     private Byte feedbackType;
     private Byte targetType;
     private Long targetId;
+    private String targetSubject;
     private String proofResourceUri;
-    private Integer contentCategory;
+    private Long contentCategory;
     private Byte status;
     private Byte verifyType;
     private Byte handleType;
@@ -125,6 +128,14 @@ public class FeedbackDTO {
 		this.targetId = targetId;
 	}
 
+	public String getTargetSubject() {
+		return targetSubject;
+	}
+
+	public void setTargetSubject(String targetSubject) {
+		this.targetSubject = targetSubject;
+	}
+
 	public String getProofResourceUri() {
 		return proofResourceUri;
 	}
@@ -133,11 +144,11 @@ public class FeedbackDTO {
 		this.proofResourceUri = proofResourceUri;
 	}
 
-	public Integer getContentCategory() {
+	public Long getContentCategory() {
 		return contentCategory;
 	}
 
-	public void setContentCategory(Integer contentCategory) {
+	public void setContentCategory(Long contentCategory) {
 		this.contentCategory = contentCategory;
 	}
 

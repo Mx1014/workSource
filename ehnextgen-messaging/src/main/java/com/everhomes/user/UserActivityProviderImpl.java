@@ -414,6 +414,23 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhFeedbacksDao.class, feedback.getId());
 	}
     
+
+    @Override
+    public void updateOtherFeedback(Long targetId, Long feedbackId, Byte verifyType, Byte handleType) {
+    	AccessSpec accessSpec = AccessSpec.readOnlyWith(EhUsers.class);
+    	ShardIterator shardIterator = new ShardIterator(accessSpec);
+
+    	this.dbProvider.iterationMapReduce(shardIterator, null, (DSLContext context, Object reducingContext) -> {
+    		context.update(Tables.EH_FEEDBACKS)
+    		.set(Tables.EH_FEEDBACKS.STATUS, (byte)1)
+    		.set(Tables.EH_FEEDBACKS.VERIFY_TYPE, verifyType)
+    		.set(Tables.EH_FEEDBACKS.HANDLE_TYPE, handleType)
+    		.where(Tables.EH_FEEDBACKS.TARGET_ID.eq(targetId).and(Tables.EH_FEEDBACKS.ID.ne(feedbackId)))
+    		.execute();
+    		return AfterAction.next;
+    	});
+    }
+    
     @Override
     public Feedback findFeedbackById(Long id) {
     	List<Feedback> feedbackList = new ArrayList<Feedback>();
