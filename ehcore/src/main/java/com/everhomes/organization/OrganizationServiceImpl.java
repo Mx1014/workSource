@@ -8389,7 +8389,7 @@ System.out.println();
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-//		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
 
@@ -8442,8 +8442,6 @@ System.out.println();
 						}
 					}
 				}
-			}else{
-
 			}
 
 			// 先把把成员从公司所有部门都删除掉
@@ -8457,7 +8455,9 @@ System.out.println();
 			// 先把把成员从公司所有机构都删除掉
 			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
 			for (OrganizationMember member: members) {
-				organizationProvider.deleteOrganizationMemberById(member.getId());
+				if(!enterpriseIds.contains(member.getOrganizationId())){
+					organizationProvider.deleteOrganizationMemberById(member.getId());
+				}
 			}
 
 			//加入到公司
