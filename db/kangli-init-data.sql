@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 SET @namespace_id=999978;
-SET @eh_core_serverURL = "https://core.zuolin.com"; -- 取具体环境连接core server的链接
-SET @eh_biz_serverURL = "biz.zuolin.com"; -- 取具体环境连接core server的链接
+SET @eh_core_serverURL = "http://alpha.lab.everhomes.com"; -- 取具体环境连接core server的链接
+SET @eh_biz_serverURL = "biz-alpha.lab.everhomes.com"; -- 取具体环境连接core server的链接
 SET @user_id = 264000;  -- 需要取现网eh_users的ID的最大值再加一定余量
 SET @account_name='285585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
 SET @community_id = 240111044331057733; -- 需要取现网eh_communities的ID的最大值再加一定余量
@@ -71,27 +71,23 @@ INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, 
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13214528344',  '221616',  3, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '苏畅', 0, '13214528344', 3, @namespace_id);	
+	VALUES((@organization_member_id := @organization_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '苏畅', 0, '13214528344', 3, @namespace_id);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES((@organization_member_id := @organization_member_id + 1), @organization_id, 'USER', @user_id, 'manager', '苏畅', 0, '13214528344', 3);
 
 
 SET @user_id = @user_id + 1;
 SET @account_name = @account_name + 1;
-SET @org_member_id = (SELECT MAX(id) FROM `eh_organization_members`);
+SET @organization_member_id = (SELECT MAX(id) FROM `eh_organization_members`);
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (@user_id, UUID(), @account_name, '吴惠祺', '', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
 	VALUES ((@user_identifier_id := @user_identifier_id + 1) , @user_id ,  '0',  '13510600750',  '221616',  3, UTC_TIMESTAMP(), @namespace_id);
 -- DELETE FROM `eh_organization_members` WHERE organization_id = @organization_id AND target_type = 'USER' AND target_id = @user_id;
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES((@org_member_id := @org_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '吴惠祺', 0, '13510600750', 3, @namespace_id);	
+	VALUES((@organization_member_id := @organization_member_id + 1), @organization_id, 'USER', @user_id  , 'manager', '吴惠祺', 0, '13510600750', 3, @namespace_id);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES((@role_assignment_id := @role_assignment_id + 1), 'EhOrganizations', @organization_id, 'EhUsers', @user_id  , 1001, 1, UTC_TIMESTAMP());
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES((@organization_member_id := @organization_member_id + 1), @organization_id, 'USER', @user_id, 'manager', '吴惠祺', 0, '13510600750', 3);
 
 	
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
@@ -140,7 +136,6 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 	
 
 SET @community_id = @community_id + 1;
-
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(@community_id, UUID(), @shi_id, '厦门市',  @qu_id, '思明区', '康利金融大厦', '康利金融大厦', '厦门市思明区观音山商务运营中心宜兰路9号', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 74, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
@@ -528,7 +523,7 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT(@eh_core_serverURL, '/mobile/static/app_agreements/agreements.html?999978'), 'the relative path for kangli app agreements', @namespace_id, NULL);
+	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT(@eh_core_serverURL, '/mobile/static/app_agreements/agreements.html?ns=999978'), 'the relative path for kangli app agreements', @namespace_id, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('https://',@eh_biz_serverURL,'/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @eh_biz_serverURL, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'bussiness url', @namespace_id, '');
 
@@ -599,6 +594,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 20841,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+        VALUES((@menu_scope_id := @menu_scope_id + 1), 40000,'', 'EhNamespaces', @namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 40400,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 40410,'', 'EhNamespaces', @namespace_id,2);
@@ -627,7 +624,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 41300,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-        VALUES((@menu_scope_id := @menu_scope_id + 1), 40750,'', 'EhNamespaces', @namespace_id,2);
+        VALUES((@menu_scope_id := @menu_scope_id + 1), 41310,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 40800,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
@@ -726,6 +723,8 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
         VALUES((@menu_scope_id := @menu_scope_id + 1), 50850,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 50860,'', 'EhNamespaces', @namespace_id,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+        VALUES((@menu_scope_id := @menu_scope_id + 1), 50900,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
         VALUES((@menu_scope_id := @menu_scope_id + 1), 60000,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
@@ -943,7 +942,7 @@ SET @parent_id = @service_alliance_category_id + 1;
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES (@parent_id, 'community', @community_id, '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');
 
-UPDATE `eh_launch_pad_items` SET `actionData`=CONCAT('{"type":',@paren_id,'"parentId":',@paren_id,',"displayType": "grid"}') WHERE `namespace_id`=@namespace_id AND `item_group`='Bizs2' AND `item_name`='INCR_SER';
+UPDATE `eh_launch_pad_items` SET `action_data`=CONCAT('{"type":',@paren_id,'"parentId":',@paren_id,',"displayType": "grid"}') WHERE `namespace_id`=@namespace_id AND `item_group`='Bizs2' AND `item_name`='INCR_SER';
 	
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ((@service_alliance_category_id := @service_alliance_category_id +1), 'community', @community_id, @parent_id, '律所', '律所', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, @namespace_id, '');

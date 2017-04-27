@@ -102,6 +102,8 @@ public enum VersionRealmType {
     IOS_GUANGDA("iOS_Guangda"),
     ANDROID_KANGLI("Android_Kangli"),
     IOS_KANGLI("iOS_Kangli"),
+    ANDROID_SSIPPM("Android_Ssippm"),
+    IOS_SSIPPM("iOS_Ssippm"),
     ;
     
     private String code;
