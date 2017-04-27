@@ -2249,9 +2249,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		if(targetId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+		}
+		if(StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+		}
 
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
 
 //		if(startTime != null) {
 //			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(startTime));
@@ -2297,8 +2302,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addSelect(fields);
 		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.COMMUNITY_ID.eq(communityId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.PROCESS_TYPE.eq(EquipmentTaskProcessType.REVIEW.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		if(communityId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.COMMUNITY_ID.eq(communityId));
+		}
 
 		if(startTime != null) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASK_LOGS.CREATE_TIME.ge(startTime));
