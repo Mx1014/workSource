@@ -4,7 +4,7 @@ insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('orga
 insert into `eh_locale_strings` (`scope`, `code`, `locale`, `text`) values('organization','700001','zh_CN','电话号码不能为空');
 
 -- 把eh_organization_members的两个字段更新对应到eh_organization两个字段的值 add by sfyan 20170427
-update `eh_organization_members` om set `group_path` = (select path from eh_organizations where id = om.organization_id), `group_type` = (select `group_type` from eh_organizations where id = om.organization_id), `update_time` = now();
+update `eh_organization_members` om set `group_path` = (select path from eh_organizations where id = om.organization_id), `group_type` = (select `group_type` from eh_organizations where id = om.organization_id), `update_time` = now() where `group_path` <> (select path from eh_organizations where id = om.organization_id) OR `group_type` <> (select `group_type` from eh_organizations where id = om.organization_id);
 
 -- 增加应用类型和商家类型 add by yanjun 20170427 search-2.0
 SELECT MAX(id) INTO @id FROM eh_search_types;
