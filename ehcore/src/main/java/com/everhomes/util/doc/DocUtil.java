@@ -88,7 +88,10 @@ public class DocUtil {
             Template template=null;
             //设置模板装置方法和路径，FreeMarker支持多种模板装载方法。可以重servlet，classpath,数据库装载。
             //加载模板文件
-            configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
+//            this.getClass().getResourceAsStream("/excels/pmtask.xlsx");
+//            configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
+            LOGGER.info("@@@@@@@@@@@@@@@@@@@@@@"+this.getClass().getResource("/").getPath());
+            configure.setClassForTemplateLoading(this.getClass(), "/template");
 
             //设置对象包装器
 //            configure.setObjectWrapper(new DefaultObjectWrapper());
