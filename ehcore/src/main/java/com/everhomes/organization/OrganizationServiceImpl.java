@@ -2025,18 +2025,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
-	private void leaveOrganizationMember(OrganizationMember member){
-		leaveOrganizationMember(member, false);
-	}
-
 	/**
 	 *
-	 * @param m 要删除的机构成员
-	 * @param isDelete 是否物理删除，从数据库中直接把成员从企业删除掉，还是只是置状态成无效
-     */
-	private void leaveOrganizationMember(OrganizationMember m, Boolean isDelete){
+	 * @param m 要删除的机构成员以及全部的权限
+	 * @param isDelete 是否物理删除，从数据库中直接把成员从机构删除掉，还是只是置状态成无效
+	 */
+	private void deleteOrganizationMember(OrganizationMember m, Boolean isDelete){
 
 		User user = UserContext.current().getUser();
+
+		if(isDelete){
+			organizationProvider.deleteOrganizationMemberById(m.getId());
+		}else{
+			m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+			updateEnterpriseContactStatus(user.getId(), m);
+		}
 
 		//同事把用户权限去掉
 		if(OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER){
@@ -2053,50 +2056,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				aclProvider.deleteAcl(acl.getId());
 			}
 
-		}
-
-		if(OrganizationGroupType.fromCode(m.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-
-			if(isDelete){
-				organizationProvider.deleteOrganizationMemberById(m.getId());
-			}else{
-				m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
-				updateEnterpriseContactStatus(user.getId(), m);
-			}
-
-			//记录删除log
-			OrganizationMemberLog orgLog = new OrganizationMemberLog();
-			orgLog.setOrganizationId(m.getOrganizationId());
-			orgLog.setContactName(m.getContactName());
-			orgLog.setContactToken(m.getContactToken());
-			orgLog.setUserId(m.getTargetId());
-			orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			orgLog.setOperationType(OperationType.QUIT.getCode());
-			orgLog.setRequestType(RequestType.ADMIN.getCode());
-			orgLog.setOperatorUid(UserContext.current().getUser().getId());
-			this.organizationProvider.createOrganizationMemberLog(orgLog);
-
-			//Remove door auth, by Janon 2016-12-15
-			if(OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER)
-				doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
-
-			// 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
-			// http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
-			Integer namespaceId = UserContext.getCurrentNamespaceId();
-			if(OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER){
-				setUserDefaultCommunityByOrganization(namespaceId, m.getTargetId(), m.getOrganizationId());
-			}
-
-			// 退出公司 发消息
-			sendMessageForContactLeave(m);
-
-			userSearcher.feedDoc(m);
-			if(LOGGER.isInfoEnabled()) {
-				LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + user.getId() + ", contactId=" + m.getTargetId()
-						+ ", enterpriseId=" + m.getOrganizationId() + ", status=" + m.getStatus() + ", removeFromDb=" + m.getStatus());
-			}
-		}else{
-			organizationProvider.deleteOrganizationMemberById(m.getId());
 		}
 	}
 
@@ -4924,12 +4883,57 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param members
      */
 	private void leaveOrganizationMembers(List<OrganizationMember> members){
+		User user = UserContext.current().getUser();
+
 		dbProvider.execute((TransactionStatus status) -> {
 			for (OrganizationMember m: members) {
-				leaveOrganizationMember(m);
+				//跟公司的关系只做状态删除，其他都直接删除
+				if(OrganizationGroupType.fromCode(m.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+					deleteOrganizationMember(m, false);
+				}else{
+					deleteOrganizationMember(m, true);
+				}
 			}
 			return null;
 		});
+
+		for (OrganizationMember m: members) {
+			if (OrganizationGroupType.fromCode(m.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+
+				//记录删除log
+				OrganizationMemberLog orgLog = new OrganizationMemberLog();
+				orgLog.setOrganizationId(m.getOrganizationId());
+				orgLog.setContactName(m.getContactName());
+				orgLog.setContactToken(m.getContactToken());
+				orgLog.setUserId(m.getTargetId());
+				orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				orgLog.setOperationType(OperationType.QUIT.getCode());
+				orgLog.setRequestType(RequestType.ADMIN.getCode());
+				orgLog.setOperatorUid(UserContext.current().getUser().getId());
+				this.organizationProvider.createOrganizationMemberLog(orgLog);
+
+				//Remove door auth, by Janon 2016-12-15
+				if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER)
+					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
+
+				// 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
+				// http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
+					setUserDefaultCommunityByOrganization(namespaceId, m.getTargetId(), m.getOrganizationId());
+				}
+
+				// 退出公司 发消息
+				sendMessageForContactLeave(m);
+
+				userSearcher.feedDoc(m);
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + user.getId() + ", contactId=" + m.getTargetId()
+							+ ", enterpriseId=" + m.getOrganizationId() + ", status=" + m.getStatus() + ", removeFromDb=" + m.getStatus());
+				}
+			}
+		}
+
 	}
 
 
