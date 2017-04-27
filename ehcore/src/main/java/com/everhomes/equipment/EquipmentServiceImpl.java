@@ -3481,6 +3481,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
     	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
 			//扫出来的任务要是当前时间能执行的任务 by xiongying20170417
+			if(r.getProcessExpireTime() == null) {
+				r.setProcessExpireTime(new Timestamp(0L));
+			}
 			if(ts.after(r.getExecutiveStartTime())
 					&& (ts.before(r.getExecutiveExpireTime()) || ts.before(r.getProcessExpireTime()))) {
 				EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
@@ -3647,15 +3650,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
-//			String realPath = request.getSession().getServletContext().getRealPath("/")+"/";
-
+			docUtil.createDoc(dataMap, "shenye", savePath);
 
 			if(StringUtils.isEmpty(cmd.getFilePath())) {
 //				download(savePath,response);
-				docUtil.createDocOnServer(dataMap, "shenye", savePath);
 				files.add(savePath);
-			} else {
-				docUtil.createDoc(dataMap, "shenye", savePath);
 			}
 			dtos.remove(dtos.size() - 1);
 		}
@@ -3692,13 +3691,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
 					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
 
-
+			docUtil.createDoc(dataMap, "shenye2", savePath);
 			if(StringUtils.isEmpty(cmd.getFilePath())) {
 //				download(savePath,response);
-				docUtil.createDocOnServer(dataMap, "shenye2", savePath);
 				files.add(savePath);
-			} else {
-				docUtil.createDoc(dataMap, "shenye2", savePath);
 			}
 		}
 		if(StringUtils.isEmpty(cmd.getFilePath())) {

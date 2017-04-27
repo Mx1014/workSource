@@ -75,52 +75,52 @@ public class DocUtil {
         }
     }
 
-    /**
-     * 根据Doc模板生成word文件
-     * @param dataMap 需要填入模板的数据
-     * @param downloadType 文件名称
-     * @param savePath 服务器路径
-     */
-    public void createDocOnServer(Map<String,Object> dataMap,String downloadType,String savePath){
-        LOGGER.info("createDocOnServer：downloadType:{}, savePath:{}", downloadType, savePath);
-        try {
-            //加载需要装填的模板
-            Template template=null;
-            //设置模板装置方法和路径，FreeMarker支持多种模板装载方法。可以重servlet，classpath,数据库装载。
-            //加载模板文件
-//            this.getClass().getResourceAsStream("/excels/pmtask.xlsx");
-//            configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
-            LOGGER.info("@@@@@@@@@@@@@@@@@@@@@@"+this.getClass().getResource("/").getPath());
-            configure.setClassForTemplateLoading(this.getClass(), "/template");
-
-            //设置对象包装器
-//            configure.setObjectWrapper(new DefaultObjectWrapper());
-            //设置异常处理器
-            configure.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
-            //定义Template对象，注意模板类型名字与downloadType要一致
-            template=configure.getTemplate(downloadType+".xml");
-
-            File outFile=new File(savePath);
-            if (outFile.exists()) {
-                LOGGER.info("文件存在：{}", savePath);
-            } else {
-                LOGGER.info("文件不存在，正在创建...：{}", savePath);
-                if (outFile.createNewFile()) {
-                    LOGGER.info("文件创建成功！：{}", savePath);
-                } else {
-                    LOGGER.info("文件创建失败！：{}", savePath);
-                }
-            }
-            Writer outWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
-            template.process(dataMap, outWriter);
-            outWriter.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TemplateException e) {
-            e.printStackTrace();
-        }
-    }
+//    /**
+//     * 根据Doc模板生成word文件
+//     * @param dataMap 需要填入模板的数据
+//     * @param downloadType 文件名称
+//     * @param savePath 服务器路径
+//     */
+//    public void createDocOnServer(Map<String,Object> dataMap,String downloadType,String savePath){
+//        LOGGER.info("createDocOnServer：downloadType:{}, savePath:{}", downloadType, savePath);
+//        try {
+//            //加载需要装填的模板
+//            Template template=null;
+//            //设置模板装置方法和路径，FreeMarker支持多种模板装载方法。可以重servlet，classpath,数据库装载。
+//            //加载模板文件
+////            this.getClass().getResourceAsStream("/excels/pmtask.xlsx");
+////            configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
+//            LOGGER.info("@@@@@@@@@@@@@@@@@@@@@@"+this.getClass().getResource("/").getPath());
+//            configure.setClassForTemplateLoading(this.getClass(), "/template");
+//
+//            //设置对象包装器
+////            configure.setObjectWrapper(new DefaultObjectWrapper());
+//            //设置异常处理器
+//            configure.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+//            //定义Template对象，注意模板类型名字与downloadType要一致
+//            template=configure.getTemplate(downloadType+".xml");
+//
+//            File outFile=new File(savePath);
+//            if (outFile.exists()) {
+//                LOGGER.info("文件存在：{}", savePath);
+//            } else {
+//                LOGGER.info("文件不存在，正在创建...：{}", savePath);
+//                if (outFile.createNewFile()) {
+//                    LOGGER.info("文件创建成功！：{}", savePath);
+//                } else {
+//                    LOGGER.info("文件创建失败！：{}", savePath);
+//                }
+//            }
+//            Writer outWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
+//            template.process(dataMap, outWriter);
+//            outWriter.close();
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (TemplateException e) {
+//            e.printStackTrace();
+//        }
+//    }
     
     public String getImageStr(String imgFile){
         InputStream in=null;
