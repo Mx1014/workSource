@@ -12,12 +12,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.rest.yellowPage.*;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -42,23 +36,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowCaseFileDTO;
+import com.everhomes.rest.flow.FlowCaseFileValue;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
-import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.wifi.WifiOwnerType;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.JumpType;
+import com.everhomes.rest.yellowPage.RequestInfoDTO;
+import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
+import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.user.UserActivityService;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 
 @Component
 public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
@@ -76,6 +87,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private UserActivityService userActivityService;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private FlowService flowService;
 	
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -387,7 +404,14 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		for (RequestInfoDTO requestInfo : list) {
 			command.setId(requestInfo.getId());
 			command.setTemplateType(requestInfo.getTemplateType());
-			GetRequestInfoResponse getRequestInfoResponse = userActivityService.getCustomRequestInfo(command);
+			Object getRequestInfoResponse = null;
+			if("flowCase".equals(command.getTemplateType())){
+				getRequestInfoResponse=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
+						FlowUserType.PROCESSOR, true);
+				
+			}else{
+				getRequestInfoResponse = userActivityService.getCustomRequestInfo(command);
+			}
 			List[] lists = requestsInfoMap.get(requestInfo.getTemplateType());
 			if(lists==null){
 				lists = new List[2];
@@ -420,7 +444,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		}
 	}
 	
+	/**
+	 * 
+	 * by dengs 20170427
+	 */
     private void createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos){
+		templateName = templateName==null?
+				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+						ServiceAllianceRequestNotificationTemplateCode.APPLY_STRING, 
+						UserContext.current().getUser().getLocale(),""):templateName;
 		XSSFSheet sheet = wb.createSheet(templateName);
 		XSSFCellStyle style = wb.createCellStyle();// 样式对象
         Font font = wb.createFont();
@@ -437,41 +469,131 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 
         XSSFRow row1 = sheet.createRow(rowNum ++);
         row1.setRowStyle(style);
-
-        row1.createCell(0).setCellValue("序号");
-        row1.createCell(1).setCellValue("用户姓名");
-        row1.createCell(2).setCellValue("手机号码");
-        row1.createCell(3).setCellValue("企业");
-        row1.createCell(4).setCellValue("服务机构");
-        row1.createCell(5).setCellValue("提交时间");
         
-        if(requestInfos[1].size()>0){
-        	GetRequestInfoResponse response = (GetRequestInfoResponse)requestInfos[1].get(0);
-        	for (int i = 0; i < response.getDtos().size(); i++) {
-        		 row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+        String order_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+				ServiceAllianceRequestNotificationTemplateCode.ORDER_STRING, 
+				UserContext.current().getUser().getLocale(),"");
+        String username_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+        		ServiceAllianceRequestNotificationTemplateCode.USERNAME_STRING, 
+        		UserContext.current().getUser().getLocale(),"");
+        String phone_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+        		ServiceAllianceRequestNotificationTemplateCode.PHONE_STRING, 
+        		UserContext.current().getUser().getLocale(),"");
+        String company_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+        		ServiceAllianceRequestNotificationTemplateCode.COMPANY_STRING, 
+        		UserContext.current().getUser().getLocale(),"");
+        String service_alliance_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+        		ServiceAllianceRequestNotificationTemplateCode.SERVICE_ALLIANCE_STRING, 
+        		UserContext.current().getUser().getLocale(),"");
+        String submit_time_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+        		ServiceAllianceRequestNotificationTemplateCode.SUBMIT_TIME_STRING, 
+        		UserContext.current().getUser().getLocale(),"");
+
+        row1.createCell(0).setCellValue(order_string);
+        row1.createCell(1).setCellValue(username_string);
+        row1.createCell(2).setCellValue(phone_string);
+        row1.createCell(3).setCellValue(company_string);
+        row1.createCell(4).setCellValue(service_alliance_string);
+        row1.createCell(5).setCellValue(submit_time_string);
+        
+        if(requestInfos[1]!=null && requestInfos[1].size()>0){
+        	//申请表单
+        	if(requestInfos[1].get(0) instanceof GetRequestInfoResponse){
+	        	GetRequestInfoResponse response = (GetRequestInfoResponse)requestInfos[1].get(0);
+	        	for (int i = 0; response!=null && i < response.getDtos().size(); i++) {
+	        		 row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+	        	}
+	        	
+	        	for (int i = 0; i < requestInfos[0].size(); i++) {
+	        		RequestInfoDTO requestInfoDTO = (RequestInfoDTO)requestInfos[0].get(i);
+	        		GetRequestInfoResponse getRequestInfoResponse = (GetRequestInfoResponse)requestInfos[1].get(i);
+	        		XSSFRow row = sheet.createRow(rowNum ++);
+	        		row.setRowStyle(style);
+	        		//固定一行的值
+	        		setFixedColumnToRow(row,requestInfoDTO,i+1);
+	        		response = (GetRequestInfoResponse)requestInfos[1].get(i);
+	        		//不定数量的值
+	        		for (int j = 0; response!=null && j < response.getDtos().size(); j++) {
+	        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
+	        		}
+				}
         	}
-        	
-        	for (int i = 0; i < requestInfos[0].size(); i++) {
-        		RequestInfoDTO requestInfoDTO = (RequestInfoDTO)requestInfos[0].get(i);
-        		GetRequestInfoResponse getRequestInfoResponse = (GetRequestInfoResponse)requestInfos[1].get(i);
-        		XSSFRow row = sheet.createRow(rowNum ++);
-        		row.setRowStyle(style);
-        		row.createCell(0).setCellValue(i+1);
-        		row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
-        		row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
-        		row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
-        		row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
-        		row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+        	//审批申请
+        	else if(requestInfos[1].get(0) instanceof FlowCaseDetailDTO){
+        		//列名称-列序号 存在表单修改的情况，所以名称也有可能改，根据名称来设置值。
+        		Map<String,Integer> columnname = new HashMap<String,Integer>();
+        		int nextcol = 6;
+        		//值
+        		for (int i = 0; i < requestInfos[0].size(); i++) {
+	        		RequestInfoDTO requestInfoDTO = (RequestInfoDTO)requestInfos[0].get(i);
+	        		XSSFRow row = sheet.createRow(rowNum ++);
+	        		row.setRowStyle(style);
+	        		//固定一行的值
+	        		setFixedColumnToRow(row,requestInfoDTO,i+1);
+	        		//不定数量的值
+	        		FlowCaseDetailDTO flowCaseDetailDTO = (FlowCaseDetailDTO)requestInfos[1].get(i);
+	        		if(flowCaseDetailDTO!=null){
+	        			Map<Integer,String> mapImage = new HashMap<Integer,String>();
+		        		List<FlowCaseEntity> entityLists = flowCaseDetailDTO.getEntities();
+		        		if(entityLists!=null)
+			        		for (FlowCaseEntity flowCaseEntity : entityLists) {
+			        			Integer col = columnname.get(flowCaseEntity.getKey());
+			        			if(col==null){
+			        				col = createColumnHeads(columnname, nextcol, flowCaseEntity, row1);
+			        				nextcol++;
+			        			}
+			        			row.createCell(col)
+			        				.setCellValue(getFileFieldValue(flowCaseEntity,col,mapImage));
+							}
+	        		}
+				}
         		
-        		response = (GetRequestInfoResponse)requestInfos[1].get(i);
-        		for (int j = 0; j < response.getDtos().size(); j++) {
-        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
-        		}
-			}
+        	}
         }
     }
 
-    @Override
+    /**
+     * 数据的名称找不到对应的列，就需要创建一个，调用此方法 
+     */
+    private int createColumnHeads(Map<String, Integer> columnname, int nextcol, FlowCaseEntity flowCaseEntity,XSSFRow row1) {
+    	//头
+		Integer col = columnname.get(flowCaseEntity.getKey());
+		if(col==null){
+			col = nextcol;
+			columnname.put(flowCaseEntity.getKey(), col);
+			row1.createCell(col).setCellValue(flowCaseEntity.getKey());
+		}
+		return col;
+	}
+    
+    /**
+	 * 文件json，转URL,URL,URL....
+	 * <b>URL:/</b>
+	 * <p></p>
+     * @param col 
+     * @param row 
+     * @param mapImage 
+	 */
+	private String getFileFieldValue(FlowCaseEntity flowCaseEntity, Integer col, Map<Integer, String> mapImage){
+		FlowCaseEntityType flowCaseEntityType = FlowCaseEntityType.fromCode(flowCaseEntity.getEntityType());
+		StringBuffer buffer = new StringBuffer();
+		if(FlowCaseEntityType.FILE == flowCaseEntityType){
+			FlowCaseFileValue files = JSONObject.parseObject(flowCaseEntity.getValue(), FlowCaseFileValue.class);
+			for (FlowCaseFileDTO flowCaseFileDTO : files.getFiles()) {
+				buffer.append(flowCaseFileDTO.getUrl());
+				buffer.append(",");
+			}
+			return buffer.toString().substring(0,  buffer.toString().length()-1);
+		}else if(FlowCaseEntityType.IMAGE == flowCaseEntityType){
+			String originalValue = mapImage.get(col);
+			originalValue = originalValue==null?"":originalValue+",";
+			mapImage.put(col, buffer.append(originalValue).append(flowCaseEntity.getValue()).toString());
+			return mapImage.get(col);
+		}
+		return flowCaseEntity.getValue();
+	}
+
+	@Override
     public SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 
@@ -621,4 +743,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         return dtos;
     }
 
+	/**
+	 * 固定几行的设置
+	 */
+	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i){
+		row.createCell(0).setCellValue(i+1);
+		row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
+		row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
+		row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
+		row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
+		row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+	}
 }

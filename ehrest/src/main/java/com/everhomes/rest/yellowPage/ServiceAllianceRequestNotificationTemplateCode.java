@@ -14,4 +14,11 @@ public interface ServiceAllianceRequestNotificationTemplateCode {
     //add by dengs 20170425 纯文字，放到eh_locale_strings表的
     static final String AN_APPLICATION_FORM = "10001"; // 的申请单
     static final String SEE_MAIL_ATTACHMENT = "10002"; // 见邮件附件
+    static final String APPLY_STRING = "10003"; // 审批
+    static final String ORDER_STRING = "10004"; // 序号
+    static final String USERNAME_STRING = "10005"; // 用户姓名
+    static final String PHONE_STRING = "10006"; // 手机号码
+    static final String COMPANY_STRING = "10007"; // 企业
+    static final String SERVICE_ALLIANCE_STRING = "10008"; // 服务机构
+    static final String SUBMIT_TIME_STRING= "10009"; // 提交时间
 }

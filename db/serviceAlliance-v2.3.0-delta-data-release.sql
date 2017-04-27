@@ -1,6 +1,13 @@
 --by dengs 国际化 邮件发送
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10001', 'zh_CN', '的申请单');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10002', 'zh_CN', '见邮件附件');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10003', 'zh_CN', '审批');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10004', 'zh_CN', '序号');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10005', 'zh_CN', '用户姓名');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10006', 'zh_CN', '手机号码');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10007', 'zh_CN', '企业');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10008', 'zh_CN', '服务机构');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('serviceAlliance.request.notification', '10009', 'zh_CN', '提交时间');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`)
     VALUES( 'serviceAlliance.request.notification', 4, 'zh_CN', '提交申请通知给机构和管理员', '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>${title}</title></head><body><p>预订人：${creatorName}</p><p>手机号：${creatorMobile}</p><p>公司名称：${creatorOrganization}</p><p>服务名称：${serviceOrgName}</p>${note}</body></html>');
