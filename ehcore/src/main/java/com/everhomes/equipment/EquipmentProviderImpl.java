@@ -2377,17 +2377,18 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				result.setAbnormalTaskIds(tasks);
 			}
 			String value = r.getValue("averageValue", String.class);
-			String[] values = value.split(",");
-			if(values != null && values.length > 0) {
-				Double average = 0.0;
-				for(String v : values) {
-					average = average + Double.valueOf(v);
+			if(value != null) {
+				String[] values = value.split(",");
+				if(values != null && values.length > 0) {
+					Double average = 0.0;
+					for(String v : values) {
+						average = average + Double.valueOf(v);
+					}
+
+					average = average/values.length;
+					result.setAverageValue(average);
 				}
-
-				average = average/values.length;
-				result.setAverageValue(average);
 			}
-
 			results.add(result);
 			return null;
 		});

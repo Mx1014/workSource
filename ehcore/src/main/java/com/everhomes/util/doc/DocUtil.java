@@ -40,6 +40,7 @@ public class DocUtil {
      * @param savePath 保存路径
      */
     public void createDoc(Map<String,Object> dataMap,String downloadType,String savePath){
+        LOGGER.info("createDoc：downloadType:{}, savePath:{}", downloadType, savePath);
         try {
             //加载需要装填的模板
             Template template=null;
@@ -81,12 +82,14 @@ public class DocUtil {
      * @param savePath 服务器路径
      */
     public void createDocOnServer(Map<String,Object> dataMap,String downloadType,String savePath){
+        LOGGER.info("createDocOnServer：downloadType:{}, savePath:{}", downloadType, savePath);
         try {
             //加载需要装填的模板
             Template template=null;
             //设置模板装置方法和路径，FreeMarker支持多种模板装载方法。可以重servlet，classpath,数据库装载。
             //加载模板文件
             configure.setClassForTemplateLoading(this.getClass(), "/com/everhomes/util/doc/template");
+
             //设置对象包装器
 //            configure.setObjectWrapper(new DefaultObjectWrapper());
             //设置异常处理器
