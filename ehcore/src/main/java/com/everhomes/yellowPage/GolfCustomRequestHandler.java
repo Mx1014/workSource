@@ -102,6 +102,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		if(category != null) {
 			categoryName = (category.getName() == null) ? "" : category.getName();
 		}
+
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -119,7 +122,6 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
 
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
@@ -135,7 +137,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		//modify by dengs 20170425  邮件附件生成
 		List<File> attementList = createAttachmentList(title, notifyMap, request);
 		List<String> stringAttementList = new ArrayList<String>();
-		attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});if(serviceOrg != null) {
+		attementList.stream().forEach(file->{stringAttementList.add(file.getAbsolutePath());});
+		if(serviceOrg != null) {
 //			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
 //			if(orgContact != null) {
 //				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);

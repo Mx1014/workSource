@@ -8,12 +8,18 @@ package com.everhomes.rest.pmkexing;
  */
 public enum PmKeXingBillStatus {
 
-    UNPAID((byte) 0), PAID((byte) 1);
+    UNPAID((byte) 0, "未缴"), PAID((byte) 1, "已缴");
 
     private Byte code;
+    private String name;
 
-    PmKeXingBillStatus(Byte code) {
+    PmKeXingBillStatus(Byte code, String name){
         this.code = code;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Byte getCode() {
@@ -23,6 +29,15 @@ public enum PmKeXingBillStatus {
     public static PmKeXingBillStatus fromCode(Byte code) {
         for (PmKeXingBillStatus type : PmKeXingBillStatus.values()) {
             if (type.code.equals(code)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public static PmKeXingBillStatus fromName(String name) {
+        for (PmKeXingBillStatus type : PmKeXingBillStatus.values()) {
+            if (type.name.equals(name)) {
                 return type;
             }
         }

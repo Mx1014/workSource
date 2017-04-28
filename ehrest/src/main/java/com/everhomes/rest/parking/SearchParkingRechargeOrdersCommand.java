@@ -32,7 +32,16 @@ public class SearchParkingRechargeOrdersCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Byte rechargeType;
-    
+    private String cardNumber;
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
     public SearchParkingRechargeOrdersCommand() {
     }
 

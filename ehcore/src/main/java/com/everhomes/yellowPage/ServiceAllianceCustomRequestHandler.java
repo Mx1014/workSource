@@ -135,6 +135,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
 		String categoryName = (category.getName() == null) ? "" : category.getName();
+
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -154,7 +157,6 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			creatorOrganization = org.getName();
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {

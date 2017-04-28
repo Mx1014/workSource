@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 帖子或评论ID</li>
  * <li>uuid: 帖子或评论UUID</li>
+ * <li>namespaceId: 域空间ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorUid: 创建者ID</li>
@@ -64,6 +65,8 @@ public class PostDTO {
 	private Long id;
 	
 	private String uuid;
+
+    private Integer namespaceId;
 	
 	private Long parentPostId;
 	
@@ -215,6 +218,14 @@ public class PostDTO {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getParentPostId() {

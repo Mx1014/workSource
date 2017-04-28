@@ -25,23 +25,23 @@ public interface Service1Soap {
     @RequestWrapper(localName = "CardPayMoney", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.CardPayMoney")
     @ResponseWrapper(localName = "CardPayMoneyResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.CardPayMoneyResponse")
     @WebResult(name = "CardPayMoneyResult", targetNamespace = "http://tempuri.org/")
-    public java.lang.String cardPayMoney(
-        @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
-        java.lang.String cardCode,
-        @WebParam(name = "carNumber", targetNamespace = "http://tempuri.org/")
-        java.lang.String carNumber,
-        @WebParam(name = "flag", targetNamespace = "http://tempuri.org/")
-        java.lang.String flag,
-        @WebParam(name = "cost", targetNamespace = "http://tempuri.org/")
-        java.lang.String cost,
-        @WebParam(name = "validStart", targetNamespace = "http://tempuri.org/")
-        java.lang.String validStart,
-        @WebParam(name = "validEnd", targetNamespace = "http://tempuri.org/")
-        java.lang.String validEnd,
-        @WebParam(name = "payTime", targetNamespace = "http://tempuri.org/")
-        java.lang.String payTime,
-        @WebParam(name = "sign", targetNamespace = "http://tempuri.org/")
-        java.lang.String sign
+    public String cardPayMoney(
+            @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
+                    String cardCode,
+            @WebParam(name = "carNumber", targetNamespace = "http://tempuri.org/")
+                    String carNumber,
+            @WebParam(name = "flag", targetNamespace = "http://tempuri.org/")
+                    String flag,
+            @WebParam(name = "cost", targetNamespace = "http://tempuri.org/")
+                    String cost,
+            @WebParam(name = "validStart", targetNamespace = "http://tempuri.org/")
+                    String validStart,
+            @WebParam(name = "validEnd", targetNamespace = "http://tempuri.org/")
+                    String validEnd,
+            @WebParam(name = "payTime", targetNamespace = "http://tempuri.org/")
+                    String payTime,
+            @WebParam(name = "sign", targetNamespace = "http://tempuri.org/")
+                    String sign
     );
 
     /**
@@ -51,7 +51,7 @@ public interface Service1Soap {
     @RequestWrapper(localName = "GetAllCardDescript", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetAllCardDescript")
     @ResponseWrapper(localName = "GetAllCardDescriptResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetAllCardDescriptResponse")
     @WebResult(name = "GetAllCardDescriptResult", targetNamespace = "http://tempuri.org/")
-    public java.lang.String getAllCardDescript();
+    public String getAllCardDescript();
 
     /**
      * 月卡用户信息查询
@@ -60,14 +60,14 @@ public interface Service1Soap {
     @RequestWrapper(localName = "GetCardInfo", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetCardInfo")
     @ResponseWrapper(localName = "GetCardInfoResponse", targetNamespace = "http://tempuri.org/", className = "com.bosigao.cxf.GetCardInfoResponse")
     @WebResult(name = "GetCardInfoResult", targetNamespace = "http://tempuri.org/")
-    public java.lang.String getCardInfo(
-        @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
-        java.lang.String cardCode,
-        @WebParam(name = "carNumber", targetNamespace = "http://tempuri.org/")
-        java.lang.String carNumber,
-        @WebParam(name = "flag", targetNamespace = "http://tempuri.org/")
-        java.lang.String flag,
-        @WebParam(name = "sign", targetNamespace = "http://tempuri.org/")
-        java.lang.String sign
+    public String getCardInfo(
+            @WebParam(name = "cardCode", targetNamespace = "http://tempuri.org/")
+                    String cardCode,
+            @WebParam(name = "carNumber", targetNamespace = "http://tempuri.org/")
+                    String carNumber,
+            @WebParam(name = "flag", targetNamespace = "http://tempuri.org/")
+                    String flag,
+            @WebParam(name = "sign", targetNamespace = "http://tempuri.org/")
+                    String sign
     );
 }

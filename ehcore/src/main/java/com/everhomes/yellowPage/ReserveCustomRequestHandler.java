@@ -122,7 +122,10 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		String categoryName = "";
 		if(category != null) {
 			categoryName = (category.getName() == null) ? "" : category.getName();
-		} 
+		}
+
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -139,7 +142,6 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 			creatorOrganization = org.getName();
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
-		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {

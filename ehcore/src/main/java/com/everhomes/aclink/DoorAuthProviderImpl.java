@@ -51,16 +51,25 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Override
+    public Long getNextDoorAuth() {
+    	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuth.class));
+    	return id;
+    }
 
     @Override
     public Long createDoorAuth(DoorAuth obj) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuth.class));
+    	if(obj.getId() == null) {
+    		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuth.class));
+    		obj.setId(id);
+    	} 
+        
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
-        obj.setId(id);
         prepareObj(obj);
         EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
         dao.insert(obj);
-        return id;
+        return obj.getId();
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,6 @@ import com.everhomes.util.ConvertHelper;
 @Component
 public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NamespaceResourceServiceImpl.class);
-	
 	ExecutorService pool = Executors.newFixedThreadPool(3);
 	@Autowired
 	private DbProvider dbProvider;
