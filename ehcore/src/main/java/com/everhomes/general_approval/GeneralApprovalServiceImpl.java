@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.Rentalv2Controller;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
@@ -58,6 +61,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -73,6 +77,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private GeneralFormProvider generalFormProvider;
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Autowired
 	private FlowService flowService;
@@ -301,16 +307,39 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-		//
+		//modify by dengs. 20170428 如果OwnerType organaization 是  community
+		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+		List<OrganizationCommunity> communityList = null;
+		if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+			 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+		}
 		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
-								.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
+						ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+						List<OrganizationCommunity> communityList = null;
+						if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+							 Condition conditionOR = null;
+							 for (OrganizationCommunity organizationCommunity : communityList) {
+								Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+										.and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+								if(conditionOR==null){
+									conditionOR = condition;
+								}else{
+									conditionOR.or(condition);
+								}
+							 }
+							 if(conditionOR!=null)
+								 query.addConditions(conditionOR);
+						}else{
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
+									.getOwnerId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
+									.getOwnerType()));
+						}
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
