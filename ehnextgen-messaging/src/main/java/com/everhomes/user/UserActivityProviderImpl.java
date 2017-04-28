@@ -371,7 +371,7 @@ public class UserActivityProviderImpl implements UserActivityProvider {
     }
 
     @Override
-	public List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte status, int pageSize) {
+	public List<Feedback> ListFeedbacks(CrossShardListingLocator locator, Integer namespaceId, Byte targetType,  Byte status, int pageSize) {
     	final List<Feedback> feedbacks = new ArrayList<>();
 
         if(locator.getShardIterator() == null) {
@@ -383,6 +383,9 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
         	SelectQuery<EhFeedbacksRecord> query = context.selectQuery(Tables.EH_FEEDBACKS);
         	Condition condition = Tables.EH_FEEDBACKS.NAMESPACE_ID.eq(namespaceId);
+        	if(targetType != null){
+        		condition = condition.and(Tables.EH_FEEDBACKS.TARGET_TYPE.eq(targetType));
+        	}
         	if(status != null){
         		condition = condition.and(Tables.EH_FEEDBACKS.STATUS.eq(status));
         	}

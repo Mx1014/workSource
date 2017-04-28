@@ -541,7 +541,7 @@ public class UserActivityServiceImpl implements UserActivityService {
     	CrossShardListingLocator locator = new CrossShardListingLocator();
     	locator.setAnchor(cmd.getPageAnchor());
     	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), cmd.getStatus(), pageSize + 1);
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
     	if (null == results)
     		return response;
     	Long nextPageAnchor = null;
@@ -561,8 +561,9 @@ public class UserActivityServiceImpl implements UserActivityService {
     		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
     			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
         		if(post != null){
-        			feedbackDto.setTargetStatus(post.getStatus());
         			feedbackDto.setTargetSubject(post.getSubject());
+        			feedbackDto.setForumId(post.getForumId());
+        			feedbackDto.setTargetStatus(post.getStatus());
         		}
     		}
     		

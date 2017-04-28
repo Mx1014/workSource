@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *   <li>targetType:0-无具体目标、1-帖子内容、2-地址、3-圈子</li>
  *   <li>targetId:所针对的目标对应的ID（如地址对应address id、帖子内容则是post id)</li>
  *   <li>targetSubject: 目标的标题名称</li>
+ *   <li>forumId: 如果举报类型是post的话，返回post对应的forumId</li>
  *   <li>targetStatus: 目标的状态， 0-已删除、1-待确认、2-正常。参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *   <li>proofResourceUri:图片链接</li>
  *   <li>contentCategory:内容类别：0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13
@@ -40,6 +41,7 @@ public class FeedbackDTO {
     private Byte targetType;
     private Long targetId;
     private String targetSubject;
+    private Long forumId;
     private Byte targetStatus;
     private String proofResourceUri;
     private Long contentCategory;
@@ -134,6 +136,14 @@ public class FeedbackDTO {
 
 	public void setTargetSubject(String targetSubject) {
 		this.targetSubject = targetSubject;
+	}
+
+	public Long getForumId() {
+		return forumId;
+	}
+
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
 	}
 
 	public Byte getTargetStatus() {
