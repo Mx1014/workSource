@@ -561,6 +561,7 @@ public class UserActivityServiceImpl implements UserActivityService {
     		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
     			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
         		if(post != null){
+        			feedbackDto.setTargetStatus(post.getStatus());
         			feedbackDto.setTargetSubject(post.getSubject());
         		}
     		}
