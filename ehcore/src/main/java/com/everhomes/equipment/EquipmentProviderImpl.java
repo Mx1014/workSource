@@ -390,6 +390,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		SelectQuery<EhEquipmentInspectionEquipmentAttachmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.EQUIPMENT_ID.eq(equipmentId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_ATTACHMENTS.ATTACHMENT_TYPE.eq((byte)1));
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findEquipmentAttachmentsByEquipmentId, sql=" + query.getSQL());
+            LOGGER.debug("findEquipmentAttachmentsByEquipmentId, bindValues=" + query.getBindValues());
+        }
 		List<EquipmentInspectionEquipmentAttachments> attachments = new ArrayList<>();
 		query.fetch().map((r) -> {
 			attachments.add(ConvertHelper.convert(r, EquipmentInspectionEquipmentAttachments.class));

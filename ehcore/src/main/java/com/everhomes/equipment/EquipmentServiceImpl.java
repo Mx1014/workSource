@@ -944,7 +944,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					eqAccessoryMap.add(map);
 				}
 			}
-			
+			deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
 			if(cmd.getAttachments() != null) {
 				for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
 					attachment.setEquipmentId(equipment.getId());
