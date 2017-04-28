@@ -2038,7 +2038,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationProvider.deleteOrganizationMemberById(m.getId());
 		}else{
 			m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
-			updateEnterpriseContactStatus(user.getId(), m);
+			organizationProvider.updateOrganizationMember(m);
 		}
 
 		//同事把用户权限去掉
