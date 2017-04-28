@@ -13,7 +13,7 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10160, 51000, 'ä
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 51000, 1001, 'EhAclRoles', 0, 1, NOW()); 
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 10160, 1001, 'EhAclRoles', 0, 1, NOW()); 
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
