@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>nextPageAnchor: 下一页锚点</li>
  *  <li>pageSize: 每页的数量</li>
- *  <li>flag: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
+ *  <li>sourceRequestType: 客户端或者web端 ,web端请务必传值。 参考 {@link com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType}</li>
  * </ul>
  */
 public class GetServiceAllianceEnterpriseListCommand {
@@ -37,7 +37,7 @@ public class GetServiceAllianceEnterpriseListCommand {
 	
 	private Long type;
 	
-	private Byte flag;
+	private Byte sourceRequestType;
 	
 	public Long getCommunityId() {
 		return communityId;
@@ -112,12 +112,12 @@ public class GetServiceAllianceEnterpriseListCommand {
 		this.type = type;
 	}
 
-	public Byte getFlag() {
-		return flag;
+	public Byte getSourceRequestType() {
+		return sourceRequestType;
 	}
 
-	public void setFlag(Byte flag) {
-		this.flag = flag;
+	public void setSourceRequestType(Byte sourceRequestType) {
+		this.sourceRequestType = sourceRequestType;
 	}
 
 	@Override
