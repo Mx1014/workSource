@@ -2032,8 +2032,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 */
 	private void deleteOrganizationMember(OrganizationMember m, Boolean isDelete){
 
-		User user = UserContext.current().getUser();
-
 		if(isDelete){
 			organizationProvider.deleteOrganizationMemberById(m.getId());
 		}else{
