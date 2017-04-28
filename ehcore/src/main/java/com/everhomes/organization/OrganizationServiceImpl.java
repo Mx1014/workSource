@@ -4884,7 +4884,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
 	private void leaveOrganizaitonByContactToken(Long operatorUid, Long organizationId, String contactToken){
 
-		Organization organization = checkEnterpriseParameter(operatorUid, organizationId, "leaveOrganizaitonByContactToken");
+		Organization organization = checkEnterpriseParameter(organizationId, operatorUid, "leaveOrganizaitonByContactToken");
 
 		List<OrganizationMember> members = new ArrayList<>();
 		List<OrganizationMember> organizationMembers = listOrganizationMemberByOrganizationPathAndContactToken(organization.getPath(), contactToken);
@@ -4894,7 +4894,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		for (OrganizationMember organizationMember: organizationMembers) {
 			Organization org = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
 			//所在的机构直属于当前公司或者就是当前公司的成员 需要删除
-			if(organization.getId() == org.getDirectlyEnterpriseId() || organization.getId() == org.getId()){
+			if(organization.getId().equals(org.getDirectlyEnterpriseId()) || organization.getId().equals(org.getId())){
 				members.add(organizationMember);
 			}
 		}
@@ -5769,6 +5769,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					ImportFileResponse response = new ImportFileResponse();
 					List<ImportOrganizationContactDataDTO> datas = handleImportOrganizationContactData(resultList);
 					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
 						response.setTitle(datas.get(0));
 						datas.remove(0);
 					}
@@ -5828,7 +5829,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<ImportOrganizationContactDataDTO> datas = new ArrayList<>();
 		int row = 1;
 		for (Object o : list) {
-			if(row < 3){
+			if(row < 2){
 				row ++;
 				continue;
 			}

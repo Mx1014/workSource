@@ -13,6 +13,7 @@ import org.jooq.RecordMapper;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public interface PropertyMgrProvider {
@@ -481,4 +482,10 @@ public interface PropertyMgrProvider {
     List<OrganizationOwnerAddress> listOrganizationOwnerAddressByAddressIds(Integer namespaceId, List<Long> addressIds);
 
     ParkingCardCategory findParkingCardCategory(Byte cardType);
+
+	public Map<Long, Integer> mapOrganizationOwnerCountByAddressIds(Integer namespaceId, List<Long> addressIds);
+
+	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds);
+
+	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
 }

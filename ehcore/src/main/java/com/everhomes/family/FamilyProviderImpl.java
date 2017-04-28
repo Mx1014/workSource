@@ -60,7 +60,9 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -128,6 +130,25 @@ public class FamilyProviderImpl implements FamilyProvider {
 		return result[0];
 	}
 	
+	@Override
+	public Map<Long, Family> mapFamilyByAddressIds(List<Long> aptIdList) {
+		 Map<Long, Family> result = new HashMap<>();
+		dbProvider.mapReduce(AccessSpec.readWriteWith(EhGroups.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					context.select().from(Tables.EH_GROUPS)
+						.where(Tables.EH_GROUPS.INTEGRAL_TAG1.in(aptIdList))
+						.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+						.fetch().map((r) -> {
+							Family family = ConvertHelper.convert(r, Family.class);
+							result.put(family.getAddressId(), family);
+							return null;
+						});
+					return true;
+				});
+
+		return result;
+	}
+
 	//@Caching(evict = { @CacheEvict(value="Family", key="#group.integralTag1")} )
     @Override
     public void updateFamily(Group group) {

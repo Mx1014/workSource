@@ -1,9 +1,12 @@
 // @formatter:off
 package com.everhomes.organization;
  
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +21,7 @@ import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1247,6 +1251,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+
+	@Override
+	public Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus) {
+		Map<Long, BigDecimal> map = new HashMap<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select(Tables.EH_ORGANIZATION_ORDERS.BILL_ID, DSL.sum(Tables.EH_ORGANIZATION_ORDERS.AMOUNT)).from(Tables.EH_ORGANIZATION_ORDERS)
+			.where(Tables.EH_ORGANIZATION_ORDERS.BILL_ID.in(billIds))
+			.and(Tables.EH_ORGANIZATION_ORDERS.STATUS.eq(organizationOrderStatus))
+			.groupBy(Tables.EH_ORGANIZATION_ORDERS.BILL_ID)
+			.fetch().map(r->{
+				map.put(r.getValue(Tables.EH_ORGANIZATION_ORDERS.BILL_ID), r.getValue(DSL.sum(Tables.EH_ORGANIZATION_ORDERS.AMOUNT)));
+				return null;
+			});
+		
+		return map;
+	}
 
 	@Override
 	public OrganizationOrder findOrganizationOrderById(Long orderId) {
