@@ -4855,7 +4855,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-		return organizationProvider.listOrganizationMemberByPath(path, null, userIdentifier.getIdentifierToken());
+		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
 	}
 
 	/**
@@ -4879,6 +4879,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	/**
+	 * 根据手机号退出公司，organizationId必须是公司
+	 * @param operatorUid
+	 * @param organizationId
+	 * @param contactToken
+     */
+	private void leaveOrganizaitonByContactToken(Long operatorUid, Long organizationId, String contactToken){
+
+		Organization organization = checkEnterpriseParameter(operatorUid, organizationId, "leaveOrganizaitonByContactToken");
+
+		List<OrganizationMember> members = new ArrayList<>();
+		List<OrganizationMember> organizationMembers = listOrganizationMemberByOrganizationPathAndContactToken(organization.getPath(), contactToken);
+
+		//如果成员在一套组织架构体系中同事存在于多个公司的情况需要进行筛选删除
+		//只要退出和删除当前公司和当前公司的所有机构成员信息，不要删除或退出掉子公司和子公司的所有机构的成员信息 add by sfyan 20170427
+		for (OrganizationMember organizationMember: organizationMembers) {
+			Organization org = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
+			//所在的机构直属于当前公司或者就是当前公司的成员 需要删除
+			if(organization.getId() == org.getDirectlyEnterpriseId() || organization.getId() == org.getId()){
+				members.add(organizationMember);
+			}
+		}
+
+		// 退出公司 add by sfyan 20170427
+		leaveOrganizationMembers(members);
+	}
+
+	/**
+	 * 根据用户id退出公司，organizationId必须是公司
+	 * @param operatorUid
+	 * @param organizationId
+	 * @param userId
+     */
+	private void leaveOrganizaitonByUserId(Long operatorUid, Long organizationId, Long userId){
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		leaveOrganizaitonByContactToken(operatorUid, organizationId, userIdentifier.getIdentifierToken());
+	}
+
+	private void leaveOrganizationMember(OrganizationMember member){
+			List<OrganizationMember> members = new ArrayList<>();
+			members.add(member);
+			leaveOrganizationMembers(members);
+	}
+
+	/**
 	 * 根据members退出删除机构成员信息
 	 * @param members
      */
@@ -4897,6 +4941,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		});
 
+		//发消息等等操作
+		leaveOrganizationAfterOperation(user.getId(), members);
+
+	}
+
+	/**
+	 * 退出公司后需要记录日志、解除门禁、设置默认小区、更新搜索引擎数据、以及发消息
+	 * @param members
+     */
+	private void leaveOrganizationAfterOperation(Long operatorUid, List<OrganizationMember> members){
 		for (OrganizationMember m: members) {
 			if (OrganizationGroupType.fromCode(m.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
 
@@ -4928,12 +4982,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 				userSearcher.feedDoc(m);
 				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + user.getId() + ", contactId=" + m.getTargetId()
+					LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + m.getTargetId()
 							+ ", enterpriseId=" + m.getOrganizationId() + ", status=" + m.getStatus() + ", removeFromDb=" + m.getStatus());
 				}
 			}
 		}
-
 	}
 
 
@@ -4947,23 +5000,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         String tag = "leaveEnterpriseContact";
 
         Long enterpriseId = cmd.getEnterpriseId();
-        Organization organization = checkEnterpriseParameter(enterpriseId, userId, tag);
 
-		List<OrganizationMember> members = new ArrayList<>();
-		List<OrganizationMember> organizationMembers = listOrganizationMemberByOrganizationPathAndUserId(organization.getPath(), userId);
-
-		//如果成员在一套组织架构体系中同事存在于多个公司的情况需要进行筛选删除
-		//只要退出和删除当前公司和当前公司的所有机构成员信息，不要删除或退出掉子公司和子公司的所有机构的成员信息 add by sfyan 20170427
-		for (OrganizationMember organizationMember: organizationMembers) {
-			Organization org = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
-			//所在的机构直属于当前公司或者就是当前公司的成员 需要删除
-			if(organization.getId() == org.getDirectlyEnterpriseId() || organization.getId() == org.getId()){
-				members.add(organizationMember);
-			}
-		}
-		
-		// 退出公司 add by sfyan 20170427
-		leaveOrganizationMembers(members);
+		//退出公司 add by sfyan20170428
+		leaveOrganizaitonByUserId(userId, enterpriseId, userId);
 //        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), userId, userId, tag);
 //        member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 //        updateEnterpriseContactStatus(userId, member);
@@ -7009,6 +7048,12 @@ System.out.println();
 					 "Unable to find the organization");
 		 }
 
+		 if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(organization.getGroupType())) {
+			 LOGGER.error("organization groupType not enterprise, operatorUid=" + operatorUid + ", enterpriseId=" + enterpriseId + ", tag=" + tag);
+			 throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_NOT_FOUND,
+					 "Unable to find the organization");
+		 }
+
 	        return organization;
 	    }
 
@@ -8405,6 +8450,7 @@ System.out.println();
 
 		Map<Long, Boolean> joinEnterpriseMap = new HashMap<>();
 
+		List<OrganizationMember> leaveMembers = new ArrayList<>();
 
 		dbProvider.execute((TransactionStatus status) -> {
 
@@ -8456,6 +8502,10 @@ System.out.println();
 			List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
 			for (OrganizationMember member: members) {
 				if(!enterpriseIds.contains(member.getOrganizationId())){
+					//记录 退出的公司
+					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())){
+						leaveMembers.add(member);
+					}
 					organizationProvider.deleteOrganizationMemberById(member.getId());
 				}
 			}
@@ -8557,6 +8607,8 @@ System.out.println();
 			return null;
 		});
 
+
+		// 如果有加入的公司 需要发送加入公司的消息等系列操作
 		for (Long enterpriseId: enterpriseIds) {
 
 			organizationMember.setOrganizationId(enterpriseId);
@@ -8579,6 +8631,10 @@ System.out.println();
 				orgLog.setOperatorUid(UserContext.current().getUser().getId());
 				this.organizationProvider.createOrganizationMemberLog(orgLog);
 			}
+		}
+		// 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428
+		if(leaveMembers.size() > 0){
+			leaveOrganizationAfterOperation(user.getId(), leaveMembers);
 		}
 		return dto;
 	}
