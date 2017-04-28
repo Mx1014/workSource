@@ -61,3 +61,6 @@ UPDATE eh_search_types s SET s.order = 3 WHERE s.content_type = 'poll';
 UPDATE eh_search_types s SET s.order = 4 WHERE s.content_type = 'news';
 UPDATE eh_search_types s SET s.order = 5 WHERE s.content_type = 'launchpaditem';
 UPDATE eh_search_types s SET s.order = 6 WHERE s.content_type = 'shop';
+
+-- 增加索引以便门牌那里查询更快，add by tt, 20170428
+ALTER TABLE `eh_organization_address_mappings` ADD INDEX `address_id` (`address_id`);
