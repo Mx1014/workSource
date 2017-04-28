@@ -5768,6 +5768,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				public ImportFileResponse importFile() {
 					ImportFileResponse response = new ImportFileResponse();
 					List<ImportOrganizationContactDataDTO> datas = handleImportOrganizationContactData(resultList);
+					if(datas.size() > 0){
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
 					List<ImportFileResultLog<ImportOrganizationContactDataDTO>> results = importOrganizationPersonnel(datas, userId, cmd);
 					response.setTotalCount((long)datas.size());
 					response.setFailCount((long)results.size());
@@ -9492,14 +9496,14 @@ System.out.println();
 
 	@Override
 	public void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
-		Map<String, String> titleMap = new HashMap<>();
-		titleMap.put("contactName", "姓名");
-		titleMap.put("contactToken", "手机号");
-		titleMap.put("gender", "性别");
-		titleMap.put("orgnaizationPath", "部门");
-		titleMap.put("jobPosition", "岗位");
-		titleMap.put("jobLevel", "职级");
-		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId(), titleMap);
+//		Map<String, String> titleMap = new HashMap<>();
+//		titleMap.put("contactName", "姓名");
+//		titleMap.put("contactToken", "手机号");
+//		titleMap.put("gender", "性别");
+//		titleMap.put("orgnaizationPath", "部门");
+//		titleMap.put("jobPosition", "岗位");
+//		titleMap.put("jobLevel", "职级");
+		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
 }
 
