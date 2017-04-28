@@ -3148,9 +3148,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+
+		//path一定不能为空 add by sfyan 20170428
+		if(StringUtils.isEmpty(path)){
+			return result;
+		}
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
 		if(null != groupTypes && groupTypes.size() > 0)

@@ -4,21 +4,21 @@ SET @eh_core_serverURL = "https://core.zuolin.com"; -- 取具体环境连接core
 SET @eh_biz_serverURL = "biz.zuolin.com"; -- 取具体环境连接core server的链接
 SET @user_id = 274000;  -- 需要取现网eh_users的ID的最大值再加一定余量
 SET @account_name='295585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
-SET @community_id = 240111044332057733; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @community_id = 240111044332059733; -- 需要取现网eh_communities的ID的最大值再加一定余量
 SET @address_id = 239825274387352717; -- 需要取现网eh_addresses的ID的最大值再加一定余量
-SET @organization_id = 1023080;  	-- 
+SET @organization_id = 1023180;  	-- 
 
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
-SET @feedback_forum_id = 190410;   -- 取eh_forums的ID最大值再加一定余量
-SET @community_forum_id = 190400;   -- 取eh_forums的ID最大值再加一定余量
-SET @building_id = 193900;   -- 取eh_buildings的ID最大值再加一定余量
+SET @feedback_forum_id = 190430;   -- 取eh_forums的ID最大值再加一定余量
+SET @community_forum_id = 190490;   -- 取eh_forums的ID最大值再加一定余量
+SET @building_id = 194900;   -- 取eh_buildings的ID最大值再加一定余量
 
 SET @region_id = 18151; 
 SET @shi_id = 18151;  
 SET @qu_id = 18151; 
 
 SET @group_id = 1020469; 
-SET @forum_id = 190410; 
+SET @forum_id = 190510; 
 
 SET @rental_res_id = 10812; 
 
