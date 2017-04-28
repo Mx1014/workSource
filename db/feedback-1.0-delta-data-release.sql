@@ -2,7 +2,7 @@
 -- 举报管理菜单 仅适用于管理公司企业后台。功能放置于内部管理分类下。不分项目   add by yanjun  20170428
 --
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
-VALUES (51000, '举报管理', 50000, NULL, 'react:/feedback-management/feedback-list', 0, 2, '/50000/51000', 'park', 510);
+VALUES (51000, '举报管理', 50000, NULL, 'react:/feedback-management/feedback-list', 0, 2, '/50000/51000', 'park', 591);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
 VALUES (10160, 0, '举报管理', '举报管理 管理员', NULL);
