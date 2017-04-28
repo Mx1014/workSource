@@ -5409,7 +5409,7 @@ public class PunchServiceImpl implements PunchService {
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
 		startCalendar.setTime(new Date(cmd.getQueryTime())); 
-		startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+		startCalendar.set(Calendar.DAY_OF_MONTH, 0);
 		startCalendar.set(Calendar.MINUTE, 0);
 		startCalendar.set(Calendar.SECOND, 0);
 		startCalendar.set(Calendar.MILLISECOND, 0);
