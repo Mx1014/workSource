@@ -1,8 +1,10 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
@@ -311,4 +313,4 @@ public interface OrganizationProvider {
 
 	ImportFileTask findImportFileTaskById(Long id);
 
-}
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);}

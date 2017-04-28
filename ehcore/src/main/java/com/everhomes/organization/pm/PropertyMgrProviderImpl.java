@@ -33,7 +33,9 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -1035,6 +1037,22 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 
 	@Override
+	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds) {
+		Map<Long, CommunityPmBill> map = new HashMap<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select().from(Tables.EH_ORGANIZATION_BILLS)
+			.where(Tables.EH_ORGANIZATION_BILLS.ENTITY_ID.in(addressIds))
+			.orderBy(Tables.EH_ORGANIZATION_BILLS.END_DATE.asc())
+			.fetch().map(r->{
+				CommunityPmBill bill = ConvertHelper.convert(r, CommunityPmBill.class);
+				map.put(bill.getEntityId(), bill);
+				return null;
+			});
+		
+		return map;
+	}
+
+	@Override
 	public CommunityPmBill findPmBillByAddressAndDate(Long addressId,java.sql.Date startDate,java.sql.Date endDate) {
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1235,6 +1253,21 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			return null;
 		});
 		return result[0];
+	}
+
+	@Override
+	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds) {
+		Map<Long, CommunityAddressMapping> map = new HashMap<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.in(addressIds))
+			.fetch().map(r->{
+				CommunityAddressMapping mapping = ConvertHelper.convert(r, CommunityAddressMapping.class);
+				map.put(mapping.getAddressId(), mapping);
+				return null;
+			});
+		
+		return map;
 	}
 
 	@Override
@@ -1535,6 +1568,25 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.fetch().map(mapper);
 		return dtoList;
     }
+
+	@Override
+	public Map<Long, Integer> mapOrganizationOwnerCountByAddressIds(Integer namespaceId, List<Long> addressIds) {
+		Map<Long, Integer> map = new HashMap<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID, DSL.count())
+			.from(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+			.join(Tables.EH_ORGANIZATION_OWNERS)
+			.on(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ORGANIZATION_OWNER_ID.eq(Tables.EH_ORGANIZATION_OWNERS.ID))
+			.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
+            .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
+			.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+			.fetch().map(r->{
+				map.put(r.getValue(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID), r.getValue(DSL.count()));
+				return null;
+			});
+		
+		return map;
+	}
 
 	@Override
 	public OrganizationOwnerType findOrganizationOwnerTypeByDisplayName(String orgOwnerTypeName) {
