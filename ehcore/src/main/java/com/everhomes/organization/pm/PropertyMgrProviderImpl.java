@@ -1580,6 +1580,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
             .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
 			.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.in(addressIds))
+			.groupBy(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID)
 			.fetch().map(r->{
 				map.put(r.getValue(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID), r.getValue(DSL.count()));
 				return null;
