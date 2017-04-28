@@ -466,5 +466,62 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 SET @locale_template_id = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates`(`id`, `namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
 	VALUES((@locale_template_id := @locale_template_id + 1), @namespace_id, 'sms.default.yzx', 1, 'zh_CN', '验证码-创梦云', '43481');
+	
+
+DELETE FROM `eh_launch_pad_items` WHERE `namespace_id`=999977 AND `item_group`='Bizs' AND `item_name`='COMMUNITY_INTRO';
+
+DELETE FROM `eh_launch_pad_items` WHERE `namespace_id`=999977 AND `item_group`='Bizs' AND `item_name`='FORUM';
+
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' WHERE `namespace_id`=999977 AND `item_group`='Bizs' AND `item_name`='DIDA_CAFE';
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' WHERE `namespace_id`=999977 AND `item_group`='Bizs' AND `item_name`='MARKET';
+UPDATE `eh_launch_pad_items` SET `action_type`= 50,`action_data`='' WHERE `namespace_id`=999977 AND `item_group`='Bizs' AND `item_name`='ACTIVITY';
+
+SET @eh_core_serverURL = "https://core.zuolin.com"; 
+SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) 
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999977, 0, 1, 240111044332059734, '/home', 'Bizs', 'COMMUNITY_INTRO', '园区介绍', 'cs://1/image/aW1hZ2UvTVRwaVlXVTNPV05tT0RJME5tWXdaRGRoT1RFM05tUXlZakV6TUdGbVpERXpOUQ', 1, 1, 13, CONCAT('{"url":"', @eh_core_serverURL, '/park-introduction/index.html?hideNavigationBar=1&rtToken=01ZHaSCn7HWyXR0RHls9FIK7sJoakyzaDhhriUmiVaf5ZHTb1cYFe4CesqjQ0widNEdEuE-5uhQHc_4xqx70gQHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fksX6wOR6G_dRAcaFYBOds4#sign_suffix"}')
+, 7, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) 
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999977, 0, 1, 240111044332059734, '/home', 'Bizs', 'COMMUNITY_INTRO', '园区介绍', 'cs://1/image/aW1hZ2UvTVRwaVlXVTNPV05tT0RJME5tWXdaRGRoT1RFM05tUXlZakV6TUdGbVpERXpOUQ', 1, 1, 13, CONCAT('{"url":"', @eh_core_serverURL, '/park-introduction/index.html?hideNavigationBar=1&rtToken=01ZHaSCn7HWyXR0RHls9FIK7sJoakyzaDhhriUmiVaf5ZHTb1cYFe4CesqjQ0widNEdEuE-5uhQHc_4xqx70gQHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fksX6wOR6G_dRAcaFYBOds4#sign_suffix"}')
+, 7, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) 
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999977, 0, 1, 240111044332059733, '/home', 'Bizs', 'COMMUNITY_INTRO', '园区介绍', 'cs://1/image/aW1hZ2UvTVRwaVlXVTNPV05tT0RJME5tWXdaRGRoT1RFM05tUXlZakV6TUdGbVpERXpOUQ', 1, 1, 13, CONCAT('{"url":"', @eh_core_serverURL, '/park-introduction/index.html?hideNavigationBar=1&rtToken=vsea8L9wTRCp40oGwQCy5_WKqyz8_S9M_FKgTY3PtFr5ZHTb1cYFe4CesqjQ0widAidFVcNwV-4Op4KAUIvBDwHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fksX6wOR6G_dRAcaFYBOds4#sign_suffix"}')
+, 7, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0);
+
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) 
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 999977, 0, 1, 240111044332059733, '/home', 'Bizs', 'COMMUNITY_INTRO', '园区介绍', 'cs://1/image/aW1hZ2UvTVRwaVlXVTNPV05tT0RJME5tWXdaRGRoT1RFM05tUXlZakV6TUdGbVpERXpOUQ', 1, 1, 13, CONCAT('{"url":"', @eh_core_serverURL, '/park-introduction/index.html?hideNavigationBar=1&rtToken=vsea8L9wTRCp40oGwQCy5_WKqyz8_S9M_FKgTY3PtFr5ZHTb1cYFe4CesqjQ0widAidFVcNwV-4Op4KAUIvBDwHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fksX6wOR6G_dRAcaFYBOds4#sign_suffix"}')
+, 7, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin', 0, NULL, NULL, 0);
+
+SET @lease_config_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`) 
+VALUES ((@lease_config_id := @lease_config_id + 1), 999977, 1, 1, 1, 1, 1);
+
+
+SET @category_id = (SELECT MAX(id) FROM `eh_categories`);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '亲子与教育', '兴趣/亲子与教育', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '运动与音乐', '兴趣/运动与音乐', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '美食与厨艺', '兴趣/美食与厨艺', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '美容化妆', '兴趣/美容化妆', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '家庭装饰', '兴趣/家庭装饰', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '名牌汇', '兴趣/名牌汇', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '宠物会', '兴趣/宠物会', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '旅游摄影', '兴趣/旅游摄影', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '拼车', '兴趣/拼车', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '老乡群', '兴趣/老乡群', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '同事群', '兴趣/同事群', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '同学群', '兴趣/同学群', 0, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@category_id := @category_id  + 1), 2, 0, '其他', '兴趣/其他', 1, 2, '2015-09-28 06:09:03', NULL, NULL, NULL, 999977);
+
+SET @service_alliance_jump_module_id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@service_alliance_jump_module_id  := @service_alliance_jump_module_id  + 1), 999977, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修', 0);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@service_alliance_jump_module_id  := @service_alliance_jump_module_id  + 1), 999977, '月卡充值', 'zl://parking/query?displayName=停车', 0);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@service_alliance_jump_module_id  := @service_alliance_jump_module_id  + 1), 999977, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@service_alliance_jump_module_id  := @service_alliance_jump_module_id  + 1), 999977, '电商', 'BIZS', 0);
+
+
+
 
 SET FOREIGN_KEY_CHECKS = 1;
