@@ -5769,6 +5769,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					ImportFileResponse response = new ImportFileResponse();
 					List<ImportOrganizationContactDataDTO> datas = handleImportOrganizationContactData(resultList);
 					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
 						response.setTitle(datas.get(0));
 						datas.remove(0);
 					}
@@ -5828,7 +5829,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<ImportOrganizationContactDataDTO> datas = new ArrayList<>();
 		int row = 1;
 		for (Object o : list) {
-			if(row < 3){
+			if(row < 2){
 				row ++;
 				continue;
 			}
