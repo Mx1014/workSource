@@ -96,8 +96,20 @@ public class ImportFileServiceImpl implements ImportFileService{
     }
 
     @Override
-    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId, Map<String, String> titleMap){
+    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId){
+        exportImportFileFailResultXls(httpResponse, taskId, null);
+    }
+
+    @Override
+    public void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId, Map<String, String> overrideTitleMap){
         ImportFileResponse result  = getImportFileResult(taskId);
+        Map<String, String> titleMap = new HashMap<>();
+
+        if(null != overrideTitleMap){
+            titleMap = overrideTitleMap;
+        }else if(null != result.getTitle()){
+            titleMap = (Map<String, String>) result.getTitle();
+        }
         if(ImportFileTaskStatus.FINISH == ImportFileTaskStatus.fromCode(result.getImportStatus())){
             List<ImportFileResultLog> logs =  result.getLogs();
             ByteArrayOutputStream out = null;

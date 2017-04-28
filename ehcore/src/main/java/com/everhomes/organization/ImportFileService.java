@@ -15,6 +15,8 @@ public interface ImportFileService {
 
     ImportFileResponse getImportFileResult(Long taskId);
 
-    void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId, Map<String, String> titleMap);
+    void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId, Map<String, String> overrideTitleMap);
+
+    void exportImportFileFailResultXls(HttpServletResponse httpResponse, Long taskId);
 
 }

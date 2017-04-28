@@ -26,6 +26,8 @@ public class ImportFileResponse<T> {
 	@ItemType(ImportFileResultLog.class)
 	private List<ImportFileResultLog<T>> logs;
 
+	private T title;
+
 	public Long getTotalCount() {
 		return totalCount;
 	}
@@ -56,5 +58,13 @@ public class ImportFileResponse<T> {
 
 	public void setImportStatus(Byte importStatus) {
 		this.importStatus = importStatus;
+	}
+
+	public T getTitle() {
+		return title;
+	}
+
+	public void setTitle(T title) {
+		this.title = title;
 	}
 }
