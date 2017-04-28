@@ -26,8 +26,6 @@ import com.everhomes.util.StringHelper;
  *   <li>verifyType: 核实情况  0-不属实， 1-属实</li>
  *   <li>handleType: 处理方式 0-无， 1-删除</li>
  *   <li>namespaceId: 域空间id</li>
- *   <li>namespaceId: 域空间id</li>
- *   
  * </ul>
  */
 public class FeedbackDTO {
