@@ -2277,6 +2277,9 @@ public class PunchServiceImpl implements PunchService {
 			}
 			
 		}
+ 
+		statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
 		statistic.setOwnerId(orgId);
@@ -4896,6 +4899,7 @@ public class PunchServiceImpl implements PunchService {
 	private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
 			Calendar punCalendar, Calendar startCalendar) { 
 		try {
+			LOGGER.debug("refresh day log and month stat "+ member.toString());
 			//刷新 daylog
 			this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
 			//刷月报 
