@@ -869,13 +869,13 @@ public class PunchServiceImpl implements PunchService {
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
 			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.get().format(punchTimeRule.getStartEarlyTime())));
+					+  punchTimeRule.getStartEarlyTimeLong()));
 	
 			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ timeSF.get().format(punchTimeRule.getStartLateTime())));
+					+  punchTimeRule.getStartLateTimeLong()));
 	
 			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0)
-					.getPunchDate()) + " " + timeSF.get().format(punchTimeRule.getWorkTime())));
+					.getPunchDate()) + " " + punchTimeRule.getWorkTimeLong()));
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
@@ -960,13 +960,17 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		else if(PunchTimesPerDay.FORTH.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
-			 //计算计算日中午十三点
 			Calendar noonAnchor = Calendar.getInstance();
-			noonAnchor.setTime(logDay.getTime());
-			noonAnchor.set(Calendar.HOUR_OF_DAY, 13);
-			noonAnchor.set(Calendar.MINUTE, 0);
-			noonAnchor.set(Calendar.SECOND, 0);
-			noonAnchor.set(Calendar.MILLISECOND, 0);
+			//中间分界点是中午下班和下午上班中间时间点
+			noonAnchor.setTime(getDAOTime(punchLogs.get(0).getPunchTime().getTime()+
+					(punchTimeRule.getNoonLeaveTimeLong()+punchTimeRule.getAfternoonArriveTimeLong())/2));
+			
+//			//计算计算日中午十三点
+//			noonAnchor.setTime(logDay.getTime());
+//			noonAnchor.set(Calendar.HOUR_OF_DAY, 13);
+//			noonAnchor.set(Calendar.MINUTE, 0);
+//			noonAnchor.set(Calendar.SECOND, 0);
+//			noonAnchor.set(Calendar.MILLISECOND, 0);
 			//将十三点之前的作为一个morningList，十三点之后的作为一个afternoonList
 			List<PunchLog> morningLogs = new ArrayList<PunchLog>();
 			List<PunchLog> afternoonLogs = new ArrayList<PunchLog>();
