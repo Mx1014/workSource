@@ -5531,7 +5531,7 @@ public class PunchServiceImpl implements PunchService {
 			
 			for (PunchSchedulingDTO statistic : listPunchScheduling.getSchedulings() )
 				setNewPunchSchedulingsBookRow(sheet, statistic,textlist);
-			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
+//			setHSSFValidation(sheet,textlist.toArray(a), 2, 32, 1, 1);
 			try {
 				
 				FileOutputStream out = new FileOutputStream(filePath);
