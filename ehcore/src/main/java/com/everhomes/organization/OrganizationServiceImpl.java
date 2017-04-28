@@ -4884,7 +4884,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      */
 	private void leaveOrganizaitonByContactToken(Long operatorUid, Long organizationId, String contactToken){
 
-		Organization organization = checkEnterpriseParameter(operatorUid, organizationId, "leaveOrganizaitonByContactToken");
+		Organization organization = checkEnterpriseParameter(organizationId, operatorUid, "leaveOrganizaitonByContactToken");
 
 		List<OrganizationMember> members = new ArrayList<>();
 		List<OrganizationMember> organizationMembers = listOrganizationMemberByOrganizationPathAndContactToken(organization.getPath(), contactToken);
