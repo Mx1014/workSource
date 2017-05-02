@@ -206,7 +206,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 			}
 		}
 		//删除生成的pdf文件，附件
-//		attementList.stream().forEach(file->{file.delete();});
+		attementList.stream().forEach(file->{file.delete();});
 	
 
 	}

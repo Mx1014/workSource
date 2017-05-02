@@ -154,7 +154,7 @@ public class JMailHandler implements MailHandler {
         MimeBodyPart attachmentPart = new MimeBodyPart(); 
         FileDataSource fds = new FileDataSource(filePath);  
         attachmentPart.setDataHandler(new DataHandler(fds));  
-        attachmentPart.setFileName(fds.getName());  
+        attachmentPart.setFileName(MimeUtility.encodeText(fds.getName(),"GBK",null));  
         
         return attachmentPart;  
     }
