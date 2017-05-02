@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -86,6 +88,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private ContentServerService contentServerService;
 			
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -186,7 +191,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
-				category.getId(), locator, Integer.MAX_VALUE);
+				request.getType(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
 				if(target.getStatus().byteValue() == 1) {
@@ -200,7 +205,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		
 		//发邮件给服务联盟机构管理员
 		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
-				category.getId(), locator, Integer.MAX_VALUE);
+				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
@@ -348,6 +353,11 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_TO_PDF;
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), notifyMap, "");
+	}
+	
+	@Override
+	public String parseUri(String uri){
+		return this.contentServerService.parserUri(uri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 	}
 
 }

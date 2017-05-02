@@ -6,10 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -26,8 +24,6 @@ import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
-import com.everhomes.yellowPage.ServiceAllianceRequests;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Chapter;
 import com.itextpdf.text.Chunk;
@@ -55,6 +51,8 @@ public interface CustomRequestHandler {
 	
 	String getFixedContent(Object notifyMap, String defaultValue);
 	
+	String parseUri(String uri);
+	
 	
 	/**
 	 * add by dengs 20170425 自定义字段转html
@@ -75,7 +73,7 @@ public interface CustomRequestHandler {
 						String[] imagesrcs = field.getFieldValue().split(",");
 						for (int i = 0; i < imagesrcs.length; i++) {
 							sb.append("<img height=\"200px\" width=\"200px\" style=\"margin-right:8px;\" src=\"");
-							sb.append(imagesrcs[i]);
+							sb.append(parseUri(imagesrcs[i]));
 							sb.append("\">");
 						}
 					}
@@ -243,6 +241,7 @@ public interface CustomRequestHandler {
 	 * url获取图片
 	 */
 	default byte[] getImageFromNetByUrl(String strUrl) throws IOException{ 
+		strUrl = parseUri(strUrl);
     	CloseableHttpClient httpclient = HttpClients.createDefault();
     	HttpGet url = new HttpGet(strUrl);
 		CloseableHttpResponse response = null;
@@ -258,6 +257,8 @@ public interface CustomRequestHandler {
 		}
         return new byte[]{};  
     }
+	
+	
 	default void sendEmail(String emailAddress, String title, String content,List<String> attachementList) {
 		if(!StringUtils.isNullOrEmpty(emailAddress)) {
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
