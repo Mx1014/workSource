@@ -258,11 +258,13 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 	 */
 	private List<String> getImageFieldValue(String columname,List<PostApprovalFormItem> values){
 		String stringImages = getFieldValue(columname, values);
-		PostApprovalFormImageValue images = JSONObject.parseObject(stringImages, PostApprovalFormImageValue.class);
 		List<String> urlLists = new ArrayList<String>();
-		for (String uri : images.getUris()) {
-			String url = this.contentServerService.parserUri(uri, EntityType.USER.getCode(), user.getId());
-			urlLists.add(url);
+		if(!"".equals(stringImages)){
+			PostApprovalFormImageValue images = JSONObject.parseObject(stringImages, PostApprovalFormImageValue.class);
+			for (String uri : images.getUris()) {
+				String url = this.contentServerService.parserUri(uri, EntityType.USER.getCode(), user.getId());
+				urlLists.add(url);
+			}
 		}
 		return urlLists;
 	}
@@ -274,11 +276,13 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 	 */
 	private List<String[]> getFileFieldValue(String columname,List<PostApprovalFormItem> values){
 		String stringFiles = getFieldValue(columname, values);
-		PostApprovalFormFileValue files = JSONObject.parseObject(stringFiles, PostApprovalFormFileValue.class);
 		List<String[]> urlLists = new ArrayList<String[]>();
-		for (PostApprovalFormFileDTO dto : files.getFiles()) {
-			String url = this.contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), user.getId());
-			urlLists.add(new String[]{url,dto.getFileName()});
+		if(!"".equals(stringFiles)){
+			PostApprovalFormFileValue files = JSONObject.parseObject(stringFiles, PostApprovalFormFileValue.class);
+			for (PostApprovalFormFileDTO dto : files.getFiles()) {
+				String url = this.contentServerService.parserUri(dto.getUri(), EntityType.USER.getCode(), user.getId());
+				urlLists.add(new String[]{url,dto.getFileName()});
+			}
 		}
 		return urlLists;
 	}
@@ -290,8 +294,11 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 	 */
 	private String getTextFieldValue(String columname,List<PostApprovalFormItem> values){
 		String stringTexts = getFieldValue(columname, values);
-		PostApprovalFormTextValue texts = JSONObject.parseObject(stringTexts, PostApprovalFormTextValue.class);
-		return texts.getText();
+		if(!"".equals(stringTexts)){
+			PostApprovalFormTextValue texts = JSONObject.parseObject(stringTexts, PostApprovalFormTextValue.class);
+			return texts.getText();
+		}
+		return "";
 	}
 	
 	/**
