@@ -11,6 +11,11 @@ import com.everhomes.util.StringHelper;
  *<li>activityId:活动ID</li>
  *<li>adultCount:成人数</li>
  *<li>childCount:小孩数</li>
+ *<li>phone:手机</li>
+ *<li>realName:姓名</li>
+ *<li>organizationName:公司</li>
+ *<li>position:职位</li>
+ *<li>email:邮箱</li>
  *</ul>
  */
 public class ActivitySignupCommand {
@@ -21,6 +26,13 @@ public class ActivitySignupCommand {
     private Integer adultCount;
     @NotNull
     private Integer childCount;
+    
+    private String phone;
+    private String realName;
+    private String organizationName;
+    private String position;
+    private String email;
+    
     
     public ActivitySignupCommand() {
     }
@@ -49,7 +61,47 @@ public class ActivitySignupCommand {
         this.childCount = childCount;
     }
     
-    @Override
+    public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getRealName() {
+		return realName;
+	}
+
+	public void setRealName(String realName) {
+		this.realName = realName;
+	}
+
+	public String getOrganizationName() {
+		return organizationName;
+	}
+
+	public void setOrganizationName(String organizationName) {
+		this.organizationName = organizationName;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

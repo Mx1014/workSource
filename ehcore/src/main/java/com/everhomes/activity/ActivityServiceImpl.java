@@ -872,13 +872,25 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     private void addAdditionalInfo(ActivityRoster roster, User user, Activity activity) {
+    	// 活动3.0.0页面可能会传来一些数据，优先选择页面传来的数据。 if条件 add by yanjun 20170502
     	SignupInfoDTO signupInfoDTO = verifyPerson(activity.getNamespaceId(), user);
-    	roster.setPhone(signupInfoDTO.getPhone());
-    	roster.setRealName(signupInfoDTO.getRealName());
+    	if(roster.getPhone() == null){
+    		roster.setPhone(signupInfoDTO.getPhone());
+    	}
+    	if(roster.getRealName() == null){
+    		roster.setRealName(signupInfoDTO.getRealName());
+    	}
     	roster.setGender(signupInfoDTO.getGender());
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
-    	roster.setOrganizationName(signupInfoDTO.getOrganizationName());
-    	roster.setPosition(signupInfoDTO.getPosition());
+    	if(roster.getOrganizationName() == null){
+    		roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+    	}
+    	if(roster.getPosition() == null){
+    		roster.setPosition(signupInfoDTO.getPosition());
+    	}
+    	if(roster.getEmail() == null){
+    		roster.setEmail(signupInfoDTO.getEmail());
+    	}
     	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
     	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
 	}
@@ -1150,9 +1162,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         
         //增加几个统计维度：未付款、已付款、未签到和已签到 add by yanjun 20170502
-        //待确认
         Integer unConfirmUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.UN_CONFIRMED.getCode()));
-        //待支付-已支付
+        //待支付\已支付, 待支付 = 未支付 - 待确认
         Integer unPayUserCount = 0;
         if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
         	unPayUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.UNPAY.getCode()));
@@ -1162,10 +1173,11 @@ public class ActivityServiceImpl implements ActivityService {
             Integer payUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
             dto.setPayUserCount(payUserCount);
         }
-        //待签到-已签到
-        if(activity.getSignupFlag() == 1){
+        //待签到/已签到，待签到 = 未签到 - 待支付 - 待确认
+        if(activity.getSignupFlag() == ActivitySignupFlag.SIGNUP.getCode()){
         	Integer unCheckinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.UN_CHECKIN.getCode()));
-            dto.setUnCheckinUserCount(unCheckinUserCount - unPayUserCount - unConfirmUserCount);
+        	unCheckinUserCount = unCheckinUserCount - unPayUserCount - unConfirmUserCount;
+        	dto.setUnCheckinUserCount(unCheckinUserCount);
             
             Integer checkinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.CHECKIN.getCode()));
             dto.setCheckinUserCount(checkinUserCount);
