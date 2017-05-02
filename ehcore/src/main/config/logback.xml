@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!--
+<!--
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    -->
+-->
+    <property resource="logback.properties" />
+
     <appender name="filelog"
         class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/core-server.log</file>
@@ -98,14 +100,17 @@
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%logger{36}] [%X{seq}] [%X{uid}] [%X{uri}] - %msg%n</pattern>
             </layout>
         </encoder>
-        <topic>logs</topic>
+        <topic>${kafka.topic}</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.RoundRobinKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
 
         <!-- each <producerConfig> translates to regular kafka-client config (format: key=value) -->
         <!-- producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs -->
         <!-- bootstrap.servers is the only mandatory producerConfig -->
+<!--
         <producerConfig>bootstrap.servers=10.1.10.102:9092</producerConfig>
+-->
+        <producerConfig>bootstrap.servers=${kafka.bootstrap.servers}</producerConfig>
         <producerConfig>block.on.buffer.full=false</producerConfig>
 
         <!-- this is the fallback appender if kafka is not available. -->
