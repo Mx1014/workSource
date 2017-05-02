@@ -108,7 +108,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 	long userId;
 	String contents;
 	User user;
-	String userCompany;
+	PostApprovalFormItem userCompanyItem;
 	public ServiceAllianceAsynchronizedAction(final String contents,final String userId) {
 		this.userId = Long.valueOf(userId);
 		this.contents = contents;
@@ -129,10 +129,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 			this.serviceOrg = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			this.category = yellowPageProvider.findCategoryById(serviceOrg.getParentId());
 		}
-		PostApprovalFormItem CompanyVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
-		if(CompanyVal != null){
-			this.userCompany = CompanyVal.getFieldValue();
-		}
+		userCompanyItem = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
 	}
 	
 	protected PostApprovalFormItem getFormFieldDTO(String string, List<PostApprovalFormItem> values) {
@@ -178,7 +175,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", changeRequestToHtml(fieldDTOs,values)); 
 		
-		notifyMap.put("creatorOrganization", userCompany);
+		notifyMap.put("creatorOrganization", getTextFieldValue(userCompanyItem.getFieldName(), values));
 		String title = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, user.getLocale(), "");
 		if(serviceOrg != null) {
@@ -209,7 +206,7 @@ public class ServiceAllianceAsynchronizedAction implements Runnable {
 			}
 		}
 		//删除生成的pdf文件，附件
-		attementList.stream().forEach(file->{file.delete();});
+//		attementList.stream().forEach(file->{file.delete();});
 	
 
 	}
