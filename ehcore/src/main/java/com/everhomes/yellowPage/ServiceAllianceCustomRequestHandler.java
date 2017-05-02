@@ -139,7 +139,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
-		String categoryName = (category.getName() == null) ? "" : category.getName();
+		String categoryName = (category== null || category.getName() == null) ? "" : category.getName();
 
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 
