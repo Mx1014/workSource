@@ -64,3 +64,7 @@ UPDATE eh_search_types s SET s.order = 6 WHERE s.content_type = 'shop';
 
 -- 增加索引以便门牌那里查询更快，add by tt, 20170428
 ALTER TABLE `eh_organization_address_mappings` ADD INDEX `address_id` (`address_id`);
+
+-- 停车充值 add by sw 20170502
+INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('parking', '10004', 'zh_CN', '服务器通讯异常，请稍后再试！');
+INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('parking', '10020', 'zh_CN', '该车牌不支持APP缴费！');
