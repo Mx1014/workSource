@@ -504,6 +504,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			} catch (IOException e) {
 			}
 		}
+		LOGGER.info("Result={}, param={}", json, param);
+
 		return json;
 	}
 
@@ -526,10 +528,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		param.put("licensekey", licensekey);
 		param.put("car_id", plateNumber);
 
-		String json = post(createRequestParam(GET_TEMP_FEE, param));
+		JSONObject newParam = createRequestParam(GET_TEMP_FEE, param);
+		String json = post(newParam);
 
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+			LOGGER.debug("Result={}, param={}", json, newParam);
 
 		String entityJson = parseJson(json);
 
