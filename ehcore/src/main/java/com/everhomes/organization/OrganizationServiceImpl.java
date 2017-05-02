@@ -8459,6 +8459,8 @@ System.out.println();
 
 			List<Long> departmentIds = cmd.getDepartmentIds();
 
+
+
 			List<Long> groupIds = cmd.getGroupIds();
 
 			List<Long> jobPositionIds = cmd.getJobPositionIds();
@@ -8532,6 +8534,7 @@ System.out.println();
 
 			//添加除公司之外的机构成员
 			if(null != departmentIds){
+				removeRepeat(departmentIds);
 				// 重新把成员添加到公司多个部门
 				for (Long departmentId : departmentIds) {
 					//排除掉上面已添加的公司机构成员
@@ -8553,6 +8556,7 @@ System.out.println();
 
 
 			if(null != groupIds){
+				removeRepeat(groupIds);
 				// 重新把成员添加到公司多个群组
 				for (Long groupId : groupIds) {
 					Organization group = checkOrganization(groupId);
@@ -8568,6 +8572,7 @@ System.out.println();
 			}
 
 			if(null != jobPositionIds){
+				removeRepeat(jobPositionIds);
 				// 重新把成员添加到公司多个群组
 				for (Long jobPositionId : jobPositionIds) {
 					Organization group = checkOrganization(jobPositionId);
@@ -8585,6 +8590,7 @@ System.out.println();
 			}
 			//重新把成员添加到公司多个职级
 			if(null != jobLevelIds){
+				removeRepeat(jobLevelIds);
 				for (Long jobLevelId : jobLevelIds) {
 					Organization group = checkOrganization(jobLevelId);
 
@@ -8640,6 +8646,21 @@ System.out.println();
 			leaveOrganizationAfterOperation(user.getId(), leaveMembers);
 		}
 		return dto;
+	}
+
+
+	/**
+	 * 去重
+	 * @param ids
+     */
+	private void removeRepeat(List<Long> ids){
+		List<Long> results = new ArrayList<>();
+		for (Long id: ids) {
+			if (!results.contains(id)) {
+				results.add(id);
+			}
+		}
+		ids = results;
 	}
 
 	@Override
