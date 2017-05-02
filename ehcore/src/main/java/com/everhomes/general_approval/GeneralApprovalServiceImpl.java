@@ -307,7 +307,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-		//modify by dengs. 20170428 如果OwnerType organaization 是  community
+		//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
 		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
 		List<OrganizationCommunity> communityList = null;
 		if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
@@ -320,6 +320,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 							SelectQuery<? extends Record> query) {
 						ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
 						List<OrganizationCommunity> communityList = null;
+						
+						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
 						if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
 							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
 							 Condition conditionOR = null;
