@@ -733,7 +733,7 @@ public class ParkingServiceImpl implements ParkingService {
 			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		Flow flow = flowProvider.findSnapshotFlow(cmd.getFlowId(), 0);
+		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
 		SortField order = null;
 		//排序
 		if (null != flow) {
