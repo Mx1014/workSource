@@ -8660,7 +8660,8 @@ System.out.println();
 				results.add(id);
 			}
 		}
-		ids = results;
+		ids.removeAll(ids);
+		ids.addAll(results);
 	}
 
 	@Override
@@ -9527,6 +9528,8 @@ System.out.println();
 //		titleMap.put("jobLevel", "职级");
 		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
+
+
 }
 
 
