@@ -149,7 +149,10 @@
         eh_service_alliance_golf_requests | eh_service_alliance_gym_requests | eh_service_alliance_server_requests |
         eh_oauth2_client_tokens | eh_oauth2_servers |
         eh_sms_logs |
-        eh_energy_meter_price_config |
+		eh_previews |
+        eh_energy_meter_price_config | eh_asset_vendor |
+		eh_import_file_tasks |
+        eh_pm_task_history_addresses |
 
         </includes>
 

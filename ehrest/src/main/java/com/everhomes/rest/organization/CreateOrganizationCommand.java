@@ -21,6 +21,7 @@ import java.util.List;
  * <li>size：职级大小 </li>
  * <li>addMemberIds：添加的人员</li>
  * <li>delMemberIds：删除的人员</li>
+ * <li>communityId：入住园区</li>
  * </ul>
  */
 public class CreateOrganizationCommand {
@@ -51,7 +52,9 @@ public class CreateOrganizationCommand {
 
 	private Integer size;
 
-	
+	private Long communityId;
+
+
 	public CreateOrganizationCommand() {
     }
 	
@@ -152,6 +155,14 @@ public class CreateOrganizationCommand {
 
 	public void setSize(Integer size) {
 		this.size = size;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	@Override

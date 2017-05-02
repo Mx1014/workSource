@@ -6,10 +6,11 @@ package com.everhomes.rest.ui.user;
  * <li>ALL(0): 所有</li>
  * <li>NEARBY(1): 周边</li>
  * <li>SAME_CITY(2): 同城</li>
+ * <li>COMMUNITY(3): 当前小区</li>
  * </ul>
  */
 public enum ActivityLocationScope {
-    ALL((byte)0), NEARBY((byte)1), SAME_CITY((byte)2);
+    ALL((byte)0), NEARBY((byte)1), SAME_CITY((byte)2), COMMUNITY((byte)3);
     
     private byte code;
     

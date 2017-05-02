@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>id: 帖子或评论ID</li>
  * <li>uuid: 帖子或评论UUID</li>
+ * <li>namespaceId: 域空间ID</li>
  * <li>parentPostId: 帖子或评论的父亲ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorUid: 创建者ID</li>
@@ -20,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  * <li>creatorAdminFlag: 创建者是否为圈的管理员</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>creatorCommunityName: 创建者小区名称</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
@@ -63,6 +65,8 @@ public class PostDTO {
 	private Long id;
 	
 	private String uuid;
+
+    private Integer namespaceId;
 	
 	private Long parentPostId;
 	
@@ -79,6 +83,8 @@ public class PostDTO {
     private Byte creatorAdminFlag;
     
     private String creatorTag;
+    
+    private String creatorCommunityName;
     
     private String targetTag;    
 
@@ -214,6 +220,14 @@ public class PostDTO {
         this.uuid = uuid;
     }
 
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getParentPostId() {
 		return parentPostId;
 	}
@@ -277,8 +291,16 @@ public class PostDTO {
     public void setCreatorTag(String creatorTag) {
         this.creatorTag = creatorTag;
     }
+    
+    public String getCreatorCommunityName() {
+		return creatorCommunityName;
+	}
 
-    public String getTargetTag() {
+	public void setCreatorCommunityName(String creatorCommunityName) {
+		this.creatorCommunityName = creatorCommunityName;
+	}
+
+	public String getTargetTag() {
         return targetTag;
     }
 
@@ -326,7 +348,7 @@ public class PostDTO {
         this.communityId = communityId;
     }
 
-    public Double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 

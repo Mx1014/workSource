@@ -1519,13 +1519,30 @@ public class CommunityServiceImpl implements CommunityService {
 		for (OrganizationMember member : members) {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(member.getOrganizationId());
 			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(null == detail){
-				detail = new OrganizationDetail();
-				if(null != organization){
-					detail.setDisplayName(organization.getName());
-					detail.setOrganizationId(organization.getId());
+
+			// 通过SQL插入到eh_organization_details里面的数据有可能会漏填displayName，此时界面会显示为undefined，
+			// 故需要对该情况补回该名字 by lqs 20170421
+//			if(null == detail){
+//				detail = new OrganizationDetail();
+//				if(null != organization){
+//					detail.setDisplayName(organization.getName());
+//					detail.setOrganizationId(organization.getId());
+//				}
+//			}
+			String displayName = organization.getName();
+			Long organizationId = organization.getId();
+			if(detail != null){
+				if(detail.getDisplayName() != null){
+					displayName = detail.getDisplayName();
 				}
+				if(detail.getOrganizationId() != null) {
+					organizationId = detail.getOrganizationId();
+				}
+			} else {
+				detail = new OrganizationDetail();
 			}
+			detail.setDisplayName(displayName);
+			detail.setOrganizationId(organizationId);
 
 			OrganizationDetailDTO detailDto = ConvertHelper.convert(detail, OrganizationDetailDTO.class);
 
@@ -3039,5 +3056,19 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			return null;
 		});
+	}
+
+	@Override
+	public List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+		List<ProjectDTO> projects = new ArrayList<>();
+		for (Community community: communities) {
+			ProjectDTO project = new ProjectDTO();
+			project.setProjectId(community.getId());
+			project.setProjectType(EntityType.COMMUNITY.getCode());
+			projects.add(project);
+		}
+		return rolePrivilegeService.getTreeProjectCategories(namespaceId, projects);
 	}
 }

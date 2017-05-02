@@ -9,6 +9,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.rest.equipment.*;
 import com.everhomes.scheduler.EquipmentInspectionTaskNotifyScheduleJob;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.CronDateUtils;
@@ -43,15 +44,6 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityInspectionStandardGroupMap;
 import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.quality.QualityInspectionTasks;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.EquipmentTaskProcessType;
-import com.everhomes.rest.equipment.EquipmentTaskResult;
-import com.everhomes.rest.equipment.EquipmentTaskStatus;
-import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
-import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
@@ -1104,6 +1096,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		template.setId(id);
 		template.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		template.setStatus(Status.ACTIVE.getCode());
+		template.setNamespaceId(UserContext.getCurrentNamespaceId());
         
 		LOGGER.info("createEquipmentInspectionTemplates: " + template);
 		
@@ -2036,7 +2029,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Cacheable(value="listEquipmentInspectionTasksUseCache", key="{#cacheKey}", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(Long inspectionCategoryId, List<String> targetType,
-			List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey) {
+			List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag) {
 
 		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
@@ -2063,7 +2056,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 
-		if(executeStandardIds == null && reviewStandardIds == null) {
+//		if(executeStandardIds == null && reviewStandardIds == null) {
+		if(AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 
@@ -2078,7 +2072,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
 		Condition con = null;
-		if(executeStandardIds != null && executeStandardIds.size() > 0) {
+//		if(executeStandardIds != null && executeStandardIds.size() > 0) {
+		if(AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
@@ -2089,7 +2084,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			con = con4;
 		}
 
-		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
+//		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
+		if(AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
 
 			//巡检完成关闭的任务

@@ -1081,7 +1081,7 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
 			if(standard != null) {
 				dto.setStandardDescription(standard.getDescription());
-
+				qualityProvider.populateStandardGroups(standard);
 				if(standard.getExecutiveGroup() != null) {
 					standard.getExecutiveGroup().forEach((executiveGroup) -> {
 						StringBuilder sb = new StringBuilder();
@@ -1112,6 +1112,17 @@ public class QualityServiceImpl implements QualityService {
 					});
 				}
 
+				//兼容之前specification没进到task里面的情况
+
+				if(category == null) {
+					QualityInspectionStandardSpecificationMap map = qualityProvider.getMapByStandardId(standard.getId());
+					if(map != null) {
+						QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(map.getSpecificationId());
+						dto.setCategoryName(getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId()));
+						dto.setCategoryId(specification.getId());
+					}
+
+				}
 			} 
         	
 //        	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
@@ -1895,7 +1906,8 @@ public class QualityServiceImpl implements QualityService {
 	public void createTaskByStandardId(Long id) {
 		LOGGER.info("createTaskByStandardId:" + id);
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
-		if(standard != null &&standard.getStatus() != null && standard.getStatus() == QualityStandardStatus.ACTIVE.getCode()) {
+		if(standard != null &&standard.getStatus() != null
+				&& QualityStandardStatus.ACTIVE.equals(QualityStandardStatus.fromStatus(standard.getStatus()))) {
 			this.qualityProvider.populateStandardGroups(standard);
 			this.qualityProvider.populateStandardSpecifications(standard);
 			

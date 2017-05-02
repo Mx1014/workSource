@@ -3456,6 +3456,8 @@ public class ForumServiceImpl implements ForumService {
                 
                 post.setCommunityId(communityId);
                 
+                populatePostCreatorCommunityName(post);
+                
                 populatePostCreatorInfo(userId, post);
                 
                 populatePostAttachements(userId, post, post.getAttachments());
@@ -3573,6 +3575,17 @@ public class ForumServiceImpl implements ForumService {
 //        }
 //    }
     
+    //填充小区名
+    private void populatePostCreatorCommunityName(Post post){
+    	User user  = userProvider.findUserById(post.getCreatorUid());
+    	if(user != null && user.getCommunityId() != null){
+    		Community community = communityProvider.findCommunityById(user.getCommunityId());
+    		if(community != null){
+    			post.setCreatorCommunityName(community.getName());
+    		}
+    	}
+    }
+
     private void populatePostCreatorInfo(long userId, Post post) {
         // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
         String creatorNickName = post.getCreatorNickName();
@@ -3711,6 +3724,10 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostForumNameInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         Forum forum = forumProvider.findForumById(forumId);
+        // 补充namespaceId，使得在分享的时候可以根据域空间ID来获取版本信息以便确定是否要下载APP  by lqs 20170418
+        if(forum != null) {
+            post.setNamespaceId(forum.getNamespaceId());
+        }
         
         if(forumId == ForumConstants.SYSTEM_FORUM) {
             VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());

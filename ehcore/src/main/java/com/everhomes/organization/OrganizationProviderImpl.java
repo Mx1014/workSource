@@ -1,12 +1,17 @@
 // @formatter:off
 package com.everhomes.organization;
  
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -16,6 +21,7 @@ import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,44 +70,6 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionMapsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
-import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
-import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
@@ -1285,6 +1253,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
+	public Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus) {
+		Map<Long, BigDecimal> map = new HashMap<>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		context.select(Tables.EH_ORGANIZATION_ORDERS.BILL_ID, DSL.sum(Tables.EH_ORGANIZATION_ORDERS.AMOUNT)).from(Tables.EH_ORGANIZATION_ORDERS)
+			.where(Tables.EH_ORGANIZATION_ORDERS.BILL_ID.in(billIds))
+			.and(Tables.EH_ORGANIZATION_ORDERS.STATUS.eq(organizationOrderStatus))
+			.groupBy(Tables.EH_ORGANIZATION_ORDERS.BILL_ID)
+			.fetch().map(r->{
+				map.put(r.getValue(Tables.EH_ORGANIZATION_ORDERS.BILL_ID), r.getValue(DSL.sum(Tables.EH_ORGANIZATION_ORDERS.AMOUNT)));
+				return null;
+			});
+		
+		return map;
+	}
+
+	@Override
 	public OrganizationOrder findOrganizationOrderById(Long orderId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Record record = context.select().from(Tables.EH_ORGANIZATION_ORDERS)
@@ -1600,6 +1584,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return result;
 		return null;
 	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+
+
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		if(null!= locator)
+			locator.setAnchor(null);
+
+		if(result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
+
+
 	@Override
 	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1759,8 +1774,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
-		
-		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
@@ -1797,8 +1813,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
-		
-		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 
 		if(!StringUtils.isEmpty(keyworks)){
 			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyworks + "%"));
@@ -1906,7 +1923,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
         // DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, organizationCommunityRequest.getCommunityId()));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhOrganizationCommunityRequestsDao dao = new EhOrganizationCommunityRequestsDao(context.configuration());
         organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(organizationCommunityRequest);        
@@ -1975,7 +1991,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
 		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId));
 		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
-		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
 		List<OrganizationCommunityRequest> request = new ArrayList<OrganizationCommunityRequest>();
 		query.fetch().map(r ->{
 			request.add(ConvertHelper.convert(r,OrganizationCommunityRequest.class));
@@ -2327,7 +2343,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
             (DSLContext context, Object reducingContext) -> {
            	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
-       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId).and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode())))
        		 .fetch().map(r ->{
        			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
        		});
@@ -2690,6 +2706,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
 				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
+
+	@Override
+	public Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+				.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.fetchOne();
 		if(r != null)
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
@@ -3137,13 +3167,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken){
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+
+		//path一定不能为空 add by sfyan 20170428
+		if(StringUtils.isEmpty(path)){
+			return result;
+		}
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+
+		if(!StringUtils.isEmpty(contactToken)){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
 	public List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		if(null != groupTypes && groupTypes.size() > 0)
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
 		if(!StringUtils.isEmpty(keywords)){
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keywords + "%")));
 		}
@@ -3294,5 +3355,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return orgAddr.get(0);
+	}
+
+	@Override
+	public void createImportFileTask(ImportFileTask importFileTask) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhImportFileTasks.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		importFileTask.setId(id);
+		importFileTask.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.insert(importFileTask);
+	}
+
+	@Override
+	public void updateImportFileTask(ImportFileTask importFileTask) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		importFileTask.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(importFileTask);
+	}
+
+	@Override
+	public ImportFileTask findImportFileTaskById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ImportFileTask.class);
 	}
 }

@@ -15,11 +15,14 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -57,10 +60,6 @@ import com.everhomes.openapi.ContractProvider;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -286,15 +285,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				});   
 				for(EnterpriseOpRequestBuilding opBuilding : opBuildings){
 					Building building = communityProvider.findBuildingById(opBuilding.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}
 				}
 			}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
 				//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
 				Building building = communityProvider.findBuildingById(dto.getSourceId());
 				if(null != building){
 					dto.setSourceName(building.getName());
-					dto.getBuildings().add(proessBuildingDTO(building));
-				}
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}				}
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
 				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
@@ -302,8 +304,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if(null != leasePromotion){
 					dto.setSourceName(leasePromotion.getSubject());
 					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
-				}
+					if (null != building) {
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}				}
 			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
 				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
@@ -311,8 +314,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					dto.setSourceName("创客申请");
 					if(yellowPage.getBuildingId()!=null){
 						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-						dto.getBuildings().add(proessBuildingDTO(building));
-					}
+						if (null != building) {
+							dto.getBuildings().add(proessBuildingDTO(building));
+						}					}
 				}
 			}
 		}
@@ -320,9 +324,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 	private BuildingDTO proessBuildingDTO(Building building){
-		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class); 
+		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class);
 		buildingDTO.setBuildingName(buildingDTO.getName());
-		buildingDTO.setName(org.springframework.util.StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
+		buildingDTO.setName(StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
 		return buildingDTO;
 	}
 
@@ -496,6 +500,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 
+		if(null == flow) {
+			LOGGER.error("Enable flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable flow not found.");
+		}
+
         CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
         flowCaseCmd.setApplyUserId(request.getApplyUserId());
         flowCaseCmd.setReferId(request.getId());
@@ -509,24 +519,23 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         	flowCaseCmd.setTitle("园区入驻");
         }
         	
-        if (flow != null) {
-            flowCaseCmd.setFlowMainId(flow.getFlowMainId());
-            flowCaseCmd.setFlowVersion(flow.getFlowVersion());
-            flowCaseCmd.setProjectType(projectType);
-            flowCaseCmd.setProjectId(projectId);
+		flowCaseCmd.setFlowMainId(flow.getFlowMainId());
+		flowCaseCmd.setFlowVersion(flow.getFlowVersion());
+		flowCaseCmd.setProjectType(projectType);
+		flowCaseCmd.setProjectId(projectId);
 
-            return flowService.createFlowCase(flowCaseCmd);
-        } else {
-        	GeneralModuleInfo gm = new GeneralModuleInfo();
-        	gm.setOrganizationId(request.getEnterpriseId());
-        	gm.setProjectType(projectType);
-        	gm.setProjectId(projectId);
-        	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
-        	gm.setModuleId(ExpansionConst.MODULE_ID);
-			gm.setOwnerId(request.getCommunityId());
-			gm.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
-			return flowService.createDumpFlowCase(gm, flowCaseCmd);
-        }
+		return flowService.createFlowCase(flowCaseCmd);
+//        else {
+//        	GeneralModuleInfo gm = new GeneralModuleInfo();
+//        	gm.setOrganizationId(request.getEnterpriseId());
+//        	gm.setProjectType(projectType);
+//        	gm.setProjectId(projectId);
+//        	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
+//        	gm.setModuleId(ExpansionConst.MODULE_ID);
+//			gm.setOwnerId(request.getCommunityId());
+//			gm.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
+//			return flowService.createDumpFlowCase(gm, flowCaseCmd);
+//        }
     }
 
     private String getBriefContent(EnterpriseOpRequest request) {
@@ -1097,12 +1106,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != leaseIssuer) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(leaseIssuer.getId());
 
-			buildingDTOs.addAll(addresses.stream().map(a -> {
+			addresses.stream().map(a -> {
 				Address address = addressProvider.findAddressById(a.getAddressId());
 				com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
 						address.getCommunityId(), address.getBuildingName());
 				return ConvertHelper.convert(building, BuildingDTO.class);
-			}).collect(Collectors.toList()));
+			}).collect(Collectors.toList()).forEach(b -> {
+				if (null != b) {
+					buildingDTOs.add(b);
+				}
+			});
 		}
 
 		if (null != organizationId)  {
@@ -1111,12 +1124,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
 
-					buildingDTOs.addAll(organizationAddresses.stream().map(a -> {
+					organizationAddresses.stream().map(a -> {
 						Address address = addressProvider.findAddressById(a.getAddressId());
 						com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
 								address.getCommunityId(), address.getBuildingName());
 						return ConvertHelper.convert(building, BuildingDTO.class);
-					}).collect(Collectors.toSet()));
+					}).collect(Collectors.toSet()).forEach(b -> {
+						if (null != b) {
+							buildingDTOs.add(b);
+						}
+					});
 				}
 			}
 		}

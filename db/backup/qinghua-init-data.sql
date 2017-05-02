@@ -2509,3 +2509,22 @@ SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_p
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41500, 1, 10136, NULL, 0, UTC_TIMESTAMP());
 
+-- update 北环门禁 mac by janson
+update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"E8:9F:54:9D:A5:A8\"}' where id=1112290;
+update `eh_launch_pad_items` set `action_data`='{\"hardwareId\":\"E8:9F:54:9D:A5:A8\"}' where id=1112291;
+
+-- added by wh 2017-4-19 18:56:55 
+
+SET @id = (SELECT MAX(id) FROM  eh_web_menu_scopes );
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '40541', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '40542', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '12200', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '40540', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '41300', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '41310', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '41320', '', 'EhNamespaces', '999984', '2');
+INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@id :=@id +1), '50900', '', 'EhNamespaces', '999984', '2');
+
+
+UPDATE  eh_launch_pad_items SET default_order =3 WHERE namespace_id = 999984 AND service_categry_id ='4';
+UPDATE  eh_launch_pad_items SET service_categry_id ='4' ,default_order =2 WHERE namespace_id = 999984 AND  item_label ='资金扶持';  

@@ -120,4 +120,5 @@ public interface QualityProvider {
 	List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
 
 	QualityInspectionTasks findLastestQualityInspectionTask(Long startTime);
+	QualityInspectionStandardSpecificationMap getMapByStandardId(Long standardId);
 }

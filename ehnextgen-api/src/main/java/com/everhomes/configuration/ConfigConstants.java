@@ -103,5 +103,7 @@ public interface ConfigConstants {
     String APP_ROUTE_BROWSER_OUTER_URI = "app.route.browser.outer.uri";
 
     String APP_ROUTE_BROWSER_INNER_URI = "app.route.browser.inner.uri";
+    
+    public static final String BIZ_SEARCH_SHOPS_API = "biz.search.shops.api";
 
 }

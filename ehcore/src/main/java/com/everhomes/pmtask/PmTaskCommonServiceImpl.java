@@ -231,9 +231,6 @@ class PmTaskCommonServiceImpl {
 
         final PmTask task = new PmTask();
 
-        //设置门牌地址,楼栋地址,服务地点
-        setPmTaskAddressInfo(cmd, task);
-
         task.setNamespaceId(namespaceId);
         task.setOwnerId(ownerId);
         task.setOwnerType(ownerType);
@@ -258,6 +255,9 @@ class PmTaskCommonServiceImpl {
         task.setOrganizationId(cmd.getOrganizationId());
         task.setRequestorName(requestorName);
         task.setRequestorPhone(requestorPhone);
+
+        //设置门牌地址,楼栋地址,服务地点
+        setPmTaskAddressInfo(cmd, task);
 
         pmTaskProvider.createTask(task);
         //附件

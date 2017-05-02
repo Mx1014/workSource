@@ -180,7 +180,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+
+		PmTaskDTO dto;
+		//TODO:为科兴与一碑对接
+		if(task.getNamespaceId() == 999983 &&
+				task.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+			dto = handler.getTaskDetail(cmd);
+		}else {
+			dto = pmTaskCommonService.getTaskDetail(cmd, false);
+
+		}
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
@@ -192,15 +204,17 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
-		
-		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
-			e = new FlowCaseEntity();
-			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
-			e.setKey("");
-			e.setValue(s.getContentUrl());
-			entities.add(e);
+
+		if (null != dto.getAttachments()) {
+			for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+				e = new FlowCaseEntity();
+				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+				e.setKey("");
+				e.setValue(s.getContentUrl());
+				entities.add(e);
+			}
 		}
-		
+
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("服务地点");

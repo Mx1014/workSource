@@ -235,14 +235,15 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					}
 				}
 				
-				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
-					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
-					parkingCardRequest.setIssueTime(new Timestamp(now));
-					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-				}else {
+				if(ParkingRequestFlowType.INTELLIGENT.getCode().equals(Integer.valueOf(tag1))) {
 					LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
+					parkingProvider.updateParkingCardRequest(parkingCardRequest);
+				}else {
+					LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
+					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
+					parkingCardRequest.setIssueTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
 			}else if("PROCESSING".equals(nodeType)) {
@@ -263,7 +264,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					}
 				}
 				
-				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
+				if(ParkingRequestFlowType.QUEQUE.getCode().equals(Integer.valueOf(tag1)) ||
+						ParkingRequestFlowType.SEMI_AUTOMATIC.getCode().equals(Integer.valueOf(tag1))) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);

@@ -9,12 +9,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -357,7 +352,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType, Long pageAnchor, Integer pageSize) {
+    		Byte rechargeType, String paidType, String cardNumber, Long pageAnchor, Integer pageSize) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -378,6 +373,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
         if(StringUtils.isNotBlank(paidType))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
+        if(StringUtils.isNotBlank(cardNumber))
+            query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CARD_NUMBER.like("%" + cardNumber + "%"));
         if(null != rechargeType)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
         if(null != startDate)
@@ -465,9 +462,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId, 
-    		Long pageAnchor, Integer pageSize){
+                                                              String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
+                                                              Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId,
+                                                              SortField order, Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
@@ -501,7 +498,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
-        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc());
+        if (null != order) {
+            query.addOrderBy(order);
+        }
         if(null != pageSize)
         	query.addLimit(pageSize);
         

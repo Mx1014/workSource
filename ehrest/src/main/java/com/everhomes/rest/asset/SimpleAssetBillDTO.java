@@ -20,6 +20,7 @@ import java.sql.Timestamp;
  *     <li>apartmentName: 门牌名</li>
  *     <li>contactNo: 催缴手机号</li>
  *     <li>periodAccountAmount: 总计应收</li>
+ *     <li>unpaidPeriodAccountAmount: 待缴费用</li>
  *     <li>status: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
  * </ul>
  */
@@ -48,6 +49,8 @@ public class SimpleAssetBillDTO {
     private String contactNo;
 
     private BigDecimal periodAccountAmount;
+
+    private BigDecimal unpaidPeriodAccountAmount;
 
     private Byte status;
 
@@ -145,6 +148,14 @@ public class SimpleAssetBillDTO {
 
     public void setPeriodAccountAmount(BigDecimal periodAccountAmount) {
         this.periodAccountAmount = periodAccountAmount;
+    }
+
+    public BigDecimal getUnpaidPeriodAccountAmount() {
+        return unpaidPeriodAccountAmount;
+    }
+
+    public void setUnpaidPeriodAccountAmount(BigDecimal unpaidPeriodAccountAmount) {
+        this.unpaidPeriodAccountAmount = unpaidPeriodAccountAmount;
     }
 
     public Byte getStatus() {

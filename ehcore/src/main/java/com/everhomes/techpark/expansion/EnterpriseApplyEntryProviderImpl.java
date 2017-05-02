@@ -6,10 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
-import com.everhomes.rest.techpark.expansion.LeaseIssuerType;
+import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
@@ -28,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +97,8 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
 
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
+		cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.ne(LeasePromotionStatus.INACTIVE.getCode()));
+
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
@@ -115,10 +115,10 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(leasePromotion.getIssuerType()));
 		}
 		if (null != leasePromotion.getStartRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.ge(leasePromotion.getStartRentArea()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.cast(BigDecimal.class).ge(leasePromotion.getStartRentArea()));
 		}
 		if (null != leasePromotion.getEndRentArea()) {
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.le(leasePromotion.getEndRentArea()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.cast(BigDecimal.class).le(leasePromotion.getEndRentArea()));
 		}
 		if (null != leasePromotion.getStartRentAmount()) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.ge(leasePromotion.getStartRentAmount()));

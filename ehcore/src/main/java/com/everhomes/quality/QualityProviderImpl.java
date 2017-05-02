@@ -92,6 +92,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.util.CronDateUtils;
 import org.jooq.Condition;
@@ -105,6 +107,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -215,14 +218,24 @@ public class QualityProviderImpl implements QualityProvider {
 	
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
+	@Value("${equipment.ip}")
+	private String equipmentIp;
 	
 	@PostConstruct
 	public void init() {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
-			String qualityInspectionTriggerName = "QualityInspection " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
-					"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
-        });
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+		if(taskServer.equals(equipmentIp)) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
+				String qualityInspectionTriggerName = "QualityInspection " + System.currentTimeMillis();
+				scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
+						"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
+			});
+		}
 
 		//五分钟后启动通知
 		Long notifyTime = System.currentTimeMillis() + 300000;
@@ -1058,6 +1071,15 @@ public class QualityProviderImpl implements QualityProvider {
 				});
 
 		return result[0];
+	}
+
+	@Override
+	public QualityInspectionStandardSpecificationMap getMapByStandardId(Long standardId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectFrom(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP)
+				.where(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()))
+				.and(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.eq(standardId))
+				.fetchOneInto(QualityInspectionStandardSpecificationMap.class);
 	}
 
 
