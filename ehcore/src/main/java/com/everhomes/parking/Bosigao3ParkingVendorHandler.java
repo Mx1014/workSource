@@ -132,7 +132,11 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
         if(entity.isSuccess()){
 			List<BosigaoCardInfo> cards = entity.getData();
 			if (null != cards && cards.size() != 0) {
-				card = cards.get(0);
+				BosigaoCardInfo tempCard = cards.get(0);
+				//卡状态 1：正常 2：挂失 3：停用 4：注销
+				if (1 == tempCard.getState()) {
+					card = tempCard;
+				}
 			}
         }
     	return card;
@@ -166,7 +170,14 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
-		return entity.isSuccess();
+		if(entity.isSuccess()) {
+			JSONObject obj = (JSONObject) entity.getData();
+			Integer result = obj.getInteger("Result");
+			if (0 == result) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private BosigaoTempFee getTempFee(String plateNumber) {
@@ -200,10 +211,8 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
-		//获取parkingID，没有其他作用，（此时在调一次，可能会产生新的临时费用，不能用这一次查询出来的费用）
-		BosigaoTempFee tempFee = getTempFee(order.getPlateNumber());
-
-		if (verifyParkingCar(order.getPlateNumber(), tempFee.getParkingID())) {
+		String parkingId = configProvider.getValue("parking.techpark.parkingId", "");
+		if (verifyParkingCar(order.getPlateNumber(), parkingId)) {
 			String url = configProvider.getValue("parking.techpark.url", "");
 			String cost = String.valueOf((order.getPrice().intValue() * 100));
 
@@ -211,7 +220,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			jsonParam.put("OrderID", order.getCardNumber());
 			jsonParam.put("PayWay", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "3" : "2");
 			jsonParam.put("Amount", cost);
-			jsonParam.put("ParkingID", tempFee.getParkingID());
+			jsonParam.put("ParkingID", parkingId);
 			jsonParam.put("OnlineOrderID", order.getId());
 			jsonParam.put("PayDate", timestampToStr2(System.currentTimeMillis()));
 
@@ -221,13 +230,19 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 			BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
-			return entity.isSuccess();
+			if(entity.isSuccess()) {
+				JSONObject obj = (JSONObject) entity.getData();
+				Integer result = obj.getInteger("Result");
+				if (0 == result) {
+					return true;
+				}
+			}
 		}
 
 		return false;
 	}
 
-    public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
 
 		String url = configProvider.getValue("parking.techpark.url", "");
@@ -402,20 +417,44 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			return dto;
 		}
 
-		Pkorder pkorder = tempFee.getPkorder();
+		if (tempFee.getResult() == 0) {
+			Pkorder pkorder = tempFee.getPkorder();
 
-		if(null == pkorder) {
-			return dto;
+			if(null == pkorder) {
+				return dto;
+			}
+			dto.setPlateNumber(plateNumber);
+			long entranceDate = strToLong2(tempFee.getEntranceDate());
+			dto.setEntryTime(entranceDate);
+	//		dto.setPayTime(tempFee.getPayTime());
+			long payTime = strToLong2(tempFee.getPayDate());
+
+			dto.setPayTime(payTime);
+			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
+			dto.setDelayTime(tempFee.getOutTime());
+			dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100)));
+			dto.setOrderToken(pkorder.getOrderID());
+		}else if (tempFee.getResult() == 2 || tempFee.getResult() == 10) {
+			dto.setPlateNumber(plateNumber);
+			long entranceDate = strToLong2(tempFee.getEntranceDate());
+			dto.setEntryTime(entranceDate);
+			//		dto.setPayTime(tempFee.getPayTime());
+			long payTime = strToLong2(tempFee.getPayDate());
+
+			dto.setPayTime(payTime);
+			dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
+			dto.setDelayTime(tempFee.getOutTime());
+			dto.setPrice(new BigDecimal(0));
+		}else if (tempFee.getResult() == 3) {
+			LOGGER.error("Not support app recharge, tempFee={}", tempFee);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.NOT_SUPPORT_APP_RECHARGE,
+					"Not support app recharge.");
+		}else if (tempFee.getResult() == 4 || tempFee.getResult() == 5) {
+			LOGGER.error("Not support app recharge, tempFee={}", tempFee);
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
+					"Not support app recharge.");
 		}
 
-		dto.setPlateNumber(plateNumber);
-		long entranceDate = strToLong2(tempFee.getEntranceDate());
-		dto.setEntryTime(entranceDate);
-		dto.setPayTime(tempFee.getPayTime());
-		dto.setParkingTime((int)((tempFee.getPayTime() - entranceDate) / (1000 * 60)));
-		dto.setDelayTime(tempFee.getOutTime());
-		dto.setPrice(pkorder.getAmount().divide(new BigDecimal(100)));
-		dto.setOrderToken(pkorder.getOrderID());
 		return dto;
 	}
 
