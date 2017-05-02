@@ -388,114 +388,94 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Override
 	public void exportRequestInfo(SearchRequestInfoCommand cmd, HttpServletResponse httpResponse) {
+		//申请记录
 		SearchRequestInfoResponse response = searchRequestInfo(cmd);
-		List<RequestInfoDTO> list = response.getDtos();
-		GetRequestInfoCommand command = new GetRequestInfoCommand();
-		//获取模板名称到map中
+		if(response.getDtos()!=null && response.getDtos().size()>0){
+			//获取模板名称到map中
+			Map<String, String> templateMap = getTemplateMap();
+			
+			//key = templateName,Value = [requests List,templateInfos List]
+			//map存 （模板名称，[模板下申请集合，模板下附加属性集合]）
+			//如('审批',[['序号':1,'用户姓名':'邓爽'],['附加属性1':'值1','附加属性2':'值2']])
+			Map<String,List[]> requestsInfoMap = new HashMap<String, List[]>();
+			GetRequestInfoCommand command = new GetRequestInfoCommand();
+			for (RequestInfoDTO requestInfo : response.getDtos()) {
+				command.setId(requestInfo.getId());
+				command.setTemplateType(requestInfo.getTemplateType());
+				Object extrasInfo = null;
+				//审批另外调用接口，返回的object，通过类型判断在生成sheet时做对应处理，参考createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos)
+				if("flowCase".equals(command.getTemplateType())){
+					extrasInfo=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
+							FlowUserType.PROCESSOR, true);
+				}else{
+					extrasInfo = userActivityService.getCustomRequestInfo(command);
+				}
+				putValuesToMap(requestsInfoMap,requestInfo,extrasInfo);
+			}
+			
+			//生成excel并，输出到httpResponse
+			try(
+				XSSFWorkbook wb = new XSSFWorkbook();
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+			){
+				for (Map.Entry<String, List[]> entry : requestsInfoMap.entrySet()) {
+					createXSSFWorkbook(wb, templateMap.get(entry.getKey()), entry.getValue());
+				}
+				wb.write(out);
+			    DownloadUtil.download(out, httpResponse);
+			} catch (Exception e) {
+				LOGGER.error("export error, e = {}", e);
+			} 
+		}
+	}
+	
+	/**
+	 * by dengs,将标准属性值 附加属性值存放到map中
+	 */
+	private void putValuesToMap(Map<String, List[]> requestsInfoMap, RequestInfoDTO requestInfo, Object extrasInfo) {
+		// TODO Auto-generated method stub
+		List[] lists = requestsInfoMap.get(requestInfo.getTemplateType());
+		if(lists==null){
+			lists = new List[2];
+			//lists[0]存放标准属性
+			lists[0] = new ArrayList<RequestInfoDTO>();
+			//lists[1]存放附加属性
+			lists[1] = new ArrayList<GetRequestInfoResponse>();
+			requestsInfoMap.put(requestInfo.getTemplateType(), lists);
+		}
+		lists[0].add(requestInfo);
+		lists[1].add(extrasInfo);
+	}
+
+	/**
+	 * by dengs 20170427 获取申请模板
+	 */
+	private Map<String, String> getTemplateMap() {
 		List<RequestTemplateDTO> templateList =  userActivityService.getCustomRequestTemplateByNamespace();
 		Map<String, String> templateMap = new HashMap<String,String>();
 		for (RequestTemplateDTO requestTemplate : templateList) {
 			templateMap.put(requestTemplate.getTemplateType(), requestTemplate.getName());
 		}
-		
-		//key = templateName,Value = [requests List,templateInfos List]
-		//map存 （模板名称，[模板下申请集合，模板下附加属性集合]）
-		Map<String,List[]> requestsInfoMap = new HashMap<String, List[]>();
-		for (RequestInfoDTO requestInfo : list) {
-			command.setId(requestInfo.getId());
-			command.setTemplateType(requestInfo.getTemplateType());
-			Object getRequestInfoResponse = null;
-			if("flowCase".equals(command.getTemplateType())){
-				getRequestInfoResponse=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
-						FlowUserType.PROCESSOR, true);
-				
-			}else{
-				getRequestInfoResponse = userActivityService.getCustomRequestInfo(command);
-			}
-			List[] lists = requestsInfoMap.get(requestInfo.getTemplateType());
-			if(lists==null){
-				lists = new List[2];
-				lists[0] = new ArrayList<RequestInfoDTO>();
-				lists[1] = new ArrayList<GetRequestInfoResponse>();
-				requestsInfoMap.put(requestInfo.getTemplateType(), lists);
-			}
-			lists[0].add(requestInfo);
-			lists[1].add(getRequestInfoResponse);
-		}
-		
-		XSSFWorkbook wb = new XSSFWorkbook();
-		for (Map.Entry<String, List[]> entry : requestsInfoMap.entrySet()) {
-			createXSSFWorkbook(wb, templateMap.get(entry.getKey()), entry.getValue());
-		}
-		ByteArrayOutputStream out = null;
-		try {
-			out = new ByteArrayOutputStream();
-			wb.write(out);
-		    DownloadUtil.download(out, httpResponse);
-		} catch (Exception e) {
-			LOGGER.error("export error, e = {}", e);
-		} finally{
-			try {
-				wb.close();
-				out.close();
-			} catch (IOException e) {
-				LOGGER.error("close error", e);
-			}
-		}
+		return templateMap;
 	}
-	
+
 	/**
 	 * 
 	 * by dengs 20170427
 	 */
     private void createXSSFWorkbook(XSSFWorkbook wb, String templateName,List[] requestInfos){
-		templateName = templateName==null?
-				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-						ServiceAllianceRequestNotificationTemplateCode.APPLY_STRING, 
-						UserContext.current().getUser().getLocale(),""):templateName;
-		XSSFSheet sheet = wb.createSheet(templateName);
-		XSSFCellStyle style = wb.createCellStyle();// 样式对象
-        Font font = wb.createFont();
-        font.setFontHeightInPoints((short)20);
-        font.setFontName("Courier New");
-
-        style.setFont(font);
-
-        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
-        titleStyle.setFont(font);
-        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+    	//创建style
+    	XSSFCellStyle style = createStyle(wb);
+    	//创建sheet
+        XSSFSheet sheet = createSheet(wb,templateName,style);
+        
 
         int rowNum = 0;
 
-        XSSFRow row1 = sheet.createRow(rowNum ++);
-        row1.setRowStyle(style);
-        
-        String order_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-				ServiceAllianceRequestNotificationTemplateCode.ORDER_STRING, 
-				UserContext.current().getUser().getLocale(),"");
-        String username_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-        		ServiceAllianceRequestNotificationTemplateCode.USERNAME_STRING, 
-        		UserContext.current().getUser().getLocale(),"");
-        String phone_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-        		ServiceAllianceRequestNotificationTemplateCode.PHONE_STRING, 
-        		UserContext.current().getUser().getLocale(),"");
-        String company_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-        		ServiceAllianceRequestNotificationTemplateCode.COMPANY_STRING, 
-        		UserContext.current().getUser().getLocale(),"");
-        String service_alliance_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-        		ServiceAllianceRequestNotificationTemplateCode.SERVICE_ALLIANCE_STRING, 
-        		UserContext.current().getUser().getLocale(),"");
-        String submit_time_string = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
-        		ServiceAllianceRequestNotificationTemplateCode.SUBMIT_TIME_STRING, 
-        		UserContext.current().getUser().getLocale(),"");
-
-        row1.createCell(0).setCellValue(order_string);
-        row1.createCell(1).setCellValue(username_string);
-        row1.createCell(2).setCellValue(phone_string);
-        row1.createCell(3).setCellValue(company_string);
-        row1.createCell(4).setCellValue(service_alliance_string);
-        row1.createCell(5).setCellValue(submit_time_string);
-        
+        //创建第一行
+        XSSFRow row1 = createRow1(sheet,style,rowNum++);
+      
+        //填充数据到sheet
         if(requestInfos[1]!=null && requestInfos[1].size()>0){
         	//申请表单
         	if(requestInfos[1].get(0) instanceof GetRequestInfoResponse){
@@ -552,7 +532,63 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         }
     }
 
+	/**
+     * by dengs,创建第一行，20170502
+     */
+    private XSSFRow createRow1(XSSFSheet sheet,XSSFCellStyle style,int rowNum) {
+		// TODO Auto-generated method stub
+    	  XSSFRow row1 = sheet.createRow(rowNum);
+          row1.setRowStyle(style);
+          
+          String excelHeads = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+  				ServiceAllianceRequestNotificationTemplateCode.EXCEL_HEAD_STRING, 
+  				UserContext.current().getUser().getLocale(),"row1");
+          String[] excelHeadArray = excelHeads.split(",");
+          String order_string = excelHeadArray[0];
+          String username_string =excelHeadArray.length>1?excelHeadArray[1]:"row2";
+          String phone_string = excelHeadArray.length>2?excelHeadArray[2]:"row3";
+          String company_string = excelHeadArray.length>3?excelHeadArray[3]:"row4";
+          String service_alliance_string = excelHeadArray.length>4?excelHeadArray[4]:"row5";
+          String submit_time_string = excelHeadArray.length>5?excelHeadArray[5]:"row6";
+
+          row1.createCell(0).setCellValue(order_string);
+          row1.createCell(1).setCellValue(username_string);
+          row1.createCell(2).setCellValue(phone_string);
+          row1.createCell(3).setCellValue(company_string);
+          row1.createCell(4).setCellValue(service_alliance_string);
+          row1.createCell(5).setCellValue(submit_time_string);
+          return row1;
+	}
+
+	/**
+     * by dengs,创建cell style,20170502
+     */
+    private XSSFCellStyle createStyle(XSSFWorkbook wb){
+		// TODO Auto-generated method stub
+		XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        return style;
+	}
+    
     /**
+     * by dengs,创建sheet，20170502
+     */
+    private XSSFSheet createSheet(XSSFWorkbook wb, String templateName,XSSFCellStyle style) {
+		// TODO Auto-generated method stub
+    	templateName = templateName==null?
+				localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+						ServiceAllianceRequestNotificationTemplateCode.APPLY_STRING, 
+						UserContext.current().getUser().getLocale(),""):templateName;
+		XSSFSheet sheet = wb.createSheet(templateName);
+        return sheet;
+	}
+
+	/**
      * 数据的名称找不到对应的列，就需要创建一个，调用此方法 
      */
     private int createColumnHeads(Map<String, Integer> columnname, int nextcol, FlowCaseEntity flowCaseEntity,XSSFRow row1) {
