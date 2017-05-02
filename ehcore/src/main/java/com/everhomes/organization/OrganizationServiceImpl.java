@@ -8409,7 +8409,6 @@ System.out.println();
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
 		}
 
-
 		Organization org = checkOrganization(cmd.getOrganizationId());
 
 		if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
@@ -8418,6 +8417,8 @@ System.out.println();
 		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -8429,10 +8430,16 @@ System.out.println();
 		organizationMember.setGroupType(org.getGroupType());
 		organizationMember.setOperatorUid(user.getId());
 		organizationMember.setGroupId(0l);
-		if(StringUtils.isEmpty(organizationMember.getTargetId())){
+
+		//手机号已注册，就把user id 跟通讯录关联起来
+		if(null != userIdentifier){
+			organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+			organizationMember.setTargetId(userIdentifier.getOwnerUid());
+		}else{
 			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
-			organizationMember.setTargetId(0l);
+			organizationMember.setTargetId(0L);
 		}
+
 
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
