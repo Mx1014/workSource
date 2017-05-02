@@ -210,7 +210,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	
 	/**
-	 * 
+	 *
 	 * <b>URL: /rental/admin/queryDefaultRule<b>
 	 * <p>
 	 * 查询默认规则
