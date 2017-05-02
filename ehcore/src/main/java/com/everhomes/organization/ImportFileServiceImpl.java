@@ -159,8 +159,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                         }
                     }else{
                         for (Map.Entry<String, String> entry : titleMap.entrySet()) {
-
-                            titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getValue()));
+                            titleRow.createCell(cellNum ++).setCellValue(entry.getValue());
                         }
                     }
                     titleRow.createCell(cellNum ++).setCellValue("错误原因");
