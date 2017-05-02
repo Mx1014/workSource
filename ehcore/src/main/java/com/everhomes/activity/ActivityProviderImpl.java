@@ -359,6 +359,23 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
     
     @Override
+    public Integer countActivityRosterByCondition(Long activityId, Condition flagCondition) {
+    	final Integer[]  count = new Integer[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
+                (context, obj) -> {
+                	Condition condition = Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId);
+                	condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.ne(ConfirmStatus.REJECT.getCode()));
+                	if(flagCondition != null){
+                		condition = condition.and(flagCondition);
+                	}
+                	Integer c = context.selectCount().from(Tables.EH_ACTIVITY_ROSTER).where(condition).fetchOneInto(Integer.class);
+                	count[0] = c;
+                    return true;
+                });
+        return count[0];
+    }
+    
+    @Override
     public List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition) {
     	List<Activity> activities = new ArrayList<Activity>();
     	List<Long> ids = new ArrayList<Long>();

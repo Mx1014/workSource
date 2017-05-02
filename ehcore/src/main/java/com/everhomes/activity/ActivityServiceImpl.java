@@ -1148,6 +1148,29 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setActivityId(activity.getId());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        
+        //增加几个统计维度：未付款、已付款、未签到和已签到 add by yanjun 20170502
+        //待确认
+        Integer unConfirmUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.UN_CONFIRMED.getCode()));
+        //待支付-已支付
+        Integer unPayUserCount = 0;
+        if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+        	unPayUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.UNPAY.getCode()));
+            unPayUserCount = unPayUserCount - unConfirmUserCount;
+            dto.setUnPayUserCount(unPayUserCount);
+            
+            Integer payUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+            dto.setPayUserCount(payUserCount);
+        }
+        //待签到-已签到
+        if(activity.getSignupFlag() == 1){
+        	Integer unCheckinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.UN_CHECKIN.getCode()));
+            dto.setUnCheckinUserCount(unCheckinUserCount - unPayUserCount - unConfirmUserCount);
+            
+            Integer checkinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.CHECKIN.getCode()));
+            dto.setCheckinUserCount(checkinUserCount);
+        }
+        
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setActivityId(activity.getId());

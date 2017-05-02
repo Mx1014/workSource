@@ -21,6 +21,9 @@ import com.everhomes.util.StringHelper;
  *<li>enrollUserCount:报名人数</li>
  *<li>enrollFamilyCount:报名家庭数</li>
  *<li>checkinUserCount:签到人数</li>
+ *<li>unCheckinUserCount:未签到人数</li>
+ *<li>payUserCount:已支付人数</li>
+ *<li>unPayUserCount:未支付人数</li>
  *<li>checkinFamilyCount:签到家庭数</li>
  *<li>confirmUserCount:确认人数</li>
  *<li>confirmFamilyCount：确认家庭数</li>
@@ -38,6 +41,8 @@ import com.everhomes.util.StringHelper;
  * <li>achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接 </li>
  * <li>achievementRichtextUrl: 活动成果富文本页面url</li>
  * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
+ * <li>chargeFlag: 是否收费：0-不收费， 1-收费</li>
+ * <li>chargePrice: 收费价格</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -57,6 +62,9 @@ public class ActivityDTO {
     private Integer enrollUserCount;
     private Integer enrollFamilyCount;
     private Integer checkinUserCount;
+    private Integer unCheckinUserCount;
+    private Integer payUserCount;
+    private Integer unPayUserCount;
     private Integer checkinFamilyCount;
     private Integer confirmUserCount;
     private Integer confirmFamilyCount;
@@ -97,7 +105,11 @@ public class ActivityDTO {
     private boolean activityAttachmentFlag;
 
     private String achievementRichtextUrl;
+    
+    private Byte chargeFlag;
 
+    private Integer chargePrice;
+    
     public String getSignupEndTime() {
 		return signupEndTime;
 	}
@@ -286,7 +298,31 @@ public class ActivityDTO {
         this.checkinUserCount = checkinUserCount;
     }
 
-    public Integer getCheckinFamilyCount() {
+    public Integer getUnCheckinUserCount() {
+		return unCheckinUserCount;
+	}
+
+	public void setUnCheckinUserCount(Integer unCheckinUserCount) {
+		this.unCheckinUserCount = unCheckinUserCount;
+	}
+
+	public Integer getPayUserCount() {
+		return payUserCount;
+	}
+
+	public void setPayUserCount(Integer payUserCount) {
+		this.payUserCount = payUserCount;
+	}
+
+	public Integer getUnPayUserCount() {
+		return unPayUserCount;
+	}
+
+	public void setUnPayUserCount(Integer unPayUserCount) {
+		this.unPayUserCount = unPayUserCount;
+	}
+
+	public Integer getCheckinFamilyCount() {
         return checkinFamilyCount;
     }
 
@@ -480,7 +516,23 @@ public class ActivityDTO {
         this.isVideoSupport = isVideoSupport;
     }
 
-    public String toString() {
+    public Byte getChargeFlag() {
+		return chargeFlag;
+	}
+
+	public void setChargeFlag(Byte chargeFlag) {
+		this.chargeFlag = chargeFlag;
+	}
+
+	public Integer getChargePrice() {
+		return chargePrice;
+	}
+
+	public void setChargePrice(Integer chargePrice) {
+		this.chargePrice = chargePrice;
+	}
+
+	public String toString() {
         return StringHelper.toJsonString(this);
     }
 }

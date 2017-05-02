@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  *<li>lotteryWinnerFlag:中奖标识</li>
  *<li>lotteryWonTime:中奖时间</li>
  *<li>phone:用户电话号码</li>
+ *<li>payFlag:是否已支付</li>
  *</ul>
  */
 public class ActivityMemberDTO {
@@ -42,6 +43,7 @@ public class ActivityMemberDTO {
     private Integer creatorFlag;
     private Integer lotteryWinnerFlag;
     private String lotteryWonTime;
+    private Byte payFlag;
     
     @ItemType(String.class)
     private List<String> phone;
@@ -178,7 +180,15 @@ public class ActivityMemberDTO {
         this.lotteryWonTime = lotteryWonTime;
     }
     
-    @Override
+    public Byte getPayFlag() {
+		return payFlag;
+	}
+
+	public void setPayFlag(Byte payFlag) {
+		this.payFlag = payFlag;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

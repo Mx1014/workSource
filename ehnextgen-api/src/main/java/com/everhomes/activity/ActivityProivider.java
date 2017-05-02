@@ -32,6 +32,14 @@ public interface ActivityProivider {
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId);
 
     List<ActivityRoster> listRosters(Long activityId);
+    
+    /**
+     * 按条件统计报名人数 add by yanjun 20170502
+     * @param activityId
+     * @param flagCondition
+     * @return
+     */
+    Integer countActivityRosterByCondition(Long activityId, Condition flagCondition);
 
     Activity findSnapshotByPostId(Long postId);
 
