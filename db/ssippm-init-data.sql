@@ -522,6 +522,6 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES ((@service_alliance_jump_module_id  := @service_alliance_jump_module_id  + 1), 999977, '电商', 'BIZS', 0);
 
 
-
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999977', 'flow', '', '0', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -2053,7 +2053,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 try {
                 	double ra = Double.valueOf(engine.eval(amountFormula).toString());
                     realAmount = BigDecimal.valueOf(ra);
-
+                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
 //                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
                 } catch (ScriptException e) {
                     String paramsStr = "{AMOUNT:" + amount +

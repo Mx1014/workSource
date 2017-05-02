@@ -8409,7 +8409,6 @@ System.out.println();
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL, "contactToken is null");
 		}
 
-
 		Organization org = checkOrganization(cmd.getOrganizationId());
 
 		if(OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(org.getGroupType())){
@@ -8418,6 +8417,8 @@ System.out.println();
 		}
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
 
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -8429,10 +8430,16 @@ System.out.println();
 		organizationMember.setGroupType(org.getGroupType());
 		organizationMember.setOperatorUid(user.getId());
 		organizationMember.setGroupId(0l);
-		if(StringUtils.isEmpty(organizationMember.getTargetId())){
+
+		//手机号已注册，就把user id 跟通讯录关联起来
+		if(null != userIdentifier){
+			organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+			organizationMember.setTargetId(userIdentifier.getOwnerUid());
+		}else{
 			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
-			organizationMember.setTargetId(0l);
+			organizationMember.setTargetId(0L);
 		}
+
 
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -8458,6 +8465,8 @@ System.out.println();
 		dbProvider.execute((TransactionStatus status) -> {
 
 			List<Long> departmentIds = cmd.getDepartmentIds();
+
+
 
 			List<Long> groupIds = cmd.getGroupIds();
 
@@ -8532,6 +8541,7 @@ System.out.println();
 
 			//添加除公司之外的机构成员
 			if(null != departmentIds){
+				removeRepeat(departmentIds);
 				// 重新把成员添加到公司多个部门
 				for (Long departmentId : departmentIds) {
 					//排除掉上面已添加的公司机构成员
@@ -8553,6 +8563,7 @@ System.out.println();
 
 
 			if(null != groupIds){
+				removeRepeat(groupIds);
 				// 重新把成员添加到公司多个群组
 				for (Long groupId : groupIds) {
 					Organization group = checkOrganization(groupId);
@@ -8568,6 +8579,7 @@ System.out.println();
 			}
 
 			if(null != jobPositionIds){
+				removeRepeat(jobPositionIds);
 				// 重新把成员添加到公司多个群组
 				for (Long jobPositionId : jobPositionIds) {
 					Organization group = checkOrganization(jobPositionId);
@@ -8585,6 +8597,7 @@ System.out.println();
 			}
 			//重新把成员添加到公司多个职级
 			if(null != jobLevelIds){
+				removeRepeat(jobLevelIds);
 				for (Long jobLevelId : jobLevelIds) {
 					Organization group = checkOrganization(jobLevelId);
 
@@ -8640,6 +8653,22 @@ System.out.println();
 			leaveOrganizationAfterOperation(user.getId(), leaveMembers);
 		}
 		return dto;
+	}
+
+
+	/**
+	 * 去重
+	 * @param ids
+     */
+	private void removeRepeat(List<Long> ids){
+		List<Long> results = new ArrayList<>();
+		for (Long id: ids) {
+			if (!results.contains(id)) {
+				results.add(id);
+			}
+		}
+		ids.removeAll(ids);
+		ids.addAll(results);
 	}
 
 	@Override
@@ -9506,6 +9535,8 @@ System.out.println();
 //		titleMap.put("jobLevel", "职级");
 		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
+
+
 }
 
 
