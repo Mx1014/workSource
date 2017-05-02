@@ -5413,7 +5413,7 @@ public class PunchServiceImpl implements PunchService {
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
 		startCalendar.setTime(new Date(cmd.getQueryTime())); 
-		startCalendar.set(Calendar.DAY_OF_MONTH, 0);
+		startCalendar.set(Calendar.DAY_OF_MONTH, 1);
 		startCalendar.set(Calendar.MINUTE, 0);
 		startCalendar.set(Calendar.SECOND, 0);
 		startCalendar.set(Calendar.MILLISECOND, 0);
@@ -5429,7 +5429,7 @@ public class PunchServiceImpl implements PunchService {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(map.getTargetId()));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(map.getTargetType()));
 				
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime().getTime())));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date( startCalendar.getTime().getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
 				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 				return null;
