@@ -3067,6 +3067,7 @@ public class CommunityServiceImpl implements CommunityService {
 			ProjectDTO project = new ProjectDTO();
 			project.setProjectId(community.getId());
 			project.setProjectType(EntityType.COMMUNITY.getCode());
+			project.setProjectName(community.getName());
 			projects.add(project);
 		}
 		return rolePrivilegeService.getTreeProjectCategories(namespaceId, projects);
