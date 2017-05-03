@@ -4563,6 +4563,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setCreatorUid(user.getId());
 			member.setNickName(user.getNickName());
 			member.setAvatar(user.getAvatar());
+			member.setApplyDescription(cmd.getContactDescription());
 
 			return member;
 		});
@@ -6276,8 +6277,12 @@ System.out.println();
 		Map<String, String> map = new HashMap<String, String>();
 
         map.put("enterpriseName", org.getName());
-
         map.put("userName", member.getContactName());
+        if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
+            map.put("description", String.format("(%s)", member.getApplyDescription()));
+        } else {
+            map.put("description", "");
+        }
 
         String scope = EnterpriseNotifyTemplateCode.SCOPE;
 
