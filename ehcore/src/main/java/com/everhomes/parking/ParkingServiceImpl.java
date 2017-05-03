@@ -1449,7 +1449,7 @@ public class ParkingServiceImpl implements ParkingService {
     		
     		if(sTime >= eTime) {
     			LOGGER.error("Get recharge result time out, cmd={}", cmd);
-        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
         				"Get recharge result time out.");
     		}
     		
