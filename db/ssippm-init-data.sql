@@ -533,6 +533,6 @@ delete from eh_launch_pad_items where namespace_id = 999977 and item_label = '�
 update eh_launch_pad_items set item_label = '公司简介' where namespace_id = 999977 and item_label = '园区介绍';
 
 -- redmine 9383 add by xiongying 20170503
-update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999977 and item_label in('会议室','客房预订','物业服务','投放房源','委托找房','服务热线','公司简介','地产服务','活动','俱乐部','任务管理');
+update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999977 and item_label in('会议室','客房预定','物业服务','投放房源','委托找房','服务热线','公司简介','地产服务','活动','俱乐部','任务管理');
 
 SET FOREIGN_KEY_CHECKS = 1;
