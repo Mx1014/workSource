@@ -68,3 +68,7 @@ ALTER TABLE `eh_organization_address_mappings` ADD INDEX `address_id` (`address_
 -- 停车充值 add by sw 20170502
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('parking', '10004', 'zh_CN', '服务器通讯异常，请稍后再试！');
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('parking', '10020', 'zh_CN', '该车牌不支持APP缴费！');
+
+-- 左邻域下面永佳天成机构数据修改 add by sfyan 20170503
+update `eh_organizations` set `directly_enterprise_id` = 1023080 where path like '/1023080/%' and `group_type` <> 'ENTERPRISE';
+
