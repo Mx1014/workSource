@@ -528,5 +528,8 @@ SET @launch_pad_layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`);
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) 
 VALUES ((@launch_pad_layout_id := @launch_pad_layout_id + 1), 999977, 'ServiceMarketLayout', '{"versionCode":"2017050301","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', 2017050301, 0, 2, '2016-03-12 19:16:25', 'park_tourist', 0, 0, 0);
 
+delete from eh_launch_pad_items where namespace_id = 999977 and item_label = '通讯录';
+update eh_launch_pad_items set item_label = '公司简介' where namespace_id = 999977 and item_label = '园区介绍';
+
 
 SET FOREIGN_KEY_CHECKS = 1;
