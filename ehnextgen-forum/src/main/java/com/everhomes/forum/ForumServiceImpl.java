@@ -1824,22 +1824,43 @@ public class ForumServiceImpl implements ForumService {
 	}
 	
 	private void sendMessageToUserWhenComment(User user, Post post, Long toUserId, int code) {
-		String templateString = getLocalTemplateString(user.getNamespaceId(), ForumNotificationTemplateCode.SCOPE, code, user.getLocale());
-		String[] templateStringSplit = templateString.split("\t");
-		String title = templateStringSplit[0];
-		String template = templateStringSplit[1];
-		
-		InnerLinkBody innerLinkBody = new InnerLinkBody(title, template);
-		String content = innerLinkBody.toString();
-		
-		Map<String, String> meta = new HashMap<>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		String userName = user.getNickName() == null ? "" : user.getNickName();
-		meta.put("userName", new MessageMetaContent(userName).toString());
-		String postName = post.getSubject() == null ? "" : post.getSubject();
-		String postNameUrl = getPostNameUrl(post);
-		meta.put("postName", new MessageMetaContent(postName, postNameUrl).toString());
+        map.put("userName", userName);
+        String postName = post.getSubject() == null ? "" : post.getSubject();
+        map.put("postName", postName);
+        String scope = ForumNotificationTemplateCode.SCOPE;
+        String text = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+		String[] textSplit = text.split("\t");
+		String title = textSplit[0];
+		String content = textSplit[1];
 		
-		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
+		RouterMetaObject mo = new RouterMetaObject();
+        mo.setUrl(getPostNameUrl(post));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+		
+        sendMessageToUser(toUserId, content, meta, MessageBodyType.TEXT.getCode());
+		
+		// 改成消息2.0的方式，需要后台拼好返回给客户端，commented by tt, 20170503
+//		String templateString = getLocalTemplateString(user.getNamespaceId(), ForumNotificationTemplateCode.SCOPE, code, user.getLocale());
+//		String[] templateStringSplit = templateString.split("\t");
+//		String title = templateStringSplit[0];
+//		String template = templateStringSplit[1];
+//		
+//		InnerLinkBody innerLinkBody = new InnerLinkBody(title, template);
+//		String content = innerLinkBody.toString();
+//		
+//		Map<String, String> meta = new HashMap<>();
+//		String userName = user.getNickName() == null ? "" : user.getNickName();
+//		meta.put("userName", new MessageMetaContent(userName).toString());
+//		String postName = post.getSubject() == null ? "" : post.getSubject();
+//		String postNameUrl = getPostNameUrl(post);
+//		meta.put("postName", new MessageMetaContent(postName, postNameUrl).toString());
+//		
+//		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
 	}
 	
 	private String getPostNameUrl(Post post) {
