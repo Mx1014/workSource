@@ -524,4 +524,9 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999977', 'flow', '', '0', NULL);
 
+SET @launch_pad_layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) 
+VALUES ((@launch_pad_layout_id := @launch_pad_layout_id + 1), 999977, 'ServiceMarketLayout', '{"versionCode":"2017050301","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":16,"columnCount":5},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', 2017050301, 0, 2, '2016-03-12 19:16:25', 'park_tourist', 0, 0, 0);
+
+
 SET FOREIGN_KEY_CHECKS = 1;
