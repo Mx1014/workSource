@@ -2595,6 +2595,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999984', '0', '0', '0', '/home', 'Bizs', '供求信息', '供求信息', 'cs://1/image/aW1hZ2UvTVRvM09HVmxNalUyTXpnNU5qZ3lNVEEzTVRGbE9HUTBZMlk1T0dSbU1qZzNNZw', '1', '1', 33, '{"type":201015,"parentId":201015,"displayType": "list"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '3');
 
-update eh_launch_pad_items set default_order = 10 where namespace_id = 999984 and item_label in('知识产权','财税咨询','法律服务','人力资源','科技金融','云服务','供应链','产品测试','福利管家');
+update eh_launch_pad_items set more_order = 10 where namespace_id = 999984 and item_label in('知识产权','财税咨询','法律服务','人力资源','科技金融','云服务','供应链','产品测试','福利管家');
 
 update eh_launch_pad_items set display_flag = 0 where item_label = '供求信息' and namespace_id = 999984;
