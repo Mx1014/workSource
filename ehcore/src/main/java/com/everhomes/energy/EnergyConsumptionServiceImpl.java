@@ -2296,6 +2296,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
                 //由于currentAmount其实是realAmount  已经算了一遍times，所以此处times赋值为1 by xiongying20170401
                 engine.put(MeterFormulaVariable.TIMES.getCode(), 1);
+                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
                 realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
             }
 
