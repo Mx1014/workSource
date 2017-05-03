@@ -72,3 +72,6 @@ INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pa
 -- 左邻域下面永佳天成机构数据修改 add by sfyan 20170503
 update `eh_organizations` set `directly_enterprise_id` = 1023080 where path like '/1023080/%' and `group_type` <> 'ENTERPRISE';
 
+-- 社群增加参数配置 add by 20170503
+update `eh_launch_pad_items` set `action_data` = '{\"url\":\"zl://association/main?layoutName=AssociationLayout&itemLocation=/association&versionCode=2017042501&displayName=社群\"}' where `item_name` = 'Association' and `item_label` = '社群' and namespace_id = 999985;
+
