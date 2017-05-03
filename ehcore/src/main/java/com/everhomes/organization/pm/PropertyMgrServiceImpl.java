@@ -5596,7 +5596,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
-	public GetReqeustInfoResponse getReqeustStatus(QuestionMetaObject cmd) {
+	public GetReqeustInfoResponse getReqeustInfo(GetReqeustInfoCommand cmd) {
 		if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
 		}

@@ -1981,8 +1981,8 @@ public class PropertyMgrController extends ControllerBase {
 	 */
 	@RequestMapping("getReqeustInfo")
 	@RestReturn(value= GetReqeustInfoResponse.class)
-	public RestResponse getReqeustInfo(QuestionMetaObject cmd) {
-		RestResponse response = new RestResponse(propertyMgrService.getReqeustStatus(cmd));
+	public RestResponse getReqeustInfo(GetReqeustInfoCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.getReqeustInfo(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

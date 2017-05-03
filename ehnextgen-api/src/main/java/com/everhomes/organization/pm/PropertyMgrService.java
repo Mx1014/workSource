@@ -454,5 +454,5 @@ public interface PropertyMgrService {
 
 	PropAptStatisticDTO getNewApartmentStatistics(PropCommunityIdCommand cmd);
 
-	GetReqeustInfoResponse getReqeustStatus(QuestionMetaObject cmd);
+	GetReqeustInfoResponse getReqeustInfo(GetReqeustInfoCommand cmd);
 }
