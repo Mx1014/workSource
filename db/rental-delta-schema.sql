@@ -26,4 +26,8 @@ ALTER TABLE `eh_rentalv2_resources`  ADD COLUMN `org_member_weekend_price` DECIM
 ALTER TABLE `eh_rentalv2_resources`  ADD COLUMN `approving_user_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户工作日价格';
 ALTER TABLE `eh_rentalv2_resources`  ADD COLUMN `approving_user_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户节假日价格';
 
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `org_member_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '原价-如果打折则有(企业内部价)';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `org_member_price` DECIMAL(10,2) DEFAULT NULL COMMENT '实际价格-打折则为折后价(企业内部价)';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `approving_user_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '原价-如果打折则有（外部客户价）';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `approving_user_price` DECIMAL(10,2) DEFAULT NULL COMMENT '实际价格-打折则为折后价（外部客户价）';
 
