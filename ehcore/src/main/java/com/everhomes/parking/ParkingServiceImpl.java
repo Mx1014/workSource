@@ -7,11 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -1209,8 +1205,20 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	
 	private Long createOrderNo(Long time) {
-		String bill = String.valueOf(time) + (int) (Math.random()*1000);
-		return Long.valueOf(bill);
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
 
 	@Override
