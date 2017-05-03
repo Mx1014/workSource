@@ -148,10 +148,15 @@ public class ActivityProviderImpl implements ActivityProivider {
 	            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
 	            dao.delete(rosters[0]);
 	            // decrease count
-	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
-	                    - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
-	            if (familyId != null)
-	                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
+	            
+	            //因为使用新规则已报名=已确认。  if条件     add by yanjun 20170503
+	            //1、signup：时不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+	            if(rosters[0].getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode()){
+	            	 activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
+	 	                    - (rosters[0].getAdultCount() + rosters[0].getChildCount()));
+	 	            if (familyId != null)
+	 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount() - 1);
+	            }
 	            ActivityProivider self = PlatformContext.getComponent(ActivityProivider.class);
 	            self.updateActivity(activity);
 	            // update dao and push event
@@ -364,12 +369,11 @@ public class ActivityProviderImpl implements ActivityProivider {
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
                 	Condition condition = Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId);
-                	condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.ne(ConfirmStatus.REJECT.getCode()));
                 	if(flagCondition != null){
                 		condition = condition.and(flagCondition);
                 	}
-                	Integer c = context.selectCount().from(Tables.EH_ACTIVITY_ROSTER).where(condition).fetchOneInto(Integer.class);
-                	count[0] = c;
+                	Integer[] c = context.select(DSL.sum(Tables.EH_ACTIVITY_ROSTER.ADULT_COUNT), DSL.sum(Tables.EH_ACTIVITY_ROSTER.CHILD_COUNT)).from(Tables.EH_ACTIVITY_ROSTER).where(condition).fetchOneInto(Integer[].class);
+                	count[0] = c[0] + c[1];
                     return true;
                 });
         return count[0];

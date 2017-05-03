@@ -18,14 +18,15 @@ import com.everhomes.util.StringHelper;
  *<li>location:位置</li>
  *<li>checkInFlag:报名标签</li>
  *<li>confirmFlag:确认</li>
- *<li>enrollUserCount:报名人数</li>
+ *<li>enrollUserCount:已报名人数</li>
  *<li>enrollFamilyCount:报名家庭数</li>
- *<li>checkinUserCount:签到人数</li>
- *<li>unCheckinUserCount:未签到人数</li>
+ *<li>confirmUserCount:已确认人数</li>
+ *<li>unConfirmUserCount:待确认人数</li>
  *<li>payUserCount:已支付人数</li>
- *<li>unPayUserCount:未支付人数</li>
+ *<li>unPayUserCount:待支付人数</li>
+ *<li>checkinUserCount:已签到人数</li>
+ *<li>unCheckinUserCount:待签到人数</li>
  *<li>checkinFamilyCount:签到家庭数</li>
- *<li>confirmUserCount:确认人数</li>
  *<li>confirmFamilyCount：确认家庭数</li>
  *<li>familyId:家庭ID</li>
  *<li>groupId:圈ID</li>
@@ -61,12 +62,13 @@ public class ActivityDTO {
     private Integer confirmFlag;
     private Integer enrollUserCount;
     private Integer enrollFamilyCount;
-    private Integer checkinUserCount;
-    private Integer unCheckinUserCount;
+    private Integer confirmUserCount;
+    private Integer unConfirmUserCount;
     private Integer payUserCount;
     private Integer unPayUserCount;
+    private Integer checkinUserCount;
+    private Integer unCheckinUserCount;
     private Integer checkinFamilyCount;
-    private Integer confirmUserCount;
     private Integer confirmFamilyCount;
     private Long groupId;
     private Long familyId;
@@ -338,7 +340,15 @@ public class ActivityDTO {
         this.confirmUserCount = confirmUserCount;
     }
 
-    public Integer getConfirmFamilyCount() {
+    public Integer getUnConfirmUserCount() {
+		return unConfirmUserCount;
+	}
+
+	public void setUnConfirmUserCount(Integer unConfirmUserCount) {
+		this.unConfirmUserCount = unConfirmUserCount;
+	}
+
+	public Integer getConfirmFamilyCount() {
         return confirmFamilyCount;
     }
 

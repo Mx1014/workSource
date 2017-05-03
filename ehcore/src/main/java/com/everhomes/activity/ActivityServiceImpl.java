@@ -316,7 +316,8 @@ public class ActivityServiceImpl implements ActivityService {
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
 		        //检查是否超过报名人数限制, add by tt, 20161012
-		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+		        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
+		        if (activity.getConfirmFlag() != null && activity.getConfirmFlag().intValue() == 0 && activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
 		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
 							"beyond contraint quantity!");
@@ -366,12 +367,18 @@ public class ActivityServiceImpl implements ActivityService {
 	                }
 	               
 	            }
-	            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
-	            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
-	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
-	            if(user.getAddressId()!=null){
-	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+	            
+	            //因为使用新规则已报名=已确认。  if条件     add by yanjun 20170503
+	            //1、signup：时不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+	            if(activity.getConfirmFlag() == 0){
+	            	int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
+	 	            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
+	 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
+	 	            if(user.getAddressId()!=null){
+	 	                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+	 	            }
 	            }
+	           
 //	            activityProvider.createActivityRoster(roster);
 	            createActivityRoster(roster);
 	            
@@ -1161,28 +1168,6 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         
-        //增加几个统计维度：未付款、已付款、未签到和已签到 add by yanjun 20170502
-        Integer unConfirmUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.UN_CONFIRMED.getCode()));
-        //待支付\已支付, 待支付 = 未支付 - 待确认
-        Integer unPayUserCount = 0;
-        if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
-        	unPayUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.UNPAY.getCode()));
-            unPayUserCount = unPayUserCount - unConfirmUserCount;
-            dto.setUnPayUserCount(unPayUserCount);
-            
-            Integer payUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-            dto.setPayUserCount(payUserCount);
-        }
-        //待签到/已签到，待签到 = 未签到 - 待支付 - 待确认
-        if(activity.getSignupFlag() == ActivitySignupFlag.SIGNUP.getCode()){
-        	Integer unCheckinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.UN_CHECKIN.getCode()));
-        	unCheckinUserCount = unCheckinUserCount - unPayUserCount - unConfirmUserCount;
-        	dto.setUnCheckinUserCount(unCheckinUserCount);
-            
-            Integer checkinUserCount = activityProvider.countActivityRosterByCondition(activity.getId(), Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.CHECKIN.getCode()));
-            dto.setCheckinUserCount(checkinUserCount);
-        }
-        
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setActivityId(activity.getId());
@@ -1200,6 +1185,11 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         fixupVideoInfo(dto);//added by janson
         ////////////////////////////////////
+        
+        //填充报名信息的统计数据 start  add by yanjun 20170503
+        populateRosterStatistics(dto);
+        //填充报名信息的统计数据  end
+        
         response.setActivity(dto);
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
@@ -1253,6 +1243,41 @@ public class ActivityServiceImpl implements ActivityService {
             response.setCreatorFlag(1);
         }
         return response;
+    }
+    
+    /**
+     * 增加几个统计维度：已确认、已付款、未付款、已签到和未签到 add by yanjun 20170502
+     * @param dto
+     */
+    private void populateRosterStatistics(ActivityDTO dto){
+    	//已确认
+        Condition condition = Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode());
+        condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+        Integer confirmUserCount = activityProvider.countActivityRosterByCondition(dto.getActivityId(), condition);
+        dto.setConfirmUserCount(confirmUserCount);
+        //已支付和待支付, 待支付 = 已确认 - 已支付
+        Integer payUserCount = 0;
+        if(dto.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+        	condition = Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode());
+            condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+        	payUserCount = activityProvider.countActivityRosterByCondition(dto.getActivityId(), condition);
+            dto.setPayUserCount(payUserCount);
+            
+            dto.setUnPayUserCount(confirmUserCount - payUserCount);
+        }
+        //已签到和待签到，待签到 = 已确认|已支付 - 已签到
+        if(dto.getCheckinFlag() == ActivitySignupFlag.SIGNUP.getCode().intValue()){
+        	condition = Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.CHECKIN.getCode());
+            condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+        	Integer checkinUserCount = activityProvider.countActivityRosterByCondition(dto.getActivityId(), condition);
+            dto.setCheckinUserCount(checkinUserCount);
+            
+            if(dto.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+            	dto.setUnCheckinUserCount(payUserCount - checkinUserCount);
+            }else{
+            	dto.setUnCheckinUserCount(confirmUserCount - checkinUserCount);
+            }
+        }
     }
     
     private String populateUserName(User user, long postId) {
@@ -1358,6 +1383,13 @@ public class ActivityServiceImpl implements ActivityService {
                     "cannnot find post record in database id=" + cmd.getRosterId());
         }
         
+        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
+        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+					"beyond contraint quantity!");
+		}
+        
         // 后台管理系统确认不用判断是不是创建者
         User user = UserContext.current().getUser();
 //        if (post.getCreatorUid().longValue() != user.getId().longValue()) {
@@ -1368,6 +1400,18 @@ public class ActivityServiceImpl implements ActivityService {
 //        }
         dbProvider.execute(status -> {
  //           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
+        	
+        	
+        	//因为使用新规则已报名=已确认 start。  add by yanjun 20170503
+            //1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+        	int adult = item.getAdultCount() == null ? 0 : item.getAdultCount();
+            int child = item.getChildCount() == null ? 0 : item.getChildCount();
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
+            if(user.getAddressId()!=null){
+                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+            }
+           //因为使用新规则已报名=已确认 end
+        	
             activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
                     + item.getChildCount());
             activity.setConfirmFamilyCount(activity.getConfirmFamilyCount() + 1);
