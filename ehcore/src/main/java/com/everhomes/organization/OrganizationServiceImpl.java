@@ -4964,14 +4964,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				orgLog.setOperatorUid(UserContext.current().getUser().getId());
 				this.organizationProvider.createOrganizationMemberLog(orgLog);
 
-				//Remove door auth, by Janon 2016-12-15
-				if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER)
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER){
+					//Remove door auth, by Janon 2016-12-15
 					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
 
-				// 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
-				// http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				if (OrganizationMemberTargetType.fromCode(m.getTargetType()) == OrganizationMemberTargetType.USER) {
+					// 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
+					// http://devops.lab.everhomes.com/issues/2812  by lqs 20161017
 					setUserDefaultCommunityByOrganization(namespaceId, m.getTargetId(), m.getOrganizationId());
 				}
 
