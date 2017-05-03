@@ -60,6 +60,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
@@ -5596,7 +5597,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     }
 
 	@Override
-	public GetReqeustInfoResponse getReqeustInfo(GetReqeustInfoCommand cmd) {
+	public GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd) {
 		if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
 		}
@@ -5607,7 +5608,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				ownerId = cmd.getRequestorUid();
 			}
 			UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(ownerId, groupId);
-			return new GetReqeustInfoResponse(userGroup.getMemberStatus());
+			return new GetRequestInfoResponse(userGroup.getMemberStatus());
 		}
 		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid parameter");
 	}

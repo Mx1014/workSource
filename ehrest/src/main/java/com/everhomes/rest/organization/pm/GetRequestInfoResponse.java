@@ -9,14 +9,14 @@ import com.everhomes.util.StringHelper;
  * <li>status: 状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  * </ul>
  */
-public class GetReqeustInfoResponse {
+public class GetRequestInfoResponse {
 	private Byte status;
 
-	public GetReqeustInfoResponse() {
+	public GetRequestInfoResponse() {
 		super();
 	}
 
-	public GetReqeustInfoResponse(Byte status) {
+	public GetRequestInfoResponse(Byte status) {
 		super();
 		this.status = status;
 	}

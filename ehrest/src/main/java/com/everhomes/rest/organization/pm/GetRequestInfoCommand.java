@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestInfo: 申请描述</li>
  * </ul>
  */
-public class GetReqeustInfoCommand {
+public class GetRequestInfoCommand {
     private String resourceType;
     private Long resourceId;
     private String targetType;
