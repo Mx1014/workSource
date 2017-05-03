@@ -5594,4 +5594,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             });
         }
     }
+
+	@Override
+	public GetReqeustInfoResponse getReqeustStatus(QuestionMetaObject cmd) {
+		if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+		}
+		if (EntityType.fromCode(cmd.getResourceType()) == EntityType.GROUP) {
+			Long groupId = cmd.getResourceId();
+			Long ownerId = cmd.getTargetId();
+			if (ownerId == null) {
+				ownerId = cmd.getRequestorUid();
+			}
+			UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(ownerId, groupId);
+			return new GetReqeustInfoResponse(userGroup.getMemberStatus());
+		}
+		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid parameter");
+	}
+    
 }
