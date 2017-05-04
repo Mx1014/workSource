@@ -345,9 +345,9 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMDD");
 		Date beginDate;
 		try {
-			beginDate = (Date) dateFormat.parse(punchMonth+"01");
+			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
 		
-			Date endDate = (Date) dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01");
+			Date endDate = new Date(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
 			return getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
 					.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
@@ -358,8 +358,8 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return 0.0; 
-		}	
+			return 0.0;
+		}
 		  
 	}
 }
