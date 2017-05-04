@@ -16,6 +16,8 @@ import org.jooq.Result;
 import org.jooq.Row2;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,10 +37,12 @@ import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ListUtils;
+import com.hp.hpl.sparta.xpath.Step;
 
 @Component
 public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApprovalRequestProviderImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -348,13 +352,15 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
 		
 			Date endDate = new Date(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
-			return getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
+			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
 					.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
 					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
 					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(beginDate))
 					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lt(endDate))
-					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode())).fetchOneInto(Double.class);
+					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+			LOGGER.debug(step.toString());
+			return step.fetchOneInto(Double.class);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
