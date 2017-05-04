@@ -354,7 +354,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50652','','EhNamespaces','999982','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50653','','EhNamespaces','999982','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50660','','EhNamespaces','999982','2');
-;
+
 
 SET @eh_launch_pad_items =(SELECT MAX(id) FROM eh_launch_pad_items ); 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
@@ -362,6 +362,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999982', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwaU1qQmtObVExTkRKbVlqTmpNR0k0T0RZd01qTm1Oekl6WWpGa1lqUXdNQQ', '1', '1', '23', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '7');
 
+-- redmine 9172 by xiongying20170504
 update eh_launch_pad_items set display_flag = 0 where namespace_id = 999982 and item_label in('活动','俱乐部');
 update eh_launch_pad_items set item_group = 'Bizs' where namespace_id = 999982 and item_label in('活动','俱乐部');
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU9XWTJaakl6Tm1JelpHSTROR1ZqT1dObU1tTmpaak16WXpsbU5XSTBOUQ' where namespace_id = 999982 and item_label = '活动';
