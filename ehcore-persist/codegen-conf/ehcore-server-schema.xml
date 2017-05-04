@@ -150,7 +150,7 @@
         eh_oauth2_client_tokens | eh_oauth2_servers |
         eh_sms_logs |
         eh_energy_meter_price_config |
-        eh_user_notification_settings |
+        eh_user_notification_settings | eh_group_member_logs |
 
         </includes>
 

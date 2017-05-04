@@ -6626,11 +6626,13 @@ System.out.println();
 	                        + ", memberId=" + requestor.getId() + ", userId=" + requestor.getTargetId(), e);
 	                }
 	            }
+	            metaObject.setRequestId(requestor.getId());
 	        }
 
 	        if(target != null) {
 	            metaObject.setTargetType(EntityType.USER.getCode());
 	            metaObject.setTargetId(target.getTargetId());
+	            metaObject.setRequestId(target.getId());
 	        }
 
 	        return metaObject;

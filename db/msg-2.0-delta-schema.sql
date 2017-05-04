@@ -15,3 +15,16 @@ CREATE TABLE `eh_user_notification_settings` (
   `update_time` DATETIME(3) DEFAULT NULL COMMENT 'message creation time',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 用于记录groupMember表记录的删除还是拒绝的状态
+-- DROP TABLE IF EXISTS `eh_group_member_logs`;
+CREATE TABLE `eh_group_member_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `group_member_id` BIGINT,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'the same as group member status',
+  `creator_uid` BIGINT,
+  `process_message` TEXT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

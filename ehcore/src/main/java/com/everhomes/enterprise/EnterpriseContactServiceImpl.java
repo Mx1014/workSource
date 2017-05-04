@@ -340,11 +340,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                         + ", contactId=" + requestor.getId() + ", userId=" + requestor.getUserId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getUserId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;

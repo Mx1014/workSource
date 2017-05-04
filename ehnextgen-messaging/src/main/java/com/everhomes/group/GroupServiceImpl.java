@@ -3657,11 +3657,13 @@ public class GroupServiceImpl implements GroupService {
                         + ", memberId=" + requestor.getMemberId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getMemberId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;

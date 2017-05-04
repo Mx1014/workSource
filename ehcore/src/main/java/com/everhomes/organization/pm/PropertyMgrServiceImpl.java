@@ -5602,22 +5602,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
 		}
 		EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
-		if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY || resourceType == EntityType.ORGANIZATIONS) {
-			Long resourceId = cmd.getResourceId();
-			Long memberId = cmd.getTargetId();
-			if (memberId == null) {
-				memberId = cmd.getRequestorUid();
+		Long requestId = cmd.getRequestId();  //表示那条记录的id
+		if (resourceType == EntityType.ORGANIZATIONS) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(requestId);
+			if (organizationMember != null) {
+				return new GetRequestInfoResponse(organizationMember.getStatus());
 			}
-			if (resourceType == EntityType.ORGANIZATIONS) {
-				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutStatus(resourceId, memberId);
-				if (organizationMember != null) {
-					return new GetRequestInfoResponse(organizationMember.getStatus());
-				}
-			}else {
-				GroupMember groupMember = groupProvider.findGroupMemberByMemberInfo(resourceId, EntityType.USER.getCode(), memberId);
-				if (groupMember != null) {
-					return new GetRequestInfoResponse(groupMember.getMemberStatus());
-				}
+		}else if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY) {
+			// groupMember拒绝的时候是直接删除的，蛋疼
+			GroupMember groupMember = groupProvider.findGroupMemberById(requestId);
+			if (groupMember != null) {
+				return new GetRequestInfoResponse(groupMember.getMemberStatus());
 			}
 		}
 		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists");
