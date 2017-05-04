@@ -64,10 +64,13 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 SimpleAssetBillDTO dto = new SimpleAssetBillDTO();
                 dto.setAccountPeriod(covertStrToTimestamp(bill.getBillDate()));
 
-                if(PmKeXingBillStatus.PAID.equals(PmKeXingBillStatus.fromName(bill.getBillStatus()))) {
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("bill status: {}", bill.getBillStatus());
+                }
+                if(PmKeXingBillStatus.PAID.getName().equals(bill.getBillStatus())) {
                     dto.setStatus(AssetBillStatus.PAID.getCode());
                 }
-                if(AssetBillStatus.UNPAID.equals(PmKeXingBillStatus.fromName(bill.getBillStatus()))) {
+                if(AssetBillStatus.UNPAID.getName().equals(bill.getBillStatus())) {
                     dto.setStatus(AssetBillStatus.UNPAID.getCode());
                 }
                 dto.setPeriodAccountAmount(bill.getReceivableAmount());
