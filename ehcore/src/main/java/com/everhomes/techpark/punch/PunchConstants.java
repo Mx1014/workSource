@@ -28,5 +28,5 @@ public class PunchConstants {
 
 	 public static final String locale = "zh_CN";
 	 /**'请假申请的时间','${beginTime}至${endTime}'*/
-	public static final int PUNCH_FLOW_REQUEST_TIME = 1;
+	public static final int PUNCH_FLOW_REQUEST_TIME = 1; 
 }
