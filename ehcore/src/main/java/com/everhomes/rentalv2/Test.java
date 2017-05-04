@@ -20,6 +20,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/4/27.
@@ -33,28 +34,69 @@ public class Test {
     static String serverUrl = "http://parking.tnar.cn:8085/kesb_req";
 
     public static void main(String[] args) {
-        AttachmentConfigDTO a = new AttachmentConfigDTO();
+//        AttachmentConfigDTO a = new AttachmentConfigDTO();
+//
+//        a.setAttachmentType((byte)1);
+//        a.setContent("123");
+//        a.setId(1L);
+//        a.setMustOptions((byte)2);
+//        RentalGoodItem item = new RentalGoodItem();
+//        item.setId(2L);
+//        item.setItemName("ceshi");
+//        a.setGoodItems(Collections.singletonList(item));
+//
+//        RentalConfigAttachment rca = ConvertHelper.convert(item, RentalConfigAttachment.class);
+//        System.out.println(rca);
+//
+//        JSONObject param = new JSONObject();
+//
+//        param.put("version", version);
+//        param.put("licensekey", licensekey);
+//        param.put("car_id", "苏FX967J");
+//
+//        String json = post(createRequestParam(GET_CARD, param));
 
-        a.setAttachmentType((byte)1);
-        a.setContent("123");
-        a.setId(1L);
-        a.setMustOptions((byte)2);
-        RentalGoodItem item = new RentalGoodItem();
-        item.setId(2L);
-        item.setItemName("ceshi");
-        a.setGoodItems(Collections.singletonList(item));
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        list.add(4);
+        list.add(5);
+        list.add(6);
 
-        RentalConfigAttachment rca = ConvertHelper.convert(item, RentalConfigAttachment.class);
-        System.out.println(rca);
 
-        JSONObject param = new JSONObject();
+        System.out.println(convertOpenWeekday(list));
+        System.out.println(convertOpenWeekday2(list));
 
-        param.put("version", version);
-        param.put("licensekey", licensekey);
-        param.put("car_id", "苏FX967J");
-
-        String json = post(createRequestParam(GET_CARD, param));
+        System.out.println(10 ^ 2);
     }
+
+    private static String convertOpenWeekday(List<Integer> openWeekdays) {
+        int openWorkdayInt=0;
+        for(Integer i : openWeekdays) {
+            openWorkdayInt += Math.pow(10, i - 1);
+        }
+        String openWorkday = String.valueOf(openWorkdayInt);
+        for(; openWorkday.length() <= 7;){
+            openWorkday = "0" + openWorkday;
+        }
+
+        return openWorkday;
+    }
+
+    private static String convertOpenWeekday2(List<Integer> openWeekdays) {
+        int openWorkdayInt=0;
+        String openWorkday;
+        //list的数字:1234567代表从星期天到星期六,经过-1作为10的次方放到7位字符串内
+        for(Integer weekdayInteger : openWeekdays)
+            openWorkdayInt+=Math.pow(10,weekdayInteger-1);
+        openWorkday = String.valueOf(openWorkdayInt);
+        for( ;openWorkday.length()<7; ){
+            openWorkday ="0"+openWorkday;
+        }
+        return openWorkday;
+    }
+
 
     public static String post(JSONObject param) {
         System.out.println(param.toJSONString());
