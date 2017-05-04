@@ -4504,6 +4504,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
+	public RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd) {
+		if(null == cmd.getId())
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid organizationId parameter in the command");
+
+		RentalResource rentalSite = rentalv2Provider.getRentalSiteById(cmd.getId());
+
+		RentalSiteDTO dto = convertRentalSite2DTO(rentalSite);
+		return dto;
+	}
+
+	@Override
 	public void addResource(AddResourceAdminCommand cmd) {
 		if(null==cmd.getOrganizationId())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
