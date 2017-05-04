@@ -585,7 +585,7 @@ public class UserActivityServiceImpl implements UserActivityService {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_INVALID_PARAMS, "feedback is not exist");
 		}
-		feedback.setStatus(cmd.getStatus());
+		feedback.setStatus((byte)1);
 		feedback.setVerifyType(cmd.getVerifyType());
 		feedback.setHandleType(cmd.getHandleType());
 		//更新自己的状态
