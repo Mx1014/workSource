@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
@@ -37,12 +38,15 @@ import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneRespons
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.server.schema.tables.pojos.EhApprovalAttachments;
+import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
@@ -50,6 +54,7 @@ import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -140,6 +145,38 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		} else {
 			createPunchExceptionRequest(userId, ownerInfo, approvalRequest, approvalExceptionContent);
 		}
+		//添加工作流
+		//异常日期：${exceptionDate}\n打卡详情：${punchDetail}
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		 
+    	Map<String, String> map = new HashMap<String, String>();  
+    	SimpleDateFormat dateSF = new SimpleDateFormat("MM-dd(E)");
+        map.put("exceptionDate",dateSF.format(new Date(content.getPunchDate()))); 
+        map.put("punchDetail", content.getPunchDetail() ); 
+		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
+				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
+		createflowCase(approvalRequest, contentString);
+	}
+
+	@Override
+	public List<FlowCaseEntity> getFlowCaseEntities(ApprovalRequest approvalRequest){
+		List<FlowCaseEntity> entities = super.getFlowCaseEntities(approvalRequest); 
+		FlowCaseEntity e = new FlowCaseEntity();  
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"requestDate", PunchConstants.locale, ""));
+    	SimpleDateFormat dateSF = new SimpleDateFormat("MM-dd(E)");
+		e.setValue(dateSF.format(approvalRequest.getCreateTime())); 
+		entities.add(e); 
+		
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		e = new FlowCaseEntity();  
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"punchDetail", PunchConstants.locale, ""));
+		e.setValue(content.getPunchDetail()); 
+		entities.add(e); 
+		entities.addAll(getPostFlowEntities(approvalRequest));
+		return entities;
+		
 	}
 
 	private void createPunchExceptionRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,

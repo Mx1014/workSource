@@ -13,11 +13,13 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
@@ -28,8 +30,12 @@ import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
+import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchDayLog;
+import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -99,6 +105,54 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		return approvalRequest;
 	}
 	 
+
+	@Override
+	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+			CreateApprovalRequestBySceneCommand cmd) {
+		super.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+		//添加工作流
+		//'加班日期：${overTimeDate}\n加班时长：${timeLength}' 
+    	Map<String, String> map = new HashMap<String, String>();  
+
+    	SimpleDateFormat dateSF = new SimpleDateFormat("MM-dd(E)");
+        map.put("overTimeDate",dateSF.format(approvalRequest.getEffectiveDate())); 
+        map.put("timeLength", approvalRequest.getHourLength()+localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),"")); 
+		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
+				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
+		createflowCase(approvalRequest, contentString);
+	}
+	
+	@Override
+	public List<FlowCaseEntity> getFlowCaseEntities(ApprovalRequest approvalRequest){
+		List<FlowCaseEntity> entities = super.getFlowCaseEntities(approvalRequest); 
+		FlowCaseEntity e = new FlowCaseEntity();  
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"requestDate", PunchConstants.locale, ""));
+    	SimpleDateFormat dateSF = new SimpleDateFormat("MM-dd(E)");
+		e.setValue(dateSF.format(approvalRequest.getCreateTime())); 
+		entities.add(e); 
+		
+		e = new FlowCaseEntity();  
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"overtimeLength", PunchConstants.locale, ""));
+		e.setValue(approvalRequest.getHourLength()+localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),"")); 
+		entities.add(e); 
+		
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		e = new FlowCaseEntity();  
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"punchDetail", PunchConstants.locale, ""));
+		e.setValue(content.getPunchDetail()); 
+		entities.add(e); 
+		
+		entities.addAll(getPostFlowEntities(approvalRequest));
+		return entities;
+		
+	}
+	
+	
 	@Override
 	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
 		List<RequestDTO> resultList = approvalRequestList.stream().map(a->{
@@ -108,8 +162,8 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 			exceptionRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
 			exceptionRequest.setReason(a.getReason()); 
 			exceptionRequest.setRequestInfo(processRequestDate(a.getEffectiveDate())+
-					localeStringProvider.find(ApprovalTypeTemplateCode.SCOPE, a.getApprovalType().toString(), UserContext.current()
-							.getUser().getLocale()).getText()+ a.getHourLength()+"小时");
+					localeStringService.getLocalizedString(ApprovalTypeTemplateCode.SCOPE, a.getApprovalType().toString(), UserContext.current()
+							.getUser().getLocale(),"") + a.getHourLength()+localeStringService.getLocalizedString("time.unit", "hour", "zh_CN", "hour"));
 			PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 			
 			String punchDetail = processPunchDetail(pdl);

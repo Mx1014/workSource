@@ -1,16 +1,25 @@
 package com.everhomes.approval;
 
+import java.awt.font.NumericShaper.Range;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+
+
+
+
+
+
 
 
 
@@ -43,7 +52,16 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
+
+
+import com.everhomes.category.Category;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
@@ -57,12 +75,18 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchTimeRule;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
@@ -238,7 +262,6 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		approvalRequest.setApprovalDayActualTimeList(approvalDayActualTimeList);
 		return approvalRequest;
 	}
-
 	private boolean checkNotInWorkTime(List<TimeRange> timeRangeList, PunchRule punchRule) {
 		for (TimeRange timeRange : timeRangeList) {
 			if (!punchService.isWorkDay(new Date(timeRange.getFromTime()), punchRule)
@@ -763,7 +786,76 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		//添加请假时间
 		createTimeRange(userId, approvalRequest.getId(), cmd.getTimeRangeList());
 		createApprovalDayActualTime(userId, approvalRequest.getId(), approvalRequest.getApprovalDayActualTimeList());
+		//添加工作流
+		//'请假类型：${absentCategory}\n请假时间${beginTime}至${endTime}'
+    	Map<String, String> map = new HashMap<String, String>();  
+    	ApprovalCategory category = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
+        map.put("absentCategory", category==null?"":category.getCategoryName());
+
+		//请假时间不能为空
+		if (ListUtils.isEmpty(cmd.getTimeRangeList()) || checkTimeEmpty(cmd.getTimeRangeList())) {
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.ABSENCE_EMPTY_TIME,
+					"time cannot be empty");
+		}
+        TimeRange range = cmd.getTimeRangeList().get(0);
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yy-MM-dd HH:mm");
+        map.put("beginTime", sdFormat.format(new Date(range.getFromTime())) ); 
+        map.put("endTime", sdFormat.format(new Date(range.getEndTime())) ); 
+		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
+				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
+		createflowCase(approvalRequest, contentString);
 	}
+
+	@Override
+	public List<FlowCaseEntity> getFlowCaseEntities(ApprovalRequest approvalRequest){
+		List<FlowCaseEntity> entities = super.getFlowCaseEntities(approvalRequest); 
+		FlowCaseEntity e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,
+				"category", RentalNotificationTemplateCode.locale, ""));
+		ApprovalCategory category = this.approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
+		if (null == category) {
+			LOGGER.debug("category can not be found : " + approvalRequest.getCategoryId());
+		} else {
+			e.setValue(category.getCategoryName());
+		}
+		entities.add(e);
+
+		List<ApprovalTimeRange> approvalTimeRangeList = approvalTimeRangeProvider.listApprovalTimeRangeByOwnerId(approvalRequest.getId());
+		Map<String, String> map = new HashMap<String, String>();  
+		SimpleDateFormat sdFormat = new SimpleDateFormat("yy-MM-dd HH:mm");
+        map.put("beginTime", sdFormat.format( approvalTimeRangeList.get(0).getFromTime()) ); 
+        map.put("endTime", sdFormat.format( approvalTimeRangeList.get(0).getEndTime()) ); 
+		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_SCOPE ,
+				PunchConstants.PUNCH_FLOW_REQUEST_TIME , "zh_CN", map, "");
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE ,
+				"absentTime", PunchConstants.locale, "")); 
+		e.setValue(contentString);
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE ,
+				"absentLength", PunchConstants.locale, "")); 
+		String[] times = approvalTimeRangeList.get(0).getActualResult().split("\\.");
+		StringBuffer sb = new StringBuffer();
+		sb.append( times[0].equals("0")?"":times[0]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale(),""));
+		sb.append( times[1].equals("0")?"":times[1]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),""));
+		sb.append( times[2].equals("0")?"":times[2]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale(),""));
+		e.setValue(sb.toString());
+		entities.add(e);
+		
+		
+		entities.addAll(getPostFlowEntities(approvalRequest));
+		return entities;
+		
+	}
+
 
 	private void createApprovalDayActualTime(Long userId, Long requestId,
 			List<ApprovalDayActualTime> approvalDayActualTimeList) {
@@ -884,12 +976,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
-		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
-		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale(),"") );
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),""));
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale(),""));
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));
@@ -925,12 +1017,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
-		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
-		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
-				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale(),""));
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),""));
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringService.getLocalizedString(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale(),""));
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));

@@ -233,4 +233,6 @@ public interface PunchService {
 
 	public CheckPunchAdminResponse checkPunchAdmin(CheckPunchAdminCommand cmd);
 
+	Long getTopEnterpriseId(Long organizationId);
+
 }
