@@ -243,15 +243,15 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 
 	private boolean checkNotInWorkTime(List<TimeRange> timeRangeList, PunchRule punchRule) {
-		for (TimeRange timeRange : timeRangeList) {
-			if (!isWorkDay(new Date(timeRange.getFromTime()), punchRule)
-					|| !isWorkDay(new Date(timeRange.getEndTime()), punchRule)
-					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule,new Date(timeRange.getFromTime()))
-					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule,new Date(timeRange.getEndTime()))
-					|| punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
-				return true;
-			}
-		}
+//		for (TimeRange timeRange : timeRangeList) {
+//			if (!isWorkDay(new Date(timeRange.getFromTime()), punchRule)
+//					|| !isWorkDay(new Date(timeRange.getEndTime()), punchRule)
+//					|| !punchService.isWorkTime(new Time(timeRange.getFromTime()), punchRule,new Date(timeRange.getFromTime()))
+//					|| !punchService.isWorkTime(new Time(timeRange.getEndTime()), punchRule,new Date(timeRange.getEndTime()))
+//					|| punchService.isRestTime(new Date(timeRange.getFromTime()), new Date(timeRange.getEndTime()), punchRule)) {
+//				return true;
+//			}
+//		}
 		return false;
 	}
 
