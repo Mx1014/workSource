@@ -57,6 +57,7 @@ import com.everhomes.util.StringHelper;
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>offlinePayeeName: 线下支付收款人姓名</li>
+ * <li>detailUrl: 详情Url</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -113,11 +114,20 @@ public class RentalSiteDTO {
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
     private String offlinePayeeName;
+
+    private String detailUrl;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getBuildingName() {
 		return buildingName;

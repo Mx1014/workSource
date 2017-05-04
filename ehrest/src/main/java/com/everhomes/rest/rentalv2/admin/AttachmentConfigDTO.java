@@ -17,10 +17,6 @@ import java.util.List;
  * <li>goodItems: 物资列表  attachmentType: GOOD_ITEM(4)时使用  {@link com.everhomes.rest.rentalv2.RentalGoodItem}</li>
  * <li>recommendUsers: 推荐员列表  attachmentType: RECOMMEND_USER(5)时使用 {@link com.everhomes.rest.rentalv2.RentalRecommendUser}</li>
  * <li>content: 内容</li>
- * <li>userName: 推荐员姓名</li>
- * <li>mobile: 推荐员手机号</li>
- * <li>iconUri: 推荐员头像uri</li>
- * <li>iconUrl: 推荐员头像url</li>
  * </ul>
  */
 public class AttachmentConfigDTO {

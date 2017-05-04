@@ -20,6 +20,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,20 +56,20 @@ public class Test {
 //        param.put("car_id", "苏FX967J");
 //
 //        String json = post(createRequestParam(GET_CARD, param));
-
-        List<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-        list.add(4);
-        list.add(5);
-        list.add(6);
-
-
-        System.out.println(convertOpenWeekday(list));
-        System.out.println(convertOpenWeekday2(list));
-
-        System.out.println(10 ^ 2);
+        System.out.println(new Date(1493827200000L));
+//        List<Integer> list = new ArrayList<>();
+//        list.add(1);
+//        list.add(2);
+//        list.add(3);
+//        list.add(4);
+//        list.add(5);
+//        list.add(6);
+//
+//
+//        System.out.println(convertOpenWeekday(list));
+//        System.out.println(convertOpenWeekday2(list));
+//
+//        System.out.println(10 ^ 2);
     }
 
     private static String convertOpenWeekday(List<Integer> openWeekdays) {

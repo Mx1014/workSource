@@ -320,6 +320,28 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getPayTotalMoney().toString());
 		entities.add(e);
 
+		List<RentalConfigAttachment> goodItems = rentalv2Provider
+				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
+		if (null != goodItems && goodItems.size() != 0) {
+
+			StringBuilder itemStr = new StringBuilder();
+			int size = goodItems.size();
+			for (int i = 0; i < size; i++) {
+				if (i == size -1) {
+					itemStr.append(goodItems.get(i).getItemName());
+				}else {
+					itemStr.append(goodItems.get(i).getItemName()).append("、");
+				}
+			}
+
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"goodItem", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(itemStr.toString());
+			entities.add(e);
+		}
+
 		List<RentalItemsOrder> ribs = rentalv2Provider.findRentalItemsBillBySiteBillId(order
 				.getId());
 		if (null != ribs) { 

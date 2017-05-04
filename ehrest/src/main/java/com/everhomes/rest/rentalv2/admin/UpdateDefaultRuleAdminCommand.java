@@ -38,8 +38,8 @@ import com.everhomes.util.StringHelper;
  * <li>cancelTime: 至少提前取消时间</li>
  * <li>refundFlag: 是否允许退款</li>
  * <li>refundRatio: 退款比例</li>
- * <li>rentalStartTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
- * <li>rentalEndTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>orgMemberWorkdayPrice: 企业内部工作日价格</li>
  * <li>orgMemberWeekendPrice: 企业内部节假日价格</li>
  * <li>approvingUserWorkdayPrice: 外部客户工作日价格</li>

@@ -710,13 +710,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		if(null==cmd.getSiteCounts()) 
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts can not be null"); 
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts can not be null");
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newDefaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
 			if(null==newDefaultRule.getCancelFlag()) {
 				newDefaultRule.setCancelFlag(NormalFlag.NEED.getCode());
 			}
 
+			if (NormalFlag.NONEED.getCode() == cmd.getRentalEndTimeFlag()) {
+				newDefaultRule.setRentalEndTime(null);
+			}
+			if (NormalFlag.NONEED.getCode() == cmd.getRentalStartTimeFlag()) {
+				newDefaultRule.setRentalStartTime(null);
+			}
 			newDefaultRule.setOpenWeekday(defaultRule.getOpenWeekday());
 			newDefaultRule.setBeginDate(defaultRule.getBeginDate());
 			newDefaultRule.setEndDate(defaultRule.getEndDate());
@@ -1191,7 +1197,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
-			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
+			List<RentalCell> rentalSiteRules = new ArrayList<>();
 
 			RentalOrder rentalBill = ConvertHelper.convert(rs, RentalOrder.class);
 			if(null== rs.getCancelTime())
@@ -2151,6 +2157,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					attachmentDTO.setResourceName(csr.getResourceName());
 					attachmentDTO.setResourceSize(csr.getResourceSize());
 				}
+			}else if (AttachmentType.RECOMMEND_USER.getCode().equals(attachment.getAttachmentType())) {
+				List<RentalConfigAttachment> tempAttachments = rentalv2Provider
+						.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_RECOMMEND_USER.name(), bill.getId());
+				List<RentalRecommendUser> recommendUsers = tempAttachments.stream()
+						.map(r -> ConvertHelper.convert(r, RentalRecommendUser.class)).collect(Collectors.toList());
+				attachmentDTO.setRecommendUsers(recommendUsers);
+
+			}else if (attachment.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
+				List<RentalConfigAttachment> tempAttachments = rentalv2Provider
+						.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_GOOD_ITEM.name(), bill.getId());
+				List<RentalGoodItem> goodItems = tempAttachments.stream()
+						.map(r -> ConvertHelper.convert(r, RentalGoodItem.class)).collect(Collectors.toList());
+				attachmentDTO.setGoodItems(goodItems);
 			}
 			attachmentDTO.setContent(attachment.getContent());
 			 
@@ -2282,6 +2301,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setRentalEndTimeFlag(cmd.getRentalEndTimeFlag());
 			rs.setRentalEndTime(cmd.getRentalEndTime());
 			rs.setRentalStartTime(cmd.getRentalStartTime());
+			if (NormalFlag.NONEED.getCode() == cmd.getRentalEndTimeFlag()) {
+				rs.setRentalEndTime(null);
+			}
+			if (NormalFlag.NONEED.getCode() == cmd.getRentalStartTimeFlag()) {
+				rs.setRentalStartTime(null);
+			}
+
 			rs.setTimeStep(cmd.getTimeStep());
 			if(null == cmd.getCancelTime())
 				cmd.setCancelTime(0L);
@@ -3024,8 +3050,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public AddRentalBillItemCommandResponse addRentalItemBill(
-			AddRentalBillItemCommand cmd) {
+	public AddRentalBillItemCommandResponse addRentalItemBill(AddRentalBillItemCommand cmd) {
 
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd
 				.getRentalBillId());
@@ -3082,10 +3107,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						if(this.valiItem(rib))
 							return true;
 						rentalv2Provider.createRentalItemBill(rib);
-									
-						
-						
-						
 					}
 					
 					
@@ -3117,14 +3138,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //	
 //			}
 			 
-			Long orderNo =  onlinePayService.createBillId(DateHelper
-					.currentGMTTime().getTime());
+			Long orderNo =  onlinePayService.createBillId(DateHelper.currentGMTTime().getTime());
 			if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 				response.setAmount(bill.getReserveMoney());
 				response.setOrderNo(String.valueOf(orderNo));
 				
-			} else if (bill.getStatus()
-					.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
+			}else if (bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 				response.setAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 				response.setOrderNo(String.valueOf(orderNo));
 			} else {
@@ -3148,13 +3167,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for(AttachmentDTO attachment : cmd.getRentalAttachments()){
 					RentalOrderAttachment rba = new RentalOrderAttachment();
 					rba.setRentalOrderId(cmd.getRentalBillId());
-					rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-							.getTime()));
+					rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 					rba.setCreatorUid(userId);
 					rba.setAttachmentType(attachment.getAttachmentType());
 					rba.setContent(attachment.getContent());
 					this.rentalv2Provider.createRentalBillAttachment(rba);
-				} 
+					if (AttachmentType.RECOMMEND_USER.getCode().equals(attachment.getAttachmentType())) {
+						List<RentalConfigAttachment> tempAttachments = rentalv2Provider
+								.queryRentalConfigAttachmentByIds(attachment.getRecommendUsers());
+						List<RentalRecommendUser> recommendUsers = tempAttachments.stream()
+								.map(r -> ConvertHelper.convert(r, RentalRecommendUser.class)).collect(Collectors.toList());
+						addRecommendUsers(recommendUsers, AttachmentType.ORDER_RECOMMEND_USER.name(), cmd.getRentalBillId());
+
+					}else if (attachment.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
+						List<RentalConfigAttachment> tempAttachments = rentalv2Provider
+								.queryRentalConfigAttachmentByIds(attachment.getGoodItems());
+						List<RentalGoodItem> goodItems = tempAttachments.stream()
+								.map(r -> ConvertHelper.convert(r, RentalGoodItem.class)).collect(Collectors.toList());
+						addGoodItems(goodItems, AttachmentType.ORDER_RECOMMEND_USER.name(), cmd.getRentalBillId());
+					}
+				}
 			}
 			//签名
 			this.setSignatureParam(response);
@@ -5341,29 +5373,57 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 				if (a.getAttachmentType().equals(AttachmentType.GOOD_ITEM.getCode())) {
 					List<RentalGoodItem> goodItems = a.getGoodItems();
-					if (null != goodItems) {
-						goodItems.forEach(g -> {
-							RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
-							gg.setOwnerType(AttachmentType.GOOD_ITEM.name());
-							gg.setOwnerId(rca.getId());
-							gg.setAttachmentType(AttachmentType.GOOD_ITEM.getCode());
-							gg.setMustOptions(NormalFlag.NEED.getCode());
-							this.rentalv2Provider.createRentalConfigAttachment(gg);
-						});
-					}
+					addGoodItems(goodItems, AttachmentType.GOOD_ITEM.name(), rca.getId());
+//					if (null != goodItems) {
+//						goodItems.forEach(g -> {
+//							RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
+//							gg.setOwnerType(AttachmentType.GOOD_ITEM.name());
+//							gg.setOwnerId(rca.getId());
+//							gg.setAttachmentType(AttachmentType.GOOD_ITEM.getCode());
+//							gg.setMustOptions(NormalFlag.NONEED.getCode());
+//							this.rentalv2Provider.createRentalConfigAttachment(gg);
+//						});
+//					}
 				}else if (a.getAttachmentType().equals(AttachmentType.RECOMMEND_USER.getCode())) {
 					List<RentalRecommendUser> recommendUsers = a.getRecommendUsers();
-					if (null != recommendUsers) {
-						recommendUsers.forEach(u -> {
-							RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
-							uu.setOwnerType(AttachmentType.RECOMMEND_USER.name());
-							uu.setOwnerId(rca.getId());
-							uu.setAttachmentType(AttachmentType.RECOMMEND_USER.getCode());
-							uu.setMustOptions(NormalFlag.NEED.getCode());
-							this.rentalv2Provider.createRentalConfigAttachment(uu);
-						});
-					}
+					addRecommendUsers(recommendUsers, AttachmentType.RECOMMEND_USER.name(), rca.getId());
+//					if (null != recommendUsers) {
+//						recommendUsers.forEach(u -> {
+//							RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
+//							uu.setOwnerType(AttachmentType.RECOMMEND_USER.name());
+//							uu.setOwnerId(rca.getId());
+//							uu.setAttachmentType(AttachmentType.RECOMMEND_USER.getCode());
+//							uu.setMustOptions(NormalFlag.NONEED.getCode());
+//							this.rentalv2Provider.createRentalConfigAttachment(uu);
+//						});
+//					}
 				}
+			});
+		}
+	}
+
+	private void addGoodItems(List<RentalGoodItem> goodItems, String ownerType, Long ownerId) {
+		if (null != goodItems) {
+			goodItems.forEach(g -> {
+				RentalConfigAttachment gg = ConvertHelper.convert(g, RentalConfigAttachment.class);
+				gg.setOwnerType(ownerType);
+				gg.setOwnerId(ownerId);
+				gg.setAttachmentType(AttachmentType.GOOD_ITEM.getCode());
+				gg.setMustOptions(NormalFlag.NONEED.getCode());
+				this.rentalv2Provider.createRentalConfigAttachment(gg);
+			});
+		}
+	}
+
+	private void addRecommendUsers(List<RentalRecommendUser> recommendUsers, String ownerType, Long ownerId) {
+		if (null != recommendUsers) {
+			recommendUsers.forEach(u -> {
+				RentalConfigAttachment uu = ConvertHelper.convert(u, RentalConfigAttachment.class);
+				uu.setOwnerType(ownerType);
+				uu.setOwnerId(ownerId);
+				uu.setAttachmentType(AttachmentType.RECOMMEND_USER.getCode());
+				uu.setMustOptions(NormalFlag.NONEED.getCode());
+				this.rentalv2Provider.createRentalConfigAttachment(uu);
 			});
 		}
 	}

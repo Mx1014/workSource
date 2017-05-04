@@ -150,7 +150,7 @@ public interface Rentalv2Provider {
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String ownerType, Long ownerId);
 
- 
+	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
 
 	void createRentalSiteOwner(RentalSiteRange siteOwner);
 

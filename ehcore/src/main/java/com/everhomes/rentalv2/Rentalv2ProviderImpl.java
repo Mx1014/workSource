@@ -1471,9 +1471,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
-		if (null != result && result.size() > 0)
-			return result;
-		return null;
+
+		return result;
+	}
+
+	@Override
+	public List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
+		Condition condition = Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID
+				.in(ids);
+
+		step.where(condition);
+		List<RentalConfigAttachment> result = step
+				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalConfigAttachment.class);
+				});
+
+		return result;
 	}
 
 	@Override
