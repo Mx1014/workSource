@@ -3698,7 +3698,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				else{
 					LOGGER.error("待付款订单:id ["+bill.getId()+"]付款金额有问题： 应该付款金额："+bill.getPayTotalMoney()+"实际付款金额："+bill.getPaidMoney());
- 
+
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : price is not right!");  
 				}
 			}else if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
 				LOGGER.error("待付款订单:id ["+bill.getId()+"] 状态已经是成功预约");

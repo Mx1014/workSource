@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -5520,7 +5519,7 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub
 			if (null == listPunchScheduling ||  listPunchScheduling.getSchedulings().size() == 0)
 				return;
-			Workbook wb = new HSSFWorkbook();
+			Workbook wb = new XSSFWorkbook();
 			Sheet sheet = wb.createSheet("sheet1");
 			
 			this.createPunchSchedulingsBookSheetHead(sheet );
