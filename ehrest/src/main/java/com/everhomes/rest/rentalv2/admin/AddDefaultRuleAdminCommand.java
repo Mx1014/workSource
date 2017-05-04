@@ -78,8 +78,8 @@ public class AddDefaultRuleAdminCommand {
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
-	@ItemType(String.class)
-	private List<String> siteNumbers;
+//	@ItemType(String.class)
+//	private List<String> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -295,12 +295,12 @@ public class AddDefaultRuleAdminCommand {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-	public List<String> getSiteNumbers() {
-		return siteNumbers;
-	}
-	public void setSiteNumbers(List<String> siteNumbers) {
-		this.siteNumbers = siteNumbers;
-	}
+//	public List<String> getSiteNumbers() {
+//		return siteNumbers;
+//	}
+//	public void setSiteNumbers(List<String> siteNumbers) {
+//		this.siteNumbers = siteNumbers;
+//	}
 
 	public Byte getRentalStartTimeFlag() {
 		return rentalStartTimeFlag;
