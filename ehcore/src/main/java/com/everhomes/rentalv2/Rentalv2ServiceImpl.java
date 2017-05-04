@@ -873,12 +873,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),cmd.getRentalSiteId());
-		if(null!=attachments){
-			response.setAttachments(new ArrayList<>());
-			for(RentalConfigAttachment single:attachments){
-				response.getAttachments().add(ConvertHelper.convert(single, AttachmentConfigDTO .class));
-			}
-		}
+		response.setAttachments(convertAttachments(attachments));
+//		if(null!=attachments){
+//			response.setAttachments(new ArrayList<>());
+//			for(RentalConfigAttachment single:attachments){
+//				response.getAttachments().add(ConvertHelper.convert(single, AttachmentConfigDTO .class));
+//			}
+//		}
 		
 		return response;
 	}

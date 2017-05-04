@@ -41,8 +41,6 @@ import com.everhomes.util.StringHelper;
  * <li>billAttachments：订单附加信息</li> 
  * <li>unpayCancelTime：未支付取消时间</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
- * <li>goodItems: 物资列表 {@link com.everhomes.rest.rentalv2.RentalGoodItem}</li>
- * <li>recommendUsers: 推荐员列表 {@link com.everhomes.rest.rentalv2.RentalRecommendUser}</li>
  * </ul>
  */
 public class RentalBillDTO {
@@ -92,11 +90,6 @@ public class RentalBillDTO {
 
 	private Byte toastFlag;
 	private String confirmationPrompt;
-
-	@ItemType(AttachmentConfigDTO.class)
-	private List<AttachmentConfigDTO> goodItems;
-	@ItemType(AttachmentConfigDTO.class)
-	private List<AttachmentConfigDTO> recommendUsers;
 	
 	@Override
     public String toString() {
@@ -450,20 +443,4 @@ public class RentalBillDTO {
 		this.confirmationPrompt = confirmationPrompt;
 	}
 
-
-	public List<AttachmentConfigDTO> getGoodItems() {
-		return goodItems;
-	}
-
-	public void setGoodItems(List<AttachmentConfigDTO> goodItems) {
-		this.goodItems = goodItems;
-	}
-
-	public List<AttachmentConfigDTO> getRecommendUsers() {
-		return recommendUsers;
-	}
-
-	public void setRecommendUsers(List<AttachmentConfigDTO> recommendUsers) {
-		this.recommendUsers = recommendUsers;
-	}
 }
