@@ -3998,14 +3998,15 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
-			if(statistic.getOverTimeSum().equals(0L)){
-				dto.setOverTimeSum(0.0);
-			}
-			else{
-				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
-				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
-			}
-
+//			if(statistic.getOverTimeSum().equals(0L)){
+//				dto.setOverTimeSum(0.0);
+//			}
+//			else{
+//				BigDecimal b = new BigDecimal(statistic.getOverTimeSum()/3600000.0);
+//				dto.setOverTimeSum(b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+//			}
+			
+			dto.setOverTimeSum(approvalRequestProvider.countHourLengthByUserAndMonth(statistic.getUserId(),statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth()));
 			List<ApprovalRangeStatistic> abscentStats = approvalRangeStatisticProvider.queryApprovalRangeStatistics(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

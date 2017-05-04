@@ -1,13 +1,17 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.Row2;
 import org.jooq.SelectConditionStep;
@@ -333,5 +337,29 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	public void deleteApprovalRequest(ApprovalRequest approvalRequest) {
 		getReadWriteDao().delete(approvalRequest);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhApprovalRequests.class, null);
+	}
+
+	@Override
+	public Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
+			String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMDD");
+		Date beginDate;
+		try {
+			beginDate = (Date) dateFormat.parse(punchMonth+"01");
+		
+			Date endDate = (Date) dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01");
+			return getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
+					.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(beginDate))
+					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lt(endDate))
+					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode())).fetchOneInto(Double.class);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0.0; 
+		}	
+		  
 	}
 }
