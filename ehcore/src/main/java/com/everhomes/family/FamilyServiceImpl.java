@@ -20,6 +20,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLog;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -805,7 +806,8 @@ public class FamilyServiceImpl implements FamilyService {
         
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
-        
+        member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+        addGroupMemberLog(member);
         //Create reject history
         UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
@@ -820,6 +822,16 @@ public class FamilyServiceImpl implements FamilyService {
         else if(cmd.getOperatorRole() == Role.SystemAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
     }
+    
+    private void addGroupMemberLog(GroupMember member) {
+    	GroupMemberLog groupMemberLog = new GroupMemberLog();
+    	groupMemberLog.setGroupMemberId(member.getId());
+    	groupMemberLog.setStatus(member.getMemberStatus());
+    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
+    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	groupMemberLog.setProcessMessage(member.toString());
+    	groupProvider.createGroupMemberLog(groupMemberLog);
+	}
     
     private void sendFamilyNotificationForMemberRejectFamilyByAdmin(Address address, Group group, GroupMember member,long operatorId) {
         // send notification to the applicant
