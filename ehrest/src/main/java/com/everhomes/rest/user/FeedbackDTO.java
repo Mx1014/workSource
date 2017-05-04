@@ -22,7 +22,8 @@ import com.everhomes.util.StringHelper;
  *   <li>targetStatus: 目标的状态， 0-已删除、1-待确认、2-正常。参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *   <li>proofResourceUri:图片链接</li>
  *   <li>contentCategory:内容类别：0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13
- *         -暴力色情、14-诈骗和虚假信息、15-骚扰；21-谣言、22-恶意营销、23-诱导分享；31-政治</li>
+ *         -暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治。参考{@link com.everhomes.rest.user.FeedbackContentCategoryType}</li>
+ *   <li>contentCategoryText: contentCategory对应的内容</li>
  *   <li>status: 处理状态  0-未处理,</li>
  *   <li>verifyType: 核实情况  0-不属实， 1-属实</li>
  *   <li>handleType: 处理方式 0-无， 1-删除</li>
@@ -45,6 +46,7 @@ public class FeedbackDTO {
     private Byte targetStatus;
     private String proofResourceUri;
     private Long contentCategory;
+    private String contentCategoryText;
     private Byte status;
     private Byte verifyType;
     private Byte handleType;
@@ -168,6 +170,14 @@ public class FeedbackDTO {
 
 	public void setContentCategory(Long contentCategory) {
 		this.contentCategory = contentCategory;
+	}
+
+	public String getContentCategoryText() {
+		return contentCategoryText;
+	}
+
+	public void setContentCategoryText(String contentCategoryText) {
+		this.contentCategoryText = contentCategoryText;
 	}
 
 	public Byte getStatus() {

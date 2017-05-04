@@ -90,6 +90,7 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FeedbackContentCategoryType;
 import com.everhomes.rest.user.FeedbackDTO;
 import com.everhomes.rest.user.FeedbackHandleType;
 import com.everhomes.rest.user.FeedbackTargetType;
@@ -566,6 +567,8 @@ public class UserActivityServiceImpl implements UserActivityService {
         			feedbackDto.setTargetStatus(post.getStatus());
         		}
     		}
+    		FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
+    		feedbackDto.setContentCategoryText(contentCategory.getText());
     		
     		feedbackDtos.add(feedbackDto);
     	});
