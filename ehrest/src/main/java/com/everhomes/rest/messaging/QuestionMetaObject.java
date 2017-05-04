@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>requestorAvatarUrl: 请求者头像URL</li>
  * <li>requestTime: 请求时间</li>
  * <li>requestInfo: 申请描述</li>
+ * <li>requestId: 申请id</li>
  * </ul>
  */
 public class QuestionMetaObject {
@@ -31,8 +32,17 @@ public class QuestionMetaObject {
     private String requestorAvatarUrl;
     private Timestamp requestTime;
     private String requestInfo;
+    private Long requestId;
     
-    public String getResourceType() {
+    public Long getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(Long requestId) {
+		this.requestId = requestId;
+	}
+
+	public String getResourceType() {
         return resourceType;
     }
 
