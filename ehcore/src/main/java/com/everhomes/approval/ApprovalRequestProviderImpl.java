@@ -359,7 +359,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(beginDate))
 					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lt(endDate))
 					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
-			LOGGER.debug(step.toString());
+//			LOGGER.debug(step.toString());
 			return step.fetchOneInto(Double.class);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
