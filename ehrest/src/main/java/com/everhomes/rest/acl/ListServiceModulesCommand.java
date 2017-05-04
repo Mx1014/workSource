@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>ownerType: 所属实体类型</li>
+ * <li>ownerType: 所属实体类型,</li>
  * <li>ownerId:  所属实体id</li>
  * <li>level: 业务模块级别</li>
  * </ul>

@@ -14,6 +14,7 @@ import com.everhomes.discover.ItemType;
  * <li>leafFlag: 是否是页子节点，参考{@link com.everhomes.rest.acl.WebMenuLeafFlag}</li>
  * <li>sortNum: 排序号</li>
  * <li>parentId: 父级id</li>
+ * <li>dtos: 子菜单</li>
  * </ul>
  */
 public class WebMenuDTO {
