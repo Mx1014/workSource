@@ -509,6 +509,9 @@ public class ExpressServiceImpl implements ExpressService {
 		expressAddress.setOrganizationId(cmd.getOrganizationId());
 		expressAddress.setOrganizationName(cmd.getOrganizationName());
 		expressAddress.setPhone(cmd.getPhone());
+		expressAddress.setProvinceId(cmd.getProvinceId());
+		expressAddress.setCityId(cmd.getCityId());
+		expressAddress.setCountyId(cmd.getCountyId());
 		expressAddress.setProvince(cmd.getProvince());
 		expressAddress.setCity(cmd.getCity());
 		expressAddress.setCounty(cmd.getCounty());
@@ -536,6 +539,9 @@ public class ExpressServiceImpl implements ExpressService {
 		expressAddress.setOrganizationId(cmd.getOrganizationId());
 		expressAddress.setOrganizationName(cmd.getOrganizationName());
 		expressAddress.setPhone(cmd.getPhone());
+		expressAddress.setProvinceId(cmd.getProvinceId());
+		expressAddress.setCityId(cmd.getCityId());
+		expressAddress.setCountyId(cmd.getCountyId());
 		expressAddress.setProvince(cmd.getProvince());
 		expressAddress.setCity(cmd.getCity());
 		expressAddress.setCounty(cmd.getCounty());

@@ -39,10 +39,16 @@ public class CreateOrUpdateExpressAddressCommand {
 
 	private String organizationName;
 
+	private Long provinceId;
+
+	private Long cityId;
+
+	private Long countyId;
+	
 	private String province;
-
+	
 	private String city;
-
+	
 	private String county;
 
 	private String detailAddress;
@@ -68,6 +74,30 @@ public class CreateOrUpdateExpressAddressCommand {
 		this.county = county;
 		this.detailAddress = detailAddress;
 		this.defaultFlag = defaultFlag;
+	}
+
+	public Long getProvinceId() {
+		return provinceId;
+	}
+
+	public void setProvinceId(Long provinceId) {
+		this.provinceId = provinceId;
+	}
+
+	public Long getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public Long getCountyId() {
+		return countyId;
+	}
+
+	public void setCountyId(Long countyId) {
+		this.countyId = countyId;
 	}
 
 	public String getOwnerType() {
