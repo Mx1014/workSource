@@ -67,7 +67,7 @@ import com.everhomes.util.Tuple;
 @Component
 public class PunchFlowModuleListener implements FlowModuleListener {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2FlowModuleListener.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PunchFlowModuleListener.class);
 	@Autowired
 	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
