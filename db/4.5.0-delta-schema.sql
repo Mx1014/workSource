@@ -26,3 +26,7 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `alias_icon_uri` VARCHAR(1024) NULL
 
 -- 增加一个排序字段，用于客户端显示顺序 add by yanjun 20170427 search-2.0
 ALTER TABLE `eh_search_types` ADD COLUMN `order` TINYINT(4) NULL;
+
+-- 删除一个重复的索引和添加一个索引 add by sfyan 20170504
+DROP INDEX eh_organization_member_target_id ON `eh_organization_members`;
+ALTER TABLE `eh_organization_members` ADD INDEX i_contact_token ( `contact_token`);

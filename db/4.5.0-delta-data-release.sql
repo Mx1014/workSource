@@ -75,3 +75,6 @@ update `eh_organizations` set `directly_enterprise_id` = 1023080 where path like
 -- 社群增加参数配置 add by 20170503
 update `eh_launch_pad_items` set `action_data` = '{\"url\":\"zl://association/main?layoutName=AssociationLayout&itemLocation=/association&versionCode=2017042501&displayName=社群\"}' where `item_name` = 'Association' and `item_label` = '社群' and namespace_id = 999985;
 
+-- 批量把通讯录关联用户 add by sfyan 20170503 需要一点时间
+update `eh_organization_members` om set `target_type` = IF(((select count(*) from `eh_user_identifiers` where namespace_id = 999992 and `identifier_token` = om.`contact_token`) = 0) , 'UNTRACK', 'USER'), `target_id` = IFNULL((select `owner_uid` from `eh_user_identifiers` where namespace_id = 999992 and `identifier_token` = om.`contact_token`) , 0) where `group_path` like '/1000750%' and status = 3 and target_type = 'UNTRACK';
+
