@@ -535,4 +535,8 @@ update eh_launch_pad_items set item_label = '公司简介' where namespace_id = 
 -- redmine 9383 add by xiongying 20170503
 update eh_launch_pad_items set delete_flag = 1 where namespace_id = 999977 and item_label in('会议室','客房预定','物业服务','投放房源','委托找房','服务热线','公司简介','地产服务','活动','俱乐部','任务管理');
 
+-- redmine 9283 add by xiongying 20170504
+SET @id = (SELECT MAX(id) FROM eh_app_urls);    
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@id := @id + 1), '999977', '创梦云', '2', '', '', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@id := @id + 1), '999977', '创梦云', '1', '', '', '移动平台聚合服务，助力园区效能提升');
 SET FOREIGN_KEY_CHECKS = 1;
