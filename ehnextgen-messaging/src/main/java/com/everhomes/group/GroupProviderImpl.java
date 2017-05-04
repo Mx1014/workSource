@@ -18,14 +18,17 @@ import com.everhomes.rest.group.GroupOpRequestStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhGroupMemberLogsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupMembersDao;
 import com.everhomes.server.schema.tables.daos.EhGroupOpRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
 import com.everhomes.server.schema.tables.daos.EhGroupsDao;
+import com.everhomes.server.schema.tables.pojos.EhGroupMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhGroupVisibleScopes;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
@@ -908,4 +911,30 @@ public class GroupProviderImpl implements GroupProvider {
 	public List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize) {
 		return listPublicGroupMembersByStatus(groupId, keyword, status, from, pageSize, true, 0L);
 	}
+
+	@Override
+	public GroupMemberLog findGroupMemberLogByGroupMemberId(Long groupMemberId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_GROUP_MEMBER_LOGS)
+			.where(Tables.EH_GROUP_MEMBER_LOGS.GROUP_MEMBER_ID.eq(groupMemberId))
+			.orderBy(Tables.EH_GROUP_MEMBER_LOGS.ID.desc())
+			.limit(1)
+			.fetch();
+		if (records != null && records.size() > 0) {
+			return ConvertHelper.convert(records.get(0), GroupMemberLog.class);
+		}
+		return null;
+	}
+
+	@Override
+	public void createGroupMemberLog(GroupMemberLog groupMemberLog) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhGroupMemberLogs.class));
+		groupMemberLog.setId(id);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroupMemberLogs.class, groupMemberLog.getId()));
+        EhGroupMemberLogsDao dao = new EhGroupMemberLogsDao(context.configuration());
+        dao.insert(groupMemberLog);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMemberLogs.class, null);
+	}
+	
+	
 }

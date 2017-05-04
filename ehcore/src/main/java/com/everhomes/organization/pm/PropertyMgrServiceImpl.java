@@ -27,6 +27,7 @@ import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLog;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -5614,8 +5615,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			if (groupMember != null) {
 				return new GetRequestInfoResponse(groupMember.getMemberStatus());
 			}
+			// 新加了一个groupMemberLog表用来存储删除还是拒绝
+			GroupMemberLog groupMemberLog = groupProvider.findGroupMemberLogByGroupMemberId(requestId);
+			if (groupMemberLog != null) {
+				return new GetRequestInfoResponse(groupMemberLog.getStatus());
+			}
 		}
-		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists");
+		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
 	}
     
 }

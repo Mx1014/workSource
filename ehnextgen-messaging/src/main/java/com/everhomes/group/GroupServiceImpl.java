@@ -1256,6 +1256,8 @@ public class GroupServiceImpl implements GroupService {
             break;
         case WAITING_FOR_ACCEPTANCE:
             deletePendingGroupMember(operatorUid, member);
+            member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+            addGroupMemberLog(member);
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
@@ -1272,7 +1274,17 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    @Override
+    private void addGroupMemberLog(GroupMember member) {
+    	GroupMemberLog groupMemberLog = new GroupMemberLog();
+    	groupMemberLog.setGroupMemberId(member.getId());
+    	groupMemberLog.setStatus(member.getMemberStatus());
+    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
+    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	groupMemberLog.setProcessMessage(member.toString());
+    	groupProvider.createGroupMemberLog(groupMemberLog);
+	}
+
+	@Override
     public void approveJoinGroupRequest(ApproveJoinGroupRequestCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
@@ -1343,6 +1355,8 @@ public class GroupServiceImpl implements GroupService {
             break;
         case WAITING_FOR_APPROVAL:
             deletePendingGroupMember(operatorUid, member);
+            member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+            addGroupMemberLog(member);
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
