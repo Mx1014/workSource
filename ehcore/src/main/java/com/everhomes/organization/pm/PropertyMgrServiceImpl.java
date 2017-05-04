@@ -5603,24 +5603,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
 		if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY || resourceType == EntityType.ORGANIZATIONS) {
-			Long groupId = cmd.getResourceId();
-			Long ownerId = cmd.getTargetId();
-			if (ownerId == null) {
-				ownerId = cmd.getRequestorUid();
+			Long resourceId = cmd.getResourceId();
+			Long memberId = cmd.getTargetId();
+			if (memberId == null) {
+				memberId = cmd.getRequestorUid();
 			}
-			// 如果userGroup中存在直接取这里的，否则从organizationMember或groupMember中取
-			UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(ownerId, groupId);
-			if (userGroup != null) {
-				return new GetRequestInfoResponse(userGroup.getMemberStatus());
-			}
-			
 			if (resourceType == EntityType.ORGANIZATIONS) {
-				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutStatus(groupId, ownerId);
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutStatus(resourceId, memberId);
 				if (organizationMember != null) {
 					return new GetRequestInfoResponse(organizationMember.getStatus());
 				}
 			}else {
-				GroupMember groupMember = groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), ownerId);
+				GroupMember groupMember = groupProvider.findGroupMemberByMemberInfo(resourceId, EntityType.USER.getCode(), memberId);
 				if (groupMember != null) {
 					return new GetRequestInfoResponse(groupMember.getMemberStatus());
 				}
