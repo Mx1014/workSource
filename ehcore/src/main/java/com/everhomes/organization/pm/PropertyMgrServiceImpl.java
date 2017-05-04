@@ -5601,16 +5601,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
 			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
 		}
-		if (EntityType.fromCode(cmd.getResourceType()) == EntityType.GROUP) {
+		EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
+		if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY || resourceType == EntityType.ORGANIZATIONS) {
 			Long groupId = cmd.getResourceId();
 			Long ownerId = cmd.getTargetId();
 			if (ownerId == null) {
 				ownerId = cmd.getRequestorUid();
 			}
+			// 如果userGroup中存在直接取这里的，否则从organizationMember或groupMember中取
 			UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(ownerId, groupId);
-			return new GetRequestInfoResponse(userGroup.getMemberStatus());
+			if (userGroup != null) {
+				return new GetRequestInfoResponse(userGroup.getMemberStatus());
+			}
+			
+			if (resourceType == EntityType.ORGANIZATIONS) {
+				OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUIdWithoutStatus(groupId, ownerId);
+				if (organizationMember != null) {
+					return new GetRequestInfoResponse(organizationMember.getStatus());
+				}
+			}else {
+				GroupMember groupMember = groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), ownerId);
+				if (groupMember != null) {
+					return new GetRequestInfoResponse(groupMember.getMemberStatus());
+				}
+			}
 		}
-		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid parameter");
+		throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists");
 	}
     
 }

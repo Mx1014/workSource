@@ -1979,7 +1979,7 @@ public class PropertyMgrController extends ControllerBase {
 	 * <b>URL: /pm/getRequestInfo</b>
 	 * <p>获取申请的信息</p>
 	 */
-	@RequestMapping("getReqeustInfo")
+	@RequestMapping("getRequestInfo")
 	@RestReturn(value= GetRequestInfoResponse.class)
 	public RestResponse getRequestInfo(GetRequestInfoCommand cmd) {
 		RestResponse response = new RestResponse(propertyMgrService.getRequestInfo(cmd));
