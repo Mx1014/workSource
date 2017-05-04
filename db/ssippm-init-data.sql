@@ -541,6 +541,6 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@id := @id + 1), '999977', '创梦云', '1', '', '', '移动平台聚合服务，助力园区效能提升');
 
 -- redmine 9431 add by xiongying20170504
-update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%"}' where namespace_id = 999977 and item_label = '嘀嗒咖啡';
+update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14937991534523928845%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 999977 and item_label = '嘀嗒咖啡';
 
 SET FOREIGN_KEY_CHECKS = 1;
