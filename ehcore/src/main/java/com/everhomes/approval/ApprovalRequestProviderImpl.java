@@ -346,7 +346,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	@Override
 	public Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
 			String punchMonth) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMDD");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		Date beginDate;
 		try {
 			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
