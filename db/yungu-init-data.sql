@@ -2,21 +2,21 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET @core_server_url = "core.zuolin.com"; -- 取具体环境连接core server的链接
 SET @biz_url = 'biz.zuolin.com'; -- 取具体环境的电商服务器连接，注意有两个域名要修改
 SET @namespace_id=999976;
-SET @user_id = 265000;  -- 需要取现网eh_users的ID的最大值再加一定余量
-SET @account_name='286585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
-SET @community_id = 240111044331058733; -- 需要取现网eh_communities的ID的最大值再加一定余量
-SET @organization_id = 1023080; 	-- 需要取eh_organizations的ID最大值并加一定余量，如果修改此值则其path也要改
-SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`);  
-SET @org_group_id = 1012469; -- 需要取eh_groups的ID的最大值再加一定余量
-SET @org_forum_id = 190412;   -- @community_forum_id+2
-SET @feedback_forum_id = 190411;   -- @community_forum_id+1
-SET @community_forum_id = 190410;   -- 取eh_forums的ID最大值再加一定余量
-SET @building_id = 194001;   -- 取eh_buildings的ID最大值再加一定余量
-SET @sheng_id = 17251;  -- 取eh_regions的ID最大值再加一定余量
+SET @user_id = (SELECT MAX(id) FROM `eh_users`) + 5;  -- 需要取现网eh_users的ID的最大值再加一定余量
+SET @account_name= 9204219; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量
+SET @organization_id = (SELECT MAX(id) FROM `eh_organizations`) + 5; 	-- 需要取eh_organizations的ID最大值并加一定余量，如果修改此值则其path也要改
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
+SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量
+SET @org_group_id = (SELECT MAX(id) FROM `eh_groups`) + 5;  -- 需要取eh_groups的ID的最大值再加一定余量
+SET @org_forum_id = @community_forum_id+2;   -- @community_forum_id+2
+SET @feedback_forum_id = @community_forum_id+1;   -- @community_forum_id+1
+SET @building_id = (SELECT MAX(id) FROM `eh_buildings`) + 5;   -- 取eh_buildings的ID最大值再加一定余量
+SET @sheng_id = (SELECT MAX(id) FROM `eh_regions`) + 5;  -- 取eh_regions的ID最大值再加一定余量
 SET @shi_id = @sheng_id + 1;  -- 在@sheng_id上加1
 SET @qu_id = @shi_id + 1;    -- 在@shi_id上加1
-SET @address_id = 239825274387253717; -- 需要取现网eh_addresses的ID的最大值再加一定余量
-SET @rentalv_type_id = 10612; -- 需要取现网eh_rentalv2_resource_types的ID的最大值再加一定余量
+SET @address_id = 239825274387255178; -- 需要取现网eh_addresses的ID的最大值再加一定余量
+SET @rentalv_type_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`) + 5; -- 需要取现网eh_rentalv2_resource_types的ID的最大值再加一定余量
 SET @layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`); 
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
 SET @banner_id = (SELECT MAX(id) FROM `eh_banners`);
@@ -34,11 +34,11 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for yungu', @namespace_id, NULL);	   
 
-INSERT INTO `eh_version_realm` VALUES (101, 'Android_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_version_realm` VALUES (102, 'iOS_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (105, 'Android_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (106, 'iOS_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
 
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(301,101,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(302,102,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(305,105,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(306,106,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 	
 	
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(@namespace_id, '南山云谷');
@@ -222,9 +222,9 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255270,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-801','朗山阁','801','2','0',UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255271,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-802','朗山阁','802','2','0',UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255272,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-803-805','朗山阁','803-805','2','0',UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255270,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-805-806','朗山阁','805-806','2','0',UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255271,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-807','朗山阁','807','2','0',UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255272,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-808-809','朗山阁','808-809','2','0',UTC_TIMESTAMP(), @namespace_id);                     
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255273,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-805-806','朗山阁','805-806','2','0',UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255274,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-807','朗山阁','807','2','0',UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)VALUES(239825274387255275,UUID(),@community_id, @shi_id, '深圳市',  @qu_id, '南山区' ,'朗山阁-808-809','朗山阁','808-809','2','0',UTC_TIMESTAMP(), @namespace_id);                     
                     
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255178, '南风楼A栋-1层A', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255179, '山水楼A栋-1层A1', '0');
@@ -321,9 +321,9 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255270, '朗山阁-801', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255271, '朗山阁-802', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255272, '朗山阁-803-805', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255270, '朗山阁-805-806', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255271, '朗山阁-807', '0');
-INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255272, '朗山阁-808-809', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255273, '朗山阁-805-806', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255274, '朗山阁-807', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@organization_address_mapping_id := @organization_address_mapping_id + 1), @organization_id, @community_id, 239825274387255275, '朗山阁-808-809', '0');
       
     
    
