@@ -711,6 +711,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null==cmd.getSiteCounts()) 
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts can not be null");
+		if (null == cmd.getRentalEndTimeFlag()) {
+			cmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
+		}
+		if (null == cmd.getRentalStartTimeFlag()) {
+			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
+		}
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalDefaultRule newDefaultRule = ConvertHelper.convert(cmd, RentalDefaultRule.class); 
 			if(null==newDefaultRule.getCancelFlag()) {
@@ -998,21 +1004,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		rSiteDTO.setAttachments(convertAttachments(attachments));
 
-		//起止时间为资源允许预定的最早和最晚时间 
-		Calendar beginCalendar = Calendar.getInstance();
-		Calendar endCalendar = Calendar.getInstance();
+		//起止时间为资源允许预定的最早和最晚时间
 		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
-		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
-		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
-		
+		String beginTime = null;
+		String endTime = null;
+		if (NormalFlag.NEED.getCode() == rentalSite.getRentalEndTimeFlag()) {
+			Calendar beginCalendar = Calendar.getInstance();
+			beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
+			beginTime = dateSF.format(beginCalendar.getTime());
+		}
+		if (NormalFlag.NEED.getCode() == rentalSite.getRentalStartTimeFlag()) {
+			Calendar endCalendar = Calendar.getInstance();
+			endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
+			endTime = dateSF.format(endCalendar.getTime());
+		}
+
+
 		BigDecimal minPrice = null;
 		Double minTimeStep = 1.0;
 		BigDecimal maxPrice = null;
 		Double maxTimeStep = 1.0;
 		
 		try {
-			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), dateSF.format(beginCalendar.getTime()), 
-					dateSF.format(endCalendar.getTime()));
+			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
 			if(null == cells || cells.size() == 0) {
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
 			}else {
