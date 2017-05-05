@@ -1261,7 +1261,5 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(@namespace_id, 'sms.default.yzx', 13, 'zh_CN', '预定2-荣超', '44953');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(@namespace_id, 'sms.default.yzx', 14, 'zh_CN', '预定3-荣超', '44954');
 	
-i
-
 
 SET FOREIGN_KEY_CHECKS = 1;
