@@ -164,8 +164,8 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findRentalSiteById")
 	@RestReturn(value = RentalSiteDTO.class)
 	public RestResponse findRentalSiteById(@Valid FindRentalSiteByIdCommand cmd) {
-		//:TODO
-		RestResponse response = new RestResponse();
+
+		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
