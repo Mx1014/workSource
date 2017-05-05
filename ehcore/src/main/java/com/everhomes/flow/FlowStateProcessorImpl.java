@@ -277,8 +277,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 //				btn.getSms().fireAction(ctx, event);
 //			}
 //			if(null != btn.getScripts()) {
-//				for(FlowGraphAction action : btn.getScripts()) {
-//					action.fireAction(ctx, event);
+//				for(FlowGraphAction build : btn.getScripts()) {
+//					build.fireAction(ctx, event);
 //				}
 //			}
 			
@@ -351,7 +351,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		//TODO use schedule ? scheduler.execute();
 		
-		//TODO do action in a delay thread
+		//TODO do build in a delay thread
 		if(curr.getMessageAction() != null) {
 			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
 		}

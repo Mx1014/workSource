@@ -14,7 +14,7 @@ public class FlowScriptFireDummy implements FlowScriptFire {
 	@Override
 	public void fireAction(FlowCaseState ctx, FlowGraphEvent event)
 			throws FlowStepErrorException {
-		LOGGER.info("dumpy script action fired");
+		LOGGER.info("dumpy script build fired");
 	}
 
 }

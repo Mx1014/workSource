@@ -48,7 +48,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         }
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
         if(actionType == null) {
-            LOGGER.error("Invalid action type, operatorId=" + operatorId + ", actionType=" + cmd.getActionType());
+            LOGGER.error("Invalid build type, operatorId=" + operatorId + ", actionType=" + cmd.getActionType());
             throw RuntimeErrorException.errorWith(QRCodeServiceErrorCode.SCOPE, 
                 QRCodeServiceErrorCode.ERROR_ACTION_TYPE_INVALID, "Action type invalid");
         }

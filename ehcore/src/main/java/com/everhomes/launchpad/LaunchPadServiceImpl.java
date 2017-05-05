@@ -940,7 +940,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 							if(null != actionData){
 								jsonObject.put(LaunchPadConstants.URL, actionData.getUrl());
 							}else{
-								LOGGER.error("item action data error. itemId = {}, actionData= {}", r.getId(), r.getActionData());
+								LOGGER.error("item build data error. itemId = {}, actionData= {}", r.getId(), r.getActionData());
 							}
 							jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 							itemDTO.setActionData(jsonObject.toJSONString());

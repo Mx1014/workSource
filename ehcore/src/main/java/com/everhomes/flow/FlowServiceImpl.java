@@ -22,7 +22,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.FlowCaseDetailActionData;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -1437,7 +1437,7 @@ public class FlowServiceImpl implements FlowService {
 			});
 			flowEvaluateItemProvider.createFlowEvaluateItem(items);
 			
-			//TODO support action for evaluate
+			//TODO support build for evaluate
 		}
 		
 		flow.setStartNode(flowGraph.getNodes().get(0).getFlowNode().getId());
@@ -1705,7 +1705,7 @@ public class FlowServiceImpl implements FlowService {
             actionData.setModuleId(ctx.getModule().getModuleId());
 
 	        RouterMetaObject rmo = new RouterMetaObject();
-	        rmo.setUrl(Action2Router.action(ActionType.FLOW_CASE_DETAIL, actionData, null));
+	        rmo.setUrl(RouterBuilder.build(Router.WORKFLOW_DETAIL, actionData));
 
             Map<String, String> meta = new HashMap<>();
             meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
@@ -3028,7 +3028,7 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public String parseActionTemplate(FlowCaseState ctx, Long actionId, String renderText) {
-        String templateKey = String.format("action:%d", actionId);
+        String templateKey = String.format("build:%d", actionId);
         Map<String, String> model = new HashMap<String, String>();
         List<String> params = getAllParams(renderText);
         if(params == null || params.size() == 0) {

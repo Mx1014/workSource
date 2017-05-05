@@ -5606,21 +5606,29 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Long requestId = cmd.getRequestId();  //表示那条记录的id
 		if (resourceType == EntityType.ORGANIZATIONS) {
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(requestId);
+			if (LOGGER.isDebugEnabled())
+			    LOGGER.debug("getRequestInfo organizationMember {}", organizationMember);
 			if (organizationMember != null) {
 				return new GetRequestInfoResponse(organizationMember.getStatus());
 			}
 		}else if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY) {
 			// groupMember拒绝的时候是直接删除的，蛋疼
 			GroupMember groupMember = groupProvider.findGroupMemberById(requestId);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("getRequestInfo groupMember {}", groupMember);
 			if (groupMember != null) {
 				return new GetRequestInfoResponse(groupMember.getMemberStatus());
 			}
 			// 新加了一个groupMemberLog表用来存储删除还是拒绝
 			GroupMemberLog groupMemberLog = groupProvider.findGroupMemberLogByGroupMemberId(requestId);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("getRequestInfo groupMemberLog {}", groupMemberLog);
 			if (groupMemberLog != null) {
 				return new GetRequestInfoResponse(groupMemberLog.getStatus());
 			}
 		}
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("getRequestInfo new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode())");
 		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
 	}
     

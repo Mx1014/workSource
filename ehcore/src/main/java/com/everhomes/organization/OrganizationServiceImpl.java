@@ -60,7 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.common.MemberApplyActionData;
+import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -71,8 +71,8 @@ import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ItemKind;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
@@ -6300,30 +6300,30 @@ System.out.println();
 	    User user = userProvider.findUserById(member.getTargetId());
 
          // send notification to who is requesting to join the enterprise
-         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT);
+         // String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT);
 
          List<Long> includeList = new ArrayList<Long>();
 
        //给申请人发的信息应为私信by xiongying 20160524
- 		sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+ 		// sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);// 不给申请人发送消息
 //         includeList.add(member.getTargetId());
 //
 //         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
          // send notification to all the other members in the group
-         notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
+         String notifyTextForOperator = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
 
          includeList = getOrganizationAdminIncludeList(member.getOrganizationId(), user.getId(), user.getId());
          if(includeList.size() > 0) {
 
              QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
-             metaObject.setRequestInfo(notifyTextForApplicant);
+             metaObject.setRequestInfo(notifyTextForOperator);
 
-             MemberApplyActionData actionData = new MemberApplyActionData();
+             QuestionMetaActionData actionData = new QuestionMetaActionData();
              actionData.setMetaObject(metaObject);
 
-             String routerUri = Action2Router.action(ActionType.ENTERPRISE_MEMBER_APPLY, actionData, null);
-             sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant, routerUri);
+             String routerUri = RouterBuilder.build(Router.ENTERPRISE_MEMBER_APPLY, actionData);
+             sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForOperator, routerUri);
 
              if(LOGGER.isDebugEnabled()) {
                  LOGGER.debug("Send waiting approval message to admin member in organization, userId=" + user.getId()
@@ -6360,23 +6360,22 @@ System.out.println();
          // send notification to who is requesting to join the enterprise
         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
 
-        QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
+        // QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
 
 		// send notification to who is requesting to join the enterprise
         List<Long> includeList = new ArrayList<Long>();
 
         includeList.add(member.getTargetId());
-		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
-
+        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 
 		//同意加入公司通知客户端  by sfyan 20160526
-		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
+		// sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
 		// 消息只发给公司的管理人员  by sfyan 20170213
 		includeList = this.includeOrgList(org, member.getTargetId());
-		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
+        sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 	}
 
 	private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -6434,7 +6433,7 @@ System.out.println();
 
 	   //消息只发给公司的管理人员  by sfyan 20170213
        includeList = this.includeOrgList(org, member.getTargetId());
-       sendEnterpriseNotification(org.getGroupId(), includeList, null, notifyTextForApplicant, null, null);
+       sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
    }
 
    /**
@@ -6500,7 +6499,7 @@ System.out.println();
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
                 includeList.forEach(targetId -> {
-                    messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                    messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
                             messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
@@ -6509,17 +6508,18 @@ System.out.println();
         }
 	}
 
+	// add by xq.tian   2017/05/05
+	@Deprecated
 	private void sendEnterpriseNotification(Long groupId,
 			List<Long> includeList, List<Long> excludeList, String message,
 			MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
 		if (message != null && message.length() != 0) {
-			String channelType = MessageChannelType.GROUP.getCode();
+			String channelType = MessageChannelType.USER.getCode();
 			String channelToken = String.valueOf(groupId);
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
-			messageDto
-					.setChannels(new MessageChannel(channelType, channelToken));
+			messageDto.setChannels(new MessageChannel(channelType, channelToken));
 			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
 			messageDto.setBody(message);
 			messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
@@ -6544,8 +6544,35 @@ System.out.println();
 		}
 	}
 
-
-
+	private void sendEnterpriseNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+        if (message != null && message.length() != 0) {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+            if (includeList != null && includeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.INCLUDE,
+                        StringHelper.toJsonString(includeList));
+            }
+            if (excludeList != null && excludeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
+                        StringHelper.toJsonString(excludeList));
+            }
+            if (includeList != null && includeList.size() > 0) {
+                if (excludeList != null && excludeList.size() > 0) {
+                    includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+                }
+                includeList.forEach(targetId -> {
+                    messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                });
+            }
+        }
+	}
 
 	/**
 	 * 处理层级菜单

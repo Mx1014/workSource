@@ -18,17 +18,8 @@ import com.everhomes.rest.group.GroupOpRequestStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhGroupMemberLogsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupMembersDao;
-import com.everhomes.server.schema.tables.daos.EhGroupOpRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupVisibleScopesDao;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
-import com.everhomes.server.schema.tables.pojos.EhGroupMemberLogs;
-import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
-import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
-import com.everhomes.server.schema.tables.pojos.EhGroupVisibleScopes;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhNews;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
 import com.everhomes.server.schema.tables.records.EhGroupOpRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
@@ -336,7 +327,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhGroupMembers.class, null);
     }
     
-    @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
+    @Caching(evict={ @CacheEvict(value="GroupMember", key="#groupMember.id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),
@@ -352,7 +343,7 @@ public class GroupProviderImpl implements GroupProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhGroupMembers.class, groupMember.getId());
     }
     
-    @Caching(evict={ @CacheEvict(value="GroupMember", key="#id"),
+    @Caching(evict={ @CacheEvict(value="GroupMember", key="#groupMember.id"),
             @CacheEvict(value="GroupMemberByInfo", key="{#groupMember.groupId, #groupMember.memberType, #groupMember.memberId}"),
             @CacheEvict(value="GroupMemberByGroupId", key="#groupMember.groupId"),
             @CacheEvict(value="listGroupMessageMembers", allEntries=true),

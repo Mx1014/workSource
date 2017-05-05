@@ -17,11 +17,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberLog;
-import com.everhomes.group.GroupProvider;
+import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -38,14 +34,14 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.MemberApplyActionData;
+import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
@@ -303,11 +299,11 @@ public class FamilyServiceImpl implements FamilyService {
             List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
             if (includeList != null && includeList.size() > 0) {
                 metaObject.setRequestInfo(notifyTextForOthers);
-                MemberApplyActionData actionData = new MemberApplyActionData();
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
                 actionData.setMetaObject(metaObject);
 
-                String routerUri = Action2Router.action(ActionType.FAMILY_MEMBER_APPLY, actionData, null);
-                sendRouterFamilyNotification(includeList,null,notifyTextForOthers, routerUri);
+                String routerUri = RouterBuilder.build(Router.FAMILY_MEMBER_APPLY, actionData);
+                sendRouterFamilyNotificationUseSystemUser(includeList,null,notifyTextForOthers, routerUri);
             }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
@@ -329,13 +325,13 @@ public class FamilyServiceImpl implements FamilyService {
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
-            }
+        }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -403,7 +399,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
 
-    private void sendRouterFamilyNotification(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
         if(message == null || message.isEmpty()) {
             return;
         }
@@ -420,6 +416,37 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 
+            includeList.forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
+    private void sendRouterFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser includeList {}", includeList);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser excludeList {}", excludeList);
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
             RouterMetaObject mo = new RouterMetaObject();
             mo.setUrl(routerUri);
             Map<String, String> meta = new HashMap<>();
@@ -428,7 +455,7 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setMeta(meta);
 
             includeList.forEach(targetId -> {
-                messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
                         messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
@@ -650,10 +677,9 @@ public class FamilyServiceImpl implements FamilyService {
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
-        
     }
     
-    public void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
+    private void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
         // send notification to the applicant
         try {
             Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0,Role.ResourceOperator);
@@ -1961,13 +1987,15 @@ public class FamilyServiceImpl implements FamilyService {
         if(targetId != null) {
             excludeList.add(targetId);
         }
+        // sendFamilyNotification(groupId, null, excludeList, message, null, null);
         sendFamilyNotification(groupId, null, excludeList, message, null, null);
     }
     
     private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message) {
         List<Long> includeList = new ArrayList<Long>();
         includeList.add(userId);
-        sendFamilyNotification(groupId, includeList, null, message, null, null);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message);
     }
     
     private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {

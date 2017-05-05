@@ -24,7 +24,6 @@ CREATE TABLE `eh_group_member_logs` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'the same as group member status',
   `creator_uid` BIGINT,
   `process_message` TEXT,
-  `create_time` DATETIME,
-
+  `create_time` DATETIME(3),
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

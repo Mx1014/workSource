@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>metaObject: metaObject</li>
  * </ul>
  */
-public class MemberApplyActionData {
+public class QuestionMetaActionData {
 
     private QuestionMetaObject metaObject;
 

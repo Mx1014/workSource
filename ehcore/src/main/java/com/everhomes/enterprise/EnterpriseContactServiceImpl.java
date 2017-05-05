@@ -23,11 +23,11 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.MemberApplyActionData;
+import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.region.RegionScope;
@@ -37,7 +37,7 @@ import com.everhomes.rest.user.UserGender;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
-import com.everhomes.util.Action2Router;
+import com.everhomes.util.RouterBuilder;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -57,10 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -846,10 +843,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(enterprise, contact, null);
                 metaObject.setRequestInfo(notifyTextForApplicant);
 
-                MemberApplyActionData actionData = new MemberApplyActionData();
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
                 actionData.setMetaObject(metaObject);
 
-                String routerUri = Action2Router.action(ActionType.ENTERPRISE_MEMBER_APPLY, actionData, null);
+                String routerUri = RouterBuilder.build(Router.ENTERPRISE_MEMBER_APPLY, actionData);
                 sendRouterEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant, routerUri);
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Send waiting approval message to admin contact in enterprise, userId=" + user.getId() 
@@ -1048,7 +1045,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             messageDto.setMeta(meta);
 
             includeList.forEach(targetId -> {
-                messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
                         messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());

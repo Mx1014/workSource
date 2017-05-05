@@ -55,7 +55,7 @@ import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
-import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.*;
@@ -1865,10 +1865,10 @@ public class ForumServiceImpl implements ForumService {
 	
 	private String getPostNameUrl(Post post) {
 		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {
-            return Action2Router.action(ActionType.ACTIVITY_DETAIL, new ActivityDetailActionData(post.getForumId(), post.getId()), null);
+            return RouterBuilder.build(Router.ACTIVITY_DETAIL, new ActivityDetailActionData(post.getForumId(), post.getId()));
             // return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
 		}
-        return Action2Router.action(ActionType.POST_DETAILS, new PostDetailActionData(post.getForumId(), post.getId()), null);
+        return RouterBuilder.build(Router.POST_DETAIL, new PostDetailActionData(post.getForumId(), post.getId()));
 		// return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
 	}
 
@@ -2797,7 +2797,7 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.error("Action category not found, userId=" + userId + ", cmd=" + cmd);
                 }
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid action category");
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid build category");
             }
             
             post.setActionCategory(cmd.getActionCategory());
