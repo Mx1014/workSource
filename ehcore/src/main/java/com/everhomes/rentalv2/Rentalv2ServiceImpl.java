@@ -530,8 +530,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			addCmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
 			addCmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
 			//默认不开启
-//			addCmd.setRentalEndTime(1000*60*60L);
-//			addCmd.setRentalStartTime(1000*60*60*24*30L);
+			addCmd.setRentalEndTime(0L);
+			addCmd.setRentalStartTime(0L);
 
 			addCmd.setApprovingUserWeekendPrice(new BigDecimal(0));
 			addCmd.setApprovingUserWorkdayPrice(new BigDecimal(0));
@@ -724,10 +724,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 
 			if (NormalFlag.NONEED.getCode() == cmd.getRentalEndTimeFlag()) {
-				newDefaultRule.setRentalEndTime(null);
+				newDefaultRule.setRentalEndTime(0L);
 			}
 			if (NormalFlag.NONEED.getCode() == cmd.getRentalStartTimeFlag()) {
-				newDefaultRule.setRentalStartTime(null);
+				newDefaultRule.setRentalStartTime(0L);
 			}
 			newDefaultRule.setOpenWeekday(defaultRule.getOpenWeekday());
 			newDefaultRule.setBeginDate(defaultRule.getBeginDate());
@@ -1006,19 +1006,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		//起止时间为资源允许预定的最早和最晚时间
 		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
-		String beginTime = null;
-		String endTime = null;
-		if (NormalFlag.NEED.getCode() == rentalSite.getRentalEndTimeFlag()) {
-			Calendar beginCalendar = Calendar.getInstance();
-			beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
-			beginTime = dateSF.format(beginCalendar.getTime());
-		}
-		if (NormalFlag.NEED.getCode() == rentalSite.getRentalStartTimeFlag()) {
-			Calendar endCalendar = Calendar.getInstance();
-			endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
-			endTime = dateSF.format(endCalendar.getTime());
-		}
+		Calendar beginCalendar = Calendar.getInstance();
+		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
+		String beginTime = dateSF.format(beginCalendar.getTime());
 
+		Calendar endCalendar = Calendar.getInstance();
+		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
+		String endTime = dateSF.format(endCalendar.getTime());
 
 		BigDecimal minPrice = null;
 		Double minTimeStep = 1.0;
@@ -2322,10 +2316,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setRentalEndTime(cmd.getRentalEndTime());
 			rs.setRentalStartTime(cmd.getRentalStartTime());
 			if (NormalFlag.NONEED.getCode() == cmd.getRentalEndTimeFlag()) {
-				rs.setRentalEndTime(null);
+				rs.setRentalEndTime(0L);
 			}
 			if (NormalFlag.NONEED.getCode() == cmd.getRentalStartTimeFlag()) {
-				rs.setRentalStartTime(null);
+				rs.setRentalStartTime(0L);
 			}
 
 			rs.setTimeStep(cmd.getTimeStep());
