@@ -18,10 +18,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Administrator on 2017/4/27.
@@ -35,6 +32,8 @@ public class Test {
     static String serverUrl = "http://parking.tnar.cn:8085/kesb_req";
 
     public static void main(String[] args) {
+        Map<java.sql.Date, Map<String,Set<Byte>>> dayMap= new HashMap<>();
+
 //        AttachmentConfigDTO a = new AttachmentConfigDTO();
 //
 //        a.setAttachmentType((byte)1);
