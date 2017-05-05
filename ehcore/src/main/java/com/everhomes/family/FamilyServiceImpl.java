@@ -333,7 +333,7 @@ public class FamilyServiceImpl implements FamilyService {
     
      //TODO when user group session?
     private void sendFamilyNotificationGroupSession(Long familyId,List<Long> includeList, List<Long> excludeList, 
-            String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+            String message, MetaObjectType metaObjectType, QuestionMetaObject metPmKeXingBillHandleraObject) {
         if(message != null && message.length() != 0) {
             String channelType = MessageChannelType.GROUP.getCode();
             String channelToken = String.valueOf(familyId);
