@@ -34,6 +34,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -131,6 +132,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class,activity.getId()));
         cxt.select().from(Tables.EH_ACTIVITY_ROSTER)
                 .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activity.getId()))
+                .and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()))
                 .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
                     rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
                 });
@@ -146,7 +148,13 @@ public class ActivityProviderImpl implements ActivityProivider {
             LOGGER.warn("the user does not signin,can cancel the operation");
             this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
-	            dao.delete(rosters[0]);
+	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
+	            rosters[0].setStatus(ActivityRosterStatus.CANCEL.getCode());
+	            dao.update(rosters[0]);
+	            //dao.delete(rosters[0]);
+	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
+	            
+	            
 	            // decrease count
 	            
 	            //因为使用新规则已报名=已确认。  if条件     add by yanjun 20170503
@@ -262,12 +270,13 @@ public class ActivityProviderImpl implements ActivityProivider {
 
     @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}",unless="#result==null")
     @Override
-    public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid) {
+    public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status) {
         ActivityRoster[] rosters = new ActivityRoster[1];
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
                 (context, obj) -> {
                     context.select().from(Tables.EH_ACTIVITY_ROSTER)
                             .where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId))
+                            .and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(status))
                             .and(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid)).fetch().forEach(item -> {
                                 rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
                             });
@@ -279,8 +288,13 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId) {
-       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId), Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.ne(ConfirmStatus.REJECT.getCode()));
+    public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId, boolean onlyConfirm) {
+    	Condition conditon = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+    	//一般用户只查已确认的，创建者查询确认和不确认的人 add by yanjun 20170505  feature activity 3.0.0
+    	if(onlyConfirm){
+    		conditon = conditon.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode()));
+    	}
+       return listInvitationsByConditions(locator,pageSize,Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId), conditon);
     }
     
     
@@ -366,6 +380,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     @Override
     public Integer countActivityRosterByCondition(Long activityId, Condition flagCondition) {
     	final Integer[]  count = new Integer[1];
+    	count[0] = 0;
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class,activityId),null,
                 (context, obj) -> {
                 	Condition condition = Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId);
@@ -373,7 +388,9 @@ public class ActivityProviderImpl implements ActivityProivider {
                 		condition = condition.and(flagCondition);
                 	}
                 	Integer[] c = context.select(DSL.sum(Tables.EH_ACTIVITY_ROSTER.ADULT_COUNT), DSL.sum(Tables.EH_ACTIVITY_ROSTER.CHILD_COUNT)).from(Tables.EH_ACTIVITY_ROSTER).where(condition).fetchOneInto(Integer[].class);
-                	count[0] = c[0] + c[1];
+                	if(c[0] != null && c[1] != null){
+                		count[0] = c[0] + c[1];
+                	}
                     return true;
                 });
         return count[0];
@@ -888,13 +905,16 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer pageOffset, int pageSize) {
+	public List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer cancelStatus, Integer pageOffset, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		SelectQuery<EhActivityRosterRecord>  query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
 		query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
 		if(status != null){
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(status.byteValue()));
+		}
+		if(cancelStatus != null){
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(cancelStatus.byteValue()));
 		}
 		query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.abs());
 		query.addLimit(pageOffset, pageSize);

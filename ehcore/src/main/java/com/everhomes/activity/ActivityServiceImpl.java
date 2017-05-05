@@ -293,6 +293,7 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setChildCount(0);
         roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         roster.setCheckinFlag(CheckInStatus.CHECKIN.getCode());
+        roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
@@ -465,9 +466,9 @@ public class ActivityServiceImpl implements ActivityService {
 		return convertActivityRoster(activityRoster, outActivity);
 	}
     
-    //如果原来已经报过（驳回，重复报名），则更新。
+    //如果原来已经报过(重复报名），则更新。
     private void createActivityRoster(ActivityRoster roster){
-    	ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(roster.getActivityId(), roster.getUid());
+    	ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(roster.getActivityId(), roster.getUid(), ActivityRosterStatus.NORMAL.getCode());
         if(oldRoster != null){
         	activityProvider.deleteRoster(oldRoster);
         }
@@ -529,6 +530,7 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setLeaderFlag(cmd.getLeaderFlag());
         roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
         roster.setEmail(cmd.getEmail());
+        roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
         
         return roster;
 	}
@@ -622,6 +624,7 @@ public class ActivityServiceImpl implements ActivityService {
 				rosters.forEach(r -> {
 					r.setConfirmUid(user.getId());
 					r.setActivityId(cmd.getActivityId());
+					r.setStatus(ActivityRosterStatus.NORMAL.getCode());
 					activityProvider.createActivityRoster(r);
 				});
 				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size());
@@ -721,7 +724,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
         
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getStatus(), offset, pageSize+1);
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getStatus(), cmd.getCancelStatus(), offset, pageSize+1);
 		Integer nextPageOffset = null;
 		if (rosters.size() > pageSize) {
 			rosters.remove(rosters.size()-1);
@@ -737,9 +740,9 @@ public class ActivityServiceImpl implements ActivityService {
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
-		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 1, 0, 100000);
-		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), 2, 0, 100000);
-		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), 0, 0, 100000);
+		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, 1, 0, 100000);
+		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), null, 2, 0, 100000);
+		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, 0, 0, 100000);
 		
 		rosters.addAll(rostersConfirms);
 		rosters.addAll(rostersRejects);
@@ -818,8 +821,13 @@ public class ActivityServiceImpl implements ActivityService {
 			int total = roster.getAdultCount() + roster.getChildCount();
 			int result = 0;
 			Activity activity = activityProvider.findActivityById(roster.getActivityId());
-			activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() - total);
+			
 			if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+				//因为使用新规则已报名=已确认 。  add by yanjun 20170503  start
+	            //1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel、delete：如果已确认则减，如果未确认则不处理
+				//此句由if外搬到if内
+				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() - total);
+				//因为使用新规则已报名=已确认。  add by yanjun 20170503   end
 				activity.setConfirmAttendeeCount((result = activity.getConfirmAttendeeCount() - total) < 0 ? 0 : result);
 				if (roster.getFamilyId() != null) {
 					activity.setConfirmFamilyCount((result = activity.getConfirmFamilyCount() -1) < 0 ? 0 : result);
@@ -871,6 +879,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
+        roster.setStatus(ActivityRosterStatus.NORMAL.getCode());
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
@@ -1033,7 +1042,7 @@ public class ActivityServiceImpl implements ActivityService {
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
         }
         
-        ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
         if(acroster == null) {
         	LOGGER.error("handle activityRoster error ,the activityRoster does not exsit.activityId={}, userId = {}",cmd.getActivityId()
         			, user.getId());
@@ -1157,9 +1166,16 @@ public class ActivityServiceImpl implements ActivityService {
             int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
             cmd.setPageSize(value);
         }
+        
+        //一般用户只查已确认的，创建者查询确认和不确认的人 add by yanjun 20170505  feature activity 3.0.0
+        boolean onlyConfirm = true;
+        if(user.getId().equals(activity.getCreatorUid())){
+        	onlyConfirm = false;
+        }
         List<ActivityRoster> rosterList = activityProvider.listRosterPagination(locator, cmd.getPageSize(),
-                activity.getId());
-        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+                activity.getId(), onlyConfirm);
+        
+        ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
         LOGGER.info("find roster {}",userRoster);
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
@@ -1489,7 +1505,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         Post post = forumProvider.findPostById(activity.getPostId());
         User user = UserContext.current().getUser();
-        ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
         LOGGER.info("find roster {}",roster);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         //活动添加是否有活动附件标识 add by xiongying 20161207
@@ -1568,12 +1584,15 @@ public class ActivityServiceImpl implements ActivityService {
                 if(roster.getConfirmFamilyId()!=null)
                     activity.setCheckinFamilyCount(activity.getCheckinFamilyCount()-1);
             }
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
-            if(roster.getConfirmFamilyId()!=null)
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
+            //因为使用新规则已报名=已确认 start。  add by yanjun 20170503
+            //1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+//            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
+//            if(roster.getConfirmFamilyId()!=null)
+//                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
             activityProvider.updateActivity(activity);
             
             roster.setConfirmFlag(ConfirmStatus.REJECT.getCode());
+            roster.setStatus(ActivityRosterStatus.REJECT.getCode());
             activityProvider.updateRoster(roster);
             
             return status;
@@ -1635,7 +1654,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         List<ActivityRoster> rosterList = activityProvider.listRosters(activity.getId());
         ActivityRoster userRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), UserContext
-                .current().getUser().getId());
+                .current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 
@@ -1887,7 +1906,7 @@ public class ActivityServiceImpl implements ActivityService {
         		  dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
         	  }
         	  //add UserActivityStatus by xiongying 20160628
-        	  ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        	  ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
         	  dto.setUserActivityStatus(getActivityStatus(roster).getCode());
           }else {
         	  dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
@@ -2001,7 +2020,7 @@ public class ActivityServiceImpl implements ActivityService {
             		dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             	}
             	//add UserActivityStatus by xiongying 20160628
-            	ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+            	ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
             	dto.setUserActivityStatus(getActivityStatus(roster).getCode());
 			}else {
 				dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
@@ -2389,7 +2408,7 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
             //add UserActivityStatus by xiongying 20160628
-            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
+            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid, ActivityRosterStatus.NORMAL.getCode());
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
             fixupVideoInfo(dto);//added by janson
 
@@ -2896,7 +2915,7 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
             //add UserActivityStatus by xiongying 20160628
-            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
+            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid, ActivityRosterStatus.NORMAL.getCode());
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
             fixupVideoInfo(dto);//added by janson
 
@@ -3295,7 +3314,7 @@ public class ActivityServiceImpl implements ActivityService {
                         dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
                     }
                     //add UserActivityStatus by xiongying 20160628
-                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
                     dto.setUserActivityStatus(getActivityStatus(roster).getCode());
 				}else {
 					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
@@ -3345,7 +3364,7 @@ public class ActivityServiceImpl implements ActivityService {
                         dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
                     }
                     //add UserActivityStatus by xiongying 20160628
-                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
                     dto.setUserActivityStatus(getActivityStatus(roster).getCode());
 				}else {
 					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());

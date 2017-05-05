@@ -64,6 +64,7 @@ import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.UserActiveStatDTO;
@@ -1180,7 +1181,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         dto.setPosterUrl(posterUrl);
         fixupVideoInfo(dto); // added by janson
         
-        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid);
+        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid, ActivityRosterStatus.NORMAL.getCode());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         
         List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());

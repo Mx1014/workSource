@@ -27,9 +27,9 @@ public interface ActivityProivider {
 
     ActivityRoster findRosterById(Long rosterId);
 
-    ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid);
+    ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status);
 
-    List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId);
+    List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 
     List<ActivityRoster> listRosters(Long activityId);
     
@@ -94,7 +94,7 @@ public interface ActivityProivider {
 
 	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
 	
-	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer offset, int pageSize);
+	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer cancelStatus, Integer offset, int pageSize);
 	
 	Integer countActivityRoster(Long activityId, Integer status);
 }
