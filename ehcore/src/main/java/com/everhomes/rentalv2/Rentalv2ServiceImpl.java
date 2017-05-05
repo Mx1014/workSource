@@ -875,9 +875,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						// 获取该物品的最大预订量
 						if (ruleOrderSum > maxOrder)
 							maxOrder = ruleOrderSum;
-					} 
-					
-					
+					}
 					dto.setCounts(dto.getCounts() - maxOrder); 
 				} 
 				
@@ -3649,23 +3647,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
 					} else {
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
@@ -3776,12 +3775,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
@@ -3797,12 +3796,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								dayBeginTime = 20*60*60*1000L; 
 							}
 						}
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
@@ -3926,12 +3925,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getBeginTime().getTime()
 								- rs.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
@@ -3947,12 +3946,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								dayBeginTime = 20*60*60*1000L; 
 							}
 						}
-						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
@@ -4092,23 +4091,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-					if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 							.getBeginTime().getTime()
 							- rs.getRentalStartTime())))) {
 						dto.setStatus(SiteRuleStatus.EARLY.getCode());
 					}
-					if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 							.getBeginTime().getTime()
 							- rs.getRentalEndTime())))) {
 						dto.setStatus(SiteRuleStatus.LATE.getCode());
 					}
 				} else {
-					if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
+					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 							.getResourceRentalDate().getTime()
 							- rs.getRentalStartTime())))) {
 						dto.setStatus(SiteRuleStatus.EARLY.getCode());
 					}
-					if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
+					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
 							.getResourceRentalDate().getTime()
 							- rs.getRentalEndTime()))) ){
 						dto.setStatus(SiteRuleStatus.LATE.getCode());

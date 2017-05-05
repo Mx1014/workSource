@@ -192,7 +192,7 @@ public class Rentalv2Controller extends ControllerBase {
 	/**
 	 * <b>URL: /rental/findRentalSiteMonthStatus</b>
 	 * <p>
-	 * 查询某服务预约某周的状态
+	 * 查询某服务预约某月的状态
 	 * </p>
 	 */
 
