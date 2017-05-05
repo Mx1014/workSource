@@ -12,7 +12,6 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListUserRelatedWebMenusCommand {
-
 	private String ownerType;
 
 	private Long ownerId;

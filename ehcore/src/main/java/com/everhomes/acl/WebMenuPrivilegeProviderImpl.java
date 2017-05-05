@@ -3,14 +3,21 @@ package com.everhomes.acl;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuStatus;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhWebMenusDao;
+import com.everhomes.server.schema.tables.pojos.EhWebMenus;
 import com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord;
 import com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord;
 import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -29,9 +36,11 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	@Autowired
 	private DbProvider dbProvider;
 	
-	@Autowired
+	 @Autowired
     private ShardingProvider shardingProvider;
 
+    @Autowired
+    private SequenceProvider sequenceProvider;
 	
 	@Override
 	//@Caching(evict={@CacheEvict(value="listWebMenuByType", key="'webMenu'")})
@@ -110,4 +119,104 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 
 		return results;
 	}
+	
+	//add by Janson
+	@Override
+	public Long nextId() {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWebMenus.class));
+		return id;
+	}
+	
+    @Override
+    public Long createWebMenu(WebMenu obj) {
+        if(obj.getId() == null) {
+        	obj.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWebMenus.class)));
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+        prepareObj(obj);
+        EhWebMenusDao dao = new EhWebMenusDao(context.configuration());
+        dao.insert(obj);
+        return obj.getId();
+    }
+    
+    @Override
+    public void createWebMenus(List<WebMenu> objs) {
+    	for(WebMenu obj : objs) {
+    		if(obj.getId() == null) {
+    			obj.setId(this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWebMenus.class)));
+    		}
+    		prepareObj(obj);
+    	}
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+    	EhWebMenusDao dao = new EhWebMenusDao(context.configuration());
+    	dao.insert(objs.toArray(new WebMenu[objs.size()]));
+    }
+    
+	//add by Janson
+    @Override
+    public void updateWebMenu(WebMenu obj) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+        EhWebMenusDao dao = new EhWebMenusDao(context.configuration());
+        dao.update(obj);
+    }
+
+	//add by Janson
+    @Override
+    public void deleteWebMenu(WebMenu obj) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+        EhWebMenusDao dao = new EhWebMenusDao(context.configuration());
+        dao.deleteById(obj.getId());
+    }
+
+	//add by Janson
+    @Override
+    public WebMenu getWebMenuById(Long id) {
+        try {
+        WebMenu[] result = new WebMenu[1];
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+
+        result[0] = context.select().from(Tables.EH_WEB_MENUS)
+            .where(Tables.EH_WEB_MENUS.ID.eq(id))
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, WebMenu.class);
+            });
+
+        return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
+
+	//add by Janson
+    @Override
+    public List<WebMenu> queryWebMenus(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWebMenus.class));
+
+        SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_WEB_MENUS.ID.gt(locator.getAnchor()));
+            }
+
+        query.addLimit(count);
+        List<WebMenu> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, WebMenu.class);
+        });
+
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+
+        return objs;
+    }
+
+	//add by Janson
+    private void prepareObj(WebMenu obj) {
+    	obj.setStatus(WebMenuStatus.ACTIVE.getCode());
+    }
 }

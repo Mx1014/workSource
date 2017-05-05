@@ -9,8 +9,10 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.WebMenuDTO;
+import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.TreeWebMenusCommand;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +30,9 @@ public class MenuController extends ControllerBase {
 
     @Autowired
     private ServiceModuleService serviceModuleService;
+    
+    @Autowired
+    private WebMenuService webMenuService;
 
 
     /**
@@ -35,9 +40,10 @@ public class MenuController extends ControllerBase {
      * <p>获取用户菜单</p>
      */
     @RequestMapping("listUserRelatedWebMenus")
-    @RestReturn(value=WebMenuDTO.class, collection = true)
+    @RestReturn(value=ListWebMenuResponse.class)
     public RestResponse listUserRelatedWebMenus(@Valid ListUserRelatedWebMenusCommand cmd) {
         RestResponse response =  new RestResponse();
+        response.setResponseObject(webMenuService.listZuolinAdminWebMenu());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

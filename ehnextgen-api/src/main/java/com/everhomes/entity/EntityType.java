@@ -52,7 +52,8 @@ public enum EntityType {
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles");
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    ZUOLIN_ADMIN("ZuolinAdmin");
 
     private String code;
     
