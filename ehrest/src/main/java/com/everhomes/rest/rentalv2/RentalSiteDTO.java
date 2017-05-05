@@ -58,6 +58,10 @@ import com.everhomes.util.StringHelper;
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>offlinePayeeName: 线下支付收款人姓名</li>
  * <li>detailUrl: 详情Url</li>
+ * <li>rentalEndTime: 至少提前预约时间</li>
+ * <li>rentalStartTime: 最多提前预约时间</li>
+ * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -115,6 +119,10 @@ public class RentalSiteDTO {
     private Long offlinePayeeUid;
     private String offlinePayeeName;
 
+	private Byte rentalStartTimeFlag;
+	private Byte rentalEndTimeFlag;
+	private Long rentalStartTime;
+	private Long rentalEndTime;
     private String detailUrl;
 	@Override
     public String toString() {
@@ -585,5 +593,35 @@ public class RentalSiteDTO {
 		this.offlinePayeeName = offlinePayeeName;
 	}
 
- 
+	public Byte getRentalStartTimeFlag() {
+		return rentalStartTimeFlag;
+	}
+
+	public void setRentalStartTimeFlag(Byte rentalStartTimeFlag) {
+		this.rentalStartTimeFlag = rentalStartTimeFlag;
+	}
+
+	public Byte getRentalEndTimeFlag() {
+		return rentalEndTimeFlag;
+	}
+
+	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
+		this.rentalEndTimeFlag = rentalEndTimeFlag;
+	}
+
+	public Long getRentalStartTime() {
+		return rentalStartTime;
+	}
+
+	public void setRentalStartTime(Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+
+	public Long getRentalEndTime() {
+		return rentalEndTime;
+	}
+
+	public void setRentalEndTime(Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
 }

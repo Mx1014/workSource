@@ -1143,7 +1143,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		List<RentalCell> rentalSiteRules = findRentalSiteRules(cmd.getRentalSiteId(), null, null,
 						cmd.getRentalType() ,
-						cmd.getRentalType().equals(RentalType.DAY)?DateLength.DAY.getCode():DateLength.MONTH.getCode(),null);
+						cmd.getRentalType().equals(RentalType.DAY)?DateLength.DAY.getCode():DateLength.MONTH.getCode(),null, null);
 		// 查sitebills
 		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 			for (RentalCell rsr : rentalSiteRules) {
@@ -2469,8 +2469,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * 取某个场所,某段时间的单元格
 	 * */
 	private List<RentalCell> findRentalSiteRules(Long rentalSiteId,
-			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength,Byte status) {
-		List<RentalCell>  result = new ArrayList<RentalCell>(); 
+			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength,Byte status, Byte rentalStartTimeFlag) {
+		List<RentalCell>  result = new ArrayList<>();
 		for(RentalCell cell : cellList.get()){
 			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
 				continue;
@@ -2479,46 +2479,51 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (null == status && !cell.getStatus().equals(RentalSiteStatus.NORMAL.getCode()))
 				continue;
 			//如果cell在最早预定时间之后则跳过
-			if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode()))
+			if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode())
+					&& NormalFlag.NEED.getCode() == rentalStartTimeFlag) {
 				if (cell.getBeginTime().after(beginDate))
-					continue; 
+					continue;
+			}
+
 			if (null != ruleDate){
 				DateLength dateLen = DateLength.fromCode(dateLength);
-				switch(dateLen){
-					case DAY:
-						if(!cell.getResourceRentalDate().equals(Date.valueOf(ruleDate)))
-							continue;
-						break;
-					case MONTH:
-						Calendar calendar1 = Calendar.getInstance();
-						calendar1.setTime(Date.valueOf(ruleDate));
-						// month begin
-						calendar1.set(Calendar.DAY_OF_MONTH,
-								calendar1.getActualMinimum(Calendar.DAY_OF_MONTH));
-						Calendar calendar2 = Calendar.getInstance();
-						calendar2.setTime(Date.valueOf(ruleDate));
-						// month end
-						calendar2.set(Calendar.DAY_OF_MONTH,
-							calendar2.getActualMaximum(Calendar.DAY_OF_MONTH));
-						if(cell.getResourceRentalDate().before(calendar1.getTime()) || 
-								cell.getResourceRentalDate().after(calendar2.getTime())  )
-							continue;
-						break;
-					case WEEK:
-						Calendar calendar3 = Calendar.getInstance();
-						calendar3.setTime(Date.valueOf(ruleDate));
-						// month begin
-						calendar3.set(Calendar.DAY_OF_WEEK,
-								calendar3.getActualMinimum(Calendar.DAY_OF_WEEK));
-						Calendar calendar4 = Calendar.getInstance();
-						calendar4.setTime(Date.valueOf(ruleDate));
-						// month end
-						calendar4.set(Calendar.DAY_OF_WEEK,
-								calendar4.getActualMaximum(Calendar.DAY_OF_WEEK));
-						if(cell.getResourceRentalDate().before(calendar3.getTime()) || 
-								cell.getResourceRentalDate().after(calendar4.getTime())  )
-						continue;
-						break;
+				if (null != dateLen) {
+					switch(dateLen){
+						case DAY:
+							if(!cell.getResourceRentalDate().equals(Date.valueOf(ruleDate)))
+								continue;
+							break;
+						case MONTH:
+							Calendar calendar1 = Calendar.getInstance();
+							calendar1.setTime(Date.valueOf(ruleDate));
+							// month begin
+							calendar1.set(Calendar.DAY_OF_MONTH,
+									calendar1.getActualMinimum(Calendar.DAY_OF_MONTH));
+							Calendar calendar2 = Calendar.getInstance();
+							calendar2.setTime(Date.valueOf(ruleDate));
+							// month end
+							calendar2.set(Calendar.DAY_OF_MONTH,
+									calendar2.getActualMaximum(Calendar.DAY_OF_MONTH));
+							if(cell.getResourceRentalDate().before(calendar1.getTime()) ||
+									cell.getResourceRentalDate().after(calendar2.getTime())  )
+								continue;
+							break;
+						case WEEK:
+							Calendar calendar3 = Calendar.getInstance();
+							calendar3.setTime(Date.valueOf(ruleDate));
+							// month begin
+							calendar3.set(Calendar.DAY_OF_WEEK,
+									calendar3.getActualMinimum(Calendar.DAY_OF_WEEK));
+							Calendar calendar4 = Calendar.getInstance();
+							calendar4.setTime(Date.valueOf(ruleDate));
+							// month end
+							calendar4.set(Calendar.DAY_OF_WEEK,
+									calendar4.getActualMaximum(Calendar.DAY_OF_WEEK));
+							if(cell.getResourceRentalDate().before(calendar3.getTime()) ||
+									cell.getResourceRentalDate().after(calendar4.getTime())  )
+								continue;
+							break;
+					}
 				}
 			}
 			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
@@ -3607,7 +3612,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dayDto.setSiteRules(new ArrayList<RentalSiteRulesDTO>());
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalCell> rentalSiteRules =  findRentalSiteRules(siteId, dateSF.format(new java.util.Date(start.getTimeInMillis())),
-					beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
+					beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
+					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalCell rsr : rentalSiteRules) {
@@ -3628,7 +3634,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							} catch (Exception e) {
 								LOGGER.error("anchorTime error  dto = "+ dto );
 							}
-							
 							
 						}
 					} else if (dto.getRentalType().equals(
@@ -3734,7 +3739,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dayDto.setSiteNumbers(new ArrayList<RentalSiteNumberRuleDTO>()); 
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalCell> rentalSiteRules = findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(start.getTimeInMillis())),
-							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
+							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
+					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalCell rsr : rentalSiteRules) {
@@ -3884,7 +3890,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dayDto.setSiteNumbers(new ArrayList<RentalSiteNumberRuleDTO>()); 
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalCell> rentalSiteRules = findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(start.getTimeInMillis())),
-							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
+							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
+					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalCell rsr : rentalSiteRules) {
@@ -4014,11 +4021,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		// 查rules
 		Map<String,List<RentalSiteRulesDTO>> siteNumberMap=new HashMap<>();
 		for(RentalResourceNumber resourceNumber :resourceNumbers){
-			siteNumberMap.put(resourceNumber.getResourceNumber(), new ArrayList<RentalSiteRulesDTO>());
+			siteNumberMap.put(resourceNumber.getResourceNumber(), new ArrayList<>());
 		}
-		response.setSiteNumbers(new ArrayList<RentalSiteNumberRuleDTO>()); 
+		response.setSiteNumbers(new ArrayList<>());
 		//按小时预订的,给客户端找到每一个时间点
-		List<Long> dayTimes = new ArrayList<Long>();
+		List<Long> dayTimes = new ArrayList<>();
 		List<RentalTimeInterval> timeIntervals = this.rentalv2Provider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		if(null!=timeIntervals){
 			for(RentalTimeInterval timeInterval : timeIntervals){
@@ -4049,7 +4056,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		List<RentalCell> rentalSiteRules =  findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(cmd.getRuleDate() )),
-						beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),RentalSiteStatus.NORMAL.getCode());
+						beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
+				RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 		// 查sitebills
 		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 			for (RentalCell rsr : rentalSiteRules) {
