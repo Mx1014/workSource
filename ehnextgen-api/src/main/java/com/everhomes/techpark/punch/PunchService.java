@@ -235,4 +235,6 @@ public interface PunchService {
 
 	Long getTopEnterpriseId(Long organizationId);
 
+	void importPunchLogs(MultipartFile[] files);
+
 }

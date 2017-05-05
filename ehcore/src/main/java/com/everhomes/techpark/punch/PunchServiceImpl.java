@@ -1227,6 +1227,27 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
+		String punchTime = datetimeSF.get().format(new Date());
+		return createPunchLog(cmd,punchTime);
+		
+	}
+
+	private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime) {
+		// TODO Auto-generated method stub
+		byte punchCode =ClockCode.FAIL.getCode();
+		try{
+			punchCode= verifyPunchClock(cmd).getCode();
+		}catch(Exception e){	
+			//有报错就表示不成功
+			PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
+			punchLog.setPunchStatus(ClockCode.FAIL.getCode());
+			punchProvider.createPunchLog(punchLog);
+			throw e;
+		} 
+		return createPunchLog(cmd, punchTime,  punchCode);
+	}
+	private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime,
+			byte punchCode) {
 
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		cmd.setEnterpriseId(getTopEnterpriseId(cmd.getEnterpriseId()));
@@ -1241,7 +1262,6 @@ public class PunchServiceImpl implements PunchService {
 		PunchClockResponse response = new PunchClockResponse();
 		Long userId = UserContext.current().getUser().getId(); 
 		// new Date()为获取当前系统时间为打卡时间
-		String punchTime = datetimeSF.get().format(new Date());
 		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 		punchLog.setUserId(userId);
 		
@@ -1301,18 +1321,9 @@ public class PunchServiceImpl implements PunchService {
 		
 		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(punCalendar
 				.getTime())));
-		
-		try{
-			response.setPunchCode(verifyPunchClock(cmd).getCode());
-			punchLog.setPunchStatus(response.getPunchCode());
-		}catch(Exception e){	
-			//有报错就表示不成功
-			punchLog.setPunchStatus(ClockCode.FAIL.getCode());
-			throw e;
-		}finally{
-			//无论如何保留打卡记录
-			punchProvider.createPunchLog(punchLog);
-		}
+		response.setPunchCode(punchCode);
+		punchLog.setPunchStatus(punchCode);
+		punchProvider.createPunchLog(punchLog);
 		//刷新这一天的数据
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
 		    this.dbProvider.execute((status) -> {
@@ -1333,7 +1344,6 @@ public class PunchServiceImpl implements PunchService {
 
 		return response;
 	}
-
 	private ClockCode verifyPunchClock(PunchClockCommand cmd) {
 		//获取打卡规则
 //		ClockCode code = ClockCode.SUCESS;
@@ -5698,7 +5708,53 @@ public class PunchServiceImpl implements PunchService {
 			punchSchedulingProvider.createPunchScheduling(scheduling);
 		}
 	}
-	
+	@Override
+	public void importPunchLogs( MultipartFile[] files) {
+		// TODO Auto-generated method stub
+		 
+		ArrayList resultList = new ArrayList();
+		String rootPath = System.getProperty("user.dir");
+		String filePath = rootPath + File.separator+UUID.randomUUID().toString() + ".xlsx";
+		LOGGER.error("importOrganization-filePath="+filePath);
+		//将原文件暂存在服务器中
+		try {
+			this.storeFile(files[0],filePath);
+		} catch (Exception e) {
+			LOGGER.error("importOrganization-store file fail.message="+e.getMessage());
+		}
+		try {
+			File file = new File(filePath);
+			if(!file.exists())
+				LOGGER.error("executeImportOrganization-file is not exist.filePath="+filePath);
+			InputStream in = new FileInputStream(file);
+			resultList = PropMrgOwnerHandler.processorExcel(in);
+		} catch (IOException e) {
+			LOGGER.error("executeImportOrganization-parse file fail.message="+e.getMessage());
+		} /*finally {
+			File file = new File(filePath);
+			if(file.exists())
+				file.delete();
+		}*/
+ 
+		for(int rowIndex=1;rowIndex<resultList.size();rowIndex++){
+			RowResult r = (RowResult)resultList.get(rowIndex);	
+			if(r.getA() == null || r.getA().trim().equals("")){
+				LOGGER.error("have row is empty.rowIndex="+(rowIndex+1));
+				break;
+			}
+			PunchClockCommand cmd = new PunchClockCommand();
+			cmd.setEnterpriseId(Long.valueOf(r.getA()));
+			try {
+				createPunchLog(cmd,datetimeSF.get().format(new SimpleDateFormat("yyyy/MM/dd  HH:mm:ss").parse(r.getB())),ClockCode.SUCESS.getCode());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				LOGGER.error("row time format wrong.rowIndex="+(rowIndex+1));
+				break;
+			}
+			  
+		}
+	}
 	private List<PunchScheduling> convertToPunchSchedulings(ArrayList list ) {
 	 
 		List<PunchScheduling> result = new ArrayList<PunchScheduling>();

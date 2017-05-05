@@ -449,7 +449,19 @@ public class PunchAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+    /**
+     * <b>URL: /punch/testimportPunchLogs</b>
+     * <p>给登录用户通过excel导入打卡记录--测试用</p>
+     */
+    @RequestMapping("testimportPunchLogs")
+    @RestReturn(value = String.class)
+    public RestResponse testimportPunchLogs(  @RequestParam(value = "_attachment_file") MultipartFile[] files) {
+    	punchService.importPunchLogs(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	/**
 	 * <b>URL: /punch/updatePunchSchedulings</b>
 	 * <p>
