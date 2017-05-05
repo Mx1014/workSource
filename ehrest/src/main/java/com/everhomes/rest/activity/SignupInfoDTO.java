@@ -23,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>signupTime: 报名时间 yyyy-MM-dd HH:MM</li>
  * <li>email: 邮箱</li>
  * <li>order: 序号</li>
+ * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
+ * <li>status: 报名状态  参见 {@link com.everhomes.rest.activity.ActivityRosterStatus}</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -49,6 +51,8 @@ public class SignupInfoDTO {
 	private String signupTime;
 	private String email;
 	private String order;
+	private Byte payFlag;
+	private Byte status;
 	
 	public Byte getCreateFlag() {
 		return createFlag;
@@ -188,6 +192,18 @@ public class SignupInfoDTO {
 	}
 	public void setOrder(String order) {
 		this.order = order;
+	}
+	public Byte getPayFlag() {
+		return payFlag;
+	}
+	public void setPayFlag(Byte payFlag) {
+		this.payFlag = payFlag;
+	}
+	public Byte getStatus() {
+		return status;
+	}
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 	@Override
 	public String toString() {

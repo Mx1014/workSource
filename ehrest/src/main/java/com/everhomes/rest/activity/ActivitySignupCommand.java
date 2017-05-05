@@ -5,8 +5,6 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 /**
- * 
- * @author elians
  *<ul>
  *<li>activityId:活动ID</li>
  *<li>adultCount:成人数</li>
@@ -16,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *<li>organizationName:公司</li>
  *<li>position:职位</li>
  *<li>email:邮箱</li>
+ *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
  *</ul>
  */
 public class ActivitySignupCommand {
@@ -32,6 +31,7 @@ public class ActivitySignupCommand {
     private String organizationName;
     private String position;
     private String email;
+    private String payFlag;
     
     
     public ActivitySignupCommand() {
@@ -99,6 +99,14 @@ public class ActivitySignupCommand {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getPayFlag() {
+		return payFlag;
+	}
+
+	public void setPayFlag(String payFlag) {
+		this.payFlag = payFlag;
 	}
 
 	@Override

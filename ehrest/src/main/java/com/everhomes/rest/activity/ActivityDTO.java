@@ -6,8 +6,6 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
- * 
- * @author elians
  *<ul>
  *<li>activityId:活动ID</li>
  *<li>categoryId: 类型</li>
