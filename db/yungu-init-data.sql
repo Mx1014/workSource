@@ -34,11 +34,11 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', CONCAT('https://', @biz_url, '/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2F', @biz_url, '%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix'), 'biz access url for yungu', @namespace_id, NULL);	   
 
-INSERT INTO `eh_version_realm` VALUES (105, 'Android_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
-INSERT INTO `eh_version_realm` VALUES (106, 'iOS_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (115, 'Android_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
+INSERT INTO `eh_version_realm` VALUES (116, 'iOS_YunGu', null, UTC_TIMESTAMP(), @namespace_id);
 
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(305,105,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
-INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(306,106,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(315,115,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+INSERT INTO `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) VALUES(316,116,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 	
 	
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(@namespace_id, '南山云谷');
