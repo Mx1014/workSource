@@ -278,9 +278,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     @XmlRootElement(name = "billBeans")
     private static class BillBeans extends ToStr {
-        // 订单状态字符串缓存 {0: "未缴", 1: "已缴"}
-        private Map<Byte, String> cacheMap = new HashMap<>();
-
         @XmlElement
         private List<Bill> bill = new ArrayList<>();
 
@@ -306,7 +303,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                     .map(BillBean::getActualmoney).collect(Collectors.reducing(BigDecimal::add))
                     .ifPresent(dto::setUnpaidAmount);
 
-            dto.setBillStatus(processBillStatusLocaleString(cacheMap, bill.billBeans));
+            dto.setBillStatus(processBillStatusLocaleString(bill.billBeans));
 
             List<PmKeXingBillItemDTO> items = bill.billBeans.parallelStream()
                     .map(BillBean::toBillItemDTO).collect(Collectors.toList());
@@ -321,15 +318,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             return new PmKeXingBillDTO();
         }
 
-        private String processBillStatusLocaleString(Map<Byte, String> cacheMap, List<BillBean> billBeans) {
+        private Byte processBillStatusLocaleString(List<BillBean> billBeans) {
             boolean haveUnpaidItem = billBeans.stream().map(BillBean::getIsPay).anyMatch(status -> Objects.equals(status, PmKeXingBillStatus.UNPAID.getCode()));
-            Byte billStatusLocaleCode = haveUnpaidItem ? PmKeXingBillStatus.UNPAID.getCode() : PmKeXingBillStatus.PAID.getCode();
-            String billStatus = cacheMap.get(billStatusLocaleCode);
-            if (billStatus == null) {
-                billStatus = localeStringService.getLocalizedString(PmKeXingBillLocalStringCode.SCOPE, String.valueOf(billStatusLocaleCode), currLocale(), "");
-                cacheMap.put(billStatusLocaleCode, billStatus);
-            }
-            return billStatus;
+            return haveUnpaidItem ? PmKeXingBillStatus.UNPAID.getCode() : PmKeXingBillStatus.PAID.getCode();
         }
     }
 
