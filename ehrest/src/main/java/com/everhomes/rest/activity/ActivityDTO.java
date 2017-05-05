@@ -40,7 +40,7 @@ import com.everhomes.util.StringHelper;
  * <li>achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接 </li>
  * <li>achievementRichtextUrl: 活动成果富文本页面url</li>
  * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
- * <li>chargeFlag: 是否收费：0-不收费， 1-收费</li>
+ * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
  * <li>chargePrice: 收费价格</li>
  *</ul>
  */
