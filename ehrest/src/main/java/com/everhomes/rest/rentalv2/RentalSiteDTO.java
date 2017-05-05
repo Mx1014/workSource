@@ -124,10 +124,20 @@ public class RentalSiteDTO {
 	private Long rentalStartTime;
 	private Long rentalEndTime;
     private String detailUrl;
+    private String reserveRouteUrl;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getReserveRouteUrl() {
+		return reserveRouteUrl;
+	}
+
+	public void setReserveRouteUrl(String reserveRouteUrl) {
+		this.reserveRouteUrl = reserveRouteUrl;
+	}
 
 	public String getDetailUrl() {
 		return detailUrl;
