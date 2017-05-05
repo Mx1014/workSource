@@ -2200,7 +2200,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalEndTime can not be null");  
 		if(null== cmd.getRentalStartTime())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");  
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");
+		if (null == cmd.getRentalEndTimeFlag()) {
+			cmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
+		}
+		if (null == cmd.getRentalStartTimeFlag()) {
+			cmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
+		}
 		//给开放日期一个缺省值
 		//默认从启动开始开放3个月，周六周日关闭
 		this.dbProvider.execute((TransactionStatus status) -> {

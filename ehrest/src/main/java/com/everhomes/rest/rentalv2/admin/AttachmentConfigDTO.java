@@ -11,8 +11,7 @@ import java.util.List;
  * <ul>
  * 预约需要提交的信息
  * <li>id: id</li>
- * <li>attachmentType: 类型，参考
- * {@link com.everhomes.rest.rentalv2.admin.AttachmentType}</li>
+ * <li>attachmentType: 类型，参考 {@link com.everhomes.rest.rentalv2.admin.AttachmentType}</li>
  * <li>mustOptions: 是否必选，1是0否</li>
  * <li>goodItems: 物资列表  attachmentType: GOOD_ITEM(4)时使用  {@link com.everhomes.rest.rentalv2.RentalGoodItem}</li>
  * <li>recommendUsers: 推荐员列表  attachmentType: RECOMMEND_USER(5)时使用 {@link com.everhomes.rest.rentalv2.RentalRecommendUser}</li>

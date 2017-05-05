@@ -56,7 +56,9 @@ public class Test {
 //        param.put("car_id", "苏FX967J");
 //
 //        String json = post(createRequestParam(GET_CARD, param));
-        System.out.println(new Date(1493827200000L));
+//        System.out.println(new Date(1493827200000L));
+        Byte b = 5;
+        System.out.println(Byte.SIZE);
 //        List<Integer> list = new ArrayList<>();
 //        list.add(1);
 //        list.add(2);
