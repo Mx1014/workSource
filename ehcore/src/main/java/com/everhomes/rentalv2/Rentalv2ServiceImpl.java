@@ -1432,24 +1432,41 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//拼装使用详情
 			StringBuilder useDetailSB = new StringBuilder();
 			Collections.sort(siteRuleIds);
+
+			if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
+//					useDetailSB.append("使用时间:");
+//					useDetailSB.append("从");
+				int size = siteRuleIds.size();
+				RentalCell firstRsr = findRentalSiteRuleById(siteRuleIds.get(0));
+				RentalCell lastRsr = findRentalSiteRuleById(siteRuleIds.get(size - 1));
+
+				useDetailSB.append(bigentimeSF.format(firstRsr.getBeginTime()));
+				useDetailSB.append("-");
+				useDetailSB.append(endtimeSF.format(lastRsr.getEndTime()));
+				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
+				}else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+				}else {
+					// 资源编号
+					useDetailSB.append("\n");
+					useDetailSB.append(" ");
+					useDetailSB.append(firstRsr.getResourceNumber());
+				}
+
+			}
+
 			// 循环存site订单
-			for (Long siteRuleId : siteRuleIds)  { 
+			for (Long siteRuleId : siteRuleIds) {
 				RentalCell rsr = findRentalSiteRuleById(siteRuleId);
 				if (null == rsr) {
 					continue;
 				}
 				if(useDetailSB.length()>1)
 					useDetailSB.append("\n");
-				if(rsr.getRentalType().equals(RentalType.HOUR.getCode())){
-//					useDetailSB.append("使用时间:");
-//					useDetailSB.append("从");
-					useDetailSB.append(bigentimeSF.format(rsr.getBeginTime()));
-					useDetailSB.append("-");
-					useDetailSB.append(endtimeSF.format(rsr.getEndTime()));
-				}else if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
+				if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
 //					useDetailSB.append("使用时间:");
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				}else {
+				}else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
+						|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 //					useDetailSB.append("使用时间:");
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())).append(" ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
@@ -1464,13 +1481,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				//独占资源 只有时间				 
-				}
-				else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+				}else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
 					//不需要资源编号
 //					useDetailSB.append(";预约数量:");
 //					useDetailSB.append(siteRule.getRentalCount()+"个 ");
-				}
-				else {
+				}else {
 					// 资源编号
 //					useDetailSB.append(";资源编号:");
 					useDetailSB.append(" ");
@@ -1580,7 +1595,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public void changeOfflinePayOrderSuccess(RentalOrder order){
+	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag){
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
 		List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
 
@@ -1604,10 +1619,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.valiRentalBill(rules);
 			
 			//本订单状态置为成功,
-			order.setStatus(SiteBillStatus.SUCCESS.getCode());			
+//			order.setStatus(SiteBillStatus.SUCCESS.getCode());
+			order.setStatus(status);
 			rentalv2Provider.updateRentalBill(order);
 			return null;
-		}); 
+		});
+		//TODO: 改成工作流的短信
 		//发短信给预订人
 		String templateScope = SmsTemplateCode.SCOPE;
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
@@ -1626,51 +1643,54 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}else{
 			smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
 		}
-		
-		//找到所有有这些ruleids的订单
-		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds);
-		if(null != otherOrders && otherOrders.size()>0)
-			for (RentalOrder otherOrder : otherOrders){
-				LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
-				//把自己排除
-				if(otherOrder.getId().equals(order.getId()))
-					continue;
-				//剩下的用线程池处理flowcase状态和发短信
-				executorPool.execute(new Runnable() {
-					@Override
-					public void run() { 
-						//其他订单置为失败工作流设置为终止
-						FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId); 
-						otherOrder.setStatus(SiteBillStatus.FAIL.getCode());			
-						rentalv2Provider.updateRentalBill(otherOrder);
-	
-						FlowAutoStepDTO dto = new FlowAutoStepDTO();
-						dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-						dto.setFlowCaseId(flowcase.getId());
-						dto.setFlowMainId(flowcase.getFlowMainId());
-						dto.setFlowNodeId(flowcase.getCurrentNodeId());
-						dto.setFlowVersion(flowcase.getFlowVersion());
-						dto.setStepCount(flowcase.getStepCount());
-						flowService.processAutoStep(dto);
-	//					//并发短信
-	//					String templateScope = SmsTemplateCode.SCOPE;
-	//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
-	//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
-	//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
-	//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
-	//
-	//					String templateLocale = RentalNotificationTemplateCode.locale; 
-	//
-	//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-	//					if(null == userIdentifier){
-	//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
-	//					}else{
-	//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-	//					}
-						
-					}
-				});
+		//根据产品定义，是在待审批的节点就不允许其他用户预订 同时段统一资源（状态不是已预约成功，比如待付款）
+		if (cancelOtherOrderFlag) {
+			//找到所有有这些ruleids的订单
+			List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds);
+			if(null != otherOrders && otherOrders.size() > 0) {
+				for (RentalOrder otherOrder : otherOrders){
+					LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
+					//把自己排除
+					if(otherOrder.getId().equals(order.getId()))
+						continue;
+					//剩下的用线程池处理flowcase状态和发短信
+					executorPool.execute(new Runnable() {
+						@Override
+						public void run() {
+							//其他订单置为失败工作流设置为终止
+							FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId);
+							otherOrder.setStatus(SiteBillStatus.FAIL.getCode());
+							rentalv2Provider.updateRentalBill(otherOrder);
+
+							FlowAutoStepDTO dto = new FlowAutoStepDTO();
+							dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+							dto.setFlowCaseId(flowcase.getId());
+							dto.setFlowMainId(flowcase.getFlowMainId());
+							dto.setFlowNodeId(flowcase.getCurrentNodeId());
+							dto.setFlowVersion(flowcase.getFlowVersion());
+							dto.setStepCount(flowcase.getStepCount());
+							flowService.processAutoStep(dto);
+							//					//并发短信
+							//					String templateScope = SmsTemplateCode.SCOPE;
+							//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+							//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName());
+							//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId());
+							//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE;
+							//
+							//					String templateLocale = RentalNotificationTemplateCode.locale;
+							//
+							//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+							//					if(null == userIdentifier){
+							//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+							//					}else{
+							//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+							//					}
+
+						}
+					});
+				}
 			}
+		}
 	}
 	
 	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {
@@ -2038,7 +2058,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				dto.getSiteItems().add(siDTO);
 			}
 		return dto;
-	} 
+	}
+
 	@Override
 	public void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill) {
 //		RentalResource rs = rentalProvider
@@ -2082,8 +2103,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setRentalBillId(bill.getId()); 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
 		//只有非独占资源，不需要选择资源编号且允许预约多个资源才显示该字段
-		if(rs != null &&NormalFlag.NONEED.getCode() == rs.getExclusiveFlag().byteValue() 
-				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign().byteValue() )
+		if(rs != null &&NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
+				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign())
 			dto.setRentalCount(bill.getRentalCount());
 		else
 			dto.setRentalCount(null);

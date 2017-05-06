@@ -204,7 +204,7 @@ public interface Rentalv2Service {
 	void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd);
 
 
-	void changeOfflinePayOrderSuccess(RentalOrder order);
+	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
 
 
 	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);

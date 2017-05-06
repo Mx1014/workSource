@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.contentserver.ResourceType;
+import com.everhomes.rest.pmtask.PmTaskFlowStatus;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.flow.FlowUserSelection;
 import com.everhomes.flow.FlowUserSelectionProvider;
@@ -54,7 +54,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
  
-import com.everhomes.util.ConvertHelper; 
 import com.everhomes.util.Tuple;
 
 @Component
@@ -68,8 +67,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private FlowEventLogProvider flowEventLogProvider;
 	@Autowired
-	private FlowProvider flowProvider;
-	@Autowired
 	private ContentServerService contentServerService;
 	@Autowired
 	private Rentalv2Service rentalv2Service;
@@ -82,7 +79,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private OrganizationService organizationService;
 	@Autowired
-	LocaleStringService localeStringService;
+	private LocaleStringService localeStringService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
 	@Autowired
@@ -123,7 +120,15 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			if(null != flowCase.getReferId()){
 				order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 			}
-			if(preFlowNode.getParams()!=null && preFlowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
+			String preNodeParam = preFlowNode.getParams();
+			String curNodeParam = currNode.getParams();
+
+//			if (null != curNodeParam) {
+//				Byte status = convertFlowStatus(curNodeParam);
+//				rentalv2Service.changeRentalOrderStatus(order, status, true);
+//			}
+
+			if(preNodeParam != null && preNodeParam.equals(RentalFlowNodeParams.AGREE.getCode())){
 				//发短信
 				//发短信给预订人
 				String templateScope = SmsTemplateCode.SCOPE;
@@ -178,11 +183,11 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
 					}
 				}
-			}else if(preFlowNode.getParams()!=null && preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-				if(currNode.getParams()!= null &&  currNode.getParams().equals(RentalFlowNodeParams.COMPLETE.getCode())){
+			}else if(preNodeParam != null && preNodeParam.equals(RentalFlowNodeParams.PAID.getCode())){
+				if(curNodeParam != null && curNodeParam.equals(RentalFlowNodeParams.COMPLETE.getCode())){
 					//已完成
-					//更改订单状态 + 发短信 
-					rentalv2Service.changeOfflinePayOrderSuccess(order);
+					//更改订单状态 + 发短信
+					rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
 				}else{
 					//从已支付到其他状态-一般是终止
 					//如果是申请者干的不发短信
@@ -212,6 +217,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			}
 		}
 	}
+
+	/**
+	 * 转换状态，由产品定义
+	 * @param nodeType
+	 * @return
+	 */
+	private Byte convertFlowStatus(String nodeType) {
+
+		switch (nodeType) {
+			case "agree": return SiteBillStatus.APPROVING.getCode();
+			case "unpaid": return SiteBillStatus.PAYINGFINAL.getCode();
+			case "paid": return SiteBillStatus.SUCCESS.getCode();
+			case "complete": return SiteBillStatus.COMPLETE.getCode();
+			default: return null;
+		}
+	}
+
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
