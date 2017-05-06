@@ -422,7 +422,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode())); 
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.OFFLINE_PAY.getCode())); 
+				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.INACTIVE.getCode()));
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -511,6 +513,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			ListingLocator locator, int count, List<Byte> status) {
 		final List<RentalOrder> result = new ArrayList<RentalOrder>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+
 		//TODO:
 		if(null!=resourceTypeId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID
@@ -824,6 +828,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.ne(SiteBillStatus.REFUNDING.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.INACTIVE.getCode()));
 
 		return step.where(condition).fetchOneInto(Double.class);
 	}
@@ -875,6 +881,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		//TODO
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ORGANIZATION_ID
 				.equal( organizationId);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
 //		condition = condition.and(Tables.EH_RENTALV2_ORDERS.OWNER_TYPE
 //				.equal(ownerType));
 		if (StringUtils.isNotEmpty(vendorType))

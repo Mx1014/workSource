@@ -1222,6 +1222,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
 			rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 			this.valiRentalBill(cmd.getRules());
+			//设置订单模式
 			if(rsType.getPayMode() == null )
 				rentalBill.setPayMode(PayMode.ONLINE_PAY.getCode());
 			else
@@ -1488,7 +1489,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setVisibleFlag(VisibleFlag.VISIBLE.getCode());
 	 
 			//用基于服务器平台的锁添加订单（包括验证和添加）
-			Tuple<Long, Boolean> tuple = (Tuple<Long, Boolean>) this.coordinationProvider
+			Tuple<Long, Boolean> tuple = this.coordinationProvider
 					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
@@ -1534,7 +1535,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rsb.setAmorpm(rsr.getAmorpm()); 
 				rsb.setEndTime(rsr.getEndTime());
 				rsb.setBeginTime(rsr.getBeginTime());
-				rsb.setTotalMoney(  money);
+				rsb.setTotalMoney(money);
 				rsb.setRentalCount(siteRule.getRentalCount());
 				rsb.setRentalResourceRuleId(rsr.getId());
 				rsb.setResourceRentalDate(new Date(cmd.getRentalDate()));
@@ -1952,8 +1953,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		for (RentalBillRuleDTO dto : ruleDTOs) {
 			if (dto.getRuleId() == null)
 				continue;
-			Double totalCount = Double.valueOf(this
-					.findRentalSiteRuleById(dto.getRuleId()).getCounts());
+			Double totalCount = findRentalSiteRuleById(dto.getRuleId()).getCounts();
 			Double rentaledCount = this.rentalv2Provider
 					.sumRentalRuleBillSumCounts(dto.getRuleId());
 			if (null == rentaledCount)
@@ -3107,7 +3107,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//2016-6-2 10:32:44 fix bug :当有物品订单（说明是付款失败再次付款），就不再生成物品订单
 			if (null != cmd.getRentalItems()&&this.rentalv2Provider.findRentalItemsBillBySiteBillId(cmd.getRentalBillId())==null) {
 
-				Tuple<Boolean, Boolean> tuple = (Tuple<Boolean, Boolean>)  this.coordinationProvider
+				Tuple<Boolean, Boolean> tuple = this.coordinationProvider
 						.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
 						.enter(() -> {
 							java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
@@ -3155,13 +3155,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 						RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS,"no enough items");
 			}
-			int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
-			
-			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
-				// 总金额为0，直接预订成功状态
-				bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-				response.setAmount(new java.math.BigDecimal(0));
-			} 
+
+			//增加审批后线上支付模式的判断 审批模式，订单状态设置成待审批 add by sw 20170506
+			//去掉线下订单模式的判断，现在线上，线下订单都跟踪状态，金额为0时，直接预约成功，否则设置成待付款
+//			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
+			if (PayMode.APPROVE_ONLINE_PAY.getCode().equals(bill.getPayMode())) {
+				bill.setStatus(SiteBillStatus.APPROVING.getCode());
+			}else {
+				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
+				if (compare == 0) {
+					// 总金额为0，直接预订成功状态
+					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+//				response.setAmount(new java.math.BigDecimal(0));
+				}else{
+					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
+				}
+			}
+
+
 //			else if ( bill.getStatus().equals(
 //							SiteBillStatus.LOCKED.getCode())) {
 //				// 预付金额为0，且状态为locked，直接进入支付定金成功状态
@@ -3381,8 +3392,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
-	public ListRentalBillsCommandResponse listRentalBills(
-			ListRentalBillsCommand cmd) {
+	public ListRentalBillsCommandResponse listRentalBills(ListRentalBillsCommand cmd) {
 		ListRentalBillsCommandResponse response = new ListRentalBillsCommandResponse();
 //		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 //		int totalCount = rentalProvider.countRentalBills(cmd.getOwnerId(),cmd.getOwnerType(),
@@ -3563,7 +3573,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		end.set(Calendar.DAY_OF_WEEK,
 				start.getActualMinimum(Calendar.DAY_OF_WEEK));
 		end.add(Calendar.DAY_OF_YEAR, 7);
-		response.setSiteDays(new ArrayList<RentalSiteDayRulesDTO>());
+		response.setSiteDays(new ArrayList<>());
 		
 		proccessDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime());
 		//按小时预订的,给客户端找到每一个时间点
@@ -3628,7 +3638,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			dtos.add(dayDto);
 			dayDto.setSiteRules(new ArrayList<RentalSiteRulesDTO>());
 			dayDto.setRentalDate(start.getTimeInMillis());
-			List<RentalCell> rentalSiteRules =  findRentalSiteRules(siteId, dateSF.format(new java.util.Date(start.getTimeInMillis())),
+			List<RentalCell> rentalSiteRules = findRentalSiteRules(siteId, dateSF.format(new java.util.Date(start.getTimeInMillis())),
 					beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
 					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 			// 查sitebills
