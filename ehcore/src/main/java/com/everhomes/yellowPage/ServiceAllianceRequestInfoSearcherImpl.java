@@ -783,7 +783,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	 * 固定几行的设置
 	 */
 	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i){
-		row.createCell(0).setCellValue(i+1);
+		row.createCell(0).setCellValue(i);
 		row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
 		row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
 		row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
