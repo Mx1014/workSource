@@ -91,12 +91,12 @@ public class MenuTest  extends LoginAuthTestCase {
     @Test
     public void testCreateAdminMenu() {
     	MenuBuilder mb = new MenuBuilder(webMenuProvider, null, null);
-    	mb.setName("系统管理").Child()
+    	mb.setName("系统管理").setDataType("system-managerment").Child()
     	
     	.setName("管理员管理").Child()
-    	.Parent().Child().setName("系统管理员管理")
-    	.Parent().Child().setName("运营管理员管理")
-    	.Parent().Child().setName("角色权限配置")
+    	.Parent().Child().setName("系统管理员管理").setDataType("system-supers")
+    	.Parent().Child().setName("运营管理员管理").setDataType("system-operators")
+    	.Parent().Child().setName("角色权限配置").setDataType("system-roles")
     	.Parent()
     	
     	.Parent().Child().setName("基础信息配置").Child()
@@ -165,7 +165,25 @@ public class MenuTest  extends LoginAuthTestCase {
     	.Parent().Child().setName("园区活动")
     	.Parent().Child().setName("园区论坛")
     	.Parent().Child().setName("园区公告")
+    	
+    	.Parent().Child().setName("能耗管理")
+    	
+    	.Child().setName("能耗管理").setDataType("energy-managerment")
+    	
+    	.Child().setName("表计管理").setDataType("meter-managerment")
+    	.Parent().Child().setName("抄表记录").setDataType("meter-log")
+    	.Parent().Child().setName("统计信息").setDataType("meter-statistics")
+    	.Parent().Child().setName("参数设置").setDataType("meter-configuration")
+    	.Parent()
+    	
+    	.Parent()
+    	
     	.Parent().Child().setName("公共门禁")
+    	
+    	.Child().setName("设备管理")
+    	.Parent().Child().setName("用户授权")
+    	.Parent()
+    	
     	.Parent().Child().setName("停车充值")
     	.Parent().Child().setName("物业报修")
     	.Parent().Child().setName("物业缴费")
