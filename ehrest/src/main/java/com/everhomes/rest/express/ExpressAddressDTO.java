@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.express;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -34,6 +32,12 @@ public class ExpressAddressDTO {
 
 	private String organizationName;
 
+	private Long provinceId;
+
+	private Long cityId;
+
+	private Long countyId;
+	
 	private String province;
 
 	private String city;
@@ -43,6 +47,30 @@ public class ExpressAddressDTO {
 	private String detailAddress;
 
 	private Byte defaultFlag;
+
+	public Long getProvinceId() {
+		return provinceId;
+	}
+
+	public void setProvinceId(Long provinceId) {
+		this.provinceId = provinceId;
+	}
+
+	public Long getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(Long cityId) {
+		this.cityId = cityId;
+	}
+
+	public Long getCountyId() {
+		return countyId;
+	}
+
+	public void setCountyId(Long countyId) {
+		this.countyId = countyId;
+	}
 
 	public Long getId() {
 		return id;
