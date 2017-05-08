@@ -995,20 +995,20 @@ public class PunchServiceImpl implements PunchService {
 				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
 			}
  
-			// 如果上午1次打卡记录
-			if ( morningLogs.size() == 1) {
-				punchDayLog.setArriveTime(getDAOTime(morningLogs.get(0).getPunchTime().getTime()));
-				punchDayLog.setWorkTime(convertTime(0L));
-				pdl.setMorningPunchStatus(PunchStatus.FORGOT.getCode());
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
-			}
-			// 如果下午1次打卡记录
-			if ( afternoonLogs.size() == 1) {
-				punchDayLog.setAfternoonArriveTime(getDAOTime(afternoonLogs.get(0).getPunchTime().getTime()));
-				punchDayLog.setWorkTime(convertTime(0L));
-				pdl.setAfternoonPunchStatus(PunchStatus.FORGOT.getCode());
-				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
-			}
+//			// 如果上午1次打卡记录
+//			if ( morningLogs.size() == 1) {
+//				punchDayLog.setArriveTime(getDAOTime(morningLogs.get(0).getPunchTime().getTime()));
+//				punchDayLog.setWorkTime(convertTime(0L));
+//				pdl.setMorningPunchStatus(PunchStatus.FORGOT.getCode());
+//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 
+//			}
+//			// 如果下午1次打卡记录
+//			if ( afternoonLogs.size() == 1) {
+//				punchDayLog.setAfternoonArriveTime(getDAOTime(afternoonLogs.get(0).getPunchTime().getTime()));
+//				punchDayLog.setWorkTime(convertTime(0L));
+//				pdl.setAfternoonPunchStatus(PunchStatus.FORGOT.getCode());
+//				pdl.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode()); 	
+//			}
 			Calendar startMinTime = Calendar.getInstance();
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar noonLeaveTime = Calendar.getInstance();
