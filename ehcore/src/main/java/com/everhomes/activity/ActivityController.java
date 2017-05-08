@@ -69,7 +69,7 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /activity/signup</b>
+     * <b>URL: /activity/createSignupOrder</b>
      * <p>创建活动报名收费订单</p>
      */
     @RequestMapping("createSignupOrder")
