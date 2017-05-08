@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -233,11 +234,7 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 	
 	private ExpressUser checkExistsExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
-		ExpressUser expressUser = expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), cmd.getServiceAddressId(), cmd.getExpressCompanyId());
-		if (expressUser.getOrganizationId().longValue() != createExpressUserDTO.getOrganizationId().longValue() || expressUser.getOrganizationMemberId().longValue() != createExpressUserDTO.getOrganizationMemberId().longValue()) {
-			return null;
-		}
-		return expressUser;
+		return expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), cmd.getServiceAddressId(), cmd.getExpressCompanyId());
 	}
 
 	@Override
@@ -408,6 +405,9 @@ public class ExpressServiceImpl implements ExpressService {
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 			if (expressOrder == null) {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order");
+			}
+			if (expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error");
 			}
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
 			expressOrderProvider.updateExpressOrder(expressOrder);
