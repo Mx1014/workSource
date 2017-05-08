@@ -961,7 +961,7 @@ public class PunchServiceImpl implements PunchService {
 		else if(PunchTimesPerDay.FORTH.getCode().equals(punchTimeRule.getPunchTimesPerDay())){
 			Calendar noonAnchor = Calendar.getInstance();
 			//中间分界点是中午下班和下午上班中间时间点
-			noonAnchor.setTime(getDAOTime(punchLogs.get(0).getPunchTime().getTime()+
+			noonAnchor.setTime(getDAOTime(punchLogs.get(0).getPunchDate().getTime()+
 					(punchTimeRule.getNoonLeaveTimeLong()+punchTimeRule.getAfternoonArriveTimeLong())/2));
 			
 //			//计算计算日中午十三点
