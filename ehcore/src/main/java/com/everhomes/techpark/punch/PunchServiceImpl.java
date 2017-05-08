@@ -868,10 +868,10 @@ public class PunchServiceImpl implements PunchService {
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
 			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+  punchTimeRule.getStartEarlyTimeLong()));
+					+ convertTimeLongToString(punchTimeRule.getStartEarlyTimeLong())));
 	
 			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+  punchTimeRule.getStartLateTimeLong()));
+					+  convertTimeLongToString(punchTimeRule.getStartLateTimeLong())));
 	
 			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0)
 					.getPunchDate()) + " " + punchTimeRule.getWorkTimeLong()));
