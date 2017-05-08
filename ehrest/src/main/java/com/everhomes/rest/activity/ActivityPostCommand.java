@@ -41,6 +41,8 @@ import com.everhomes.util.StringHelper;
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
+ * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
+ * <li>chargePrice: 收费价格</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -95,6 +97,10 @@ public class ActivityPostCommand{
     private Byte visibleRegionType;
     
     private Long visibleRegionId;
+    
+    private Byte chargeFlag;
+
+    private Integer chargePrice;
 
 	public String getSignupEndTime() {
 		return signupEndTime;
@@ -393,6 +399,22 @@ public class ActivityPostCommand{
 
 	public void setVisibleRegionId(Long visibleRegionId) {
 		this.visibleRegionId = visibleRegionId;
+	}
+
+	public Byte getChargeFlag() {
+		return chargeFlag;
+	}
+
+	public void setChargeFlag(Byte chargeFlag) {
+		this.chargeFlag = chargeFlag;
+	}
+
+	public Integer getChargePrice() {
+		return chargePrice;
+	}
+
+	public void setChargePrice(Integer chargePrice) {
+		this.chargePrice = chargePrice;
 	}
 
 	@Override
