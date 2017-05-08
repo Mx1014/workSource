@@ -1392,37 +1392,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			// }
 			rentalBill.setResourceTotalMoney(siteTotalMoney);
 			rentalBill.setPayTotalMoney(siteTotalMoney);
-	//		rentalBill.setReserveMoney(siteTotalMoney.multiply(
-	//				 new java.math.BigDecimal((rs.getPaymentRatio()==null?0:rs.getPaymentRatio())/ 100)));
 			rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
 					.format(reserveTime)));
-	//		if(rs.getPayStartTime()!=null){
-	//			rentalBill.setPayStartTime(new Timestamp(cmd.getStartTime()
-	//					- rs.getPayStartTime()));
-	//		}
-	//		if(rs.getPayEndTime()!=null){
-	//			rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
-	//					- rentalRule.getPayEndTime()));
-	//		}
+
 			rentalBill.setPaidMoney(new java.math.BigDecimal (0));
-			//
-			
-	//		if (rentalRule.getPaymentRatio()!=null&&(rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio()) <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
-	//				- rentalRule.getPayStartTime()))) {
-	//			//定金比例在100以内 在支付时间之前 为锁定待支付
-	//			rentalBill.setStatus(SiteBillStatus.LOCKED.getCode());
-	//
-	//		} else {
-				// 在支付时间之后 为待支付全款
-	//		}
-			//订单开始状态设置为INACTIVE
-//			if(rentalBill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())) {
-////				rentalBill.setStatus(SiteBillStatus.OFFLINE_PAY.getCode());
-//				rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
-//			}else {
-////				rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
-//				rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
-//			}
+
 			//修改 by sw 点击下一步时，初始化订单状态，点击立即预约才进去各个模式流程  PayMode
 			rentalBill.setStatus(SiteBillStatus.INACTIVE.getCode());
 
@@ -1583,10 +1557,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				
 			}
-			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
-//			this.valiRentalBill(0.0, cmd.getRules());
-//			this.rentalProvider.updateRentalBill(rentalBill);
-//			billDTO = ConvertHelper.convert(rentalBill, RentalBillDTO.class);
+
 			mappingRentalBillDTO(billDTO, rentalBill);
 			
 			return billDTO;
@@ -1603,7 +1574,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		//状态为已完成时，不需要验证，之前付款时，已经做过校验
 		// 注意： valiRentalBill 方法校验时，会查出当前资源状态：已预约，此时验证会不通过
-		if (SiteBillStatus.COMPLETE.getCode() != status) {
+		if (SiteBillStatus.COMPLETE.getCode() != status && SiteBillStatus.FAIL.getCode() != status) {
 			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
 			proccessCells(rs);
 			List<RentalResourceOrder> rsbs = rentalv2Provider
