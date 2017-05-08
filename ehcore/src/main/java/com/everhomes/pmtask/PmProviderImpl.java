@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.pmtask.PmTaskHistoryAddressStatus;
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -24,7 +26,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetStatus;
@@ -34,22 +35,8 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
-import com.everhomes.server.schema.tables.records.EhPmTaskTargetsRecord;
-import com.everhomes.server.schema.tables.records.EhPmTasksRecord;
 import com.everhomes.util.ConvertHelper;
-import org.apache.commons.lang.StringUtils;
-import org.jooq.*;
-import org.jooq.impl.DefaultRecordMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.everhomes.util.DateHelper;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class PmProviderImpl implements PmTaskProvider{
@@ -90,7 +77,60 @@ public class PmProviderImpl implements PmTaskProvider{
     	dao.insert(pmTaskTarget);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargets.class, null);
     }
-	
+
+	@Override
+	public void createTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress){
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskHistoryAddresses.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskHistoryAddressesDao dao = new EhPmTaskHistoryAddressesDao(context.configuration());
+		pmTaskHistoryAddress.setId(id);
+		dao.insert(pmTaskHistoryAddress);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskHistoryAddresses.class, null);
+	}
+
+	@Override
+	public PmTaskHistoryAddress findTaskHistoryAddressById(Long id) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskHistoryAddressesDao dao = new EhPmTaskHistoryAddressesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), PmTaskHistoryAddress.class);
+	}
+
+	@Override
+	public void updateTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskHistoryAddressesDao dao = new EhPmTaskHistoryAddressesDao(context.configuration());
+		dao.update(pmTaskHistoryAddress);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskHistoryAddresses.class, null);
+	}
+
+	@Override
+	public List<PmTaskHistoryAddress> listTaskHistoryAddresses(Integer namespaceId, String ownerType, Long ownerId, Long userId,
+															   Long pageAnchor, Integer pageSize) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+		SelectQuery<EhPmTaskHistoryAddressesRecord> query = context.selectQuery(Tables.EH_PM_TASK_HISTORY_ADDRESSES);
+
+		query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.STATUS.eq(PmTaskHistoryAddressStatus.ACTIVE.getCode()));
+		if(null != userId)
+			query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.CREATOR_UID.eq(userId));
+		if(null != pageAnchor && pageAnchor != 0)
+			query.addConditions(Tables.EH_PM_TASK_HISTORY_ADDRESSES.ID.gt(pageAnchor));
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PM_TASK_HISTORY_ADDRESSES.ID.asc());
+
+		List<PmTaskHistoryAddress> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTaskHistoryAddress.class))
+				.collect(Collectors.toList());
+
+		return result;
+	}
+
 	@Override
     public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Byte roleId, Long pageAnchor, Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));

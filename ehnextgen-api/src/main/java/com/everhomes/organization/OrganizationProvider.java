@@ -1,8 +1,10 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
@@ -300,7 +302,23 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
+ 
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
 			Byte operationType);
+ 
+	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
+
+	Organization findOrganizationByName(String name, String groupType, Long parentId, Integer namespaceId);
+
+	void createImportFileTask(ImportFileTask importFileTask);
+
+	void updateImportFileTask(ImportFileTask importFileTask);
+
+	ImportFileTask findImportFileTaskById(Long id);
+
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
+	
 }
+ 

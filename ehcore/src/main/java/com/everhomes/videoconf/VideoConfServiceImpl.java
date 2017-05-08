@@ -1,6 +1,7 @@
 package com.everhomes.videoconf;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -2144,12 +2145,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		ConfOrders order = this.checkOrder(orderId);
-		
+
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 		
 		this.checkVendorTypeFormat(cmd.getVendorType());
-		
+		this.checkPayAmount(order.getAmount(), new BigDecimal(cmd.getPayAmount()));
+
 		if(order.getStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
 			order.setOnlineFlag((byte) 1);
 			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
@@ -2158,7 +2160,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		return order;
 	}
-	
+
+	private void checkPayAmount(BigDecimal orderAmount, BigDecimal payAmount) {
+
+		if (0 != orderAmount.compareTo(payAmount)) {
+			LOGGER.error("Order amount is not equal to payAmount, orderAmount={}, payAmount={}", orderAmount, payAmount);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Order amount is not equal to payAmount.");
+		}
+
+	}
+
 	private void checkPayAmountIsNull(String payAmount) {
 		
 		if(payAmount == null || payAmount.trim().equals("")){

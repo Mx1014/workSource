@@ -397,7 +397,7 @@ public class GroupServiceImpl implements GroupService {
             }
 
             // 如果创建俱乐部需要审核的话，审核后再发帖子
-            if (groupSetting.getVerifyFlag() == TrueOrFalseFlag.FALSE.getCode()) {
+            if (null != groupSetting && groupSetting.getVerifyFlag() == TrueOrFalseFlag.FALSE.getCode()) {
                 recommandGroup(groupDto, regionType, regionId);
             }
 

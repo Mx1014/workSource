@@ -22,6 +22,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -31,6 +32,7 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1955,7 +1957,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
 
 		List<ProjectDTO> projectDTOs = new ArrayList<>();
-		List<Long> projectIds = new ArrayList<>();
 
 		Long startTime3 = System.currentTimeMillis();
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
@@ -1967,7 +1968,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					dto.setProjectName(community.getName());
 					dto.setProjectType(EntityType.COMMUNITY.getCode());
 					projectDTOs.add(dto);
-					projectIds.add(dto.getProjectId());
 				}
 				break;
 			}
@@ -2015,15 +2015,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setProjectName(community.getName());
 					}
 					projectDTOs.add(dto);
-					projectIds.add(dto.getProjectId());
 				}
 			}
 		}
-		Long startTime5 = System.currentTimeMillis();
+		Long endTime1 = System.currentTimeMillis();
+		if(LOGGER.isInfoEnabled()){
+			LOGGER.debug("Track: listUserRelatedProjectByMenuId: get privileges:{}, webMenuPrivilege elapse:{}, get organization elapse:{}, total elapse:{}", endTime2 - startTime2, endTime3 - startTime3, endTime1 - startTime3, endTime1 - startTime1);
+		}
+		return getTreeProjectCategories(namespaceId, projectDTOs);
+	}
+
+	@Override
+	public List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects){
+		Long startTime = System.currentTimeMillis();
 		List<ProjectDTO> entityts = new ArrayList<>();
 		List<Long> categoryIds = new ArrayList<>();
-		if(0 != projectDTOs.size()){
-			for (ProjectDTO project: projectDTOs) {
+		List<Long> projectIds = new ArrayList<>();
+
+		if(0 != projects.size()){
+			for (ProjectDTO project: projects) {
 				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(),namespaceId);
 
 				if(null != categoryAssignment){
@@ -2038,10 +2048,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}else{
 					entityts.add(project);
 				}
+
+				projectIds.add(project.getProjectId());
 			}
 		}
-		Long endTime5 = System.currentTimeMillis();
-		List<ProjectDTO> projects = new ArrayList<>();
+		List<ProjectDTO> projectTrees = new ArrayList<>();
 		if(0 != categoryIds.size()){
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
@@ -2055,17 +2066,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			for(ProjectDTO project: temp) {
 				getChildCategories(temp, project);
 				if(project.getParentId() == 0L) {
-					projects.add(project);
+					projectTrees.add(project);
 				}
 			}
-			setResourceDTOs(projects, projectIds, namespaceId);
+			setResourceDTOs(projectTrees, projectIds, namespaceId);
 		}
-		projects.addAll(entityts);
-		Long endTime1 = System.currentTimeMillis();
+		projectTrees.addAll(entityts);
+
+		Long endTime = System.currentTimeMillis();
 		if(LOGGER.isInfoEnabled()){
-			LOGGER.debug("Track: listUserRelatedProjectByMenuId: get privileges elapse:{}, webMenuPrivilege elapse:{}, get organization elapse:{}, get all project elapse:{}, get project tree elapse:{}, total elapse:{}", endTime2 - startTime2, endTime3 - startTime3, startTime5 - startTime3, endTime5 - startTime5, endTime1 - endTime5, endTime1 - startTime1);
+			LOGGER.debug("Track: getProjectCategoryTree: get project category tree:{}", endTime - startTime);
 		}
-		return projects;
+
+		return projectTrees;
 	}
 
 	private ProjectDTO getChildCategories(List<ProjectDTO> list, ProjectDTO dto){
@@ -2211,7 +2224,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
     public static void main(String[] args) {
-		List<Long> privilegeIds = new ArrayList<>();
-		privilegeIds.addAll(null);
+//		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));
+		System.out.println("2015/11/11".replaceAll("/", "-"));
+//		System.out.println(new Timestamp(DateUtil.parseDate("2015-11-11 02:30:00").getTime()));
+
+//		for (int i = 1; i < 13; i++ ) {
+//			System.out.println("INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) VALUES((@building_id := @building_id + 1), @community_id, '伊湾尊府" + i + "号楼', '" + i + "号楼', 0, '0755-82738680', '浑南区朗日街19-" + i + "号楼', NULL, 41.843665, 123.455102, 'wxry133m02s0', '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999993);");
+//		}
 	}
 }

@@ -65,4 +65,13 @@ public interface PmTaskProvider {
 	List<PmTaskLog> listRepairByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 
 	List<PmTaskLog> listRepairByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	void createTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress);
+
+	List<PmTaskHistoryAddress> listTaskHistoryAddresses(Integer namespaceId, String ownerType, Long ownerId, Long userId,
+														Long pageAnchor, Integer pageSize);
+
+	void updateTaskHistoryAddress(PmTaskHistoryAddress pmTaskHistoryAddress);
+
+	PmTaskHistoryAddress findTaskHistoryAddressById(Long id);
 }

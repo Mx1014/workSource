@@ -18,6 +18,8 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusMessageDispatcher;
 import com.everhomes.bus.LocalBusMessageHandler;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.business.Business;
+import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -40,6 +42,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -67,11 +70,13 @@ import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
@@ -256,6 +261,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
+	
+    @Autowired
+    private LaunchPadService launchPadService;
+    
+    @Autowired
+    private BusinessService businessService;
 
 
 	private static final String DEVICE_KEY = "device_login";
@@ -807,12 +818,14 @@ public class UserServiceImpl implements UserService {
 		if(user == null) {
 			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByToken(namespaceId, userIdentifierToken);
 			if(userIdentifier == null) {
-				LOGGER.warn("Unable to find identifier record of " + userIdentifierToken);
+				LOGGER.warn("Unable to find identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+				        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
 				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UNABLE_TO_LOCATE_USER, "Unable to locate user");
 			} else {
 				user = this.userProvider.findUserById(userIdentifier.getOwnerUid());
 				if(user == null) {
-					LOGGER.error("Unable to find owner user of identifier record: " + userIdentifierToken);
+					LOGGER.error("Unable to find owner user of identifier record,  namespaceId={}, userIdentifierToken={}, deviceIdentifier={}, pusherIdentify={}", 
+                        namespaceId, userIdentifierToken, deviceIdentifier, pusherIdentify);
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_USER_NOT_EXIST, "User does not exist");
 				}
 			}
@@ -3190,14 +3203,27 @@ public class UserServiceImpl implements UserService {
 		case NEWS:
 			response = newsService.searchNewsByScene(cmd);
 			break;
+		case LAUNCHPADITEM:
+			response = launchPadService.searchLaunchPadItemByScene(cmd);
+			break;
+		case SHOP:
+			response = businessService.searchShops(cmd);
+			break;
 		case ALL:
 			int pageSize = (int)configProvider.getIntValue("search.content.size", 3);
 			cmd.setPageSize(pageSize);
 
 			List<ContentBriefDTO> dtos = new ArrayList<ContentBriefDTO>();
+			List<LaunchPadItemDTO> itemDtos = new ArrayList<LaunchPadItemDTO>();
+			List<ShopDTO> shopDtos = new ArrayList<ShopDTO>();
 			response.setDtos(dtos);
+			response.setLaunchPadItemDtos(itemDtos);
+			response.setShopDTOs(shopDtos);
 
 			SearchTypes searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.ACTIVITY.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.ACTIVITY.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.ACTIVITY) != null 
 						&& forumService.searchContents(cmd, SearchContentType.ACTIVITY).getDtos() != null) {
@@ -3206,6 +3232,9 @@ public class UserServiceImpl implements UserService {
 			}
 
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.POLL.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.POLL.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.POLL) != null 
 						&& forumService.searchContents(cmd, SearchContentType.POLL).getDtos() != null) {
@@ -3214,6 +3243,9 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.TOPIC.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.TOPIC.getCode());
+			}
 			if(searchType != null) {
 				if(forumService.searchContents(cmd, SearchContentType.TOPIC) != null 
 						&& forumService.searchContents(cmd, SearchContentType.TOPIC).getDtos() != null) {
@@ -3222,12 +3254,42 @@ public class UserServiceImpl implements UserService {
 			}
 
 			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.NEWS.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.NEWS.getCode());
+			}
 			if(searchType != null) {
 				if(newsService.searchNewsByScene(cmd) != null 
 						&& newsService.searchNewsByScene(cmd).getDtos() != null) {
 					response.getDtos().addAll(newsService.searchNewsByScene(cmd).getDtos());
 				}
 			}
+			
+			//查询应用 add by yanjun 20170419
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.LAUNCHPADITEM.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.LAUNCHPADITEM.getCode());
+			}
+			if(searchType != null) {
+				 SearchContentsBySceneReponse tempResp = launchPadService.searchLaunchPadItemByScene(cmd);
+				if( tempResp != null 
+						&& tempResp.getLaunchPadItemDtos() != null) {
+					response.getLaunchPadItemDtos().addAll(tempResp.getLaunchPadItemDtos());
+				}
+			}
+			
+			//查询电商店铺 add by yanjun 20170419
+			searchType = userActivityProvider.findByContentAndNamespaceId(namespaceId, SearchContentType.SHOP.getCode());
+			if(searchType == null){
+				searchType = userActivityProvider.findByContentAndNamespaceId(0, SearchContentType.SHOP.getCode());
+			}
+			if(searchType != null) {
+				SearchContentsBySceneReponse tempResp = businessService.searchShops(cmd);
+				if(tempResp != null 
+						&& tempResp.getShopDTOs() != null) {
+					response.getShopDTOs().addAll(tempResp.getShopDTOs());
+				}
+			}
+			
 
 			break;
 

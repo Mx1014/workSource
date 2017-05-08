@@ -1,5 +1,6 @@
 package com.everhomes.payment;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.StringUtils;
@@ -30,6 +31,13 @@ public class PaymentCardOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.checkOrderNoIsNull(cmd.getOrderNo());
 		Long orderId = Long.parseLong(cmd.getOrderNo());
 		PaymentCardRechargeOrder order = checkOrder(orderId);
+
+		if (0 != order.getAmount().compareTo(new BigDecimal(cmd.getPayAmount()))) {
+			LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Order amount is not equal to payAmount.");
+		}
+
 		PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(order.getCardId());
 		PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		

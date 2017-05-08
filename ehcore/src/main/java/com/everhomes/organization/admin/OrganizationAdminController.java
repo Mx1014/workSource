@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 
 import org.slf4j.Logger;
@@ -875,7 +876,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入企业信息</p>
      */
     @RequestMapping("importEnterpriseData")
-    @RestReturn(value = ImportDataResponse.class)
+    @RestReturn(value = ImportFileResponse.class)
     public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
@@ -884,8 +885,8 @@ public class OrganizationAdminController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-        ImportDataResponse importDataResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
-        RestResponse response = new RestResponse(importDataResponse);
+        ImportFileResponse<ImportEnterpriseDataDTO> importFileResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
+        RestResponse response = new RestResponse(importFileResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -896,12 +897,11 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入机构成员信息</p>
      */
     @RequestMapping("importOrganizationPersonnelData")
-    @RestReturn(value = ImportOrganizationPersonnelDataResponse.class)
+    @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
-//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         if (null == files || null == files[0]) {
             LOGGER.error("files is null, userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
@@ -1147,4 +1147,33 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/org/getImportFileResult</b>
+     * <p>查询导入的文件结果</p>
+     */
+    @RequestMapping("getImportFileResult")
+    @RestReturn(value = ImportFileResponse.class)
+    public RestResponse getImportFileResult(@Valid GetImportFileResultCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.getImportFileResult(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/org/exportImportFileFailResultXls</b>
+     * <p>查询导入的文件结果</p>
+     */
+    @RequestMapping("exportImportFileFailResultXls")
+    @RestReturn(value = String.class)
+    public RestResponse exportImportFileFailResultXls(@Valid GetImportFileResultCommand cmd, HttpServletResponse httpResponse) {
+        organizationService.exportImportFileFailResultXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
 }

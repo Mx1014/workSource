@@ -211,6 +211,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.rest.equipment.*;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -464,84 +465,6 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
-import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.DeleteEquipmentsCommand;
-import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
-import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
-import com.everhomes.rest.equipment.EquipmentAccessoryMapDTO;
-import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
-import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
-import com.everhomes.rest.equipment.EquipmentParameterDTO;
-import com.everhomes.rest.equipment.EquipmentQrCodeTokenDTO;
-import com.everhomes.rest.equipment.EquipmentReviewStatus;
-import com.everhomes.rest.equipment.EquipmentServiceErrorCode;
-import com.everhomes.rest.equipment.EquipmentStandardMapDTO;
-import com.everhomes.rest.equipment.EquipmentStandardStatus;
-import com.everhomes.rest.equipment.EquipmentStandardsDTO;
-import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.EquipmentTaskAttachmentDTO;
-import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.EquipmentTaskLogsDTO;
-import com.everhomes.rest.equipment.EquipmentTaskProcessResult;
-import com.everhomes.rest.equipment.EquipmentTaskProcessType;
-import com.everhomes.rest.equipment.EquipmentTaskResult;
-import com.everhomes.rest.equipment.EquipmentTaskStatus;
-import com.everhomes.rest.equipment.EquipmentsDTO;
-import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
-import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
-import com.everhomes.rest.equipment.ImportDataType;
-import com.everhomes.rest.equipment.ImportOwnerCommand;
-import com.everhomes.rest.equipment.InspectionItemDTO;
-import com.everhomes.rest.equipment.InspectionItemResult;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
-import com.everhomes.rest.equipment.InspectionTemplateDTO;
-import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
-import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
-import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
-import com.everhomes.rest.equipment.ListTaskByIdCommand;
-import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
-import com.everhomes.rest.equipment.ListTasksByTokenCommand;
-import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
-import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardRelationsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentStandardsResponse;
-import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
-import com.everhomes.rest.equipment.ListEquipmentTasksResponse;
-import com.everhomes.rest.equipment.SearchEquipmentsCommand;
-import com.everhomes.rest.equipment.SearchEquipmentsResponse;
-import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
-import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
-import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
-import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
-import com.everhomes.rest.equipment.StandardGroupDTO;
-import com.everhomes.rest.equipment.StandardType;
-import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
-import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
-import com.everhomes.rest.equipment.Status;
-import com.everhomes.rest.equipment.TaskCountDTO;
-import com.everhomes.rest.equipment.TaskType;
-import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
-import com.everhomes.rest.equipment.UpdateEquipmentsCommand;
-import com.everhomes.rest.equipment.UpdateInspectionTemplateCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationCommand;
-import com.everhomes.rest.equipment.VerifyEquipmentLocationResponse;
 import com.everhomes.rest.forum.AttachmentDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -3123,7 +3046,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					null, null, offset, userId);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					null, null, offset, pageSize + 1, cacheKey);
+					null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode());
 
 		}
 		if(!isAdmin) {
@@ -3149,7 +3072,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					executeStandardIds, reviewStandardIds, offset, userId);
 
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
+					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
 
 		}
 

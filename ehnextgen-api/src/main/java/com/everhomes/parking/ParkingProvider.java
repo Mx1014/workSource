@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.parking.ParkingLotVendor;
+import org.jooq.SortField;
 
 public interface ParkingProvider {
 	ParkingVendor findParkingVendorByName(String name);
@@ -34,7 +35,7 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, String paidType, Long pageAnchor, Integer pageSize);
+    		Byte rechargeType, String paidType, String cardNumber, Long pageAnchor, Integer pageSize);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
@@ -46,10 +47,10 @@ public interface ParkingProvider {
     
     ParkingRechargeRate findParkingRechargeRatesById(Long id);
     
-    List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
-    		Timestamp endDate, Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, 
-    		Long flowId, Long pageAnchor, Integer pageSize);
+    List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
+                                                       String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
+                                                       Timestamp endDate, Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName,
+                                                       Long flowId, SortField order, Long pageAnchor, Integer pageSize);
     
     void setParkingLotConfig(ParkingLot parkingLot);
     

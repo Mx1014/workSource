@@ -130,7 +130,13 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		ParkingRechargeOrder order = checkOrder(orderId);
 		
 		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
-		
+
+		if (0 != order.getPrice().compareTo(payAmount)) {
+			LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Order amount is not equal to payAmount.");
+		}
+
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 		
