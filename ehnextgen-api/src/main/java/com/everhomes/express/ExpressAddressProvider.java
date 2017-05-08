@@ -17,7 +17,7 @@ public interface ExpressAddressProvider {
 	List<ExpressAddress> listExpressAddress();
 
 	void updateOtherAddressToNotDefault(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId, Long userId,
-			Long currentId);
+			Long currentId, Byte category);
 
 	List<ExpressAddress> listExpressAddressByOwner(ExpressOwner owner, Byte category);
 

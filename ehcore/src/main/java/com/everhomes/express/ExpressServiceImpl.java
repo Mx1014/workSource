@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.express;
 
-import java.security.acl.Owner;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -19,7 +18,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.CommonStatus;
@@ -492,7 +490,7 @@ public class ExpressServiceImpl implements ExpressService {
 				expressAddress = updateExpressAddress(owner, cmd);
 			}
 			if (TrueOrFalseFlag.fromCode(expressAddress.getDefaultFlag()) == TrueOrFalseFlag.TRUE) {
-				updateOtherAddressToNotDefault(owner, expressAddress.getId());
+				updateOtherAddressToNotDefault(owner, expressAddress);
 			}
 			return expressAddress;
 		});
@@ -532,7 +530,8 @@ public class ExpressServiceImpl implements ExpressService {
 	private ExpressAddress updateExpressAddress(ExpressOwner owner, CreateOrUpdateExpressAddressCommand cmd) {
 		ExpressAddress expressAddress = expressAddressProvider.findExpressAddressById(cmd.getId());
 		if (expressAddress == null || !expressAddress.getOwnerType().equals(owner.getOwnerType().getCode()) || expressAddress.getOwnerId().longValue() != owner.getOwnerId().longValue()
-				|| expressAddress.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || expressAddress.getCreatorUid().longValue() != owner.getUserId()) {
+				|| expressAddress.getNamespaceId().intValue() != owner.getNamespaceId().intValue() || expressAddress.getCreatorUid().longValue() != owner.getUserId()
+				|| expressAddress.getCategory().byteValue() != cmd.getCategory().byteValue()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameter");
 		}
 		expressAddress.setUserName(cmd.getUserName());
@@ -556,8 +555,8 @@ public class ExpressServiceImpl implements ExpressService {
 		return expressAddress;
 	}
 
-	private void updateOtherAddressToNotDefault(ExpressOwner owner, Long currentId) {
-		expressAddressProvider.updateOtherAddressToNotDefault(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), currentId);
+	private void updateOtherAddressToNotDefault(ExpressOwner owner, ExpressAddress expressAddress) {
+		expressAddressProvider.updateOtherAddressToNotDefault(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), expressAddress.getId(), expressAddress.getCategory());
 	}
 
 	private ExpressAddressDTO convertToExpressAddressDTO(ExpressAddress expressAddress) {

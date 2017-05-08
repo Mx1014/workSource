@@ -59,7 +59,7 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 
 	@Override
 	public void updateOtherAddressToNotDefault(Integer namespaceId, ExpressOwnerType ownerType, Long ownerId,
-			Long userId, Long currentId) {
+			Long userId, Long currentId, Byte category) {
 		getReadWriteContext().update(Tables.EH_EXPRESS_ADDRESSES)
 			.set(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FLAG, (TrueOrFalseFlag.FALSE.getCode()))
 			.set(Tables.EH_EXPRESS_ADDRESSES.UPDATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
@@ -69,6 +69,7 @@ public class ExpressAddressProviderImpl implements ExpressAddressProvider {
 			.and(Tables.EH_EXPRESS_ADDRESSES.OWNER_ID.eq(ownerId))
 			.and(Tables.EH_EXPRESS_ADDRESSES.CREATOR_UID.eq(userId))
 			.and(Tables.EH_EXPRESS_ADDRESSES.DEFAULT_FLAG.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.and(Tables.EH_EXPRESS_ADDRESSES.CATEGORY.eq(category))
 			.and(Tables.EH_EXPRESS_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 			.and(Tables.EH_EXPRESS_ADDRESSES.ID.ne(currentId))
 			.execute();
