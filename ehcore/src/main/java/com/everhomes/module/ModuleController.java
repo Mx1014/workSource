@@ -7,6 +7,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
 import com.everhomes.rest.acl.ListServiceModulesCommand;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.acl.WebMenuDTO;
@@ -47,7 +48,7 @@ public class ModuleController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /menu/listServiceModules</b>
+     * <b>URL: /module/listServiceModules</b>
      * <p>业务模块列表</p>
      */
     @RequestMapping("listServiceModules")
@@ -60,7 +61,7 @@ public class ModuleController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /menu/treeServiceModules</b>
+     * <b>URL: /module/treeServiceModules</b>
      * <p>树状结构的业务模块列表</p>
      */
     @RequestMapping("treeServiceModules")
@@ -72,4 +73,16 @@ public class ModuleController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /module/listServiceModulePrivileges</b>
+     * <p>业务模块权限列表</p>
+     */
+    @RequestMapping("listServiceModulePrivileges")
+    @RestReturn(value=ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

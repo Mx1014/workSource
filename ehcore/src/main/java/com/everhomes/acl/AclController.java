@@ -303,4 +303,48 @@ public class AclController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /acl/getPrivilegeIdsByRoleId</b>
+     * <p>查询角色的权限集合</p>
+     */
+    @RequestMapping("getPrivilegeIdsByRoleId")
+    @RestReturn(value=Long.class, collection = true)
+    public RestResponse getPrivilegeIdsByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+    /**
+     * <b>URL: /acl/createRolePrivileges</b>
+     * <p>创建角色和权限的关系</p>
+     */
+    @RequestMapping("createRolePrivileges")
+    @RestReturn(value=String.class)
+    public RestResponse createRolePrivileges(@Valid CreateRolePrivilegesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listRoles</b>
+     * <p>角色列表</p>
+     */
+    @RequestMapping("listRoles")
+    @RestReturn(value=RoleDTO.class, collection = true)
+    public RestResponse listRoles(@Valid ListRolesCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+
+
 }
