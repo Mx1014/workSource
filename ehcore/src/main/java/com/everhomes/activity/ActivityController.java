@@ -23,6 +23,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.util.ConvertHelper;
@@ -52,6 +54,7 @@ public class ActivityController extends ControllerBase {
 //    }
     /**
      * 报名
+     * <b>URL: /activity/signup</b>
      * @return {@link ActivityDTO}
      */
     @RequestMapping("signup")
@@ -62,6 +65,34 @@ public class ActivityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         response.setResponseObject(result);
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/signup</b>
+     * <p>创建活动报名收费订单</p>
+     */
+    @RequestMapping("createSignupOrder")
+    @RestReturn(value=CommonOrderDTO.class)
+    public RestResponse createSignupOrder(@Valid createSignupOrderCommand cmd) {
+    	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
+    	RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/notifySignupOrderPayment</b>
+     * <p>支付后，由统一支付调用此接口来通知各支付结果</p>
+     */
+    @RequestMapping("notifySignupOrderPayment")
+    @RestReturn(value = String.class)
+    public RestResponse notifySignupOrderPayment(PayCallbackCommand cmd) {
+    	activityService.notifySignupOrderPayment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
     

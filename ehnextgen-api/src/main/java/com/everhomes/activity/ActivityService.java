@@ -4,6 +4,8 @@ import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
@@ -25,6 +27,10 @@ public interface ActivityService {
     void createPost(ActivityPostCommand cmd, Long postId);
 
     ActivityDTO signup(ActivitySignupCommand cmd);
+    
+    CommonOrderDTO createSignupOrder(createSignupOrderCommand cmd);
+    
+    void notifySignupOrderPayment(PayCallbackCommand cmd);
 
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 

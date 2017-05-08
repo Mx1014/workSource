@@ -8,6 +8,7 @@ package com.everhomes.rest.order;
  *	<li>10000003-pmsy-思源物业</li>
  *	<li>10000005-rentalOrder-思源物业</li>
  *	<li>10000006-rentalrefund-思源物业</li>
+ *  <li>10000007-activitySignupOrder-活动报名缴费</li>
  *</ul>
  */
 public class OrderType {
@@ -16,6 +17,7 @@ public class OrderType {
 	public static final int PM_SIYUAN_CODE = 10000003;
 	public static final int PAYMENT_CARD_CODE = 10000004;
 	public static final int RENTAL_ORDER_CODE = 10000005; 
+	public static final int ACTIVITY_SIGNUP_ORDER_CODE = 10000007; 
 	
 	
 	public static enum OrderTypeEnum{
@@ -23,7 +25,8 @@ public class OrderType {
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
 		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业"), 
 		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通"),
-		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订") ; 
+		RENTALORDER(OrderType.RENTAL_ORDER_CODE,"rentalOrder","资源预订"),
+		ACTIVITYSIGNUPORDER(OrderType.ACTIVITY_SIGNUP_ORDER_CODE,"activitySignupOrder","活动报名缴费"); 
 
 		private int code;
 		private String pycode;

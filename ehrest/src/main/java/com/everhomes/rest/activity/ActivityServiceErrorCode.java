@@ -25,5 +25,8 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME=10019;
     static final int ERROR_PHONE=10020;
 	static final int ERROR_NO_ROSTER = 10021;
+	static final int ERROR_CONVERT_TO_COMMON_ORDER_FAIL = 10022;
+	static final int ERROR_PAYAMOUNT_ERROR = 10023;
+	static final int ERROR_ORDERTYPE_NO_FIND = 10024;
 
 }

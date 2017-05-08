@@ -3,6 +3,7 @@ package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -31,6 +32,8 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.order.OrderEmbeddedHandler;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
@@ -51,7 +54,12 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -88,6 +96,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -204,6 +214,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private ConfigurationProvider configProvider;
+    
+    @Autowired
+	private OrderUtil commonOrderUtil;
     
     @PostConstruct
     public void setup() {
@@ -414,6 +427,80 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
 	 }
+    
+
+	@Override
+	public CommonOrderDTO createSignupOrder(createSignupOrderCommand cmd) {
+		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+		if(roster == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+					"no roster.");
+		}
+		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+		if(activity == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+					"no activity.");
+		}
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_SUBJECT), 
+				UserContext.current().getUser().getLocale(), 
+				"activity roster pay");
+		
+		orderCmd.setBody(temple);
+		orderCmd.setOrderNo(cmd.getActivityRosterId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		orderCmd.setSubject(temple);
+		orderCmd.setTotalFee(new BigDecimal(activity.getChargePrice()));
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.",e);
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_CONVERT_TO_COMMON_ORDER_FAIL,
+					"convertToCommonOrder is fail.");
+		}
+		
+		//设置订单开始时间，用于定时取消订单
+		if(roster.getOrderStartTime() == null){
+			roster.setOrderStartTime(new Timestamp(dto.getTimestamp()));
+			activityProvider.updateRoster(roster);
+			//TODO 启动定时器，定时取消
+		}else{
+			dto.setTimestamp(roster.getOrderStartTime().getTime());
+		}
+		
+		return dto;
+	}
+	
+	@Override
+	public void notifySignupOrderPayment(PayCallbackCommand cmd) {
+		
+		OrderEmbeddedHandler orderEmbeddedHandler = this.getOrderHandler(cmd.getOrderType());
+		
+		LOGGER.debug("OrderEmbeddedHandler={}", orderEmbeddedHandler.getClass().getName());
+		
+		if(cmd.getPayStatus().equalsIgnoreCase("success"))
+			orderEmbeddedHandler.paySuccess(cmd);
+		if(cmd.getPayStatus().equalsIgnoreCase("fail"))
+			orderEmbeddedHandler.payFail(cmd);
+	}
+	
+	private OrderEmbeddedHandler getOrderHandler(String orderType) {
+		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
+	}
+	
+	private String getOrderTypeCode(String orderType) {
+		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
+		if(null == code){
+			LOGGER.error("Invalid parameter, orderType not found, orderType={}", orderType);
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_ORDERTYPE_NO_FIND,
+					"Invalid parameter, orderType not found");
+		}
+		return String.valueOf(code);
+	}
     
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
@@ -1437,6 +1524,12 @@ public class ActivityServiceImpl implements ActivityService {
             item.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             item.setConfirmFamilyId(cmd.getConfirmFamilyId());
             item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+            
+            //设置订单开始时间，用于定时取消订单
+    		//TODO 启动定时器，定时取消
+            if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+            	item.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            }
             activityProvider.updateRoster(item);
             return status;
         });
@@ -4274,4 +4367,5 @@ public class ActivityServiceImpl implements ActivityService {
 			return;
 		}
 	}
+
 }
