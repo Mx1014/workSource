@@ -1512,16 +1512,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						return this.rentalv2Provider.createRentalOrder(rentalBill);
 					});
 			Long rentalBillId = tuple.first(); 
-			if (rentalBill.getStatus().equals(
-					SiteBillStatus.PAYINGFINAL.getCode())) {
-				// 20分钟后，取消未成功的订单
-				final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(),
-						new Object[] {String.valueOf(rentalBill.getId())});
-	
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-						reserveTime.getTime() + cancelTime);
-	
-			}
+//			if (rentalBill.getStatus().equals(
+//					SiteBillStatus.PAYINGFINAL.getCode())) {
+//				// 20分钟后，取消未成功的订单
+//				final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(),
+//						new Object[] {String.valueOf(rentalBill.getId())});
+//
+//				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+//						reserveTime.getTime() + cancelTime);
+//
+//			}
 			 
 			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
@@ -1596,20 +1596,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag){
+
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
 		List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
-
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-		proccessCells(rs);
-		List<RentalResourceOrder> rsbs = rentalv2Provider
-				.findRentalResourceOrderByOrderId(order.getId());
 		List<Long> resourceRuleIds = new ArrayList<>();
-		for(RentalResourceOrder rsb : rsbs){
-			RentalBillRuleDTO dto = new RentalBillRuleDTO();
-			dto.setRentalCount(rsb.getRentalCount());
-			dto.setRuleId(rsb.getRentalResourceRuleId());
-			resourceRuleIds.add(rsb.getRentalResourceRuleId());
-			rules.add(dto);					
+
+		//状态为已完成时，不需要验证，之前付款时，已经做过校验
+		// 注意： valiRentalBill 方法校验时，会查出当前资源状态：已预约，此时验证会不通过
+		if (SiteBillStatus.COMPLETE.getCode() != status) {
+			RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+			proccessCells(rs);
+			List<RentalResourceOrder> rsbs = rentalv2Provider
+					.findRentalResourceOrderByOrderId(order.getId());
+			for(RentalResourceOrder rsb : rsbs){
+				RentalBillRuleDTO dto = new RentalBillRuleDTO();
+				dto.setRentalCount(rsb.getRentalCount());
+				dto.setRuleId(rsb.getRentalResourceRuleId());
+				resourceRuleIds.add(rsb.getRentalResourceRuleId());
+				rules.add(dto);
+			}
 		}
 		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+order.getRentalResourceId())
@@ -1617,7 +1622,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			//验证订单下的资源是否足够
 			this.valiRentalBill(rules);
-			
+
 			//本订单状态置为成功,
 //			order.setStatus(SiteBillStatus.SUCCESS.getCode());
 			order.setStatus(status);
@@ -1670,22 +1675,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							dto.setFlowVersion(flowcase.getFlowVersion());
 							dto.setStepCount(flowcase.getStepCount());
 							flowService.processAutoStep(dto);
-							//					//并发短信
-							//					String templateScope = SmsTemplateCode.SCOPE;
-							//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
-							//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName());
-							//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId());
-							//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE;
-							//
-							//					String templateLocale = RentalNotificationTemplateCode.locale;
-							//
-							//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-							//					if(null == userIdentifier){
-							//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
-							//					}else{
-							//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-							//					}
-
 						}
 					});
 				}
@@ -2020,7 +2009,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalOrder> billList = this.rentalv2Provider.listRentalBills(userId,
 				cmd.getResourceTypeId(), locator, pageSize + 1,
-				status);
+				status, PayMode.ONLINE_PAY.getCode());
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		if (null == billList)
 			return response;
@@ -3178,11 +3167,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 
 			//增加审批后线上支付模式的判断 审批模式，订单状态设置成待审批 add by sw 20170506
-			//去掉线下订单模式的判断，现在线上，线下订单都跟踪状态，金额为0时，直接预约成功，否则设置成待付款
+			//现在审批线上模式，线下订单模式都跟踪状态，金额为0时，直接预约成功，否则设置成待付款
+			//线上模式只有成功之后才走工作流
 //			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
-			if (PayMode.APPROVE_ONLINE_PAY.getCode().equals(bill.getPayMode())) {
-				bill.setStatus(SiteBillStatus.APPROVING.getCode());
-			}else {
+			//线下模式和审批线上模式 都走工作流
+			if (PayMode.ONLINE_PAY.getCode().equals(bill.getPayMode())) {
 				int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
 				if (compare == 0) {
 					// 总金额为0，直接预订成功状态
@@ -3191,6 +3180,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else{
 					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 				}
+			}else {
+				bill.setStatus(SiteBillStatus.APPROVING.getCode());
 			}
 
 
@@ -3216,7 +3207,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				response.setAmount(bill.getPayTotalMoney());
 			}
 			bill.setOrderNo(String.valueOf(orderNo));
-			rentalv2Provider.updateRentalBill(bill);
+//			rentalv2Provider.updateRentalBill(bill);
 			// save bill and online pay bill
 			RentalOrderPayorderMap billmap = new RentalOrderPayorderMap();
 	 
@@ -3258,12 +3249,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.setSignatureParam(response);
 			return null;
 		});
-		if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
-			
-			onOrderSuccess(bill);
-		}
+
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
-		if(bill.getStatus().equals(SiteBillStatus.OFFLINE_PAY.getCode())){
+		//线下模式和审批线上模式 都走工作流
+		if(bill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode())
+				|| bill.getPayMode().equals(PayMode.APPROVE_ONLINE_PAY.getCode())) {
 			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
 					.enter(() -> {
 						List<RentalBillRuleDTO> rules = new ArrayList<>();
@@ -3285,10 +3275,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
 							response.setFlowCaseUrl(url);
 						}
-						
+						bill.setFlowCaseId(flowCase.getId());
+						rentalv2Provider.updateRentalBill(bill);
+
 						return null;
 					}); 
+		}else {
+			rentalv2Provider.updateRentalBill(bill);
+
+			if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+				onOrderSuccess(bill);
 			}
+		}
 		// 客户端生成订单
 		return response;
 	}
@@ -3631,6 +3629,39 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 		response.setDayTimes(dayTimes);
  		}
 		return response;
+	}
+
+	private List<Long> caculateOrdinateList(List<RentalTimeInterval> timeIntervals) {
+		List<Long> dayTimes = new ArrayList<>();
+
+		if (null != timeIntervals) {
+			for(RentalTimeInterval timeInterval : timeIntervals){
+				Long dayTimeBegin = Timestamp.valueOf(dateSF.format(new java.util.Date())
+						+ " "
+						+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
+						+ ":"
+						+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
+						+ ":00").getTime();
+				if(!dayTimes.contains(dayTimeBegin))
+					dayTimes.add(dayTimeBegin);
+
+				for (double i = timeInterval.getBeginTime(); i < timeInterval.getEndTime();) {
+
+					i = i + timeInterval.getTimeStep();
+					Long dayTimeEnd = Timestamp.valueOf(dateSF.format(new java.util.Date())
+							+ " "
+							+ String.valueOf((int) i / 1)
+							+ ":"
+							+ String.valueOf((int) (( i % 1) * 60))
+							+ ":00").getTime();
+					if(!dayTimes.contains(dayTimeEnd))
+						dayTimes.add(dayTimeEnd);
+
+				}
+			}
+		}
+
+		return dayTimes;
 	}
 
 	private List<RentalSitePicDTO> convertRentalSitePicDTOs(List<RentalResourcePic> pics) {

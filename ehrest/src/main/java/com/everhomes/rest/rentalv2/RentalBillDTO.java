@@ -90,12 +90,20 @@ public class RentalBillDTO {
 
 	private Byte toastFlag;
 	private String confirmationPrompt;
+	private Long flowCaseId;
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
 
 	public String getBuildingName() {
 		return buildingName;
