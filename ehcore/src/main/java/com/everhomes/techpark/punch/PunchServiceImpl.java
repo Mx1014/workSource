@@ -1613,7 +1613,7 @@ public class PunchServiceImpl implements PunchService {
 //	}
 
 	// 计算两个日期间工作日天数，不包含结束时间
-	private Integer countWorkDayCount(Calendar startCalendar, Calendar endCalendar ,PunchRule pr) {
+	private Integer countWorkDayCount(Calendar startCalendar, Calendar endCalendar ,PunchStatistic statistic) {
 //		Integer workDayCount = 0;
 //		Calendar calendar = Calendar.getInstance();
 //		calendar.setTime(startCalendar.getTime());
@@ -1626,6 +1626,10 @@ public class PunchServiceImpl implements PunchService {
 //				return workDayCount;
 //			}
 //		} 
+		
+		PunchRuleOwnerMap ruleMap = getPunchRuleMap(statistic.getOwnerType(), statistic.getOwnerId(), statistic.getUserId());
+		if(null == ruleMap)
+			return 0;
 		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -1634,6 +1638,10 @@ public class PunchServiceImpl implements PunchService {
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.between(new java.sql.Date(startCalendar.getTime().getTime()),
 						new java.sql.Date( endCalendar.getTime().getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull()); 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(ruleMap.getOwnerType()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(ruleMap.getOwnerId())); 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(ruleMap.getTargetType())); 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.eq(ruleMap.getTargetId())); 
 				query.addOrderBy(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.asc());
 				return null;
 			}
@@ -2294,7 +2302,7 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setOwnerId(orgId);
 		statistic.setPunchTimesPerDay(timeRule.getPunchTimesPerDay());
 		statistic.setUserId(member.getTargetId());
-		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, pr);
+		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
 		statistic.setUserName(member.getContactName());
 		OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());   
