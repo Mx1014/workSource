@@ -1330,7 +1330,7 @@ public class PunchServiceImpl implements PunchService {
 		    	try {
 					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
 				} catch (Exception e) {
-					LOGGER.error(e.toString());
+					LOGGER.error(e.toString(),e);
 					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 							PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
 							"Something wrong with refresh PunchDayLog");
