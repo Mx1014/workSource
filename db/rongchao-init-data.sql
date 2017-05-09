@@ -1278,4 +1278,19 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10600,'', 'EhNamespaces', 999975,2);
 delete from eh_web_menu_scopes where owner_id = 999975 and menu_id = 50900;
+
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM09EVTFNRFZrTmpoak1qa3laVFpsTlRWa1pURXhaRFEzTURBME1Ea3pOUQ' where namespace_id = 999975 and item_label = '资源预定';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU0yRTROVEE1TTJabE16ZzRZamM0WXpJNFlqWTRZelk1WWpBMlpHTTROZw' where namespace_id = 999975 and item_label = '打卡考勤';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE56VmlaRFV3TVRWaU16VmtOelV4WVdNek1XSTJPVFpsWm1KaVlqUTNNdw' where namespace_id = 999975 and item_label = '物业报修';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwak16ZzJOelkzWVRoalpqSTFPR1JtWVRrMU5XWmxZV1kyTWpSbU5UUXpNdw' where namespace_id = 999975 and item_label = '视频会议';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa01UazNORGhsTnpVNFlqUXlNalpsTm1RNE56QTBOMkUxTjJNMU9EQTFaQQ' where namespace_id = 999975 and item_label = '租赁';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE5XUXhNakZqTm1VeFptVTNNMlF4TVdRNE5UQTJZMkptWVdSaVpEUTFPUQ' where namespace_id = 999975 and item_label = '客服';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwak56SXhaRGd3WTJGbE0yVTJZams0TkRJNE1UWm1NRFZrT0dWaVpHTmtaUQ' where namespace_id = 999975 and item_label = '通讯录';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM016VTVaRFprWXpabFlUWXpaV1kwTUdNeU1UVTNPRE16Tm1SaVpURXhPQQ' where namespace_id = 999975 and item_label = '更多';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVkyRTNNVFpqT1dVM1pqQmhNRGsyTWpJeFlqYzNNbUl6TUdZNU1qVmtOUQ' where namespace_id = 999975 and item_label = '设备巡检';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvelpHTXdPREE0Tm1RNU5URm1ZVFkyWWpRek5XWXlOalUwTXpsaE1HVm1PUQ' where namespace_id = 999975 and item_label = '能耗管理';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpXTmpaVGRrTmpKa01UQTVOemxoWkRKbU1HTTNZVFU1TUdJeVl6Z3lOZw' where namespace_id = 999975 and item_label = '任务管理';
+
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek5qRXlPR0psTmpFM05ESmhOMkpqWlRKbE1UUmtNR0prTVRrd1ltTm1Odw' where namespace_id = 999975;
+
 SET FOREIGN_KEY_CHECKS = 1;
