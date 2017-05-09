@@ -1635,7 +1635,7 @@ public class PunchServiceImpl implements PunchService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) { 
 //				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(ruleMap.getOwnerType()));
@@ -4723,7 +4723,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 3.查询所有现在+86400000(一天)开始到15分钟后的最晚上班时间的timerule
 	 * 4.通过timerule找昨天的schedule然后找到部门用户推送
 	 * */
-	@Scheduled(cron = "1 10/15 * * * ?") 
+	@Scheduled(cron = "1 0/15 * * * ?") 
 	public void scheduledSendPushToUsers(){
 		 
 		
@@ -4821,7 +4821,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/3 * * * ?")
+	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled(){
 		
