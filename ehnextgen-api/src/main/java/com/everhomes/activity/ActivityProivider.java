@@ -28,6 +28,8 @@ public interface ActivityProivider {
     ActivityRoster findRosterById(Long rosterId);
 
     ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status);
+    
+    ActivityRoster findRosterByOrderNo(Long orderNo);
 
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
 

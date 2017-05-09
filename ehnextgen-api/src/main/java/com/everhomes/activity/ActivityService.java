@@ -30,8 +30,6 @@ public interface ActivityService {
     
     CommonOrderDTO createSignupOrder(createSignupOrderCommand cmd);
     
-    void notifySignupOrderPayment(PayCallbackCommand cmd);
-
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 
     ActivityDTO checkin(ActivityCheckinCommand cmd);
@@ -108,6 +106,10 @@ public interface ActivityService {
 	ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd);
 
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
+	
+	RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd);
+
+	RosterOrderSettingDTO getRosterOrderSetting(GetRosterOrderSettingCommand cmd);
 
 	void activityWarningSchedule();
 	

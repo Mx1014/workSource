@@ -3,6 +3,8 @@ package com.everhomes.activity;
 
 import ch.hsr.geohash.GeoHash;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -63,6 +65,10 @@ import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
+import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
+import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
@@ -77,6 +83,7 @@ import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
@@ -88,22 +95,38 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -218,6 +241,15 @@ public class ActivityServiceImpl implements ActivityService {
     @Autowired
 	private OrderUtil commonOrderUtil;
     
+	@Autowired
+	private AppProvider appProvider; 
+    
+	@Autowired
+	private OnlinePayService onlinePayService;
+	
+	@Autowired
+	private RosterOrderSettingProvider rosterOrderSettingProvider;
+	
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -393,6 +425,15 @@ public class ActivityServiceImpl implements ActivityService {
 	 	            }
 	            }
 	           
+	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，用于定时取消订单
+	    		//TODO 启动定时器，定时取消
+	            if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
+	            	Long orderNo = this.onlinePayService.createBillId(DateHelper
+	        				.currentGMTTime().getTime());
+	            	roster.setOrderNo(orderNo);
+	            	roster.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	            }
+	            
 //	            activityProvider.createActivityRoster(roster);
 	            createActivityRoster(roster);
 	            
@@ -450,7 +491,7 @@ public class ActivityServiceImpl implements ActivityService {
 				"activity roster pay");
 		
 		orderCmd.setBody(temple);
-		orderCmd.setOrderNo(cmd.getActivityRosterId().toString());
+		orderCmd.setOrderNo(roster.getOrderNo().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		orderCmd.setSubject(temple);
 		orderCmd.setTotalFee(new BigDecimal(activity.getChargePrice()));
@@ -463,43 +504,7 @@ public class ActivityServiceImpl implements ActivityService {
 					"convertToCommonOrder is fail.");
 		}
 		
-		//设置订单开始时间，用于定时取消订单
-		if(roster.getOrderStartTime() == null){
-			roster.setOrderStartTime(new Timestamp(dto.getTimestamp()));
-			activityProvider.updateRoster(roster);
-			//TODO 启动定时器，定时取消
-		}else{
-			dto.setTimestamp(roster.getOrderStartTime().getTime());
-		}
-		
 		return dto;
-	}
-	
-	@Override
-	public void notifySignupOrderPayment(PayCallbackCommand cmd) {
-		
-		OrderEmbeddedHandler orderEmbeddedHandler = this.getOrderHandler(cmd.getOrderType());
-		
-		LOGGER.debug("OrderEmbeddedHandler={}", orderEmbeddedHandler.getClass().getName());
-		
-		if(cmd.getPayStatus().equalsIgnoreCase("success"))
-			orderEmbeddedHandler.paySuccess(cmd);
-		if(cmd.getPayStatus().equalsIgnoreCase("fail"))
-			orderEmbeddedHandler.payFail(cmd);
-	}
-	
-	private OrderEmbeddedHandler getOrderHandler(String orderType) {
-		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
-	}
-	
-	private String getOrderTypeCode(String orderType) {
-		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
-		if(null == code){
-			LOGGER.error("Invalid parameter, orderType not found, orderType={}", orderType);
-			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_ORDERTYPE_NO_FIND,
-					"Invalid parameter, orderType not found");
-		}
-		return String.valueOf(code);
 	}
     
     @Override
@@ -1060,59 +1065,222 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
-        User user = UserContext.current().getUser();
-        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
-        if (activity == null) {
-            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
-        }
-        Post post = forumProvider.findPostById(activity.getPostId());
-        if (post == null) {
-            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
-        }
-         activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
-        if (activity.getGroupId() != null) {
-            LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
-            leaveCmd.setGroupId(activity.getGroupId());
-            //remove from group or not
-           // groupService.leaveGroup(leaveCmd);
-        }
-//        Post p = createPost(user.getId(), post, null, "");
-////        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
-//        p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
-//        forumProvider.createPost(p);
-        ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-        dto.setActivityId(activity.getId());
-        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-        dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setGroupId(activity.getGroupId());
-        dto.setStartTime(activity.getStartTime().toString());
-        dto.setStopTime(activity.getEndTime().toString());
-        dto.setSignupEndTime(getSignupEndTime(activity).toString());
-        dto.setForumId(post.getForumId());
-        dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
-        dto.setPosterUrl(getActivityPosterUrl(activity));
-        fixupVideoInfo(dto);//added by janson
-        
-        //Send message to creator
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("userName", user.getNickName());
-        map.put("postName", activity.getSubject());
-        sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR);
-        
-        return dto;
+		
+		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+	        return (ActivityDTO)dbProvider.execute((status) -> {
+	        	
+	        	//cmd中用户Id，该字段当前仅用于定时取消订单时无法从UserContext.current中获取用户
+	        	User user = null;
+	        	if(cmd.getUserId() != null){
+	        		user = userProvider.findUserById(cmd.getUserId());
+	        	}else{
+	        		user = UserContext.current().getUser();
+	        	}
+	             Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+	             if (activity == null) {
+	                 LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+	             }
+	             Post post = forumProvider.findPostById(activity.getPostId());
+	             if (post == null) {
+	                 LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                         ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+	             }
+	             
+	             //如果有退款，先退款再取消订单
+	             this.signupOrderRefund(activity, user.getId());
+	             
+	             activityProvider.cancelSignup(activity, user.getId(), getFamilyId());
+	             if (activity.getGroupId() != null) {
+	                 LeaveGroupCommand leaveCmd = new LeaveGroupCommand();
+	                 leaveCmd.setGroupId(activity.getGroupId());
+	                 //remove from group or not
+	                // groupService.leaveGroup(leaveCmd);
+	             }
+//	             Post p = createPost(user.getId(), post, null, "");
+////	             p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+//	             p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+//	                         String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
+//	             forumProvider.createPost(p);
+	             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+	             dto.setActivityId(activity.getId());
+	             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+	             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+	             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+	             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	             dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	             dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+	             dto.setProcessStatus(getStatus(activity).getCode());
+	             dto.setFamilyId(activity.getCreatorFamilyId());
+	             dto.setGroupId(activity.getGroupId());
+	             dto.setStartTime(activity.getStartTime().toString());
+	             dto.setStopTime(activity.getEndTime().toString());
+	             dto.setSignupEndTime(getSignupEndTime(activity).toString());
+	             dto.setForumId(post.getForumId());
+	             dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
+	             dto.setPosterUrl(getActivityPosterUrl(activity));
+	             fixupVideoInfo(dto);//added by janson
+	             
+	             //Send message to creator
+	             Map<String, String> map = new HashMap<String, String>();
+	             map.put("userName", user.getNickName());
+	             map.put("postName", activity.getSubject());
+	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR);
+	             
+	             return dto;
+	        	
+	        });
+        }).first();
     }
 
+	private void signupOrderRefund(Activity activity, Long userId){
+		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
+		
+		//只有需要支付并已经支付的才需要退款
+		if(activity.getChargeFlag() != ActivityChargeFlag.CHARGE.getCode() || roster.getPayFlag() != ActivityRosterPayFlag.PAY.getCode()){
+			return;
+		}
+		
+		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+		String refoundApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+		String appKey = configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+		refundCmd.setAppKey(appKey);
+		Long timestamp = System.currentTimeMillis();
+		refundCmd.setTimestamp(timestamp);
+		Integer randomNum = (int) (Math.random()*1000);
+		refundCmd.setNonce(randomNum);
+		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+				.currentGMTTime().getTime());
+		refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+		
+		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
+		
+		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo()); 
+		
+		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+		
+		refundCmd.setRefundAmount(new BigDecimal(roster.getPayAmount()));
+		
+		refundCmd.setRefundMsg("报名取消退款");
+		this.setSignatureParam(refundCmd);
+		
+		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
+		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+			roster.setPayFlag(ActivityRosterPayFlag.REFUND.getCode());
+			roster.setRefundOrderNo(refoundOrderNo);
+			roster.setRefundAmount(roster.getPayAmount());
+			roster.setRefundTime(new Timestamp(timestamp));
+			activityProvider.updateRoster(roster);
+		}
+		else{
+			LOGGER.error("bill id=["+roster.getOrderNo()+"] refound error param is "+refundCmd.toString());
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+							"bill  refound error"); 
+		}	
+	}
+	
+	/***给支付相关的参数签名*/
+	private void setSignatureParam(PayZuolinRefundCommand cmd) {
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",cmd.getAppKey());
+		map.put("timestamp",cmd.getTimestamp()+"");
+		map.put("nonce",cmd.getNonce()+"");
+		map.put("refundOrderNo",cmd.getRefundOrderNo());
+		map.put("orderNo", cmd.getOrderNo());
+		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+		map.put("orderType",cmd.getOrderType() );
+		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundAmount", cmd.getRefundAmount().toString());
+		map.put("refundMsg", cmd.getRefundMsg()); 
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		cmd.setSignature(signature);
+	}
+	
+	
+	
+	private Object restCall(String api, Object command, Class<?> responseType) {
+		String host = this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
+		return restCall(api, command, responseType, host);
+	}
+	private Object restCall(String api, Object o, Class<?> responseType,String host) {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new StringHttpMessageConverter(Charset
+				.forName("UTF-8")));
+		template.setMessageConverters(messageConverters);
+		String[] apis = api.split(" ");
+		String method = apis[0];
+
+		String url = host
+				+ api.substring(method.length() + 1, api.length()).trim();
+
+		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
+		HttpEntity<String> requestEntity = null;
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Host", host); 
+		headers.add("charset", "UTF-8");
+
+		ListenableFuture<ResponseEntity<String>> future = null;
+
+		if (method.equalsIgnoreCase("POST")) {
+			requestEntity = new HttpEntity<>(StringHelper.toJsonString(o),
+					headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.POST, requestEntity,
+					String.class);
+		} else {
+			Map<String, String> params = new HashMap<String, String>();
+			StringHelper.toStringMap("", o, params);
+			LOGGER.debug("params is :" + params.toString());
+
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				paramMap.add(entry.getKey().substring(1),
+						URLEncoder.encode(entry.getValue()));
+			}
+
+			url = UriComponentsBuilder.fromHttpUrl(url).queryParams(paramMap)
+					.build().toUriString();
+			requestEntity = new HttpEntity<>(null, headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.GET, requestEntity,
+					String.class);
+		}
+
+		ResponseEntity<String> responseEntity = null;
+		try {
+			responseEntity = future.get();
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.info("restCall error " + e.getMessage());
+			return null;
+		}
+
+		if (responseEntity != null
+				&& responseEntity.getStatusCode() == HttpStatus.OK) {
+
+			// String bodyString = new
+			// String(responseEntity.getBody().getBytes("ISO-8859-1"), "UTF-8")
+			// ;
+			String bodyString = responseEntity.getBody();
+			LOGGER.debug(bodyString);
+			LOGGER.debug("HEADER" + responseEntity.getHeaders());
+//			return bodyString;
+			return StringHelper.fromJsonString(bodyString, responseType);
+
+		}
+
+		LOGGER.info("restCall error " + responseEntity.getStatusCode());
+		return null;
+
+	}
+	
     @Override
     public ActivityDTO checkin(ActivityCheckinCommand cmd) {
         User user = UserContext.current().getUser();
@@ -1528,6 +1696,9 @@ public class ActivityServiceImpl implements ActivityService {
             //设置订单开始时间，用于定时取消订单
     		//TODO 启动定时器，定时取消
             if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+            	Long orderNo = this.onlinePayService.createBillId(DateHelper
+        				.currentGMTTime().getTime());
+            	item.setOrderNo(orderNo);
             	item.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             }
             activityProvider.updateRoster(item);
@@ -3974,6 +4145,55 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		return warningSetting;
 	}
+	
+	@Override
+	public RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd) {
+		if(cmd.getNamespaceId()==null || cmd.getDays() == null || cmd.getHours() == null ){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cmd="+cmd);
+		}
+		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId());
+		if (rosterOrderSetting != null && rosterOrderSetting.getId() != null) {
+			rosterOrderSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
+			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			
+			rosterOrderSettingProvider.updateRosterOrderSetting(rosterOrderSetting);
+		}else {
+			rosterOrderSetting = new RosterOrderSetting();
+			rosterOrderSetting.setNamespaceId(cmd.getNamespaceId());
+			rosterOrderSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			rosterOrderSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
+			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
+			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			
+			rosterOrderSettingProvider.createRosterOrderSetting(rosterOrderSetting);
+		}
+		RosterOrderSettingDTO dto = ConvertHelper.convert(rosterOrderSetting, RosterOrderSettingDTO.class);
+		dto.setDays(cmd.getDays());
+		dto.setHours(cmd.getHours());
+		return null;
+	}
+
+	@Override
+	public RosterOrderSettingDTO getRosterOrderSetting(GetRosterOrderSettingCommand cmd) {
+		if (cmd.getNamespaceId()==null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"cmd="+cmd);
+		}
+		
+		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId());
+		
+		if (rosterOrderSetting != null) {
+			Integer days = (int) (rosterOrderSetting.getTime() / 1000 / 3600 / 24);
+			Integer hours  = (int) (rosterOrderSetting.getTime() / 1000 / 3600 % 24);
+			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours, rosterOrderSetting.getTime());
+		}
+		
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 100, 1, (100*24+1)*3600*1000L);
+	}
+	
    
 	/**
 	 * 活动开始前的提醒，采用轮循+定时两种方式执行定时任务

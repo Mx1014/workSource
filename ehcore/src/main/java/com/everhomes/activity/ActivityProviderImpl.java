@@ -34,6 +34,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
@@ -286,6 +287,24 @@ public class ActivityProviderImpl implements ActivityProivider {
                 });
         return rosters[0];
     }
+    
+    @Override
+    public ActivityRoster findRosterByOrderNo(Long orderNo) {
+        ActivityRoster[] rosters = new ActivityRoster[1];
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),null,
+                (context, obj) -> {
+                    context.select().from(Tables.EH_ACTIVITY_ROSTER)
+                            .where(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()))
+                            .and(Tables.EH_ACTIVITY_ROSTER.ORDER_NO.eq(orderNo)).fetch().forEach(item -> {
+                                rosters[0] = ConvertHelper.convert(item, ActivityRoster.class);
+                            });
+                    if (rosters[0] != null)
+                        return false;
+                    return true;
+                });
+        return rosters[0];
+    }
+    
 
     @Override
     public List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int  pageSize, Long activityId, boolean onlyConfirm) {

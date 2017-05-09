@@ -36,7 +36,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
-		ActivityRoster roster = activityProvider.findRosterById(Long.valueOf(cmd.getOrderNo()));
+		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");
@@ -52,6 +52,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 			roster.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			roster.setPayAmount(Integer.valueOf(cmd.getPayAccount()));
 			activityProvider.updateRoster(roster);
 			return null;
 		});

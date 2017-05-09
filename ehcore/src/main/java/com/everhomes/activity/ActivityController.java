@@ -24,7 +24,6 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.util.ConvertHelper;
@@ -77,20 +76,6 @@ public class ActivityController extends ControllerBase {
     public RestResponse createSignupOrder(@Valid createSignupOrderCommand cmd) {
     	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
     	RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /activity/notifySignupOrderPayment</b>
-     * <p>支付后，由统一支付调用此接口来通知各支付结果</p>
-     */
-    @RequestMapping("notifySignupOrderPayment")
-    @RestReturn(value = String.class)
-    public RestResponse notifySignupOrderPayment(PayCallbackCommand cmd) {
-    	activityService.notifySignupOrderPayment(cmd);
-        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -501,6 +486,26 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=ActivityWarningResponse.class)
     public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
     	return new RestResponse(activityService.queryActivityWarning(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/setRosterOrderSetting</b>
+     * <p>设置订单支付有效期</p>
+     */
+    @RequestMapping("setRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse setRosterOrderSetting(SetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.setRosterOrderSetting(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getRosterOrderSetting</b>
+     * <p>查询订单支付有效期</p>
+     */
+    @RequestMapping("getRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse getRosterOrderSetting(GetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.getRosterOrderSetting(cmd));
     }
     
     /**
