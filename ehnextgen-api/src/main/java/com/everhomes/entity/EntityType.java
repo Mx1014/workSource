@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.*;
  * <li>BUILDING: 楼栋</li>
  * <li>APPURLS: app 信息</li>
  * <li>NEWS: 新闻</li>
+ * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
 public enum EntityType {
@@ -53,7 +54,7 @@ public enum EntityType {
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
-    ZUOLIN_ADMIN("ZuolinAdmin");
+    ZUOLIN_ADMIN("EhZuolinAdmins");
 
     private String code;
     
