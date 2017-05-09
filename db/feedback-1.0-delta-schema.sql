@@ -7,5 +7,5 @@ ALTER TABLE `eh_feedbacks` ADD COLUMN `namespace_id` INT(11) NULL;
 -- 举报管理中有用到target_id进行查询 add by yanjun 20170427
 ALTER TABLE `eh_feedbacks` ADD INDEX i_eh_feedbacks_target_id(`target_id`);
 
---修改举报content_category的注释
+-- 修改举报content_category的注释
 ALTER TABLE `eh_feedbacks` CHANGE `content_category` `content_category` BIGINT(20) DEFAULT '0' NOT NULL COMMENT '0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13-暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治';
