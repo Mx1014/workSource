@@ -46,19 +46,19 @@ public interface RolePrivilegeService {
 	 * 创建角色权限
 	 * @param cmd
 	 */
-	void createRolePrivilege(CreateRolePrivilegeCommand cmd);
+	void createRolePrivileges(CreateRolePrivilegesCommand cmd);
 	
 	/**
 	 * 修改角色权限
 	 * @param cmd
 	 */
-	void updateRolePrivilege(UpdateRolePrivilegeCommand cmd);
+	void updateRolePrivileges(UpdateRolePrivilegesCommand cmd);
 	
 	/**
 	 * 删除角色权限
 	 * @param cmd
 	 */
-	void deleteRolePrivilege(DeleteRolePrivilegeCommand cmd);
+	void deleteRolePrivileges(DeleteRolePrivilegesCommand cmd);
 	
 	/**
 	 * 获取角色权限
@@ -68,11 +68,11 @@ public interface RolePrivilegeService {
 	List<ListWebMenuPrivilegeDTO> qryRolePrivileges(QryRolePrivilegesCommand cmd);
 	
 	/**
-	 * 根据机构获取角色列表
+	 * 获取角色列表
 	 * @param cmd
 	 * @return
 	 */
-	List<RoleDTO> listAclRoleByOrganizationId(ListAclRolesCommand cmd);
+	List<RoleDTO> listRoles(ListRolesCommand cmd);
 	
 	/**
 	 * 判断是否是系统管理员
@@ -307,4 +307,6 @@ public interface RolePrivilegeService {
 	List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd);
 
 	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
+
+	List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd);
 }

@@ -310,7 +310,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("getPrivilegeIdsByRoleId")
     @RestReturn(value=Long.class, collection = true)
     public RestResponse getPrivilegeIdsByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeIdsByRoleId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -325,6 +325,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("createRolePrivileges")
     @RestReturn(value=String.class)
     public RestResponse createRolePrivileges(@Valid CreateRolePrivilegesCommand cmd) {
+        rolePrivilegeService.createRolePrivileges(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -337,7 +338,8 @@ public class AclController extends ControllerBase {
      */
     @RequestMapping("updateRolePrivileges")
     @RestReturn(value=String.class)
-    public RestResponse updateRolePrivileges(@Valid CreateRolePrivilegesCommand cmd) {
+    public RestResponse updateRolePrivileges(@Valid UpdateRolePrivilegesCommand cmd) {
+        rolePrivilegeService.updateRolePrivileges(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -351,6 +353,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteRolePrivileges")
     @RestReturn(value=String.class)
     public RestResponse deleteRolePrivileges(@Valid DeleteRolePrivilegesCommand cmd) {
+        rolePrivilegeService.deleteRolePrivileges(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -364,7 +367,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listRoles")
     @RestReturn(value=RoleDTO.class, collection = true)
     public RestResponse listRoles(@Valid ListRolesCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listRoles(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
