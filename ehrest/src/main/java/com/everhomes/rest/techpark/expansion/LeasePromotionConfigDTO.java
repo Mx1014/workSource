@@ -1,7 +1,16 @@
 package com.everhomes.rest.techpark.expansion;
 
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>id: 任务log Id</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>rentAmountFlag: 租金启用标志</li>
+ * <li>issuingLeaseFlag: 用户是否可发布招租信息</li>
+ * <li>issuerManageFlag: 设置按钮显示与否</li>
+ * <li>parkIndroduceFlag: 园区介绍是否显示</li>
+ * <li>renewFlag: 续租是否显示</li>
+ * <li>areaSearchFlag: 是否支持面积搜索</li>
+ * </ul>
  */
 public class LeasePromotionConfigDTO {
     private Long id;
@@ -11,6 +20,15 @@ public class LeasePromotionConfigDTO {
     private Byte issuerManageFlag;
     private Byte parkIndroduceFlag;
     private Byte renewFlag;
+    private Byte areaSearchFlag;
+
+    public Byte getAreaSearchFlag() {
+        return areaSearchFlag;
+    }
+
+    public void setAreaSearchFlag(Byte areaSearchFlag) {
+        this.areaSearchFlag = areaSearchFlag;
+    }
 
     public Long getId() {
         return id;

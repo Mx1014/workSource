@@ -15,12 +15,17 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 
+
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.forum.Attachment;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.equipment.*;
 import com.everhomes.user.*;
+
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.rest.equipment.*;
+
 import com.everhomes.util.*;
 
 import com.everhomes.util.doc.DocUtil;
@@ -70,6 +75,9 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
+
+import com.everhomes.rest.forum.AttachmentDTO;
+
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -2663,10 +2671,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		}
 
 		if(isAdmin) {
+
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, null, null, offset, userId);
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey);
+					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode());
 
 		}
 		if(!isAdmin) {
@@ -2691,8 +2700,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executeStandardIds, reviewStandardIds, offset, userId);
 
+<<<<<<< HEAD
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
 					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
+=======
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
+>>>>>>> master
 
 		}
 

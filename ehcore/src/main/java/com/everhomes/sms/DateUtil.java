@@ -2,6 +2,9 @@ package com.everhomes.sms;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -169,5 +172,26 @@ public class DateUtil {
             e.printStackTrace();
         }
         return date;
+    }
+
+    public static java.sql.Date parseDate(String date) {
+        String pattern = null;
+        if (date != null) {
+            if (date.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                pattern = "yyyy-MM-dd";
+            } else if (date.matches("\\d{4}/\\d{2}/\\d{2}")) {
+                pattern = "yyyy/MM/dd";
+            } else if(date.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")){
+                pattern = "yyy-MM-dd HH:mm:ss";
+            } else if(date.matches("\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}")){
+                pattern = "yyy/MM/dd HH:mm:ss";
+            }
+        }
+        if(null != pattern){
+            TemporalAccessor accessor = DateTimeFormatter.ofPattern(pattern).parse(date);
+            LocalDate ld = LocalDate.from(accessor);
+            return java.sql.Date.valueOf(ld);
+        }
+        return null;
     }
 }

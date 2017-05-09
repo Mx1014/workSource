@@ -1,5 +1,5 @@
 SET FOREIGN_KEY_CHECKS = 0;
-SET @eh_core_serverURL = "https://beta.zuolin.com"; -- 取具体环境连接core server的链接
+SET @eh_core_serverURL = "https://core.zuolin.com"; -- 取具体环境连接core server的链接
 SET @user_id = 254000;  -- 需要取现网eh_users的ID的最大值再加一定余量
 SET @account_name='275585'; -- 需要取现网eh_users的acount_name的6位的最大值再加一定余量
 SET @community_id = 240111044331056733; -- 需要取现网eh_communities的ID的最大值再加一定余量

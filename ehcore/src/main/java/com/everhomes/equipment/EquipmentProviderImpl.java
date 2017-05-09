@@ -2053,7 +2053,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds,
-			Integer offset, Integer pageSize, String cacheKey) {
+			Integer offset, Integer pageSize, String cacheKey, Byte adminFlag) {
+
 
 		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
@@ -2081,7 +2082,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 
-		if(executeStandardIds == null && reviewStandardIds == null) {
+//		if(executeStandardIds == null && reviewStandardIds == null) {
+		if(AdminFlag.YES.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 
@@ -2096,7 +2098,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
 		Condition con = null;
-		if(executeStandardIds != null && executeStandardIds.size() > 0) {
+//		if(executeStandardIds != null && executeStandardIds.size() > 0) {
+		if(AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
@@ -2107,7 +2110,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			con = con4;
 		}
 
-		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
+//		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
+		if(AdminFlag.NO.equals(AdminFlag.fromStatus(adminFlag))) {
 			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
 
 			//巡检完成关闭的任务

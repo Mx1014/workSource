@@ -52,4 +52,8 @@ public interface OrganizationServiceErrorCode {
 	static final int ERROR_SEND_EMAIL = 600004; //email 发邮件错误
 
 	static final int ERROR_ORG_JOB_POSITION_EXISTS = 600005; //通用岗位已存在
+
+    int ERROR_CONTACTNAME_ISNULL = 700000;
+
+    int ERROR_CONTACTTOKEN_ISNULL = 700001;
 }

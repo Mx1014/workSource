@@ -307,4 +307,12 @@ public interface RolePrivilegeService {
 	List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd);
 
 	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
+
+	/**
+	 * 获取项目分类的树状数据结构
+	 * @param namespaceId
+	 * @param projects
+     * @return
+     */
+	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects);
 }

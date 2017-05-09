@@ -3,6 +3,7 @@ package com.everhomes.family;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.address.Address;
 import com.everhomes.group.Group;
@@ -63,6 +64,8 @@ public interface FamilyProvider {
     List<GroupMember> listAllFamilyMembers(int offset, int pageSize);
 
     void updateFamily(Group group);
+
+	Map<Long, Family> mapFamilyByAddressIds(List<Long> aptIdList);
     
     
 }

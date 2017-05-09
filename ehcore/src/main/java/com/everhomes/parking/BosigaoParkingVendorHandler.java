@@ -12,14 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -30,33 +27,14 @@ import com.bosigao.cxf.Service1Soap;
 import com.bosigao.cxf.rest.BosigaoCardInfo;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardType;
-import com.everhomes.rest.parking.ParkingLotVendor;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateStatus;
-import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
+import com.everhomes.rest.parking.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -69,19 +47,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	private ParkingProvider parkingProvider;
 	
 	@Autowired
-	private LocaleStringService localeStringService;
-	
-	@Autowired
 	private LocaleTemplateService localeTemplateService;
-	
-	@Autowired
-    private ConfigurationProvider configProvider;
-	
-	@Autowired
-    private UserProvider userProvider;
-	
-	@Autowired
-	private OrderUtil commonOrderUtil;
 	
 	@Autowired
     private BigCollectionProvider bigCollectionProvider;
@@ -90,22 +56,18 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber) {
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
+                                                       Long parkingLotId, String plateNumber) {
         
-    	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	
-    	BosigaoCardInfo card = getCardInfo(plateNumber);
+    	List<ParkingCardDTO> resultList = new ArrayList<>();
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
+		BosigaoCardInfo card = getCardInfo(plateNumber);
     	
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
-			
-//			Boolean validStatus = card.getValid();
-//			this.checkValidStatusIsNull(validStatus,plateNumber);
-//			
-//			if(!validStatus){
-//				return resultList;
-//			}
+
 			String validEnd = card.getValidEnd();
 			Long endTime = strToLong2(validEnd+"235959");
 			long now = System.currentTimeMillis();
@@ -120,7 +82,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(endTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+				return response;
 			}
 			
 			String plateOwnerName = card.getUserName();
@@ -145,8 +108,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else{
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
 		}
-        return resultList;
+        return response;
     }
 
     private BosigaoCardInfo getCardInfo(String plateNumber){
@@ -203,7 +168,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     }
     
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId, String plateNumber, String cardNo) {
     	
     	List<ParkingRechargeRate> parkingRechargeRateList = new ArrayList<>();
     	
@@ -229,34 +194,32 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order,String payStatus) {
+    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
 
-			if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-				if (payStatus.toLowerCase().equals("fail")) {
-					LOGGER.error("Parking pay failed, order={}", order);
-				} else {
-					ResultHolder resultHolder = recharge(order);
-					if (resultHolder.isSuccess()) {
-						dbProvider.execute((TransactionStatus transactionStatus) -> {
-							order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-							order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-							parkingProvider.updateParkingRechargeOrder(order);
+		if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+			if (payStatus.toLowerCase().equals("fail")) {
+				LOGGER.error("Parking pay failed, order={}", order);
+			} else {
+				ResultHolder resultHolder = recharge(order);
+				if (resultHolder.isSuccess()) {
+					dbProvider.execute((TransactionStatus transactionStatus) -> {
+						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						parkingProvider.updateParkingRechargeOrder(order);
 
-							String key = "parking-recharge" + order.getId();
-							String value = String.valueOf(order.getId());
-							Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-							RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+						String key = "parking-recharge" + order.getId();
+						String value = String.valueOf(order.getId());
+						Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+						RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
 
-							LOGGER.error("Delete parking order key, key={}", key);
-							redisTemplate.delete(key);
+						LOGGER.error("Delete parking order key, key={}", key);
+						redisTemplate.delete(key);
 
-							return null;
-						});
-					}
+						return null;
+					});
 				}
 			}
-
-
+		}
     }
     
     
@@ -305,7 +268,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		}
     }
     
-    private void checkResultHolderIsNull(ResultHolder resultHolder,String plateNo) {
+    private void checkResultHolderIsNull(ResultHolder resultHolder, String plateNo) {
 		if(resultHolder == null){
 			LOGGER.error("remote search pay order return null.plateNo="+plateNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -430,7 +393,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
-			Long parkingLotId, String plateNumber) {
+                                               Long parkingLotId, String plateNumber) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -440,5 +403,15 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
+	}
+
 }

@@ -1,6 +1,6 @@
 package com.everhomes.parking.ketuo;
 
-public class KetuoTemoFee {
+public class KetuoTempFee {
 	private String orderNo;
 	private String entryTime;
 	private String payTime;

@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
+import com.everhomes.parking.ketuo.*;
+import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -46,29 +48,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.parking.ketuo.EncryptUtil;
-import com.everhomes.parking.ketuo.KetuoCard;
-import com.everhomes.parking.ketuo.KetuoCardRate;
-import com.everhomes.parking.ketuo.KetuoCardType;
-import com.everhomes.parking.ketuo.KetuoJsonEntity;
-import com.everhomes.parking.ketuo.KetuoTemoFee;
+import com.everhomes.parking.ketuo.KetuoTempFee;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
-import com.everhomes.rest.parking.GetOpenCardInfoCommand;
-import com.everhomes.rest.parking.ListCardTypeCommand;
-import com.everhomes.rest.parking.ListCardTypeResponse;
-import com.everhomes.rest.parking.OpenCardInfoDTO;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingCardType;
-import com.everhomes.rest.parking.ParkingLotVendor;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.parking.ParkingRechargeType;
-import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
-import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -107,13 +88,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
-    	
-    	KetuoCard card = getCard(plateNumber);
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
+		KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
@@ -133,7 +115,9 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+
+				return response;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
@@ -155,9 +139,12 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else {
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
+
 		}
         
-        return resultList;
+        return response;
     }
 
     @Override
@@ -413,7 +400,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
+//		KetuoTempFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
 //		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
@@ -437,19 +424,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return false;
     }
-//	public static void main(String[] args) {
-//		String s= "{\"data\":{\"parkingTime\":109568},\"resCode\":0,\"resMsg\":null}";
-//		JSONObject json = JSONObject.parseObject(s);
-//		Object obj = json.get("resCode");
-//		if(null != obj ) {
-//			int resCode = (int) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
-//		
-//	}
+
 	private boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
@@ -567,8 +542,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		
 	}
 
-	private KetuoTemoFee getTempFee(String plateNumber) {
-		KetuoTemoFee tempFee = null;
+	private KetuoTempFee getTempFee(String plateNumber) {
+		KetuoTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_TEMP_FEE);
@@ -576,9 +551,9 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity<KetuoTemoFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTemoFee>>(){});
+		KetuoJsonEntity<KetuoTempFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTempFee>>(){});
 		if(entity.isSuccess()){
-			List<KetuoTemoFee> list = entity.getData();
+			List<KetuoTempFee> list = entity.getData();
 			if(null != list && !list.isEmpty()) {
 				tempFee = list.get(0);
 			}
@@ -590,7 +565,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
 			Long parkingLotId, String plateNumber) {
-		KetuoTemoFee tempFee = getTempFee(plateNumber);
+		KetuoTempFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(null == tempFee)
@@ -621,5 +596,15 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -203,9 +204,9 @@ public interface OrganizationService {
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);
 	List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd);
-	ImportDataResponse importEnterpriseData(MultipartFile mfile,
-			Long userId, ImportEnterpriseDataCommand cmd);
-	ImportOrganizationPersonnelDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+	ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
+																	 Long userId, ImportEnterpriseDataCommand cmd);
+	ImportFileTaskDTO importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
@@ -432,4 +433,8 @@ public interface OrganizationService {
 	List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
 	ContractDTO processContract(Contract contract, Integer namespaceId);
 	ContractDTO processContract(Contract contract);
+
+	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
+
+	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 }

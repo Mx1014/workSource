@@ -80,12 +80,13 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     private DbProvider dbProvider;
 	
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
-    	
+		GetParkingCardsResponse response = new GetParkingCardsResponse();
+		response.setCards(resultList);
+
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -106,7 +107,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	    	}
 			
 			if(expireTime + cardReserveTime < now){
-				return resultList;
+				response.setToastType(ParkingToastType.CARD_EXPIRED.getCode());
+
+				return response;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
@@ -128,9 +131,12 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
+		}else {
+			response.setToastType(ParkingToastType.NOT_CARD_USER.getCode());
+
 		}
         
-        return resultList;
+        return response;
     }
 
     @Override
@@ -386,7 +392,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
+//		KetuoTempFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
 //		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
@@ -540,8 +546,8 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 		
 	}
 
-	private KetuoTemoFee getTempFee(String plateNumber) {
-		KetuoTemoFee tempFee = null;
+	private KetuoTempFee getTempFee(String plateNumber) {
+		KetuoTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_TEMP_FEE);
@@ -549,9 +555,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity<KetuoTemoFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTemoFee>>(){});
+		KetuoJsonEntity<KetuoTempFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTempFee>>(){});
 		if(entity.isSuccess()){
-			List<KetuoTemoFee> list = entity.getData();
+			List<KetuoTempFee> list = entity.getData();
 			if(null != list && !list.isEmpty()) {
 				tempFee = list.get(0);
 			}
@@ -563,7 +569,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
 			Long parkingLotId, String plateNumber) {
-		KetuoTemoFee tempFee = getTempFee(plateNumber);
+		KetuoTempFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(null == tempFee)
@@ -594,5 +600,15 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void lockParkingCar(LockParkingCarCommand cmd) {
+
 	}
 }

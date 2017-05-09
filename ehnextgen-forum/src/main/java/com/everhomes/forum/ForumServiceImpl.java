@@ -3724,6 +3724,10 @@ public class ForumServiceImpl implements ForumService {
     private void populatePostForumNameInfo(long userId, Post post) {
         Long forumId = post.getForumId();
         Forum forum = forumProvider.findForumById(forumId);
+        // 补充namespaceId，使得在分享的时候可以根据域空间ID来获取版本信息以便确定是否要下载APP  by lqs 20170418
+        if(forum != null) {
+            post.setNamespaceId(forum.getNamespaceId());
+        }
         
         if(forumId == ForumConstants.SYSTEM_FORUM) {
             VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
