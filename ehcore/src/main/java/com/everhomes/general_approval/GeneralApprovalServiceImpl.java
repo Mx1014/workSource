@@ -348,10 +348,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 								.getModuleId()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
 								.getModuleType()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
-								.getProjectId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
-								.getProjectType()));
+						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
+						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
+						if(entityType == EntityType.COMMUNITY){
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
+									.getProjectId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
+									.getProjectType()));
+						}
 						return query;
 					}
 				});
