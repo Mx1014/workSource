@@ -956,7 +956,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 String aesKey = "";
                 if(dg != null) {
                 	aesKey = dg.getAesIv();
-                } else {
+                }
+                if(aesKey == null || aesKey.isEmpty()) {
                 	aesKey = AclinkUtils.generateAESKey();	
                 }
                 
