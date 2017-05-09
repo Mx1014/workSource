@@ -14,3 +14,14 @@ ALTER TABLE `eh_activities` ADD COLUMN `charge_flag` TINYINT(4) DEFAULT '0' NULL
 ALTER TABLE `eh_activities` ADD COLUMN `charge_price` INT(11) NULL COMMENT 'charge_price';
 
 
+-- 订单过期时间的设置表
+CREATE TABLE `eh_roster_order_settings` (
+   `id` BIGINT(20) NOT NULL,
+   `namespace_id` INT(11) NOT NULL COMMENT 'namespace id',
+   `time` BIGINT(20) DEFAULT NULL COMMENT 'millisecond',
+   `create_time` DATETIME DEFAULT NULL,
+   `creator_uid` BIGINT(20) DEFAULT NULL,
+   `update_time` DATETIME DEFAULT NULL,
+   `operator_uid` BIGINT(20) DEFAULT NULL,
+   PRIMARY KEY (`id`)
+ ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
