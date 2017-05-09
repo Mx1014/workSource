@@ -1,17 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
-import com.everhomes.rest.organization.*;
-
-import org.jooq.Condition;
-
 import com.everhomes.community.Community;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
@@ -21,6 +10,14 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.organization.*;
+import org.jooq.Condition;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
@@ -314,7 +311,7 @@ public interface OrganizationProvider {
 
 	ImportFileTask findImportFileTaskById(Long id);
 
-	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);}
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
 
 	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
 }
