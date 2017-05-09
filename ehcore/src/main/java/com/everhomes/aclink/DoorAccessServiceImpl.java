@@ -22,6 +22,10 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.promotion.OpPromotionActivity;
+import com.everhomes.promotion.OpPromotionActivityContext;
+import com.everhomes.promotion.OpPromotionCondition;
+import com.everhomes.promotion.OpPromotionUtils;
 import com.everhomes.redis.JsonStringRedisSerializer;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.organization.*;
@@ -68,9 +72,14 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -93,10 +102,13 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOpPromotionActivities;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -113,7 +125,7 @@ import org.springframework.util.StringUtils;
 
 
 @Component
-public class DoorAccessServiceImpl implements DoorAccessService {
+public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscriber {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
@@ -212,6 +224,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     private UserActivityProvider userActivityProvider;
     
+    @Autowired
+    private LocalBus localBus;
+    
     final Pattern npattern = Pattern.compile("\\d+");
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -233,6 +248,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @PostConstruct
     public void setup() {
         Security.addProvider(new BouncyCastleProvider());
+        String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhUserIdentifiers.class, null);
+        localBus.subscribe(subcribeKey, this);
     }
     
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -730,7 +747,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         log.setDoorId(doorAuth.getDoorId());
         log.setUserId(doorAuth.getUserId());
         log.setRightContent(doorAuth.getRightOpen() + "," + doorAuth.getRightVisitor() + "," + doorAuth.getRightRemote());
-        log.setCreateUid(UserContext.current().getUser().getId());
+        if(UserContext.current().getUser() != null) {
+        	log.setCreateUid(UserContext.current().getUser().getId());	
+        } else {
+        	log.setCreateUid(doorAuth.getUserId());
+        }
+        
         String discription = "";
         if(doorAuth.getRightOpen() > 0){
             discription += "授权开门权限";
@@ -3337,4 +3359,70 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
 
     }
+
+	@Override
+	public Action onLocalBusMessage(Object arg0, String arg1, Object arg2,
+			String arg3) {
+        //Must be
+        try {
+        	ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					LOGGER.info("start run.....");
+					 Long id = (Long)arg2;
+			         if(null == id) {
+			              LOGGER.error("None of promotion");
+			         } else {
+			        	 if(LOGGER.isDebugEnabled()) {
+			        		 LOGGER.debug("new promotion id= " + id); 
+			        	 }
+			              
+		              try {
+		            	  newUserAutoAuth(id);
+		              } catch(Exception exx) {
+		            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
+		            	  }
+
+			         }
+				}
+			});
+			
+        } catch(Exception e) {
+            LOGGER.error("onLocalBusMessage error ", e);
+        } finally{
+        	
+        }
+
+        return Action.none;
+	}
+	
+	private void newUserAutoAuth(Long identifierId) {
+		UserIdentifier identifier = userProvider.findIdentifierById(identifierId);
+		if(identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode())) {
+			String mac = this.configProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
+			if(mac == null || mac.isEmpty()) {
+				return;
+			}
+			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
+			if(doorAccess == null) {
+				LOGGER.warn("aclink auto auth failed mac=" + mac);
+				return;
+			}
+			
+			CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
+			cmd.setApproveUserId(User.SYSTEM_UID);
+			cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+			cmd.setAuthType(DoorAuthType.FOREVER.getCode());
+			cmd.setDescription("new user auto created");
+			cmd.setDoorId(doorAccess.getId());
+			cmd.setNamespaceId(identifier.getId());
+			cmd.setPhone(identifier.getIdentifierToken());
+			cmd.setRightOpen((byte)1);
+			cmd.setRightRemote((byte)1);
+			cmd.setUserId(identifier.getOwnerUid());
+			createDoorAuth(cmd);
+		}
+		
+		identifier.getNamespaceId();
+	}
 }
