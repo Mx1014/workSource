@@ -391,16 +391,21 @@ long id = sequenceProvider.getNextSequence(NameMapper
 	}
 
 	@Override
-	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String name) {
+	public List<PunchTimeRule> queryPunchTimeRules(String ownerType,Long ownerId,String targetType , Long targetId,String name) {
 	    // 在公司与机构合并之前，打卡跟着eh_groups表走，合并之后打卡表为全局表 modify by lqs 20160722
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhPunchTimeRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
-		query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
+		if(null != name)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.NAME.eq(name));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != targetType)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			query.addConditions(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId));
 		
 		List<PunchTimeRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -1040,9 +1045,9 @@ long id = sequenceProvider.getNextSequence(key);
 			Date endDate = Date.valueOf(endDay);
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
 		}
-		  
+		  // modify by wh 2017-4-25 order by punch date asc
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
-				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc()).fetch()
  				.map((r) -> {
  		            return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
  		        });
@@ -1292,6 +1297,57 @@ long id = sequenceProvider.getNextSequence(key);
 		return null;
 	}
 	
+
+	@Override
+	public List<PunchTimeRule> queryPunchTimeRuleList(  Long startTimeLong, Long endTimeLong ) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchTimeRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
+		 
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.ne(-1L); 
+		condition = condition.and(Tables.EH_PUNCH_TIME_RULES.START_LATE_TIME_LONG.between(startTimeLong, endTimeLong) );
+		query.addConditions(condition); 
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<PunchTimeRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+	@Override
+	public List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType, Long targetId,CrossShardListingLocator locator, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhPunchTimeRulesRecord> query = context
+				.selectQuery(Tables.EH_PUNCH_TIME_RULES);
+		 
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.ID.ne(-1L);
+		if(null != ownerType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.eq(ownerType));
+		if(null != ownerId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.eq(ownerId)); 
+		if(null != targetType)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.eq(targetType));
+		if(null != targetId)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.TARGET_ID.eq(targetId)); 
+		if (null != locator && locator != null && locator.getAnchor() != null)
+			condition = condition.and(Tables.EH_PUNCH_TIME_RULES.ID.gt(locator.getAnchor()));
+		query.addConditions(condition);
+		query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_PUNCH_TIME_RULES.ID.asc());
+		List<PunchTimeRule> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, PunchTimeRule.class));
+			return null;
+		});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
 
     @Override
     public Long createPunchLocationRule(PunchLocationRule obj) {

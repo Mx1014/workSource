@@ -205,5 +205,12 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void calculateRangeStat(ApprovalRequest approvalRequest) {
+		// TODO Auto-generated method stub
+		// 取到所有的ranges-目前一个request对应一个
+		// 找到时间
+	}
 	
 }

@@ -42,11 +42,13 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
@@ -1220,7 +1222,7 @@ public class GroupServiceImpl implements GroupService {
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
-            sendGroupNotificationForAcceptJoinGroupInvitation(group, inviter, member);;
+            sendGroupNotificationForAcceptJoinGroupInvitation(group, inviter, member);
             break;
         default:
             LOGGER.error("Group member is not in acceptance state, userId=" + userId + ", groupId=" + groupId 
@@ -1254,6 +1256,8 @@ public class GroupServiceImpl implements GroupService {
             break;
         case WAITING_FOR_ACCEPTANCE:
             deletePendingGroupMember(operatorUid, member);
+            member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+            addGroupMemberLog(member);
             
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), member.getInviterUid());
@@ -1270,7 +1274,17 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    @Override
+    private void addGroupMemberLog(GroupMember member) {
+    	GroupMemberLog groupMemberLog = new GroupMemberLog();
+    	groupMemberLog.setGroupMemberId(member.getId());
+    	groupMemberLog.setStatus(member.getMemberStatus());
+    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
+    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	groupMemberLog.setProcessMessage(member.toString());
+    	groupProvider.createGroupMemberLog(groupMemberLog);
+	}
+
+	@Override
     public void approveJoinGroupRequest(ApproveJoinGroupRequestCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
@@ -1341,6 +1355,8 @@ public class GroupServiceImpl implements GroupService {
             break;
         case WAITING_FOR_APPROVAL:
             deletePendingGroupMember(operatorUid, member);
+            member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+            addGroupMemberLog(member);
 
             GroupMember rejecter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                 EntityType.USER.getCode(), operatorUid);
@@ -2769,7 +2785,7 @@ public class GroupServiceImpl implements GroupService {
         includeList.add(userId);
         sendGroupNotification(groupId, includeList, null, message, metaObjectType, metaObject);
     }
-    
+
     private void sendGroupNotificationToExcludeUsers(Long groupId, Long operatorId, Long targetId, String message) {
         List<Long> excludeList = new ArrayList<Long>();
         if(operatorId != null) {
@@ -2808,11 +2824,11 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    private void sendGroupNotification(Long groupId, List<Long> includeList, List<Long> excludeList, 
+    private void sendGroupNotification(Long groupId, List<Long> includeList, List<Long> excludeList,
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message == null || message.isEmpty()) {
             return;
-            }
+        }
         
         boolean groupSession = true;
         Group group = this.groupProvider.findGroupById(groupId);
@@ -2858,7 +2874,76 @@ public class GroupServiceImpl implements GroupService {
             }
         }
     }
-    
+
+    private void sendRouterGroupNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterGroupNotificationUseSystemUser includeList {}", includeList);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterGroupNotificationUseSystemUser excludeList {}", excludeList);
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+
+            RouterMetaObject mo = new RouterMetaObject();
+            mo.setUrl(routerUri);
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+            messageDto.setMeta(meta);
+
+            includeList.forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
+    private void sendGroupNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendGroupNotificationUseSystemUser includeList {}", includeList);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendGroupNotificationUseSystemUser excludeList {}", excludeList);
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+
+            includeList.forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
     /**
      * 私有圈
      * @param group
@@ -2896,8 +2981,16 @@ public class GroupServiceImpl implements GroupService {
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
             //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
             if(includeList.size() > 0) {
-                // QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, null, null);
+
+                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+                metaObject.setRequestInfo(notifyTextForOther);
+
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
+
+                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
             }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
@@ -2936,9 +3029,15 @@ public class GroupServiceImpl implements GroupService {
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
             //sendGroupNotificationToExcludeUsers(group.getId(), member.getMemberId(), null, notifyTextForOther);
             if(includeList.size() > 0) {
-               // QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                sendGroupNotification(group.getId(), includeList, null, notifyTextForOther, 
-                    MetaObjectType.GROUP_REQUEST_TO_JOIN, null);
+                QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+                metaObject.setRequestInfo(notifyTextForOther);
+
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
+
+                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOther, routerUri);
             }
             
        } catch(Exception e) {
@@ -2962,7 +3061,7 @@ public class GroupServiceImpl implements GroupService {
             this.sendGroupNotificationPublicForReqToJoinGroupFreely(group, member);
         }
     }
-    
+
     private void sendGroupNotificationForReqToJoinGroupWaitingApproval(Group group, GroupMember member) {
         // send notification to the applicant
         try {
@@ -2971,7 +3070,7 @@ public class GroupServiceImpl implements GroupService {
             map.put("userName", member.getMemberNickName());
             User user = userProvider.findUserById(member.getMemberId());
             String locale = user.getLocale();
-            
+
             // send notification to who is requesting to join the group
             // 加入需要审核的俱乐部时，不给申请者发消息，add by tt, 20161104
             String scope = GroupNotificationTemplateCode.SCOPE;
@@ -2981,9 +3080,9 @@ public class GroupServiceImpl implements GroupService {
             	String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             	sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
 			}
-            
+
             // send notification to all administrators in the group
-            
+
             code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_OPERATOR;
             // 如果是俱乐部，则按以下模板发送消息，add by tt, 20161104
             if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
@@ -2993,21 +3092,30 @@ public class GroupServiceImpl implements GroupService {
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
             if(includeList.size() > 0) {
+
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+                metaObject.setRequestInfo(notifyTextForAdmin);
+
                 // 下面的应该写错了，这里不影响以前逻辑的情况下，把俱乐部的metaObjectType换成GROUP_REQUEST_TO_JOIN，add by tt, 20161104
                 if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
-                	sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
-                            MetaObjectType.GROUP_REQUEST_TO_JOIN, metaObject);
+                    QuestionMetaActionData actionData = new QuestionMetaActionData();
+                    actionData.setMetaObject(metaObject);
+
+                    String routerUri = RouterBuilder.build(Router.GROUP_MEMBER_APPLY, actionData);
+                	sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForAdmin, routerUri);
                 }else {
-                	sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
-                			MetaObjectType.GROUP_INVITE_TO_JOIN, metaObject);
+                    QuestionMetaActionData actionData = new QuestionMetaActionData();
+                    actionData.setMetaObject(metaObject);
+
+                    String routerUri = RouterBuilder.build(Router.GROUP_INVITE_APPLY, actionData);
+                    sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForAdmin, routerUri);
 				}
             }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
     }
-    
+
     private void sendGroupNotificationForInviteToJoinGroupFreely(Group group, GroupMember inviter, GroupMember invitee) {
         if(inviter == null || invitee == null) {
             LOGGER.error("The inviter or invitee should not be null, inviter=" + inviter + ", invitee=" + invitee);
@@ -3059,9 +3167,16 @@ public class GroupServiceImpl implements GroupService {
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_INVITATION_REQ_FOR_OPERATOR;
         String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
         QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, inviter, invitee);
-        sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForOperator, 
-            MetaObjectType.GROUP_INVITE_TO_JOIN, metaObject);
+        metaObject.setRequestInfo(notifyTextForOperator);
+        List<Long> includeList = new ArrayList<>();
+        includeList.add(invitee.getMemberId());
+        QuestionMetaActionData actionData = new QuestionMetaActionData();
+        actionData.setMetaObject(metaObject);
+
+        String routerUri = RouterBuilder.build(Router.GROUP_INVITE_APPLY, actionData);
+        sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForOperator, routerUri);
 
         // send notification to inviter
         //code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_INVITATION_REQ_FOR_APPLICANT;
@@ -3093,16 +3208,17 @@ public class GroupServiceImpl implements GroupService {
         String scope = GroupNotificationTemplateCode.SCOPE;
         int code = GroupNotificationTemplateCode.GROUP_JOIN_INVITATION_ACCEPT_FOR_APPLICANT;
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToIncludeUser(group.getId(), invitee.getMemberId(), notifyTextForApplicant);
+        sendGroupNotificationUseSystemUser(Collections.singletonList(inviter.getMemberId()), null, notifyTextForApplicant);
 
         // send notification to inviter
         code = GroupNotificationTemplateCode.GROUP_JOIN_INVITATION_ACCEPT_FOR_OPERATOR;
         String notifyTextForOperator = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendGroupNotificationToIncludeUser(group.getId(), inviter.getMemberId(), notifyTextForOperator);
-        
+        sendGroupNotificationUseSystemUser(Collections.singletonList(invitee.getMemberId()), null, notifyTextForOperator);
+
         // send notification to all members in the group
         code = GroupNotificationTemplateCode.GROUP_JOIN_INVITATION_ACCEPT_FOR_OTHER;
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
         sendGroupNotificationToExcludeUsers(group.getId(), inviter.getMemberId(), invitee.getMemberId(), notifyTextForOther);
     }
     
@@ -3349,8 +3465,13 @@ public class GroupServiceImpl implements GroupService {
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
             if(includeList.size() > 0) {
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
-                    MetaObjectType.GROUP_REQUEST_TO_BE_ADMIN, metaObject);
+                metaObject.setRequestInfo(notifyTextForAdmin);
+
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.GROUP_MANAGER_APPLY, actionData);
+                sendRouterGroupNotificationUseSystemUser(includeList, null, notifyTextForAdmin, routerUri);
             }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
@@ -3587,11 +3708,13 @@ public class GroupServiceImpl implements GroupService {
                         + ", memberId=" + requestor.getMemberId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getMemberId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;
@@ -3683,7 +3806,7 @@ public class GroupServiceImpl implements GroupService {
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_GROUP);

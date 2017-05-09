@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType：organization/user</li>
  * <li>ownerId：id</li>
  * <li>name：名称</li>
+ * <li>description：描述</li>
  * <li>startEarlyTime：最早上班时间</li>
  * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
  * <li>endEarlyTime：最早下班班时间</li>
@@ -53,6 +54,7 @@ public class PunchTimeRuleDTO {
 
 	private Long daySplitTime;
 	
+	private String description;
 	 
 	 
 	public Long getId() {
@@ -167,5 +169,17 @@ public class PunchTimeRuleDTO {
 
 	public void setDaySplitTime(Long daySplitTime) {
 		this.daySplitTime = daySplitTime;
+	}
+
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
