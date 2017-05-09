@@ -334,6 +334,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
 				RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
 		customObject.put("offlinePayInfo",contentString);
+		customObject.put("orderId", String.valueOf(order.getId()));
 		flowCase.setCustomObject(JSON.toJSONString(customObject));
 		return entities;
 	}
