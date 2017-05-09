@@ -3973,6 +3973,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchCountCommandResponse listPunchCount(
 			ListPunchCountCommand cmd) {
 //		processQueryCommandDay(cmd);
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4098,7 +4099,7 @@ public class PunchServiceImpl implements PunchService {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();
-//		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
 		List<OrganizationMember> organizationMembers = null;
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
