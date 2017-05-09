@@ -3,6 +3,7 @@ package com.everhomes.rentalv2;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
@@ -456,6 +457,22 @@ public class Rentalv2Controller extends ControllerBase {
 	@RestReturn(value = AddRentalBillItemCommandResponse.class)
 	public RestResponse addRentalItemBill(@Valid AddRentalBillItemCommand cmd) {
 		AddRentalBillItemCommandResponse result = rentalService.addRentalItemBill(cmd); 
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/getRentalBillPayInfo</b>
+	 * <p>
+	 * 获取订单支付信息
+	 * </p>
+	 */
+	@RequestMapping("getRentalBillPayInfo")
+	@RestReturn(value = CommonOrderDTO.class)
+	public RestResponse getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd) {
+		CommonOrderDTO result = rentalService.getRentalBillPayInfo(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

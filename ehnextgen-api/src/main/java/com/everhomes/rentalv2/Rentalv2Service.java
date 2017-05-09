@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
@@ -211,4 +212,5 @@ public interface Rentalv2Service {
 
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 
+	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
 }

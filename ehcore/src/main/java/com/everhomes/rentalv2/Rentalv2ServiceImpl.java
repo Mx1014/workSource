@@ -37,6 +37,10 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.order.OrderUtil;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.rentalv2.*;
 import net.greghaines.jesque.Job;
 
@@ -232,6 +236,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private UserProvider userProvider;
 	@Autowired
 	private AppProvider appProvider;
+	@Autowired
+	private OrderUtil commonOrderUtil;
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -1485,17 +1491,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						this.valiRentalBill(cmd.getRules());
 						return this.rentalv2Provider.createRentalOrder(rentalBill);
 					});
-			Long rentalBillId = tuple.first(); 
-//			if (rentalBill.getStatus().equals(
-//					SiteBillStatus.PAYINGFINAL.getCode())) {
-//				// 20分钟后，取消未成功的订单
-//				final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(),
-//						new Object[] {String.valueOf(rentalBill.getId())});
-//
-//				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-//						reserveTime.getTime() + cancelTime);
-//
-//			}
+			Long rentalBillId = tuple.first();
 			 
 			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
@@ -1566,6 +1562,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	@Override
+	public CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd) {
+		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd.getId());
+
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
+		orderCmd.setOrderNo(bill.getOrderNo());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.RENTALORDER.getPycode());
+		orderCmd.setSubject(OrderType.OrderTypeEnum.RENTALORDER.getMsg());
+		orderCmd.setTotalFee(bill.getPayTotalMoney());
+
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+
+	}
+
+	@Override
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag){
 
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
@@ -1627,8 +1647,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for (RentalOrder otherOrder : otherOrders){
 					LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
 					//把自己排除
-					if(otherOrder.getId().equals(order.getId()))
+					if(otherOrder.getId().equals(order.getId())) {
 						continue;
+					}
 					//剩下的用线程池处理flowcase状态和发短信
 					executorPool.execute(new Runnable() {
 						@Override
@@ -1646,6 +1667,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							dto.setFlowVersion(flowcase.getFlowVersion());
 							dto.setStepCount(flowcase.getStepCount());
 							flowService.processAutoStep(dto);
+
+							//发短信和消息
+							Map<String, String> map = new HashMap<>();
+							map.put("useTime", order.getUseDetail());
+							map.put("resourceName", order.getResourceName());
+							sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+									RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+
+							String templateScope = SmsTemplateCode.SCOPE;
+							int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;
+							String templateLocale = RentalNotificationTemplateCode.locale;
+
+							List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+							smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName());
+
+							UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+							if(null == userIdentifier){
+								LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+							}else{
+								smsProvider.sendSms(otherOrder.getNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+							}
 						}
 					});
 				}
@@ -3034,6 +3076,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				response.setAmount(new java.math.BigDecimal(0));
 				}else{
 					bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
+
+					// n分钟后，取消未成功的订单
+					final Job job1 = new Job(CancelUnsuccessRentalOrderAction.class.getName(),
+							new Object[] {String.valueOf(bill.getId())});
+
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+							bill.getReserveTime().getTime() + cancelTime);
 				}
 			}else {
 				bill.setStatus(SiteBillStatus.APPROVING.getCode());
@@ -3129,8 +3178,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						if (null != flowCase) {
 							String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
 							response.setFlowCaseUrl(url);
+							bill.setFlowCaseId(flowCase.getId());
 						}
-						bill.setFlowCaseId(flowCase.getId());
+
 						rentalv2Provider.updateRentalBill(bill);
 
 						return null;
