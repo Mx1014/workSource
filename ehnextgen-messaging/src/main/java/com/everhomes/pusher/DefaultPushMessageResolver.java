@@ -1,15 +1,9 @@
 package com.everhomes.pusher;
 
-import java.util.Locale;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.appurl.AppUrlProvider;
-import com.everhomes.appurl.AppUrls;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.PushMessageResolver;
@@ -17,14 +11,18 @@ import com.everhomes.msgbox.Message;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.OpenMsgSessionActionData;
 import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.messaging.DeviceMessage;
-import com.everhomes.rest.messaging.DeviceMessageType;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessagingLocalStringCode;
-import com.everhomes.rest.messaging.MessagingPriorityConstants;
-import com.everhomes.user.OSType;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
+import com.everhomes.user.UserProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Locale;
 
 @Component(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT)
 public class DefaultPushMessageResolver implements PushMessageResolver {
@@ -33,6 +31,12 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
 	
     @Autowired
     MessagingService messagingService;
+
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private GroupProvider groupProvider;
    
     @Autowired
     private LocaleStringService localeStringService;
@@ -50,6 +54,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         if(null != UserContext.current().getUser()) {
             locale = UserContext.current().getUser().getLocale(); 
         }
+
         deviceMessage.setAlert(this.localeStringService.getLocalizedString(
                 MessagingLocalStringCode.SCOPE,
                 String.valueOf(MessagingLocalStringCode.NEW_MESSAGE_ALERT),
@@ -90,7 +95,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         String bodyType = msg.getMeta().get("bodyType");
         if(null == bodyType) {
             return deviceMessage;
-            }
+        }
         
         deviceMessage.getExtra().putAll(msg.getMeta());
         
@@ -145,10 +150,35 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
                 break;
             default:
                 break;
-                }
             }
-        
+        }
+        // 发送者昵称
+        String senderName = this.getSenderName(msg);
+        deviceMessage.setAlert(senderName + deviceMessage.getAlert());
         return deviceMessage;
     }
 
+    private String getSenderName(Message msg) {
+        String senderName = "";
+        MessageChannelType channelType = MessageChannelType.fromCode(msg.getChannelType());
+        switch (channelType) {
+            case USER:
+                User sender = userProvider.findUserById(msg.getSenderUid());
+                if (sender != null) {
+                    senderName = sender.getNickName();
+                    senderName += "：";
+                }
+                break;
+            case GROUP:
+                Group group = groupProvider.findGroupById(Long.valueOf(msg.getChannelToken()));
+                if (group != null && group.getName() != null && group.getName().length() != 0) {
+                    senderName = group.getName();
+                    senderName += "：";
+                }
+                break;
+            case ADDRESS:
+                break;
+        }
+        return senderName;
+    }
 }

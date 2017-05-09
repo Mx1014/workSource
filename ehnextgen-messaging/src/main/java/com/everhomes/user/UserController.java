@@ -1,31 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.acl.PrivilegeConstants;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -45,6 +20,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.oauth2.OAuth2Service;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -56,50 +32,34 @@ import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
-import com.everhomes.rest.user.AppIdStatusCommand;
-import com.everhomes.rest.user.AppIdStatusResponse;
-import com.everhomes.rest.user.AppServiceAccessCommand;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CheckVerifyCodeCommand;
-import com.everhomes.rest.user.DeleteUserIdentifierCommand;
-import com.everhomes.rest.user.FetchMessageCommandResponse;
-import com.everhomes.rest.user.FetchPastToRecentMessageCommand;
-import com.everhomes.rest.user.FetchRecentToPastMessageCommand;
-import com.everhomes.rest.user.FindTokenByUserIdCommand;
-import com.everhomes.rest.user.GetAppAgreementCommand;
-import com.everhomes.rest.user.GetFamilyMemberInfoCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserSnapshotInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.LogonByTokenCommand;
-import com.everhomes.rest.user.LogonCommand;
-import com.everhomes.rest.user.LogonCommandResponse;
-import com.everhomes.rest.user.ResendVerificationCodeByIdentifierCommand;
-import com.everhomes.rest.user.ResendVerificationCodeCommand;
-import com.everhomes.rest.user.ResetPasswordCommand;
-import com.everhomes.rest.user.SendMessageCommand;
-import com.everhomes.rest.user.SetCurrentCommunityCommand;
-import com.everhomes.rest.user.SetPasswordCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.VerifyAndResetPasswordCommand;
+import com.everhomes.rest.user.*;
 import com.everhomes.scene.SceneService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * User management API controller
@@ -504,6 +464,21 @@ public class UserController extends ControllerBase {
 		return new RestResponse("OK");
 	}
 
+    /**
+     * <b>URL: /user/getUserNickName</b>
+     * <p>根据Etag判断用户昵称是否更新，首次访问或者昵称更新则返回昵称数据，否则返回304</p>
+     */
+    @RequestMapping(value = "getUserNickName")
+    @RestReturn(UserInfo.class)
+    public RestResponse getUserNickName(GetUserNickNameCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        String nickName = userService.getUserNickName(cmd);
+
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setNickName(nickName);
+        return new RestResponse(userInfo);
+    }
+
 	/**
 	 * <b>URL: /user/setUserInfo</b>
 	 * <p>设置用户信息</p>
@@ -544,7 +519,42 @@ public class UserController extends ControllerBase {
 	    return new RestResponse(community);
 	}
 
+    /**
+     * <b>URL: /user/updateUserNotificationSetting</b>
+     * <p>设置会话推送免打扰</p>
+     */
+    @RequestMapping("updateUserNotificationSetting")
+    @RestReturn(UserNotificationSettingDTO.class)
+    public RestResponse updateUserNotificationSetting(@Valid UpdateUserNotificationSettingCommand cmd) {
+        UserNotificationSettingDTO dto = this.userService.updateUserNotificationSetting(cmd);
+        return new RestResponse(dto);
+    }
 
+    /**
+     * <b>URL: /user/getUserNotificationSetting</b>
+     * <p>获取会话推送免打扰设置</p>
+     */
+    @RequestMapping("getUserNotificationSetting")
+    @RestReturn(UserNotificationSettingDTO.class)
+    public RestResponse getUserNotificationSetting(@Valid GetUserNotificationSettingCommand cmd) {
+        UserNotificationSettingDTO dto = this.userService.getUserNotificationSetting(cmd);
+        return new RestResponse(dto);
+    }
+
+    /**
+     * <b>URL: /user/getMessageSessionInfo</b>
+     * <p>获取消息会话所需的信息</p>
+     */
+    @RequestMapping("getMessageSessionInfo")
+    @RestReturn(MessageSessionInfoDTO.class)
+    public RestResponse getMessageSessionInfo(@Valid GetMessageSessionInfoCommand cmd, HttpServletRequest request, HttpServletResponse response) {
+        MessageSessionInfoDTO dto = this.userService.getMessageSessionInfo(cmd);
+        String eTag = DigestUtils.md5Hex(dto.toString().getBytes(Charset.forName("UTF-8")));
+        if(!EtagHelper.checkHeaderEtagOnly(30, eTag, request, response)) {
+            return null;
+        }
+        return new RestResponse(dto);
+    }
 
 	/**
 	 * <b>URL: /user/sendMessage</b>
@@ -588,7 +598,7 @@ public class UserController extends ControllerBase {
 		long senderBoxSequence = this.userService.getNextStoreSequence(UserContext.current().getLogin(),
 				UserContext.current().getLogin().getNamespaceId(), message.getAppId());
 
-		cmd.getChannels().stream().forEach((channel) -> {
+		cmd.getChannels().forEach((channel) -> {
 			messagingService.routeMessage(UserContext.current().getLogin(),
 					cmd.getAppId() != null ? cmd.getAppId() : App.APPID_MESSAGING,
 							channel.getChannelType(), channel.getChannelToken(), message,
@@ -780,6 +790,7 @@ public class UserController extends ControllerBase {
 	public RestResponse getFamilyMemberInfo(GetFamilyMemberInfoCommand cmd){
 		return new RestResponse(userService.getUserInfo(cmd.getUid()));
 	}
+
 	/**
 	 * 查询个人简介
 	 * 返回值有：

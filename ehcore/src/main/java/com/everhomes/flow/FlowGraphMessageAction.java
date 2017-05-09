@@ -1,13 +1,11 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.util.DateHelper;
+
+import java.sql.Timestamp;
 
 public class FlowGraphMessageAction extends FlowGraphAction {
 
@@ -51,6 +49,7 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		dto.setTimeoutAtTick(timeoutAtTick);
 		dto.setRemindTick(remindTick);
 		dto.setRemindCount(remindCount);
+		dto.setFlowUserType(event.getUserType().getCode());
 
 		if(ctx.getOperator() != null) {
 			dto.setOperatorId(ctx.getOperator().getId());

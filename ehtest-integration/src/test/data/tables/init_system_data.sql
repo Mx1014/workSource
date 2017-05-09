@@ -411,6 +411,12 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`, `name`, `description`, `tag`, `names
 	(4180, 32, '门禁管理', NULL, NULL, 999990, 'EhOrganizations', 1001132);
 /*!40000 ALTER TABLE `eh_acl_roles` ENABLE KEYS */;
 
+<<<<<<< HEAD
+=======
+-- 正在导出表  ehcore_shenye.eh_acl_privileges 的数据：~69 rows (大约)
+/*!40000 ALTER TABLE `eh_acl_privileges` DISABLE KEYS */;
+-- truncate table `eh_acl_privileges`;
+>>>>>>> msg-2.0
 ALTER TABLE `eh_acl_privileges` AUTO_INCREMENT = 4096;
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(1, 0, 'All');
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(2, 0, 'Visible');
@@ -423,6 +429,10 @@ INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(100, 2, 'forum.to
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(101, 2, 'forum.topic.delete');
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(102, 2, 'forum.reply.new');
 INSERT INTO `eh_acl_privileges`(`id`, `app_id`, `name`) VALUES(103, 2, 'forum.reply.delete');
+<<<<<<< HEAD
+=======
+/*!40000 ALTER TABLE `eh_acl_roles` ENABLE KEYS */;
+>>>>>>> msg-2.0
 
 -- 正在导出表  ehcore_shenye.eh_acl_role_assignments 的数据：~33 rows (大约)
 /*!40000 ALTER TABLE `eh_acl_role_assignments` DISABLE KEYS */;
