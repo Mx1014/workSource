@@ -111,7 +111,7 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id);
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
-	VALUES((@namespace_resource_id := @namespace_resource_id + 1), 1, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
 
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
 	VALUES ((@building_id := @building_id + 1), @community_id, '深圳国际商会中心', '深圳国际商会中心', 0, NULL, '广东省深圳市福华三路168号', NULL, 114.05695, 22.53306, 'ws105qj8xdf4', '', '', '2', '1', UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
@@ -1261,5 +1261,21 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(@namespace_id, 'sms.default.yzx', 13, 'zh_CN', '预定2-荣超', '44953');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(@namespace_id, 'sms.default.yzx', 14, 'zh_CN', '预定3-荣超', '44954');
 	
+-- modify add by xiongying20170509
+SET @equipment_category_id = (SELECT max(id) FROM `eh_equipment_inspection_categories`);    
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '设备', '/设备', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '装修', '/装修', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '空置房', '/空置房', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '安保', '/安保', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '日常工作检查', '/日常工作检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '公共设施检查', '/公共设施检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '周末值班', '/周末值班', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '安全检查', '/安全检查', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999975, '', 0, '0', '其他', '/其他', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
 
+SET @lease_config_id = (SELECT max(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_config_id := @lease_config_id + 1), '999975', '1', '1', '1', '1', '1', '1');
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10600,'', 'EhNamespaces', 999975,2);
+delete from eh_web_menu_scopes where owner_id = 999975 and menu_id = 50900;
 SET FOREIGN_KEY_CHECKS = 1;
