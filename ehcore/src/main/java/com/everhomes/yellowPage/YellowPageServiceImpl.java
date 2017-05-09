@@ -595,9 +595,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		this.processDetailUrl(dto);
 //		response.setDisplayName(serviceAlliance.getNickName());
-		Community community = communityProvider.findCommunityById(dto.getOwnerId());
-		if(community != null) {
-			dto.setNamespaceId(community.getNamespaceId());
+		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(dto.getOwnerType());
+		if(belongType == ServiceAllianceBelongType.COMMUNITY){
+			Community community = communityProvider.findCommunityById(dto.getOwnerId());
+			if(community != null) {
+				dto.setNamespaceId(community.getNamespaceId());
+			}
+		}else{
+			Organization organization = organizationProvider.findOrganizationById(dto.getOwnerId());
+			if(organization!=null){
+				dto.setNamespaceId(organization.getNamespaceId());
+			}
 		}
 //		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
