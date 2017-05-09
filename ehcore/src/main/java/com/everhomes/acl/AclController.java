@@ -72,15 +72,15 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/createServiceModuleAdmin</b>
+     * <b>URL: /acl/createServiceModuleAdministrators</b>
      * <p>创建业务模块管理员</p>
      */
-    @RequestMapping("createServiceModuleAdmin")
+    @RequestMapping("createServiceModuleAdministrators")
     @RestReturn(value=String.class)
-    public RestResponse createServiceModuleAdmin(@Valid CreateServiceModuleAdminCommand cmd) {
+    public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
-        rolePrivilegeService.createServiceModuleAdmin(cmd);
+//        rolePrivilegeService.createServiceModuleAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -108,7 +108,7 @@ public class AclController extends ControllerBase {
      * <p>业务模块管理员列表</p>
      */
     @RequestMapping("listServiceModuleAdministrators")
-    @RestReturn(value=OrganizationContactDTO.class, collection = true)
+    @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
     public RestResponse listServiceModuleAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
@@ -123,7 +123,7 @@ public class AclController extends ControllerBase {
      * <p>删除业务模块管理员</p>
      */
     @RequestMapping("deleteServiceModuleAdministrators")
-    @RestReturn(value=OrganizationContactDTO.class, collection = true)
+    @RestReturn(value=String.class)
     public RestResponse deleteServiceModuleAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
@@ -310,7 +310,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("getPrivilegeIdsByRoleId")
     @RestReturn(value=Long.class, collection = true)
     public RestResponse getPrivilegeIdsByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeIdsByRoleId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -325,6 +325,35 @@ public class AclController extends ControllerBase {
     @RequestMapping("createRolePrivileges")
     @RestReturn(value=String.class)
     public RestResponse createRolePrivileges(@Valid CreateRolePrivilegesCommand cmd) {
+        rolePrivilegeService.createRolePrivileges(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/updateRolePrivileges</b>
+     * <p>修改角色和权限的关系</p>
+     */
+    @RequestMapping("updateRolePrivileges")
+    @RestReturn(value=String.class)
+    public RestResponse updateRolePrivileges(@Valid UpdateRolePrivilegesCommand cmd) {
+        rolePrivilegeService.updateRolePrivileges(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/deleteRolePrivileges</b>
+     * <p>删除角色和权限的关系</p>
+     */
+    @RequestMapping("deleteRolePrivileges")
+    @RestReturn(value=String.class)
+    public RestResponse deleteRolePrivileges(@Valid DeleteRolePrivilegesCommand cmd) {
+        rolePrivilegeService.deleteRolePrivileges(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -338,11 +367,12 @@ public class AclController extends ControllerBase {
     @RequestMapping("listRoles")
     @RestReturn(value=RoleDTO.class, collection = true)
     public RestResponse listRoles(@Valid ListRolesCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listRoles(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
 
 
 

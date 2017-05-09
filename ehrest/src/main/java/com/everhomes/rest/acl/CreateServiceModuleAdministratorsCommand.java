@@ -1,22 +1,26 @@
 package com.everhomes.rest.acl;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
+ * <li>organizationId: 当前机构id</li>
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型, 参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司, 如果是左邻后台传0即可</li>
- * <li>organizationId: 机构id</li>
  * <li>targetId：对象id</li>
  * <li>targetType：对象类型，Eh_Users, Eh_Organizations,{@link com.everhomes.rest.common.EntityType}</li>
- * <li>moduleId: 模块Id</li>
+ * <li>moduleIds:  业务模块id集合</li>
  * </ul>
  */
-public class DeleteServiceModuleAdministratorsCommand {
+public class CreateServiceModuleAdministratorsCommand {
 
+	@NotNull
+	private Long organizationId;
 
 	@NotNull
 	private String ownerType;
@@ -24,24 +28,17 @@ public class DeleteServiceModuleAdministratorsCommand {
 	@NotNull
 	private Long ownerId;
 
-	@NotNull
-	private Long organizationId;
+	private Long targetId;
 
-	@NotNull
 	private String targetType;
 
 	@NotNull
-	private Long targetId;
-
-	@NotNull
-	private Long moduleId;
-	
+	@ItemType(Long.class)
+	private List<Long> moduleIds;
 
 	public Long getOrganizationId() {
 		return organizationId;
 	}
-
-
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
@@ -63,14 +60,6 @@ public class DeleteServiceModuleAdministratorsCommand {
 		this.ownerId = ownerId;
 	}
 
-	public String getTargetType() {
-		return targetType;
-	}
-
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
 	public Long getTargetId() {
 		return targetId;
 	}
@@ -79,12 +68,20 @@ public class DeleteServiceModuleAdministratorsCommand {
 		this.targetId = targetId;
 	}
 
-	public Long getModuleId() {
-		return moduleId;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setModuleId(Long moduleId) {
-		this.moduleId = moduleId;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public List<Long> getModuleIds() {
+		return moduleIds;
+	}
+
+	public void setModuleIds(List<Long> moduleIds) {
+		this.moduleIds = moduleIds;
 	}
 
 	@Override

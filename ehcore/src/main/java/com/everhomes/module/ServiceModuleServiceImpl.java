@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
 import com.everhomes.rest.acl.ServiceModuleTreeVType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -101,6 +102,41 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		return result;
 	}
 
+	@Override
+	public List<ServiceModuleDTO> listServiceModulePrivileges(ListServiceModulePrivilegesCommand cmd){
+		Integer startLevel = 2; //从二级开始查询
+		List<Byte> types = cmd.getTypes();
+
+		//默认查询左邻运营后台需要的模块，即园区模块和左邻运营方需要的系统管理模块
+		if(null == types && types.size() == 0){
+			types = new ArrayList<>();
+			types.add(ServiceModuleType.PARK.getCode());
+			types.add(ServiceModuleType.MANAGER.getCode());
+		}
+
+		List<ServiceModule> serviceModules= serviceModuleProvider.listServiceModule(startLevel, types);
+
+		List<ServiceModuleDTO> dtos = serviceModules.stream().map(r ->{
+			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		List<ServiceModuleDTO> results = new ArrayList<ServiceModuleDTO>();
+
+		for(ServiceModuleDTO s: dtos) {
+
+			//获取子节点
+			getChildServiceModules(dtos, s);
+
+			//以startLevel级别作为每个模块的根节点
+			if(s.getLevel() == startLevel) {
+				results.add(s);
+			}
+		}
+
+		return results;
+	}
+
 	private List<ServiceModule> filterList(List<ServiceModule> modules, List<ServiceModuleScope> scopes) {
 		List<ServiceModule> result = new ArrayList<ServiceModule>();
 		outer:
@@ -118,6 +154,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 	private ServiceModuleDTO getChildServiceModules(List<ServiceModuleDTO> list, ServiceModuleDTO dto){
 		
 		List<ServiceModuleDTO> childrens = new ArrayList<ServiceModuleDTO>();
+
+		if(dto.getLevel() == 1){
+			dto.setvType(ServiceModuleTreeVType.MODULE_CATEGORY.getCode());
+		}else if(dto.getLevel() == 2){
+			dto.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
+		}else if(dto.getLevel() == 3){
+			dto.setvType(ServiceModuleTreeVType.PRIVILEGE_CATEGORY.getCode());
+		}
 		
 		for (ServiceModuleDTO serviceModuleDTO : list) {
 			serviceModuleDTO.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());

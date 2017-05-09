@@ -169,26 +169,29 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 	
 	@Override
-	public void createRolePrivilege(CreateRolePrivilegeCommand cmd) {
+	public void createRolePrivileges(CreateRolePrivilegesCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
+
+			//创建角色
 			Role role = new Role();
 			role.setAppId(AppConstants.APPID_PARK_ADMIN);
 			role.setName(cmd.getRoleName());
 			role.setDescription(cmd.getDescription());
 			role.setNamespaceId(namespaceId);
-			role.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-			role.setOwnerId(cmd.getOrganizationId());
+			role.setOwnerType(cmd.getOwnerType());
+			role.setOwnerId(cmd.getOwnerId());
 			aclProvider.createRole(role);
-			
+
+			//添加角色和权限的关系
 			List<Long> privilegeIds = cmd.getPrivilegeIds();
 			if(null != privilegeIds && 0 != privilegeIds.size()){
 				Acl acl = new Acl();
 				acl.setGrantType((byte) 1);
-				acl.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-				acl.setOwnerId(cmd.getOrganizationId());
+				acl.setOwnerType(cmd.getOwnerType());
+				acl.setOwnerId(cmd.getOwnerId());
 				acl.setOrderSeq(0);
 				acl.setRoleId(role.getId());
 				acl.setCreatorUid(user.getId());
@@ -205,25 +208,26 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 	
 	@Override
-	public void updateRolePrivilege(UpdateRolePrivilegeCommand cmd) {
+	public void updateRolePrivileges(UpdateRolePrivilegesCommand cmd) {
 		User user = UserContext.current().getUser();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
+			//修改角色信息
 			Role role = aclProvider.getRoleById(cmd.getRoleId());
 			role.setName(cmd.getRoleName());
 			role.setDescription(cmd.getDescription());
 			aclProvider.updateRole(role);
-			
-			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getRoleId());
-			for (Acl acl : acls) {
-				aclProvider.deleteAcl(acl.getId());
-			}
+
+			//删除角色的权限
+			deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
+
+			//重新添加角色和权限的关系
 			List<Long> privilegeIds = cmd.getPrivilegeIds();
 			if(null != privilegeIds && 0 != privilegeIds.size()){
 				Acl acl = new Acl();
 				acl.setGrantType((byte) 1);
-				acl.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-				acl.setOwnerId(cmd.getOrganizationId());
+				acl.setOwnerType(cmd.getOwnerType());
+				acl.setOwnerId(cmd.getOwnerId());
 				acl.setOrderSeq(0);
 				acl.setRoleId(cmd.getRoleId());
 				acl.setCreatorUid(user.getId());
@@ -239,18 +243,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 	
 	@Override
-	public void deleteRolePrivilege(DeleteRolePrivilegeCommand cmd) {
+	public void deleteRolePrivileges(DeleteRolePrivilegesCommand cmd) {
 		dbProvider.execute((TransactionStatus status) -> {
-			
+			//删除角色
 			aclProvider.deleteRole(cmd.getRoleId());
-			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getRoleId());
-			for (Acl acl : acls) {
-				aclProvider.deleteAcl(acl.getId());
-			}
+			//删除角色权限
+			deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
 			return null;
 		});
 	}
-	
+
 	@Override
 	public List<ListWebMenuPrivilegeDTO> qryRolePrivileges(
 			QryRolePrivilegesCommand cmd) {
@@ -275,38 +277,31 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	
 	@Override
-	public List<RoleDTO> listAclRoleByOrganizationId(ListAclRolesCommand cmd) {
-		
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		
+	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
 		
-		List<RoleDTO> dtos = new ArrayList<RoleDTO>();
-		if(null == org){
-			return dtos;
-		}
-		
-//		List<String> groupTypes = new ArrayList<String>();
-//		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-//		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-	
-//		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
-		
-//		List<Long> ownerIds = new ArrayList<Long>();
-//		ownerIds.add(org.getId());
-//		if(null != orgs && 0 != orgs.size()){
-//			for (Organization organization : orgs) {
-//				ownerIds.add(organization.getId());
-//			}
-//		}
-		
-		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, cmd.getAppId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
-		
-		dtos = roles.stream().map(r->{
+		return roles.stream().map(r->{
 			return ConvertHelper.convert(r, RoleDTO.class);
 		}).collect(Collectors.toList());
-		
-		return dtos;
+	}
+
+	@Override
+	public List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd) {
+
+		Role role = aclProvider.getRoleById(cmd.getRoleId());
+		if(null == role){
+			LOGGER.error("Role Non-existent., roleId = {}", cmd.getRoleId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"Role Non-existent.");
+		}
+
+		List<Acl> acls = aclProvider.getResourceAclByRole(cmd.getOwnerType(), cmd.getOwnerId(), new AclRoleDescriptor(EntityType.ROLE.getCode(), cmd.getRoleId()));
+
+		return acls.stream().map(r->{
+			return r.getPrivilegeId();
+		}).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -1558,22 +1553,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 
-		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(entityType.getCode());
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(cmd.getOwnerId()));
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(cmd.getModuleId()));
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.USER.getCode()));
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(cmd.getUserId()));
-
-		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOrganizationId());
-
-		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
-			serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
-		}
+//		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(entityType.getCode());
+//		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(cmd.getOwnerId()));
+//		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(cmd.getModuleId()));
+//		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.USER.getCode()));
+//		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(cmd.getUserId()));
+//
+//		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOrganizationId());
+//
+//		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
+//			serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
+//		}
 
 		/**
 		 * 权限删除
 		 */
-		this.deleteAcls(entityType.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getUserId(), cmd.getModuleId(), null);
+//		this.deleteAcls(entityType.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getUserId(), cmd.getModuleId(), null);
 	}
 
 	@Override

@@ -5,25 +5,39 @@ import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
-
 /**
  * <ul>
+ * <li>roleId: 角色id</li>
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型  参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
- * <li>moduleId:模块Id，不传查询全部</li>
- * <li>types:需要的模块类型，不传就查询左邻运营后台的全部模块，即园区模块和管理模块， 参考{@link com.everhomes.rest.module.ServiceModuleType}</li>
+ * <li>roleName:角色名称</li>
+ * <li>description:描述</li>
+ * <li>privilegeIds:权限集合</li>
  * </ul>
  */
-public class ListServiceModulePrivilegesCommand {
+public class UpdateRolePrivilegesCommand {
 	
+	private Long roleId;
+
 	private String ownerType;
 
 	private Long ownerId;
 
-	private Long moduleId;
+	private String roleName;
 
-	@ItemType(Byte.class)
-	private List<Byte> types;
+	private String description;
+
+	@ItemType(Long.class)
+	private List<Long> privilegeIds;
+
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -41,20 +55,28 @@ public class ListServiceModulePrivilegesCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getModuleId() {
-		return moduleId;
+	public String getRoleName() {
+		return roleName;
 	}
 
-	public void setModuleId(Long moduleId) {
-		this.moduleId = moduleId;
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
 	}
 
-	public List<Byte> getTypes() {
-		return types;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setTypes(List<Byte> types) {
-		this.types = types;
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Long> getPrivilegeIds() {
+		return privilegeIds;
+	}
+
+	public void setPrivilegeIds(List<Long> privilegeIds) {
+		this.privilegeIds = privilegeIds;
 	}
 
 	@Override
