@@ -27,6 +27,7 @@ import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupMemberLog;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -61,6 +62,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.GetRequestInfoCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
@@ -5778,4 +5780,40 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             });
         }
     }
+
+	@Override
+	public GetRequestInfoResponse getRequestInfo(GetRequestInfoCommand cmd) {
+		if (StringUtils.isEmpty(cmd.getResourceType()) || cmd.getResourceId() == null || cmd.getRequestorUid() == null) {
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter");
+		}
+		EntityType resourceType = EntityType.fromCode(cmd.getResourceType());
+		Long requestId = cmd.getRequestId();  //表示那条记录的id
+		if (resourceType == EntityType.ORGANIZATIONS) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(requestId);
+			if (LOGGER.isDebugEnabled())
+			    LOGGER.debug("getRequestInfo organizationMember {}", organizationMember);
+			if (organizationMember != null) {
+				return new GetRequestInfoResponse(organizationMember.getStatus());
+			}
+		}else if (resourceType == EntityType.GROUP || resourceType == EntityType.FAMILY) {
+			// groupMember拒绝的时候是直接删除的，蛋疼
+			GroupMember groupMember = groupProvider.findGroupMemberById(requestId);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("getRequestInfo groupMember {}", groupMember);
+			if (groupMember != null) {
+				return new GetRequestInfoResponse(groupMember.getMemberStatus());
+			}
+			// 新加了一个groupMemberLog表用来存储删除还是拒绝
+			GroupMemberLog groupMemberLog = groupProvider.findGroupMemberLogByGroupMemberId(requestId);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("getRequestInfo groupMemberLog {}", groupMemberLog);
+			if (groupMemberLog != null) {
+				return new GetRequestInfoResponse(groupMemberLog.getStatus());
+			}
+		}
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("getRequestInfo new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode())");
+		return new GetRequestInfoResponse(GroupMemberStatus.INACTIVE.getCode());
+	}
+    
 }
