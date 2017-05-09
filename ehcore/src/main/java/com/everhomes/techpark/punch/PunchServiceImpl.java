@@ -2275,7 +2275,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
-		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
+//		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
 //		PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(member.getTargetId(), startCalendar.getTime());
 		PunchStatistic statistic = new PunchStatistic();
 
@@ -2301,7 +2301,6 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
 		statistic.setOwnerId(orgId);
-		statistic.setPunchTimesPerDay(timeRule.getPunchTimesPerDay());
 		statistic.setUserId(member.getTargetId());
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
@@ -2313,7 +2312,8 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
-		for(PunchDayLog dayLog : dayLogList){ 
+		for(PunchDayLog dayLog : dayLogList){
+			statistic.setPunchTimesPerDay(dayLog.getPunchTimesPerDay());
 			PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
 					PunchStatisticsDTO.class);
 			list.add(dto);
