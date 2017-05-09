@@ -542,8 +542,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 
-	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
+	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
 			Calendar logDay) throws ParseException {
+		Long companyId = getTopEnterpriseId(companyId1);
 		PunchLogsDay pdl = new PunchLogsDay();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
