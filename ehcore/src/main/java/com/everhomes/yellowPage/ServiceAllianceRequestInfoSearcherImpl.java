@@ -51,6 +51,7 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.wifi.WifiOwnerType;
@@ -389,6 +390,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void exportRequestInfo(SearchRequestInfoCommand cmd, HttpServletResponse httpResponse) {
 		//申请记录
+		if(cmd.getPageSize()==null){
+			cmd.setPageSize(100000000);
+			cmd.setPageAnchor(0L);
+		}
 		SearchRequestInfoResponse response = searchRequestInfo(cmd);
 		if(response.getDtos()!=null && response.getDtos().size()>0){
 			//获取模板名称到map中
@@ -481,7 +486,11 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         	if(requestInfos[1].get(0) instanceof GetRequestInfoResponse){
 	        	GetRequestInfoResponse response = (GetRequestInfoResponse)requestInfos[1].get(0);
 	        	for (int i = 0; response!=null && i < response.getDtos().size(); i++) {
-	        		 row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+	        		FieldContentType fieldContentType = FieldContentType.fromCode(response.getDtos().get(i).getFieldContentType());
+	        		//只导出文本数据 by dengs,2017 05 09
+	        		if(fieldContentType == FieldContentType.TEXT){
+	        			row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+	        		}
 	        	}
 	        	
 	        	for (int i = 0; i < requestInfos[0].size(); i++) {
@@ -494,7 +503,11 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	        		response = (GetRequestInfoResponse)requestInfos[1].get(i);
 	        		//不定数量的值
 	        		for (int j = 0; response!=null && j < response.getDtos().size(); j++) {
-	        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
+	        			FieldContentType fieldContentType = FieldContentType.fromCode(response.getDtos().get(j).getFieldContentType());
+		        		//只导出文本数据 by dengs,2017 05 09
+	        			if(fieldContentType == FieldContentType.TEXT){
+		        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
+		        		}
 	        		}
 				}
         	}
@@ -517,13 +530,17 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		        		List<FlowCaseEntity> entityLists = flowCaseDetailDTO.getEntities();
 		        		if(entityLists!=null)
 			        		for (FlowCaseEntity flowCaseEntity : entityLists) {
-			        			Integer col = columnname.get(flowCaseEntity.getKey());
-			        			if(col==null){
-			        				col = createColumnHeads(columnname, nextcol, flowCaseEntity, row1);
-			        				nextcol++;
+			        			FlowCaseEntityType flowCaseEntityType =	FlowCaseEntityType.fromCode(flowCaseEntity.getEntityType());
+			        			//不导出图片和文件
+			        			if(flowCaseEntityType!=FlowCaseEntityType.FILE && flowCaseEntityType!=FlowCaseEntityType.IMAGE){
+				        			Integer col = columnname.get(flowCaseEntity.getKey());
+				        			if(col==null){
+				        				col = createColumnHeads(columnname, nextcol, flowCaseEntity, row1);
+				        				nextcol++;
+				        			}
+				        			row.createCell(col)
+				        				.setCellValue(getFileFieldValue(flowCaseEntity,col,mapImage));
 			        			}
-			        			row.createCell(col)
-			        				.setCellValue(getFileFieldValue(flowCaseEntity,col,mapImage));
 							}
 	        		}
 				}
