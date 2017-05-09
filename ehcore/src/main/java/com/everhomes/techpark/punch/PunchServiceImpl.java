@@ -607,9 +607,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/***
-	 * @param punchLogs
-	 *            ： 当天的全部打卡记录通过punchProvider.listPunchLogsByDate()方法得到;
-	 * @param punchRule
+	 * @param userId
+	 *            ： 打卡用户;
+	 * @param companyId
 	 *            :打卡规则
 	 * @param logDay
 	 *            : 计算的打卡日期
@@ -1635,9 +1635,9 @@ public class PunchServiceImpl implements PunchService {
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) { 
 //				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.gt(new java.sql.Date( startCalendar.getTime()));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.between(new java.sql.Date(startCalendar.getTime().getTime()),
-						new java.sql.Date( endCalendar.getTime().getTime())));
-				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull()); 
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.greaterOrEqual(new java.sql.Date(startCalendar.getTime().getTime()));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.RULE_DATE.lt(new java.sql.Date( endCalendar.getTime().getTime())));
+				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TIME_RULE_ID.isNotNull());
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.eq(ruleMap.getOwnerType()));
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.eq(ruleMap.getOwnerId())); 
 				query.addConditions(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.eq(ruleMap.getTargetType())); 
@@ -4821,7 +4821,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 26/15 * * * ?")
+	@Scheduled(cron = "1 0/3 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled(){
 		
