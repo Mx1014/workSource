@@ -2700,13 +2700,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executeStandardIds, reviewStandardIds, offset, userId);
 
-<<<<<<< HEAD
+
 			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
-					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
-=======
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
->>>>>>> master
+					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
+
 
 		}
 
