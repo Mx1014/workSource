@@ -211,7 +211,7 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 	
 	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
-		if (createExpressUserDTO.getOrganizationId() == null || createExpressUserDTO.getOrganizationMemberId() == null) {
+		if (createExpressUserDTO.getOrganizationId() == null || createExpressUserDTO.getOrganizationMemberId() == null || createExpressUserDTO.getUserId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressUser expressUser = null;
