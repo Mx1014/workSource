@@ -874,7 +874,7 @@ public class PunchServiceImpl implements PunchService {
 					+  convertTimeLongToString(punchTimeRule.getStartLateTimeLong())));
 	
 			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0)
-					.getPunchDate()) + " " + punchTimeRule.getWorkTimeLong()));
+					.getPunchDate()) + " " + convertTimeLongToString(punchTimeRule.getWorkTimeLong())));
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
@@ -4821,7 +4821,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/15 * * * ?")
+	@Scheduled(cron = "1 26/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled(){
 		
