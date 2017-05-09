@@ -93,10 +93,13 @@ public class MenuTest  extends LoginAuthTestCase {
     	MenuBuilder mb = new MenuBuilder(webMenuProvider, null, null);
     	mb.setName("系统管理").setDataType("system-managerment").Child()
     	
-    	.setName("管理员管理").Child()
-    	.Parent().Child().setName("系统管理员管理").setDataType("system-supers")
-    	.Parent().Child().setName("运营管理员管理").setDataType("system-operators")
+    	.setName("管理员管理").setDataType("system-supers").Child()
+    	.Parent().Child().setName("管理员管理").setDataType("system-supers").Child()
+    	
+    	.setName("运营管理员管理").setDataType("system-operators")
     	.Parent().Child().setName("角色权限配置").setDataType("system-roles")
+    	.Parent()
+    	
     	.Parent()
     	
     	.Parent().Child().setName("基础信息配置").Child()
