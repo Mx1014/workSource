@@ -1569,7 +1569,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag){
 
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
-		List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
+		List<RentalBillRuleDTO> rules = new ArrayList<>();
 		List<Long> resourceRuleIds = new ArrayList<>();
 
 		//状态为已完成时，不需要验证，之前付款时，已经做过校验
@@ -1602,23 +1602,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		//TODO: 改成工作流的短信
 		//发短信给预订人
-		String templateScope = SmsTemplateCode.SCOPE;
-		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
-		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE; 
-
-		Map<String, String> map = new HashMap<String, String>(); 
-		map.put("useTime", order.getUseDetail());
-	    map.put("resourceName", order.getResourceName()); 
-	    sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
-		String templateLocale = RentalNotificationTemplateCode.locale; 
-
-		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-		if(null == userIdentifier){
-			LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-		}else{
-			smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-		}
+//		String templateScope = SmsTemplateCode.SCOPE;
+//		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+//		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+//		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE;
+//
+//		Map<String, String> map = new HashMap<String, String>();
+//		map.put("useTime", order.getUseDetail());
+//	    map.put("resourceName", order.getResourceName());
+//	    sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+//		String templateLocale = RentalNotificationTemplateCode.locale;
+//
+//		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+//		if(null == userIdentifier){
+//			LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+//		}else{
+//			smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+//		}
 		//根据产品定义，是在待审批的节点就不允许其他用户预订 同时段统一资源（状态不是已预约成功，比如待付款）
 		if (cancelOtherOrderFlag) {
 			//找到所有有这些ruleids的订单
@@ -1764,7 +1764,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				}
 //			}  
 		
-			map = new HashMap<String, String>(); 
+			map = new HashMap<>();
 			map.put("userName", user.getNickName());
 		    map.put("resourceName", rentalBill.getResourceName());
 		    map.put("useDetail", rentalBill.getUseDetail());
@@ -1800,110 +1800,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
 				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
-//	private void assignSiteNumber(RentalResourceOrder rsb ,RentalSiteRule rsr, RentalBillDTO billDTO,Integer loopCnt) {
-//		
-//		if(loopCnt++>20){
-//			throw RuntimeErrorException
-//			.errorWith(
-//					RentalServiceErrorCode.SCOPE,
-//					RentalServiceErrorCode.ERROR_LOOP_TOOMUCH,"动态分配循环次数过多 ");
-//		}
-//		try{
-//			this.dbProvider.execute((TransactionStatus status) -> {
-//				Map<Integer, Double> siteNumberMap = new HashMap<Integer, Double> ();
-//				//查询已预定的number 装入Map
-//				List<RentalResourceOrderNumber> siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
-//				if(null!=siteNumbers){
-//					for(RentalResourceOrderNumber siteNumber : siteNumbers){
-//						if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
-//							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
-//						else
-//							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
-//					}
-//				}
-//				//资源编号
-//				int site_number =1;
-//				//分配到第几个资源
-//				double siteCount = 1.0;
-//				//先给整数个site_rule 分配number
-//				for( ;siteCount <=rsb.getRentalCount();siteCount++){
-//					while(true){
-//						if(null == siteNumberMap.get(site_number))
-//							break;
-//						else
-//							site_number++;
-//					}
-//					//如果编号超出资源退出循环
-//					if(site_number > rsr.getCounts())
-//						break;
-//					RentalResourceOrderNumber sitesBillNumber = new RentalResourceOrderNumber();
-//					sitesBillNumber.setRentalCount(1.0);
-//					sitesBillNumber.setRentalSiteBillId(rsb.getId());
-//					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
-//					sitesBillNumber.setSiteNumber(site_number);
-//					this.rentalProvider.createRentalResourceOrderNumber(sitesBillNumber);
-//					siteNumberMap.put(site_number, 1.0);		
-//				}
-//				//分配半个
-//				for( siteCount=siteCount-0.5;siteCount <=rsb.getRentalCount();){
-//					if (siteCount <rsb.getRentalCount())
-//						billDTO.setToastFlag(NormalFlag.NEED.getCode());
-//					while(true){
-//						if( siteNumberMap.get(site_number)==0.5)
-//							break;
-//						else
-//							site_number++;
-//					}
-//					//资源编号超出单元格的个数,直接异常-应该不会有这种情况
-//					if(site_number > rsr.getCounts())
-//						throw RuntimeErrorException
-//						.errorWith(
-//								RentalServiceErrorCode.SCOPE,
-//								RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
-//								localeStringService.getLocalizedString(
-//										String.valueOf(RentalServiceErrorCode.SCOPE),
-//										String.valueOf(RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES),
-//										UserContext.current().getUser()
-//												.getLocale(),
-//										" has no enough sites to rental "));
-//					RentalResourceOrderNumber sitesBillNumber = new RentalResourceOrderNumber();
-//					sitesBillNumber.setRentalCount(0.5);
-//					sitesBillNumber.setRentalSiteBillId(rsb.getId());
-//					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
-//					sitesBillNumber.setSiteNumber(site_number);
-//					this.rentalProvider.createRentalResourceOrderNumber(sitesBillNumber);
-//					siteNumberMap.put(site_number, 0.5);
-//					siteCount= siteCount+0.5;
-//				}
-//				//验证是否有冲突，如果有抛出异常
-//				siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
-//				siteNumberMap = new HashMap<Integer, Double> ();
-//				for(RentalResourceOrderNumber siteNumber : siteNumbers){
-//					if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
-//						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
-//					else
-//						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
-//					//如果超过1.1个也就是1.5或者更多,说明冲突，重新分配
-//					if(siteNumberMap.get(siteNumber.getSiteNumber())>1.1)
-//						throw RuntimeErrorException
-//						.errorWith(
-//								RentalServiceErrorCode.SCOPE,
-//								RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN,"资源编号重复，重新分配资源 ");
-//				}
-//				return null;
-//			});
-//		}catch(RuntimeErrorException e){
-//			if(e.getErrorCode()==RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN){
-//				//如果是分配到重复资源编号的就重新分配
-//				LOGGER.info("assign rental site repeat,loop again ;time = "+loopCnt);
-//				assignSiteNumber(rsb,rsr,billDTO,loopCnt);
-//			}else{
-//				throw e;
-//			}
-//			
-//		}
-//	
-//}
 
 	@Override
 	public void valiRentalBill(Double rentalcount, List<RentalBillRuleDTO> ruleDTOs) {
@@ -1984,7 +1880,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		if (null == billList)
 			return response;
-		response.setRentalBills(new ArrayList<RentalBillDTO>());
+		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : billList) {
 			RentalBillDTO dto = proccessOrderDTO(bill);
 			  
@@ -2000,7 +1896,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(dto.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 			dto.setUnpayCancelTime(bill.getReserveTime().getTime() + cancelTime);
 		}
-		dto.setSiteItems(new ArrayList<SiteItemDTO>());
+		dto.setSiteItems(new ArrayList<>());
 		List<RentalItemsOrder> rentalSiteItems = rentalv2Provider
 				.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
 		if(null!= rentalSiteItems)
@@ -2101,7 +1997,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setUnPayPrice(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
-		dto.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
+		dto.setRentalSiteRules(new ArrayList<>());
 		//支付方式
 		List<RentalOrderPayorderMap> billPaybillMaps = this.rentalv2Provider.findRentalBillPaybillMapByBillId(bill.getId()) ;
 		if(null!=billPaybillMaps && billPaybillMaps.size()>0)
@@ -2132,7 +2028,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalItemsOrder> ribs = rentalv2Provider
 				.findRentalItemsBillBySiteBillId(bill.getId());
 		if(null!=ribs){
-			dto.setSiteItems(new ArrayList<SiteItemDTO>());
+			dto.setSiteItems(new ArrayList<>());
 			//dto不是final的变量就改为for循环,不用foreach
 			for(RentalItemsOrder item : ribs){
 				SiteItemDTO siDTO = ConvertHelper.convert(item, SiteItemDTO.class);
@@ -2147,7 +2043,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setUseDetail(bill.getUseDetail()); 
 				
 		// 订单的附件attachments
-		dto.setBillAttachments(new ArrayList<BillAttachmentDTO>());
+		dto.setBillAttachments(new ArrayList<>());
 		List<RentalOrderAttachment> attachments = rentalv2Provider
 				.findRentalBillAttachmentByBillId(dto.getRentalBillId());
 		for (RentalOrderAttachment attachment : attachments) {
@@ -2182,18 +2078,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 	}
 
-//	public GetRentalTypeRuleCommandResponse getRentalTypeRule(
-//			GetRentalTypeRuleCommand cmd) {
-//		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-//		RentalRule rentalRule = rentalProvider.getRentalRule(
-//				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
-//		if(null == rentalRule){
-//			return new GetRentalTypeRuleCommandResponse();
-//		}
-//		GetRentalTypeRuleCommandResponse response = ConvertHelper.convert(rentalRule, GetRentalTypeRuleCommandResponse.class);
-//		response.setPayRatio(rentalRule.getPaymentRatio());
-//		return response;
-//	}
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteRulesAdminCommand cmd) {
 		
@@ -2437,7 +2321,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private List<RentalCell> findRentalSiteRuleByDate(Long rentalSiteId,
 			String siteNumber, Timestamp beginTime, Timestamp endTime,
 			List<Byte> ampmList, String rentalDate){
-		List<RentalCell>  result = new ArrayList<RentalCell>(); 
+		List<RentalCell>  result = new ArrayList<>();
 		for(RentalCell cell : cellList.get()){
 			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
 				continue;
@@ -2537,7 +2421,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * */
 	private void proccessCells(RentalResource rs){
 		
-		cellList.set(new ArrayList<RentalCell>());
+		cellList.set(new ArrayList<>());
 		currentId.set(rs.getCellBeginId());
 		seqNum.set(0L);
 		BigDecimal weekendPrice = rs.getWeekendPrice() == null ? new BigDecimal(0) : rs.getWeekendPrice(); 
@@ -2914,7 +2798,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(null == rs)
 			return;
 		//给负责人推送
-		StringBuffer managerContent = new StringBuffer();
+		StringBuilder managerContent = new StringBuilder();
 		User user =this.userProvider.findUserById(rentalBill.getRentalUid()) ;
 		if (null == user )
 			return;
@@ -2934,7 +2818,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private void setSignatureParam(PayZuolinRefundCommand cmd) {
 		App app = appProvider.findAppByKey(cmd.getAppKey());
 		
-		Map<String,String> map = new HashMap<String, String>();
+		Map<String,String> map = new HashMap<>();
 		map.put("appKey",cmd.getAppKey());
 		map.put("timestamp",cmd.getTimestamp()+"");
 		map.put("nonce",cmd.getNonce()+"");
@@ -3053,7 +2937,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rental site id");
 		
 		GetItemListCommandResponse response = new GetItemListCommandResponse();
-		response.setSiteItems(new ArrayList<SiteItemDTO>());
+		response.setSiteItems(new ArrayList<>());
 		List<RentalItem> rsiSiteItems = rentalv2Provider
 				.findRentalSiteItems(cmd.getRentalSiteId());
 		for (RentalItem rsi : rsiSiteItems) {
@@ -3284,7 +3168,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//加工作流
 		createflowCase(order);
 		//发消息给管理员
-		addOrderSendMessage(order );
+		addOrderSendMessage(order);
+		//发短信在对接支付的handler  RentalOrderEmbeddedHandler //TODO:看是否需要移到这里
 	}
 	private FlowCase createflowCase(RentalOrder order){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
@@ -3369,7 +3254,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"app not found.");
 		}
-		Map<String,String> map = new HashMap<String, String>();
+		Map<String,String> map = new HashMap<>();
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
 		map.put("randomNum",randomNum+"");
@@ -3406,7 +3291,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setNextPageAnchor( bills.get(bills.size() -1).getId()); 
 		}
 		
-		response.setRentalBills(new ArrayList<RentalBillDTO>());
+		response.setRentalBills(new ArrayList<>());
 		for (RentalOrder bill : bills) {
 			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
 			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
@@ -3414,7 +3299,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			List<RentalItemsOrder> rentalSiteItems = rentalv2Provider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
 			if(null!=rentalSiteItems){
-				dto.setSiteItems(new ArrayList<SiteItemDTO>());
+				dto.setSiteItems(new ArrayList<>());
 				for (RentalItemsOrder rib : rentalSiteItems) {
 					SiteItemDTO siDTO = new SiteItemDTO();
 					siDTO.setCounts(rib.getRentalCount());
@@ -3929,7 +3814,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		end.set(Calendar.DAY_OF_MONTH,
 				start.getActualMinimum(Calendar.DAY_OF_MONTH));
 		end.add(Calendar.MONTH, 1);
-		response.setSiteDays(new ArrayList<RentalSiteNumberDayRulesDTO>());
+		response.setSiteDays(new ArrayList<>());
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteNumberDayRulesDTO dayDto = new RentalSiteNumberDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -4175,7 +4060,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
 				if(siteNumberMap.get(dto.getSiteNumber())==null)
-					siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
+					siteNumberMap.put(dto.getSiteNumber(), new ArrayList<>());
 				siteNumberMap.get(dto.getSiteNumber()).add(dto);
 			}
 		}
@@ -4304,35 +4189,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		return response;
 	}
-	 
-
-//	private void processRentalBillCountDTO(RentalBillCountDTO dto, List<RentalOrder> bills ){
-//		Integer sumCount =0;
-//		Integer completeCount =0;
-//		Integer cancelCount=0;
-//		Integer overTimeCount=0;
-//		Integer successCount=0;
-//		for(RentalOrder bill : bills){
-//			sumCount++;
-//			if(bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
-//				completeCount++;
-//			}
-//			else 	if(bill.getStatus().equals(SiteBillStatus.FAIL.getCode())){
-//				cancelCount ++;
-//			}
-//			else 	if(bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
-//				overTimeCount ++ ;
-//			}
-//			else 	if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
-//				successCount ++;
-//			}
-//		}
-//		dto.setSumCount(sumCount);
-//		dto.setCancelCount(cancelCount);
-//		dto.setCompleteCount(completeCount);
-//		dto.setOverTimeCount(overTimeCount);
-//		dto.setSuccessCount(successCount);
-//	}
 
 	@Override
 	public HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,
@@ -4568,7 +4424,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			nextPageAnchor = rentalSites.get(rentalSites.size() -1).getId();
 		}
 		response.setNextPageAnchor(nextPageAnchor);
-		response.setRentalSites(rentalSites.stream().map(r -> convertRentalSite2DTO(r))
+		response.setRentalSites(rentalSites.stream().map(this::convertRentalSite2DTO)
 			.collect(Collectors.toList()));
 
 		return response;
@@ -4583,8 +4439,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rentalSite = rentalv2Provider.getRentalSiteById(cmd.getId());
 
-		RentalSiteDTO dto = convertRentalSite2DTO(rentalSite);
-		return dto;
+		return convertRentalSite2DTO(rentalSite);
 	}
 
 	@Override
@@ -5320,6 +5175,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 	
 	/**
+	 *  线上模式，没有对接工作流的短信，TODO:以后如果需要对接，则需要修改
 	 * 发短信给付费成功的用户
 	 * */
 	@Override

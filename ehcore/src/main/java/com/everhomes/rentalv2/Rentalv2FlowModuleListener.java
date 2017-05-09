@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.flow.*;
-import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +44,8 @@ import com.everhomes.user.UserProvider;
  
 import com.everhomes.util.Tuple;
 
+import javax.annotation.Resource;
+
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
@@ -73,7 +74,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
     private LocaleTemplateService localeTemplateService;
 	@Autowired
 	private Rentalv2Service rentalService;
-
 	@Autowired
 	private SmsProvider smsProvider;
 	@Override
@@ -132,93 +132,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.FAIL.getCode(), false);
 			}
 
-//			if(preNodeParam != null && preNodeParam.equals(RentalFlowNodeParams.AGREE.getCode())){
-//				//发短信
-//				//发短信给预订人
-//				String templateScope = SmsTemplateCode.SCOPE;
-//				String templateLocale = RentalNotificationTemplateCode.locale;
-//				UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-//				List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-//				smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
-//
-//				Map<String, String> map = new HashMap<String, String>();
-//				map.put("useTime", order.getUseDetail());
-//			    map.put("resourceName", order.getResourceName());
-//				if(currNode.getParams()!= null && currNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-//					//从同意到已支付界面
-//					String contactName="";
-//					String contactToken="";
-//					if(null != order.getOfflinePayeeUid()){
-//						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
-//						if(null!=member){
-//							contactName = member.getContactName();
-//							contactToken = member.getContactToken();
-//						}
-//					}
-//					smsProvider.addToTupleList(variables, "offlinePayeeName", contactName);
-//					smsProvider.addToTupleList(variables, "offlinePayeeContact", contactToken);
-//					smsProvider.addToTupleList(variables, "offlineCashierAddress", order.getOfflineCashierAddress());
-//					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-//					int templateId = SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE;
-//					if(null == userIdentifier){
-//						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-//					}else{
-//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-//					}
-//				    map.put("offlinePayeeName", contactName);
-//				    map.put("offlinePayeeContact", contactToken);
-//				    map.put("offlineCashierAddress", order.getOfflineCashierAddress());
-//				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
-//				}else{
-//					//从同意到其他节点-就是说被驳回
-//					//如果是申请者干的不发短信
-//					LOGGER.debug("paid to not comple user type : "+ctx.getCurrentEvent().getUserType().getCode());
-//					LOGGER.debug("agree to a node which is not paid ");
-//					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
-//						return ;
-//					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-//					int templateId = SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE;
-//
-//				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
-//					if(null == userIdentifier){
-//						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-//					}else{
-//						LOGGER.debug("this is a remind sms to " +userIdentifier.getIdentifierToken() );
-//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-//					}
-//				}
-//			}else if(preNodeParam != null && preNodeParam.equals(RentalFlowNodeParams.PAID.getCode())){
-//				if(curNodeParam != null && curNodeParam.equals(RentalFlowNodeParams.COMPLETE.getCode())){
-//					//已完成
-//					//更改订单状态 + 发短信
-//					rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
-//				}else{
-//					//从已支付到其他状态-一般是终止
-//					//如果是申请者干的不发短信
-//					LOGGER.debug("paid to not comple user type : "+ctx.getCurrentEvent().getUserType().getCode());
-//					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
-//						return;
-//					String templateScope = SmsTemplateCode.SCOPE;
-//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-//					smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
-//					RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-//					int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;
-//					Map<String, String> map = new HashMap<String, String>();
-//					map.put("useTime", order.getUseDetail());
-//				    map.put("resourceName", order.getResourceName());
-//				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
-//					String templateLocale = RentalNotificationTemplateCode.locale;
-//
-//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-//					if(null == userIdentifier){
-//						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-//					}else{
-//
-//						LOGGER.debug("send message to  : "+userIdentifier.getIdentifierToken());
-//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-//					}
-//				}
-//			}
 		}
 	}
 
@@ -259,19 +172,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		//
-		// e = new FlowCaseEntity();
-		// e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		// e.setKey("test-multi-key3");
-		// e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-		// entities.add(e);
-		//
-		// e = new FlowCaseEntity();
-		// e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-		// e.setKey("test-text-key2");
-		// e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-		// entities.add(e);
-		
+
 		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		FlowCaseEntity e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -328,8 +229,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		entities.add(e);
 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
-		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag().byteValue()
-				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign().byteValue()) {
+		if (rs != null && NormalFlag.NONEED.getCode() == rs.getExclusiveFlag()
+				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign()) {
 			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
@@ -437,20 +338,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		return entities;
 	}
 
-	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-		String url = null;
-		if (uri != null && uri.length() > 0) {
-			try {
-				url = contentServerService.parserUri(uri, ownerType, ownerId);
-			} catch (Exception e) {
-				LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType,
-						ownerId, e);
-			}
-		}
-
-		return url;
-	}
-
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
 		// TODO Auto-generated method stub
@@ -461,66 +348,66 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	public void onFlowButtonFired(FlowCaseState ctx) {
 		// 
 		
-		FlowGraphNode currentNode = ctx.getCurrentNode();
-		LOGGER.debug("buttun fire params : " + currentNode.getFlowNode().getParams()+"step type "+ctx.getStepType());
-		//当前节点是同意待支付节点并且事件是催办的时候
-		if(currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams().equals(RentalFlowNodeParams.PAID.getCode())
-				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType())){ 
-			FlowLogType logType = FlowLogType.NODE_REMIND;
-			FlowEventLog log = new FlowEventLog();
-			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
-			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
-			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
-			log.setFlowCaseId(ctx.getFlowCase().getId());
-			log.setFlowUserId(ctx.getOperator().getId());
-			log.setLogType(logType.getCode());
-			log.setFlowNodeId(currentNode.getFlowNode().getId());
-			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
-			LOGGER.debug("offline pay : cuiban remind : log size : " + remindLogs==null?"0":String.valueOf(remindLogs.size()));
-			if(remindLogs == null || remindLogs.size()==0){
-				//第一次催办发短信给管理员
-				
-				EhFlowCases flowCase =ctx.getFlowCase();
-				RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
-				String templateScope = SmsTemplateCode.SCOPE;
-				String templateLocale = RentalNotificationTemplateCode.locale; 
-				RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-				if(null != rs){ 
-					int templateId = SmsTemplateCode.RENTAL_REMIND_CODE; 
-					User user = userProvider.findUserById(ctx.getOperator().getId());
-					List<Tuple<String, Object>> variables = smsProvider.toTupleList("userName", user.getNickName());
-					
-					UserIdentifier rentalIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode()) ;
-					smsProvider.addToTupleList(variables, "userPhone", rentalIdentifier.getIdentifierToken()); 
-					smsProvider.addToTupleList(variables, "resourceName", rs.getResourceName()); 
-					smsProvider.addToTupleList(variables, "usetime", order.getUseDetail()); 
-					smsProvider.addToTupleList(variables, "price", order.getPayTotalMoney()); 
-					Map<String, String> map = new HashMap<String, String>(); 
-					map.put("userName", user.getNickName());
-					map.put("userPhone", rentalIdentifier.getIdentifierToken()); 
-					map.put("resourceName", rs.getResourceName()); 
-					map.put("usetime", order.getUseDetail()); 
-					map.put("price", ""+order.getPayTotalMoney() );  
-					//从同意到已支付界面 
-					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getCurrentNode().getFlowNode().getId()
-							, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-					List<Long> users = flowService.resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, ctx.getCurrentNode().getFlowNode().getId(), selections);
-
-					if(null != users){
-						for(Long userId : users){
-							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
-							rentalService.sendMessageCode(userId,  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
-							if(null == userIdentifier){
-								LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-							}else{
-								smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-							}
-						}    
-					}
-					
-				}
-			}
-		}
+//		FlowGraphNode currentNode = ctx.getCurrentNode();
+//		LOGGER.debug("buttun fire params : " + currentNode.getFlowNode().getParams()+"step type "+ctx.getStepType());
+//		//当前节点是同意待支付节点并且事件是催办的时候
+//		if(currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams().equals(RentalFlowNodeParams.PAID.getCode())
+//				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType().getCode())){
+//			FlowLogType logType = FlowLogType.NODE_REMIND;
+//			FlowEventLog log = new FlowEventLog();
+//			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+//			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+//			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+//			log.setFlowCaseId(ctx.getFlowCase().getId());
+//			log.setFlowUserId(ctx.getOperator().getId());
+//			log.setLogType(logType.getCode());
+//			log.setFlowNodeId(currentNode.getFlowNode().getId());
+//			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
+//			LOGGER.debug("offline pay : cuiban remind : log size : " + remindLogs.size());
+//			if(remindLogs.size() == 0){
+//				//第一次催办发短信给管理员
+//
+//				EhFlowCases flowCase =ctx.getFlowCase();
+//				RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
+//				String templateScope = SmsTemplateCode.SCOPE;
+//				String templateLocale = RentalNotificationTemplateCode.locale;
+//				RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId());
+//				if(null != rs){
+//					int templateId = SmsTemplateCode.RENTAL_REMIND_CODE;
+//					User user = userProvider.findUserById(ctx.getOperator().getId());
+//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("userName", user.getNickName());
+//
+//					UserIdentifier rentalIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode()) ;
+//					smsProvider.addToTupleList(variables, "userPhone", rentalIdentifier.getIdentifierToken());
+//					smsProvider.addToTupleList(variables, "resourceName", rs.getResourceName());
+//					smsProvider.addToTupleList(variables, "usetime", order.getUseDetail());
+//					smsProvider.addToTupleList(variables, "price", order.getPayTotalMoney());
+//					Map<String, String> map = new HashMap<>();
+//					map.put("userName", user.getNickName());
+//					map.put("userPhone", rentalIdentifier.getIdentifierToken());
+//					map.put("resourceName", rs.getResourceName());
+//					map.put("usetime", order.getUseDetail());
+//					map.put("price", ""+order.getPayTotalMoney() );
+//
+//					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getCurrentNode().getFlowNode().getId()
+//							, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+//					List<Long> users = flowService.resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, ctx.getCurrentNode().getFlowNode().getId(), selections);
+//
+//					if(null != users){
+//						for(Long userId : users){
+//							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+//							rentalService.sendMessageCode(userId,  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
+//							if(null == userIdentifier){
+//								LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+//							}else{
+//								smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+//							}
+//						}
+//					}
+//
+//				}
+//			}
+//		}
 	}
 
 	@Override
@@ -553,13 +440,100 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		User user = this.userProvider.findUserById(order.getRentalUid());
 		String userName = user.getNickName();
 		String userPhone = userIdentifier.getIdentifierToken();
-		String resourceName = resourceType.getName();
+		String resourceTypeName = resourceType.getName();
 
-		if (SmsTemplateCode.RENTAL_PROCESSING_NODE_CODE == templateId) {
+		if (SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE == templateId) {
+			//线下模式审批通过 短信
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+			String contactName="";
+			String contactToken="";
+			if(null != order.getOfflinePayeeUid()){
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+				if(null != member){
+					contactName = member.getContactName();
+					contactToken = member.getContactToken();
+				}
+			}
+			smsProvider.addToTupleList(variables, "offlinePayeeName", contactName);
+			smsProvider.addToTupleList(variables, "offlinePayeeContact", contactToken);
+			smsProvider.addToTupleList(variables, "offlineCashierAddress", order.getOfflineCashierAddress());
+			//TODO:以后可能会修改
+			//发消息,工作流消息不支持 资源预约需要的变量
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			map.put("offlinePayeeName", contactName);
+			map.put("offlinePayeeContact", contactToken);
+			map.put("offlineCashierAddress", order.getOfflineCashierAddress());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
+		}else if (SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
+			//审批驳回
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+		}else if (SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+
+			//支付成功
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+		}else if (SmsTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE);
+			//审批线上支付模式 审批通过短信
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+		}else if (SmsTemplateCode.RENTAL_CANCEL_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+
+			//预约失败
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+		}else if (SmsTemplateCode.RENTAL_REMIND_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
+
+			//线下支付客户催办
 
 			smsProvider.addToTupleList(variables, "userName", userName);
 			smsProvider.addToTupleList(variables, "userPhone", userPhone);
-			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "price", order.getPayTotalMoney());
+
+		}else if (SmsTemplateCode.RENTAL_PROCESSING_NODE_CODE == templateId) {
+
+			smsProvider.addToTupleList(variables, "userName", userName);
+			smsProvider.addToTupleList(variables, "userPhone", userPhone);
+			smsProvider.addToTupleList(variables, "resourceTypeName", resourceTypeName);
 
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_NODE_SUPERVISE_CODE == templateId){
 			//TODO: 给督办发短信
@@ -587,15 +561,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_ABSORT_CODE == templateId){
-			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+			smsProvider.addToTupleList(variables, "resourceName", resourceTypeName);
 
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_REMINDER_CODE == templateId){
 			smsProvider.addToTupleList(variables, "userName", userName);
 			smsProvider.addToTupleList(variables, "userPhone", userPhone);
-			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+			smsProvider.addToTupleList(variables, "resourceName", resourceTypeName);
 		}else if (SmsTemplateCode.RENTAL_COMPLETED_CODE == templateId){
-			smsProvider.addToTupleList(variables, "resourceName", resourceName);
-
+			smsProvider.addToTupleList(variables, "resourceName", resourceTypeName);
 		}
 	}
 

@@ -82,6 +82,13 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 
 						if (order.getPayMode().equals(PayMode.ONLINE_PAY.getCode())) {
 							rentalService.onOrderSuccess(order);
+							//发短信
+							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+							if(null == userIdentifier){
+								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
+							}else{
+								rentalService.sendRentalSuccessSms(order.getNamespaceId(),userIdentifier.getIdentifierToken(), order);
+							}
 						}else {
 							FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
 
@@ -108,15 +115,6 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 							fireButtonCommand.setButtonId(button.getId());
 							flowService.fireButton(fireButtonCommand);
 						}
-
-						//发短信
-//						UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
-//						if(null == userIdentifier){
-//							LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
-//						}else{
-//							rentalService.sendRentalSuccessSms(order.getNamespaceId(),userIdentifier.getIdentifierToken(), order);
-//						}
-
 					}else {
 						LOGGER.error("待付款订单:id ["+order.getId()+"]付款金额有问题： 应该付款金额："+order.getPayTotalMoney()+"实际付款金额："+order.getPaidMoney());
 					}
