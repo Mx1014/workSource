@@ -80,7 +80,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("listServiceModulePrivileges")
     @RestReturn(value=ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(serviceModuleService.listServiceModulePrivileges(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

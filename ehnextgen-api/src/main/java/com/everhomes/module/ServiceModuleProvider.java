@@ -38,4 +38,6 @@ public interface ServiceModuleProvider {
 	List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId);
 
 	List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId);
+
+	List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types);
 }

@@ -3,9 +3,9 @@ package com.everhomes.rest.module;
 
 /**
  * <ul>
- * <li>INACTIVE: 无效的</li>
- * <li>CONFIRMING: 待审核</li>
- * <li>ACTIVE: 正常</li>
+ * <li>PARK: 园区模块</li>
+ * <li>ORGANIZATION: 机构企业模块</li>
+ * <li>MANAGER: 运营管理方模块</li>
  * </ul>
  */
 public enum ServiceModuleType {

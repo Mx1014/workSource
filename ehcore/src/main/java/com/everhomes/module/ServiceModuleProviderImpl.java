@@ -287,6 +287,26 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		});
 		return results;
 	}
+
+	@Override
+	public List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types) {
+		List<ServiceModule> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+
+		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+		if(null != startLevel)
+			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.ge(startLevel));
+		if(null != types && types.size() > 0)
+			cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.in(types));
+
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModule.class));
+			return null;
+		});
+		return results;
+	}
 	
 	@Override
 	public List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy) {
