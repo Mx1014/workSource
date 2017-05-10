@@ -62,6 +62,8 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>payMode: 支付模式</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -126,10 +128,29 @@ public class RentalSiteDTO {
     private String detailUrl;
     private String reserveRouteUrl;
 
+    private Long resourceTypeId;
+    private Byte payMode;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
 
 	public String getReserveRouteUrl() {
 		return reserveRouteUrl;

@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.contentserver.ResourceType;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -950,8 +951,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite){
+
+		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
+
 		proccessCells(rentalSite);
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
+
+		rSiteDTO.setResourceTypeId(resourceType.getId());
+		rSiteDTO.setPayMode(resourceType.getPayMode());
+
 		if(null!=rentalSite.getDayBeginTime())
 			rSiteDTO.setDayBeginTime(convertTimeToGMTMillisecond(rentalSite.getDayBeginTime() ));
 		if(null!=rentalSite.getDayEndTime())
