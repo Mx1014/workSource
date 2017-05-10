@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -24,7 +25,16 @@ import com.everhomes.util.StringHelper;
  *<li>lotteryWinnerFlag:中奖标识</li>
  *<li>lotteryWonTime:中奖时间</li>
  *<li>phone:用户电话号码</li>
- *<li>payFlag:是否已支付</li>
+ *<li>payFlag:支付状态  0: no pay, 1:have pay, 2:tobepay, 3:refund</li>
+ *<li>orderNo:支付订单号</li>
+ *<li>orderStartTime:点单开始时间，用于计算取消订单</li>
+ *<li>vendorType:支付方式 10001: alipay, 10002: wechatpay</li>
+ *<li>payAmount:支付金额</li>
+ *<li>payTime:支付时间</li>
+ *<li>refundOrderNo:退款订单号</li>
+ *<li>refundAmount:退款金额</li>
+ *<li>refundTime:退款金额</li>
+ *<li>status:订单状态 0: cancel, 1: reject, 2:normal</li>
  *</ul>
  */
 public class ActivityMemberDTO {
@@ -44,6 +54,15 @@ public class ActivityMemberDTO {
     private Integer lotteryWinnerFlag;
     private String lotteryWonTime;
     private Byte payFlag;
+    private Long orderNo;
+    private Timestamp orderStartTime;
+    private String vendorType;
+    private Integer payAmount;
+    private Timestamp payTime;
+    private Long refundOrderNo;
+    private Integer refundAmount;
+    private Timestamp refundTime;
+    private Byte status;
     
     @ItemType(String.class)
     private List<String> phone;
@@ -186,6 +205,78 @@ public class ActivityMemberDTO {
 
 	public void setPayFlag(Byte payFlag) {
 		this.payFlag = payFlag;
+	}
+
+	public Long getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(Long orderNo) {
+		this.orderNo = orderNo;
+	}
+
+	public Timestamp getOrderStartTime() {
+		return orderStartTime;
+	}
+
+	public void setOrderStartTime(Timestamp orderStartTime) {
+		this.orderStartTime = orderStartTime;
+	}
+
+	public String getVendorType() {
+		return vendorType;
+	}
+
+	public void setVendorType(String vendorType) {
+		this.vendorType = vendorType;
+	}
+
+	public Integer getPayAmount() {
+		return payAmount;
+	}
+
+	public void setPayAmount(Integer payAmount) {
+		this.payAmount = payAmount;
+	}
+
+	public Timestamp getPayTime() {
+		return payTime;
+	}
+
+	public void setPayTime(Timestamp payTime) {
+		this.payTime = payTime;
+	}
+
+	public Long getRefundOrderNo() {
+		return refundOrderNo;
+	}
+
+	public void setRefundOrderNo(Long refundOrderNo) {
+		this.refundOrderNo = refundOrderNo;
+	}
+
+	public Integer getRefundAmount() {
+		return refundAmount;
+	}
+
+	public void setRefundAmount(Integer refundAmount) {
+		this.refundAmount = refundAmount;
+	}
+
+	public Timestamp getRefundTime() {
+		return refundTime;
+	}
+
+	public void setRefundTime(Timestamp refundTime) {
+		this.refundTime = refundTime;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 
 	@Override
