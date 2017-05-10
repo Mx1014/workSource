@@ -542,8 +542,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 
-	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
+	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId1,
 			Calendar logDay) throws ParseException {
+		Long companyId = getTopEnterpriseId(companyId1);
 		PunchLogsDay pdl = new PunchLogsDay();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
@@ -2274,7 +2275,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
-		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
+//		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
 //		PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(member.getTargetId(), startCalendar.getTime());
 		PunchStatistic statistic = new PunchStatistic();
 
@@ -2300,7 +2301,6 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
 		statistic.setOwnerId(orgId);
-		statistic.setPunchTimesPerDay(timeRule.getPunchTimesPerDay());
 		statistic.setUserId(member.getTargetId());
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
@@ -2312,7 +2312,8 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
-		for(PunchDayLog dayLog : dayLogList){ 
+		for(PunchDayLog dayLog : dayLogList){
+			statistic.setPunchTimesPerDay(dayLog.getPunchTimesPerDay());
 			PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
 					PunchStatisticsDTO.class);
 			list.add(dto);
@@ -3973,6 +3974,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchCountCommandResponse listPunchCount(
 			ListPunchCountCommand cmd) {
 //		processQueryCommandDay(cmd);
+//		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -4098,7 +4100,7 @@ public class PunchServiceImpl implements PunchService {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();
-//		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
 		List<OrganizationMember> organizationMembers = null;
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 

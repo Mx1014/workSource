@@ -11,8 +11,7 @@ import java.util.Set;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
-import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.equipment.*;
 
 
 public interface EquipmentProvider {
@@ -40,7 +39,8 @@ public interface EquipmentProvider {
 	void updateEquipmentAccessoryMap(EquipmentInspectionAccessoryMap map);
 	void creatEquipmentAttachment(EquipmentInspectionEquipmentAttachments eqAttachment);
 	void deleteEquipmentAttachmentById(Long id);
-	
+	List<EquipmentInspectionEquipmentAttachments> findEquipmentAttachmentsByEquipmentId(Long equipmentId);
+
 	List<EquipmentStandardMap> findByStandardId(Long standardId);
 	List<EquipmentStandardMap> findByTarget(Long targetId, String targetType);
 	
@@ -129,8 +129,17 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
 
-	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(Long inspectionCategoryId,
+
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(List<Byte> taskStatus, Long inspectionCategoryId,
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey, Byte adminFlag);
 
+
 	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
+	List<EquipmentInspectionEquipments> listEquipmentsById(List<Long> ids);
+
+	List<EquipmentInspectionTasks> listTaskByIds(List<Long> ids);
+
+	TasksStatData statDaysEquipmentTasks(Long targetId, String targetType, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
+	ReviewedTaskStat statDaysReviewedTasks(Long communityId, Long inspectionCategoryId, Timestamp startTime, Timestamp endTime);
+	List<ItemResultStat> statItemResults(Long equipmentId, Long standardId, Timestamp startTime, Timestamp endTime);
 }

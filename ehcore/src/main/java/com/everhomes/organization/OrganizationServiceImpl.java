@@ -5555,9 +5555,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 					organizationProvider.updateOrganizationMember(m);
 				}
 			}
-
+			UserIdentifier userIdentifier = null;
 			if(m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
+				userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
 
 				if(null == userIdentifier){
 					User newuser = new User();
@@ -5593,8 +5593,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setNamespaceId(namespaceId);
 				organizationProvider.updateOrganizationMember(m);
 
-//				userSearcher.feedDoc(m);
 			}
+
+			//刷新企业通讯录
+			if(null != userIdentifier)
+				processUserForMember(userIdentifier);
 
 			if(null != cmd.getAssignmentId())
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
