@@ -167,7 +167,34 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
 		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
-	
+
+	@Override
+	public void createRole(CreateRoleCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		//创建角色
+		Role role = new Role();
+		role.setAppId(AppConstants.APPID_PARK_ADMIN);
+		role.setName(cmd.getRoleName());
+		role.setDescription(cmd.getDescription());
+		role.setNamespaceId(namespaceId);
+		role.setOwnerType(cmd.getOwnerType());
+		role.setOwnerId(cmd.getOwnerId());
+		aclProvider.createRole(role);
+	}
+
+	@Override
+	public void updateRole(UpdateRoleCommand cmd) {
+		User user = UserContext.current().getUser();
+
+		//修改角色信息
+		Role role = checkRole(cmd.getRoleId());
+		role.setName(cmd.getRoleName());
+		role.setDescription(cmd.getDescription());
+		aclProvider.updateRole(role);
+
+	}
+
 	@Override
 	public void createRolePrivileges(CreateRolePrivilegesCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -209,14 +236,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Override
 	public void updateRolePrivileges(UpdateRolePrivilegesCommand cmd) {
+
+		checkRole(cmd.getRoleId());
+
 		User user = UserContext.current().getUser();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
-			//修改角色信息
-			Role role = aclProvider.getRoleById(cmd.getRoleId());
-			role.setName(cmd.getRoleName());
-			role.setDescription(cmd.getDescription());
-			aclProvider.updateRole(role);
+//			//修改角色信息
+//			Role role = aclProvider.getRoleById(cmd.getRoleId());
+//			role.setName(cmd.getRoleName());
+//			role.setDescription(cmd.getDescription());
+//			aclProvider.updateRole(role);
 
 			//删除角色的权限
 			deleteAcls(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
@@ -244,6 +274,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Override
 	public void deleteRolePrivileges(DeleteRolePrivilegesCommand cmd) {
+
+		checkRole(cmd.getRoleId());
+
 		dbProvider.execute((TransactionStatus status) -> {
 			//删除角色
 			aclProvider.deleteRole(cmd.getRoleId());
@@ -273,13 +306,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return this.getListWebMenuPrivilege(webMenuPrivileges, null);
 	}
 	
-	
+	private Role checkRole(Long roleId){
+		Role role = aclProvider.getRoleById(roleId);
+		if(null == role){
+			LOGGER.error("Role Non-existent., roleId = {}", roleId);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"Role Non-existent.");
+		}
+
+		return role;
+	}
 	
 	
 	@Override
 	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
 		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
 		
 		return roles.stream().map(r->{
@@ -287,15 +328,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}).collect(Collectors.toList());
 	}
 
+
+
 	@Override
 	public List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd) {
 
-		Role role = aclProvider.getRoleById(cmd.getRoleId());
-		if(null == role){
-			LOGGER.error("Role Non-existent., roleId = {}", cmd.getRoleId());
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"Role Non-existent.");
-		}
+		checkRole(cmd.getRoleId());
 
 		List<Acl> acls = aclProvider.getResourceAclByRole(cmd.getOwnerType(), cmd.getOwnerId(), new AclRoleDescriptor(EntityType.ROLE.getCode(), cmd.getRoleId()));
 

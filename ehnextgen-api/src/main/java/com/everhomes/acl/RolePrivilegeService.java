@@ -309,4 +309,8 @@ public interface RolePrivilegeService {
 	List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId);
 
 	List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd);
+
+	void createRole(CreateRoleCommand cmd);
+
+	void updateRole(UpdateRoleCommand cmd);
 }

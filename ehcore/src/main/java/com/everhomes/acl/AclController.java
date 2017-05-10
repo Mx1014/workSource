@@ -317,15 +317,28 @@ public class AclController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /acl/createRole</b>
+     * <p>创建角色</p>
+     */
+    @RequestMapping("createRole")
+    @RestReturn(value=String.class)
+    public RestResponse createRole(@Valid CreateRoleCommand cmd) {
+        rolePrivilegeService.createRole(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
-     * <b>URL: /acl/createRolePrivileges</b>
-     * <p>创建角色和权限的关系</p>
+     * <b>URL: /acl/updateRole</b>
+     * <p>修改角色</p>
      */
-    @RequestMapping("createRolePrivileges")
+    @RequestMapping("updateRole")
     @RestReturn(value=String.class)
-    public RestResponse createRolePrivileges(@Valid CreateRolePrivilegesCommand cmd) {
-        rolePrivilegeService.createRolePrivileges(cmd);
+    public RestResponse updateRole(@Valid UpdateRoleCommand cmd) {
+        rolePrivilegeService.updateRole(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
