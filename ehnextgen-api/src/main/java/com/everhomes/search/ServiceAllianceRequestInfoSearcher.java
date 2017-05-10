@@ -2,6 +2,8 @@ package com.everhomes.search;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchOrgRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
@@ -18,6 +20,7 @@ public interface ServiceAllianceRequestInfoSearcher {
     void feedDoc(ServiceAllianceRequestInfo request);
     void syncFromDb();
     SearchRequestInfoResponse searchRequestInfo(SearchRequestInfoCommand cmd);
+    void exportRequestInfo(SearchRequestInfoCommand cmd,HttpServletResponse resp);
     SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd);
     SearchRequestInfoResponse searchOrgRequestInfo(SearchOrgRequestInfoCommand cmd);
 
