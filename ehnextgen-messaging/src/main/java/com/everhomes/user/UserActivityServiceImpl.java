@@ -497,6 +497,17 @@ public class UserActivityServiceImpl implements UserActivityService {
 
     @Override
     public void addFeedback(FeedbackCommand cmd) {
+    	
+    	//如果post已经被删除，则不能在举报了。 add by yanjun 20170510
+    	if(cmd.getTargetType() == FeedbackTargetType.POST.getCode()){
+    		Post post = forumProvider.findPostById(cmd.getTargetId());
+    		if(post != null && post.getStatus() != PostStatus.ACTIVE.getCode()){
+    			LOGGER.error("Forum post already deleted, " + "topicId=" + cmd.getTargetId());
+    			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+    					ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "post was deleted"); 
+    		}
+    	}
+    	
         User user = UserContext.current().getUser();
         
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
