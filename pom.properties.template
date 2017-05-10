@@ -62,6 +62,7 @@ zxing-core.version=3.2.0
 validation-api.version=1.1.0.Final
 httpclient.version=4.3.5
 fastjson.version=1.2.4
+itextpdf.version=5.5.11
 
 maven-compiler-plugin.version=3.2
 maven-antrun-plugin.version=1.7

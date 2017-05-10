@@ -9,15 +9,14 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
-import com.everhomes.general_approval.GeneralApprovalProvider;
 import com.everhomes.general_approval.GeneralApprovalVal;
 import com.everhomes.general_approval.GeneralForm;
-import com.everhomes.general_approval.GeneralFormProvider;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
@@ -64,6 +63,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
 		
 		PostApprovalFormCommand cmd = JSONObject.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
+		//and by dengs 20170427 异步发送邮件
+		sendEmailAsynchronizedTask(flowCase.getContent(),flowCase.getApplyUserId());
 		StringBuffer contentBuffer = new StringBuffer();
 		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
 				.getApprovalId());
@@ -106,7 +107,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
 			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
-			 
+
 			contentBuffer.append("申请来源");
 			contentBuffer.append(" : ");
 			contentBuffer.append(parentPage.getName());
@@ -250,5 +251,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void sendEmailAsynchronizedTask(String contents,Long userId) {
+		ServiceAllianceAsynchronizedServiceImpl handler = PlatformContext.getComponent("serviceAllianceAsynchronizedServiceImpl");
+		handler.pushToQueque(contents,userId);
 	}
 }
