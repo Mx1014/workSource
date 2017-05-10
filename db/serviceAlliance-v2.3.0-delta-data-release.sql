@@ -4,6 +4,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10002', 'zh_CN', '见邮件附件');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10003', 'zh_CN', '审批');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10004', 'zh_CN', '序号,用户姓名,手机号码,企业,服务机构,提交时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10005', 'zh_CN', '申请类型,申请来源,服务机构');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10006', 'zh_CN', '姓名,联系电话,企业');
 
 select max(id) into @id from eh_locale_templates;
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`,`locale`, `description`, `text`)

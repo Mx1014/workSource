@@ -40,6 +40,10 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.general_approval.GeneralApprovalVal;
+import com.everhomes.general_approval.GeneralApprovalValProvider;
+import com.everhomes.general_approval.GeneralForm;
+import com.everhomes.general_approval.GeneralFormProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
@@ -51,6 +55,7 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.user.FieldContentType;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.RequestTemplateDTO;
@@ -94,6 +99,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	
 	@Autowired
 	private FlowService flowService;
+	
+	@Autowired
+	private GeneralApprovalValProvider generalApprovalValProvider;
+	
+	@Autowired
+	private GeneralFormProvider generalFormProvider;
 	
 	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
@@ -412,6 +423,15 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 				if("flowCase".equals(command.getTemplateType())){
 					extrasInfo=flowService.getFlowCaseDetail(requestInfo.getFlowCaseId(), UserContext.current().getUser().getId(),
 							FlowUserType.PROCESSOR, true);
+					if(null==templateMap.get("flowCase"+requestInfo.getFlowCaseId())){
+						GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(requestInfo.getFlowCaseId(),
+								GeneralFormDataSourceType.USER_NAME.getCode()); 
+						GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+								val.getFormOriginId(), val.getFormVersion());
+						//使用表单名称+表单id作为sheet的名称 by dengs 20170510
+						requestInfo.setTemplateType("flowCase"+form.getId());
+						templateMap.put("flowCase"+form.getId(), form.getFormName()+form.getId());
+					}
 				}else{
 					extrasInfo = userActivityService.getCustomRequestInfo(command);
 				}
@@ -474,16 +494,14 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
     	//创建sheet
         XSSFSheet sheet = createSheet(wb,templateName,style);
         
-
         int rowNum = 0;
 
-        //创建第一行
-        XSSFRow row1 = createRow1(sheet,style,rowNum++);
-      
         //填充数据到sheet
         if(requestInfos[1]!=null && requestInfos[1].size()>0){
         	//申请表单
         	if(requestInfos[1].get(0) instanceof GetRequestInfoResponse){
+        		 //创建第一行
+                XSSFRow row1 = createRow1(sheet,style,rowNum++);
 	        	GetRequestInfoResponse response = (GetRequestInfoResponse)requestInfos[1].get(0);
 	        	for (int i = 0; response!=null && i < response.getDtos().size(); i++) {
 	        		FieldContentType fieldContentType = FieldContentType.fromCode(response.getDtos().get(i).getFieldContentType());
@@ -514,15 +532,17 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         	//审批申请
         	else if(requestInfos[1].get(0) instanceof FlowCaseDetailDTO){
         		//列名称-列序号 存在表单修改的情况，所以名称也有可能改，根据名称来设置值。
+        		 //创建第一行
+                XSSFRow row1 = createRow1forFlowCase(sheet,style,rowNum++,(FlowCaseDetailDTO)requestInfos[1].get(0));
         		Map<String,Integer> columnname = new HashMap<String,Integer>();
-        		int nextcol = 6;
+        		int nextcol = row1.getLastCellNum();
         		//值
         		for (int i = 0; i < requestInfos[0].size(); i++) {
 	        		RequestInfoDTO requestInfoDTO = (RequestInfoDTO)requestInfos[0].get(i);
 	        		XSSFRow row = sheet.createRow(rowNum ++);
 	        		row.setRowStyle(style);
 	        		//固定一行的值
-	        		setFixedColumnToRow(row,requestInfoDTO,i+1);
+	        		setFixedColumnToRow(row,requestInfoDTO,i+1,(FlowCaseDetailDTO)requestInfos[1].get(0));
 	        		//不定数量的值
 	        		FlowCaseDetailDTO flowCaseDetailDTO = (FlowCaseDetailDTO)requestInfos[1].get(i);
 	        		if(flowCaseDetailDTO!=null){
@@ -530,9 +550,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		        		List<FlowCaseEntity> entityLists = flowCaseDetailDTO.getEntities();
 		        		if(entityLists!=null)
 			        		for (FlowCaseEntity flowCaseEntity : entityLists) {
-			        			FlowCaseEntityType flowCaseEntityType =	FlowCaseEntityType.fromCode(flowCaseEntity.getEntityType());
 			        			//不导出图片和文件
-			        			if(flowCaseEntityType!=FlowCaseEntityType.FILE && flowCaseEntityType!=FlowCaseEntityType.IMAGE){
+			        			if(isExportColumn(flowCaseEntity)){
 				        			Integer col = columnname.get(flowCaseEntity.getKey());
 				        			if(col==null){
 				        				col = createColumnHeads(columnname, nextcol, flowCaseEntity, row1);
@@ -544,9 +563,24 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 							}
 	        		}
 				}
-        		
         	}
         }
+    }
+    
+    /**
+     *  by dengs,20170510 部分申请字段不导出
+     */
+    private boolean isExportColumn(FlowCaseEntity flowCaseEntity){
+    	FlowCaseEntityType flowCaseEntityType =	FlowCaseEntityType.fromCode(flowCaseEntity.getEntityType());
+    	String notExportColumns = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+  				ServiceAllianceRequestNotificationTemplateCode.EXCEL_NOTEXPORT_COLUMN_STRING, 
+  				UserContext.current().getUser().getLocale(),"1,2,3");
+    	String[] notExportColumnArray = notExportColumns.split(",");
+    	return 	flowCaseEntityType!=FlowCaseEntityType.FILE 
+				&& flowCaseEntityType!=FlowCaseEntityType.IMAGE
+				&& !notExportColumnArray[0].equals(flowCaseEntity.getKey())
+				&& !notExportColumnArray[1].equals(flowCaseEntity.getKey())
+				&& !notExportColumnArray[2].equals(flowCaseEntity.getKey());
     }
 
 	/**
@@ -576,6 +610,62 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
           row1.createCell(5).setCellValue(submit_time_string);
           return row1;
 	}
+    /**
+     * by dengs,创建第一行，20170502
+     * @param flowCaseDetailDTO 
+     */
+    private XSSFRow createRow1forFlowCase(XSSFSheet sheet,XSSFCellStyle style,int rowNum, FlowCaseDetailDTO flowCaseDetailDTO) {
+    	// TODO Auto-generated method stub
+    	XSSFRow row1 = sheet.createRow(rowNum);
+    	row1.setRowStyle(style);
+    	
+    	String excelHeads = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+    			ServiceAllianceRequestNotificationTemplateCode.EXCEL_HEAD_STRING, 
+    			UserContext.current().getUser().getLocale(),"row1");
+    	String[] excelHeadArray = excelHeads.split(",");
+    	String order_string = excelHeadArray[0];
+    	String username_string =excelHeadArray.length>1?excelHeadArray[1]:"row2";
+    	String phone_string = excelHeadArray.length>2?excelHeadArray[2]:"row3";
+    	String company_string = excelHeadArray.length>3?excelHeadArray[3]:"row4";
+    	String service_alliance_string = excelHeadArray.length>4?excelHeadArray[4]:"row5";
+    	String submit_time_string = excelHeadArray.length>5?excelHeadArray[5]:"row6";
+    	
+    	int nextColumnNum = 0;
+    	boolean[] isExports = isExportEntity(flowCaseDetailDTO);
+    	row1.createCell(nextColumnNum++).setCellValue(order_string);
+    	if(isExports[0]){
+    		row1.createCell(nextColumnNum++).setCellValue(username_string);
+    	}
+    	if(isExports[1]){
+    		row1.createCell(nextColumnNum++).setCellValue(phone_string);
+    	}
+    	if(isExports[2]){
+    		row1.createCell(nextColumnNum++).setCellValue(company_string);
+    	}
+    	row1.createCell(nextColumnNum++).setCellValue(service_alliance_string);
+    	row1.createCell(nextColumnNum++).setCellValue(submit_time_string);
+    	return row1;
+    }
+    
+    private boolean[] isExportEntity(FlowCaseDetailDTO flowCaseDetailDTO){
+    	boolean showUserName = true,showPhone = true,showCompany = true;
+    	List<FlowCaseEntity> eneities = flowCaseDetailDTO.getEntities();
+    	if(eneities.size()>2){
+    		String notExportColumns = localeStringService.getLocalizedString(ServiceAllianceRequestNotificationTemplateCode.SCOPE, 
+	  				ServiceAllianceRequestNotificationTemplateCode.EXCEL_NOTEXPORT_FIX_COLUMN_STRING, 
+	  				UserContext.current().getUser().getLocale(),"1,2,3");
+    	    String[] notExportColumnArray = notExportColumns.split(",");
+    		FlowCaseEntity entity0 = eneities.get(0);
+    		FlowCaseEntity entity1 = eneities.get(1);
+    		FlowCaseEntity entity2 = eneities.get(2);
+    		showUserName = !entity0.getKey().equals(notExportColumnArray[0]);
+    		showPhone = !(entity0.getKey().equals(notExportColumnArray[1]) || entity1.getKey().equals(notExportColumnArray[1]));
+    		showCompany = !(entity0.getKey().equals(notExportColumnArray[2]) 
+    				|| entity1.getKey().equals(notExportColumnArray[2]) 
+    				|| entity2.getKey().equals(notExportColumnArray[2]));
+    	}
+    	return new boolean[]{showUserName,showPhone,showCompany};
+    }
 
 	/**
      * by dengs,创建cell style,20170502
@@ -796,15 +886,35 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         return dtos;
     }
 
+	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i){
+		setFixedColumnToRow(row, requestInfoDTO, i,null);
+	}
 	/**
 	 * 固定几行的设置
 	 */
-	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i){
-		row.createCell(0).setCellValue(i);
-		row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
-		row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
-		row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
-		row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
-		row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+	private void setFixedColumnToRow(XSSFRow row, RequestInfoDTO requestInfoDTO, int i, FlowCaseDetailDTO flowCaseDetailDTO){
+		if(flowCaseDetailDTO!=null){
+			boolean[] isExports = isExportEntity(flowCaseDetailDTO);
+			int nextColumnNum = 0;
+			row.createCell(nextColumnNum++).setCellValue(i);
+			if(isExports[0]){
+				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorName());
+			}
+			if(isExports[1]){
+				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorMobile());
+			}
+			if(isExports[2]){
+				row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreatorOrganization());
+			}
+			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getServiceOrganization());
+			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreateTime());
+		}else{
+			row.createCell(0).setCellValue(i);
+			row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
+			row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
+			row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
+			row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
+			row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+		}
 	}
 }

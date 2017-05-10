@@ -16,4 +16,6 @@ public interface ServiceAllianceRequestNotificationTemplateCode {
     static final String SEE_MAIL_ATTACHMENT = "10002"; // 见邮件附件
     static final String APPLY_STRING = "10003"; // 审批
     static final String EXCEL_HEAD_STRING = "10004"; // 导出申请记录的表格头，用,分割
+    static final String EXCEL_NOTEXPORT_COLUMN_STRING = "10005"; // 申请类型,申请来源,服务机构
+    static final String EXCEL_NOTEXPORT_FIX_COLUMN_STRING = "10006"; // 姓名,联系电话,企业
 }
