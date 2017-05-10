@@ -2150,9 +2150,12 @@ public class BusinessServiceImpl implements BusinessService {
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
 
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("list business promotion namespaceId={}", namespaceId);
 
         if ("biz".equals(source)) {// 从电商服务器获取数据
-            Integer namespaceId = UserContext.getCurrentNamespaceId();
             return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
         }
         // 从数据库获取数据
@@ -2160,7 +2163,7 @@ public class BusinessServiceImpl implements BusinessService {
             ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
 
             List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
-                    UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());
+                    namespaceId, pageSize, cmd.getPageAnchor());
 
             List<ModulePromotionEntityDTO> entities =
                     promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
@@ -2280,26 +2283,28 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public void testTransaction() {
-        List<String> execute = dbProvider.execute(s -> test());
-        System.out.println(execute);
+        dbProvider.execute(s -> test());
     }
 
     private List<String> test() {
         for (int i = 0; i < 10; i++) {
             BusinessPromotion promotion = new BusinessPromotion();
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            promotion.setNamespaceId(namespaceId);
             promotion.setSubject("comm:" + i);
-            promotion.setNamespaceId(1);
             businessPromotionProvider.createBusinessPromotion(promotion);
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("create business promotion {} {} {}", i, namespaceId, promotion);
+            // try {
+            //     Thread.sleep(5000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
             if (i == 9) {
-                throw RuntimeErrorException.errorWith("err", 1, "error");
+                throw RuntimeErrorException.errorWith("err", i, "error");
             }
         }
-        return Collections.singletonList("");
+        return null;
     }
 
     @Override
