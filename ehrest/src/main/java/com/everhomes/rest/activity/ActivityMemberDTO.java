@@ -25,16 +25,16 @@ import com.everhomes.util.StringHelper;
  *<li>lotteryWinnerFlag:中奖标识</li>
  *<li>lotteryWonTime:中奖时间</li>
  *<li>phone:用户电话号码</li>
- *<li>payFlag:支付状态  0: no pay, 1:have pay, 2:tobepay, 3:refund</li>
+ *<li>payFlag:支付状态  0: no pay, 1:have pay, 2:tobepay, 3:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
  *<li>orderNo:支付订单号</li>
  *<li>orderStartTime:点单开始时间，用于计算取消订单</li>
- *<li>vendorType:支付方式 10001: alipay, 10002: wechatpay</li>
+ *<li>vendorType:支付方式 10001: alipay, 10002: wechatpay 参考 {@link com.everhomes.rest.organization.VendorType }</li>
  *<li>payAmount:支付金额</li>
  *<li>payTime:支付时间</li>
  *<li>refundOrderNo:退款订单号</li>
  *<li>refundAmount:退款金额</li>
  *<li>refundTime:退款金额</li>
- *<li>status:订单状态 0: cancel, 1: reject, 2:normal</li>
+ *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
  *</ul>
  */
 public class ActivityMemberDTO {
