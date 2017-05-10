@@ -59,13 +59,10 @@ public class RosterOrderSettingProviderImpl implements RosterOrderSettingProvide
 	public RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-		Record record = context.select()
+		RosterOrderSetting rosterOrderSetting = context.select()
 				.from(Tables.EH_ROSTER_ORDER_SETTINGS)
 				.where(Tables.EH_ROSTER_ORDER_SETTINGS.NAMESPACE_ID.eq(namespaceId))
-				.fetchOne();
-		if(record != null){
-			return ConvertHelper.convert(record, RosterOrderSetting.class);
-		}
-		return null;
+				.fetchOneInto(RosterOrderSetting.class);
+		return rosterOrderSetting;
 	}
 }

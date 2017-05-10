@@ -1300,6 +1300,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPmTaskHistoryAddresses.class, Tables.EH_PM_TASK_HISTORY_ADDRESSES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_HISTORY_ADDRESSES.ID.max()).from(Tables.EH_PM_TASK_HISTORY_ADDRESSES).fetchOne().value1();
         });
+        syncTableSequence(null, EhRosterOrderSettings.class, Tables.EH_ROSTER_ORDER_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ROSTER_ORDER_SETTINGS.ID.max()).from(Tables.EH_ROSTER_ORDER_SETTINGS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
