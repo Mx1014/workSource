@@ -5597,7 +5597,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			//刷新企业通讯录
 			if(null != userIdentifier)
-				processUserForMember(userIdentifier);
+                processUserForMemberWithoutMessage(userIdentifier);
 
 			if(null != cmd.getAssignmentId())
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
@@ -5627,8 +5627,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 	}
 
-	@Override
-	public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+    @Override
+    public OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier) {
+        return processUserForMember(identifier, false);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+	private OrganizationMemberDTO processUserForMember(UserIdentifier identifier, boolean needSendMessage) {
 		try {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
@@ -5657,7 +5666,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 	// 机构是公司的情况下 才发送短信
                 	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-                        sendMessageForContactApproved(member);
+                        if (needSendMessage) {
+                            sendMessageForContactApproved(member);
+                        }
                         userSearcher.feedDoc(member);
                         //支持多部门 记录可能存在多条，故取公司这条
                         organizationMember = member;
