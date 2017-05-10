@@ -2309,7 +2309,9 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptId(dept.getId());
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
- 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
+
+        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+ 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 		for(PunchDayLog dayLog : dayLogList){
@@ -2339,7 +2341,16 @@ public class PunchServiceImpl implements PunchService {
 //			processForthPunchListCount(list, statistic);
 //		}
 		processPunchListCount(list, statistic);
-		this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth(),statistic.getUserId());
+
+        List<String> groupTypeList = new ArrayList<String>();
+        groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(ownerId + "/%", groupTypeList);
+        List<Long> orgIds = new ArrayList();
+        for(Organization org1 : organizations)
+            orgIds.add(org1.getId());
+        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),orgIds,statistic.getPunchMonth(),statistic.getUserId());
+
 		this.punchProvider.createPunchStatistic(statistic);
 
 	}
@@ -4888,16 +4899,23 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
-	public void dayRefreshLogScheduled(){
-		
-		  
-			
+	public void dayRefreshLogScheduled() {
+
+
+        Date runDate = DateHelper.currentGMTTime();
+        dayRefreshLogScheduled(runDate);
+    }
+    @Override
+    public void testDayRefreshLogs(Long runDate){
+        dayRefreshLogScheduled(new Date(runDate));
+    }
+    public void dayRefreshLogScheduled(Date runDate){
 		//刷新前一天的
 		Calendar punCalendar = Calendar.getInstance();
+        punCalendar.setTime(runDate);
 		punCalendar.add(Calendar.DATE, -1);
 		//取所有设置了rule的公司 
 
-		Date runDate = DateHelper.currentGMTTime();
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTime(runDate); 
 		endCalendar.set(Calendar.SECOND, 0);

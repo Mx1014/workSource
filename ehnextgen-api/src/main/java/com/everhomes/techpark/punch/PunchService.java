@@ -168,6 +168,8 @@ public interface PunchService {
 
 	void dayRefreshLogScheduled();
 
+	void testDayRefreshLogs(Long runDate);
+
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd);
 
 	void refreshMonthDayLogs(String month);

@@ -828,7 +828,7 @@ public class PunchAdminController extends ControllerBase {
 
 	/**
 	 * <p>
-	 * 清空公司某部门/某人 考勤规则 
+	 * 清空公司某部门/某人 考勤规则
 	 * </p>
 	 * <b>URL: /punch/deleteTargetPunchAllRule</b>
 	 */
@@ -841,4 +841,23 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <p>
+	 * 清空公司某部门/某人 考勤规则
+	 * </p>
+	 * <b>URL: /punch/testPunchDayRefresh</b>
+	 */
+	@RequestMapping("testPunchDayRefresh")
+	@RestReturn(value = String.class)
+	public RestResponse testPunchDayRefresh(@Valid  Long runDate) {
+		punchService.testDayRefreshLogs(runDate);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 }
