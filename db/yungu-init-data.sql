@@ -478,4 +478,8 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 SET @lease_id = (SELECT MAX(id) FROM `eh_lease_configs`);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_id := @lease_id + 1), '999976', '1', '1', '1', '1', '1', '0');
 
+SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@config_id := @config_id + 1), 'pmtask.handler-999976', 'flow', '', '0', NULL);
+
+update eh_launch_pad_items set action_data = '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1&rtToken=c4Ej5bF2FbWokGfiIUg7KeqOP_Uq1WMrXYX5b23gsVP5ZHTb1cYFe4CesqjQ0widtxf5NrVDIdMzcAFUXR2_kAHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fqr5fqFfYoBcrMBfKgxbH1c#sign_suffix"}' where namespace_id = 999976 and item_label = '园区介绍';
 SET FOREIGN_KEY_CHECKS = 1;
