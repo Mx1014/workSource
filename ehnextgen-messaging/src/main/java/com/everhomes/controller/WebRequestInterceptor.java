@@ -82,8 +82,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
         cleanupUserContext();
 
-        MDC.remove("seq");
-
         Long startTick = (Long) request.getAttribute(ATTR_KEY_START_TICK);
         if (startTick != null) {
             long requestExecutionMs = System.currentTimeMillis() - startTick.longValue();
@@ -96,6 +94,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         } else {
             LOGGER.debug("Complete request: {}", requestInfo);
         }
+
+        MDC.remove("seq");
+
     }
 
     @Override
