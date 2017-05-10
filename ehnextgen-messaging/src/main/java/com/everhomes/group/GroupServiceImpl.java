@@ -2904,7 +2904,7 @@ public class GroupServiceImpl implements GroupService {
             meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
             messageDto.setMeta(meta);
 
-            includeList.forEach(targetId -> {
+            includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
@@ -2935,7 +2935,7 @@ public class GroupServiceImpl implements GroupService {
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_GROUP);
 
-            includeList.forEach(targetId -> {
+            includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
