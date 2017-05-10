@@ -354,10 +354,24 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50652','','EhNamespaces','999982','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50653','','EhNamespaces','999982','2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'50660','','EhNamespaces','999982','2');
-;
+
 
 SET @eh_launch_pad_items =(SELECT MAX(id) FROM eh_launch_pad_items ); 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999982', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwaU1qQmtObVExTkRKbVlqTmpNR0k0T0RZd01qTm1Oekl6WWpGa1lqUXdNQQ', '1', '1', '23', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', '7');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999982', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwaU1qQmtObVExTkRKbVlqTmpNR0k0T0RZd01qTm1Oekl6WWpGa1lqUXdNQQ', '1', '1', '23', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '7');
+
+-- redmine 9172 by xiongying20170504
+update eh_launch_pad_items set display_flag = 0 where namespace_id = 999982 and item_label in('活动','俱乐部');
+update eh_launch_pad_items set item_group = 'Bizs' where namespace_id = 999982 and item_label in('活动','俱乐部');
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU9XWTJaakl6Tm1JelpHSTROR1ZqT1dObU1tTmpaak16WXpsbU5XSTBOUQ' where namespace_id = 999982 and item_label = '活动';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk56QTROV0kzWXpOaE56VmlaVFppWTJKaE5qSTVOVE0zTlRZNU1XVXdaZw' where namespace_id = 999982 and item_label = '俱乐部';
+
+
+update eh_launch_pad_layouts set layout_json = '{"versionCode":"2017050402","versionName":"3.12.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"Bulletins","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"","widget":"News","instanceConfig":{"timeWidgetStyle":"datetime","categoryId":0,"itemGroup":"Default","newsSize":5},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}' where id in(512, 513) and namespace_id = 999982;
+update eh_launch_pad_layouts set version_code = '2017050402' where id in(512, 513) and namespace_id = 999982;
+
+-- 后台同步增加“信息发布-新闻管理”菜单 by xiongying20170504
+SET @id =(SELECT MAX(id) FROM eh_web_menu_scopes ); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'10800','','EhNamespaces','999982','2');

@@ -3057,4 +3057,19 @@ public class CommunityServiceImpl implements CommunityService {
 			return null;
 		});
 	}
+
+	@Override
+	public List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+		List<ProjectDTO> projects = new ArrayList<>();
+		for (Community community: communities) {
+			ProjectDTO project = new ProjectDTO();
+			project.setProjectId(community.getId());
+			project.setProjectType(EntityType.COMMUNITY.getCode());
+			project.setProjectName(community.getName());
+			projects.add(project);
+		}
+		return rolePrivilegeService.getTreeProjectCategories(namespaceId, projects);
+	}
 }

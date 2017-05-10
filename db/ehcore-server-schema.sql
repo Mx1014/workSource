@@ -4169,6 +4169,21 @@ CREATE TABLE `eh_hot_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_import_file_tasks`;
+CREATE TABLE `eh_import_file_tasks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` VARCHAR(64) NOT NULL DEFAULT '',
+  `status` TINYINT NOT NULL,
+  `result` TEXT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- item 类别 by sfyan 20161025
 DROP TABLE IF EXISTS `eh_item_service_categries`;
 CREATE TABLE `eh_item_service_categries` (
@@ -4277,6 +4292,7 @@ CREATE TABLE `eh_launch_pad_items` (
   `service_categry_id` BIGINT COMMENT 'service categry id',
   `selected_icon_uri` VARCHAR(1024),
   `more_order` INTEGER NOT NULL DEFAULT 0,
+  `alias_icon_uri` VARCHAR(1024) COMMENT '原有icon_uri有圆形、方形等，展现风格不一致。应对这样的场景增加alias_icon_uri，存储圆形默认图片。',
   
   PRIMARY KEY (`id`),
   KEY `i_eh_scoped_cfg_combo` (`namespace_id`,`app_id`,`scope_code`,`scope_id`,`item_name`),
@@ -4962,6 +4978,7 @@ CREATE TABLE `eh_organization_address_mappings` (
   
   PRIMARY KEY (`id`),
   KEY `fk_eh_organization` (`organization_id`),
+  KEY `address_id` (`address_id`),
   CONSTRAINT `eh_organization_address_mappings_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5289,12 +5306,14 @@ CREATE TABLE `eh_organization_members` (
   `namespace_id` INTEGER DEFAULT 0,
   `visible_flag` TINYINT DEFAULT 0 COMMENT '0 show 1 hide',
   `group_type` VARCHAR(64) COMMENT 'ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER',
+  `creator_uid` BIGINT,
+  `operator_uid` BIGINT,  
   
   PRIMARY KEY (`id`),
   KEY `fk_eh_orgm_owner` (`organization_id`),
   KEY `i_eh_corg_group` (`member_group`),
-  KEY `eh_organization_member_target_id` (`target_id`),
   KEY `i_target_id` (`target_id`),
+  KEY `i_contact_token` (`contact_token`),
   CONSTRAINT `eh_organization_members_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5578,6 +5597,8 @@ CREATE TABLE `eh_organizations` (
   `namespace_organization_token` VARCHAR(256) COMMENT 'the token from third party',
   `namespace_organization_type` VARCHAR(128) COMMENT 'the type of organization',
   `size` INTEGER COMMENT 'job level size',
+  `creator_uid` BIGINT,
+  `operator_uid` BIGINT,
   
   PRIMARY KEY (`id`),
   KEY `i_eh_org_name_level` (`name`,`level`),
@@ -8234,6 +8255,7 @@ CREATE TABLE `eh_search_types` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
   `create_time` DATETIME,
   `delete_time` DATETIME,
+  `order` TINYINT,
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

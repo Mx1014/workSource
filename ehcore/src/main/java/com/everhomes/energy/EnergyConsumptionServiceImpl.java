@@ -2053,7 +2053,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 try {
                 	double ra = Double.valueOf(engine.eval(amountFormula).toString());
                     realAmount = BigDecimal.valueOf(ra);
-
+                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
 //                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
                 } catch (ScriptException e) {
                     String paramsStr = "{AMOUNT:" + amount +
@@ -2296,6 +2296,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), currentAmount);
                 //由于currentAmount其实是realAmount  已经算了一遍times，所以此处times赋值为1 by xiongying20170401
                 engine.put(MeterFormulaVariable.TIMES.getCode(), 1);
+                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
                 realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
             }
 

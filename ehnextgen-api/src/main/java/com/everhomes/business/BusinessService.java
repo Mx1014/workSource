@@ -16,6 +16,8 @@ import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.ListUserCommand;
@@ -89,4 +91,9 @@ public interface BusinessService {
     void createBusinessPromotion(CreateBusinessPromotionCommand cmd);
 
     void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd);
+    
+    /**
+     * 搜索电商信息
+     */
+    SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd);
 }
