@@ -2716,6 +2716,11 @@ public class ForumServiceImpl implements ForumService {
         //添加人数限制，add by tt, 20161012
         post.setMaxQuantity(cmd.getMaxQuantity());
         
+        //添加活动状态，用于暂存或者立刻发布，不传默认2是立刻发布 add by yanjun 20170510
+        if(cmd.getStatus() != null){
+        	post.setStatus(cmd.getStatus());
+        }
+        
         return post;
     }
     

@@ -32,6 +32,8 @@ import com.everhomes.util.StringHelper;
  *<li>postId:帖子ID</li>
  *<li>posterUrl:海报链接</li>
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
+ *<li>userPayFlag:支付状态  0: no pay, 1:have pay, 2:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
+ *<li>userOrderCountdown:订单倒计时时间长度</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *<li>uuid:活动唯一的标识</li>
  *<li>mediaUrl:活动url</li>
@@ -77,6 +79,8 @@ public class ActivityDTO {
     private String posterUrl;
    
     private Integer userActivityStatus;
+    private Byte userPayFlag;
+    private Long userOrderCountdown;
     private Integer processStatus;
     private String uuid;
     private String guest;
@@ -362,7 +366,23 @@ public class ActivityDTO {
         this.userActivityStatus = userActivityStatus;
     }
 
-    public Integer getProcessStatus() {
+	public Byte getUserPayFlag() {
+		return userPayFlag;
+	}
+
+	public void setUserPayFlag(Byte userPayFlag) {
+		this.userPayFlag = userPayFlag;
+	}
+
+	public Long getUserOrderCountdown() {
+		return userOrderCountdown;
+	}
+
+	public void setUserOrderCountdown(Long userOrderCountdown) {
+		this.userOrderCountdown = userOrderCountdown;
+	}
+
+	public Integer getProcessStatus() {
         return processStatus;
     }
 

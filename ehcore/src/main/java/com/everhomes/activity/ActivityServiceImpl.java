@@ -270,8 +270,13 @@ public class ActivityServiceImpl implements ActivityService {
         
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
-        //status:状态，0-无效、1-草稿、2-已发布
-        activity.setStatus((byte)2);
+        
+        //if条件用于暂存或者立刻发布，不传默认2立刻发布  activity-3.0.0 增加暂存功能   add by yanjun 20170510 
+        if(activity.getStatus() == null){
+        	//status:状态，0-无效、1-草稿、2-已发布
+            activity.setStatus((byte)2);
+        }
+        
         activity.setCheckinFamilyCount(0);
         activity.setConfirmAttendeeCount(0);
         activity.setConfirmFamilyCount(0);
@@ -1922,6 +1927,13 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 
+        //返回倒计时 add by yanjun 20170510 start
+        GetRosterOrderSettingCommand gcmd = new GetRosterOrderSettingCommand();
+        gcmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        RosterOrderSettingDTO  rosterOrderSettingDTO = this.getRosterOrderSetting(gcmd);
+        Long  nowTime = DateHelper.currentGMTTime().getTime();
+        //返回倒计时 add by yanjun 20170510 end
+        
         //活动添加是否有活动附件标识 add by xiongying 20161207
         boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
         dto.setActivityAttachmentFlag(existAttachments);
@@ -1946,8 +1958,22 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(userRoster == null ? ActivityStatus.UN_SIGNUP.getCode() : getActivityStatus(
                 userRoster).getCode());
+        
+        //返回倒计时 add by yanjun 20170510 start
+        dto.setUserPayFlag(userRoster == null || userRoster.getPayFlag() == null ? ActivityRosterPayFlag.UNPAY.getCode() : userRoster.getPayFlag());
+        if(userRoster != null && userRoster.getPayFlag() != null && userRoster.getPayFlag() == ActivityRosterPayFlag.UNPAY.getCode() && userRoster.getOrderStartTime() != null){
+        	Long countdown =  userRoster.getOrderStartTime().getTime() + rosterOrderSettingDTO.getTime() - nowTime;
+        	if(countdown > 0){
+        		dto.setUserOrderCountdown(countdown);
+        	}
+        }
+        //返回倒计时 add by yanjun 20170510 end
+        
         fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
+        
+       
+        
         List<ActivityMemberDTO> result = rosterList.stream().map(r -> {
             ActivityMemberDTO d = ConvertHelper.convert(r, ActivityMemberDTO.class);
             d.setConfirmFlag(convertToInt(r.getConfirmFlag()));
@@ -1981,6 +2007,16 @@ public class ActivityServiceImpl implements ActivityService {
 				}
 
             }
+            
+            //返回倒计时 add by yanjun 20170510 start
+            if(d.getPayFlag() != null && d.getPayFlag() == ActivityRosterPayFlag.UNPAY.getCode() && d.getOrderStartTime() != null){
+            	Long countdown =  d.getOrderStartTime().getTime() + rosterOrderSettingDTO.getTime() - nowTime;
+            	if(countdown > 0){
+            		d.setOrderCountdown(countdown);
+            	}
+            }
+            //返回倒计时 add by yanjun 20170510 end
+            
             return d;
         }).collect(Collectors.toList());
         response.setRoster(result);

@@ -1,5 +1,5 @@
 -- 活动增加支付相关字段 add by yanjun 20170502
-ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_flag` TINYINT(4) DEFAULT '0' NULL COMMENT '0: no pay, 1:have pay, 2:tobepay, 3:refund';
+ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_flag` TINYINT(4) DEFAULT '0' NULL COMMENT '0: no pay, 1:have pay, 2:refund';
 ALTER TABLE `eh_activity_roster` ADD COLUMN `order_no` BIGINT(20) NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `order_start_time` DATETIME NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `vendor_type` VARCHAR(32) NULL COMMENT '10001: alipay, 10002: wechatpay';

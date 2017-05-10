@@ -47,6 +47,7 @@ import com.everhomes.util.StringHelper;
  * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
  * <li>videoUrl: TODO 需要么？</li>
  * <li>maxQuantity: 限制人数</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  * </ul>
  */
 public class NewTopicCommand {
@@ -107,7 +108,9 @@ public class NewTopicCommand {
     private Byte mediaDisplayFlag;
     
     private Integer maxQuantity;
-
+    
+    private Byte status;
+    
 	public Integer getMaxQuantity() {
 		return maxQuantity;
 	}
@@ -321,7 +324,15 @@ public class NewTopicCommand {
         this.currentOrgId = currentOrgId;
     }
 
-    @Override
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

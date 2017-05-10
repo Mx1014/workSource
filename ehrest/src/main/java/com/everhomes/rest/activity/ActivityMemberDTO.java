@@ -8,7 +8,6 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * 
- * @author elians
  *<ul>
  *<li>id:登记ID</li>
  *<li>uid:用户ID</li>
@@ -25,9 +24,10 @@ import com.everhomes.util.StringHelper;
  *<li>lotteryWinnerFlag:中奖标识</li>
  *<li>lotteryWonTime:中奖时间</li>
  *<li>phone:用户电话号码</li>
- *<li>payFlag:支付状态  0: no pay, 1:have pay, 2:tobepay, 3:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
+ *<li>payFlag:支付状态  0: no pay, 1:have pay, 2:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
  *<li>orderNo:支付订单号</li>
- *<li>orderStartTime:点单开始时间，用于计算取消订单</li>
+ *<li>orderStartTime:订单开始时间，用于计算取消订单</li>
+ *<li>orderCountdown:订单倒计时时间长度</li>
  *<li>vendorType:支付方式 10001: alipay, 10002: wechatpay 参考 {@link com.everhomes.rest.organization.VendorType }</li>
  *<li>payAmount:支付金额</li>
  *<li>payTime:支付时间</li>
@@ -56,6 +56,7 @@ public class ActivityMemberDTO {
     private Byte payFlag;
     private Long orderNo;
     private Timestamp orderStartTime;
+    private Long orderCountdown;
     private String vendorType;
     private Integer payAmount;
     private Timestamp payTime;
@@ -221,6 +222,14 @@ public class ActivityMemberDTO {
 
 	public void setOrderStartTime(Timestamp orderStartTime) {
 		this.orderStartTime = orderStartTime;
+	}
+
+	public Long getOrderCountdown() {
+		return orderCountdown;
+	}
+
+	public void setOrderCountdown(Long orderCountdown) {
+		this.orderCountdown = orderCountdown;
 	}
 
 	public String getVendorType() {

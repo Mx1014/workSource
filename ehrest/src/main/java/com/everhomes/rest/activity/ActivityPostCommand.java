@@ -43,6 +43,7 @@ import com.everhomes.util.StringHelper;
  * <li>visibleRegionId: 区域范围类型对应的ID</li>
  * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
  * <li>chargePrice: 收费价格</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -101,6 +102,8 @@ public class ActivityPostCommand{
     private Byte chargeFlag;
 
     private Integer chargePrice;
+    
+    private Byte status;
 
 	public String getSignupEndTime() {
 		return signupEndTime;
@@ -415,6 +418,14 @@ public class ActivityPostCommand{
 
 	public void setChargePrice(Integer chargePrice) {
 		this.chargePrice = chargePrice;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 
 	@Override
