@@ -4899,16 +4899,23 @@ public class PunchServiceImpl implements PunchService {
 	 * */
 	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
-	public void dayRefreshLogScheduled(){
-		
-		  
-			
+	public void dayRefreshLogScheduled() {
+
+
+        Date runDate = DateHelper.currentGMTTime();
+        dayRefreshLogScheduled(runDate);
+    }
+    @Override
+    public void testDayRefreshLogs(Long runDate){
+        dayRefreshLogScheduled(new Date(runDate));
+    }
+    public void dayRefreshLogScheduled(Date runDate){
 		//刷新前一天的
 		Calendar punCalendar = Calendar.getInstance();
+        punCalendar.setTime(runDate);
 		punCalendar.add(Calendar.DATE, -1);
 		//取所有设置了rule的公司 
 
-		Date runDate = DateHelper.currentGMTTime();
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTime(runDate); 
 		endCalendar.set(Calendar.SECOND, 0);
