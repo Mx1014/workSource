@@ -4173,7 +4173,7 @@ public class ActivityServiceImpl implements ActivityService {
 		RosterOrderSettingDTO dto = ConvertHelper.convert(rosterOrderSetting, RosterOrderSettingDTO.class);
 		dto.setDays(cmd.getDays());
 		dto.setHours(cmd.getHours());
-		return null;
+		return dto;
 	}
 
 	@Override

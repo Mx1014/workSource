@@ -2,6 +2,7 @@
 package com.everhomes.activity;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.everhomes.db.AccessSpec;
@@ -58,11 +59,13 @@ public class RosterOrderSettingProviderImpl implements RosterOrderSettingProvide
 	public RosterOrderSetting findRosterOrderSettingByNamespace(Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-	    RosterOrderSetting rosterOrderSetting = context.select()
-	    							.from(Tables.EH_ORGANIZATION_MEMBERS)
-	    							.where(Tables.EH_ROSTER_ORDER_SETTINGS.NAMESPACE_ID.eq(namespaceId))
-	    							.fetchOne().map(r->ConvertHelper.convert(r, RosterOrderSetting.class));
-
-	    return rosterOrderSetting;
+		Record record = context.select()
+				.from(Tables.EH_ROSTER_ORDER_SETTINGS)
+				.where(Tables.EH_ROSTER_ORDER_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+				.fetchOne();
+		if(record != null){
+			return ConvertHelper.convert(record, RosterOrderSetting.class);
+		}
+		return null;
 	}
 }
