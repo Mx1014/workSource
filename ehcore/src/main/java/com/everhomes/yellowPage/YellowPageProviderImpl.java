@@ -273,6 +273,59 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         }
         return saList;
 	}
+	
+	@Override
+	public List<ServiceAlliances> queryServiceAlliance(
+			CrossShardListingLocator locator, int pageSize, String ownerType,
+			Long ownerId, Long parentId, Long categoryId, String keywords, Long organizationId,String organizationType) {
+		List<ServiceAlliances> saList = new ArrayList<ServiceAlliances>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+        SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+ 
+        if (!StringUtils.isEmpty(ownerType) )
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType)
+    				.and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId))
+    				.or(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType)))
+    				);
+        else
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId).or(
+        			Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(organizationId).and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(organizationType))));
+     
+        
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.gt(locator.getAnchor()));
+            }
+        
+        query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+        
+        if(!org.springframework.util.StringUtils.isEmpty(keywords)){
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.NAME.like("%" + keywords + "%"));
+        }
+        
+        if(categoryId != null) {
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.CATEGORY_ID.eq(categoryId));
+        }
+        
+        if(null!=parentId){
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.eq(parentId));
+        } else {
+    		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
+		}
+        query.addLimit(pageSize);
+
+        LOGGER.info(query.toString());
+
+        query.fetch().map((r) -> {
+        	saList.add(ConvertHelper.convert(r, ServiceAlliances.class));
+            return null;
+        });
+        
+        if(saList != null && saList.size() > 0) {
+            return saList;
+        }
+        return saList;
+	}
 
 
 	@Override

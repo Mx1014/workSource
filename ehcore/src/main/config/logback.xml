@@ -112,9 +112,13 @@
         <producerConfig>bootstrap.servers=10.1.10.102:9092</producerConfig>
         <!--<producerConfig>bootstrap.servers=${kafka.bootstrap.servers}</producerConfig> -->
         <!-- don't wait for a broker to ack the reception of a batch.  -->
+<!--
         <producerConfig>acks=0</producerConfig>
+-->
         <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
+<!--
         <producerConfig>linger.ms=1000</producerConfig>
+-->
         <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
         <producerConfig>block.on.buffer.full=false</producerConfig>
         <!-- define a client-id that you use to identify yourself against the kafka broker -->

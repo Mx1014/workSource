@@ -2309,7 +2309,7 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptId(dept.getId());
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
-		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
+ 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 		for(PunchDayLog dayLog : dayLogList){
@@ -2456,6 +2456,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private void countForthStatistic(PunchStatisticsDTO punchDayLogDTO, PunchStatistic statistic) {
 		if (punchDayLogDTO.getMorningApprovalStatus() != null) {
+            //审批后的状态
 			//上午
 			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
 				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
@@ -2540,30 +2541,13 @@ public class PunchServiceImpl implements PunchService {
 				statistic.setWorkCount(statistic.getWorkCount() + 1);
 			}
 		} else {
+            //未审批的状态
 			//上午
 			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningStatus()) {
 				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
 				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setSickCount(statistic.getSickCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setSickCount(statistic.getSickCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningStatus()) {
+			}  else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningStatus()) {
 				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()) {
-				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
 				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningStatus()) {
 				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
@@ -2583,28 +2567,10 @@ public class PunchServiceImpl implements PunchService {
 			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonStatus()) {
 				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
 				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setSickCount(statistic.getSickCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setSickCount(statistic.getSickCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonStatus()) {
 				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
 				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
-				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
-				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+			}  else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
 				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
 				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
@@ -4090,9 +4056,10 @@ public class PunchServiceImpl implements PunchService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		Long organizationId = org.getDirectlyEnterpriseId();
-		if(organizationId.equals(0L))
-			organizationId = org.getId();
+//		Long organizationId = org.getDirectlyEnterpriseId();
+//		if(organizationId.equals(0L))
+//			organizationId = org.getId();
+        Long organizationId = getTopEnterpriseId(cmd.getOwnerId());
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
 				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );

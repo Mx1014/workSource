@@ -12,8 +12,11 @@ import com.everhomes.server.schema.tables.pojos.EhParkingClearanceLogs;
 import com.everhomes.server.schema.tables.records.EhParkingClearanceLogsRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.JoinType;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -53,7 +56,7 @@ public class ParkingClearanceLogProviderImpl implements ParkingClearanceLogProvi
 
     @Override
     public List<ParkingClearanceLog> searchClearanceLog(ParkingClearanceLogQueryObject qo) {
-        SelectQuery<EhParkingClearanceLogsRecord> query = context().selectFrom(Tables.EH_PARKING_CLEARANCE_LOGS).getQuery();
+        SelectQuery<Record> query = context().select(Tables.EH_PARKING_CLEARANCE_LOGS.fields()).from(Tables.EH_PARKING_CLEARANCE_LOGS).getQuery();
         if (qo.getNamespaceId() != null) {
             query.addConditions(Tables.EH_PARKING_CLEARANCE_LOGS.NAMESPACE_ID.eq(qo.getNamespaceId()));
         }
@@ -77,14 +80,14 @@ public class ParkingClearanceLogProviderImpl implements ParkingClearanceLogProvi
         } else {
             query.addConditions(Tables.EH_PARKING_CLEARANCE_LOGS.STATUS.ne(ParkingClearanceLogStatus.INACTIVE.getCode()));
         }
-        if (qo.getPlateNumber() != null) {
+        if (StringUtils.isNotEmpty(qo.getPlateNumber())) {
             query.addConditions(Tables.EH_PARKING_CLEARANCE_LOGS.PLATE_NUMBER.like(DSL.concat("%", qo.getPlateNumber(), "%")));
         }
-        if (qo.getApplicant() != null) {
+        if (StringUtils.isNotEmpty(qo.getApplicant())) {
             query.addJoin(Tables.EH_USERS, JoinType.JOIN, Tables.EH_PARKING_CLEARANCE_LOGS.APPLICANT_ID.eq(Tables.EH_USERS.ID));
             query.addConditions(Tables.EH_USERS.NICK_NAME.like(DSL.concat("%", qo.getApplicant(), "%")));
         }
-        if (qo.getIdentifierToken() != null) {
+        if (StringUtils.isNotEmpty(qo.getIdentifierToken())) {
             query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.JOIN, Tables.EH_PARKING_CLEARANCE_LOGS.APPLICANT_ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
             query.addConditions(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(DSL.concat("%", qo.getIdentifierToken(), "%")));
         }
