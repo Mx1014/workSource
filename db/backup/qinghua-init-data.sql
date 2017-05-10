@@ -2608,3 +2608,7 @@ update eh_launch_pad_items set service_categry_id = 10 where namespace_id = 9999
 -- 车辆放行导出excel无数据提示，add by tt, 20170510
 select max(id) into @id from `eh_locale_strings`; 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'parking.clearance', '10011', 'zh_CN', '没有数据');
+
+-- 更改服务联盟是否支持审批, add by tt, 20170510
+select max(id) into @id from `eh_service_alliance_jump_module`;
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES (@id+1, 999984, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
