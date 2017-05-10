@@ -99,6 +99,7 @@ public interface QualityProvider {
 	
 	List<QualityInspectionSpecifications> listAllChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Byte inspectionType);
 	List<QualityInspectionSpecifications> listChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Long parentId, Byte inspectionType);
+	List<QualityInspectionSpecifications> listAddAndModifyChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, List<Long> scopeIds, Long parentId, Byte inspectionType);
 
 	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count);
 	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime);

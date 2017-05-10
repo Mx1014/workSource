@@ -2,7 +2,6 @@
 package com.everhomes.family;
 
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -18,10 +17,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupAdminStatus;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupProvider;
+import com.everhomes.group.*;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -38,12 +34,14 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressServiceErrorCode;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.QuestionMetaActionData;
 import com.everhomes.rest.family.*;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
 import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
@@ -60,7 +58,6 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
-
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -295,11 +292,19 @@ public class FamilyServiceImpl implements FamilyService {
             // send notification to family other members
             code = FamilyNotificationTemplateCode.FAMILY_JOIN_REQ_FOR_OPERATOR;
             final String notifyTextForOthers = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
             QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
+            metaObject.setRequestInfo(notifyTextForOthers);
+
             List<Long> includeList = getFamilyIncludeList(group.getId(), null, member.getMemberId());
-            if(includeList != null && includeList.size() > 0)
-                sendFamilyNotification(group.getId(),includeList,null,notifyTextForOthers,
-                        MetaObjectType.GROUP_REQUEST_TO_JOIN,metaObject);
+            if (includeList != null && includeList.size() > 0) {
+                metaObject.setRequestInfo(notifyTextForOthers);
+                QuestionMetaActionData actionData = new QuestionMetaActionData();
+                actionData.setMetaObject(metaObject);
+
+                String routerUri = RouterBuilder.build(Router.FAMILY_MEMBER_APPLY, actionData);
+                sendRouterFamilyNotificationUseSystemUser(includeList,null,notifyTextForOthers, routerUri);
+            }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, familyId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
         }
@@ -320,13 +325,13 @@ public class FamilyServiceImpl implements FamilyService {
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        // messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
-            }
+        }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -361,7 +366,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
     }
     
-    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList,
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         //User session
         Map<String, String> meta = null;
@@ -391,6 +396,70 @@ public class FamilyServiceImpl implements FamilyService {
             if(exclude.get(gm.getMemberId()) == null && gm.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
                 sendMessageToUser(gm.getMemberId(), message, meta);
             }
+        }
+    }
+
+    private void sendFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            includeList.forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
+        }
+    }
+
+    private void sendRouterFamilyNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message, String routerUri) {
+        if(message == null || message.isEmpty()) {
+            return;
+        }
+
+        if(includeList != null && includeList.size() > 0) {
+            if (excludeList != null && excludeList.size() > 0) {
+                includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+            }
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser includeList {}", includeList);
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("sendRouterFamilyNotificationUseSystemUser excludeList {}", excludeList);
+
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+
+            RouterMetaObject mo = new RouterMetaObject();
+            mo.setUrl(routerUri);
+            Map<String, String> meta = new HashMap<>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+            messageDto.setMeta(meta);
+
+            includeList.forEach(targetId -> {
+                messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                        AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                        messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+            });
         }
     }
 
@@ -608,10 +677,9 @@ public class FamilyServiceImpl implements FamilyService {
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
         sendFamilyNotificationForLeaveFamily(address, group, member);
-        
     }
     
-    public void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
+    private void sendFamilyNotificationForLeaveFamily(Address address, Group group, GroupMember member) {
         // send notification to the applicant
         try {
             Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0,Role.ResourceOperator);
@@ -764,7 +832,8 @@ public class FamilyServiceImpl implements FamilyService {
         
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
-        
+        member.setMemberStatus(GroupMemberStatus.REJECT.getCode());
+        addGroupMemberLog(member);
         //Create reject history
         UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
@@ -779,6 +848,16 @@ public class FamilyServiceImpl implements FamilyService {
         else if(cmd.getOperatorRole() == Role.SystemAdmin)
             sendFamilyNotificationForMemberRejectFamilyByAdmin(address,group,member,userId);
     }
+    
+    private void addGroupMemberLog(GroupMember member) {
+    	GroupMemberLog groupMemberLog = new GroupMemberLog();
+    	groupMemberLog.setGroupMemberId(member.getId());
+    	groupMemberLog.setStatus(member.getMemberStatus());
+    	groupMemberLog.setCreatorUid(UserContext.current().getUser().getId());
+    	groupMemberLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	groupMemberLog.setProcessMessage(member.toString());
+    	groupProvider.createGroupMemberLog(groupMemberLog);
+	}
     
     private void sendFamilyNotificationForMemberRejectFamilyByAdmin(Address address, Group group, GroupMember member,long operatorId) {
         // send notification to the applicant
@@ -1908,13 +1987,15 @@ public class FamilyServiceImpl implements FamilyService {
         if(targetId != null) {
             excludeList.add(targetId);
         }
+        // sendFamilyNotification(groupId, null, excludeList, message, null, null);
         sendFamilyNotification(groupId, null, excludeList, message, null, null);
     }
     
     private void sendFamilyNotificationToIncludeUser(Long groupId, Long userId, String message) {
         List<Long> includeList = new ArrayList<Long>();
         includeList.add(userId);
-        sendFamilyNotification(groupId, includeList, null, message, null, null);
+        // sendFamilyNotification(groupId, includeList, null, message, null, null);
+        sendFamilyNotificationUseSystemUser(includeList, null, message);
     }
     
     private List<Long> getFamilyIncludeList(Long groupId, Long operatorId, Long targetId) {
@@ -1959,11 +2040,13 @@ public class FamilyServiceImpl implements FamilyService {
                         + ", memberId=" + requestor.getMemberId(), e);
                 }
             }
+            metaObject.setRequestId(requestor.getId());
         }
         
         if(target != null) {
             metaObject.setTargetType(EntityType.USER.getCode());
             metaObject.setTargetId(target.getMemberId());
+            metaObject.setRequestId(target.getId());
         }
         
         return metaObject;

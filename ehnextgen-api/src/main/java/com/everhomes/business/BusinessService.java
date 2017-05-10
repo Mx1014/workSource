@@ -96,4 +96,6 @@ public interface BusinessService {
      * 搜索电商信息
      */
     SearchContentsBySceneReponse searchShops(SearchContentsBySceneCommand cmd);
+
+    void testTransaction();
 }

@@ -2279,6 +2279,30 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
+    public void testTransaction() {
+        List<String> execute = dbProvider.execute(s -> test());
+        System.out.println(execute);
+    }
+
+    private List<String> test() {
+        for (int i = 0; i < 10; i++) {
+            BusinessPromotion promotion = new BusinessPromotion();
+            promotion.setSubject("comm:" + i);
+            promotion.setNamespaceId(1);
+            businessPromotionProvider.createBusinessPromotion(promotion);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (i == 9) {
+                throw RuntimeErrorException.errorWith("err", 1, "error");
+            }
+        }
+        return Collections.singletonList("");
+    }
+
+    @Override
     public void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd) {
         if (cmd.getSource() != null) {
             this.source = cmd.getSource();

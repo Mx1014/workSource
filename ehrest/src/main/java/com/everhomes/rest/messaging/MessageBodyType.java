@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.rest.messaging;
 
 /**
@@ -10,13 +11,24 @@ package com.everhomes.rest.messaging;
  *     <li>NOTIFY</li>
  *     <li>RICH_LINK</li>
  *     <li>INNER_LINK: 消息内容内部有链接</li>
+ *     <li>ACTION: 带有跳转动作的消息</li>
  * </ul>
  */
 public enum MessageBodyType {
-    TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK"), NOTIFY("NOTIFY"), RICH_LINK("RICH_LINK"), INNER_LINK("INNER_LINK");
+    TEXT("TEXT"),
+    IMAGE("IMAGE"),
+    AUDIO("AUDIO"),
+    VIDEO("VIDEO"),
+    LINK("LINK"),
+    NOTIFY("NOTIFY"),
+    RICH_LINK("RICH_LINK"),
+    INNER_LINK("INNER_LINK"),
+    ACTION("ACTION")
+    ;
     
     private String code;
-    private MessageBodyType(String code) {
+
+    MessageBodyType(String code) {
         this.code = code;
     }
     
@@ -30,7 +42,6 @@ public enum MessageBodyType {
                 return t;
             }
         }
-        
         return null;
     }
 }

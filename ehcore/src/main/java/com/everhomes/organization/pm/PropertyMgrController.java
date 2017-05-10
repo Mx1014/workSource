@@ -12,6 +12,7 @@ import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
+import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -1973,4 +1974,17 @@ public class PropertyMgrController extends ControllerBase {
         Long userId = UserContext.current().getUser().getId();
         resolver.checkUserAuthority(userId, ownerType, ownerId, organizationId, privilegeId);
     }
+
+	/**
+	 * <b>URL: /pm/getRequestInfo</b>
+	 * <p>获取申请的信息</p>
+	 */
+	@RequestMapping("getRequestInfo")
+	@RestReturn(value= GetRequestInfoResponse.class)
+	public RestResponse getRequestInfo(GetRequestInfoCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.getRequestInfo(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

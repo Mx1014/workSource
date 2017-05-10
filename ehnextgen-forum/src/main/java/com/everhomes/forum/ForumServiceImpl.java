@@ -55,15 +55,9 @@ import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.messaging.InnerLinkBody;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaContent;
-import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.common.Router;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
@@ -1830,29 +1824,52 @@ public class ForumServiceImpl implements ForumService {
 	}
 	
 	private void sendMessageToUserWhenComment(User user, Post post, Long toUserId, int code) {
-		String templateString = getLocalTemplateString(user.getNamespaceId(), ForumNotificationTemplateCode.SCOPE, code, user.getLocale());
-		String[] templateStringSplit = templateString.split("\t");
-		String title = templateStringSplit[0];
-		String template = templateStringSplit[1];
-		
-		InnerLinkBody innerLinkBody = new InnerLinkBody(title, template);
-		String content = innerLinkBody.toString();
-		
-		Map<String, String> meta = new HashMap<>();
+		Map<String, Object> map = new HashMap<String, Object>();
 		String userName = user.getNickName() == null ? "" : user.getNickName();
-		meta.put("userName", new MessageMetaContent(userName).toString());
-		String postName = post.getSubject() == null ? "" : post.getSubject();
-		String postNameUrl = getPostNameUrl(post);
-		meta.put("postName", new MessageMetaContent(postName, postNameUrl).toString());
+        map.put("userName", userName);
+        String postName = post.getSubject() == null ? "" : post.getSubject();
+        map.put("postName", postName);
+        String scope = ForumNotificationTemplateCode.SCOPE;
+        String text = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+		String[] textSplit = text.split("\t");
+		String title = textSplit[0];
+		String content = textSplit[1];
 		
-		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
+		RouterMetaObject mo = new RouterMetaObject();
+        mo.setUrl(getPostNameUrl(post));
+        Map<String, String> meta = new HashMap<>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.MESSAGE_ROUTER.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
+        meta.put(MessageMetaConstant.MESSAGE_SUBJECT, title);
+		
+        sendMessageToUser(toUserId, content, meta, MessageBodyType.TEXT.getCode());
+		
+		// 改成消息2.0的方式，需要后台拼好返回给客户端，commented by tt, 20170503
+//		String templateString = getLocalTemplateString(user.getNamespaceId(), ForumNotificationTemplateCode.SCOPE, code, user.getLocale());
+//		String[] templateStringSplit = templateString.split("\t");
+//		String title = templateStringSplit[0];
+//		String template = templateStringSplit[1];
+//		
+//		InnerLinkBody innerLinkBody = new InnerLinkBody(title, template);
+//		String content = innerLinkBody.toString();
+//		
+//		Map<String, String> meta = new HashMap<>();
+//		String userName = user.getNickName() == null ? "" : user.getNickName();
+//		meta.put("userName", new MessageMetaContent(userName).toString());
+//		String postName = post.getSubject() == null ? "" : post.getSubject();
+//		String postNameUrl = getPostNameUrl(post);
+//		meta.put("postName", new MessageMetaContent(postName, postNameUrl).toString());
+//		
+//		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
 	}
 	
 	private String getPostNameUrl(Post post) {
 		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {
-			return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
+            return RouterBuilder.build(Router.ACTIVITY_DETAIL, new ActivityDetailActionData(post.getForumId(), post.getId()));
+            // return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
 		}
-		return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
+        return RouterBuilder.build(Router.POST_DETAIL, new PostDetailActionData(post.getForumId(), post.getId()));
+		// return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
 	}
 
 	private String getLocalTemplateString(Integer namespaceId, String scope, int code, String locale)	{
@@ -2780,7 +2797,7 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.error("Action category not found, userId=" + userId + ", cmd=" + cmd);
                 }
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid action category");
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid build category");
             }
             
             post.setActionCategory(cmd.getActionCategory());
