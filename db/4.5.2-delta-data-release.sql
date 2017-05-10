@@ -135,5 +135,5 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 20031, 1005, 'E
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 20031, 1001, 'EhAclRoles', 0, 1, NOW()); 
 
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES ('1238', '10011', '20851', '设备巡检', '1', '1', '设备巡检 管理员权限', '710');
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES ('1238', '10011', '20852', '设备巡检', '1', '1', '设备巡检 管理员权限', '710');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), '10011', '20851', '设备巡检', '1', '1', '设备巡检 管理员权限', '710');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), '10011', '20852', '设备巡检', '1', '1', '设备巡检 管理员权限', '710');
