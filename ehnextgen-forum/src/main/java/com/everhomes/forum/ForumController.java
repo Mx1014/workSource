@@ -32,6 +32,7 @@ import com.everhomes.rest.forum.MakeTopCommand;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PublishTopicCommand;
 import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
@@ -386,6 +387,22 @@ public class ForumController extends ControllerBase {
     public RestResponse increasePostViewCount(IncreasePostViewCountCommand cmd) {
 //        PostDTO postDto = this.forumService.getTopic(cmd);
         
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/publishTopic</b>
+     * <p>发布活动，将后台暂存的活动发布</p>
+     * @return 删除结果
+     */
+    @RequestMapping("publishTopic")
+    @RestReturn(value=String.class)
+    public RestResponse publisTopic(PublishTopicCommand cmd) {
+//        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
+        //TODO
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
