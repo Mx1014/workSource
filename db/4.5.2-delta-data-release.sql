@@ -303,14 +303,11 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 9999
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 51000, '', 'EhNamespaces', 1000001, 2);
 
--- 修改服务市场“供求信息”item的位置及规则，add by tt, 20170510（已执行）
-SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
-INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999984', '0');
-
-update eh_launch_pad_items set service_categry_id = 5 where namespace_id = 999984 and item_name = '供求信息' and scene_type= 'pm_admin';
-update eh_launch_pad_items set service_categry_id = 10 where namespace_id = 999984 and item_name = '供求信息' and scene_type= 'park_tourist';
 
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000001, 51000, '举报管理', NULL, 2);
 
->>>>>>> e825e9db8d7d764df9434a5f8a872f6cc92dd735
+
+-- 车辆放行导出excel无数据提示，add by tt, 20170510（清华）
+select max(id) into @id from `eh_locale_strings`; 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'parking.clearance', '10011', 'zh_CN', '没有数据');
