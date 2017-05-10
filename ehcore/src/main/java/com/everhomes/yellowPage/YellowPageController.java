@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -369,6 +370,21 @@ public class YellowPageController  extends ControllerBase {
         SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
 
         RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /yellowPage/exportRequestInfo</b>
+     * <p>导出申请信息/p>
+     */
+    @RequestMapping("exportRequestInfo")
+    @RestReturn(value=String.class)
+    public RestResponse exportRequestInfo(@Valid SearchRequestInfoCommand cmd, HttpServletResponse resp) {
+        this.saRequestInfoSearcher.exportRequestInfo(cmd, resp);
+        
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
