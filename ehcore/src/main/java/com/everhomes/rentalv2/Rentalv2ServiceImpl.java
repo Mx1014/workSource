@@ -1440,51 +1440,52 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					useDetailSB.append(firstRsr.getResourceNumber());
 				}
 
-			}
-
-			// 循环存site订单
-			for (Long siteRuleId : siteRuleIds) {
-				RentalCell rsr = findRentalSiteRuleById(siteRuleId);
-				if (null == rsr) {
-					continue;
-				}
-				if(useDetailSB.length()>1)
-					useDetailSB.append("\n");
-				if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
+			}else {
+				// 循环存site订单
+				for (Long siteRuleId : siteRuleIds) {
+					RentalCell rsr = findRentalSiteRuleById(siteRuleId);
+					if (null == rsr) {
+						continue;
+					}
+					if(useDetailSB.length()>1)
+						useDetailSB.append("\n");
+					if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
 //					useDetailSB.append("使用时间:");
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
-				}else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
-						|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+						useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
+					}else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
+							|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 //					useDetailSB.append("使用时间:");
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())).append(" ");
-					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.AM.getCode(), RentalNotificationTemplateCode.locale, "morning"));
-					if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.PM.getCode(), RentalNotificationTemplateCode.locale, "afternoon"));
-					if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
-						useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
-								""+AmorpmFlag.NIGHT.getCode(), RentalNotificationTemplateCode.locale, "night"));
-				}
-				if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
-				//独占资源 只有时间				 
-				}else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
-					//不需要资源编号
+						useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())).append(" ");
+						if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
+							useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+									""+AmorpmFlag.AM.getCode(), RentalNotificationTemplateCode.locale, "morning"));
+						if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode()))
+							useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+									""+AmorpmFlag.PM.getCode(), RentalNotificationTemplateCode.locale, "afternoon"));
+						if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode()))
+							useDetailSB.append(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.SCOPE,
+									""+AmorpmFlag.NIGHT.getCode(), RentalNotificationTemplateCode.locale, "night"));
+					}
+					if(rs.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
+						//独占资源 只有时间
+					}else if(rs.getAutoAssign().equals(NormalFlag.NONEED.getCode())){
+						//不需要资源编号
 //					useDetailSB.append(";预约数量:");
 //					useDetailSB.append(siteRule.getRentalCount()+"个 ");
-				}else {
-					// 资源编号
+					}else {
+						// 资源编号
 //					useDetailSB.append(";资源编号:");
-					useDetailSB.append(" ");
-					useDetailSB.append(rsr.getResourceNumber());
+						useDetailSB.append(" ");
+						useDetailSB.append(rsr.getResourceNumber());
 //					useDetailSB.append("号");
-				}
+					}
 //				if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-//					Integer loopCnt = 0; 
+//					Integer loopCnt = 0;
 ////					assignSiteNumber(rsb,rsr,billDTO,loopCnt);
 //				}
+				}
 			}
+
 			rentalBill.setUseDetail(useDetailSB.toString());
 			rentalBill.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
