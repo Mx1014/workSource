@@ -1163,10 +1163,10 @@ update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd00yWmlOV1V3
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk0yRTNaRFJpTW1ZMllUSm1PR0kyWWpsa1lURTNPRGxoWVROa1pqUXpaUQ' where namespace_id = 999979 and item_label = 'SAAS资源申请';
 
 
-
+-- 投诉建议移到首页 by xiongying20170510
 update eh_launch_pad_items set display_flag = 1 where namespace_id = 999979 and item_label = '投诉建议';
 update eh_launch_pad_items set default_order = 5 where namespace_id = 999979 and item_label = '投诉建议';
-
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pEZzFNekkwTm1SallqQm1PR1l6TldJNU5qZ3lNRGhsTldSak9UazROUQ' where namespace_id = 999979 and item_label = '任务管理';
     
     
     
