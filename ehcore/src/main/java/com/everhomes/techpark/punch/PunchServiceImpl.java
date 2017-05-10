@@ -3974,7 +3974,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListPunchCountCommandResponse listPunchCount(
 			ListPunchCountCommand cmd) {
 //		processQueryCommandDay(cmd);
-		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
+//		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
