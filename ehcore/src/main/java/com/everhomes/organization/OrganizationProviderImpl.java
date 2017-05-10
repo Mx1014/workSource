@@ -1157,7 +1157,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, OrganizationMember.class);
 		return null;
 	}
-	
+
+	@Override
+	public OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId,
+			Long organizationId) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())); 
+		Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+
+		if(r != null)
+			return ConvertHelper.convert(r, OrganizationMember.class);
+		return null;
+	}
 	@Override
 	public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2976,6 +2989,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(id)); 
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
+			return null;
+		});
+		if(results.size() == 0)
+			return null;
+		return results;
+	}
+
+	@Override
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId,Long organizationId,Byte operationType) {
+		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(userId)); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(organizationId)); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(operationType)); 
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
 		query.fetch().map(r -> {
 			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
 			return null;

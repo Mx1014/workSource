@@ -1,13 +1,7 @@
 package com.everhomes.equipment;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -17,205 +11,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 
 
+
+import com.everhomes.appurl.AppUrlService;
+import com.everhomes.forum.Attachment;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
+import com.everhomes.rest.equipment.*;
+import com.everhomes.user.*;
+
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.rest.equipment.*;
+
 import com.everhomes.util.*;
 
+import com.everhomes.util.doc.DocUtil;
+import com.google.zxing.WriterException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -224,209 +39,15 @@ import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -435,10 +56,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -448,30 +67,22 @@ import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.quality.QualityInspectionCategories;
-import com.everhomes.quality.QualityInspectionStandardGroupMap;
-import com.everhomes.quality.QualityInspectionStandards;
-import com.everhomes.quality.QualityInspectionTaskAttachments;
-import com.everhomes.quality.QualityInspectionTaskRecords;
-import com.everhomes.quality.QualityInspectionTasks;
-import com.everhomes.quality.QualityService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
+
 import com.everhomes.rest.forum.AttachmentDTO;
+
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
@@ -479,30 +90,14 @@ import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMenuResponse;
 import com.everhomes.rest.organization.OrganizationNaviFlag;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.quality.CountTasksResponse;
-import com.everhomes.rest.quality.EvaluationDTO;
-import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.rest.quality.QualityInspectionTaskDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskResult;
-import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
-import com.everhomes.rest.quality.QualityInspectionTaskStatus;
-import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
-import com.everhomes.rest.quality.QualityStandardsDTO;
-import com.everhomes.rest.quality.QualityTaskType;
-import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;import com.everhomes.search.EquipmentAccessoriesSearcher;
@@ -512,13 +107,9 @@ import com.everhomes.search.EquipmentStandardSearcher;
 import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.everhomes.videoconf.ConfOrders;
+import sun.misc.BASE64Encoder;
 
 @Component
 public class EquipmentServiceImpl implements EquipmentService {
@@ -580,18 +171,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
     private AclProvider aclProvider;
-
-	@Autowired
-	private QualityService qualityService;
 	
 	@Autowired
 	private EquipmentStandardMapSearcher equipmentStandardMapSearcher;
 	
 	@Autowired
-	private UserProvider userProvider;
-	
-	@Autowired
 	private CommunityProvider communityProvider;
+
+	@Autowired
+	private AppUrlService appUrlService;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -865,6 +453,9 @@ public class EquipmentServiceImpl implements EquipmentService {
         try {
             // path是指欲下载的文件的路径。
             File file = new File(path);
+			if ( !file.isFile() ) {
+				LOGGER.info("filename:{} is not a file", path);
+			}
             // 取得文件名。
             String filename = file.getName();
             // 取得文件的后缀名。
@@ -888,8 +479,9 @@ public class EquipmentServiceImpl implements EquipmentService {
             
             // 读取完成删除文件
             if (file.isFile() && file.exists()) {  
-                file.delete();  
+                file.delete();
             } 
+
         } catch (IOException ex) { 
  			LOGGER.error(ex.getMessage());
  			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
@@ -1243,7 +835,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 						eqAccessoryMap.add(map);
 					}
 				}
-				
+
+				deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
 				if(cmd.getAttachments() != null) {
 					for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
 						attachment.setEquipmentId(equipment.getId());
@@ -1359,7 +952,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					eqAccessoryMap.add(map);
 				}
 			}
-			
+			deleteEquipmentAttachmentsByEquipmentId(equipment.getId());
 			if(cmd.getAttachments() != null) {
 				for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
 					attachment.setEquipmentId(equipment.getId());
@@ -1450,15 +1043,24 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipmentProvider.updateEquipmentAccessoryMap(map);
 		}
 	}
-	
+
+	private void deleteEquipmentAttachmentsByEquipmentId(Long equipmentId) {
+		List<EquipmentInspectionEquipmentAttachments> attachments = equipmentProvider.findEquipmentAttachmentsByEquipmentId(equipmentId);
+		if(attachments != null && attachments.size() > 0) {
+			attachments.forEach(attachment -> {
+				equipmentProvider.deleteEquipmentAttachmentById(attachment.getId());
+			});
+		}
+	}
+
 	private void updateEquipmentAttachment(EquipmentAttachmentDTO dto, Long uid) {
 		
 		EquipmentInspectionEquipmentAttachments attachment = ConvertHelper.convert(dto, 
 				EquipmentInspectionEquipmentAttachments.class);
 		
-		if(dto.getId() != null) {
-			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
-		} 
+//		if(dto.getId() != null) {
+//			equipmentProvider.deleteEquipmentAttachmentById(dto.getId());
+//		}
 
 		attachment.setCreatorUid(uid);
 		equipmentProvider.creatEquipmentAttachment(attachment);
@@ -1587,6 +1189,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		filePath = filePath + "Equipments"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 		this.createEquipmentsBook(filePath, dtos);
+		LOGGER.info("filePath:{}", filePath);
 		
 		return download(filePath,response);
 	}
@@ -1896,9 +1499,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentTaskDTO dto = updateEquipmentTasks(task, log, cmd.getAttachments());
 			List<InspectionItemResult> itemResults = cmd.getItemResults();
 			if(itemResults != null && itemResults.size() > 0) {
+
 				for(InspectionItemResult itemResult : itemResults) {
 					EquipmentInspectionItemResults result = ConvertHelper.convert(itemResult, EquipmentInspectionItemResults.class);
 					result.setTaskLogId(log.getId());
+					result.setCommunityId(task.getTargetId());
+					result.setStandardId(task.getStandardId());
+					result.setEquipmentId(task.getEquipmentId());
+					result.setInspectionCategoryId(task.getInspectionCategoryId());
+					result.setNamespaceId(task.getNamespaceId());
 					equipmentProvider.createEquipmentInspectionItemResults(result);
 				}
 			}
@@ -1918,6 +1527,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		equipmentProvider.updateEquipmentTask(task);
 		equipmentTasksSearcher.feedDoc(task);
+
+		log.setInspectionCategoryId(task.getInspectionCategoryId());
+		log.setCommunityId(task.getTargetId());
+		log.setNamespaceId(task.getNamespaceId());
 		equipmentProvider.createEquipmentInspectionTasksLogs(log);
 		
 		User user = UserContext.current().getUser();
@@ -2222,7 +1835,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		updateEquipmentTasks(task, log, null);
 	}
-	
+
+	@Override
+	public void reviewEquipmentTasks(ReviewEquipmentTasksCommand cmd) {
+		cmd.getTaskIds().forEach(taskId -> {
+			ReviewEquipmentTaskCommand command = new ReviewEquipmentTaskCommand();
+			command.setEndTime(cmd.getEndTime());
+			command.setOperatorId(cmd.getOperatorId());
+			command.setOperatorType(cmd.getOperatorType());
+			command.setOwnerId(cmd.getOwnerId());
+			command.setOwnerType(cmd.getOwnerType());
+			command.setReviewResult(cmd.getReviewResult());
+			command.setTaskId(taskId);
+			reviewEquipmentTask(command);
+		});
+	}
+
 	private void sendMessageToUser(Long userId, String content) {
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -3043,10 +2671,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		}
 
 		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					null, null, offset, userId);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode());
+
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, null, null, offset, userId);
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey, AdminFlag.YES.getCode());
 
 		}
 		if(!isAdmin) {
@@ -3068,11 +2697,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(), targetTypes, targetIds,
 					executeStandardIds, reviewStandardIds, offset, userId);
 
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getInspectionCategoryId(), targetTypes, targetIds,
-					executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
+
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getTaskStatus(), cmd.getInspectionCategoryId(),
+					targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey, AdminFlag.NO.getCode());
+
 
 		}
 
@@ -3129,7 +2760,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 
-	private String convertListEquipmentInspectionTasksCache(Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
+	private String convertListEquipmentInspectionTasksCache(List<Byte> taskStatus, Long inspectionCategoryId,List<String> targetType, List<Long> targetId,
 				List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
@@ -3147,7 +2778,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(targetId != null && targetId.size() > 0) {
 			sb.append(targetId.get(0));
 		}
-
+		sb.append(taskStatus);
+		sb.append("-");
 		sb.append(inspectionCategoryId);
 		sb.append("-");
 		sb.append(offset);
@@ -3868,10 +3500,18 @@ public class EquipmentServiceImpl implements EquipmentService {
         	tasks.remove(tasks.size() - 1);
         	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
         }
-        
+		Timestamp ts = new Timestamp(DateHelper.currentGMTTime().getTime());
     	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
+			//扫出来的任务要是当前时间能执行的任务 by xiongying20170417
+			if(r.getProcessExpireTime() == null) {
+				r.setProcessExpireTime(new Timestamp(0L));
+			}
+			if(ts.after(r.getExecutiveStartTime())
+					&& (ts.before(r.getExecutiveExpireTime()) || ts.before(r.getProcessExpireTime()))) {
+				EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+				return dto;
+			}
+        	return null;
         }).filter(r->r!=null).collect(Collectors.toList());
         
 		response.setTasks(dtos);
@@ -3932,26 +3572,13 @@ public class EquipmentServiceImpl implements EquipmentService {
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
         }
        
-//		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(taskIdlist);
-//		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
-//        for(QualityInspectionTasks task : tasks) {
-//        	QualityInspectionTaskRecords record = equipmentProvider.listLastRecordByTaskId(task.getId());
-//        	if(record != null) {
-//        		task.setRecord(record);
-//            	records.add(task.getRecord());
-//        	}
-//        	
-//        }
-//
-//		this.qualityProvider.populateRecordAttachments(records);
-//		this.qualityProvider.populateRecordItemResults(records);
-//
-//		for(QualityInspectionTaskRecords record : records) {
-//			populateRecordAttachements(record, record.getAttachments());
-//		}
-//        
-//		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
-//		response.setTasks(dtoList);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(taskIdlist);
+
+		List<EquipmentTaskDTO> dtoList = tasks.stream().map(task -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+		response.setTasks(dtoList);
 		return response;
 	}
 
@@ -3994,6 +3621,308 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		response.setTasks(tasks);
 		return response;
+	}
+
+	public void exportEquipmentsCard(ExportEquipmentsCardCommand cmd, HttpServletResponse response) {
+		List<Long> equipmentIds = new ArrayList<>();
+		if(!StringUtils.isEmpty(cmd.getIds())) {
+			String[] ids = cmd.getIds().split(",");
+			for(String id : ids) {
+				equipmentIds.add(Long.valueOf(id));
+			}
+		}
+		LOGGER.info("equipmentIds: {}", equipmentIds);
+		List<EquipmentInspectionEquipments> equipments = equipmentProvider.listEquipmentsById(equipmentIds);
+		List<EquipmentsDTO> dtos = equipments.stream().map(equipment -> {
+			EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		String filePath = cmd.getFilePath();
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			URL rootPath = EquipmentServiceImpl.class.getResource("/");
+			filePath = rootPath.getPath() + this.downloadDir ;
+			File file = new File(filePath);
+			if(!file.exists())
+				file.mkdirs();
+
+		}
+
+//		return download(filePath,response);
+
+		DocUtil docUtil=new DocUtil();
+		List<String> files = new ArrayList<>();
+		if(dtos.size() % 2 == 1) {
+			EquipmentsDTO dto = dtos.get(dtos.size() - 1);
+			
+			Map<String, Object> dataMap=createEquipmentCardDoc(dto);
+
+			GetAppInfoCommand command = new GetAppInfoCommand();
+			command.setNamespaceId(dto.getNamespaceId());
+			command.setOsType(OSType.Android.getCode());
+			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(appUrlDTO.getLogoUrl() != null) {
+				dataMap.put("shenyeLogo", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+			}
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
+				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
+				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
+				dataMap.put("qrCode", encoder.encode(data));
+			}
+
+			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
+			docUtil.createDoc(dataMap, "shenye", savePath);
+
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+//				download(savePath,response);
+				files.add(savePath);
+			}
+			dtos.remove(dtos.size() - 1);
+		}
+
+		for(int i = 0; i <dtos.size(); i = i+2) {
+			EquipmentsDTO dto1 = dtos.get(i);
+			EquipmentsDTO dto2 = dtos.get(i+1);
+//			DocUtil docUtil=new DocUtil();
+			Map<String, Object> dataMap=createTwoEquipmentCardDoc(dto1, dto2);
+
+			GetAppInfoCommand command = new GetAppInfoCommand();
+			command.setNamespaceId(dto1.getNamespaceId());
+			command.setOsType(OSType.Android.getCode());
+			AppUrlDTO appUrlDTO = appUrlService.getAppInfo(command);
+			if(appUrlDTO.getLogoUrl() != null) {
+				dataMap.put("shenyeLogo1", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+				dataMap.put("shenyeLogo2", docUtil.getUrlImageStr(appUrlDTO.getLogoUrl()));
+			}
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
+				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
+				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
+				dataMap.put("qrCode1", encoder.encode(data));
+			}
+
+			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
+				ByteArrayOutputStream out = generateQRCode(dto2.getQrCodeToken());
+				byte[] data=out.toByteArray();
+				BASE64Encoder encoder=new BASE64Encoder();
+				dataMap.put("qrCode2", encoder.encode(data));
+			}
+
+			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
+					"-" + dto2.getId()+ "-" + dto2.getName() + ".doc";
+
+			docUtil.createDoc(dataMap, "shenye2", savePath);
+			if(StringUtils.isEmpty(cmd.getFilePath())) {
+//				download(savePath,response);
+				files.add(savePath);
+			}
+		}
+		if(StringUtils.isEmpty(cmd.getFilePath())) {
+			if(files.size() > 1) {
+				String zipPath = filePath + System.currentTimeMillis() + "EquipmentCard.zip";
+				LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+				DownloadUtils.writeZip(files, zipPath);
+				download(zipPath,response);
+			} else if(files.size() == 1) {
+				download(files.get(0),response);
+			}
+
+		}
+
+	}
+
+	private Timestamp getDayBegin(Calendar cal, int period) {
+		cal.add(Calendar.DATE, period);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.MILLISECOND, 001);
+		return new Timestamp(cal.getTimeInMillis());
+	}
+
+	private Timestamp getDayEnd(Calendar cal, int period) {
+		cal.add(Calendar.DATE, period);
+		cal.set(Calendar.HOUR_OF_DAY, 23);
+		cal.set(Calendar.SECOND, 59);
+		cal.set(Calendar.MINUTE, 59);
+		cal.set(Calendar.MILLISECOND, 999);
+		return new Timestamp(cal.getTimeInMillis());
+	}
+
+	@Override
+	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
+		StatTodayEquipmentTasksResponse response = ConvertHelper.convert(stat, StatTodayEquipmentTasksResponse.class);
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setCurrentWaitingForExecuting(response.getWaitingForExecuting() + response.getInMaintance());
+		response.setCurrentWaitingForApproval(response.getCompleteWaitingForApproval() + response.getCompleteMaintanceWaitingForApproval() + response.getNeedMaintanceWaitingForApproval());
+		response.setReviewed(response.getReviewQualified() + response.getReviewUnqualified());
+		return response;
+	}
+
+	@Override
+	public StatLastDaysEquipmentTasksResponse statLastDaysEquipmentTasks(StatLastDaysEquipmentTasksCommand cmd) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), getDayBegin(cal, -cmd.getLastDays()), getDayEnd(cal, 0));
+
+		StatLastDaysEquipmentTasksResponse response = new StatLastDaysEquipmentTasksResponse();
+		response.setComplete(statTasks.getComplete());
+		response.setCompleteInspection(statTasks.getCompleteInspection());
+		response.setCompleteMaintance(statTasks.getCompleteMaintance());
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+		response.setReviewed(response.getReviewQualified()+response.getReviewUnqualified());
+		return response;
+	}
+
+	@Override
+	public StatIntervalAllEquipmentTasksResponse statIntervalAllEquipmentTasks(StatIntervalAllEquipmentTasksCommand cmd) {
+		Timestamp begin = null;
+		Timestamp end = null;
+		if(cmd.getStartTime() != null) {
+			begin = new Timestamp(cmd.getStartTime());
+		}
+		if(cmd.getEndTime() != null) {
+			end = new Timestamp((cmd.getEndTime()));
+		}
+		TasksStatData statTasks = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
+				cmd.getInspectionCategoryId(), begin, end);
+		ReviewedTaskStat reviewStat = equipmentProvider.statDaysReviewedTasks(cmd.getTargetId(),
+				cmd.getInspectionCategoryId(), begin, end);
+
+		StatIntervalAllEquipmentTasksResponse response = ConvertHelper.convert(statTasks, StatIntervalAllEquipmentTasksResponse.class);
+		response.setReviewUnqualified(reviewStat.getUnqualifiedTasks());
+		response.setReviewQualified(reviewStat.getQualifiedTasks());
+		response.setReviewedTasks(response.getReviewUnqualified() + response.getReviewQualified());
+		response.setUnReviewedTasks(statTasks.getNeedMaintanceWaitingForApproval() + statTasks.getCompleteWaitingForApproval());
+		response.setReviewTasks(response.getUnReviewedTasks() + response.getReviewedTasks());
+
+		Double maintanceRate = response.getComplete().equals(0L) ? 0.00 : (double)response.getCompleteMaintance()/(double)response.getComplete();
+		response.setMaintanceRate(maintanceRate);
+		Double delayRate = (response.getComplete()+response.getDelay()) == 0L ? 0.00 : (double)response.getDelay()/(double)(response.getComplete()+response.getDelay());
+		response.setDelayRate(delayRate);
+		Double reviewQualifiedRate = response.getReviewedTasks().equals(0L) ? 0.00 : (double)response.getReviewQualified()/(double)response.getReviewedTasks();
+		response.setReviewQualifiedRate(reviewQualifiedRate);
+		Double reviewDalayRate = response.getReviewTasks().equals(0L) ? 0.00 : (double)response.getReviewDelayTasks()/(double)response.getReviewTasks();
+		response.setReviewDalayRate(reviewDalayRate);
+
+		return response;
+	}
+
+	@Override
+	public StatItemResultsInEquipmentTasksResponse statItemResultsInEquipmentTasks(StatItemResultsInEquipmentTasksCommand cmd) {
+		StatItemResultsInEquipmentTasksResponse response = new StatItemResultsInEquipmentTasksResponse();
+//		itemResultStat: 巡检参数统计 参考ItemResultStat
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		if(equipment != null) {
+			response.setEquipmentName(equipment.getName());
+			response.setCustomNumber(equipment.getCustomNumber());
+			response.setLocation(equipment.getLocation());
+		}
+
+		Timestamp begin = null;
+		Timestamp end = null;
+		if(cmd.getStartTime() != null) {
+			begin = new Timestamp(cmd.getStartTime());
+		}
+		if(cmd.getEndTime() != null) {
+			end = new Timestamp((cmd.getEndTime()));
+		}
+		List<ItemResultStat> results = equipmentProvider.statItemResults(cmd.getEquipmentId(), cmd.getStandardId(),
+				begin, end);
+		results.forEach(result -> {
+			EquipmentInspectionItems item = equipmentProvider.findEquipmentInspectionItem(result.getItemId());
+			if(item != null) {
+				result.setValueJason(item.getValueJason());
+				result.setValueType(item.getValueType());
+			}
+		});
+		response.setItemResultStat(results);
+		return response;
+	}
+
+	@Override
+	public ListEquipmentTasksResponse listAbnormalTasks(ListAbnormalTasksCommand cmd) {
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(cmd.getAbnormalTaskIds());
+		if(tasks != null && tasks.size() > 0) {
+			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
+				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+				return dto;
+			}).collect(Collectors.toList());
+
+			response.setTasks(dtos);
+		}
+		return response;
+	}
+
+	private ByteArrayOutputStream generateQRCode(String qrToken) {
+		ByteArrayOutputStream out = null;
+		try {
+			BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 270, 270, null);
+			out = new ByteArrayOutputStream();
+			ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (WriterException e) {
+			e.printStackTrace();
+		}
+
+		return out;
+	}
+
+	private Map<String, Object> createEquipmentCardDoc(EquipmentsDTO dto) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		dataMap.put("sequenceNo", dto.getSequenceNo());
+		dataMap.put("versionNo", dto.getVersionNo());
+		dataMap.put("name", dto.getName());
+		dataMap.put("equipmentModel", dto.getEquipmentModel());
+		dataMap.put("parameter", dto.getParameter());
+		dataMap.put("customNumber", dto.getCustomNumber());
+		dataMap.put("manufacturer", dto.getManufacturer());
+		dataMap.put("manager", dto.getManager());
+		dataMap.put("status",EquipmentStatus.fromStatus(dto.getStatus()).getName());
+
+		return dataMap;
+	}
+
+	private Map<String, Object> createTwoEquipmentCardDoc(EquipmentsDTO dto1, EquipmentsDTO dto2) {
+		Map<String, Object> dataMap=new HashMap<String, Object>();
+		dataMap.put("sequenceNo1", dto1.getSequenceNo());
+		dataMap.put("versionNo1", dto1.getVersionNo());
+		dataMap.put("name1", dto1.getName());
+		dataMap.put("equipmentModel1", dto1.getEquipmentModel());
+		dataMap.put("parameter1", dto1.getParameter());
+		dataMap.put("customNumber1", dto1.getCustomNumber());
+		dataMap.put("manufacturer1", dto1.getManufacturer());
+		dataMap.put("manager1", dto1.getManager());
+		dataMap.put("status1",EquipmentStatus.fromStatus(dto1.getStatus()).getName());
+
+		dataMap.put("sequenceNo2", dto2.getSequenceNo());
+		dataMap.put("versionNo2", dto2.getVersionNo());
+		dataMap.put("name2", dto2.getName());
+		dataMap.put("equipmentModel2", dto2.getEquipmentModel());
+		dataMap.put("parameter2", dto2.getParameter());
+		dataMap.put("customNumber2", dto2.getCustomNumber());
+		dataMap.put("manufacturer2", dto2.getManufacturer());
+		dataMap.put("manager2", dto2.getManager());
+		dataMap.put("status2",EquipmentStatus.fromStatus(dto2.getStatus()).getName());
+
+		return dataMap;
 	}
 
 }

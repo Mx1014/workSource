@@ -5555,9 +5555,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 					organizationProvider.updateOrganizationMember(m);
 				}
 			}
-
+			UserIdentifier userIdentifier = null;
 			if(m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
+				userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
 
 				if(null == userIdentifier){
 					User newuser = new User();
@@ -5593,8 +5593,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setNamespaceId(namespaceId);
 				organizationProvider.updateOrganizationMember(m);
 
-//				userSearcher.feedDoc(m);
 			}
+
+			//刷新企业通讯录
+			if(null != userIdentifier)
+				processUserForMember(userIdentifier);
 
 			if(null != cmd.getAssignmentId())
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
@@ -8748,11 +8751,11 @@ System.out.println();
 	}
 
 	@Override
-	public OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId){
+	public OrganizationDTO getMemberTopDepartment(List<String> groupTypes, String token, Long organizationId){
 
 		Organization organization = checkOrganization(organizationId);
 
-		List<OrganizationDTO> dtos = getOrganizationMemberGroups(organizationGroupType, token, organization.getPath());
+		List<OrganizationDTO> dtos = getOrganizationMemberGroups(groupTypes, token, organization.getPath());
 
 		if(null == dtos || 0 == dtos.size()){
 			return ConvertHelper.convert(organization, OrganizationDTO.class);
@@ -9010,7 +9013,9 @@ System.out.println();
 		}
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode()); 
+		return this.getMemberTopDepartment(groupTypes, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
 	}
 
 	private void setUserDefaultCommunityByOrganization(Integer namespaceId, Long userId, Long oranizationId) {

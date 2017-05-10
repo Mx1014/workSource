@@ -111,7 +111,7 @@ public interface PunchProvider {
  
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay);
 
-	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId, String name);
+	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId,String targetType , Long targetId, String name);
 
 	PunchTimeRule getPunchTimeRuleById(Long id);
 
@@ -282,6 +282,11 @@ public interface PunchProvider {
 			java.sql.Date beginDate , java.sql.Date endDate);
 
 	PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType, Long targetId);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType,
+			Long targetId, CrossShardListingLocator locator, int pageSize);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(Long startTimeLong, Long endTimeLong);
  
  
  

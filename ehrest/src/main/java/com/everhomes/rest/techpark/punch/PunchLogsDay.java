@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  * <li>leaveTime:下午离开时间</li>
  * <li>noonLeaveTime:早上离开时间-四次打卡</li>
  * <li>afternoonArriveTime:下午到达时间-四次打卡</li>
+ * <li>statuString：状态文字</li> 
  * </ul>
  */
 public class PunchLogsDay{
@@ -72,6 +73,8 @@ public class PunchLogsDay{
     private Long leaveTime; 
     private Long noonLeaveTime;
     private Long afternoonArriveTime;
+    //added by wh 增加状态说明文字
+    private String statuString;
 
 	public Byte getMorningPunchStatus() {
 		return morningPunchStatus;
@@ -414,6 +417,18 @@ public class PunchLogsDay{
 
 	public void setAfternoonArriveTime(Long afternoonArriveTime) {
 		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
+
+
+	public String getStatuString() {
+		return statuString;
+	}
+
+
+
+	public void setStatuString(String statuString) {
+		this.statuString = statuString;
 	}
 
 

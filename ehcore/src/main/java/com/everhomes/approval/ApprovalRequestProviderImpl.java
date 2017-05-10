@@ -1,17 +1,23 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.math.BigDecimal;
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.Row2;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +37,12 @@ import com.everhomes.server.schema.tables.daos.EhApprovalRequestsDao;
 import com.everhomes.server.schema.tables.pojos.EhApprovalRequests;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ListUtils;
+import com.hp.hpl.sparta.xpath.Step;
 
 @Component
 public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApprovalRequestProviderImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -333,5 +341,31 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	public void deleteApprovalRequest(ApprovalRequest approvalRequest) {
 		getReadWriteDao().delete(approvalRequest);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhApprovalRequests.class, null);
+	}
+
+	@Override
+	public Double countHourLengthByUserAndMonth(Long userId, String ownerType, Long ownerId,
+			String punchMonth) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Date beginDate;
+		try {
+			beginDate = new Date(dateFormat.parse(punchMonth+"01").getTime());
+		
+			Date endDate = new Date(dateFormat.parse((Integer.valueOf(punchMonth)+1)+"01").getTime());
+			SelectConditionStep<Record1<BigDecimal>> step = getReadOnlyContext().select(Tables.EH_APPROVAL_REQUESTS.HOUR_LENGTH.sum()).from(Tables.EH_APPROVAL_REQUESTS)
+					.where(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(userId))
+					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+					.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(beginDate))
+					.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lt(endDate))
+					.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.AGREEMENT.getCode()));
+//			LOGGER.debug(step.toString());
+			return step.fetchOneInto(Double.class);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return 0.0;
+		}
+		  
 	}
 }
