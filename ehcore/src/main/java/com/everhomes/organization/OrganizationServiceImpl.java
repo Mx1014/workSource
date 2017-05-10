@@ -6983,7 +6983,7 @@ System.out.println();
 		   }
 
 	   }
-	   return includeList;
+       return includeList.stream().distinct().collect(Collectors.toList());
    }
 
 	private void sendRouterEnterpriseNotificationUseSystemUser(
@@ -7012,7 +7012,7 @@ System.out.println();
                 if (excludeList != null && excludeList.size() > 0) {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
-                includeList.forEach(targetId -> {
+                includeList.stream().distinct().forEach(targetId -> {
                     messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
@@ -7022,7 +7022,6 @@ System.out.println();
         }
 	}
 
-	// add by xq.tian   2017/05/05
 	@Deprecated
 	private void sendEnterpriseNotification(Long groupId,
 			List<Long> includeList, List<Long> excludeList, String message,
@@ -7078,7 +7077,7 @@ System.out.println();
                 if (excludeList != null && excludeList.size() > 0) {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
-                includeList.forEach(targetId -> {
+                includeList.stream().distinct().forEach(targetId -> {
                     messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
