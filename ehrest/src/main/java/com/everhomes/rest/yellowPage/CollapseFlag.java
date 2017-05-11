@@ -11,12 +11,12 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
  *
  *  @author:dengs 2017年5月11日
  */
-public enum CollapseDescription {
+public enum CollapseFlag {
 	TRUE((byte)1), FALSE((byte)0);
 	
 	private byte code;
 	
-	private CollapseDescription(Byte code) {
+	private CollapseFlag(Byte code) {
 		this.code = code;
 	}
 	
