@@ -5569,7 +5569,7 @@ public class PunchServiceImpl implements PunchService {
 		if(targetType.equals(PunchOwnerType.User.getCode())){
 			//如果有个人规则就返回个人规则
 			map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, targetType, targetId);
-			if (null != map && map.getPunchRuleId() != null) 
+			if (null != map ) 
 				return map;
 			//如果没有就按照部门来找规则
 			OrganizationDTO deptDTO = findUserDepartment(targetId, ownerId);
