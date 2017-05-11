@@ -33,7 +33,7 @@ import com.everhomes.util.StringHelper;
  *<li>payTime:支付时间</li>
  *<li>refundOrderNo:退款订单号</li>
  *<li>refundAmount:退款金额</li>
- *<li>refundTime:退款金额</li>
+ *<li>refundTime:退款时间</li>
  *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
  *</ul>
  */
