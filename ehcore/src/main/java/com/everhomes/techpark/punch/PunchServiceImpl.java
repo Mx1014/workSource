@@ -4092,6 +4092,9 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+            LOGGER.debug("dto",dto.toString());
+
+            punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
 //				dto.setOverTimeSum(0.0);
 //			}
@@ -4143,8 +4146,6 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 			}
-
-			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
 		response.setNextPageAnchor(nextPageAnchor);
