@@ -5031,6 +5031,7 @@ public class PunchServiceImpl implements PunchService {
 			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
 				else{
  
 					LOGGER.error("Invalid target type or  Id parameter in the command");
