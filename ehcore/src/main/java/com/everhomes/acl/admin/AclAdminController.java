@@ -221,7 +221,7 @@ public class AclAdminController extends ControllerBase {
     public RestResponse listAclRoleByOrganizationId(@Valid ListAclRolesCommand cmd) {
     	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeList);
     	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationId(cmd));
+    	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
