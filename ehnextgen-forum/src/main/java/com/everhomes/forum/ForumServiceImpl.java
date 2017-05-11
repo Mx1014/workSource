@@ -4010,7 +4010,7 @@ public class ForumServiceImpl implements ForumService {
 //        if(null == EntityType.fromCode(ownerType) && null == ownerId && null == currentOrgId){
 //            return;
 //        }
-        if(CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+        if(categoryId != null && CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
             resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.PUBLISH_NOTICE_TOPIC);
         }
     }

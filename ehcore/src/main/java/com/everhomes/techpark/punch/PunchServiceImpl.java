@@ -2309,7 +2309,9 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptId(dept.getId());
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
-		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), orgId, dateSF.get().format(startCalendar.getTime()),
+
+        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+ 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 		for(PunchDayLog dayLog : dayLogList){
@@ -2332,17 +2334,25 @@ public class PunchServiceImpl implements PunchService {
 			}
 			
 		}
-		if(statistic.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
-			processTwicePunchListCount(list, statistic);
-		}
-		else{
-			processForthPunchListCount(list, statistic);
-		} 
-		this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),statistic.getOwnerId(),statistic.getPunchMonth(),statistic.getUserId());
+//		if(statistic.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
+//			processTwicePunchListCount(list, statistic);
+//		}
+//		else{
+//			processForthPunchListCount(list, statistic);
+//		}
+		processPunchListCount(list, statistic);
+
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
+        List<Long> orgIds = new ArrayList();
+        if(null!=organizations)
+            for(Organization org1 : organizations)
+                orgIds.add(org1.getId());
+        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),orgIds,statistic.getPunchMonth(),statistic.getUserId());
+
 		this.punchProvider.createPunchStatistic(statistic);
-		
+
 	}
-	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
+	private void processPunchListCount(List<PunchStatisticsDTO> list,
 			PunchStatistic statistic) { 
 		statistic.setWorkCount(0.0);
 		statistic.setUnpunchCount(0.0);
@@ -2356,282 +2366,343 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setOverTimeSum(0L); 
 		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 		for (PunchStatisticsDTO punchDayLogDTO : list) {
-			if (punchDayLogDTO.getMorningApprovalStatus() != null) {
-				//上午
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}
-				//下午
-				
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}
-				//加班和正常
-				if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()||ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
-					statistic.setOverTimeSum(statistic.getOverTimeSum()+((punchDayLogDTO.getWorkTime()==null)?0L:punchDayLogDTO.getWorkTime()));
-				}else  if(ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()&&ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
-					statistic.setWorkCount(statistic.getWorkCount()+1);
-				}
-			} else {
-				//上午
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}
-				//下午
-				
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}
-				//加班和正常
-				if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonStatus()||ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningStatus()){
-					statistic.setOverTimeSum(statistic.getOverTimeSum()+
-							((punchDayLogDTO.getWorkTime()==null)?0L:punchDayLogDTO.getWorkTime()));
-				}else  if(ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonStatus()&&ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningStatus()) {
-					statistic.setWorkCount(statistic.getWorkCount()+1);
-				} 
+			if(punchDayLogDTO.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())) {
+				countForthStatistic(punchDayLogDTO,statistic);
+			}else if (punchDayLogDTO.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())) {
+				countTwiceStatistic(punchDayLogDTO, statistic);
+			}
 
-				//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
-				statistic.setWorkCount(statistic.getWorkDayCount()-statistic.getUnpunchCount()-statistic.getAbsenceCount()
-						-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
+		}
+			//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
+		statistic.setWorkCount(statistic.getWorkDayCount() - statistic.getUnpunchCount() - statistic.getAbsenceCount()
+				- statistic.getSickCount() - statistic.getOutworkCount() - statistic.getExchangeCount());
+
+		}
+
+	private void countTwiceStatistic(PunchStatisticsDTO punchDayLogDTO, PunchStatistic statistic) {
+		if (punchDayLogDTO.getApprovalStatus() != null) {
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				statistic.setOverTimeSum(statistic.getOverTimeSum() + punchDayLogDTO.getWorkTime());
+			}
+		} else {
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getStatus()) {
+				statistic.setOverTimeSum(statistic.getOverTimeSum() + punchDayLogDTO.getWorkTime());
 			}
 		}
 	}
-	private void processTwicePunchListCount(List<PunchStatisticsDTO> list, PunchStatistic statistic) {
-		statistic.setWorkCount(0.0);
-		statistic.setUnpunchCount(0.0);
-		statistic.setSickCount(0.0);
-		statistic.setOutworkCount(0.0);
-		statistic.setLeaveEarlyCount(0);
-		statistic.setExchangeCount(0.0);
-		statistic.setBlandleCount(0);
-		statistic.setBelateCount(0);
-		statistic.setAbsenceCount(0.0); 
-		statistic.setOverTimeSum(0L); 
-		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
-		for (PunchStatisticsDTO punchDayLogDTO : list) {
-			if (punchDayLogDTO.getApprovalStatus() != null) {
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getApprovalStatus()){
-					statistic.setOverTimeSum(statistic.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
-				} 
-			} else {
-				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setSickCount(statistic.getSickCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setSickCount(statistic.getSickCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setBlandleCount(statistic.getBlandleCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setBelateCount(statistic.getBelateCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+1);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
-					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
-				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getStatus()){
-					statistic.setOverTimeSum(statistic.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
-				} 
+
+	private void countForthStatistic(PunchStatisticsDTO punchDayLogDTO, PunchStatistic statistic) {
+		if (punchDayLogDTO.getMorningApprovalStatus() != null) {
+            //审批后的状态
+			//上午
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
 			}
+			//下午
+
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setSickCount(statistic.getSickCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setOutworkCount(statistic.getOutworkCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setExchangeCount(statistic.getExchangeCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+			//加班和正常
+			if (ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonApprovalStatus() || ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setOverTimeSum(statistic.getOverTimeSum() + ((punchDayLogDTO.getWorkTime() == null) ? 0L : punchDayLogDTO.getWorkTime()));
+			} else if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonApprovalStatus() && ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+				statistic.setWorkCount(statistic.getWorkCount() + 1);
+			}
+		} else {
+            //未审批的状态
+			//上午
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}  else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+			//下午
+
+			if (ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setUnpunchCount(statistic.getUnpunchCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}  else if (ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setBlandleCount(statistic.getBlandleCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setBelateCount(statistic.getBelateCount() + 1);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			} else if (ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()) {
+				statistic.setAbsenceCount(statistic.getAbsenceCount() + 0.5);
+				statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+			}
+			//加班和正常
+			if (ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonStatus() || ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setOverTimeSum(statistic.getOverTimeSum() +
+						((punchDayLogDTO.getWorkTime() == null) ? 0L : punchDayLogDTO.getWorkTime()));
+			} else if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonStatus() && ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningStatus()) {
+				statistic.setWorkCount(statistic.getWorkCount() + 1);
+			}
+
 		}
-		//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
-		statistic.setWorkCount(statistic.getWorkDayCount()-statistic.getUnpunchCount()-statistic.getAbsenceCount()
-				-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
 	}
-	 
+
+//	private void processTwicePunchListCount(List<PunchStatisticsDTO> list, PunchStatistic statistic) {
+//		statistic.setWorkCount(0.0);
+//		statistic.setUnpunchCount(0.0);
+//		statistic.setSickCount(0.0);
+//		statistic.setOutworkCount(0.0);
+//		statistic.setLeaveEarlyCount(0);
+//		statistic.setExchangeCount(0.0);
+//		statistic.setBlandleCount(0);
+//		statistic.setBelateCount(0);
+//		statistic.setAbsenceCount(0.0);
+//		statistic.setOverTimeSum(0L);
+//		statistic.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+//		for (PunchStatisticsDTO punchDayLogDTO : list) {
+//			if (punchDayLogDTO.getApprovalStatus() != null) {
+//				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setSickCount(statistic.getSickCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setSickCount(statistic.getSickCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setOutworkCount(statistic.getOutworkCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setExchangeCount(statistic.getExchangeCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setBlandleCount(statistic.getBlandleCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setBelateCount(statistic.getBelateCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setAbsenceCount(statistic.getAbsenceCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getApprovalStatus()){
+//					statistic.setOverTimeSum(statistic.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
+//				}
+//			} else {
+//				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setUnpunchCount(statistic.getUnpunchCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setSickCount(statistic.getSickCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setSickCount(statistic.getSickCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setOutworkCount(statistic.getOutworkCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setOutworkCount(statistic.getOutworkCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setLeaveEarlyCount(statistic.getLeaveEarlyCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setExchangeCount(statistic.getExchangeCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setExchangeCount(statistic.getExchangeCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setBlandleCount(statistic.getBlandleCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setBelateCount(statistic.getBelateCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setAbsenceCount(statistic.getAbsenceCount()+1);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setAbsenceCount(statistic.getAbsenceCount()+0.5);
+//					statistic.setExceptionStatus(ExceptionStatus.EXCEPTION.getCode());
+//				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getStatus()){
+//					statistic.setOverTimeSum(statistic.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
+//				}
+//			}
+//		}
+//		//应上班天数－缺勤天数－事假天数-病假天数-调休天数-公出天数-调休天数
+//		statistic.setWorkCount(statistic.getWorkDayCount()-statistic.getUnpunchCount()-statistic.getAbsenceCount()
+//				-statistic.getSickCount()-statistic.getOutworkCount()-statistic.getExchangeCount());
+//	}
+
 //	// 创建每个user的打卡map信息
 //	private Map<Long, List<PunchStatisticsDTO>> buildUserPunchCountMap(
 //			List<PunchStatisticsDTO> punchDayLogDTOList) {
@@ -3994,14 +4065,15 @@ public class PunchServiceImpl implements PunchService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		Long organizationId = org.getDirectlyEnterpriseId();
-		if(organizationId.equals(0L))
-			organizationId = org.getId();
+//		Long organizationId = org.getDirectlyEnterpriseId();
+//		if(organizationId.equals(0L))
+//			organizationId = org.getId();
+        Long organizationId = getTopEnterpriseId(cmd.getOwnerId());
 		List<PunchStatistic> results = this.punchProvider.queryPunchStatistics(cmd.getOwnerType(),
 				organizationId,cmd.getMonth(),
 				cmd.getExceptionStatus(),userIds, locator, pageSize + 1 );
 		response.setExtColumns(new ArrayList<>());
-		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  cmd.getOwnerId(), ApprovalType.ABSENCE.getCode());
+		List<ApprovalCategory> categories = approvalCategoryProvider.listApprovalCategory(UserContext.getCurrentNamespaceId(), cmd.getOwnerType(),  organizationId, ApprovalType.ABSENCE.getCode());
 		if(null != categories){
 			for(ApprovalCategory category : categories){
 				response.getExtColumns().add(category.getCategoryName());
@@ -4823,18 +4895,25 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/15 * * * ?")
+	@Scheduled(cron = "1 0/2 * * * ?")
 	@Override
-	public void dayRefreshLogScheduled(){
-		
-		  
-			
+	public void dayRefreshLogScheduled() {
+
+
+        Date runDate = DateHelper.currentGMTTime();
+        dayRefreshLogScheduled(runDate);
+    }
+    @Override
+    public void testDayRefreshLogs(Long runDate){
+        dayRefreshLogScheduled(new Date(runDate));
+    }
+    public void dayRefreshLogScheduled(Date runDate){
 		//刷新前一天的
 		Calendar punCalendar = Calendar.getInstance();
+        punCalendar.setTime(runDate);
 		punCalendar.add(Calendar.DATE, -1);
 		//取所有设置了rule的公司 
 
-		Date runDate = DateHelper.currentGMTTime();
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.setTime(runDate); 
 		endCalendar.set(Calendar.SECOND, 0);

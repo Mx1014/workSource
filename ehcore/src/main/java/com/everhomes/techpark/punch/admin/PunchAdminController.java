@@ -3,6 +3,7 @@ package com.everhomes.techpark.punch.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.techpark.punch.admin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,38 +21,6 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
-import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
-import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
-import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchPointsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
-import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
-import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
-import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
-import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.techpark.punch.PunchService;
 @RestDoc(value = "Punch controller", site = "ehccore")
 @RestController
@@ -828,7 +797,7 @@ public class PunchAdminController extends ControllerBase {
 
 	/**
 	 * <p>
-	 * 清空公司某部门/某人 考勤规则 
+	 * 清空公司某部门/某人 考勤规则
 	 * </p>
 	 * <b>URL: /punch/deleteTargetPunchAllRule</b>
 	 */
@@ -841,4 +810,23 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <p>
+	 * 清空公司某部门/某人 考勤规则
+	 * </p>
+	 * <b>URL: /punch/testPunchDayRefresh</b>
+	 */
+	@RequestMapping("testPunchDayRefresh")
+	@RestReturn(value = String.class)
+	public RestResponse testPunchDayRefresh(@Valid TestPunchDayRefreshCommand cmd) {
+		punchService.testDayRefreshLogs(cmd.getRunDate());
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 }

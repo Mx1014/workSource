@@ -1881,3 +1881,7 @@ INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_t
 INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ((@equipment_category_id := @equipment_category_id + 1), 999978, '', 0, '0', '其他', '/其他', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- 更改服务联盟是否支持审批, add by tt, 20170510
+select max(id) into @id from `eh_service_alliance_jump_module`;
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES (@id+1, 999978, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);

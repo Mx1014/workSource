@@ -26,11 +26,29 @@ public class ParkingClearanceLogDTO {
     private String identifierToken;
     private String plateNumber;
     private Timestamp applyTime;
+    private String applyTimeString;
     private Timestamp clearanceTime;
+    private String clearanceTimeString;
     private String remarks;
     private String status;
 
-    public Long getId() {
+    public String getApplyTimeString() {
+		return applyTimeString;
+	}
+
+	public void setApplyTimeString(String applyTimeString) {
+		this.applyTimeString = applyTimeString;
+	}
+
+	public String getClearanceTimeString() {
+		return clearanceTimeString;
+	}
+
+	public void setClearanceTimeString(String clearanceTimeString) {
+		this.clearanceTimeString = clearanceTimeString;
+	}
+
+	public Long getId() {
         return id;
     }
 

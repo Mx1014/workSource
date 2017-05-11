@@ -199,7 +199,10 @@ public interface OrganizationService {
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
-	OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
+
+    OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier);
+
+    OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);
