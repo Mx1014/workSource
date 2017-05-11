@@ -791,20 +791,20 @@ update eh_launch_pad_items set action_type = 33 where item_label = '装修申请
 
 -- 更多里面增加22个icon
 
-INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
-	VALUES(1, '产业服务', '', 1, 0, 1, 999979);
-INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
-	VALUES(2, '政务服务', '', 1, 0, 1, 999979);
-INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
-	VALUES(3, 'IT服务', '', 1, 0, 1, 999979);
-    
+-- INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
+--	VALUES(1, '产业服务', '', 1, 0, 1, 999979);
+-- INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
+--	VALUES(2, '政务服务', '', 1, 0, 1, 999979);
+-- INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`)
+--	VALUES(3, 'IT服务', '', 1, 0, 1, 999979);
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);      
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), 999979, '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', '', '1', '1', 56, '', '73', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+SET @layout_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);  
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ((@layout_id := @layout_id + 1), 999979, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"we服务","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4}]}', '2017050501', '0', '2', UTC_TIMESTAMP(), 'pm_admin', '0', '0', '0');
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ((@layout_id := @layout_id + 1), 999979, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"we服务","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4}]}', '2017050501', '0', '2', UTC_TIMESTAMP(), 'park_tourist', '0', '0', '0');
 
-INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ('428', 999979, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"we服务","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4}]}', '2017050501', '0', '2', UTC_TIMESTAMP(), 'pm_admin', '0', '0', '0');
-INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES ('429', 999979, 'SecondServiceMarketLayout', '{"versionCode":"2017030701","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"we服务","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4}]}', '2017050501', '0', '2', UTC_TIMESTAMP(), 'park_tourist', '0', '0', '0');
 
-SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);  
 SET @sa_category_id = (SELECT max(id) FROM `eh_service_alliances`);
 SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
@@ -1115,24 +1115,58 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'Bizs', 'MORE', '更多', '', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"Bizs"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '3');
 
+-- 调整光大第二个主页签 by xiongying20170509
+update eh_launch_pad_layouts set layout_json = '{"versionCode":"2017050502","versionName":"4.1.3","layoutName":"SecondServiceMarketLayout","displayName":"we服务","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"chanye"},"style":"Default","title":"产业服务","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"zhengwu"},"style":"Default","title":"政务服务","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"it"},"style":"Default","title":"IT服务","defaultOrder":1,"separatorFlag":1,"separatorHeight":16,"columnCount":4}]}' where namespace_id = 999979 and name = 'SecondServiceMarketLayout';
+update eh_launch_pad_layouts set version_code = '2017050502' where namespace_id = 999979 and name = 'SecondServiceMarketLayout';
+update eh_launch_pad_items set item_group = 'chanye' where namespace_id = 999979 and item_location = '/secondhome' and item_label in('金融服务','人才服务','咨询服务','财务管理','法务咨询','培训服务','专利申请','商标申请','著作权申请');
+update eh_launch_pad_items set item_group = 'zhengwu' where namespace_id = 999979 and item_location = '/secondhome' and item_label in('工商注册','消防代办','税务代办','卫生许可','环保审批','科技资助','政策法规');
+update eh_launch_pad_items set item_group = 'it' where namespace_id = 999979 and item_location = '/secondhome' and item_label in('企业建站','IT托管','系统集成','云服务','SAAS资源申请');
+
+delete from eh_launch_pad_items where namespace_id = 999979 and item_location = '/secondhome' and item_name = 'MORE';
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'it', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"it"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '3');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'it', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"it"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', '3');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'zhengwu', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"zhengwu"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '2');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'zhengwu', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"zhengwu"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', '2');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'chanye', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"chanye"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '1');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@item_id := @item_id + 1), '999979', '0', '0', '0', '/secondhome', 'chanye', 'MORE', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1URTNOek00WkRSbVkyVmpZemN3WmpZNVlURm1aakEwWVRSbU1tRXlNZw', '1', '1', 1, '{"itemLocation":"/secondhome","itemGroup":"chanye"}', '1000', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', '1');
+
+    
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE9UaG1NV0l6TXpsak5ETmxaV00zWVdKak5tVXdaREZtWW1SalpHWmlaZw' where namespace_id = 999979 and item_label = '金融服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE5tWXhaVEU1TWpVeVpqZGxOalE0WmpJMFlUSm1OV000TTJRMU9XVTNNUQ' where namespace_id = 999979 and item_label = '人才服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5tUmhaVFpoWXpFek5EYzVORGszWWpVM09UZGlZemxrTkRNM01HTTNOZw' where namespace_id = 999979 and item_label = '咨询服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVl6aG1NMlkzTkRCaVpqQTNZbUUzTm1VM05tWmxZMlEzWWpsbU9ERTJOUQ' where namespace_id = 999979 and item_label = '财务管理';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd05qRXdZV0l3WVdGa09HWXdObUUxT1dJNU1HTTRZVEkwT0dWak5tTTROZw' where namespace_id = 999979 and item_label = '法务咨询';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9UTmhNak0wWVdWbU9URmhaV1k0TldKak1XVXhabVl5Wm1KaE0yTmtNZw' where namespace_id = 999979 and item_label = '培训服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk9XRTVOalU1WW1Jek0yRXlPVFJpWm1KbE0yRTNaVGhoTldSaU56TmpOQQ' where namespace_id = 999979 and item_label = '专利申请';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMlpUTTBOREkwT1RjNFpqUTBOVGc1WlRKak1HSm1OVFEzWWpSaE1qYzRZZw' where namespace_id = 999979 and item_label = '商标申请';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa09HRXpOemRsTlRBeVlXWTBaams0TnpNd00yTTNOemRoTnpNNU5qZGhZdw' where namespace_id = 999979 and item_label = '著作权申请';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE1XWTFNemcwWkdJME5HTXdOelpqTVRsbFlqTmxZV0l3TlRObU5URmtOUQ' where namespace_id = 999979 and item_label = '工商注册';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNFlUZzVPRFJpTnpnM05UZzNZMlJpTkRjNVpXUmpOV1UxTTJRNE1HWXhOUQ' where namespace_id = 999979 and item_label = '消防代办';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwak0yWmhNVFZtTkRJeFlURmhPVFF5TXpnek5UWTRNalJrTWpWbU5XWXpZUQ' where namespace_id = 999979 and item_label = '税务代办';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pqVmpZbVF6WVRJMk5qUTBNakUxWkROaFl6VTRNRFZpTWpKbE5tSTNZZw' where namespace_id = 999979 and item_label = '卫生许可';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvek9EazNNakkyWVRKak5EazVOR1UxTjJFeE4yTTVNVEk0TVRRNU5UVm1PUQ' where namespace_id = 999979 and item_label = '环保审批';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaVpXSTNOell4WVRNNFpqRm1ZV0prTnpSaU9UQmpNelpsWmpjeU5UVXdOUQ' where namespace_id = 999979 and item_label = '科技资助';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9UVmhZbVk0TURsak5ETmtaVEF4TUdFeU5tUXdNV0l4WlRNeU5UZGpaQQ' where namespace_id = 999979 and item_label = '政策法规';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5Ua3dObVV4TVdOaU1tSXpPREE0WVdFNU1UYzNNekkxWmpreE5UUm1ZUQ' where namespace_id = 999979 and item_label = '企业建站';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNE1EYzRZemcxTUdZNVlUZzJPV1k1TVRabE1qSmlZMkUxTVRoaE4yTmlOZw' where namespace_id = 999979 and item_label = 'IT托管';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM09UbGtOekU1TW1ZMU9EVXdPR0V5TldOa05UTmxaRGRrTTJVeE5UVTVNdw' where namespace_id = 999979 and item_label = '系统集成';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd00yWmlOV1V3TmpBek1UWXhNVEJsWmpNMFkyUXlaVFV3TW1aa05tSTBOdw' where namespace_id = 999979 and item_label = '云服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMk0yRTNaRFJpTW1ZMllUSm1PR0kyWWpsa1lURTNPRGxoWVROa1pqUXpaUQ' where namespace_id = 999979 and item_label = 'SAAS资源申请';
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- 投诉建议移到首页 by xiongying20170510
+update eh_launch_pad_items set display_flag = 1 where namespace_id = 999979 and item_label = '投诉建议';
+update eh_launch_pad_items set default_order = 5 where namespace_id = 999979 and item_label = '投诉建议';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pEZzFNekkwTm1SallqQm1PR1l6TldJNU5qZ3lNRGhsTldSak9UazROUQ' where namespace_id = 999979 and item_label = '任务管理';
     
     
     
