@@ -2301,7 +2301,8 @@ public class PunchServiceImpl implements PunchService {
 				.getTime()));
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-		statistic.setOwnerId(orgId);
+        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+		statistic.setOwnerId(ownerId);
 		statistic.setUserId(member.getTargetId());
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
@@ -2311,7 +2312,6 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
 
-        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
  		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -4058,7 +4058,6 @@ public class PunchServiceImpl implements PunchService {
 		Organization org = this.checkOrganization(cmd.getOwnerId());
 		
 		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
-		LOGGER.debug("USER IDS: "+StringHelper.toJsonString(userIds));
 		if (null == userIds)
 			return response;
 		//分页查询
@@ -4092,7 +4091,6 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
-            LOGGER.debug("dto",dto.toString());
 
             punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
