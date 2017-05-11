@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -703,4 +705,107 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+     * <b>URL: /activity/statisticsSummary</b>
+     * <p>统计总览</p>
+     */
+    @RequestMapping("statisticsSummary")
+    @RestReturn(value=StatisticsSummaryResponse.class)
+    public RestResponse statisticsSummary(){
+    	StatisticsSummaryResponse result = new StatisticsSummaryResponse();
+    	
+    	result.setActivityCount(1000);
+    	result.setActivityDayCount(1);
+    	result.setActivityWeekCount(10);
+    	result.setActivityMonthCount(50);
+    	
+    	result.setRosterCount(3000);
+    	result.setRosterDayCount(5);
+    	result.setRosterWeekCount(20);
+    	result.setRosterMonthCount(100);
+    	
+    	result.setManCount(60);
+    	result.setWomanCount(40);
+    	
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsActivity</b>
+     * <p>统计活动</p>
+     */
+    @RequestMapping("statisticsActivity")
+    @RestReturn(value=StatisticsActivityResponse.class)
+    public RestResponse statisticsActivity(StatisticsActivityCommand cmd){
+    	StatisticsActivityResponse result = new StatisticsActivityResponse();
+    	result.setList(new ArrayList<ActivityDTO>());
+    	for(int i= 0; i<10 ;i++){
+    		ActivityDTO item = new ActivityDTO();
+    		item.setActivityId(2301L +1);
+    		item.setForumId(176520L);
+    		item.setPostId(195320L + i );
+    		item.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    		item.setEnrollUserCount(100 + i);
+    		item.setSubject("标题" + i);
+    		result.getList().add(item);
+    	}
+    	
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsOrganization</b>
+     * <p>统计企业</p>
+     */
+    @RequestMapping("statisticsOrganization")
+    @RestReturn(value=StatisticsOrganizationResponse.class)
+    public RestResponse statisticsOrganization(StatisticsOrganizationCommand cmd){
+    	StatisticsOrganizationResponse result = new StatisticsOrganizationResponse();
+    	result.setList(new ArrayList<StatisticsOrganizationDTO>());
+    	for(int i= 0; i<10 ;i++){
+    		StatisticsOrganizationDTO item = new StatisticsOrganizationDTO();
+    		item.setOrgName("企业名称" + i);
+    		item.setSignActivityCount(i+10);
+    		item.setSignPeopleCount(i+ 100);
+    		result.getList().add(item);
+    	}
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsTag</b>
+     * <p>统计标签</p>
+     */
+    @RequestMapping("statisticsTag")
+    @RestReturn(value=StatisticsTagResponse.class)
+    public RestResponse statisticsTag(StatisticsTagCommand cmd){
+    	StatisticsTagResponse result = new StatisticsTagResponse();
+    	result.setList(new ArrayList<StatisticsTagDTO>());
+    	for(int i= 0; i<10 ;i++){
+    		StatisticsTagDTO item = new StatisticsTagDTO();
+    		item.setTagId(1000L + i);
+    		item.setTagName("Tag" + i);
+    		item.setSignPeopleCount(10 + i);
+    		item.setSignPeopleRate(0.1);
+    		item.setCreateActivityCount(2 + i);
+    		item.setCreateActivityRate(0.1);
+    		result.getList().add(item);
+    	}
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    
 }

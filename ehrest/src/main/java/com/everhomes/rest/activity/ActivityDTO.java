@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -113,6 +114,8 @@ public class ActivityDTO {
     private Byte chargeFlag;
 
     private Integer chargePrice;
+    
+    private Timestamp createTime;
     
     public String getSignupEndTime() {
 		return signupEndTime;
@@ -558,6 +561,14 @@ public class ActivityDTO {
 
 	public void setChargePrice(Integer chargePrice) {
 		this.chargePrice = chargePrice;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public String toString() {
