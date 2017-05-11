@@ -2342,7 +2342,7 @@ public class PunchServiceImpl implements PunchService {
 //		}
 		processPunchListCount(list, statistic);
 
-        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "/%", null);
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
         List<Long> orgIds = new ArrayList();
         if(null!=organizations)
             for(Organization org1 : organizations)
