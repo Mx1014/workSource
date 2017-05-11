@@ -4985,9 +4985,14 @@ public class PunchServiceImpl implements PunchService {
 						(orgId, groupTypeList, null) ;
 				//循环刷所有员工
 				for(OrganizationMemberDTO member : organizationMembers){
-					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+//					}
+					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
+					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
 						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-					}
+							
 				}
 			}
 			else{
