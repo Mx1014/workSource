@@ -183,6 +183,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -4057,6 +4058,7 @@ public class PunchServiceImpl implements PunchService {
 		Organization org = this.checkOrganization(cmd.getOwnerId());
 		
 		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+		LOGGER.debug("USER IDS: "+StringHelper.toJsonString(userIds));
 		if (null == userIds)
 			return response;
 		//分页查询
@@ -4178,6 +4180,9 @@ public class PunchServiceImpl implements PunchService {
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
 			
 			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
+
+			LOGGER.debug(" organizationProvider.listOrganizationByGroupTypes("+org.getPath()+"% , "+StringHelper.toJsonString(groupTypeList)+"); " );
+			LOGGER.debug("orgs  : "+StringHelper.toJsonString(orgs));
 			List<Long> orgIds = new ArrayList<Long>();
 			orgIds.add(org.getId());
 			for (Organization o : orgs){
@@ -4186,6 +4191,7 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
+			LOGGER.debug("organizationMembers  : "+StringHelper.toJsonString(organizationMembers));
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
