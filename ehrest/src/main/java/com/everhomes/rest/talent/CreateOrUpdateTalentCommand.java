@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -23,31 +26,36 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOrUpdateTalentCommand {
-
+	@NotNull
+	@Size(min=1)
 	private String ownerType;
-
+	@NotNull
 	private Long ownerId;
-
+	@NotNull
 	private Long organizationId;
 
 	private Long id;
-
+	@NotNull
+	@Size(min=1)
 	private String name;
 
 	private String avatarUri;
-
+	@NotNull
+	@Size(min=1)
 	private String position;
-
+	@NotNull
 	private Long categoryId;
-
+	@NotNull
 	private Byte gender;
-
+	@NotNull
 	private Integer experience;
-
+	@NotNull
+	@Size(min=1)
 	private String graduateSchool;
-
+	@NotNull
 	private Byte degree;
-
+	@NotNull
+	@Size(min=1)
 	private String phone;
 
 	private String remark;

@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,13 +16,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteTalentCommand {
-
+	@NotNull
+	@Size(min=1)
 	private String ownerType;
-
+	@NotNull
 	private Long ownerId;
-
+	@NotNull
 	private Long organizationId;
-
+	@NotNull
 	private Long id;
 
 	public DeleteTalentCommand() {

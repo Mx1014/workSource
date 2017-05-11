@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,9 +15,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteTalentCateogryCommand {
-
+	@NotNull
 	private Long organizationId;
-
+	@NotNull
 	private Long id;
 
 	public DeleteTalentCateogryCommand() {

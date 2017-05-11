@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListTalentCateogryCommand {
-
+	@NotNull
 	private Long organizationId;
 
 	public ListTalentCateogryCommand() {

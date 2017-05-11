@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,25 +16,16 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListTalentQueryHistoryCommand {
-
+	@NotNull
+	@Size(min=1)
 	private String ownerType;
-
+	@NotNull
 	private Long ownerId;
-
+	@NotNull
 	private Long organizationId;
-
-	private Long id;
 
 	public ListTalentQueryHistoryCommand() {
 
-	}
-
-	public ListTalentQueryHistoryCommand(String ownerType, Long ownerId, Long organizationId, Long id) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.organizationId = organizationId;
-		this.id = id;
 	}
 
 	public String getOwnerType() {
@@ -56,14 +50,6 @@ public class ListTalentQueryHistoryCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	@Override

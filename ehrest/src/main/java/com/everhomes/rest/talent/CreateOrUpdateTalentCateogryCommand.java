@@ -3,6 +3,9 @@ package com.everhomes.rest.talent;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -14,9 +17,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateOrUpdateTalentCateogryCommand {
-
+	@NotNull
+	@Size(min=1)
 	private Long organizationId;
-
+	
 	@ItemType(TalentCategoryDTO.class)
 	private List<TalentCategoryDTO> talentCategories;
 
