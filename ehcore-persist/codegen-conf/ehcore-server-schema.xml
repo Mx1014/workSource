@@ -153,6 +153,7 @@
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
+        eh_talents | eh_talent_categories | eh_talent_query_histories |
 
         </includes>
 
