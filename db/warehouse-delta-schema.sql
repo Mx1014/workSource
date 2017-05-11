@@ -78,12 +78,16 @@ CREATE TABLE `eh_warehouse_stock_logs` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `request_id` BIGINT NOT NULL COMMENT 'id of eh_warehouse_requests',
+  `request_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_warehouse_requests',
   `request_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: stock in, 1: stock out',
   `request_source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: request, 1: manual input',
   `warehouse_id` BIGINT NOT NULL COMMENT 'id of eh_warehouses',
   `material_id` BIGINT NOT NULL COMMENT 'eh_warehouse_materials',
-  `amount` BIGINT NOT NULL DEFAULT 0,
+  `delivery_amount` BIGINT NOT NULL DEFAULT 0,
+  `stock_amount` BIGINT NOT NULL DEFAULT 0,
+  `request_uid` BIGINT,
+  `delivery_uid` BIGINT,
+  `create_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
