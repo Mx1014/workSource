@@ -289,6 +289,9 @@ public interface PunchProvider {
 			Long targetId, CrossShardListingLocator locator, int pageSize);
 
 	List<PunchTimeRule> queryPunchTimeRuleList(Long startTimeLong, Long endTimeLong);
+
+	void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId);
  
  
  
