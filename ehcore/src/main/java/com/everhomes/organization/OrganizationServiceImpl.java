@@ -277,17 +277,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setNamespaceId(parOrg.getNamespaceId());
 		organization.setCreatorUid(user.getId());
-		if(OrganizationGroupType.ENTERPRISE.getCode().equals(parOrg.getGroupType())){
-			organization.setDirectlyEnterpriseId(parOrg.getId());
-		}else{
-			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
-		}
+
 
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
+
+			Long directlyEnterpriseId = parOrg.getDirectlyEnterpriseId();
+			if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				directlyEnterpriseId = parOrg.getId();
+			}
+
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				this.createChildrenEnterprise(organization,cmd.getAddress(), cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds());
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_POSITION){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 				organizationProvider.createOrganization(organization);
 				//更新通用岗位
 				this.updateOrganizationJobPositionMap(organization, cmd.getJobPositionIds());
@@ -295,14 +297,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				//更新组人员
 				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_LEVEL){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 				// 增加职级大小
 				organization.setSize(cmd.getSize());
 				organizationProvider.createOrganization(organization);
 				//更新组人员
 				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.GROUP){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 
 				organizationProvider.createOrganization(organization);
 				// 创建经理群组
