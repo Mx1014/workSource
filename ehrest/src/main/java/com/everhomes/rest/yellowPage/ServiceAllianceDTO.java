@@ -43,7 +43,7 @@ import java.util.List;
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  *  <li>jumpId : 跳转模块id</li>
- *  <li>collapseHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
+ *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -123,7 +123,7 @@ public class ServiceAllianceDTO {
 
 	private Long jumpId;
 	
-	private Integer collapseHeight;
+	private Integer descriptionHeight;
 	
 	public String getDisplayServiceUrl() {
 		return displayServiceUrl;
@@ -367,12 +367,12 @@ public class ServiceAllianceDTO {
 		this.jumpId = jumpId;
 	}
 
-	public Integer getCollapseHeight() {
-		return collapseHeight;
+	public Integer getDescriptionHeight() {
+		return descriptionHeight;
 	}
 
-	public void setCollapseHeight(Integer collapseHeight) {
-		this.collapseHeight = collapseHeight;
+	public void setDescriptionHeight(Integer descriptionHeight) {
+		this.descriptionHeight = descriptionHeight;
 	}
 
 	@Override
