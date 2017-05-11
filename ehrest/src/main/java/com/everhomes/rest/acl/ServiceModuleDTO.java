@@ -31,8 +31,6 @@ public class ServiceModuleDTO implements Serializable {
 
 	private Integer level;
 
-	private String conditionType;
-
 	@ItemType(ServiceModuleDTO.class)
 	private List<ServiceModuleDTO> serviceModules;
 
@@ -82,14 +80,6 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setvType(Byte vType) {
 		this.vType = vType;
-	}
-
-	public String getConditionType() {
-		return conditionType;
-	}
-
-	public void setConditionType(String conditionType) {
-		this.conditionType = conditionType;
 	}
 
 	public List<ServiceModuleDTO> getServiceModules() {
