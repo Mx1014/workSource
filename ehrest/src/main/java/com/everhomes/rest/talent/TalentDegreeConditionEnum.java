@@ -24,7 +24,7 @@ public enum TalentDegreeConditionEnum {
 		return code;
 	}
 
-	public TalentDegreeConditionEnum fromCode(Byte code) {
+	public static TalentDegreeConditionEnum fromCode(Byte code) {
 		if (code != null) {
 			for (TalentDegreeConditionEnum talentExperienceConditionEnum : TalentDegreeConditionEnum.values()) {
 				if (talentExperienceConditionEnum.getCode().byteValue() == code.byteValue()) {

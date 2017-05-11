@@ -20,7 +20,7 @@ public enum TalentOwnerType {
 		return code;
 	}
 
-	public TalentOwnerType fromCode(String code) {
+	public static TalentOwnerType fromCode(String code) {
 		if (code != null && !code.isEmpty()) {
 			for (TalentOwnerType talentOwnerType : TalentOwnerType.values()) {
 				if (talentOwnerType.getCode().equals(code)) {

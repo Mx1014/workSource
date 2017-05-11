@@ -14,40 +14,12 @@ import com.everhomes.util.StringHelper;
  */
 public class DeleteTalentCateogryCommand {
 
-	private String ownerType;
-
-	private Long ownerId;
-
 	private Long organizationId;
 
 	private Long id;
 
 	public DeleteTalentCateogryCommand() {
 
-	}
-
-	public DeleteTalentCateogryCommand(String ownerType, Long ownerId, Long organizationId, Long id) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.organizationId = organizationId;
-		this.id = id;
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 
 	public Long getOrganizationId() {
