@@ -1059,6 +1059,33 @@ long id = sequenceProvider.getNextSequence(key);
 	}
 
 	@Override
+	public List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
+														   Long companyId, String startDay, String endDay) {
+		// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
+		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
+		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
+			Date startDate = Date.valueOf(startDay);
+			Date endDate = Date.valueOf(endDay);
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.greaterOrEqual(startDate));
+			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.lt(endDate));
+		}
+		// modify by wh 2017-4-25 order by punch date asc
+		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.asc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, EhPunchDayLogsRecord.class);
+				});
+
+		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, PunchDayLog.class);
+		}).collect(Collectors.toList());
+		return result;
+	}
+
+	@Override
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay) {
 
