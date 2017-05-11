@@ -290,3 +290,8 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000
 -- 车辆放行导出excel无数据提示，add by tt, 20170510（清华）
 select max(id) into @id from `eh_locale_strings`; 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'parking.clearance', '10011', 'zh_CN', '没有数据');
+
+
+-- 修改帖子评论发消息内容模板，add by tt, 20170511
+update eh_locale_templates set text = '新的评论\t${userName}评论了你的帖子「${postName}」。' where  scope = 'forum.notification' and code  =  2;
+update eh_locale_templates set text = '新的回复\t${userName}回复了你在帖子「${postName}」 的评论。' where  scope = 'forum.notification' and code  =  3;

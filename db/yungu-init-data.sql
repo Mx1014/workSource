@@ -110,7 +110,7 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(@organization_id, @community_id);
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
-	VALUES((@namespace_resource_id := @namespace_resource_id + 1), 1, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
+	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
 	
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
 	VALUES((@building_id := @building_id + 1), @community_id, '南风楼A栋', '南风楼A栋', 0, '0755-86000082', '南山区留仙大道1183号南山云谷创新产业园南风楼', NULL, NULL, NULL, NULL, '', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
@@ -464,6 +464,22 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 SET @module_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`) 
 SELECT (@module_id := @module_id + 1), owner_id, menu_id, '', NULL, '2' FROM eh_web_menu_scopes WHERE 
-menu_id IN (select id from eh_service_modules) AND `owner_id` = 999979;
+menu_id IN (select id from eh_service_modules) AND `owner_id` = 999976;
 
+
+-- redmine9600 add by xiongying20170510
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa01ESTNOMlUwT1dSaVptWXlabUl6TW1Jek56VXlZV1ZoTTJNd05XSTNPUQ' where namespace_id = 999976 and item_label = '资源预约';
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40300,'', 'EhNamespaces', 999976,2);
+
+SET @appUrl_id = (SELECT MAX(id) FROM `eh_app_urls`);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@appUrl_id := @appUrl_id + 1), '999976', '名网邦', '2', '', '', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@appUrl_id := @appUrl_id + 1), '999976', '名网邦', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+
+SET @lease_id = (SELECT MAX(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_id := @lease_id + 1), '999976', '1', '1', '1', '1', '1', '0');
+
+SET @config_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@config_id := @config_id + 1), 'pmtask.handler-999976', 'flow', '', '0', NULL);
+
+update eh_launch_pad_items set action_data = '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1&rtToken=c4Ej5bF2FbWokGfiIUg7KeqOP_Uq1WMrXYX5b23gsVP5ZHTb1cYFe4CesqjQ0widtxf5NrVDIdMzcAFUXR2_kAHDH1S8kVcMvXj-Kfdu9NXbAUNs_omn50T_XT2pP9gI7J5NSA1U4WOE7QAbRsS-fqr5fqFfYoBcrMBfKgxbH1c#sign_suffix"}' where namespace_id = 999976 and item_label = '园区介绍';
 SET FOREIGN_KEY_CHECKS = 1;
