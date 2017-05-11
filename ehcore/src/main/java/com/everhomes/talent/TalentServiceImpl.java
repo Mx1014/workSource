@@ -3,6 +3,7 @@ package com.everhomes.talent;
 
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCateogryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentCateogryCommand;
@@ -18,6 +19,7 @@ import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
 import com.everhomes.rest.talent.TopTalentCommand;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @Component
 public class TalentServiceImpl implements TalentService {
@@ -88,4 +90,8 @@ public class TalentServiceImpl implements TalentService {
 		return new ListTalentQueryHistoryResponse();
 	}
 
+	private boolean checkAdmin(Long userId, Long organizationId) {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		return resolver.checkSuperAdmin(userId, organizationId);
+	}
 }
