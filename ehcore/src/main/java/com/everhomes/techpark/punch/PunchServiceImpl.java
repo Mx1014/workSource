@@ -2311,7 +2311,7 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setWorkDayCount(workDayCount);
 
         Long ownerId = getTopEnterpriseId(member.getOrganizationId());
- 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogs(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
+ 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 		for(PunchDayLog dayLog : dayLogList){
@@ -2342,13 +2342,11 @@ public class PunchServiceImpl implements PunchService {
 //		}
 		processPunchListCount(list, statistic);
 
-        List<String> groupTypeList = new ArrayList<String>();
-        groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-        groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(ownerId + "/%", groupTypeList);
+        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "/%", null);
         List<Long> orgIds = new ArrayList();
-        for(Organization org1 : organizations)
-            orgIds.add(org1.getId());
+        if(null!=organizations)
+            for(Organization org1 : organizations)
+                orgIds.add(org1.getId());
         this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),orgIds,statistic.getPunchMonth(),statistic.getUserId());
 
 		this.punchProvider.createPunchStatistic(statistic);
@@ -4897,7 +4895,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/15 * * * ?")
+	@Scheduled(cron = "1 0/2 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
 

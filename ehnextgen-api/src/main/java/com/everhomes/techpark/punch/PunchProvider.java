@@ -100,6 +100,9 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay);
 
+	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
+													Long companyId, String startDay, String endDay);
+
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay);
 
