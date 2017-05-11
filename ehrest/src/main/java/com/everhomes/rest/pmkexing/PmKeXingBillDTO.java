@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * <ul>
  *     <li>billDate：账单日期</li>
- *     <li>billStatus：账单状态</li>
+ *     <li>billStatus：账单状态{@link com.everhomes.rest.pmkexing.PmKeXingBillStatus}</li>
  *     <li>receivableAmount: 应收合计</li>
  *     <li>unpaidAmount: 待缴费用</li>
  *     <li>items: 费用项列表 {@link com.everhomes.rest.pmkexing.PmKeXingBillItemDTO}</li>
@@ -20,7 +20,7 @@ import java.util.List;
 public class PmKeXingBillDTO {
 
     private String billDate;
-    private String billStatus;
+    private Byte billStatus;
     private BigDecimal receivableAmount = BigDecimal.ZERO;
     private BigDecimal unpaidAmount = BigDecimal.ZERO;
     @ItemType(PmKeXingBillItemDTO.class)
@@ -32,14 +32,6 @@ public class PmKeXingBillDTO {
 
     public void setBillDate(String billDate) {
         this.billDate = billDate;
-    }
-
-    public String getBillStatus() {
-        return billStatus;
-    }
-
-    public void setBillStatus(String billStatus) {
-        this.billStatus = billStatus;
     }
 
     public BigDecimal getReceivableAmount() {
@@ -64,6 +56,14 @@ public class PmKeXingBillDTO {
 
     public void setUnpaidAmount(BigDecimal unpaidAmount) {
         this.unpaidAmount = unpaidAmount;
+    }
+
+    public Byte getBillStatus() {
+        return billStatus;
+    }
+
+    public void setBillStatus(Byte billStatus) {
+        this.billStatus = billStatus;
     }
 
     @Override

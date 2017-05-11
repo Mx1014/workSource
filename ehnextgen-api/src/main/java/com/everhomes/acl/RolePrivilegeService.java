@@ -313,4 +313,11 @@ public interface RolePrivilegeService {
 	void createRole(CreateRoleCommand cmd);
 
 	void updateRole(UpdateRoleCommand cmd);
+	/**
+	 * 获取项目分类的树状数据结构
+	 * @param namespaceId
+	 * @param projects
+     * @return
+     */
+	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects);
 }

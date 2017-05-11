@@ -15,6 +15,8 @@ import java.util.List;
  * <li>delManagerMemberIds：删除的经理通讯录id</li>
  * <li>jobPositionIds：通用岗位</li>
  * <li>size：职级大小 </li>
+ * <li>communityId：入住园区</li>
+ * <li>scopeType：入住的节点范围类型{@link com.everhomes.rest.organization.OrganizationCommunityScopeType}</li>
  * </ul>
  */
 public class UpdateOrganizationsCommand {
@@ -45,6 +47,10 @@ public class UpdateOrganizationsCommand {
 
 	@ItemType(Long.class)
 	private List<Long> delMemberIds;
+
+	private Long communityId;
+
+	private String scopeType;
 
 	
 	public String getName() {
@@ -133,5 +139,21 @@ public class UpdateOrganizationsCommand {
 
 	public void setSize(Integer size) {
 		this.size = size;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public String getScopeType() {
+		return scopeType;
+	}
+
+	public void setScopeType(String scopeType) {
+		this.scopeType = scopeType;
 	}
 }

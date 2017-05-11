@@ -2081,6 +2081,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999984', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '53', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '10000', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '0', NULL);
 
+	
 
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ('200977', 'community', '240111044331055835', '0', '我要投资', '我要投资', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999984', '');
@@ -2528,3 +2529,72 @@ INSERT INTO  `eh_web_menu_scopes`(`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 UPDATE  eh_launch_pad_items SET default_order =3 WHERE namespace_id = 999984 AND service_categry_id ='4';
 UPDATE  eh_launch_pad_items SET service_categry_id ='4' ,default_order =2 WHERE namespace_id = 999984 AND  item_label ='资金扶持';  
+
+
+
+	
+-- 许娟在升级4.5.0的时候，把清华信息港从4.3.2版本升级到4.5.0，出现服务市场为空的问题，这是因为在4.3.3版本eh_item_service_categries加上了scene_type字段，却没有做数据迁移；
+-- 数据迁移时，需要把原来的几个类型的scene_type改为pm_admin(加字段时默认值为default)，然后再添加park_tourist场景的数据，并修改eh_launch_pad_items的service_categry_id值
+-- by lqs 20170503
+UPDATE `eh_item_service_categries` SET `scene_type`='pm_admin' WHERE `id` IN (3, 4, 5, 6, 7);
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
+	VALUES(8, '科创服务', 'cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ', 1, 0, 1, 999984,'park_tourist');
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
+	VALUES(9, '专业服务', 'cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ', 1, 0, 1, 999984,'park_tourist');
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
+	VALUES(10, '园区服务', 'cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ', 1, 0, 1, 999984,'park_tourist');
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
+	VALUES(11, '生活服务', 'cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ', 1, 0, 1, 999984,'park_tourist');
+INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
+	VALUES(12, '企业服务', 'cs://1/image/aW1hZ2UvTVRvME9ESmxPR1pqT0dFM1pHSmpaRFkwTWpRNE16TmtaVEUwTWpRMFl6UTNaUQ', 1, 0, 1, 999984,'park_tourist');		
+	
+-- 修改eh_launch_pad_items的service_categry_id值
+update eh_launch_pad_items set service_categry_id=12 where id=112858 AND namespace_id=999984; -- 打卡考勤  park_tourist  7
+update eh_launch_pad_items set service_categry_id=10 where id=112897 AND namespace_id=999984; -- 会议室  park_tourist  5
+update eh_launch_pad_items set service_categry_id=10 where id=112899 AND namespace_id=999984; -- 园区入驻  park_tourist  5
+update eh_launch_pad_items set service_categry_id=10 where id=112910 AND namespace_id=999984; -- 物业报修  park_tourist  5
+update eh_launch_pad_items set service_categry_id=10 where id=112916 AND namespace_id=999984; -- 报修任务  park_tourist  5
+update eh_launch_pad_items set service_categry_id=12 where id=112918 AND namespace_id=999984; -- 通讯录  park_tourist  7
+update eh_launch_pad_items set service_categry_id=10 where id=112926 AND namespace_id=999984; -- 服务维修  park_tourist  5
+update eh_launch_pad_items set service_categry_id=11 where id=112928 AND namespace_id=999984; -- 水木之家  park_tourist  6
+update eh_launch_pad_items set service_categry_id=9 where id=112958 AND namespace_id=999984; -- 知识产权  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112959 AND namespace_id=999984; -- 财税咨询  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112960 AND namespace_id=999984; -- 法律服务  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112961 AND namespace_id=999984; -- 人力资源  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112962 AND namespace_id=999984; -- 科技金融  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112963 AND namespace_id=999984; -- 云服务  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112964 AND namespace_id=999984; -- 供应链  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112965 AND namespace_id=999984; -- 产品测试  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112966 AND namespace_id=999984; -- 福利管家  park_tourist  4
+update eh_launch_pad_items set service_categry_id=9 where id=112970 AND namespace_id=999984; -- 资金扶持  park_tourist  4
+update eh_launch_pad_items set service_categry_id=10 where id=112974 AND namespace_id=999984; -- 投诉建议  park_tourist  5
+update eh_launch_pad_items set service_categry_id=10 where id=112976 AND namespace_id=999984; -- 绿植租摆  park_tourist  5
+update eh_launch_pad_items set service_categry_id=10 where id=1112290 AND namespace_id=999984; -- 北环门禁  park_tourist  5
+update eh_launch_pad_items set service_categry_id=8 where id=112949 AND namespace_id=999984; -- 我要投资  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112950 AND namespace_id=999984; -- 我要融资  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112951 AND namespace_id=999984; -- 我有项目  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112952 AND namespace_id=999984; -- 星空孵化  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112953 AND namespace_id=999984; -- 研发平台  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112954 AND namespace_id=999984; -- 载物咨询  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112955 AND namespace_id=999984; -- 国际合作  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112956 AND namespace_id=999984; -- 科技成果  park_tourist  3
+update eh_launch_pad_items set service_categry_id=8 where id=112957 AND namespace_id=999984; -- 紫荆汇  park_tourist  3
+
+-- redmine 9164 add by xiongying 20170503
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES (201015, 'community', '240111044331055835', '0', '供求信息', '供求信息', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999984', '');
+
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331055835', '供求信息', '供求信息', 201015, '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    
+SET @eh_launch_pad_items = (SELECT max(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999984', '0', '0', '0', '/home', 'Bizs', '供求信息', '供求信息', 'cs://1/image/aW1hZ2UvTVRvM09HVmxNalUyTXpnNU5qZ3lNVEEzTVRGbE9HUTBZMlk1T0dSbU1qZzNNZw', '1', '1', 33, '{"type":201015,"parentId":201015,"displayType": "list"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', '3');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999984', '0', '0', '0', '/home', 'Bizs', '供求信息', '供求信息', 'cs://1/image/aW1hZ2UvTVRvM09HVmxNalUyTXpnNU5qZ3lNVEEzTVRGbE9HUTBZMlk1T0dSbU1qZzNNZw', '1', '1', 33, '{"type":201015,"parentId":201015,"displayType": "list"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', '3');
+
+update eh_launch_pad_items set more_order = 10 where namespace_id = 999984 and item_label in('知识产权','财税咨询','法律服务','人力资源','科技金融','云服务','供应链','产品测试','福利管家');
+
+update eh_launch_pad_items set display_flag = 0 where item_label = '供求信息' and namespace_id = 999984;

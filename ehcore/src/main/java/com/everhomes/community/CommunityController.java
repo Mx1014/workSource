@@ -413,4 +413,16 @@ public class CommunityController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /community/getTreeProjectCategories</b>
+     * <p>项目分类树状列表</p>
+     */
+    @RequestMapping("getTreeProjectCategories")
+    @RestReturn(value=String.class)
+    public RestResponse getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd) {
+        RestResponse response =  new RestResponse(communityService.getTreeProjectCategories(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -152,4 +152,6 @@ public interface CommunityService {
 	void updateChildProject(UpdateChildProjectCommand cmd);
 
 	void deleteChildProject(DeleteChildProjectCommand cmd);
+
+	List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd);
 }

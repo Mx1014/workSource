@@ -7,17 +7,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.parking.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +24,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.SortField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +81,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -596,7 +593,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
-			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
+			if(null != dto && null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
 				LOGGER.error("Overdue fees, cmd={}", cmd);
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
@@ -731,11 +728,36 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null != cmd.getEndDate())
 			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
+
+		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+		SortField order = null;
+		//排序
+		if (null != flow) {
+			Integer flowMode = Integer.valueOf(flow.getStringTag1());
+			if (ParkingCardRequestStatus.AUDITING.getCode() == cmd.getStatus()) {
+				order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
+			}else if (ParkingCardRequestStatus.QUEUEING.getCode() == cmd.getStatus()) {
+				if (ParkingRequestFlowType.QUEQUE.getCode().equals(flowMode)) {
+					order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
+				}else {
+					order = Tables.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME.desc();
+				}
+			}else if (ParkingCardRequestStatus.PROCESSING.getCode() == cmd.getStatus()) {
+				order = Tables.EH_PARKING_CARD_REQUESTS.ISSUE_TIME.desc();
+			}else if (ParkingCardRequestStatus.SUCCEED.getCode() == cmd.getStatus()) {
+				order = Tables.EH_PARKING_CARD_REQUESTS.PROCESS_SUCCEED_TIME.desc();
+			}else if (ParkingCardRequestStatus.OPENED.getCode() == cmd.getStatus()) {
+				order = Tables.EH_PARKING_CARD_REQUESTS.OPEN_CARD_TIME.desc();
+			}else if (ParkingCardRequestStatus.INACTIVE.getCode() == cmd.getStatus()) {
+				order = Tables.EH_PARKING_CARD_REQUESTS.CANCEL_TIME.desc();
+			}
+
+		}
+
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
     			cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(), 
-    			cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), cmd.getPageAnchor(), pageSize);
+    			cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), order, cmd.getPageAnchor(), pageSize);
     	
     	Long userId = UserContext.current().getUser().getId();
     	int size = list.size();
@@ -1183,8 +1205,20 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 	
 	private Long createOrderNo(Long time) {
-		String bill = String.valueOf(time) + (int) (Math.random()*1000);
-		return Long.valueOf(bill);
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+//		String prefix = sdf.format(new Date());
+		String suffix = String.valueOf(generateRandomNumber(3));
+
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
 
 	@Override
@@ -1423,7 +1457,7 @@ public class ParkingServiceImpl implements ParkingService {
     		
     		if(sTime >= eTime) {
     			LOGGER.error("Get recharge result time out, cmd={}", cmd);
-        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
         				"Get recharge result time out.");
     		}
     		

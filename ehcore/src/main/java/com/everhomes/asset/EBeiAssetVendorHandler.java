@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,10 +63,12 @@ public class EBeiAssetVendorHandler implements AssetVendorHandler {
                 SimpleAssetBillDTO dto = new SimpleAssetBillDTO();
                 dto.setAccountPeriod(covertStrToTimestamp(bill.getBillDate()));
 
-                if(PmKeXingBillStatus.PAID.equals(PmKeXingBillStatus.fromName(bill.getBillStatus()))) {
-                    dto.setStatus(AssetBillStatus.PAID.getCode());
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("bill status: {}", bill.getBillStatus());
                 }
-                if(AssetBillStatus.UNPAID.equals(PmKeXingBillStatus.fromName(bill.getBillStatus()))) {
+                if(PmKeXingBillStatus.PAID.getCode().equals(bill.getBillStatus())) {
+                    dto.setStatus(AssetBillStatus.PAID.getCode());
+                } else if(PmKeXingBillStatus.UNPAID.getCode().equals(bill.getBillStatus())) {
                     dto.setStatus(AssetBillStatus.UNPAID.getCode());
                 }
                 dto.setPeriodAccountAmount(bill.getReceivableAmount());

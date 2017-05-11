@@ -9,12 +9,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -467,9 +462,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId, 
-    		Long pageAnchor, Integer pageSize){
+                                                              String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
+                                                              Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId,
+                                                              SortField order, Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
@@ -503,7 +498,9 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
-        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc());
+        if (null != order) {
+            query.addOrderBy(order);
+        }
         if(null != pageSize)
         	query.addLimit(pageSize);
         

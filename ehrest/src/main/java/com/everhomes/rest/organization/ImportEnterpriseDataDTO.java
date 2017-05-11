@@ -5,27 +5,27 @@ import com.everhomes.util.StringHelper;
 
 public class ImportEnterpriseDataDTO {
 	
-	private String name;
+	private String name = "";
 
-	private String displayName;
+	private String displayName = "";
 
-	private String adminName;
+	private String adminName = "";
 
-	private String adminToken;
+	private String adminToken = "";
 
-	private String email;
+	private String email = "";
 
-	private String buildingName;
+	private String buildingName = "";
 
-	private String address;
+	private String address = "";
 
-	private String contact;
+	private String contact = "";
 
-	private String number;
+	private String number = "";
 
-	private String checkinDate;
+	private String checkinDate = "";
 
-	private String description;
+	private String description = "";
 
 	public String getName() {
 		return name;

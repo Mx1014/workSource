@@ -4,6 +4,8 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.launchpad.admin.*;
 import com.everhomes.rest.ui.launchpad.*;
+import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
+import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -71,4 +73,11 @@ public interface LaunchPadService {
      * @param cmd
      */
     void editLaunchPadItemByScene(EditLaunchPadItemBySceneCommand cmd);
+    
+    /**
+     * 查询应用
+     * @param cmd
+     * @return
+     */
+    SearchContentsBySceneReponse searchLaunchPadItemByScene(SearchContentsBySceneCommand cmd);
 }
