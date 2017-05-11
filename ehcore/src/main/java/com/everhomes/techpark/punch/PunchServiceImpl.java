@@ -4191,7 +4191,7 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
-			LOGGER.debug("organizationMembers  : "+StringHelper.toJsonString(organizationMembers));
+			 
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
