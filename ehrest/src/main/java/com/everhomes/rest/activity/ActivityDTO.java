@@ -45,6 +45,8 @@ import com.everhomes.util.StringHelper;
  * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
  * <li>chargeFlag: 是否收费：0-不收费， 1-收费  参考{@link com.everhomes.rest.activity.ActivityChargeFlag }</li>
  * <li>chargePrice: 收费价格</li>
+ * <li>createTime: 创建时间</li>
+ * <li>systemTime: 系统时间</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -115,7 +117,9 @@ public class ActivityDTO {
 
     private Integer chargePrice;
     
-    private Timestamp createTime;
+    private Long createTime;
+    
+    private Long systemTime;
     
     public String getSignupEndTime() {
 		return signupEndTime;
@@ -563,12 +567,20 @@ public class ActivityDTO {
 		this.chargePrice = chargePrice;
 	}
 
-	public Timestamp getCreateTime() {
+	public Long getCreateTime() {
 		return createTime;
 	}
 
-	public void setCreateTime(Timestamp createTime) {
+	public void setCreateTime(Long createTime) {
 		this.createTime = createTime;
+	}
+
+	public Long getSystemTime() {
+		return systemTime;
+	}
+
+	public void setSystemTime(Long systemTime) {
+		this.systemTime = systemTime;
 	}
 
 	public String toString() {

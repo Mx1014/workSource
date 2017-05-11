@@ -1934,6 +1934,10 @@ public class ActivityServiceImpl implements ActivityService {
         Long  nowTime = DateHelper.currentGMTTime().getTime();
         //返回倒计时 add by yanjun 20170510 end
         
+        //返回系统当前时间 add by yanjun 20170510
+        dto.setSystemTime(DateHelper.currentGMTTime().getTime());
+        
+        
         //活动添加是否有活动附件标识 add by xiongying 20161207
         boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
         dto.setActivityAttachmentFlag(existAttachments);

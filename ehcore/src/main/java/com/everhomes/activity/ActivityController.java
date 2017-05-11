@@ -748,7 +748,7 @@ public class ActivityController extends ControllerBase {
     		item.setActivityId(2301L +1);
     		item.setForumId(176520L);
     		item.setPostId(195320L + i );
-    		item.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    		item.setCreateTime(System.currentTimeMillis());
     		item.setEnrollUserCount(100 + i);
     		item.setSubject("标题" + i);
     		result.getList().add(item);
