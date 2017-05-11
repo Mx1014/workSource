@@ -277,17 +277,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setNamespaceId(parOrg.getNamespaceId());
 		organization.setCreatorUid(user.getId());
-		if(OrganizationGroupType.ENTERPRISE.getCode().equals(parOrg.getGroupType())){
-			organization.setDirectlyEnterpriseId(parOrg.getId());
-		}else{
-			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
-		}
+
 
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
+
+			Long directlyEnterpriseId = parOrg.getDirectlyEnterpriseId();
+			if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				directlyEnterpriseId = parOrg.getId();
+			}
+
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				this.createChildrenEnterprise(organization,cmd.getAddress(), cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds());
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_POSITION){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 				organizationProvider.createOrganization(organization);
 				//更新通用岗位
 				this.updateOrganizationJobPositionMap(organization, cmd.getJobPositionIds());
@@ -295,14 +297,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				//更新组人员
 				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_LEVEL){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 				// 增加职级大小
 				organization.setSize(cmd.getSize());
 				organizationProvider.createOrganization(organization);
 				//更新组人员
 				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
 			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.GROUP){
-				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				organization.setDirectlyEnterpriseId(directlyEnterpriseId);
 
 				organizationProvider.createOrganization(organization);
 				// 创建经理群组
@@ -5597,7 +5599,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			//刷新企业通讯录
 			if(null != userIdentifier)
-				processUserForMember(userIdentifier);
+                processUserForMemberWithoutMessage(userIdentifier);
 
 			if(null != cmd.getAssignmentId())
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
@@ -5627,8 +5629,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 	}
 
-	@Override
-	public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+    @Override
+    public OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier) {
+        return processUserForMember(identifier, false);
+    }
+
+    @Override
+    public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+        return processUserForMember(identifier, true);
+    }
+
+	private OrganizationMemberDTO processUserForMember(UserIdentifier identifier, boolean needSendMessage) {
 		try {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
@@ -5657,7 +5668,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                 	// 机构是公司的情况下 才发送短信
                 	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-                        sendMessageForContactApproved(member);
+                        if (needSendMessage) {
+                            sendMessageForContactApproved(member);
+                        }
                         userSearcher.feedDoc(member);
                         //支持多部门 记录可能存在多条，故取公司这条
                         organizationMember = member;
@@ -6983,7 +6996,7 @@ System.out.println();
 		   }
 
 	   }
-	   return includeList;
+       return includeList.stream().distinct().collect(Collectors.toList());
    }
 
 	private void sendRouterEnterpriseNotificationUseSystemUser(
@@ -7012,7 +7025,7 @@ System.out.println();
                 if (excludeList != null && excludeList.size() > 0) {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
-                includeList.forEach(targetId -> {
+                includeList.stream().distinct().forEach(targetId -> {
                     messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
@@ -7022,7 +7035,6 @@ System.out.println();
         }
 	}
 
-	// add by xq.tian   2017/05/05
 	@Deprecated
 	private void sendEnterpriseNotification(Long groupId,
 			List<Long> includeList, List<Long> excludeList, String message,
@@ -7078,7 +7090,7 @@ System.out.println();
                 if (excludeList != null && excludeList.size() > 0) {
                     includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
                 }
-                includeList.forEach(targetId -> {
+                includeList.stream().distinct().forEach(targetId -> {
                     messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                     messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                             AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),

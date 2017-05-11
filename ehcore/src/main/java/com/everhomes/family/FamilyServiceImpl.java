@@ -416,7 +416,7 @@ public class FamilyServiceImpl implements FamilyService {
             messageDto.setBody(message);
             messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 
-            includeList.forEach(targetId -> {
+            includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
@@ -454,7 +454,7 @@ public class FamilyServiceImpl implements FamilyService {
             meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(mo));
             messageDto.setMeta(meta);
 
-            includeList.forEach(targetId -> {
+            includeList.stream().distinct().forEach(targetId -> {
                 messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
                 messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
                         AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),

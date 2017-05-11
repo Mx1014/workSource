@@ -15,7 +15,6 @@ import com.everhomes.rest.rpc.client.RealtimeMessageIndicationPdu;
 import com.everhomes.rest.rpc.client.StoredMessageIndicationPdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.rest.user.UserMuteNotificationFlag;
 import com.everhomes.user.*;
 import com.everhomes.util.DateHelper;
@@ -81,14 +80,16 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         
         // reflect back message to sender
         if((deliveryOption & MessagingConstants.MSG_FLAG_REFLECT_BACK.getCode()) != 0) {
-            logins.stream().filter((UserLogin login) -> {
+            routeMessageTo(senderLogin, appId, senderLogin, dstChannelType, dstChannelToken, message, deliveryOption);
+
+            /*logins.stream().filter((UserLogin login) -> {
                 if ((login.getStatus() == UserLoginStatus.LOGGED_IN) && login.getUserId() == senderLogin.getUserId() && login.getLoginId() == senderLogin.getLoginId()) {
                     return true;
                 }
                 return context.checkAndAdd(login.getUserId(), login.getLoginId());
             }).forEach((UserLogin login) -> {
                 routeMessageTo(senderLogin, appId, login, dstChannelType, dstChannelToken, message, deliveryOption);
-            });
+            });*/
         }
 
         MessageDTO shadowClone = message;
