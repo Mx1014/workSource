@@ -4141,7 +4141,7 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 			}
-			
+
 			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
@@ -4895,7 +4895,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/2 * * * ?")
+	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
 
@@ -4937,7 +4937,7 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchScheduling punchScheduling : punchSchedulings){
 			//在15分钟+1分钟延迟内的进行计算, 不在此范围的continue
 			long endLong = runDate.getTime();
-			long beginLong = runDate.getTime() - 16*60*1000L;
+			long beginLong = runDate.getTime() - 15*60*1000L;
 			if(null == punchScheduling.getTimeRuleId())
 				continue;
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
