@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.module;
+package com.everhomes.rest.menu;
 
 /**
  * <ul>
@@ -9,13 +9,13 @@ package com.everhomes.rest.module;
  * <li>ORGANIZATION：前提条件是机构，机构的前提条件要有域空间（有域空间的筛选条件，联动出机构的筛选条件）</li>
  * </ul>
  */
-public enum ServiceModuleConditionType {
+public enum WebMenuConditionType {
 
     SYSTEM("system"), NAMESPACE("namespace"), PROJECT("project"), ORGANIZATION("organization");
 
     private String code;
 
-    private ServiceModuleConditionType(String code) {
+    private WebMenuConditionType(String code) {
         this.code = code;
     }
     
@@ -23,9 +23,9 @@ public enum ServiceModuleConditionType {
         return this.code;
     }
     
-    public static ServiceModuleConditionType fromCode(String code) {
-        ServiceModuleConditionType[] values = ServiceModuleConditionType.values();
-        for (ServiceModuleConditionType value: values) {
+    public static WebMenuConditionType fromCode(String code) {
+        WebMenuConditionType[] values = WebMenuConditionType.values();
+        for (WebMenuConditionType value: values) {
             if(value.getCode().equals(code)){
                 return value;
             }

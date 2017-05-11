@@ -387,7 +387,43 @@ public class AclController extends ControllerBase {
     }
 
 
+    /**
+     * <b>URL: /acl/listServiceModuleAuthorizedMembers</b>
+     * <p>业务模块里面的业务授权人员</p>
+     */
+    @RequestMapping("listServiceModuleAuthorizedMembers")
+    @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
+    public RestResponse listServiceModuleAuthorizedMembers(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /acl/createServiceModuleAuthorizedMember</b>
+     * <p>创建业务模块先的业务授权人员</p>
+     */
+    @RequestMapping("createServiceModuleAuthorizedMember")
+    @RestReturn(value=String.class)
+    public RestResponse createServiceModuleAuthorizedMember(@Valid CreateServiceModuleAuthorizedMemberCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
+    /**
+     * <b>URL: /acl/deleteServiceModuleAuthorizedMember</b>
+     * <p>删除业务授权人员</p>
+     */
+    @RequestMapping("deleteServiceModuleAuthorizedMember")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

@@ -18,7 +18,7 @@ import java.util.List;
  * <li>moduleIds:  业务模块id集合</li>
  * </ul>
  */
-public class CreateServiceModuleAdministratorsCommand {
+public class CreateServiceModuleAuthorizedMemberCommand {
 
 	@NotNull
 	private Long organizationId;
@@ -36,8 +36,11 @@ public class CreateServiceModuleAdministratorsCommand {
 	private Byte allFlag;
 
 	@NotNull
+	private Long moduleId;
+
+	@NotNull
 	@ItemType(Long.class)
-	private List<Long> moduleIds;
+	private List<Long> privilegeIds;
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -87,12 +90,20 @@ public class CreateServiceModuleAdministratorsCommand {
 		this.allFlag = allFlag;
 	}
 
-	public List<Long> getModuleIds() {
-		return moduleIds;
+	public Long getModuleId() {
+		return moduleId;
 	}
 
-	public void setModuleIds(List<Long> moduleIds) {
-		this.moduleIds = moduleIds;
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public List<Long> getPrivilegeIds() {
+		return privilegeIds;
+	}
+
+	public void setPrivilegeIds(List<Long> privilegeIds) {
+		this.privilegeIds = privilegeIds;
 	}
 
 	@Override
