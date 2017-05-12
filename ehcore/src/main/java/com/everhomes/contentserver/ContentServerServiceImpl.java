@@ -186,6 +186,17 @@ public class ContentServerServiceImpl implements ContentServerService {
             token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         return parserSingleUri(uri, cache, ownerType, ownerId, token);
     }
+    
+    @Override
+    public String parserUri(String uri) {
+    	if (uri != null && !uri.isEmpty()) {
+			try {
+				return parserUri(uri, null, null);
+			} catch (Exception e) {
+			}
+		}
+    	return null;
+    }
 
     private Map<Long, ContentServer> getServersHash() {
         List<ContentServer> servers = contentServerProvider.listContentServers();

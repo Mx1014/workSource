@@ -9,13 +9,16 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>organizationId: 管理公司id</li>
+ * <li>id: id</li>
  * </ul>
  */
-public class ListTalentCateogryCommand {
+public class DeleteTalentCategoryCommand {
 	@NotNull
 	private Long organizationId;
+	@NotNull
+	private Long id;
 
-	public ListTalentCateogryCommand() {
+	public DeleteTalentCategoryCommand() {
 
 	}
 
@@ -25,6 +28,14 @@ public class ListTalentCateogryCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override

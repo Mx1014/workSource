@@ -3,22 +3,23 @@ package com.everhomes.talent;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.talent.CreateOrUpdateTalentCateogryCommand;
+import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
-import com.everhomes.rest.talent.DeleteTalentCateogryCommand;
+import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
 import com.everhomes.rest.talent.ImportTalentCommand;
-import com.everhomes.rest.talent.ListTalentCateogryCommand;
-import com.everhomes.rest.talent.ListTalentCateogryResponse;
+import com.everhomes.rest.talent.ListTalentCategoryCommand;
+import com.everhomes.rest.talent.ListTalentCategoryResponse;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
@@ -34,33 +35,33 @@ public class TalentController extends ControllerBase {
 	
 	/**
 	 * <p>1.分类列表</p>
-	 * <b>URL: /talent/listTalentCateogry</b>
+	 * <b>URL: /talent/listTalentCategory</b>
 	 */
-	@RequestMapping("listTalentCateogry")
-	@RestReturn(ListTalentCateogryResponse.class)
-	public RestResponse listTalentCateogry(ListTalentCateogryCommand cmd){
-		return new RestResponse(talentService.listTalentCateogry(cmd));
+	@RequestMapping("listTalentCategory")
+	@RestReturn(ListTalentCategoryResponse.class)
+	public RestResponse listTalentCategory(ListTalentCategoryCommand cmd){
+		return new RestResponse(talentService.listTalentCategory(cmd));
 	}
 
 	/**
 	 * <p>2.新增或更新分类</p>
-	 * <b>URL: /talent/createOrUpdateTalentCateogry</b>
+	 * <b>URL: /talent/createOrUpdateTalentCategory</b>
 	 */
-	@RequestMapping("createOrUpdateTalentCateogry")
+	@RequestMapping("createOrUpdateTalentCategory")
 	@RestReturn(String.class)
-	public RestResponse createOrUpdateTalentCateogry(CreateOrUpdateTalentCateogryCommand cmd){
-		talentService.createOrUpdateTalentCateogry(cmd);
+	public RestResponse createOrUpdateTalentCategory(CreateOrUpdateTalentCategoryCommand cmd){
+		talentService.createOrUpdateTalentCategory(cmd);
 		return new RestResponse();
 	}
 
 	/**
 	 * <p>3.删除分类</p>
-	 * <b>URL: /talent/deleteTalentCateogry</b>
+	 * <b>URL: /talent/deleteTalentCategory</b>
 	 */
-	@RequestMapping("deleteTalentCateogry")
+	@RequestMapping("deleteTalentCategory")
 	@RestReturn(String.class)
-	public RestResponse deleteTalentCateogry(DeleteTalentCateogryCommand cmd){
-		talentService.deleteTalentCateogry(cmd);
+	public RestResponse deleteTalentCategory(DeleteTalentCategoryCommand cmd){
+		talentService.deleteTalentCategory(cmd);
 		return new RestResponse();
 	}
 
@@ -124,8 +125,8 @@ public class TalentController extends ControllerBase {
 	 */
 	@RequestMapping("importTalent")
 	@RestReturn(String.class)
-	public RestResponse importTalent(ImportTalentCommand cmd, MultipartFile[] attachment){
-		talentService.importTalent(cmd);
+	public RestResponse importTalent(ImportTalentCommand cmd, @RequestParam("attachment") MultipartFile[] attachment){
+		talentService.importTalent(cmd, attachment);
 		return new RestResponse();
 	}
 

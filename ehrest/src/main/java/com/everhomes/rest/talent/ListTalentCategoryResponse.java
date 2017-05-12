@@ -12,16 +12,16 @@ import com.everhomes.util.StringHelper;
  * <li>talentCategories: 分类列表，参考{@link com.everhomes.rest.talent.TalentCategoryDTO}</li>
  * </ul>
  */
-public class ListTalentCateogryResponse {
+public class ListTalentCategoryResponse {
 
 	@ItemType(TalentCategoryDTO.class)
 	private List<TalentCategoryDTO> talentCategories;
 
-	public ListTalentCateogryResponse() {
+	public ListTalentCategoryResponse() {
 
 	}
 
-	public ListTalentCateogryResponse(List<TalentCategoryDTO> talentCategories) {
+	public ListTalentCategoryResponse(List<TalentCategoryDTO> talentCategories) {
 		super();
 		this.talentCategories = talentCategories;
 	}

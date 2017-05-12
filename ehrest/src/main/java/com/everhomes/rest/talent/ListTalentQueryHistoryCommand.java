@@ -2,46 +2,21 @@
 package com.everhomes.rest.talent;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>参数:
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</li>
- * <li>ownerId: 所属id</li>
  * <li>organizationId: 管理公司id</li>
- * <li>id: id</li>
  * </ul>
  */
 public class ListTalentQueryHistoryCommand {
-	@NotNull
-	@Size(min=1)
-	private String ownerType;
-	@NotNull
-	private Long ownerId;
 	@NotNull
 	private Long organizationId;
 
 	public ListTalentQueryHistoryCommand() {
 
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 
 	public Long getOrganizationId() {

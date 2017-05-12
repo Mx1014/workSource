@@ -13,4 +13,8 @@ public interface TalentCategoryProvider {
 
 	List<TalentCategory> listTalentCategory();
 
+	List<TalentCategory> listTalentCategoryByNamespace(Integer namespaceId);
+
+	TalentCategory findTalentCategoryByName(Integer namespaceId, String name);
+
 }

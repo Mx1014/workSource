@@ -13,4 +13,6 @@ public interface TalentQueryHistoryProvider {
 
 	List<TalentQueryHistory> listTalentQueryHistory();
 
+	List<TalentQueryHistory> listTalentQueryHistoryByUser(Long userId);
+
 }

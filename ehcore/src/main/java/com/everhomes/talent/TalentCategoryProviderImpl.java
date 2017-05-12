@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTalentCategoriesDao;
@@ -58,12 +60,31 @@ public class TalentCategoryProviderImpl implements TalentCategoryProvider {
 	}
 	
 	@Override
+	public TalentCategory findTalentCategoryByName(Integer namespaceId, String name) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_TALENT_CATEGORIES)
+			.where(Tables.EH_TALENT_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_TALENT_CATEGORIES.NAME.eq(name))
+			.and(Tables.EH_TALENT_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.fetchOne();
+		return record == null ? null : ConvertHelper.convert(record, TalentCategory.class);
+	}
+
+	@Override
 	public List<TalentCategory> listTalentCategory() {
 		return getReadOnlyContext().select().from(Tables.EH_TALENT_CATEGORIES)
 				.orderBy(Tables.EH_TALENT_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, TalentCategory.class));
 	}
 	
+	@Override
+	public List<TalentCategory> listTalentCategoryByNamespace(Integer namespaceId) {
+		return getReadOnlyContext().select().from(Tables.EH_TALENT_CATEGORIES)
+				.where(Tables.EH_TALENT_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_TALENT_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_TALENT_CATEGORIES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, TalentCategory.class));
+	}
+
 	private EhTalentCategoriesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

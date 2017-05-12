@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTalentQueryHistoriesDao;
@@ -64,6 +65,15 @@ public class TalentQueryHistoryProviderImpl implements TalentQueryHistoryProvide
 				.fetch().map(r -> ConvertHelper.convert(r, TalentQueryHistory.class));
 	}
 	
+	@Override
+	public List<TalentQueryHistory> listTalentQueryHistoryByUser(Long userId) {
+		return getReadOnlyContext().select().from(Tables.EH_TALENT_QUERY_HISTORIES)
+				.where(Tables.EH_TALENT_QUERY_HISTORIES.CREATOR_UID.eq(userId))
+				.and(Tables.EH_TALENT_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_TALENT_QUERY_HISTORIES.ID.desc())
+				.fetch().map(r -> ConvertHelper.convert(r, TalentQueryHistory.class));
+	}
+
 	private EhTalentQueryHistoriesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
