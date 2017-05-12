@@ -38,6 +38,8 @@ CREATE TABLE `eh_warehouse_materials` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
@@ -55,6 +57,8 @@ CREATE TABLE `eh_warehouse_material_categories` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
@@ -71,6 +75,8 @@ CREATE TABLE `eh_warehouse_stocks` (
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
