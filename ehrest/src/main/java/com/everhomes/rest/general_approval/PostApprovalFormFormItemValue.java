@@ -22,5 +22,17 @@ public class PostApprovalFormFormItemValue {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public List<PostApprovalFormItem> getValues() {
+		return values;
+	}
+
+
+
+	public void setValues(List<PostApprovalFormItem> values) {
+		this.values = values;
+	}
  
 }

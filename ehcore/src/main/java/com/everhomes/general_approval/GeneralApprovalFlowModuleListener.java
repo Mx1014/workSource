@@ -1,13 +1,12 @@
 package com.everhomes.general_approval;
 
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tools.ant.types.FileList.FileName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -28,8 +27,11 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormFormDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
+import com.everhomes.rest.general_approval.PostApprovalFormFormItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormFormValue;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
@@ -126,84 +128,121 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 					.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
 			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+			// 模板设定的字段DTOs
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
-			for (GeneralApprovalVal val : vals) {
-				try{
-					if (!DEFUALT_FIELDS.contains(val.getFieldName())) {
-						// 不在默认fields的就是自定义字符串，组装这些
-						FlowCaseEntity e = new FlowCaseEntity();
-						GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-						if(null == dto ){
-							LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
-							continue;
-						}
-							
-						e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-						
-						switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-						case SINGLE_LINE_TEXT:
-							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
-							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-							entities.add(e);
-							break;
-						case MULTI_LINE_TEXT:
-							e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-							entities.add(e);
-							break;
-						case IMAGE:
-							e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
-							//工作流images怎么传
-							PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
-							for(String uriString : imageValue.getUris()){
-								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-								e.setValue(url);
-								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-								entities.add(e2);
-							}
-							break;
-						case FILE:
-	//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
-							//TODO:工作流需要新增类型file
-							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
-							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class); 
-							if (null == fileValue || fileValue.getFiles() ==null )
-								break;
-							List<FlowCaseFileDTO> files = new ArrayList<>();
-							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO(); 
-								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()); 
-								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-								fileDTO.setUrl(url);
-								fileDTO.setFileName(dto2.getFileName());
-								fileDTO.setFileSize(resource.getResourceSize());
-								files.add(fileDTO);
-							}
-							FlowCaseFileValue value = new FlowCaseFileValue();
-							value.setFiles(files);
-							e.setValue(JSON.toJSONString(value));
-							entities.add(e);
-							break;
-						case INTEGER_TEXT:
-							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
-							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-							entities.add(e);
-							break;
-							
-						}
-						
-					}
-				}catch(NullPointerException e){
-					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
-				}catch(Exception e){
-					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
-					
-				}
-			}
+			processEntities(entities, vals,fieldDTOs);
+			
 		}
 		return entities;
 	}
+
+	private void processEntities(
+			List<FlowCaseEntity> entities,List<GeneralApprovalVal> vals ,List<GeneralFormFieldDTO> fieldDTOs ){
+		
+		for (GeneralApprovalVal val : vals) {
+			try{
+				if (!DEFUALT_FIELDS.contains(val.getFieldName())) {
+					// 不在默认fields的就是自定义字符串，组装这些
+					FlowCaseEntity e = new FlowCaseEntity();
+					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+					if(null == dto ){
+						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
+						continue;
+					}
+						
+					e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName()); 
+					switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+					case SINGLE_LINE_TEXT:
+					case NUMBER_TEXT:
+					case DATE:
+					case DROP_BOX :
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+						entities.add(e);
+						break;
+					case MULTI_LINE_TEXT:
+						e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+						entities.add(e);
+						break;
+					case IMAGE:
+						e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
+						//工作流images怎么传
+						PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
+						for(String uriString : imageValue.getUris()){
+							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+							e.setValue(url);
+							FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+							entities.add(e2);
+						}
+						break;
+					case FILE:
+//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
+						//TODO:工作流需要新增类型file
+						e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
+						PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class); 
+						if (null == fileValue || fileValue.getFiles() ==null )
+							break;
+						List<FlowCaseFileDTO> files = new ArrayList<>();
+						for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
+							FlowCaseFileDTO fileDTO = new FlowCaseFileDTO(); 
+							String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()); 
+							ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+							fileDTO.setUrl(url);
+							fileDTO.setFileName(dto2.getFileName());
+							fileDTO.setFileSize(resource.getResourceSize());
+							files.add(fileDTO);
+						}
+						FlowCaseFileValue value = new FlowCaseFileValue();
+						value.setFiles(files);
+						e.setValue(JSON.toJSONString(value));
+						entities.add(e);
+						break;
+					case INTEGER_TEXT:
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+						entities.add(e);
+						break;
+					case FORM:
+						
+						PostApprovalFormFormValue subFormValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFormValue.class);
+						//取出设置的子表单fields
+						GeneralFormFormDTO subFromExtra = ConvertHelper.convert(dto.getFieldExtra(), GeneralFormFormDTO.class) ;
+						//给子表单计数从1开始
+						int formCount = 1;
+						//循环取出每一个子表单值
+						for(PostApprovalFormFormItemValue subForm1:subFormValue.getForms()){
+							e = new FlowCaseEntity(); 
+							e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName()); 
+							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+							e.setValue(formCount+"");
+							entities.add(e);
+							List<GeneralApprovalVal> subVals = new ArrayList<>();
+							//循环取出一个子表单的每一个字段值
+							for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
+								GeneralApprovalVal obj =  new GeneralApprovalVal(); 
+								obj.setFieldName(subFromValue1.getFieldName());
+								obj.setFieldType(subFromValue1.getFieldType());
+								obj.setFieldStr3(subFromValue1.getFieldValue());
+								subVals.add(obj);
+							}
+							List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
+							processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
+							entities.addAll(subSingleEntities);
+						}
+						break;
+					}
+					
+				}
+			}catch(NullPointerException e){
+				LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
+			}catch(Exception e){
+				LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
+				
+			}
+		}
+	} 
 
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
