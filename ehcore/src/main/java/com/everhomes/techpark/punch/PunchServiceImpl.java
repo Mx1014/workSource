@@ -183,6 +183,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -2300,7 +2301,8 @@ public class PunchServiceImpl implements PunchService {
 				.getTime()));
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-		statistic.setOwnerId(orgId);
+        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+		statistic.setOwnerId(ownerId);
 		statistic.setUserId(member.getTargetId());
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
@@ -2310,7 +2312,6 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
 
-        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
  		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -4090,6 +4091,8 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+
+            punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
 //				dto.setOverTimeSum(0.0);
 //			}
@@ -4141,8 +4144,6 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 			}
-			
-			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
 		response.setNextPageAnchor(nextPageAnchor);
@@ -4178,6 +4179,9 @@ public class PunchServiceImpl implements PunchService {
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
 			
 			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
+
+			LOGGER.debug(" organizationProvider.listOrganizationByGroupTypes("+org.getPath()+"% , "+StringHelper.toJsonString(groupTypeList)+"); " );
+			LOGGER.debug("orgs  : "+StringHelper.toJsonString(orgs));
 			List<Long> orgIds = new ArrayList<Long>();
 			orgIds.add(org.getId());
 			for (Organization o : orgs){
@@ -4186,6 +4190,7 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
+			 
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -4895,7 +4900,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/2 * * * ?")
+	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
 
@@ -4937,7 +4942,7 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchScheduling punchScheduling : punchSchedulings){
 			//在15分钟+1分钟延迟内的进行计算, 不在此范围的continue
 			long endLong = runDate.getTime();
-			long beginLong = runDate.getTime() - 16*60*1000L;
+			long beginLong = runDate.getTime() - 15*60*1000L;
 			if(null == punchScheduling.getTimeRuleId())
 				continue;
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
@@ -4980,9 +4985,14 @@ public class PunchServiceImpl implements PunchService {
 						(orgId, groupTypeList, null) ;
 				//循环刷所有员工
 				for(OrganizationMemberDTO member : organizationMembers){
-					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+//					}
+					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
+					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
 						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-					}
+							
 				}
 			}
 			else{
@@ -5024,8 +5034,11 @@ public class PunchServiceImpl implements PunchService {
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
 			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
-				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
+				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+				}
 				else{
  
 					LOGGER.error("Invalid target type or  Id parameter in the command");
@@ -5569,7 +5582,7 @@ public class PunchServiceImpl implements PunchService {
 		if(targetType.equals(PunchOwnerType.User.getCode())){
 			//如果有个人规则就返回个人规则
 			map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, targetType, targetId);
-			if (null != map && map.getPunchRuleId() != null) 
+			if (null != map ) 
 				return map;
 			//如果没有就按照部门来找规则
 			OrganizationDTO deptDTO = findUserDepartment(targetId, ownerId);

@@ -160,13 +160,6 @@ public interface UserService {
     UserNotificationSettingDTO getUserNotificationSetting(GetUserNotificationSettingCommand cmd);
 
     /**
-     * 根据Etag判断用户昵称是否更新，首次访问或者昵称更新则返回昵称数据，否则返回304
-     * @param cmd
-     * @return
-     */
-    String getUserNickName(GetUserNickNameCommand cmd);
-
-    /**
      * 根据会话获取用户信息
      * @param cmd
      * @return
