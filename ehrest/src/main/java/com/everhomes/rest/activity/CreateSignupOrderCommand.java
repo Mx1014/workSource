@@ -6,19 +6,19 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 /**
  *<ul>
- *<li>activityRosterId:活动报名ID</li>
+ *<li>activityId:活动ID</li>
  *</ul>
  */
 public class CreateSignupOrderCommand {
     @NotNull
-    private Long activityRosterId;
-   
-	public Long getActivityRosterId() {
-		return activityRosterId;
+    private Long activityId;
+
+	public Long getActivityId() {
+		return activityId;
 	}
 
-	public void setActivityRosterId(Long activityRosterId) {
-		this.activityRosterId = activityRosterId;
+	public void setActivityId(Long activityId) {
+		this.activityId = activityId;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +53,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 			roster.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			roster.setPayAmount(Double.valueOf(cmd.getPayAccount()));
+			roster.setPayAmount(new BigDecimal(cmd.getPayAccount()));
 			activityProvider.updateRoster(roster);
 			return null;
 		});
@@ -74,8 +75,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	
 	
-	private void checkPayAmount(String payAmount, Double chargePrice) {
-		if(StringUtils.isBlank(payAmount) || chargePrice.doubleValue() != Double.valueOf(payAmount).doubleValue()){
+	private void checkPayAmount(String payAmount, BigDecimal chargePrice) {
+		if(StringUtils.isBlank(payAmount) || chargePrice == null || !chargePrice.equals(new BigDecimal(payAmount))){
 			LOGGER.error("payAmount and chargePrice is not equal.");
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
 					"payAmount and chargePrice is not equal.");

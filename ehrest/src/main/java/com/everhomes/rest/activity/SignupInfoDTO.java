@@ -1,6 +1,7 @@
 //@formatter:off
 package com.everhomes.rest.activity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -67,10 +68,10 @@ public class SignupInfoDTO {
     private Timestamp orderStartTime;
     private Long orderCountdown;
     private String vendorType;
-    private Double payAmount;
+    private BigDecimal payAmount;
     private Timestamp payTime;
     private Long refundOrderNo;
-    private Double refundAmount;
+    private BigDecimal refundAmount;
     private Timestamp refundTime;
 	private Byte status;
 	
@@ -244,13 +245,16 @@ public class SignupInfoDTO {
 		this.vendorType = vendorType;
 	}
 	
-	public Double getPayAmount() {
+	public BigDecimal getPayAmount() {
 		return payAmount;
 	}
-	public void setPayAmount(Double payAmount) {
+	public void setPayAmount(BigDecimal payAmount) {
 		this.payAmount = payAmount;
 	}
-	public void setRefundAmount(Double refundAmount) {
+	public BigDecimal getRefundAmount() {
+		return refundAmount;
+	}
+	public void setRefundAmount(BigDecimal refundAmount) {
 		this.refundAmount = refundAmount;
 	}
 	public Timestamp getPayTime() {
@@ -266,9 +270,6 @@ public class SignupInfoDTO {
 		this.refundOrderNo = refundOrderNo;
 	}
 	
-	public Double getRefundAmount() {
-		return refundAmount;
-	}
 	public Timestamp getRefundTime() {
 		return refundTime;
 	}

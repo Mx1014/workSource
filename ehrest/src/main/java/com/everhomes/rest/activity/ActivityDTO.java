@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -117,7 +118,7 @@ public class ActivityDTO {
     
     private Byte chargeFlag;
 
-    private Double chargePrice;
+    private BigDecimal chargePrice;
     
     private Long createTime;
     
@@ -569,11 +570,11 @@ public class ActivityDTO {
 		this.chargeFlag = chargeFlag;
 	}
 
-	public Double getChargePrice() {
+	public BigDecimal getChargePrice() {
 		return chargePrice;
 	}
 
-	public void setChargePrice(Double chargePrice) {
+	public void setChargePrice(BigDecimal chargePrice) {
 		this.chargePrice = chargePrice;
 	}
 

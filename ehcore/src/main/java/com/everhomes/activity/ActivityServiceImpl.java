@@ -480,7 +480,9 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd) {
-		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+		
+		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");
@@ -502,7 +504,7 @@ public class ActivityServiceImpl implements ActivityService {
 		orderCmd.setOrderNo(roster.getOrderNo().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		orderCmd.setSubject(temple);
-		orderCmd.setTotalFee(new BigDecimal(activity.getChargePrice()));
+		orderCmd.setTotalFee(activity.getChargePrice());
 		CommonOrderDTO dto = null;
 		try {
 			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
@@ -1169,7 +1171,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		
-		refundCmd.setRefundAmount(new BigDecimal(roster.getPayAmount()));
+		refundCmd.setRefundAmount(roster.getPayAmount());
 		
 		refundCmd.setRefundMsg("报名取消退款");
 		this.setSignatureParam(refundCmd);
