@@ -15,7 +15,6 @@ import java.util.List;
  * <li>path: 层次关系</li>
  * <li>level: 级别</li>
  * <li>serviceModules: 子业务模块</li>
- * <li>conditionType：模块关联的条件，参考{@link com.everhomes.rest.module.ServiceModuleConditionType}</li>
  * </ul>
  */
 public class ServiceModuleDTO implements Serializable {

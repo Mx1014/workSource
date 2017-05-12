@@ -104,6 +104,20 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/assignmentServiceModule</b>
+     * <p>业务模块分配</p>
+     */
+    @RequestMapping("assignmentServiceModule")
+    @RestReturn(value=String.class)
+    public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
      * <b>URL: /acl/listServiceModuleAdministrators</b>
      * <p>业务模块管理员列表</p>
      */
@@ -394,7 +408,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listServiceModuleAuthorizedMembers")
     @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
     public RestResponse listServiceModuleAuthorizedMembers(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

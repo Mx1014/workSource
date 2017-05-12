@@ -182,12 +182,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		role.setNamespaceId(namespaceId);
 		role.setOwnerType(cmd.getOwnerType());
 		role.setOwnerId(cmd.getOwnerId());
+		role.setCreatorUid(user.getId());
+		role.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		aclProvider.createRole(role);
 	}
 
 	@Override
 	public void updateRole(UpdateRoleCommand cmd) {
-		User user = UserContext.current().getUser();
 
 		//修改角色信息
 		Role role = checkRole(cmd.getRoleId());
@@ -326,6 +327,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
 		
 		return roles.stream().map(r->{
+			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);
+			role.setCreateTime(r.getCreateTime().getTime());
+			User user = userProvider.findUserById(r.getCreatorUid());
+			if(null != user){
+				role.setCreatorUName(user.getNickName());
+			}
 			return ConvertHelper.convert(r, RoleDTO.class);
 		}).collect(Collectors.toList());
 	}

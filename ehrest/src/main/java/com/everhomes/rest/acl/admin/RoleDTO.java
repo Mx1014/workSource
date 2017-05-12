@@ -18,6 +18,12 @@ public class RoleDTO {
 	
 	private String description;
 
+	private Long creatorUid;
+
+	private Long createTime;
+
+	private String creatorUName;
+
 	public Long getId() {
 		return id;
 	}
@@ -49,6 +55,28 @@ public class RoleDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
-	
+
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getCreatorUName() {
+		return creatorUName;
+	}
+
+	public void setCreatorUName(String creatorUName) {
+		this.creatorUName = creatorUName;
+	}
 }

@@ -177,10 +177,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 			for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
 				ServiceModuleDTO p = new ServiceModuleDTO();
 				p.setId(modulePrivilege.getPrivilegeId());
-				Privilege privilege = aclProvider.getPrivilegeById(modulePrivilege.getPrivilegeId());
-				if(null != privilege){
-					p.setName(privilege.getName());
-				}
+				p.setName(modulePrivilege.getRemark());
 				p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
 				ps.add(p);
 			}

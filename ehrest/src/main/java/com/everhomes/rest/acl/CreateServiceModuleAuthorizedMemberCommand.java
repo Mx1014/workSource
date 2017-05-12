@@ -15,7 +15,8 @@ import java.util.List;
  * <li>targetId：对象id</li>
  * <li>targetType：对象类型，Eh_Users, Eh_Organizations,{@link com.everhomes.rest.common.EntityType}</li>
  * <li>allFlag：是否全部业务模块 1：是 0：否</li>
- * <li>moduleIds:  业务模块id集合</li>
+ * <li>moduleId:  模块id</li>
+ * <li>privilegeIds:  业务模块id集合</li>
  * </ul>
  */
 public class CreateServiceModuleAuthorizedMemberCommand {
