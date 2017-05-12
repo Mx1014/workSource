@@ -101,7 +101,7 @@ public class ActivityPostCommand{
     
     private Byte chargeFlag;
 
-    private Integer chargePrice;
+    private Double chargePrice;
     
     private Byte status;
 
@@ -412,11 +412,11 @@ public class ActivityPostCommand{
 		this.chargeFlag = chargeFlag;
 	}
 
-	public Integer getChargePrice() {
+	public Double getChargePrice() {
 		return chargePrice;
 	}
 
-	public void setChargePrice(Integer chargePrice) {
+	public void setChargePrice(Double chargePrice) {
 		this.chargePrice = chargePrice;
 	}
 

@@ -75,7 +75,7 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("createSignupOrder")
     @RestReturn(value=CommonOrderDTO.class)
-    public RestResponse createSignupOrder(@Valid createSignupOrderCommand cmd) {
+    public RestResponse createSignupOrder(@Valid CreateSignupOrderCommand cmd) {
     	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
     	RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

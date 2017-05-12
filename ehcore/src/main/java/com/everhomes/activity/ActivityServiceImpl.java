@@ -463,6 +463,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            dto.setPosterUrl(getActivityPosterUrl(activity));
 	            fixupVideoInfo(dto);//added by janson
 	            
+	            //add by yanjun 20170512
+	            dto.setUserRosterId(roster.getId());
+	            
 	            //Send message to creator
 	            Map<String, String> map = new HashMap<String, String>();
 	            map.put("userName", user.getNickName());
@@ -476,7 +479,7 @@ public class ActivityServiceImpl implements ActivityService {
     
 
 	@Override
-	public CommonOrderDTO createSignupOrder(createSignupOrderCommand cmd) {
+	public CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd) {
 		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,

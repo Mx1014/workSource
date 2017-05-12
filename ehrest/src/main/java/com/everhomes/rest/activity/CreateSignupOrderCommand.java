@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *<li>activityRosterId:活动报名ID</li>
  *</ul>
  */
-public class createSignupOrderCommand {
+public class CreateSignupOrderCommand {
     @NotNull
     private Long activityRosterId;
    

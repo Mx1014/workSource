@@ -28,7 +28,7 @@ public interface ActivityService {
 
     ActivityDTO signup(ActivitySignupCommand cmd);
     
-    CommonOrderDTO createSignupOrder(createSignupOrderCommand cmd);
+    CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
     
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 

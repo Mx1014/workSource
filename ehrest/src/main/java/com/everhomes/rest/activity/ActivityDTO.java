@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>userPayFlag:支付状态  0: no pay, 1:have pay, 2:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
  *<li>userOrderCountdown:订单倒计时时间长度</li>
+ *<li>userRosterId:订单倒计时时间长度</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *<li>uuid:活动唯一的标识</li>
  *<li>mediaUrl:活动url</li>
@@ -84,6 +85,7 @@ public class ActivityDTO {
     private Integer userActivityStatus;
     private Byte userPayFlag;
     private Long userOrderCountdown;
+    private Long userRosterId;
     private Integer processStatus;
     private String uuid;
     private String guest;
@@ -115,7 +117,7 @@ public class ActivityDTO {
     
     private Byte chargeFlag;
 
-    private Integer chargePrice;
+    private Double chargePrice;
     
     private Long createTime;
     
@@ -389,6 +391,14 @@ public class ActivityDTO {
 		this.userOrderCountdown = userOrderCountdown;
 	}
 
+	public Long getUserRosterId() {
+		return userRosterId;
+	}
+
+	public void setUserRosterId(Long userRosterId) {
+		this.userRosterId = userRosterId;
+	}
+
 	public Integer getProcessStatus() {
         return processStatus;
     }
@@ -559,11 +569,11 @@ public class ActivityDTO {
 		this.chargeFlag = chargeFlag;
 	}
 
-	public Integer getChargePrice() {
+	public Double getChargePrice() {
 		return chargePrice;
 	}
 
-	public void setChargePrice(Integer chargePrice) {
+	public void setChargePrice(Double chargePrice) {
 		this.chargePrice = chargePrice;
 	}
 
