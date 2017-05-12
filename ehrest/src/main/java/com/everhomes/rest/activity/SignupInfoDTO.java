@@ -67,10 +67,10 @@ public class SignupInfoDTO {
     private Timestamp orderStartTime;
     private Long orderCountdown;
     private String vendorType;
-    private Integer payAmount;
+    private Double payAmount;
     private Timestamp payTime;
     private Long refundOrderNo;
-    private Integer refundAmount;
+    private Double refundAmount;
     private Timestamp refundTime;
 	private Byte status;
 	
@@ -243,11 +243,15 @@ public class SignupInfoDTO {
 	public void setVendorType(String vendorType) {
 		this.vendorType = vendorType;
 	}
-	public Integer getPayAmount() {
+	
+	public Double getPayAmount() {
 		return payAmount;
 	}
-	public void setPayAmount(Integer payAmount) {
+	public void setPayAmount(Double payAmount) {
 		this.payAmount = payAmount;
+	}
+	public void setRefundAmount(Double refundAmount) {
+		this.refundAmount = refundAmount;
 	}
 	public Timestamp getPayTime() {
 		return payTime;
@@ -261,11 +265,9 @@ public class SignupInfoDTO {
 	public void setRefundOrderNo(Long refundOrderNo) {
 		this.refundOrderNo = refundOrderNo;
 	}
-	public Integer getRefundAmount() {
+	
+	public Double getRefundAmount() {
 		return refundAmount;
-	}
-	public void setRefundAmount(Integer refundAmount) {
-		this.refundAmount = refundAmount;
 	}
 	public Timestamp getRefundTime() {
 		return refundTime;

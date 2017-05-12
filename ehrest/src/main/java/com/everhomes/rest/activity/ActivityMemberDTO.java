@@ -58,10 +58,10 @@ public class ActivityMemberDTO {
     private Timestamp orderStartTime;
     private Long orderCountdown;
     private String vendorType;
-    private Integer payAmount;
+    private Double payAmount;
     private Timestamp payTime;
     private Long refundOrderNo;
-    private Integer refundAmount;
+    private Double refundAmount;
     private Timestamp refundTime;
     private Byte status;
     
@@ -240,12 +240,16 @@ public class ActivityMemberDTO {
 		this.vendorType = vendorType;
 	}
 
-	public Integer getPayAmount() {
+	public Double getPayAmount() {
 		return payAmount;
 	}
 
-	public void setPayAmount(Integer payAmount) {
+	public void setPayAmount(Double payAmount) {
 		this.payAmount = payAmount;
+	}
+
+	public void setRefundAmount(Double refundAmount) {
+		this.refundAmount = refundAmount;
 	}
 
 	public Timestamp getPayTime() {
@@ -264,12 +268,8 @@ public class ActivityMemberDTO {
 		this.refundOrderNo = refundOrderNo;
 	}
 
-	public Integer getRefundAmount() {
+	public Double getRefundAmount() {
 		return refundAmount;
-	}
-
-	public void setRefundAmount(Integer refundAmount) {
-		this.refundAmount = refundAmount;
 	}
 
 	public Timestamp getRefundTime() {

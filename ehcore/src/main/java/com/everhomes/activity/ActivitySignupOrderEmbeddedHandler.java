@@ -52,7 +52,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 			roster.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			roster.setPayAmount(Integer.valueOf(cmd.getPayAccount()));
+			roster.setPayAmount(Double.valueOf(cmd.getPayAccount()));
 			activityProvider.updateRoster(roster);
 			return null;
 		});
@@ -74,8 +74,8 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	
 	
-	private void checkPayAmount(String payAmount, Integer chargePrice) {
-		if(StringUtils.isBlank(payAmount) || chargePrice != Integer.valueOf(payAmount)){
+	private void checkPayAmount(String payAmount, Double chargePrice) {
+		if(StringUtils.isBlank(payAmount) || chargePrice.doubleValue() != Double.valueOf(payAmount).doubleValue()){
 			LOGGER.error("payAmount and chargePrice is not equal.");
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
 					"payAmount and chargePrice is not equal.");
