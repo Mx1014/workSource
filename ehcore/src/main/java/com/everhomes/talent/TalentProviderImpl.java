@@ -4,7 +4,10 @@ package com.everhomes.talent;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +16,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.talent.ListTalentCommand;
+import com.everhomes.rest.talent.TalentDegreeConditionEnum;
+import com.everhomes.rest.talent.TalentDegreeEnum;
+import com.everhomes.rest.talent.TalentExperienceConditionEnum;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTalentsDao;
@@ -52,6 +59,20 @@ public class TalentProviderImpl implements TalentProvider {
 	}
 
 	@Override
+	public void updateTalentId(Talent talent) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTalents.class));
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		Long userId = UserContext.current().getUser().getId();
+		
+		getReadWriteContext().update(Tables.EH_TALENTS)
+			.set(Tables.EH_TALENTS.ID, id)
+			.set(Tables.EH_TALENTS.UPDATE_TIME, now)
+			.set(Tables.EH_TALENTS.OPERATOR_UID, userId)
+			.where(Tables.EH_TALENTS.ID.eq(talent.getId()))
+			.execute();
+	}
+
+	@Override
 	public Talent findTalentById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), Talent.class);
@@ -64,6 +85,68 @@ public class TalentProviderImpl implements TalentProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, Talent.class));
 	}
 	
+	@Override
+	public List<Talent> listTalent(Integer namespaceId, ListTalentCommand cmd) {
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_TALENTS)
+			.where(Tables.EH_TALENTS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_TALENTS.OWNER_TYPE.eq(cmd.getOwnerType()))
+			.and(Tables.EH_TALENTS.OWNER_ID.eq(cmd.getOwnerId()));
+			
+		if (cmd.getCategoryId() != null) {
+			step.and(Tables.EH_TALENTS.CATEGORY_ID.eq(cmd.getCategoryId()));
+		}
+		
+		if (cmd.getGender() != null) {
+			step.and(Tables.EH_TALENTS.GENDER.eq(cmd.getGender()));
+		}
+		
+		// 经验
+		if (cmd.getExperience() != null) {
+			if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.UNDER_ONE_YEAR.getCode()) {
+				step.and(Tables.EH_TALENTS.EXPERIENCE.le(1));
+			}else if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.ONE_THREE.getCode()) {
+				step.and(Tables.EH_TALENTS.EXPERIENCE.ge(1))
+					.and(Tables.EH_TALENTS.EXPERIENCE.le(3));
+			}else if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.THREE_FIVE.getCode()) {
+				step.and(Tables.EH_TALENTS.EXPERIENCE.ge(3))
+				.and(Tables.EH_TALENTS.EXPERIENCE.le(5));
+			}else if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.FIVE_TEN.getCode()) {
+				step.and(Tables.EH_TALENTS.EXPERIENCE.ge(5))
+				.and(Tables.EH_TALENTS.EXPERIENCE.le(10));
+			}else if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.OVER_TEN.getCode()) {
+				step.and(Tables.EH_TALENTS.EXPERIENCE.ge(10));
+			}
+		}
+		
+		// 学历
+		if (cmd.getDegree() != null) {
+			if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.UNDER_SECONDARY.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.le(TalentDegreeEnum.SECONDARY.getCode()));
+			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_SECONDARY.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.SECONDARY.getCode()));
+			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_BACHELOR.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.BACHELOR.getCode()));
+			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_MASTER.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.MASTER.getCode()));
+			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_DOCTOR.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.DOCTOR.getCode()));
+			}
+		}
+		
+		// 关键词
+		if (StringUtils.isNotEmpty(cmd.getKeyword())) {
+			String keyword = "%"+cmd.getKeyword()+"%";
+			step.and(Tables.EH_TALENTS.NAME.like(keyword).or(Tables.EH_TALENTS.POSITION.like(keyword)).or(Tables.EH_TALENTS.GRADUATE_SCHOOL.like(keyword)));
+		}
+		
+		if (cmd.getPageAnchor() != null) {
+			step.and(Tables.EH_TALENTS.ID.lt(cmd.getPageAnchor()));
+		}
+		
+		return step.orderBy(Tables.EH_TALENTS.ID.desc()).limit(cmd.getPageSize())
+			.fetch().map(r->ConvertHelper.convert(r, Talent.class));
+	}
+
 	private EhTalentsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

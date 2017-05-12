@@ -3,10 +3,12 @@ package com.everhomes.talent;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
+import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
@@ -53,5 +55,11 @@ public interface TalentService {
 
 
 	public ListTalentQueryHistoryResponse listTalentQueryHistory(ListTalentQueryHistoryCommand cmd);
+
+
+	public void deleteTalentQueryHistory(DeleteTalentQueryHistoryCommand cmd);
+
+
+	public void clearTalentQueryHistory(ClearTalentQueryHistoryCommand cmd);
 
 }

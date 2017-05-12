@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键词</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
+ * <li>historyFlag: 是否添加到历史记录</li>
  * </ul>
  */
 public class ListTalentCommand {
@@ -43,23 +44,19 @@ public class ListTalentCommand {
 	private Long pageAnchor;
 
 	private Integer pageSize;
+	
+	private Byte historyFlag;
 
 	public ListTalentCommand() {
 
 	}
 
-	public ListTalentCommand(String ownerType, Long ownerId, Long organizationId, Long categoryId, Byte gender, Byte experience, Byte degree, String keyword, Long pageAnchor, Integer pageSize) {
-		super();
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.organizationId = organizationId;
-		this.categoryId = categoryId;
-		this.gender = gender;
-		this.experience = experience;
-		this.degree = degree;
-		this.keyword = keyword;
-		this.pageAnchor = pageAnchor;
-		this.pageSize = pageSize;
+	public Byte getHistoryFlag() {
+		return historyFlag;
+	}
+
+	public void setHistoryFlag(Byte historyFlag) {
+		this.historyFlag = historyFlag;
 	}
 
 	public String getOwnerType() {

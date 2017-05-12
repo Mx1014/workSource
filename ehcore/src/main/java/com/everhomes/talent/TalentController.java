@@ -10,10 +10,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
 import com.everhomes.rest.talent.DeleteTalentCategoryCommand;
 import com.everhomes.rest.talent.DeleteTalentCommand;
+import com.everhomes.rest.talent.DeleteTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.EnableTalentCommand;
 import com.everhomes.rest.talent.GetTalentDetailCommand;
 import com.everhomes.rest.talent.GetTalentDetailResponse;
@@ -148,6 +150,28 @@ public class TalentController extends ControllerBase {
 	@RestReturn(ListTalentQueryHistoryResponse.class)
 	public RestResponse listTalentQueryHistory(ListTalentQueryHistoryCommand cmd){
 		return new RestResponse(talentService.listTalentQueryHistory(cmd));
+	}
+
+	/**
+	 * <p>12.删除人才信息查询记录</p>
+	 * <b>URL: /talent/deleteTalentQueryHistory</b>
+	 */
+	@RequestMapping("deleteTalentQueryHistory")
+	@RestReturn(String.class)
+	public RestResponse deleteTalentQueryHistory(DeleteTalentQueryHistoryCommand cmd){
+		talentService.deleteTalentQueryHistory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>13.清空人才信息查询记录</p>
+	 * <b>URL: /talent/clearTalentQueryHistory</b>
+	 */
+	@RequestMapping("clearTalentQueryHistory")
+	@RestReturn(String.class)
+	public RestResponse clearTalentQueryHistory(ClearTalentQueryHistoryCommand cmd){
+		talentService.clearTalentQueryHistory(cmd);
+		return new RestResponse();
 	}
 
 }
