@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListRolesCommand {
+	private Integer namespaceId;
 	
 	private String ownerType;
 
@@ -40,6 +41,14 @@ public class ListRolesCommand {
 
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override
