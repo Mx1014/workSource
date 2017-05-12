@@ -33,7 +33,11 @@ public class Test {
 
     public static void main(String[] args) {
         Map<java.sql.Date, Map<String,Set<Byte>>> dayMap= new HashMap<>();
-
+        String s = String.valueOf((int) 8.5 / 1)
+                + ":"
+                + String.valueOf((int) (( 8.5 % 1) * 60))
+                + ":00";
+        System.out.println(s);
 //        AttachmentConfigDTO a = new AttachmentConfigDTO();
 //
 //        a.setAttachmentType((byte)1);

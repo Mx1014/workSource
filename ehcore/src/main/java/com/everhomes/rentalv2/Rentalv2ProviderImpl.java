@@ -113,6 +113,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
 		rentalsite.setId(id);
+		rentalsite.setDefaultOrder(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2ResourcesRecord record = ConvertHelper.convert(rentalsite,
 				EhRentalv2ResourcesRecord.class);
@@ -983,7 +984,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
 
 		List<RentalResource> result = step.where(condition)
-				.orderBy(Tables.EH_RENTALV2_RESOURCES.ID.asc()).limit(pageSize).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc()).limit(pageSize).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalResource.class);
 				});
 		if(result.size()==0)
