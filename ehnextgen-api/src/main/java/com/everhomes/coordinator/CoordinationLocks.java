@@ -65,7 +65,10 @@ public enum CoordinationLocks {
     WARNING_QUALITY_TASK("warning.quality.task"),
 
     OS_OBJECT("os.object"),
-    ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),;
+    ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
+
+    FLOW_CASE_UPDATE("flowCase.update"),
+    ;
 
 
     private String code;
