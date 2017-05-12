@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  *     <li>deliveryFlag: 出库状态 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialDeliveryFlag}</li>
  *     <li>warehouseId: 仓库id</li>
  *     <li>requestUserName: 申请人姓名</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -26,6 +28,10 @@ public class SearchRequestsCommand {
     private Long warehouseId;
 
     private String requestUserName;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public Byte getDeliveryFlag() {
         return deliveryFlag;
@@ -73,6 +79,22 @@ public class SearchRequestsCommand {
 
     public void setWarehouseId(Long warehouseId) {
         this.warehouseId = warehouseId;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

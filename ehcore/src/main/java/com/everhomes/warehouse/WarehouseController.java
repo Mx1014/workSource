@@ -5,13 +5,22 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -398,5 +407,60 @@ public class WarehouseController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+
+    /**
+     * <b>URL: /warehouse/importWarehouseMaterialCategories</b>
+     * <p>导入物品分类</p>
+     */
+    @RequestMapping("importWarehouseMaterialCategories")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importWarehouseMaterialCategories(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if(null == files || null == files[0]){
+            LOGGER.error("files is null。userId="+userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+//        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterialCategories(cmd, files[0], userId);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /warehouse/importWarehouseMaterials</b>
+     * <p>导入物品</p>
+     */
+    @RequestMapping("importWarehouseMaterials")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importWarehouseMaterials(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if(null == files || null == files[0]){
+            LOGGER.error("files is null。userId="+userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+//        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterials(cmd, files[0], userId);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /warehouse/exportWarehouseStockLogs</b>
+     * <p>导出库存日志</p>
+     */
+    @RequestMapping("exportWarehouseStockLogs")
+    public HttpServletResponse exportWarehouseStockLogs(@Valid SearchWarehouseStockLogsCommand cmd, HttpServletResponse response) {
+
+//        HttpServletResponse commandResponse = warehouseService.exportWarehouseStockLogs(cmd, response);
+//
+//        return commandResponse;
+        return null;
     }
 }

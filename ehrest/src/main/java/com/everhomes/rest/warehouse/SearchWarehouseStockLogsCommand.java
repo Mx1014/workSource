@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  *     <li>materialNumber: 物品编码</li>
  *     <li>requestType: 类型 参考{@link com.everhomes.rest.warehouse.WarehouseStockRequestType}</li>
  *     <li>requestName: 申请人姓名</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -32,6 +34,26 @@ public class SearchWarehouseStockLogsCommand {
     private String materialNumber;
 
     private String requestName;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
 
     public Long getMaterialId() {
         return materialId;

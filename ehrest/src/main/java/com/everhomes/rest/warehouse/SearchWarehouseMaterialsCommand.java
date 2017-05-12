@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: 物品所属类型id</li>
  *     <li>name: 物品名称</li>
  *     <li>materialNumber: 物品编码</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -19,6 +21,10 @@ public class SearchWarehouseMaterialsCommand {
     private String name;
 
     private String materialNumber;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public String getMaterialNumber() {
         return materialNumber;
@@ -50,6 +56,22 @@ public class SearchWarehouseMaterialsCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

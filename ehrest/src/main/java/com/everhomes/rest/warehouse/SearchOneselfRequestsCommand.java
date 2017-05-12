@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *     <li>reviewResult： 审阅结果 参考{@link com.everhomes.rest.warehouse.WarehouseRequestReviewResult}</li>
  *     <li>deliveryFlag: 出库状态 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialDeliveryFlag}</li>
  *     <li>materialName: 物品名称</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -23,6 +25,10 @@ public class SearchOneselfRequestsCommand {
     private Byte deliveryFlag;
 
     private String materialName;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public Long getOwnerId() {
         return ownerId;
@@ -62,6 +68,22 @@ public class SearchOneselfRequestsCommand {
 
     public void setReviewResult(Byte reviewResult) {
         this.reviewResult = reviewResult;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override
