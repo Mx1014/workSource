@@ -432,7 +432,7 @@ public class ActivityServiceImpl implements ActivityService {
 	           
 	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，用于定时取消订单
 	    		//TODO 启动定时器，定时取消
-	            if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
+	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
 	            	Long orderNo = this.onlinePayService.createBillId(DateHelper
 	        				.currentGMTTime().getTime());
 	            	roster.setOrderNo(orderNo);
@@ -1703,7 +1703,7 @@ public class ActivityServiceImpl implements ActivityService {
             
             //设置订单开始时间，用于定时取消订单
     		//TODO 启动定时器，定时取消
-            if(activity.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
             	Long orderNo = this.onlinePayService.createBillId(DateHelper
         				.currentGMTTime().getTime());
             	item.setOrderNo(orderNo);
