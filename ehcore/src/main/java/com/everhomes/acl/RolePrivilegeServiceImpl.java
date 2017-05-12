@@ -262,6 +262,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setOwnerType(cmd.getOwnerType());
 				acl.setOwnerId(cmd.getOwnerId());
 				acl.setOrderSeq(0);
+				acl.setRoleType(EntityType.ROLE.getCode());
 				acl.setRoleId(cmd.getRoleId());
 				acl.setCreatorUid(user.getId());
 				acl.setCreateTime(time);
