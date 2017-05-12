@@ -324,25 +324,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return role;
 	}
 	
-	
 	@Override
 	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
 
-		List<Role> roles = privilegeProvider.getRolesByOwnerAndKeywords(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
-		
 		return roles.stream().map(r->{
 			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);
-			role.setCreateTime(r.getCreateTime().getTime());
-			User user = userProvider.findUserById(r.getCreatorUid());
-			if(null != user){
-				role.setCreatorUName(user.getNickName());
+			if(r.getCreateTime() != null) {
+				role.setCreateTime(r.getCreateTime().getTime());	
+			}
+			if(r.getCreatorUid() != null) {
+				User user = userProvider.findUserById(r.getCreatorUid());
+				if(null != user){
+					role.setCreatorUName(user.getNickName());
+				}	
 			}
 			return ConvertHelper.convert(r, RoleDTO.class);
 		}).collect(Collectors.toList());
 	}
-
-
 
 	@Override
 	public List<Long> getPrivilegeIdsByRoleId(ListPrivilegesByRoleIdCommand cmd) {
