@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,11 +54,28 @@ public class TalentQueryHistoryProviderImpl implements TalentQueryHistoryProvide
 	}
 
 	@Override
+	public void deleteTalentQueryHistory(TalentQueryHistory talentQueryHistory) {
+		getReadWriteDao().delete(talentQueryHistory);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTalentQueryHistories.class, talentQueryHistory.getId());
+	}
+	
+	@Override
 	public TalentQueryHistory findTalentQueryHistoryById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), TalentQueryHistory.class);
 	}
 	
+	@Override
+	public TalentQueryHistory findTalentQueryHistoryByKeyword(Long userId, String keyword) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_TALENT_QUERY_HISTORIES)
+			.where(Tables.EH_TALENT_QUERY_HISTORIES.CREATOR_UID.eq(userId))
+			.and(Tables.EH_TALENT_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_TALENT_QUERY_HISTORIES.KEYWORD.eq(keyword))
+			.fetchOne();
+		
+		return record == null ? null : ConvertHelper.convert(record, TalentQueryHistory.class);
+	}
+
 	@Override
 	public List<TalentQueryHistory> listTalentQueryHistory() {
 		return getReadOnlyContext().select().from(Tables.EH_TALENT_QUERY_HISTORIES)
@@ -71,6 +89,7 @@ public class TalentQueryHistoryProviderImpl implements TalentQueryHistoryProvide
 				.where(Tables.EH_TALENT_QUERY_HISTORIES.CREATOR_UID.eq(userId))
 				.and(Tables.EH_TALENT_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.orderBy(Tables.EH_TALENT_QUERY_HISTORIES.ID.desc())
+				.limit(6)
 				.fetch().map(r -> ConvertHelper.convert(r, TalentQueryHistory.class));
 	}
 

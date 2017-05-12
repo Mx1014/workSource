@@ -168,9 +168,22 @@ public class TalentServiceImpl implements TalentService {
 			nextPageAnchor = talents.get(talents.size()-1).getId();
 		}
 		
+		if (TrueOrFalseFlag.fromCode(cmd.getHistoryFlag()) == TrueOrFalseFlag.TRUE && StringUtils.isNotBlank(cmd.getKeyword())) {
+			addQueryHistory(cmd.getKeyword().trim());
+		}
+		
 		return new ListTalentResponse(nextPageAnchor, talents.stream().map(this::convertWithoutRemark).collect(Collectors.toList()));
 	}
 	
+	private void addQueryHistory(String keyword) {
+		//如果已有,先删除再添加,这样可以保证按倒序排列
+		TalentQueryHistory talentQueryHistory = talentQueryHistoryProvider.findTalentQueryHistoryByKeyword(userId(), keyword);
+		if (talentQueryHistory != null) {
+			talentQueryHistoryProvider.deleteTalentQueryHistory(talentQueryHistory);
+		}
+		talentQueryHistoryProvider.createTalentQueryHistory(talentQueryHistory);
+	}
+
 	private TalentDTO convertWithoutRemark(Talent talent) {
 		TalentDTO talentDTO = convert(talent);
 		talentDTO.setRemark(null);
@@ -255,7 +268,8 @@ public class TalentServiceImpl implements TalentService {
 		Integer namespaceId = namespaceId();
 		ArrayList<RowResult> resultList = processorExcel(attachment[0]);
 		dbProvider.execute(s->{
-			resultList.forEach(r->{
+			for (int i = 2; i < resultList.size(); i++) {
+				RowResult r = resultList.get(i);
 				CreateOrUpdateTalentCommand command = new CreateOrUpdateTalentCommand();
 				command.setOwnerType(cmd.getOwnerType());
 				command.setOwnerId(cmd.getOwnerId());
@@ -271,7 +285,7 @@ public class TalentServiceImpl implements TalentService {
 				command.setRemark(r.getI());
 				ValidatorUtil.validate(command);
 				createTalent(command);
-			});
+			}
 			return null;
 		});
 	}

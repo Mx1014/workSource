@@ -15,4 +15,8 @@ public interface TalentQueryHistoryProvider {
 
 	List<TalentQueryHistory> listTalentQueryHistoryByUser(Long userId);
 
+	TalentQueryHistory findTalentQueryHistoryByKeyword(Long userId, String keyword);
+
+	void deleteTalentQueryHistory(TalentQueryHistory talentQueryHistory);
+
 }

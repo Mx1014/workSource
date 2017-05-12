@@ -134,8 +134,8 @@ public class TalentProviderImpl implements TalentProvider {
 		}
 		
 		// 关键词
-		if (StringUtils.isNotEmpty(cmd.getKeyword())) {
-			String keyword = "%"+cmd.getKeyword()+"%";
+		if (StringUtils.isNotBlank(cmd.getKeyword())) {
+			String keyword = "%"+cmd.getKeyword().trim()+"%";
 			step.and(Tables.EH_TALENTS.NAME.like(keyword).or(Tables.EH_TALENTS.POSITION.like(keyword)).or(Tables.EH_TALENTS.GRADUATE_SCHOOL.like(keyword)));
 		}
 		
