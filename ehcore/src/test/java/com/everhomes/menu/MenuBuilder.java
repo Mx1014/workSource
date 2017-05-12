@@ -91,6 +91,14 @@ public class MenuBuilder {
 		this.curr.getItem().setModuleId(moduleId);
 		return this;
 	}
+	public MenuBuilder setConditionType(String conditionType) {
+		this.curr.getItem().setConditionType(conditionType);
+		return this;
+	}
+	public MenuBuilder setCategory(String category) {
+		this.curr.getItem().setCategory(category);
+		return this;
+	}
 	public List<WebMenu> getWebMenus() {
 		List<WebMenu> menus = new ArrayList<WebMenu>();
 		for(WebMenu m : this.allMenus) {

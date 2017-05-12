@@ -1,7 +1,19 @@
 package com.everhomes.menu;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,15 +29,14 @@ import org.springframework.context.annotation.Configuration;
 
 import com.everhomes.acl.WebMenu;
 import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.flow.FlowServiceTest;
-import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.rest.menu.WebMenuCategory;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
 public class MenuTest  extends LoginAuthTestCase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MenuTest.class);
 	
     @Configuration
     @ComponentScan(basePackages = {
@@ -93,13 +104,9 @@ public class MenuTest  extends LoginAuthTestCase {
     	MenuBuilder mb = new MenuBuilder(webMenuProvider, null, null);
     	mb.setName("系统管理").setDataType("system-managerment").Child()
     	
-    	.setName("管理员管理").setDataType("system-supers").Child()
-    	.Parent().Child().setName("管理员管理").setDataType("system-supers").Child()
-    	
-    	.setName("运营管理员管理").setDataType("system-operators")
-    	.Parent().Child().setName("角色权限配置").setDataType("system-roles")
-    	.Parent()
-    	
+    	.setName("管理员管理").setDataType("system-supers").setCategory(WebMenuCategory.MODULE.getCode()).Child()
+    	.setName("管理员列表").setDataType("system-operators").setCategory(WebMenuCategory.PAGE.getCode())
+    	.Parent().Child().setName("管理员权限与角色").setDataType("system-roles").setCategory(WebMenuCategory.PAGE.getCode())
     	.Parent()
     	
     	.Parent().Child().setName("基础信息配置").Child()
@@ -169,16 +176,12 @@ public class MenuTest  extends LoginAuthTestCase {
     	.Parent().Child().setName("园区论坛")
     	.Parent().Child().setName("园区公告")
     	
-    	.Parent().Child().setName("能耗管理")
-    	
-    	.Child().setName("能耗管理").setDataType("energy-managerment")
+    	.Parent().Child().setName("能耗管理").setDataType("energy-managerment").setCategory(WebMenuCategory.MODULE.getCode())
     	
     	.Child().setName("表计管理").setDataType("meter-managerment")
     	.Parent().Child().setName("抄表记录").setDataType("meter-log")
     	.Parent().Child().setName("统计信息").setDataType("meter-statistics")
     	.Parent().Child().setName("参数设置").setDataType("meter-configuration")
-    	.Parent()
-    	
     	.Parent()
     	
     	.Parent().Child().setName("公共门禁")
@@ -252,4 +255,35 @@ public class MenuTest  extends LoginAuthTestCase {
     	LOGGER.info(StringHelper.toJsonString(res));
     }
     
+    @Test
+    public void testAes() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
+//    	byte[] key = "Huawei123".getBytes();
+    	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+    	String ivText = "dd9f310b00e92c2905d358b565661d6d";
+    	byte[] ivData = StringHelper.fromHexString(ivText);
+    	IvParameterSpec iv = new IvParameterSpec(ivData);
+    	cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), iv);
+    	String data = "abcd1234";
+		byte[] b = cipher.doFinal(data.getBytes());
+		LOGGER.info("key=" + key.length);
+		LOGGER.info(StringHelper.toHexString(b));
+
+    }
+    
+//    @Test
+//    public void testAes2() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+//    	byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
+//    	String data = "dd9f310b00e92c2905d358b565661d6d8894c7f0bb1d398cd1a0b7be580ac04c";
+//    	byte[] input = StringHelper.fromHexString(data);
+//    	byte[] iv = new byte[16];
+//    	IvParameterSpec iv = new IvParameterSpec(key);
+//    	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+//    	Key inputKey = new SecretKeySpec(key, "AES", );
+//    	cipher.init(Cipher.DECRYPT_MODE, inputKey);
+//    	LOGGER.info("input=" + input.length);
+//		byte[] b = cipher.doFinal(input);
+//		LOGGER.info(new String(b));
+//    }
+//    
 }
