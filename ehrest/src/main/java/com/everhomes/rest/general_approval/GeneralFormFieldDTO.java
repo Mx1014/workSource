@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO}
  * 日期类型：{@link com.everhomes.rest.general_approval.GeneralFormDateDTO}
  * 下拉框类型：{@link com.everhomes.rest.general_approval.GeneralFormDropBoxDTO}
- * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormFormDTO} 
+ * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO} 
  * </li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>

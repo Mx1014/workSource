@@ -14,14 +14,14 @@ import com.everhomes.util.StringHelper;
  * <li>NUMBER_TEXT:数字文本 继承整数文本 支持计算公式</li>
  * <li>DATE:日期控件</li>
  * <li>DROP_BOX:下拉框</li>
- * <li>FORM:子表单</li>
+ * <li>SUBFORM:子表单</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormFieldType {
 	SINGLE_LINE_TEXT("SINGLE_LINE_TEXT"), MULTI_LINE_TEXT("MULTI_LINE_TEXT"), IMAGE("IMAGE"), FILE("FILE"), INTEGER_TEXT("INTEGER_TEXT"),NUMBER_TEXT("NUMBER_TEXT"),DATE("DATE"),
-	DROP_BOX("DROP_BOX"),FORM("FORM");
+	DROP_BOX("DROP_BOX"),SUBFORM("SUBFORM");
 	
 	private String code;
 	

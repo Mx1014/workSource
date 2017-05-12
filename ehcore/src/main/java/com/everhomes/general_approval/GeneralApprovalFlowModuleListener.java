@@ -27,11 +27,11 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
-import com.everhomes.rest.general_approval.PostApprovalFormFormItemValue;
-import com.everhomes.rest.general_approval.PostApprovalFormFormValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformItemValue;
+import com.everhomes.rest.general_approval.PostApprovalFormSubformValue;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
@@ -204,15 +204,15 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 						entities.add(e);
 						break;
-					case FORM:
+					case SUBFORM:
 						
-						PostApprovalFormFormValue subFormValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFormValue.class);
+						PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormSubformValue.class);
 						//取出设置的子表单fields
-						GeneralFormFormDTO subFromExtra = ConvertHelper.convert(dto.getFieldExtra(), GeneralFormFormDTO.class) ;
+						GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
 						//给子表单计数从1开始
 						int formCount = 1;
 						//循环取出每一个子表单值
-						for(PostApprovalFormFormItemValue subForm1:subFormValue.getForms()){
+						for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
 							e = new FlowCaseEntity(); 
 							e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName()); 
 							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 

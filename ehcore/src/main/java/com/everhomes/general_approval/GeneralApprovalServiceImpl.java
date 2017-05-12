@@ -45,6 +45,8 @@ import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
+import com.everhomes.rest.general_approval.GeneralFormNumDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
@@ -205,8 +207,45 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		checkFieldDTOs(fieldDTOs);
 		dto.setFormFields(fieldDTOs);
 		return dto;
+	}
+
+	private void checkFieldDTOs(List<GeneralFormFieldDTO> fieldDTOs) {
+		for(GeneralFormFieldDTO fieldDTO : fieldDTOs){
+			checkFieldDTO(fieldDTO);
+		}
+	}
+	/**检查客户端传的fieldDTO是否合法*/
+	private void checkFieldDTO(GeneralFormFieldDTO fieldDTO) {
+		switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
+		case SUBFORM:
+			//对于子表单要检查所有的字段
+			GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
+			for(GeneralFormFieldDTO subFormFieldDTO : subFromExtra.getFormFields()){
+				checkFieldDTO(subFormFieldDTO);
+			}
+			break;
+		case NUMBER_TEXT:
+			//对于数字要检查默认公式
+			GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(), GeneralFormNumDTO.class);
+			checkNumberDefaultValue(numberExtra.getDefaultValue());
+			break;
+		default:
+			break; 
+		}
+	}
+	/**
+	 * 检验数字文本框的默认公式
+	 * 1. SUM（）里面必须是子表单变量，SUM（变量）算一个变量
+	 * 2. 两个变量之间必须有+、-、*、/中的一个符号
+	 * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号
+	 * 4. 括号必须成对出现
+	*/
+	private void checkNumberDefaultValue(String defaultValue) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

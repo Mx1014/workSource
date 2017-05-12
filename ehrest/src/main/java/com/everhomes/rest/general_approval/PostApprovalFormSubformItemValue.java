@@ -7,12 +7,12 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>values: 字段值<@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>values: 字段值 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  * @author janson
  *
  */
-public class PostApprovalFormFormItemValue {
+public class PostApprovalFormSubformItemValue {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 	 

@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class GeneralFormFormDTO {
+public class GeneralFormSubformDTO {
 
     @ItemType(GeneralFormFieldDTO.class)
 	private

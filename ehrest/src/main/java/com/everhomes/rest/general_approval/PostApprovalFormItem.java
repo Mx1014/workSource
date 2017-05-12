@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * 下拉框值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue.java}
- * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormFormValue.java}
+ * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormSubformValue.java}
  * </li>
  * <ul>
  * @author janson
