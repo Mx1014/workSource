@@ -663,6 +663,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		org.setDisplayName(organization.getName());
 
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		//modify by dengs,20170512,将经纬度转换成 OrganizationDetailDTO 里面的类型，不改动dto，暂时不影响客户端。后面考虑将dto的经纬度改成Double
+		if(null != org.getLatitude())
+			dto.setLatitude(org.getLatitude().toString());
+		if(null != org.getLongitude())
+			dto.setLongitude(org.getLongitude().toString());
+		//end
 		dto.setEmailDomain(org.getEmailDomain());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());

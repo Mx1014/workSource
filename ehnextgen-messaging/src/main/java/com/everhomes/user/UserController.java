@@ -464,21 +464,6 @@ public class UserController extends ControllerBase {
 		return new RestResponse("OK");
 	}
 
-    /**
-     * <b>URL: /user/getUserNickName</b>
-     * <p>根据Etag判断用户昵称是否更新，首次访问或者昵称更新则返回昵称数据，否则返回304</p>
-     */
-    @RequestMapping(value = "getUserNickName")
-    @RestReturn(UserInfo.class)
-    public RestResponse getUserNickName(GetUserNickNameCommand cmd, HttpServletRequest request, HttpServletResponse response) {
-        String nickName = userService.getUserNickName(cmd);
-
-
-        UserInfo userInfo = new UserInfo();
-        userInfo.setNickName(nickName);
-        return new RestResponse(userInfo);
-    }
-
 	/**
 	 * <b>URL: /user/setUserInfo</b>
 	 * <p>设置用户信息</p>
