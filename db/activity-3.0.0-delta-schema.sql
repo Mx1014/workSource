@@ -3,15 +3,15 @@ ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_flag` TINYINT(4) DEFAULT '0' NU
 ALTER TABLE `eh_activity_roster` ADD COLUMN `order_no` BIGINT(20) NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `order_start_time` DATETIME NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `vendor_type` VARCHAR(32) NULL COMMENT '10001: alipay, 10002: wechatpay';
-ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_amount` DECIMAL(2) NULL;
+ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_amount` DECIMAL(10, 2) NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `pay_time` DATETIME NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_order_no` BIGINT(20) NULL;
-ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_amount` DECIMAL(2) NULL;
+ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_amount` DECIMAL(10, 2) NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `refund_time` DATETIME NULL;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `status` TINYINT(4) DEFAULT '2' NULL COMMENT '0: cancel, 1: reject, 2:normal';
 
 ALTER TABLE `eh_activities` ADD COLUMN `charge_flag` TINYINT(4) DEFAULT '0' NULL COMMENT '0: no charge, 1: charge'; 
-ALTER TABLE `eh_activities` ADD COLUMN `charge_price` DECIMAL(2) NULL COMMENT 'charge_price';
+ALTER TABLE `eh_activities` ADD COLUMN `charge_price` DECIMAL(10, 2) NULL COMMENT 'charge_price';
 
 
 -- 订单过期时间的设置表
