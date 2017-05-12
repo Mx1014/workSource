@@ -1970,7 +1970,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         //返回倒计时 add by yanjun 20170510 start
         dto.setUserPayFlag(userRoster == null || userRoster.getPayFlag() == null ? ActivityRosterPayFlag.UNPAY.getCode() : userRoster.getPayFlag());
-        if(userRoster != null && userRoster.getPayFlag() != null && userRoster.getPayFlag() == ActivityRosterPayFlag.UNPAY.getCode() && userRoster.getOrderStartTime() != null){
+        if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()  && userRoster != null && userRoster.getOrderStartTime() != null &&
+        		(userRoster.getPayFlag() == null || userRoster.getPayFlag().byteValue() == ActivityRosterPayFlag.UNPAY.getCode())){
         	Long countdown =  userRoster.getOrderStartTime().getTime() + rosterOrderSettingDTO.getTime() - nowTime;
         	if(countdown > 0){
         		dto.setUserOrderCountdown(countdown);
