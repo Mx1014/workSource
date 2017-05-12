@@ -233,7 +233,6 @@ public class TalentServiceImpl implements TalentService {
 		talent.setEnabled(cmd.getEnabled());
 		talentProvider.updateTalent(talent);
 	}
-	
 
 	private Talent findTalentById(Long id, Integer namespaceId, String ownerType, Long ownerId) {
 		Talent talent = talentProvider.findTalentById(id);
@@ -245,14 +244,12 @@ public class TalentServiceImpl implements TalentService {
 		return talent;
 	}
 	
-	
 	@Override
 	public void deleteTalent(DeleteTalentCommand cmd) {
 		Talent talent = findTalentById(cmd.getId(), namespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		talent.setStatus(CommonStatus.INACTIVE.getCode());
 		talentProvider.updateTalent(talent);
 	}
-	
 
 	@Override
 	public void topTalent(TopTalentCommand cmd) {
@@ -261,7 +258,6 @@ public class TalentServiceImpl implements TalentService {
 		// 不能直接用update方法，那个是根据主键更新的
 		talentProvider.updateTalentId(talent);
 	}
-	
 
 	@Override
 	public void importTalent(ImportTalentCommand cmd, MultipartFile[] attachment) {
@@ -342,24 +338,20 @@ public class TalentServiceImpl implements TalentService {
 		return talentDTO;
 	}
 	
-	
 	@Override
 	public ListTalentQueryHistoryResponse listTalentQueryHistory(ListTalentQueryHistoryCommand cmd) {
 		List<TalentQueryHistory> talentQueryHistories = talentQueryHistoryProvider.listTalentQueryHistoryByUser(userId());
 		return new ListTalentQueryHistoryResponse(talentQueryHistories.stream().map(this::convert).collect(Collectors.toList()));
 	}
 	
-	
 	private TalentQueryHistoryDTO convert(TalentQueryHistory talentQueryHistory) {
 		return ConvertHelper.convert(talentQueryHistory, TalentQueryHistoryDTO.class);
 	}
-	
 
 	@Override
 	public void deleteTalentQueryHistory(DeleteTalentQueryHistoryCommand cmd) {
 		deleteTalentQueryHistory(findTalentQueryHistoryById(cmd.getId()));
 	}
-	
 	
 	private TalentQueryHistory findTalentQueryHistoryById(Long id) {
 		TalentQueryHistory talentQueryHistory = talentQueryHistoryProvider.findTalentQueryHistoryById(id);
@@ -375,7 +367,6 @@ public class TalentServiceImpl implements TalentService {
 		talentQueryHistoryProvider.updateTalentQueryHistory(talentQueryHistory);
 	}
 	
-	
 	@Override
 	public void clearTalentQueryHistory(ClearTalentQueryHistoryCommand cmd) {
 		List<TalentQueryHistory> talentQueryHistories = talentQueryHistoryProvider.listTalentQueryHistoryByUser(userId());
@@ -384,7 +375,6 @@ public class TalentServiceImpl implements TalentService {
 			return null;
 		});
 	}
-	
 	
 	private Long userId() {
 		return UserContext.current().getUser().getId();
