@@ -108,7 +108,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		List<Byte> types = cmd.getTypes();
 
 		//默认查询左邻运营后台需要的模块，即园区模块和左邻运营方需要的系统管理模块
-		if(null == types && types.size() == 0){
+		if(null == types || types.size() == 0){
 			types = new ArrayList<>();
 			types.add(ServiceModuleType.PARK.getCode());
 			types.add(ServiceModuleType.MANAGER.getCode());
