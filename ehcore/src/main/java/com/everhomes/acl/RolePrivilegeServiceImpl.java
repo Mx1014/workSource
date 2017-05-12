@@ -62,6 +62,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private PrivilegeProvider privilegeProvider;
+
+	@Autowired
+	private AuthorizationProvider authorizationProvider;
 	
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
@@ -323,11 +326,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		return role;
 	}
-	
+
 	@Override
 	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
+		List<Role> roles = privilegeProvider.getRolesByOwnerAndKeywords(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
 
 		return roles.stream().map(r->{
 			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);
@@ -2265,10 +2268,128 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				"non-privileged.");
     }
 
+	@Override
+	public List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd) {
+		List<Authorization> authorizations = authorizationProvider.listTargetAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), null, IdentityType.MANAGE.getCode());
+		authorizations.stream().map((r) ->{
+			RoleAuthorizationsDTO dto = ConvertHelper.convert(r, RoleAuthorizationsDTO.class);
+			if(EntityType.USER == EntityType.fromCode(r.getTargetType())){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(r.getTargetId(), IdentifierType.MOBILE.getCode());
+				if(null != userIdentifier){
+					dto.setIdentifierToken(userIdentifier.getIdentifierToken());
+				}
+				User user = userProvider.findUserById(r.getTargetId());
+				if(null != user){
+					dto.setNikeName(user.getNickName());
+				}
+			}
+
+			dto.setRoles(getRoleManageByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId()));
+			return dto;
+		}).collect(Collectors.toList());
+		return null;
+	}
+
+	@Override
+	public void updateRoleAdministrators(CreateRoleAdministratorsCommand cmd) {
+		DeleteRoleAdministratorsCommand deleteCmd = ConvertHelper.convert(cmd, DeleteRoleAdministratorsCommand.class);
+		dbProvider.execute((TransactionStatus status) -> {
+			deleteRoleAdministrators(deleteCmd);
+			createRoleAdministrators(cmd);
+			return null;
+		});
+	}
+
+	@Override
+	public void createRoleAdministrators(CreateRoleAdministratorsCommand cmd) {
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+		authorization.setAuthType(EntityType.ROLE.getCode());
+		authorization.setIdentityType(IdentityType.MANAGE.getCode());
+		authorization.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+		dbProvider.execute((TransactionStatus status) -> {
+			for (Long roleId: cmd.getRoleIds()) {
+				authorization.setAuthId(roleId);
+				authorizationProvider.createAuthorization(authorization);
+				assignmentAclRole(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), namespaceId, user.getId(), roleId);
+			}
+			return null;
+		});
+
+	}
+
+	private void assignmentAclRole(String ownerType, Long ownerId, String targetType, Long targetId, Integer namespaceId, Long creatorUid, Long roleId){
+		RoleAssignment roleAssignment = new RoleAssignment();
+		roleAssignment.setOwnerType(ownerType);
+		roleAssignment.setOwnerId(ownerId);
+		roleAssignment.setTargetType(targetType);
+		roleAssignment.setTargetId(targetId);
+		roleAssignment.setCreatorUid(creatorUid);
+		roleAssignment.setNamespaceId(namespaceId);
+		roleAssignment.setRoleId(roleId);
+		aclProvider.createRoleAssignment(roleAssignment);
+	}
+
+	@Override
+	public void deleteRoleAdministrators(DeleteRoleAdministratorsCommand cmd) {
+		List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.ROLE.getCode());
+		List<Long> roleIds = new ArrayList<>();
+		dbProvider.execute((TransactionStatus status) -> {
+			for (Authorization authorization: authorizations) {
+				roleIds.add(authorization.getAuthId());
+				authorizationProvider.deleteAuthorizationById(authorization.getId());
+			}
+
+			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+			for (RoleAssignment roleAssignment: roleAssignments) {
+				if(roleIds.contains(roleAssignment.getRoleId())){
+					aclProvider.deleteRoleAssignment(roleAssignment.getId());
+				}
+			}
+			return null;
+		});
+	}
+
+	@Override
+	public RoleAuthorizationsDTO checkRoleAdministrators(CheckRoleAdministratorsCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifierToken());
+		RoleAuthorizationsDTO dto = new RoleAuthorizationsDTO();
+		dto.setTargetType(EntityType.USER.getCode());
+		if(null != userIdentifier){
+			dto.setTargetId(userIdentifier.getOwnerUid());
+			dto.setIdentifierToken(userIdentifier.getIdentifierToken());
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if(null != user){
+				dto.setNikeName(user.getNickName());
+			}
+
+			List<RoleDTO> roles = getRoleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), dto.getTargetType(), dto.getTargetId());
+
+			if(roles.size() > 0){
+				dto.setRoles(roles);
+			}
+		}
+		return dto;
+	}
+
+	private List<RoleDTO> getRoleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId){
+		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizations(ownerType, ownerId, targetType, targetId ,EntityType.ROLE.getCode());
+		List<RoleDTO> roles = new ArrayList<>();
+		for (Authorization authorization: authorizations) {
+			Role role = aclProvider.getRoleById(authorization.getAuthId());
+			if(null != role){
+				roles.add(ConvertHelper.convert(role, RoleDTO.class));
+			}
+		}
+		return roles;
+	}
 
 
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 //		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));
 		System.out.println("2015/11/11".replaceAll("/", "-"));
 //		System.out.println(new Timestamp(DateUtil.parseDate("2015-11-11 02:30:00").getTime()));

@@ -320,4 +320,14 @@ public interface RolePrivilegeService {
      * @return
      */
 	List<ProjectDTO> getTreeProjectCategories(Integer namespaceId, List<ProjectDTO> projects);
+
+	List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd);
+
+	void deleteRoleAdministrators(DeleteRoleAdministratorsCommand cmd);
+
+	void createRoleAdministrators(CreateRoleAdministratorsCommand cmd);
+
+	void updateRoleAdministrators(CreateRoleAdministratorsCommand cmd);
+
+	RoleAuthorizationsDTO checkRoleAdministrators(CheckRoleAdministratorsCommand cmd);
 }

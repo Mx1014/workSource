@@ -22,7 +22,7 @@ public class CheckRoleAdministratorsCommand {
 
     private Integer namespaceId;
 
-    private Long identifierToken;
+    private String identifierToken;
 
     public String getOwnerType() {
         return ownerType;
@@ -48,11 +48,11 @@ public class CheckRoleAdministratorsCommand {
         this.namespaceId = namespaceId;
     }
 
-    public Long getIdentifierToken() {
+    public String getIdentifierToken() {
         return identifierToken;
     }
 
-    public void setIdentifierToken(Long identifierToken) {
+    public void setIdentifierToken(String identifierToken) {
         this.identifierToken = identifierToken;
     }
 

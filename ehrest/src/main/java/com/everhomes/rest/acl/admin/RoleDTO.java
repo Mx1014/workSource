@@ -24,6 +24,15 @@ public class RoleDTO {
 
 	private String creatorUName;
 
+	public RoleDTO(){
+
+	}
+
+	public RoleDTO(Long id, String name){
+		this.id = id;
+		this.name = name;
+	}
+
 	public Long getId() {
 		return id;
 	}

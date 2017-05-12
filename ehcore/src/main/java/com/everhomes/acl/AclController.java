@@ -448,7 +448,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listRoleAdministrators")
     @RestReturn(value=RoleAuthorizationsDTO.class, collection = true)
     public RestResponse listRoleAdministrators(@Valid ListRoleAdministratorsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listRoleAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -461,6 +461,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteRoleAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteRoleAdministrators(@Valid DeleteRoleAdministratorsCommand cmd) {
+        rolePrivilegeService.deleteRoleAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -474,6 +475,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("createRoleAdministrators")
     @RestReturn(value=String.class)
     public RestResponse createRoleAdministrators(@Valid CreateRoleAdministratorsCommand cmd) {
+        rolePrivilegeService.createRoleAdministrators(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -487,6 +489,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("updateRoleAdministrators")
     @RestReturn(value=String.class)
     public RestResponse updateRoleAdministrators(@Valid CreateRoleAdministratorsCommand cmd) {
+        rolePrivilegeService.updateRoleAdministrators(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -500,7 +503,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("checkRoleAdministrators")
     @RestReturn(value=RoleAuthorizationsDTO.class)
     public RestResponse checkRoleAdministrators(@Valid CheckRoleAdministratorsCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(rolePrivilegeService.checkRoleAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
