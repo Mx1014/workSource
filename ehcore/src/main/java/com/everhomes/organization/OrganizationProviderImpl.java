@@ -1159,6 +1159,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
+	public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		Result<Record> r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc()).limit(1).fetch();
+		
+		if(r != null && r.size() > 0)
+			return ConvertHelper.convert(r.get(0), OrganizationMember.class);
+		return null;
+	}
+	
+	@Override
 	public List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId){
 		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

@@ -328,10 +328,10 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	FlowActionInfo action = createActionInfo("您有一个车辆放行任务未处理", orgId);
     	remindCmd.setMessageAction(action);
 
-    	// action = createActionInfo("催办:tick:节点id:" + dto.getId(), orgId);
-    	// action.setReminderAfterMinute(10L);
-    	// action.setReminderTickMinute(20L);
-    	// remindCmd.setTickMessageAction(action);
+    	// build = createActionInfo("催办:tick:节点id:" + dto.getId(), orgId);
+    	// build.setReminderAfterMinute(10L);
+    	// build.setReminderTickMinute(20L);
+    	// remindCmd.setTickMessageAction(build);
     	flowService.updateFlowNodeReminder(remindCmd);
     }
     

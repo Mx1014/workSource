@@ -1,12 +1,8 @@
 package com.everhomes.test.junit.oauth2client;
 
-import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.StringHelper;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 public class OAuth2ClientTest extends BaseLoginAuthTestCase {
 
@@ -40,7 +36,7 @@ public class OAuth2ClientTest extends BaseLoginAuthTestCase {
     }*/
 
     //3. 通用的调用第三方api接口，原样返回第三方返回的数据
-    @Test
+    /*@Test
     public void testApi() {
         logon();
         OAuth2ClientApiCommand cmd = new OAuth2ClientApiCommand();
@@ -56,7 +52,7 @@ public class OAuth2ClientTest extends BaseLoginAuthTestCase {
 
     private void logon() {
         logon(namespaceId, userIdentifier, plainTextPwd);
-    }
+    }*/
 
     @Before
     public void setUp() {

@@ -1300,6 +1300,11 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhImportFileTasks.class, Tables.EH_IMPORT_FILE_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_IMPORT_FILE_TASKS.ID.max()).from(Tables.EH_IMPORT_FILE_TASKS).fetchOne().value1();
+        syncTableSequence(null, EhUserNotificationSettings.class, Tables.EH_USER_NOTIFICATION_SETTINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_USER_NOTIFICATION_SETTINGS.ID.max()).from(Tables.EH_USER_NOTIFICATION_SETTINGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhGroupMemberLogs.class, Tables.EH_GROUP_MEMBER_LOGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_GROUP_MEMBER_LOGS.ID.max()).from(Tables.EH_GROUP_MEMBER_LOGS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhPmTaskHistoryAddresses.class, Tables.EH_PM_TASK_HISTORY_ADDRESSES.getName(), (dbContext) -> {

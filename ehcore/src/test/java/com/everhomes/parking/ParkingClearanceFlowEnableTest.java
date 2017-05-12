@@ -250,9 +250,9 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     private void updateNodeReminder(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
     	remindCmd.setFlowNodeId(dto.getId());
-    	FlowActionInfo action = createActionInfo("test-remind-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo("test-remind-build-" + dto.getId(), orgId);
     	remindCmd.setMessageAction(action);
-    	action = createActionInfo("test-remind-tick-action-" + dto.getId(), orgId);
+    	action = createActionInfo("test-remind-tick-build-" + dto.getId(), orgId);
     	action.setReminderAfterMinute(10l);
     	action.setReminderTickMinute(20l);
     	remindCmd.setTickMessageAction(action);
@@ -286,12 +286,12 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
     	cmd.setFlowNodeId(dto.getId());
     	
-    	FlowActionInfo action = createActionInfo("test-track-enter-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo("test-track-enter-build-" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);
     	
-    	action = createActionInfo("test-track-reject-action-" + dto.getId(), orgId);
+    	action = createActionInfo("test-track-reject-build-" + dto.getId(), orgId);
     	action.setTrackerApplier(0l);
     	action.setTrackerProcessor(1l);
     	
