@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>formFields: 子表单的字段列表</li>
+ * <li>formFields: 子表单的字段列表{@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}}</li>
  * </ul>
  * @author janson
  *
