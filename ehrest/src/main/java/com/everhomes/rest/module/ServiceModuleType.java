@@ -9,7 +9,7 @@ package com.everhomes.rest.module;
  * </ul>
  */
 public enum ServiceModuleType {
-    PARK((byte)0), ORGANIZATION((byte)1), MANAGER((byte)2);
+    ORGANIZATION((byte)0), PARK((byte)1), MANAGER((byte)2);
     
     private byte code;
     
