@@ -60,11 +60,8 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-<<<<<<< HEAD
 import com.everhomes.rest.common.ImportFileResponse;
-=======
 import com.everhomes.rest.common.QuestionMetaActionData;
->>>>>>> msg-2.0
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
@@ -109,10 +106,6 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-<<<<<<< HEAD
-
-=======
->>>>>>> msg-2.0
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;

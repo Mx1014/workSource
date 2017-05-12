@@ -313,7 +313,7 @@ public interface OrganizationProvider {
 
 	ImportFileTask findImportFileTaskById(Long id);
 
-	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);}
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
 	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
 }
 
