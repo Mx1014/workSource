@@ -61,7 +61,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private DbProvider dbProvider;
 	
 	@Autowired
-	private AclProvider aclProvider;
+	private PrivilegeProvider privilegeProvider;
 	
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
@@ -74,6 +74,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private UserProvider userProvider;
+
+	@Autowired
+	private AclProvider aclProvider;
 
 	@Autowired
 	private ServiceModuleProvider serviceModuleProvider;
@@ -325,7 +328,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<RoleDTO> listRoles(ListRolesCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId());
+
+		List<Role> roles = privilegeProvider.getRolesByOwnerAndKeywords(namespaceId, AppConstants.APPID_PARK_ADMIN, cmd.getOwnerType(), cmd.getOwnerId(), cmd.getKeywords());
 		
 		return roles.stream().map(r->{
 			RoleDTO role = ConvertHelper.convert(r, RoleDTO.class);

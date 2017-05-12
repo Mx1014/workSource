@@ -433,8 +433,74 @@ public class AclController extends ControllerBase {
      */
     @RequestMapping("deleteServiceModuleAuthorizedMember")
     @RestReturn(value=String.class)
-    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteRoleAdministratorsCommand cmd) {
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    /**
+     * <b>URL: /acl/listRoleAdministrators</b>
+     * <p>角色管理员列表</p>
+     */
+    @RequestMapping("listRoleAdministrators")
+    @RestReturn(value=RoleAuthorizationsDTO.class, collection = true)
+    public RestResponse listRoleAdministrators(@Valid ListRoleAdministratorsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/deleteRoleAdministrators</b>
+     * <p>角色模块管理员</p>
+     */
+    @RequestMapping("deleteRoleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse deleteRoleAdministrators(@Valid DeleteRoleAdministratorsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/createRoleAdministrators</b>
+     * <p>创建角色模块管理员</p>
+     */
+    @RequestMapping("createRoleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse createRoleAdministrators(@Valid CreateRoleAdministratorsCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/updateRoleAdministrators</b>
+     * <p>创建角色模块管理员</p>
+     */
+    @RequestMapping("updateRoleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse updateRoleAdministrators(@Valid CreateRoleAdministratorsCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/checkRoleAdministrators</b>
+     * <p>校验角色模块管理员</p>
+     */
+    @RequestMapping("checkRoleAdministrators")
+    @RestReturn(value=RoleAuthorizationsDTO.class)
+    public RestResponse checkRoleAdministrators(@Valid CheckRoleAdministratorsCommand cmd) {
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

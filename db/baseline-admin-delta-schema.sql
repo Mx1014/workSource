@@ -10,3 +10,23 @@ ALTER TABLE `eh_acl_roles` ADD COLUMN `create_time` DATETIME DEFAULT now() COMME
 
 ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_creator_uid`(`creator_uid`);
 ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_create_time`(`create_time`);
+
+
+-- 授权表，包括模块管理员授权和模块下的用户和部门权限授权以及角色授权
+CREATE TABLE `eh_authorizations` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `target_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhUsers',
+  `target_id` bigint(20) NOT NULL,
+  `target_name` varchar(128),
+  `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
+  `owner_id` bigint(20) NOT NULL,
+  `auth_type` varchar(64) NOT NULL COMMENT 'EhServiceModules, EhRoles',
+  `auth_id` bigint(20) NOT NULL,
+  `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
+  `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
+  `create_uid` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
