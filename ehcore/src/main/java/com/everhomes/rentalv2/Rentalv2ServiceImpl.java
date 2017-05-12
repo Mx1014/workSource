@@ -5387,7 +5387,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid defaultOrderId parameter in the command");
 		}
 		RentalResource resource = rentalv2Provider.getRentalSiteById(cmd.getId());
-		RentalResource exchangeResource = rentalv2Provider.getRentalSiteById(cmd.getId());
+		RentalResource exchangeResource = rentalv2Provider.getRentalSiteById(cmd.getDefaultOrderId());
 
 		if (null == resource) {
 			LOGGER.error("RentalResource not found, cmd={}", cmd);
