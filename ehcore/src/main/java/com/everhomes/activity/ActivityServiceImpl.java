@@ -2012,6 +2012,10 @@ public class ActivityServiceImpl implements ActivityService {
         }
         //返回倒计时 add by yanjun 20170510 end
         
+        //填充报名信息的统计数据 start  add by yanjun 20170510
+        populateRosterStatistics(dto);
+        //填充报名信息的统计数据  end
+        
         fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
         
