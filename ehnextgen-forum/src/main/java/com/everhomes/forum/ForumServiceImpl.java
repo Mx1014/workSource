@@ -114,6 +114,9 @@ public class ForumServiceImpl implements ForumService {
     private ActivityService activityService;
     
     @Autowired
+    private ActivityProivider activityProvider;
+    
+    @Autowired
     private DbProvider dbProvider;
     
     @Autowired
@@ -1336,7 +1339,7 @@ public class ForumServiceImpl implements ForumService {
 	        	 condition = condition.and(privateCond);
 	         }
 	         
-	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
 	             long endTime = System.currentTimeMillis();
 	             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1419,7 +1422,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1506,7 +1509,7 @@ public class ForumServiceImpl implements ForumService {
         if(null != cond){
         	condition = condition.and(cond);
         }
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), null);
         
         
         if(LOGGER.isInfoEnabled()) {
@@ -1518,7 +1521,7 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(locator.getAnchor(), dtos);
     }
     
-    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Byte needTemporary ){
     	User user = UserContext.current().getUser();
         Long userId = user.getId();
     	
@@ -1528,7 +1531,13 @@ public class ForumServiceImpl implements ForumService {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动
+            if(needTemporary != null && needTemporary.byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
@@ -4313,7 +4322,7 @@ public class ForumServiceImpl implements ForumService {
 		}
     	
     	condition = condition.and(visibleCondition);
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus, null);
         
         ListPostCommandResponse response = new ListPostCommandResponse();
         response.setPosts(dtos);
@@ -5447,7 +5456,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null, null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -5537,6 +5546,33 @@ public class ForumServiceImpl implements ForumService {
         }).collect(Collectors.toList());
         
         return new ListUserGroupPostResponse(nextPageAnchor, postDtoList);
+	}
+
+	@Override
+	public void publisTopic(PublishTopicCommand cmd) {
+		Activity activity = activityProvider.findSnapshotByPostId(cmd.getTopicId());
+		if(activity == null){
+			 LOGGER.error("invalid post id=", cmd.getTopicId());
+	            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + cmd.getTopicId());
+		}
+
+		Post post = forumProvider.findPostById(activity.getPostId());
+		if(post == null){
+			LOGGER.error("Forum post not found, topicId=" + activity.getPostId());
+			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
+		}
+		
+		this.dbProvider.execute((status) -> {
+			activity.setStatus(PostStatus.ACTIVE.getCode());
+			post.setStatus(PostStatus.ACTIVE.getCode());
+			activityProvider.updateActivity(activity);
+			forumProvider.updatePost(post);
+			
+			return null;
+		});
+		
 	}
     
 }

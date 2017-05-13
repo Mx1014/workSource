@@ -5,24 +5,14 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>forumId: 论坛id</li>
  * <li>topicId: 帖子ID</li>
  * </ul>
  */
 public class PublishTopicCommand {
 
-    private Long forumId;
     private Long topicId;
     
     public PublishTopicCommand() {
-    }
-
-    public Long getForumId() {
-        return forumId;
-    }
-
-    public void setForumId(Long forumId) {
-        this.forumId = forumId;
     }
 
     public Long getTopicId() {

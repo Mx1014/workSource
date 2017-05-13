@@ -40,6 +40,7 @@ import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -463,7 +464,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime) {
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime, Byte needTemporary) {
     	
     	//按时间排序 用offset方式替代原有anchor modified by xiongying 20160707
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -488,7 +489,14 @@ public class ActivityProviderImpl implements ActivityProivider {
             query.addConditions(condition);
         }
         Integer offset =  (int) ((pageOffset - 1 ) * (count-1));
-        query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
+        
+        //新增暂存活动，后台管理员在web端要看到暂存的活动 add by yanjun 20170513
+        if(needTemporary != null && needTemporary.byteValue() == 1){
+        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+        }else{
+        	query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        }
+        
 
         if(orderByCreateTime) {
             query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());

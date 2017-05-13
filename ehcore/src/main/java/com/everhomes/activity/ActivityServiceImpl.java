@@ -2145,7 +2145,7 @@ public class ActivityServiceImpl implements ActivityService {
         
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         //List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
-        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion, false);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion, false, null);
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             Post post = forumProvider.findPostById(activity.getPostId());
             if(post==null){
@@ -2208,7 +2208,7 @@ public class ActivityServiceImpl implements ActivityService {
        //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
        //List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
        Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
+       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false, null).stream().map(activity->{
           ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
           dto.setActivityId(activity.getId());
           Post post = forumProvider.findPostById(activity.getPostId());
@@ -2322,7 +2322,7 @@ public class ActivityServiceImpl implements ActivityService {
 		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
 		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
 		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false, null).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -2411,7 +2411,7 @@ public class ActivityServiceImpl implements ActivityService {
 		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
 		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
 		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false, null).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -2699,7 +2699,7 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }
 
-        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
+        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false, null);
         
 //        if(ret != null && ret.size() > 0) {
 //        	for(Activity act : ret) {
@@ -3215,7 +3215,7 @@ public class ActivityServiceImpl implements ActivityService {
             }
         }
 
-        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
+        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false, null);
 
         activities.addAll(ret);
         List<ActivityDTO> activityDtos = activities.stream().map(activity->{
@@ -3580,7 +3580,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(cmd.getOrderByCreateTime() != null && cmd.getOrderByCreateTime() == 1) {
             orderByCreateTime = true;
         }
-        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus(), orderByCreateTime);
+        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus(), orderByCreateTime, cmd.getNeedTemporary());
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activities, userId=" + operatorId + ", size=" + dtos.size() 
@@ -3591,14 +3591,11 @@ public class ActivityServiceImpl implements ActivityService {
         return response;
 	}
 	
-	private List<ActivityDTO> getOrgActivities(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Boolean orderByCreateTime){
+	private List<ActivityDTO> getOrgActivities(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Boolean orderByCreateTime, Byte needTemporary){
     	User user = UserContext.current().getUser();
     	
     	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
     	
-    	
-    	condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
-        
         if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
         	condition = condition.and(Tables.EH_ACTIVITIES.START_TIME.gt(timestemp));
         }
@@ -3615,7 +3612,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(orderByCreateTime == null) {
             orderByCreateTime = false;
         }
-        List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition, orderByCreateTime);
+        List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition, orderByCreateTime, needTemporary);
 
         if(orderByCreateTime) {
             List<ActivityDTO> activityDtos = activities.stream().map(activity -> {

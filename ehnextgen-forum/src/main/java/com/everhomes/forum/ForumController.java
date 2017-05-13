@@ -401,8 +401,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("publishTopic")
     @RestReturn(value=String.class)
     public RestResponse publisTopic(PublishTopicCommand cmd) {
-//        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
-        //TODO
+        this.forumService.publisTopic(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
