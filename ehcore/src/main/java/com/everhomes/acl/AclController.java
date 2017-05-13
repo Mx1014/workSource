@@ -329,6 +329,19 @@ public class AclController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /acl/getPrivilegeInfosByRoleId</b>
+     * <p>查询角色的权限集合</p>
+     */
+    @RequestMapping("getPrivilegeInfosByRoleId")
+    @RestReturn(value=AclPrivilegeInfoResponse.class)
+    public RestResponse getPrivilegeInfosByRoleId(@Valid ListPrivilegesByRoleIdCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.getPrivilegeInfosByRoleId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 
     /**

@@ -43,11 +43,11 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrivilegeProviderImpl.class);
 
-	@Cacheable(
+	/* @Cacheable(
 			value = {"AclRoles-ByOwnerAndKeywords"},
 			key = "{#namespaceId, #appId, #ownerType, #ownerId, #keywords}",
 			unless = "#result == null || #result.size() == 0"
-	)
+	) */
 	@Override
 	public List<Role> getRolesByOwnerAndKeywords(int namespaceId, long appId, String ownerType, Long ownerId, String keywords) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhAclRoles.class));

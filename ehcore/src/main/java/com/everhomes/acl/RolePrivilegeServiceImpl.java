@@ -92,6 +92,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ServiceModuleService serviceModuleService;
+	
+	@Autowired
+	private AclPrivilegeProvider aclPrivilegeProvider;
 
 	
 	@Override
@@ -357,6 +360,37 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return acls.stream().map(r->{
 			return r.getPrivilegeId();
 		}).collect(Collectors.toList());
+	}
+	
+	//added by janson
+	@Override
+	public AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(ListPrivilegesByRoleIdCommand cmd) {
+		checkRole(cmd.getRoleId());
+
+		List<Acl> acls = aclProvider.getResourceAclByRole(cmd.getOwnerType(), cmd.getOwnerId(), new AclRoleDescriptor(EntityType.ROLE.getCode(), cmd.getRoleId()));
+		AclPrivilegeInfoResponse resp = new AclPrivilegeInfoResponse();
+		
+		List<AclPrivilegeInfo> infos = acls.stream().map(r->{
+			AclPrivilegeInfo info = new AclPrivilegeInfo();
+			info.setPrivilegeId(r.getPrivilegeId());
+			info.setRoleId(r.getRoleId());
+//			AclPrivilege privilege = aclPrivilegeProvider.getAclPrivilegeById(r.getPrivilegeId());
+//			if(privilege != null) {
+//				info.setPrivilegeName(privilege.getName());	
+//			}
+			List<ServiceModulePrivilege> mps = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(r.getPrivilegeId(), null);
+			if(mps != null) {
+				List<ServiceModulePrivilegeDTO> mpDTOS = mps.stream().map(rr->{
+					return ConvertHelper.convert(rr, ServiceModulePrivilegeDTO.class);
+				}).collect(Collectors.toList());
+				
+				info.setModulePrivileges(mpDTOS);
+			}
+			return info;
+		}).collect(Collectors.toList());
+		
+		resp.setPrivileges(infos);
+		return resp;
 	}
 	
 	@Override
@@ -2271,7 +2305,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd) {
 		List<Authorization> authorizations = authorizationProvider.listTargetAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), null, IdentityType.MANAGE.getCode());
-		authorizations.stream().map((r) ->{
+		return authorizations.stream().map((r) ->{
 			RoleAuthorizationsDTO dto = ConvertHelper.convert(r, RoleAuthorizationsDTO.class);
 			if(EntityType.USER == EntityType.fromCode(r.getTargetType())){
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(r.getTargetId(), IdentifierType.MOBILE.getCode());
@@ -2287,7 +2321,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			dto.setRoles(getRoleManageByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId()));
 			return dto;
 		}).collect(Collectors.toList());
-		return null;
 	}
 
 	@Override
@@ -2308,6 +2341,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setAuthType(EntityType.ROLE.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(UserContext.getCurrentNamespaceId());
+		authorization.setCreateUid(user.getId());
+		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		dbProvider.execute((TransactionStatus status) -> {
 			for (Long roleId: cmd.getRoleIds()) {

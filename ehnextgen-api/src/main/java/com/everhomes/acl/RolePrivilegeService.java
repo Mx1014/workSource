@@ -330,4 +330,7 @@ public interface RolePrivilegeService {
 	void updateRoleAdministrators(CreateRoleAdministratorsCommand cmd);
 
 	RoleAuthorizationsDTO checkRoleAdministrators(CheckRoleAdministratorsCommand cmd);
+
+	AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(
+			ListPrivilegesByRoleIdCommand cmd);
 }
