@@ -46,6 +46,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ActivityDetailActionData;
+import com.everhomes.rest.common.Router;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -55,6 +57,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -470,7 +473,11 @@ public class ActivityServiceImpl implements ActivityService {
 	            Map<String, String> map = new HashMap<String, String>();
 	            map.put("userName", user.getNickName());
 	            map.put("postName", activity.getSubject());
-	            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR);
+	            
+	            //创建带链接跳转的消息头    add by yanjun 20170513 
+	        	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
+	        	
+	            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR, meta);
 	            
 	            return dto;
 	        });
@@ -946,12 +953,14 @@ public class ActivityServiceImpl implements ActivityService {
 		});
 	}
 
-	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code, Map<String, String> meta) {
     	
         String scope = ActivityNotificationTemplateCode.SCOPE;
         
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-        sendMessageToUser(uid, notifyTextForOther, null);
+        
+        
+        sendMessageToUser(uid, notifyTextForOther, meta);
     }
     
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
@@ -1137,7 +1146,7 @@ public class ActivityServiceImpl implements ActivityService {
 	             Map<String, String> map = new HashMap<String, String>();
 	             map.put("userName", user.getNickName());
 	             map.put("postName", activity.getSubject());
-	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR);
+	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
 	             
 	             return dto;
 	        	
@@ -1736,10 +1745,34 @@ public class ActivityServiceImpl implements ActivityService {
         
         //管理员同意活动的报名
         if (item.getUid().longValue() != 0L) {
-        	Map<String, String> map = new HashMap<String, String>();
-        	map.put("userName", user.getNickName());
-        	map.put("postName", activity.getSubject());
-        	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER);
+        	if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode()){
+        		Map<String, String> map = new HashMap<String, String>();
+            	map.put("userName", user.getNickName());
+            	map.put("postName", activity.getSubject());
+            	
+            	//创建带链接跳转的消息头    add by yanjun 20170513
+            	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
+            	 
+            	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER, meta);
+        	}else{
+        		GetRosterOrderSettingCommand setCmd = new GetRosterOrderSettingCommand();
+        		setCmd.setNamespaceId(user.getNamespaceId());
+        		RosterOrderSettingDTO settingDto = this.getRosterOrderSetting(setCmd);
+        		
+        		Integer days = (int) (settingDto.getTime() / 1000 / 3600 / 24);
+    			Integer hours  = (int) (settingDto.getTime() / 1000 / 3600 % 24);
+        		
+        		Map<String, String> map = new HashMap<String, String>();
+        		map.put("postName", activity.getSubject());
+            	map.put("payTimeDays", days.toString());
+            	map.put("payTimeHours", hours.toString());
+            	
+            	//创建带链接跳转的消息头    add by yanjun 20170513
+            	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
+            	 
+            	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY, meta);
+        	}
+        	
 		}
         return dto;
     }
@@ -4632,6 +4665,19 @@ public class ActivityServiceImpl implements ActivityService {
 			System.out.print("aaaa...........");
 			return;
 		}
+	}
+	
+	private Map<String, String> createActivityDetailMeta(Long forumId, Long topicId){
+		Map<String, String> meta = new HashMap<String, String>();
+		RouterMetaObject routerMetaObject = new RouterMetaObject();
+		ActivityDetailActionData actionData = new ActivityDetailActionData();
+		actionData.setForumId(forumId);
+		actionData.setTopicId(topicId);
+		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+		routerMetaObject.setUrl(url);
+		meta.put("meta-object-type", "message.router");
+		meta.put("meta-object", routerMetaObject.toString());
+		return meta;
 	}
 
 }

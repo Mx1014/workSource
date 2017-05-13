@@ -8,6 +8,6 @@ public class ActivityNotificationTemplateCode {
     public static final int ACTIVITY_CREATOR_REJECT_TO_USER = 4;   //活动被管理员拒绝，通知活动报名者
     public static final int CREATOR_DELETE_ACTIVITY = 5;   //很抱歉通知您：您报名的活动<${tab} 丨 ${title}>因故取消。\n更多活动敬请继续关注。
     public static final int ACTIVITY_WARNING_PARTICIPANT = 6;   //您报名的活动 <${tab} 丨 ${title}> 还有 ${time}就要开始了 >>
-
+    public static final int ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY = 8;    //活动被管理员同意，通知活动报名者去支付
 
 }
