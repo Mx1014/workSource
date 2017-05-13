@@ -5,8 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>tagId: 机构Id</li>
- *     <li>tagName: 机构名称</li>
+ *     <li>tagName: 标签名称</li>
  *     <li>signPeopleCount: 报名人数总数</li>
  *     <li>signPeopleRate: 报名人数比例</li>
  *     <li>createActivityCount:创建活动总数</li>
@@ -15,8 +14,6 @@ import com.everhomes.util.StringHelper;
  */
 public class StatisticsTagDTO {
 
-	private Long tagId;
-	
 	private String tagName;
 	
 	private Integer signPeopleCount;
@@ -27,14 +24,6 @@ public class StatisticsTagDTO {
 	
 	private Double createActivityRate;
 	
-	public Long getTagId() {
-		return tagId;
-	}
-
-	public void setTagId(Long tagId) {
-		this.tagId = tagId;
-	}
-
 	public String getTagName() {
 		return tagName;
 	}

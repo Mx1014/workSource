@@ -7,21 +7,20 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
  * <ul>
- * <li>list: 活动列表信息</li>
+ * <li>list: 活动列表信息 {@link com.everhomes.rest.activity.StatisticsActivityDTO}</li>
  * </ul>
  */
 public class StatisticsActivityResponse {
 	
-	@ItemType(value = ActivityDTO.class)
-	private List<ActivityDTO> list;
+	@ItemType(value = StatisticsActivityDTO.class)
+	private List<StatisticsActivityDTO> list;
 	
-	public List<ActivityDTO> getList() {
+	public List<StatisticsActivityDTO> getList() {
 		return list;
 	}
 
-	public void setList(List<ActivityDTO> list) {
+	public void setList(List<StatisticsActivityDTO> list) {
 		this.list = list;
 	}
 

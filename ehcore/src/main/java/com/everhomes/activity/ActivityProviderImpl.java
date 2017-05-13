@@ -34,14 +34,17 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.activity.ActivityChargeFlag;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.activity.StatisticsActivityDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.rest.user.UserGender;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
@@ -960,4 +963,202 @@ public class ActivityProviderImpl implements ActivityProivider {
 		return query.fetchCount();
 	}
 	
+	@Override
+	public  Integer countActivity(Integer nameSpaceId, Timestamp startTime, Timestamp endTime){
+		final Integer[]  count = new Integer[1];
+		count[0] = 0;
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(nameSpaceId);
+					
+					//官方活动
+					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
+					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
+					condition = condition.and(officeCondition);
+					
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+					if(startTime != null && endTime != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(endTime));
+					}
+					Integer c = context.selectCount().from(Tables.EH_ACTIVITIES).where(condition).fetchOneInto(Integer.class);
+					if(c != null){
+						count[0] += c;
+					}
+					return true;
+				});
+		return count[0];
+	}
+	
+	@Override
+	public Integer countActivityRoster(Integer nameSpaceId, Timestamp startTime, Timestamp endTime, UserGender userGender){
+		final Integer[]  count = new Integer[1];
+		count[0] = 0;
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(nameSpaceId);
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode()));
+					
+					//官方活动
+					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
+					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
+					condition = condition.and(officeCondition);
+					
+					//已支付
+					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+					condition = condition.and(chargeCondition);
+					
+					if(startTime != null && endTime != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(endTime));
+					}
+					
+					//性别
+					if(userGender == null){
+						count[0] += context.selectCount()
+								.from(Tables.EH_ACTIVITY_ROSTER)
+								.join(Tables.EH_ACTIVITIES)
+								.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+								.where(condition).fetchOneInto(Integer.class);
+					}else{
+						condition = condition.and(Tables.EH_USERS.GENDER.eq(userGender.getCode()));
+						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID));
+						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.UID.eq(Tables.EH_USERS.ID));
+						count[0] += context.selectCount()
+								.from(Tables.EH_ACTIVITY_ROSTER, Tables.EH_ACTIVITIES, Tables.EH_USERS)
+								.where(condition).fetchOneInto(Integer.class);
+					}
+					
+					return true;
+				});
+		return count[0];
+	}
+
+	@Override
+	public List<Activity> statisticsActivity(Integer namespaceId, Long startTime, Long endTime, String tag) {
+
+		List<Activity> list = new ArrayList<Activity>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+
+					//官方活动
+					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
+					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
+					condition = condition.and(officeCondition);
+
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+					if(startTime != null && endTime != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(new Timestamp(startTime)));
+						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(new Timestamp(endTime)));
+					}
+					
+					if(tag != null && !"".equals(tag)){
+						condition = condition.and(Tables.EH_ACTIVITIES.TAG.eq(tag));
+					}
+					context.select().from(Tables.EH_ACTIVITIES).where(condition).fetch().forEach(r -> {
+						list.add(ConvertHelper.convert(r, Activity.class));
+						return ;
+					});
+
+					return true;
+				});
+		return list;
+	}
+	
+	@Override
+	public List<Object[]> statisticsRosterPay(List<Long> activityIds){
+		final List<Object[]>  response = new ArrayList<Object[]>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					
+					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.in(activityIds));
+
+					//已支付
+					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+					condition = condition.and(chargeCondition);
+					
+					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID, DSL.count())
+							.from(Tables.EH_ACTIVITY_ROSTER)
+							.join(Tables.EH_ACTIVITIES)
+							.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+							.where(condition)
+							.groupBy(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID)
+							.fetchInto(Object[].class);
+					
+					if(list != null){
+						response.addAll(list);
+					}
+					return true;
+				});
+		return response;
+	}
+	
+	@Override
+	public List<Object[]> statisticsRosterTag(){
+		final List<Object[]>  response = new ArrayList<Object[]>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					
+					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+
+					//已支付
+					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+					condition = condition.and(chargeCondition);
+					
+					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
+							.from(Tables.EH_ACTIVITY_ROSTER)
+							.join(Tables.EH_ACTIVITIES)
+							.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+							.where(condition)
+							.groupBy(Tables.EH_ACTIVITIES.TAG)
+							.fetchInto(Object[].class);
+					
+					if(list != null){
+						response.addAll(list);
+					}
+					return true;
+				});
+		return response;
+	}
+	
+	@Override
+	public List<Object[]> statisticsActivityTag(){
+		final List<Object[]>  response = new ArrayList<Object[]>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					
+					Condition condition = Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode());
+
+//					//已支付
+//					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+//					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+//					condition = condition.and(chargeCondition);
+					
+					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
+							.from(Tables.EH_ACTIVITIES)
+							.where(condition)
+							.groupBy(Tables.EH_ACTIVITIES.TAG)
+							.fetchInto(Object[].class);
+					
+					if(list != null){
+						response.addAll(list);
+					}
+					return true;
+				});
+		return response;
+	}
+	
+	public void statisticsOrganization(){
+		
+	}
+
 }

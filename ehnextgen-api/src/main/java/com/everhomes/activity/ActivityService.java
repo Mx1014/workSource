@@ -158,4 +158,30 @@ public interface ActivityService {
 
 	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
 
-	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);}
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);
+	
+	/**
+	 * 统计总览
+	 * @return
+	 */
+	StatisticsSummaryResponse statisticsSummary();
+	/**
+	 * 按活动统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd);
+	/**
+	 * 按企业统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd);
+	/**
+	 * 按标签统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
+}
+

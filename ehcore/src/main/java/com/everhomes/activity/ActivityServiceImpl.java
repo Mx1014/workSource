@@ -4677,4 +4677,259 @@ public class ActivityServiceImpl implements ActivityService {
 		return meta;
 	}
 
+	@Override
+	public StatisticsSummaryResponse statisticsSummary() {
+		StatisticsSummaryResponse response = new StatisticsSummaryResponse();
+		Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+		
+		Integer activityCount = activityProvider.countActivity(nameSpaceId, null, null);
+		Integer activityDayCount = activityProvider.countActivity(nameSpaceId, this.getTimesmorning(), this.getTimesnight());
+		Integer activityMonthCount = activityProvider.countActivity(nameSpaceId, this.getTimesMonthmorning(), this.getTimesMonthnight());
+		Integer activityWeekCount = activityProvider.countActivity(nameSpaceId, this.getTimesWeekmorning(), this.getTimesWeeknight());
+		
+		response.setActivityCount(activityCount);
+		response.setActivityDayCount(activityDayCount);
+		response.setActivityMonthCount(activityMonthCount);
+		response.setActivityWeekCount(activityWeekCount);
+		
+		Integer rosterCount = activityProvider.countActivityRoster(nameSpaceId, null, null, null);
+		Integer rosterDayCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesmorning(), this.getTimesnight(), null);
+		Integer rosterMonthCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesMonthmorning(), this.getTimesMonthnight(), null);
+		Integer rosterWeekCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesWeekmorning(), this.getTimesWeeknight(), null);
+		
+		response.setRosterCount(rosterCount);
+		response.setRosterDayCount(rosterDayCount);
+		response.setRosterMonthCount(rosterMonthCount);
+		response.setRosterWeekCount(rosterWeekCount);
+		
+		Integer manCount = activityProvider.countActivityRoster(nameSpaceId, null, null, UserGender.MALE);
+		Integer womanCount = activityProvider.countActivityRoster(nameSpaceId, null, null, UserGender.FEMALE);
+		
+		response.setManCount(manCount);
+		response.setWomanCount(womanCount);
+		
+		return response;
+	}
+
+	@Override
+	public StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd) {
+		StatisticsActivityResponse response = new StatisticsActivityResponse();
+		List<StatisticsActivityDTO> listDto = new ArrayList<StatisticsActivityDTO>();
+		List<Activity> results = activityProvider.statisticsActivity(UserContext.getCurrentNamespaceId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag());
+		List<Long> activityIds = new ArrayList<Long>();
+		
+		if(results != null){
+			results.forEach(r -> {
+				StatisticsActivityDTO dto = ConvertHelper.convert(r, StatisticsActivityDTO.class);
+				dto.setActivityId(r.getId());
+				dto.setCreateTime(r.getCreateTime().getTime());
+				dto.setEnrollUserCount(0);
+				listDto.add(dto);
+				activityIds.add(r.getId());
+			});
+		}
+		List<Object[]> listObject = activityProvider.statisticsRosterPay(activityIds);
+		
+		if(listObject != null){
+			listObject.forEach(r->{
+				listDto.forEach(rr -> {
+					
+					if(r[0] != null && ((Long)r[0]).equals(rr.getActivityId())){
+						Integer count = r[1] == null ? 0 : (Integer)r[1];
+						rr.setEnrollUserCount(count);
+					}
+					
+				});
+			});
+		}
+		
+		//排序 参考  com.everhomes.rest.activity.StatisticsOrderByFlag
+		
+		StatisticsActivityDTO temp = null;
+		for(int i= 0; i< listDto.size(); i++){
+			for(int j=i+1; j< listDto.size(); j++){
+				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
+					if(listDto.get(j).getEnrollUserCount().intValue() > listDto.get(i).getEnrollUserCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					} 
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_ASC.getCode()){
+					if(listDto.get(j).getEnrollUserCount().intValue() < listDto.get(i).getEnrollUserCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					} 
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PUBLISH_TIME_DESC.getCode()){
+					if(listDto.get(j).getCreateTime().longValue() > listDto.get(i).getCreateTime()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					}
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PUBLISH_TIME_ASC.getCode()){
+					if(listDto.get(j).getCreateTime().longValue() < listDto.get(i).getCreateTime()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					}
+				}
+			}
+		}
+		
+		response.setList(listDto);
+		return response;
+	}
+
+	@Override
+	public StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd) {
+		StatisticsTagResponse response = new StatisticsTagResponse();
+		List<StatisticsTagDTO> listDto = new ArrayList<StatisticsTagDTO>();
+		
+		List<Object[]> listActivityTag = activityProvider.statisticsActivityTag();
+		List<Object[]> listRosterTag = activityProvider.statisticsRosterTag();
+		
+		final Integer[] activityCount = new Integer[1];
+		activityCount[0] = 0;
+		final Integer[] rosterCount = new Integer[1];
+		rosterCount[0] = 0;
+		
+		if(listActivityTag != null && listRosterTag != null){
+			listActivityTag.forEach(r -> {
+				if((String) r[0] == null){
+					return;
+				}
+				StatisticsTagDTO temp = new StatisticsTagDTO();
+				temp.setTagName((String)r[0]);
+				temp.setCreateActivityCount((Integer)r[1]);
+				
+				//先设成0防止空指针
+				temp.setSignPeopleCount(0);;
+				activityCount[0] += (Integer)r[1];
+				
+				listRosterTag.forEach(rr -> {
+					if(((String) r[0]).equals((String)rr[0])){
+						temp.setSignPeopleCount((Integer) rr[1]);
+						rosterCount[0] += (Integer)rr[1];
+					}
+				});
+				
+				listDto.add(temp);
+			});
+		}
+		
+		//计算比例
+		listDto.forEach(r -> {
+			if(activityCount[0] > 0){
+				r.setCreateActivityRate(r.getCreateActivityCount().doubleValue()/activityCount[0]);
+			}else{
+				r.setCreateActivityRate(0D);
+			}
+			
+			if(rosterCount[0] > 0){
+				r.setSignPeopleRate(r.getSignPeopleCount().doubleValue()/rosterCount[0]);
+			}else{
+				r.setSignPeopleRate(0D);
+			}
+			
+		});
+		
+		//排序 参考  com.everhomes.rest.activity.StatisticsOrderByFlag
+		
+		StatisticsTagDTO temp = null;
+		for(int i= 0; i< listDto.size(); i++){
+			for(int j=i+1; j< listDto.size(); j++){
+				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
+					if(listDto.get(j).getSignPeopleCount().intValue() > listDto.get(i).getSignPeopleCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					} 
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_ASC.getCode()){
+					if(listDto.get(j).getSignPeopleCount().intValue() < listDto.get(i).getSignPeopleCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					} 
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.ACTIVITY_COUNT_DESC.getCode()){
+					if(listDto.get(j).getCreateActivityCount().longValue() > listDto.get(i).getCreateActivityCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					}
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.ACTIVITY_COUNT_ASC.getCode()){
+					if(listDto.get(j).getCreateActivityCount().longValue() < listDto.get(i).getCreateActivityCount()){
+						temp = listDto.get(i);
+						listDto.set(i, listDto.get(j));
+						listDto.set(j, temp);
+					}
+				}
+			}
+		}
+		
+		response.setList(listDto);
+		
+		
+		return response;
+	}
+	
+	
+	 // 获得当天0点时间  
+    private Timestamp getTimesmorning() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.set(Calendar.HOUR_OF_DAY, 0);  
+        cal.set(Calendar.SECOND, 0);  
+        cal.set(Calendar.MINUTE, 0);  
+        cal.set(Calendar.MILLISECOND, 0);  
+        return new Timestamp(cal.getTime().getTime());  
+  
+  
+    }  
+    // 获得当天24点时间  
+    private Timestamp getTimesnight() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.set(Calendar.HOUR_OF_DAY, 24);  
+        cal.set(Calendar.SECOND, 0);  
+        cal.set(Calendar.MINUTE, 0);  
+        cal.set(Calendar.MILLISECOND, 0);  
+        return new Timestamp(cal.getTime().getTime());  
+    }  
+  
+    // 获得本周日0点时间  
+    private Timestamp getTimesWeekmorning() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);  
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);  
+        return new Timestamp(cal.getTime().getTime());  
+    }  
+  
+    // 获得本周六24点时间  
+    private Timestamp getTimesWeeknight() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.setTime(getTimesWeekmorning());  
+        cal.add(Calendar.DAY_OF_WEEK, 7);  
+        return new Timestamp(cal.getTime().getTime());  
+    }  
+  
+    // 获得本月第一天0点时间  
+    private Timestamp getTimesMonthmorning() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);  
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));  
+        return new Timestamp(cal.getTime().getTime());  
+    }  
+  
+    // 获得本月最后一天24点时间  
+    private Timestamp getTimesMonthnight() {  
+        Calendar cal = Calendar.getInstance();  
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);  
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));  
+        cal.set(Calendar.HOUR_OF_DAY, 24);  
+        return new Timestamp(cal.getTime().getTime());  
+    }  
 }

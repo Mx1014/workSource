@@ -9,6 +9,7 @@ import org.jooq.Operator;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.user.UserGender;
 
 public interface ActivityProivider {
     Activity findActivityById(Long id);
@@ -99,4 +100,16 @@ public interface ActivityProivider {
 	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer cancelStatus, Integer offset, int pageSize);
 	
 	Integer countActivityRoster(Long activityId, Integer status);
+	
+	Integer countActivity(Integer namespaceId, Timestamp startTime, Timestamp endTime);
+	
+	Integer countActivityRoster(Integer namespaceId, Timestamp startTime, Timestamp endTime, UserGender userGender);
+	
+	List<Activity> statisticsActivity(Integer namespaceId, Long startTime, Long endTime, String tag);
+	
+	List<Object[]> statisticsRosterPay(List<Long> activityIds);
+	
+	List<Object[]> statisticsRosterTag();
+	
+	List<Object[]> statisticsActivityTag();
 }

@@ -713,21 +713,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("statisticsSummary")
     @RestReturn(value=StatisticsSummaryResponse.class)
     public RestResponse statisticsSummary(){
-    	StatisticsSummaryResponse result = new StatisticsSummaryResponse();
-    	
-    	result.setActivityCount(1000);
-    	result.setActivityDayCount(1);
-    	result.setActivityWeekCount(10);
-    	result.setActivityMonthCount(50);
-    	
-    	result.setRosterCount(3000);
-    	result.setRosterDayCount(5);
-    	result.setRosterWeekCount(20);
-    	result.setRosterMonthCount(100);
-    	
-    	result.setManCount(60);
-    	result.setWomanCount(40);
-    	
+    	StatisticsSummaryResponse result = activityService.statisticsSummary();
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -741,19 +727,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("statisticsActivity")
     @RestReturn(value=StatisticsActivityResponse.class)
     public RestResponse statisticsActivity(StatisticsActivityCommand cmd){
-    	StatisticsActivityResponse result = new StatisticsActivityResponse();
-    	result.setList(new ArrayList<ActivityDTO>());
-    	for(int i= 0; i<10 ;i++){
-    		ActivityDTO item = new ActivityDTO();
-    		item.setActivityId(2301L +1);
-    		item.setForumId(176520L);
-    		item.setPostId(195320L + i );
-    		item.setCreateTime(System.currentTimeMillis());
-    		item.setEnrollUserCount(100 + i);
-    		item.setSubject("标题" + i);
-    		result.getList().add(item);
-    	}
-    	
+    	StatisticsActivityResponse result = activityService.statisticsActivity(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -789,18 +763,17 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("statisticsTag")
     @RestReturn(value=StatisticsTagResponse.class)
     public RestResponse statisticsTag(StatisticsTagCommand cmd){
-    	StatisticsTagResponse result = new StatisticsTagResponse();
-    	result.setList(new ArrayList<StatisticsTagDTO>());
-    	for(int i= 0; i<10 ;i++){
-    		StatisticsTagDTO item = new StatisticsTagDTO();
-    		item.setTagId(1000L + i);
-    		item.setTagName("Tag" + i);
-    		item.setSignPeopleCount(10 + i);
-    		item.setSignPeopleRate(0.1);
-    		item.setCreateActivityCount(2 + i);
-    		item.setCreateActivityRate(0.1);
-    		result.getList().add(item);
-    	}
+    	StatisticsTagResponse result = activityService.statisticsTag(cmd);
+//    	result.setList(new ArrayList<StatisticsTagDTO>());
+//    	for(int i= 0; i<10 ;i++){
+//    		StatisticsTagDTO item = new StatisticsTagDTO();
+//    		item.setTagName("Tag" + i);
+//    		item.setSignPeopleCount(10 + i);
+//    		item.setSignPeopleRate(0.1);
+//    		item.setCreateActivityCount(2 + i);
+//    		item.setCreateActivityRate(0.1);
+//    		result.getList().add(item);
+//    	}
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
