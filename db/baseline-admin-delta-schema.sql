@@ -24,7 +24,7 @@ CREATE TABLE `eh_authorizations` (
   `auth_type` varchar(64) NOT NULL COMMENT 'EhServiceModules, EhRoles',
   `auth_id` bigint(20) NOT NULL,
   `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
-  `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
+  `all_module_flag` tinyint(4) COMMENT '0 not all, 1 all',
   `create_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,

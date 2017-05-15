@@ -2335,6 +2335,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void createRoleAdministrators(CreateRoleAdministratorsCommand cmd) {
+
+		if(null == cmd.getRoleIds() || cmd.getRoleIds().size() == 0){
+			LOGGER.error("roleIds is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"roleIds is null.");
+		}
+
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
