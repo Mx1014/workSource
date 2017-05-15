@@ -52,7 +52,6 @@ public class FlowGraphSMSAction extends FlowGraphAction {
 		dto.setTimeoutAtTick(timeoutAtTick);
 		dto.setRemindTick(remindTick);
 		dto.setRemindCount(remindCount);
-        dto.setFlowUserType(event.getUserType().getCode());
 
 		if(ctx.getOperator() != null) {
 			dto.setOperatorId(ctx.getOperator().getId());
