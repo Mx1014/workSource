@@ -183,6 +183,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -868,14 +869,11 @@ public class PunchServiceImpl implements PunchService {
 			Calendar startMinTime = Calendar.getInstance();
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
-			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString(punchTimeRule.getStartEarlyTimeLong())));
-	
-			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+  convertTimeLongToString(punchTimeRule.getStartLateTimeLong())));
-	
-			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0)
-					.getPunchDate()) + " " + convertTimeLongToString(punchTimeRule.getWorkTimeLong())));
+			startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong());
+
+			startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartLateTimeLong());
+
+			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong());
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
@@ -1016,19 +1014,14 @@ public class PunchServiceImpl implements PunchService {
 			Calendar afternoonArriveTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
 			Calendar arriveCalendar = Calendar.getInstance();
-			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getStartEarlyTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getStartEarlyTime()):punchTimeRule.getStartEarlyTimeLong()))));
-			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getStartLateTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getStartLateTime()):punchTimeRule.getStartLateTimeLong()))));
+			startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartEarlyTimeLong());
+			startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartLateTimeLong());
 					 
-			noonLeaveTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getNoonLeaveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getNoonLeaveTime()):punchTimeRule.getNoonLeaveTimeLong()))));
+			noonLeaveTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getNoonLeaveTimeLong());
 			 
-			afternoonArriveTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getAfternoonArriveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getAfternoonArriveTime()):punchTimeRule.getAfternoonArriveTimeLong()))));
+			afternoonArriveTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getAfternoonArriveTimeLong());
  
-			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate()) + " " 
-			+ convertTimeLongToString((punchTimeRule.getWorkTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getWorkTime()):punchTimeRule.getWorkTimeLong()))));
+			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong());
 			long realWorkTime = 0L;
 			if(null == pdl.getMorningPunchStatus()){
 				
@@ -1234,8 +1227,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime) {
-		// TODO Auto-generated method stub
-		byte punchCode =ClockCode.FAIL.getCode();
+		//
+		byte punchCode;
 		try{
 			punchCode= verifyPunchClock(cmd).getCode();
 		}catch(Exception e){	
@@ -1272,8 +1265,7 @@ public class PunchServiceImpl implements PunchService {
 		try {
 			punCalendar.setTime(datetimeSF.get().parse(punchTime));
 		} catch (ParseException e) {
-
-			e.printStackTrace();
+            LOGGER.error("parse punchTime error punch Time = " + punchTime,e);
 		}
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		if (null == pr  )
@@ -1309,7 +1301,7 @@ public class PunchServiceImpl implements PunchService {
 			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
 		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
 			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
-
+        //TODO: 用日期来处理
 		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
 			//取前一天的ptr,如果周期分界点>打卡时间+86400000 则算前一天
 			punCalendar.setTime(yesterday.getTime());
@@ -1325,8 +1317,8 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchCode(punchCode);
 		punchLog.setPunchStatus(punchCode);
 		punchProvider.createPunchLog(punchLog);
-		//刷新这一天的数据
-		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
+//		//刷新这一天的数据
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
 		    this.dbProvider.execute((status) -> {
 		    	try {
 					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
@@ -1339,8 +1331,8 @@ public class PunchServiceImpl implements PunchService {
 				}
 		        return null;
 		    });
-		    return null;
-		});
+//		    return null;
+//		});
 		response.setPunchTime(punchTime);
 
 		return response;
@@ -2300,7 +2292,8 @@ public class PunchServiceImpl implements PunchService {
 				.getTime()));
 		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
 		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-		statistic.setOwnerId(orgId);
+        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+		statistic.setOwnerId(ownerId);
 		statistic.setUserId(member.getTargetId());
 		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 		
@@ -2310,7 +2303,6 @@ public class PunchServiceImpl implements PunchService {
 		statistic.setDeptName(dept.getName());
 		statistic.setWorkDayCount(workDayCount);
 
-        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
  		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
 						dateSF.get().format(endCalendar.getTime()) );
 		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
@@ -4090,6 +4082,8 @@ public class PunchServiceImpl implements PunchService {
 		List<Long> absenceUserIdList = new ArrayList<>();
 		for(PunchStatistic statistic : results){
 			PunchCountDTO dto =ConvertHelper.convert(statistic, PunchCountDTO.class);
+
+            punchCountDTOList.add(dto);
 //			if(statistic.getOverTimeSum().equals(0L)){
 //				dto.setOverTimeSum(0.0);
 //			}
@@ -4141,8 +4135,6 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 			}
-			
-			punchCountDTOList.add(dto);
 			absenceUserIdList.add(statistic.getUserId());
 		}
 		response.setNextPageAnchor(nextPageAnchor);
@@ -4178,6 +4170,9 @@ public class PunchServiceImpl implements PunchService {
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
 			
 			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
+
+			LOGGER.debug(" organizationProvider.listOrganizationByGroupTypes("+org.getPath()+"% , "+StringHelper.toJsonString(groupTypeList)+"); " );
+			LOGGER.debug("orgs  : "+StringHelper.toJsonString(orgs));
 			List<Long> orgIds = new ArrayList<Long>();
 			orgIds.add(org.getId());
 			for (Organization o : orgs){
@@ -4186,6 +4181,7 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
+			 
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -4895,7 +4891,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 2.找timerule里分界点(分界点只会是0,15,30,45)在这一个15分钟内的(当前时间点取整-15分钟,当前时间点取整]
 	 * 3.找到规则映射的公司/部门/个人,然后精确到个人.刷前一天的记录.
 	 * */
-	@Scheduled(cron = "1 0/2 * * * ?")
+	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
 
@@ -4937,7 +4933,7 @@ public class PunchServiceImpl implements PunchService {
 		for(PunchScheduling punchScheduling : punchSchedulings){
 			//在15分钟+1分钟延迟内的进行计算, 不在此范围的continue
 			long endLong = runDate.getTime();
-			long beginLong = runDate.getTime() - 16*60*1000L;
+			long beginLong = runDate.getTime() - 15*60*1000L;
 			if(null == punchScheduling.getTimeRuleId())
 				continue;
 			PunchTimeRule ptr = punchProvider.getPunchTimeRuleById(punchScheduling.getTimeRuleId());
@@ -4980,9 +4976,14 @@ public class PunchServiceImpl implements PunchService {
 						(orgId, groupTypeList, null) ;
 				//循环刷所有员工
 				for(OrganizationMemberDTO member : organizationMembers){
-					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+//					}
+					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
+					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
 						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-					}
+							
 				}
 			}
 			else{
@@ -5024,8 +5025,11 @@ public class PunchServiceImpl implements PunchService {
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
 			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
-				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
+				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+				}
 				else{
  
 					LOGGER.error("Invalid target type or  Id parameter in the command");
@@ -5305,7 +5309,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid target type or  Id parameter in the command");
 		}
-		
+		//z注释map和rule 的关系
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId,
 				targetType, targetId);
 		if(map == null){
@@ -5315,15 +5319,13 @@ public class PunchServiceImpl implements PunchService {
 			map.setTargetId(targetId);
 			map.setTargetType(targetType);
 			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
+			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			PunchRule pr = new PunchRule();
 			pr.setOwnerId(ownerId);
 			pr.setOwnerType(ownerType);
 			pr.setName(targetId+"rule");
 			pr.setCreatorUid(UserContext.current().getUser().getId());
-			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			this.punchProvider.createPunchRule(pr);
 			map.setPunchRuleId(pr.getId());
 			this.punchProvider.createPunchRuleOwnerMap(map);
@@ -5518,8 +5520,9 @@ public class PunchServiceImpl implements PunchService {
 		startCalendar.set(Calendar.MILLISECOND, 0);
 		endCalendar.setTime(startCalendar.getTime());
 		endCalendar.add(Calendar.MONTH, 1);
-		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-			
+		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,
+                new ListingQueryBuilderCallback()  {
+			//TODO 联表查询
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
@@ -5548,7 +5551,7 @@ public class PunchServiceImpl implements PunchService {
 						dto.setTimeRuleName(timeRule.getName());
 						dto.setTimeRuleDescription(timeRule.getDescription());
 					}else{
-
+                        //TODO : 减少IO 做成MAP
 						LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_DEFAULT_SCOPE, PUNCH_TIME_RULE_NAME,"zh_CN");
 						dto.setTimeRuleName( scheduleLocaleString==null?"":scheduleLocaleString.getText());
 					}
@@ -5561,7 +5564,7 @@ public class PunchServiceImpl implements PunchService {
 		 
 		response.setTimeRules(listPunchTimeRuleList(cmd2).getTimeRules());
 		return response;
-	} 
+	}
 	private PunchRuleOwnerMap getUsefulRuleMap(String ownerType, Long ownerId, String targetType,
 			Long targetId) {
 		// TODO Auto-generated method stub
@@ -5569,7 +5572,7 @@ public class PunchServiceImpl implements PunchService {
 		if(targetType.equals(PunchOwnerType.User.getCode())){
 			//如果有个人规则就返回个人规则
 			map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, targetType, targetId);
-			if (null != map && map.getPunchRuleId() != null) 
+			if (null != map ) 
 				return map;
 			//如果没有就按照部门来找规则
 			OrganizationDTO deptDTO = findUserDepartment(targetId, ownerId);

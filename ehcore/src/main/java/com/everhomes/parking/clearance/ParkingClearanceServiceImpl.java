@@ -428,7 +428,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     
     private void formatToExport(ParkingClearanceLogDTO log) {
     	log.setApplyTimeString(DateUtil.dateToStr(log.getApplyTime(), DateUtil.DATE_TIME_LINE));
-    	log.setClearanceTimeString(DateUtil.dateToStr(log.getClearanceTime(), DateUtil.DATE_TIME_LINE));
+    	log.setClearanceTimeString(DateUtil.dateToStr(log.getClearanceTime(), DateUtil.YMR_SLASH));
     }
 
 	@Override
