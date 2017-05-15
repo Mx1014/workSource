@@ -310,15 +310,17 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				yestCalendar.setTimeInMillis(a.getFromTime()); 
 				yestCalendar.add(Calendar.DAY_OF_MONTH, -1);
 				PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), yestCalendar.getTime()) ;
- 
-				long yesterdayTime = calculateOneDayTime( punchService.convertTimeToGMTMillisecond(new Time(a.getFromTime())) + DAY_MILLISECONDGMT, 
-						 punchService.convertTimeToGMTMillisecond(new Time(a.getEndTime()))  + DAY_MILLISECONDGMT, dto);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(a.getFromTime());
+				long fromTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L;
+				calendar.setTimeInMillis(a.getEndTime());
+				long endTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L; 
+				long yesterdayTime = calculateOneDayTime( fromTime+ DAY_MILLISECONDGMT, endTime  + DAY_MILLISECONDGMT, dto);
 				//2.用今天的规则计算一下时间
 				Calendar todayCalendar = Calendar.getInstance();
 				todayCalendar.setTimeInMillis(a.getFromTime());  
 				dto = processTimeRuleDTO(punchRule.getId(), todayCalendar.getTime()) ;
-				long todayTime = calculateOneDayTime( punchService.convertTimeToGMTMillisecond(new Time(a.getFromTime())) , 
-						 punchService.convertTimeToGMTMillisecond(new Time(a.getEndTime())) , dto);
+				long todayTime = calculateOneDayTime( fromTime,endTime, dto);
 				//3.把用昨天规则计算的和今天规则计算的加起来
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
