@@ -1,0 +1,17 @@
+package com.everhomes.rest.warehouse;
+
+/**
+ * Created by ying.xiong on 2017/5/12.
+ */
+public interface WarehouseServiceErrorCode {
+    static final String SCOPE = "warehouse";
+    static final int ERROR_WAREHOUSE_NOT_EXIST = 10001;//仓库不存在
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST = 10002;//物品分类不存在
+    static final int ERROR_WAREHOUSE_MATERIAL_NOT_EXIST = 10003;//物品不存在
+    static final int ERROR_WAREHOUSE_NUMBER_ALREADY_EXIST = 10004;//仓库编码已存在
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST = 10005;//物品分类编码已存在
+    static final int ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST = 10006;//物品编码已存在
+    static final int ERROR_WAREHOUSE_STOCK_NOT_NULL = 10007;//仓库库存不为0
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_IN_USE = 10008;//物品分类有关联物品
+    static final int ERROR_WAREHOUSE_MATERIAL_RELATED_TO_WAREHOUSE = 10009;//物品有库存引用
+}

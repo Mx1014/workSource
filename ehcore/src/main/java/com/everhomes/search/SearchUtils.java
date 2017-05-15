@@ -53,6 +53,12 @@ public class SearchUtils {
 
     public static final String ENERGY_METER_READING_LOG = "energyMeterReadingLog";
 
+    public static final String WAREHOUSE = "warehouse";
+
+    public static final String WAREHOUSE_MATERIAL = "warehouseMaterial";
+
+    public static final String WAREHOUSE_MATERIAL_CATEGORY = "warehouseMaterialCategory";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";
