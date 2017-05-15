@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 //import org.apache.http.annotation.Contract;
@@ -223,6 +224,42 @@ public class HttpUtils {
 				url = url + "?" + paramstr;
 			}
 			HttpGet httpget = new HttpGet(url);
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			retVal = httpclient.execute(httpget, responseHandler);
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
+		return retVal;
+	}
+	
+	/**
+	 * get请求
+	 * 
+	 * @param url
+	 * @param params
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource")
+	public static String get(String url, Map<String, String> params, Header[] headers) throws IOException {
+		HttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setIntParameter("http.socket.timeout", 100000);
+		String retVal = "";
+		try {
+			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+			if (params != null) {
+				for (Map.Entry<String, String> param : params.entrySet()) {
+					qparams.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+				}
+			}
+			String paramstr = URLEncodedUtils.format(qparams, HTTP.UTF_8);
+			if (StringUtils.isNotEmpty(paramstr)) {
+				url = url + "?" + paramstr;
+			}
+			HttpGet httpget = new HttpGet(url);
+			httpget.setHeaders(headers);
 			ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			retVal = httpclient.execute(httpget, responseHandler);
 		} catch (IOException e) {

@@ -16,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,7 +223,10 @@ public class EmsHandler implements ExpressHandler {
 		String url = TRACK_BILL_URL.replace("#{billno}", billno);
 		String result = null;
 		try {
-			result = HttpUtils.get(url, null);
+			Header[] headers = new Header[2];
+			headers[0] = new BasicHeader("version", "ems_track_cn_1.0");
+			headers[1] = new BasicHeader("authenticate", "");
+			result = HttpUtils.get(url, null, headers);
 		} catch (IOException e) {
 			LOGGER.error("track bill from ems error: {}", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "track bill error");
