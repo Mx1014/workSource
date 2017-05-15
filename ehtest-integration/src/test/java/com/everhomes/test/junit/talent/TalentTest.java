@@ -4,10 +4,14 @@ package com.everhomes.test.junit.talent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Record;
+import org.jooq.Result;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.talent.ClearTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCategoryCommand;
 import com.everhomes.rest.talent.CreateOrUpdateTalentCommand;
@@ -29,7 +33,10 @@ import com.everhomes.rest.talent.ListTalentQueryHistoryRestResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
 import com.everhomes.rest.talent.ListTalentRestResponse;
 import com.everhomes.rest.talent.TalentCategoryDTO;
+import com.everhomes.rest.talent.TalentDTO;
+import com.everhomes.rest.talent.TalentQueryHistoryDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
 
@@ -69,7 +76,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListTalentCategoryCommand cmd = new ListTalentCategoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 
 		ListTalentCategoryRestResponse response = httpClientService.restPost(url, cmd, ListTalentCategoryRestResponse.class);
 		assertNotNull(response);
@@ -77,7 +84,9 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 		ListTalentCategoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		List<TalentCategoryDTO> list = myResponse.getTalentCategories();
+		assertNotNull(list);
+		assertTrue(list.size() > 0);
 
 	}
 
@@ -88,19 +97,22 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		CreateOrUpdateTalentCategoryCommand cmd = new CreateOrUpdateTalentCategoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 		List<TalentCategoryDTO> talentCategoryDTOList = new ArrayList<>();
 		TalentCategoryDTO talentCategoryDTO = new TalentCategoryDTO();
-		talentCategoryDTO.setId(1L);
-		talentCategoryDTO.setName("");
+		talentCategoryDTO.setName("我是分类");
 		talentCategoryDTOList.add(talentCategoryDTO);
+		TalentCategoryDTO talentCategoryDTO2 = new TalentCategoryDTO();
+		talentCategoryDTO2.setName("我是分类2");
+		talentCategoryDTOList.add(talentCategoryDTO2);
 		cmd.setTalentCategories(talentCategoryDTOList);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_TALENT_CATEGORIES).where(Tables.EH_TALENT_CATEGORIES.NAME.like("我是分类%")).fetch();
+		assertEquals(2, result.size());
 
 	}
 
@@ -111,14 +123,16 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		DeleteTalentCategoryCommand cmd = new DeleteTalentCategoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENT_CATEGORIES).where(Tables.EH_TALENT_CATEGORIES.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(CommonStatus.INACTIVE.getCode(), record.getValue(Tables.EH_TALENT_CATEGORIES.STATUS).byteValue());
 
 	}
 
@@ -129,17 +143,17 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListTalentCommand cmd = new ListTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
-		cmd.setCategoryId(1L);
-		cmd.setGender((byte)1);
-		cmd.setExperience((byte)1);
-		cmd.setDegree((byte)1);
-		cmd.setKeyword("");
-		cmd.setPageAnchor(1L);
-		cmd.setPageSize(0);
-		cmd.setHistoryFlag((byte)1);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
+//		cmd.setCategoryId(1L);
+//		cmd.setGender((byte)1);
+//		cmd.setExperience((byte)1);
+//		cmd.setDegree((byte)1);
+//		cmd.setKeyword("");
+//		cmd.setPageAnchor(1L);
+		cmd.setPageSize(2);
+//		cmd.setHistoryFlag((byte)1);
 
 		ListTalentRestResponse response = httpClientService.restPost(url, cmd, ListTalentRestResponse.class);
 		assertNotNull(response);
@@ -148,7 +162,9 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		ListTalentResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
 
-
+		List<TalentDTO> list = myResponse.getTalents();
+		assertNotNull(list);
+		assertEquals(2, list.size());
 	}
 
 	//5. 创建或更新人才信息
@@ -158,26 +174,28 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		CreateOrUpdateTalentCommand cmd = new CreateOrUpdateTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
-		cmd.setId(1L);
-		cmd.setName("");
-		cmd.setAvatarUri("");
-		cmd.setPosition("");
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
+//		cmd.setId(1L);
+		cmd.setName("tt_test");
+		cmd.setAvatarUri("https://www.baidu.com");
+		cmd.setPosition("软件");
 		cmd.setCategoryId(1L);
 		cmd.setGender((byte)1);
-		cmd.setExperience(0);
-		cmd.setGraduateSchool("");
+		cmd.setExperience(10);
+		cmd.setGraduateSchool("中山大学");
 		cmd.setDegree((byte)1);
-		cmd.setPhone("");
-		cmd.setRemark("");
+		cmd.setPhone("13265767391");
+		cmd.setRemark("我是详情");
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.NAME.eq("tt_test")).fetchOne();
+		assertNotNull(record);
+		assertEquals("13265767391", record.getValue(Tables.EH_TALENTS.PHONE));
 
 	}
 
@@ -188,18 +206,20 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		EnableTalentCommand cmd = new EnableTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
-		cmd.setId(1L);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
+		cmd.setId(2L);
 		cmd.setEnabled((byte)1);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(2L)).fetchOne();
+		assertNotNull(record);
+		assertEquals((byte)1, record.getValue(Tables.EH_TALENTS.ENABLED).byteValue());
+		
 	}
 
 	//7. 删除人才信息
@@ -209,16 +229,18 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		DeleteTalentCommand cmd = new DeleteTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(CommonStatus.INACTIVE.getCode(), record.getValue(Tables.EH_TALENTS.STATUS).byteValue());
 
 	}
 
@@ -228,18 +250,23 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		String url = TOP_TALENT_URL;
 		logon();
 
+		Record record1 = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(1L)).fetchOne();
+		assertNotNull(record1);
+		
 		TopTalentCommand cmd = new TopTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-
+		Record record2 = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).orderBy(Tables.EH_TALENTS.ID.desc()).limit(1).fetchOne();
+		assertNotNull(record2);
+		assertEquals(record1.getValue(Tables.EH_TALENTS.NAME), record2.getValue(Tables.EH_TALENTS.NAME));
+		
 	}
 
 	//9. 导入人才信息
@@ -249,15 +276,15 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ImportTalentCommand cmd = new ImportTalentCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		
 
 	}
 
@@ -268,9 +295,9 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		GetTalentDetailCommand cmd = new GetTalentDetailCommand();
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
-		cmd.setOrganizationId(1L);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331051304L);
+		cmd.setOrganizationId(999992L);
 		cmd.setId(1L);
 
 		GetTalentDetailRestResponse response = httpClientService.restPost(url, cmd, GetTalentDetailRestResponse.class);
@@ -279,8 +306,10 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 		GetTalentDetailResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
-
+		TalentDTO talentDTO = myResponse.getTalent();
+		assertNotNull(talentDTO);
+		assertNotNull(talentDTO.getName());
+		
 	}
 
 	//11. 人才信息查询记录
@@ -290,7 +319,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListTalentQueryHistoryCommand cmd = new ListTalentQueryHistoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 
 		ListTalentQueryHistoryRestResponse response = httpClientService.restPost(url, cmd, ListTalentQueryHistoryRestResponse.class);
 		assertNotNull(response);
@@ -299,7 +328,10 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		ListTalentQueryHistoryResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
 
-
+		List<TalentQueryHistoryDTO> list = myResponse.getTalentQueryHistories();
+		assertNotNull(list);
+		assertEquals(2, list.size());
+		
 	}
 
 	//12. 删除人才信息查询记录
@@ -309,43 +341,36 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		DeleteTalentQueryHistoryCommand cmd = new DeleteTalentQueryHistoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENT_QUERY_HISTORIES).where(Tables.EH_TALENT_QUERY_HISTORIES.ID.eq(1L)).fetchOne();
+		assertNotNull(record);
+		assertEquals(CommonStatus.INACTIVE.getCode(), record.getValue(Tables.EH_TALENT_QUERY_HISTORIES.STATUS).byteValue());
 
 	}
 
 	//13. 清空人才信息查询记录
-	//@Test
+	@Test
 	public void testClearTalentQueryHistory() {
 		String url = CLEAR_TALENT_QUERY_HISTORY_URL;
 		logon();
 
 		ClearTalentQueryHistoryCommand cmd = new ClearTalentQueryHistoryCommand();
-		cmd.setOrganizationId(1L);
+		cmd.setOrganizationId(999992L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENT_QUERY_HISTORIES).where(Tables.EH_TALENT_QUERY_HISTORIES.STATUS.eq(CommonStatus.ACTIVE.getCode())).fetchOne();
+		assertNull(record);
 
 	}
-
-
-
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -357,13 +382,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	@Override
 	protected void initCustomData() {
-		String jsonFilePath = "data/json/1.0.0-questionnaire-test-data-170220.txt";
-		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
-		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
-	}
-	
-	private void initListData() {
-		String jsonFilePath = "data/json/1.0.0-approval-test-data-list-160907.txt";
+		String jsonFilePath = "data/json/talent-1.0.0-test-data-170515.txt";
 		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}
@@ -376,7 +395,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 	private void logon() {
 		String userIdentifier = "tt";
 		String plainTexPassword = "123456";
-		Integer namespaceId = 999995;
+		Integer namespaceId = 999992;
 		logon(namespaceId, userIdentifier, plainTexPassword);
 	}
 }
