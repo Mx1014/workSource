@@ -2304,7 +2304,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd) {
-		List<Authorization> authorizations = authorizationProvider.listTargetAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), null, IdentityType.MANAGE.getCode());
+		List<Authorization> authorizations = authorizationProvider.listTargetAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId(), IdentityType.MANAGE.getCode());
 		return authorizations.stream().map((r) ->{
 			RoleAuthorizationsDTO dto = ConvertHelper.convert(r, RoleAuthorizationsDTO.class);
 			if(EntityType.USER == EntityType.fromCode(r.getTargetType())){
