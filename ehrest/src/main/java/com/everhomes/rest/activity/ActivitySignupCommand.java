@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  *<li>childCount:小孩数</li>
  *<li>phone:手机</li>
  *<li>realName:姓名</li>
- *<li>organizationName:公司</li>
+ *<li>organizationId:公司Id，如果用户没有使用当前场景的公司，则不传id仅传名称</li>
+ *<li>organizationName:公司名称</li>
  *<li>position:职位</li>
  *<li>email:邮箱</li>
  *<li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
@@ -28,6 +29,7 @@ public class ActivitySignupCommand {
     
     private String phone;
     private String realName;
+    private Long organizationId;
     private String organizationName;
     private String position;
     private String email;
@@ -75,6 +77,14 @@ public class ActivitySignupCommand {
 
 	public void setRealName(String realName) {
 		this.realName = realName;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public String getOrganizationName() {

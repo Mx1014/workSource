@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>realName: 真实姓名</li>
  * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>communityName: 园区名称</li>
+ * <li>organizationId:公司Id，如果用户没有使用当前场景的公司，则不传id仅传名称</li>
  * <li>organizationName: 企业名称</li>
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
@@ -47,6 +48,7 @@ public class SignupInfoDTO {
 	private Byte gender;
 	private String genderText;
 	private String communityName;
+	private Long organizationId;
 	private String organizationName;
 	private String position;
 	private Byte leaderFlag;
@@ -152,6 +154,12 @@ public class SignupInfoDTO {
 	}
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 	public String getOrganizationName() {
 		return organizationName;
