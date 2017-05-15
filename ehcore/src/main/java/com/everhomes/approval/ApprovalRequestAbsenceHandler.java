@@ -26,11 +26,14 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javassist.runtime.DotClass;
 
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.joda.time.Hours;
 import org.omg.CORBA.PRIVATE_MEMBER;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +50,10 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+import ch.qos.logback.classic.Logger;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
@@ -85,7 +92,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	//时间相加减需要带上这个差值
 	private static final Long MILLISECONDGMT=8*3600*1000L;
 	private static final Long DAY_MILLISECONDGMT=24*3600*1000L;
+
 	
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ApprovalRequestDefaultHandler.class);
 //	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 //	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 //	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -388,6 +397,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private long calculateOneDayTime(long fromTime, long endTime, PunchTimeRuleDTO dto) {
 		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
+		fromTime = punchService.convertTimeToGMTMillisecond(new Time(fromTime));
+		endTime = punchService.convertTimeToGMTMillisecond(new Time(endTime));
+//		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
 		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
 			return 0L;
 		// 确定起始时间:
