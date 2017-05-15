@@ -296,12 +296,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		timeRangeList.forEach(a->{
 			//如果不跨天
 			if (punchService.isSameDay(new Date(a.getFromTime()), new Date(a.getEndTime()))) {
-				//1.用昨天的规则计算一下时间
+				//1.用昨天的规则计算一下时间 注意:起止时间要加一天的毫秒数
 				Calendar yestCalendar = Calendar.getInstance();
 				yestCalendar.setTimeInMillis(a.getFromTime()); 
 				yestCalendar.add(Calendar.DAY_OF_MONTH, -1);
 				PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), yestCalendar.getTime()) ;
-				long yesterdayTime = calculateOneDayTime(a.getFromTime(), a.getEndTime(), dto);
+				long yesterdayTime = calculateOneDayTime(a.getFromTime() + DAY_MILLISECONDGMT, a.getEndTime() + DAY_MILLISECONDGMT, dto);
 				//2.用今天的规则计算一下时间
 				Calendar todayCalendar = Calendar.getInstance();
 				todayCalendar.setTimeInMillis(a.getFromTime());  
