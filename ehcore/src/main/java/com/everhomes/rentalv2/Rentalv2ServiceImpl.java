@@ -4762,6 +4762,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			cell.setOriginalPrice(cmd.getOriginalPrice());
 			cell.setHalfresourcePrice(cmd.getHalfsitePrice());
 			cell.setHalfresourceOriginalPrice(cmd.getHalfsiteOriginalPrice());
+			cell.setOrgMemberPrice(cmd.getOrgMemberPrice());
+			cell.setOrgMemberOriginalPrice(cmd.getOrgMemberOriginalPrice());
+			cell.setApprovingUserPrice(cmd.getApprovingUserPrice());
+			cell.setApprovingUserOriginalPrice(cmd.getApprovingUserOriginalPrice());
 			cell.setStatus(cmd.getStatus());
 			cell.setCounts(cmd.getCounts());
 			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
@@ -5402,9 +5406,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"RentalResource not found");
 		}
 
+		Long order = resource.getDefaultOrder();
+		Long exchangeOrder = exchangeResource.getDefaultOrder();
+
 		dbProvider.execute((TransactionStatus status) -> {
-			resource.setDefaultOrder(cmd.getDefaultOrderId());
-			exchangeResource.setDefaultOrder(cmd.getId());
+			resource.setDefaultOrder(exchangeOrder);
+			exchangeResource.setDefaultOrder(order);
 			rentalv2Provider.updateRentalSite(resource);
 			rentalv2Provider.updateRentalSite(exchangeResource);
 			return null;
