@@ -1293,4 +1293,8 @@ update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwalpXTmpaVGRr
 
 update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek5qRXlPR0psTmpFM05ESmhOMkpqWlRKbE1UUmtNR0prTVRrd1ltTm1Odw' where namespace_id = 999975;
 
+-- fix 9850 modify add by xiongying20170515
+SET @configuration_id = (SELECT max(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
+	VALUES ((@configuration_id := @configuration_id + 1), 'video.official.support', '0', 'offical video support', '999975', NULL);
 SET FOREIGN_KEY_CHECKS = 1;
