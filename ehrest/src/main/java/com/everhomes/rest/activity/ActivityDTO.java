@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  *<li>forumId:论坛</li>
  *<li>postId:帖子ID</li>
  *<li>posterUrl:海报链接</li>
+ *<li>posterUri:海报链接Uri</li>
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>userPayFlag:支付状态  0: no pay, 1:have pay, 2:refund 参考 {@link com.everhomes.rest.activity.ActivityRosterPayFlag }</li>
  *<li>userOrderCountdown:订单倒计时时间长度</li>
@@ -82,6 +83,7 @@ public class ActivityDTO {
     private Double latitude;
     private String subject;
     private String posterUrl;
+    private String posterUri;
    
     private Integer userActivityStatus;
     private Byte userPayFlag;
@@ -418,7 +420,15 @@ public class ActivityDTO {
         this.posterUrl = posterUrl;
     }
 
-    public String getSubject() {
+    public String getPosterUri() {
+		return posterUri;
+	}
+
+	public void setPosterUri(String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+	public String getSubject() {
         return subject;
     }
 
