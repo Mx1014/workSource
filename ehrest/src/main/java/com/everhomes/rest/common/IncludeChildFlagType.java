@@ -7,13 +7,13 @@ package com.everhomes.rest.common;
  * <li>YES(1): 全部</li>
  * </ul>
  */
-public enum IsAllFlag {
+public enum IncludeChildFlagType {
 
     NO((byte)0), YES((byte)1);
 
     private byte code;
 
-    private IsAllFlag(byte code) {
+    private IncludeChildFlagType(byte code) {
         this.code = code;
     }
     
@@ -21,11 +21,11 @@ public enum IsAllFlag {
         return this.code;
     }
 
-    public static IsAllFlag fromCode(Byte code) {
+    public static IncludeChildFlagType fromCode(Byte code) {
         if(code == null)
             return null;
-        IsAllFlag[] values = IsAllFlag.values();
-        for(IsAllFlag value : values){
+        IncludeChildFlagType[] values = IncludeChildFlagType.values();
+        for(IncludeChildFlagType value : values){
             if(value.getCode() == code.byteValue())
                 return value;
         }

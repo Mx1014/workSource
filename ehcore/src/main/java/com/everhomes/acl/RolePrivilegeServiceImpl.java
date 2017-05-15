@@ -16,6 +16,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
@@ -2348,6 +2349,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setAuthType(EntityType.ROLE.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(UserContext.getCurrentNamespaceId());
+		authorization.setAllFlag(AllFlagType.NO.getCode());
 		authorization.setCreateUid(user.getId());
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
