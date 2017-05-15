@@ -399,7 +399,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
 		fromTime = punchService.convertTimeToGMTMillisecond(new Time(fromTime));
 		endTime = punchService.convertTimeToGMTMillisecond(new Time(endTime));
-//		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
+ 		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
 		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
 			return 0L;
 		// 确定起始时间:
