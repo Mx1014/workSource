@@ -7,14 +7,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
-import com.everhomes.rest.acl.ListServiceModulesCommand;
-import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.acl.WebMenuDTO;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.TreeWebMenusCommand;
-import com.everhomes.rest.module.GetServiceModuleCommand;
-import com.everhomes.rest.module.TreeServiceModuleCommand;
+import com.everhomes.rest.module.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -81,6 +77,45 @@ public class ModuleController extends ControllerBase {
     @RestReturn(value=ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
         RestResponse response =  new RestResponse(serviceModuleService.listServiceModulePrivileges(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/assignmentServiceModule</b>
+     * <p>业务模块分配，包括添加和编辑</p>
+     */
+    @RequestMapping("assignmentServiceModule")
+    @RestReturn(value=String.class)
+    public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/deleteAssignmentServiceModule</b>
+     * <p>删除业务模块分配关系</p>
+     */
+    @RequestMapping("deleteServiceModuleAssignmentRelation")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceModuleAssignmentRelation(@Valid DeleteServiceModuleAssignmentRelationCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listServiceModuleAssignmentRelations</b>
+     * <p>业务模块分配关系列表</p>
+     */
+    @RequestMapping("listServiceModuleAssignmentRelations")
+    @RestReturn(value=ServiceModuleAssignmentRelationDTO.class, collection = true)
+    public RestResponse listServiceModuleAssignmentRelations(@Valid ListServiceModuleAssignmentRelationsCommand cmd) {
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
