@@ -16,6 +16,7 @@ package com.everhomes.rest.common;
  * <li>FAMILY: 家庭</li>
  * <li>ORGANIZATIONS: 机构</li>
  * <li>BUILDING: 楼栋</li>
+ * <li>EhServiceModules: 业务模块</li>
  * <li>EhZuolinAdmins: 左邻管理</li>
  * </ul>
  */
@@ -32,6 +33,7 @@ public enum EntityType {
     TOPIC("EhTopics"),
     ORGANIZATIONS("EhOrganizations"),
     BUILDING("EhBuildings"),
+    SERVICE_MODULE("EhServiceModules"),
     ZUOLIN_ADMIN("EhZuolinAdmins");
 
     private String code;
