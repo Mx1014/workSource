@@ -310,12 +310,15 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				yestCalendar.setTimeInMillis(a.getFromTime()); 
 				yestCalendar.add(Calendar.DAY_OF_MONTH, -1);
 				PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), yestCalendar.getTime()) ;
-				long yesterdayTime = calculateOneDayTime(a.getFromTime() + DAY_MILLISECONDGMT, a.getEndTime() + DAY_MILLISECONDGMT, dto);
+ 
+				long yesterdayTime = calculateOneDayTime( punchService.convertTimeToGMTMillisecond(new Time(a.getFromTime())) + DAY_MILLISECONDGMT, 
+						 punchService.convertTimeToGMTMillisecond(new Time(a.getEndTime()))  + DAY_MILLISECONDGMT, dto);
 				//2.用今天的规则计算一下时间
 				Calendar todayCalendar = Calendar.getInstance();
 				todayCalendar.setTimeInMillis(a.getFromTime());  
 				dto = processTimeRuleDTO(punchRule.getId(), todayCalendar.getTime()) ;
-				long todayTime = calculateOneDayTime(a.getFromTime(), a.getEndTime(), dto);
+				long todayTime = calculateOneDayTime( punchService.convertTimeToGMTMillisecond(new Time(a.getFromTime())) , 
+						 punchService.convertTimeToGMTMillisecond(new Time(a.getEndTime())) , dto);
 				//3.把用昨天规则计算的和今天规则计算的加起来
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
@@ -397,8 +400,6 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private long calculateOneDayTime(long fromTime, long endTime, PunchTimeRuleDTO dto) {
 		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
-		fromTime = punchService.convertTimeToGMTMillisecond(new Time(fromTime));
-		endTime = punchService.convertTimeToGMTMillisecond(new Time(endTime));
  		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
 		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
 			return 0L;
