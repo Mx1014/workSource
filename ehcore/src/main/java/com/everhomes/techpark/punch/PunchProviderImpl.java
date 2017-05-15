@@ -83,6 +83,7 @@ import com.everhomes.server.schema.tables.records.EhPunchLocationRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchRulesRecord;
+import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhPunchTimeRulesRecord;
 import com.everhomes.server.schema.tables.records.EhPunchWifiRulesRecord;
@@ -2488,6 +2489,20 @@ long id = sequenceProvider.getNextSequence(key);
 			return records.size();
 		}
 		return 0;
+	}
+
+	@Override
+	public void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId) {
+
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchTimeRulesRecord> step = context.delete(Tables.EH_PUNCH_TIME_RULES);
+		Condition condition = Tables.EH_PUNCH_TIME_RULES.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_TIME_RULES.TARGET_TYPE.equal(targetType))
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_TIME_RULES.OWNER_TYPE.equal(ownerType)) ; 
+		step.where(condition);
+		step.execute();
 	}
 	
 	

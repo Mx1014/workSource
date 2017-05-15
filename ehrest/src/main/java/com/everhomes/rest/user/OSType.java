@@ -1,4 +1,4 @@
-package com.everhomes.user;
+package com.everhomes.rest.user;
 
 public enum OSType {
     Unknown((byte) 0), IOS((byte) 1), Android((byte) 2), windowsPhone((byte) 3), Firefox((byte) 4), Blackberry((byte) 5), IOSWeiXin((byte) 6), AndriodWeiXin((byte) 7);

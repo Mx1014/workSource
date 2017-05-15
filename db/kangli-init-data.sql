@@ -1885,3 +1885,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 更改服务联盟是否支持审批, add by tt, 20170510
 select max(id) into @id from `eh_service_alliance_jump_module`;
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES (@id+1, 999978, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
+
+-- 更改app info, add by tt, 20170510
+select max(id) into @id from  `eh_app_urls`;
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES (@id:=@id+1, 999978, '康利k生活', 2, 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.kangli', 'cs://1/image/aW1hZ2UvTVRvNVkyWmtaakUxTXpKaVkyWTJNalExTldFeVltUmxaRFl5TkdGaU4ySTNPQQ', '移动平台聚合服务，助力园区效能提升');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES (@id:=@id+1, 999978, '康利k生活', 1, 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.kangli', 'cs://1/image/aW1hZ2UvTVRvNVkyWmtaakUxTXpKaVkyWTJNalExTldFeVltUmxaRFl5TkdGaU4ySTNPQQ', '移动平台聚合服务，助力园区效能提升');

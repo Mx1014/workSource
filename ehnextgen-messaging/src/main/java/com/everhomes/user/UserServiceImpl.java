@@ -3719,20 +3719,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getUserNickName(GetUserNickNameCommand cmd) {
-        if (cmd.getUid() == null) {
-            LOGGER.error("Invalid cmd, {}", cmd.toString());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Invalid cmd, %s", cmd.toString());
-        }
-        UserInfo userInfo = this.getUserSnapshotInfo(cmd.getUid());
-        if (userInfo != null) {
-            return userInfo.getNickName();
-        }
-        return null;
-    }
-
-    @Override
     public MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd) {
         MessageSessionInfoDTO dto = new MessageSessionInfoDTO();
         com.everhomes.rest.common.EntityType targetType = com.everhomes.rest.common.EntityType.fromCode(cmd.getTargetType());
@@ -3758,7 +3744,7 @@ public class UserServiceImpl implements UserService {
                         dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     }
                 } else {
-                    LOGGER.warn("userInfo are not founded, cmd={}", cmd.toString());
+                    LOGGER.warn("userInfo are not found, cmd={}", cmd.toString());
                 }
                 break;
             case GROUP:
@@ -3769,11 +3755,11 @@ public class UserServiceImpl implements UserService {
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
                 } else {
-                    LOGGER.warn("group are not founded, cmd={}", cmd.toString());
+                    LOGGER.warn("group are not found, cmd={}", cmd.toString());
                 }
                 break;
             default:
-                LOGGER.warn("targetType are not founded, cmd={}", cmd.toString());
+                LOGGER.warn("targetType are not found, cmd={}", cmd.toString());
         }
         return dto;
     }

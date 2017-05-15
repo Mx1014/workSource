@@ -4976,9 +4976,14 @@ public class PunchServiceImpl implements PunchService {
 						(orgId, groupTypeList, null) ;
 				//循环刷所有员工
 				for(OrganizationMemberDTO member : organizationMembers){
-					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId() && !userIdList.contains(member.getTargetId())){
+//						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+//					}
+					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
+					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
 						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-					}
+							
 				}
 			}
 			else{
@@ -5020,8 +5025,11 @@ public class PunchServiceImpl implements PunchService {
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
 		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
 			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
-				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType()))
+				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+				}
 				else{
  
 					LOGGER.error("Invalid target type or  Id parameter in the command");

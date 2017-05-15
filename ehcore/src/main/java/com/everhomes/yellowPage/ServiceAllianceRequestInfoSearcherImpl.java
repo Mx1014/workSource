@@ -507,7 +507,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	        		FieldContentType fieldContentType = FieldContentType.fromCode(response.getDtos().get(i).getFieldContentType());
 	        		//只导出文本数据 by dengs,2017 05 09
 	        		if(fieldContentType == FieldContentType.TEXT){
-	        			row1.createCell(6+i).setCellValue(response.getDtos().get(i).getFieldName());
+	        			row1.createCell(3+i).setCellValue(response.getDtos().get(i).getFieldName());
 	        		}
 	        	}
 	        	
@@ -524,7 +524,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	        			FieldContentType fieldContentType = FieldContentType.fromCode(response.getDtos().get(j).getFieldContentType());
 		        		//只导出文本数据 by dengs,2017 05 09
 	        			if(fieldContentType == FieldContentType.TEXT){
-		        			row.createCell(6+j).setCellValue(response.getDtos().get(j).getFieldValue());
+		        			row.createCell(3+j).setCellValue(response.getDtos().get(j).getFieldValue());
 		        		}
 	        		}
 				}
@@ -596,18 +596,18 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
   				UserContext.current().getUser().getLocale(),"row1");
           String[] excelHeadArray = excelHeads.split(",");
           String order_string = excelHeadArray[0];
-          String username_string =excelHeadArray.length>1?excelHeadArray[1]:"row2";
-          String phone_string = excelHeadArray.length>2?excelHeadArray[2]:"row3";
-          String company_string = excelHeadArray.length>3?excelHeadArray[3]:"row4";
+//          String username_string =excelHeadArray.length>1?excelHeadArray[1]:"row2";
+//          String phone_string = excelHeadArray.length>2?excelHeadArray[2]:"row3";
+//          String company_string = excelHeadArray.length>3?excelHeadArray[3]:"row4";
           String service_alliance_string = excelHeadArray.length>4?excelHeadArray[4]:"row5";
           String submit_time_string = excelHeadArray.length>5?excelHeadArray[5]:"row6";
 
           row1.createCell(0).setCellValue(order_string);
-          row1.createCell(1).setCellValue(username_string);
-          row1.createCell(2).setCellValue(phone_string);
-          row1.createCell(3).setCellValue(company_string);
-          row1.createCell(4).setCellValue(service_alliance_string);
-          row1.createCell(5).setCellValue(submit_time_string);
+//          row1.createCell(1).setCellValue(username_string);
+//          row1.createCell(2).setCellValue(phone_string);
+//          row1.createCell(3).setCellValue(company_string);
+          row1.createCell(1).setCellValue(service_alliance_string);
+          row1.createCell(2).setCellValue(submit_time_string);
           return row1;
 	}
     /**
@@ -910,11 +910,11 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 			row.createCell(nextColumnNum++).setCellValue(requestInfoDTO.getCreateTime());
 		}else{
 			row.createCell(0).setCellValue(i);
-			row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
-			row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
-			row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
-			row.createCell(4).setCellValue(requestInfoDTO.getServiceOrganization());
-			row.createCell(5).setCellValue(requestInfoDTO.getCreateTime());
+//			row.createCell(1).setCellValue(requestInfoDTO.getCreatorName());
+//			row.createCell(2).setCellValue(requestInfoDTO.getCreatorMobile());
+//			row.createCell(3).setCellValue(requestInfoDTO.getCreatorOrganization());
+			row.createCell(1).setCellValue(requestInfoDTO.getServiceOrganization());
+			row.createCell(2).setCellValue(requestInfoDTO.getCreateTime());
 		}
 	}
 }
