@@ -2441,6 +2441,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		seqNum.set(0L);
 		BigDecimal weekendPrice = rs.getWeekendPrice() == null ? new BigDecimal(0) : rs.getWeekendPrice(); 
 		BigDecimal workdayPrice = rs.getWorkdayPrice() == null ? new BigDecimal(0) : rs.getWorkdayPrice();
+		BigDecimal orgMemberWeekendPrice = rs.getOrgMemberWeekendPrice() == null ? new BigDecimal(0) : rs.getOrgMemberWeekendPrice();
+		BigDecimal orgMemberWorkdayPrice = rs.getOrgMemberWorkdayPrice() == null ? new BigDecimal(0) : rs.getOrgMemberWorkdayPrice();
+		BigDecimal approvingUserWeekendPrice = rs.getApprovingUserWeekendPrice() == null ? new BigDecimal(0) : rs.getApprovingUserWeekendPrice();
+		BigDecimal approvingUserWorkdayPrice = rs.getApprovingUserWorkdayPrice() == null ? new BigDecimal(0) : rs.getApprovingUserWorkdayPrice();
+
 //		List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
 		AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(rs, AddRentalSiteSingleSimpleRule.class );
 		singleCmd.setRentalSiteId(rs.getId());
@@ -2497,6 +2502,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			singleCmd.setEndDate(rs.getEndDate().getTime());
 			singleCmd.setWeekendPrice(weekendPrice);
 			singleCmd.setWorkdayPrice(workdayPrice);
+			singleCmd.setOrgMemberWeekendPrice(orgMemberWeekendPrice);
+			singleCmd.setOrgMemberWorkdayPrice(orgMemberWorkdayPrice);
+			singleCmd.setApprovingUserWeekendPrice(approvingUserWeekendPrice);
+			singleCmd.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 			if (rs.getRentalType().equals(RentalType.HOUR.getCode()))  {
 				if(singleCmd.getTimeIntervals() != null){
 					Double beginTime = null;
