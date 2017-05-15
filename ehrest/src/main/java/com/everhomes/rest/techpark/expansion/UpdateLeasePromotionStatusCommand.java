@@ -2,6 +2,12 @@ package com.everhomes.rest.techpark.expansion;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>id：id</li>
+ * <li>status：状态</li>
+ * </ul>
+ */
 public class UpdateLeasePromotionStatusCommand {
 	@NotNull
 	private Long id;

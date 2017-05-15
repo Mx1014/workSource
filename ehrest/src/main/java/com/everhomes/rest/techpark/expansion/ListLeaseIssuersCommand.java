@@ -1,7 +1,12 @@
 package com.everhomes.rest.techpark.expansion;
 
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>communityId：园区id</li>
+ * <li>keyword：搜索关键字</li>
+ * <li>pageAnchor：分页瞄</li>
+ * <li>pageSize：每页条数</li>
+ * </ul>
  */
 public class ListLeaseIssuersCommand {
     private Long pageAnchor;

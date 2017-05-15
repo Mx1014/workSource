@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
  * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
  * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
+ * <li>fieldValue: 字段值（查询详情时才会有值）</li>
  * </ul>
  * @author janson
  *
@@ -37,6 +38,8 @@ public class GeneralFormFieldDTO {
 	private String dataSourceType;
 	private String validatorType;
 	private String fieldExtra;
+
+	private String fieldValue;
 
 	public String getFieldName() {
 		return fieldName;
@@ -132,6 +135,14 @@ public class GeneralFormFieldDTO {
 
 	public void setRenderType(String renderType) {
 		this.renderType = renderType;
+	}
+
+	public String getFieldValue() {
+		return fieldValue;
+	}
+
+	public void setFieldValue(String fieldValue) {
+		this.fieldValue = fieldValue;
 	}
 
 	@Override

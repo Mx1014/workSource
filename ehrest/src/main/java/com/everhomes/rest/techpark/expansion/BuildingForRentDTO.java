@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 
 /**
  * <ul>
@@ -14,7 +15,7 @@ import com.everhomes.discover.ItemType;
  * <li>buildingName：楼栋名</li>
  * <li>rentPosition：招租位置</li>
  * <li>rentType：招租类型：1：出租{@link com.everhomes.rest.techpark.expansion.LeasePromotionType} </li>
- * <li>posterUri：标题图 </li>
+ * <li>posterUri：封面uri，标题图 </li>
  * <li>posterUrl：标题图的URL </li>
  * <li>rentAreas：招租面积</li>
  * <li>contacts：联系人</li>
@@ -23,7 +24,22 @@ import com.everhomes.discover.ItemType;
  * <li>status：命名空间 参考{@link com.everhomes.rest.techpark.expansion.LeasePromotionStatus}}</li>
  * <li>description：随便写一点什么</li> 
  * <li>address：地址</li> 
- * <li>attachments：附件{@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO}</li> 
+ * <li>attachments：附件{@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO}</li>
+ * <li>enterTimeFlag：入住时间是否启用 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
+ * <li>addressId：门牌ID</li>
+ * <li>apartmentName：门牌地址</li>
+ * <li>orientation：朝向</li>
+ * <li>rentAmount：租金金额</li>
+ * <li>unit：租金单位 {@link com.everhomes.rest.techpark.expansion.LeasePromotionUnit}</li>
+ * <li>detailUrl：招租详情url，提供给app</li>
+ * <li>buildingDetailUrl：楼栋详情url，提供给app</li>
+ * <li>deleteFlag：是否可以删除</li>
+ * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
+ * <li>longitude：经度</li>
+ * <li>latitude：纬度</li>
+ * <li>generalFormId：表单id</li>
+ * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
+ * <li>formValues：表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  */
 public class BuildingForRentDTO {
@@ -62,6 +78,36 @@ public class BuildingForRentDTO {
 	private String detailUrl;
 	private String buildingDetailUrl;
 	private Byte deleteFlag;
+
+	private Long generalFormId;
+	private Byte customFormFlag;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	public Long getGeneralFormId() {
+		return generalFormId;
+	}
+
+	public void setGeneralFormId(Long generalFormId) {
+		this.generalFormId = generalFormId;
+	}
+
+	public Byte getCustomFormFlag() {
+		return customFormFlag;
+	}
+
+	public void setCustomFormFlag(Byte customFormFlag) {
+		this.customFormFlag = customFormFlag;
+	}
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
 
 	public String getBuildingDetailUrl() {
 		return buildingDetailUrl;

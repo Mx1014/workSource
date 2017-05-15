@@ -1,7 +1,9 @@
 package com.everhomes.rest.techpark.expansion;
 
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>namespaceId：域空间id</li>
+ * </ul>
  */
 public class GetLeasePromotionConfigCommand {
     private Integer namespaceId;

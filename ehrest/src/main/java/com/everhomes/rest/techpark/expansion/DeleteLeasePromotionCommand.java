@@ -2,6 +2,11 @@ package com.everhomes.rest.techpark.expansion;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>id：id</li>
+ * </ul>
+ */
 public class DeleteLeasePromotionCommand {
 
 	@NotNull

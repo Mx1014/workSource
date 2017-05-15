@@ -75,21 +75,6 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
-//	/**
-//	续租也用上面那个 applyEntry
-//	 * <b>URL: /techpark/entry/applyRenew
-//	 * <p>
-//	 */
-//	@RequestMapping("applyRenew")
-//	@RestReturn(value=String.class)
-//	public RestResponse applyRenew(EnterpriseApplyRenewCommand cmd){
-//		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
-//		RestResponse response = new RestResponse(b);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-	
 	/**
 	 * <b>URL: /techpark/entry/listForRents
 	 * <p>招租列表

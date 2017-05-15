@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
-
  * <li>sourceId：来源ID：黄页ID</li>
  * <li>sourceType：来源类型building /market_zone /for_rent/office_cubicle(工位)的 参考{@link com.everhomes.rest.techpark.expansion.ApplyEntrySourceType}}</li>
  * <li>enterpriseName：申请公司名</li>
@@ -19,7 +18,10 @@ import com.everhomes.util.StringHelper;
  * <li>communityId：园区ID</li>
  * <li>namespaceId：命名空间</li>
  * <li>description：随便写一点什么</li> 
- * <li>contractId：合同id-如果有的话</li> 
+ * <li>contractId：合同id-如果有的话</li>
+ * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
+ * <li>addressId：门牌id</li>
+ * <li>buildingId：楼栋id</li>
  * </ul>
  */
 public class EnterpriseApplyEntryCommand {

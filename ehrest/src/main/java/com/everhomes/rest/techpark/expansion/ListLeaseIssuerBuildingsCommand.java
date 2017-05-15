@@ -5,6 +5,8 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  * <li>communityId: 园区ID</li>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>organizationId: 公司ID</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

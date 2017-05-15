@@ -270,7 +270,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		for (EnterpriseApplyEntryDTO dto : dtos) {
 			dto.setBuildings(new ArrayList<BuildingDTO>() );
 			//对于不同的类型有不同的sourceName 和 楼栋
-			if(ApplyEntryApplyType.fromType(dto.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
+			if(dto.getApplyType() == ApplyEntryApplyType.RENEW.getCode()){
 				//续租的搜
 				dto.setSourceName("续租");
 				List<EnterpriseOpRequestBuilding> opBuildings = enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null, Integer.MAX_VALUE,  new ListingQueryBuilderCallback() {
@@ -294,9 +294,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				Building building = communityProvider.findBuildingById(dto.getSourceId());
 				if(null != building){
 					dto.setSourceName(building.getName());
-					if (null != building) {
-						dto.getBuildings().add(proessBuildingDTO(building));
-					}				}
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
 				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
@@ -700,7 +699,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			return ad;
 		}).collect(Collectors.toList()));
 
-		dto.setUnit("元/㎡/月");
+		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {

@@ -6,7 +6,13 @@ import com.everhomes.rest.address.AddressDTO;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>addressIds：门牌地址列表</li>
+ * <li>communityId：园区id</li>
+ * <li>issuerContact：业主手机号</li>
+ * <li>issuerName：业主姓名</li>
+ * <li>enterpriseIds：公司id列表</li>
+ * </ul>
  */
 public class AddLeaseIssuerCommand {
 
