@@ -314,7 +314,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 				MyDate myDate = new MyDate();
 				caculateAbsentDate(myDate, yesterdayTime+todayTime);
 				actualTime.setActualResult(myDate.toString());
-				 
+				a.setActualResult(myDate.toString());
 				approvalDayActualTimeList.add(actualTime);
 			} else {
 //				//如果跨天
