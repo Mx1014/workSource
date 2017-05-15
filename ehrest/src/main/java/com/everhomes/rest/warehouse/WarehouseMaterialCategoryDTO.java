@@ -11,6 +11,7 @@ import java.sql.Timestamp;
  *     <li>ownerId: 物品分类所属类型id</li>
  *     <li>parentId: 上级分类id</li>
  *     <li>parentCategoryNumber: 上级分类编码</li>
+ *     <li>parentCategoryName: 上级分类名称</li>
  *     <li>name: 物品分类名称</li>
  *     <li>categoryNumber: 物品分类编码</li>
  *     <li>updateTime: 最后更新时间</li>
@@ -29,6 +30,8 @@ public class WarehouseMaterialCategoryDTO {
 
     private String parentCategoryNumber;
 
+    private String parentCategoryName;
+
     private String name;
 
     private String categoryNumber;
@@ -41,6 +44,14 @@ public class WarehouseMaterialCategoryDTO {
 
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getParentCategoryName() {
+        return parentCategoryName;
+    }
+
+    public void setParentCategoryName(String parentCategoryName) {
+        this.parentCategoryName = parentCategoryName;
     }
 
     public String getCategoryNumber() {
