@@ -54,12 +54,12 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 		List roles;
 		Condition cond = null;
 		if(!org.springframework.util.StringUtils.isEmpty(keywords)){
-			cond = com.everhomes.schema.Tables.EH_ACL_ROLES.NAME.like(keywords + "%");
+			cond = com.everhomes.schema.Tables.EH_ACL_ROLES.NAME.like("%" + keywords + "%");
 		}
 		if(ownerId == null) {
 			Condition c = com.everhomes.schema.Tables.EH_ACL_ROLES.NAMESPACE_ID.eq(Integer.valueOf(namespaceId)).and(com.everhomes.schema.Tables.EH_ACL_ROLES.APP_ID.eq(Long.valueOf(appId))).and(com.everhomes.schema.Tables.EH_ACL_ROLES.OWNER_TYPE.eq(ownerType)).and(com.everhomes.schema.Tables.EH_ACL_ROLES.OWNER_ID.isNull());
 			if(null != cond){
-				c.and(cond);
+				c = c.and(cond);
 			}
 			roles = context.select(new Field[0]).from(new TableLike[]{com.everhomes.schema.Tables.EH_ACL_ROLES})
 					.where(new Condition[]{c}).fetch().map((arg) -> {
@@ -69,7 +69,7 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 		} else {
 			Condition c = com.everhomes.schema.Tables.EH_ACL_ROLES.NAMESPACE_ID.eq(Integer.valueOf(namespaceId)).and(com.everhomes.schema.Tables.EH_ACL_ROLES.APP_ID.eq(Long.valueOf(appId))).and(com.everhomes.schema.Tables.EH_ACL_ROLES.OWNER_TYPE.eq(ownerType)).and(com.everhomes.schema.Tables.EH_ACL_ROLES.OWNER_ID.eq(ownerId));
 			if(null != cond){
-				c.and(cond);
+				c = c.and(cond);
 			}
 			roles = context.select(new Field[0]).from(new TableLike[]{com.everhomes.schema.Tables.EH_ACL_ROLES}).where(new Condition[]{c}).fetch().map((arg) -> {
 				return (Role)ConvertHelper.convert(arg, Role.class);
