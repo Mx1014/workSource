@@ -1175,8 +1175,8 @@ update eh_launch_pad_items set default_order = 5 where namespace_id = 999979 and
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwa1pEZzFNekkwTm1SallqQm1PR1l6TldJNU5qZ3lNRGhsTldSak9UazROUQ' where namespace_id = 999979 and item_label = '任务管理';
     
     
-    
-    
+-- fix 9824 by xiongying20170515   
+update eh_launch_pad_items set delete_flag = 0 where namespace_id = 999979 and item_label = '更多';    
     
     
     
