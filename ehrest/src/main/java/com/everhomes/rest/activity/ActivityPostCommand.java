@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.activity;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -101,7 +103,7 @@ public class ActivityPostCommand{
     
     private Byte chargeFlag;
 
-    private Double chargePrice;
+    private BigDecimal chargePrice;
     
     private Byte status;
 
@@ -412,11 +414,11 @@ public class ActivityPostCommand{
 		this.chargeFlag = chargeFlag;
 	}
 
-	public Double getChargePrice() {
+	public BigDecimal getChargePrice() {
 		return chargePrice;
 	}
 
-	public void setChargePrice(Double chargePrice) {
+	public void setChargePrice(BigDecimal chargePrice) {
 		this.chargePrice = chargePrice;
 	}
 

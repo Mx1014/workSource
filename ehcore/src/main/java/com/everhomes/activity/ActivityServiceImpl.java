@@ -500,6 +500,14 @@ public class ActivityServiceImpl implements ActivityService {
 					"no activity.");
 		}
 		
+		//设置过期时间
+		GetActivityTimeCommand timeCmd = new GetActivityTimeCommand();
+		timeCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		ActivityTimeResponse  timeResponse = this.getActivityTime(timeCmd);
+		Map<String, Long> bodyMap = new HashMap<String, Long>();
+		Long expiredTime = roster.getOrderStartTime().getTime() + timeResponse.getOrderTime();
+		bodyMap.put("expiredTime", expiredTime);
+		
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
@@ -507,7 +515,7 @@ public class ActivityServiceImpl implements ActivityService {
 				UserContext.current().getUser().getLocale(), 
 				"activity roster pay");
 		
-		orderCmd.setBody(temple);
+		orderCmd.setBody(bodyMap.toString());
 		orderCmd.setOrderNo(roster.getOrderNo().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
 		orderCmd.setSubject(temple);
