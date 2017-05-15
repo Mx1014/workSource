@@ -12,6 +12,7 @@ import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/5/12.
  */
+@Component
 public class WarehouseServiceImpl implements WarehouseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseServiceImpl.class);

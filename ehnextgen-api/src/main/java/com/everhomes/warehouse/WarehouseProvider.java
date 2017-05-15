@@ -18,14 +18,12 @@ public interface WarehouseProvider {
     void updateWarehouseMaterialCategories(WarehouseMaterialCategories category);
     WarehouseMaterialCategories findWarehouseMaterialCategories(Long id, String ownerType, Long ownerId);
     WarehouseMaterialCategories findWarehouseMaterialCategoriesByNumber(String categoryNumber, String ownerType, Long ownerId);
-    void deleteWarehouseMaterialCategories(Long id);
 
     void creatWarehouseMaterials(WarehouseMaterials materials);
     void updateWarehouseMaterials(WarehouseMaterials materials);
     WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId);
     WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
     List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId);
-    void deleteWarehouseMaterials(Long id);
 
     List<WarehouseStocks> listWarehouseStocks(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId);

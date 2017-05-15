@@ -32,6 +32,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/5/12.
  */
+@Component
 public class WarehouseProviderImpl implements WarehouseProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseProviderImpl.class);
@@ -190,11 +192,6 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public void deleteWarehouseMaterialCategories(Long id) {
-
-    }
-
-    @Override
     public void creatWarehouseMaterials(WarehouseMaterials materials) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseMaterials.class));
 
@@ -277,11 +274,6 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         });
 
         return result;
-    }
-
-    @Override
-    public void deleteWarehouseMaterials(Long id) {
-
     }
 
     @Override
