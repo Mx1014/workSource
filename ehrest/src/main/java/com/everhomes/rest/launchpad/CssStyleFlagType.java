@@ -6,17 +6,17 @@ package com.everhomes.rest.launchpad;
  * <li>YES(定制): 1</li>
  * </ul>
  */
-public enum CustomFlagType {
+public enum CssStyleFlagType {
 	NO((byte)0),YES((byte)1);
 	private byte code;
-	private CustomFlagType(byte code){
+	private CssStyleFlagType(byte code){
 		this.code = code;
 	}
 	public byte getCode() {
 		return code;
 	}
-	public static CustomFlagType fromCode(byte code){
-		for(CustomFlagType r: CustomFlagType.values()){
+	public static CssStyleFlagType fromCode(byte code){
+		for(CssStyleFlagType r: CssStyleFlagType.values()){
 			if(r.getCode() == code)
 				return r;
 		}
