@@ -2,6 +2,8 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.Project;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
