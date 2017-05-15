@@ -4270,6 +4270,55 @@ public class ActivityServiceImpl implements ActivityService {
 		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 100, 1, (100*24+1)*3600*1000L);
 	}
 	
+
+	@Override
+	public ActivityTimeResponse setActivityTime(SetActivityTimeCommand cmd) {
+		ActivityTimeResponse timeResponse = new ActivityTimeResponse();
+		timeResponse.setNamespaceId(cmd.getNamespaceId());
+		
+		SetActivityWarningCommand warningCmd = new SetActivityWarningCommand();
+		warningCmd.setNamespaceId(cmd.getNamespaceId());
+		warningCmd.setDays(cmd.getWarningDays());
+		warningCmd.setHours(cmd.getOrderHours());
+		ActivityWarningResponse  warningResponse  = this.setActivityWarning(warningCmd);
+		timeResponse.setWarningDays(warningResponse.getDays());
+		timeResponse.setWarningHours(warningResponse.getHours());
+		timeResponse.setWarningTime(warningResponse.getTime());
+		
+		SetRosterOrderSettingCommand orderCommand = new SetRosterOrderSettingCommand();
+		orderCommand.setNamespaceId(cmd.getNamespaceId());
+		orderCommand.setDays(cmd.getOrderDays());
+		orderCommand.setHours(cmd.getOrderHours());
+		RosterOrderSettingDTO orderResponse = this.setRosterOrderSetting(orderCommand);
+		timeResponse.setOrderDays(orderResponse.getDays());
+		timeResponse.setOrderHours(orderResponse.getHours());
+		timeResponse.setOrderTime(orderResponse.getTime());
+		
+		return timeResponse;
+	}
+
+	@Override
+	public ActivityTimeResponse getActivityTime(GetActivityTimeCommand cmd) {
+		ActivityTimeResponse timeResponse = new ActivityTimeResponse();
+		timeResponse.setNamespaceId(cmd.getNamespaceId());
+		
+		GetActivityWarningCommand warningCommand = new GetActivityWarningCommand();
+		warningCommand.setNamespaceId(cmd.getNamespaceId());
+		ActivityWarningResponse  warningResponse  = this.queryActivityWarning(warningCommand);
+		timeResponse.setWarningDays(warningResponse.getDays());
+		timeResponse.setWarningHours(warningResponse.getHours());
+		timeResponse.setWarningTime(warningResponse.getTime());
+		
+		GetRosterOrderSettingCommand orderCommand = new GetRosterOrderSettingCommand();
+		orderCommand.setNamespaceId(cmd.getNamespaceId());
+		RosterOrderSettingDTO orderResponse = this.getRosterOrderSetting(orderCommand);
+		timeResponse.setOrderDays(orderResponse.getDays());
+		timeResponse.setOrderHours(orderResponse.getHours());
+		timeResponse.setOrderTime(orderResponse.getTime());
+		
+		return timeResponse;
+	}  
+	
    
 	/**
 	 * 活动开始前的提醒，采用轮循+定时两种方式执行定时任务

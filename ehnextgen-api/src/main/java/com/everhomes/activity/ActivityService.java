@@ -107,6 +107,10 @@ public interface ActivityService {
 
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
 	
+	ActivityTimeResponse setActivityTime(SetActivityTimeCommand cmd);
+
+	ActivityTimeResponse getActivityTime(GetActivityTimeCommand cmd);
+	
 	RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd);
 
 	RosterOrderSettingDTO getRosterOrderSetting(GetRosterOrderSettingCommand cmd);

@@ -511,6 +511,27 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /activity/setActivityTime</b>
+     * <p>设置活动提醒、订单有效期</p>
+     */
+    @RequestMapping("setActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse setActivityTime(SetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.setActivityTime(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getActivityTime</b>
+     * <p>查询活动提醒、订单有效期</p>
+     */
+    @RequestMapping("getActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse getActivityTime(GetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.getActivityTime(cmd));
+    }
+    
+    
+    /**
 	 * <b>URL: /activity/listActivityEntryCategories</b>
 	 * <p> 列出活动类型 </p>
 	 */
