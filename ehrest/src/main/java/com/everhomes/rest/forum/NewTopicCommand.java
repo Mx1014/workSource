@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *                            所管理的片区ID（片区ID实际上为机构ID）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
  * </ul>
  * <ul>字段：
+ * <li>oldId: 老ID，当暂存过后提交时要传来老的Id用于删除老数据</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -51,6 +52,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class NewTopicCommand {
+	private Long oldId;
+	
     private String ownerType;
 
     private Long ownerId;
@@ -111,6 +114,14 @@ public class NewTopicCommand {
     
     private Byte status;
     
+	public Long getOldId() {
+		return oldId;
+	}
+
+	public void setOldId(Long oldId) {
+		this.oldId = oldId;
+	}
+
 	public Integer getMaxQuantity() {
 		return maxQuantity;
 	}

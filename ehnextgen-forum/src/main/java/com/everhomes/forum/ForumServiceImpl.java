@@ -238,6 +238,12 @@ public class ForumServiceImpl implements ForumService {
 
         // 阻止黑名单用户发帖(临时解决方案)
         this.checkUserBlacklist(creatorUid);
+        
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----start
+        if(cmd.getOldId() != null){
+        	this.deletePost(cmd.getForumId(), cmd.getOldId(), true, null, null, null);
+        }
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----end
 
         Post post = processTopicCommand(creatorUid, cmd);
 
@@ -768,7 +774,19 @@ public class ForumServiceImpl implements ForumService {
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
-        } else {
+        }else if(PostStatus.fromCode(post.getStatus()) == PostStatus.WAITING_FOR_CONFIRMATION) {
+        	post.setStatus(PostStatus.INACTIVE.getCode());
+            post.setDeleterUid(userId);
+            post.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            try {
+                this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                    this.forumProvider.updatePost(post);
+                    return null;
+                });
+            } catch(Exception e) {
+                LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
+            }
+        }else {
             //Added by Janson
             if(deleteUserPost) {
                 try {
