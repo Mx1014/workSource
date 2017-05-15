@@ -869,14 +869,11 @@ public class PunchServiceImpl implements PunchService {
 			Calendar startMinTime = Calendar.getInstance();
 			Calendar startMaxTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
-			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString(punchTimeRule.getStartEarlyTimeLong())));
-	
-			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+  convertTimeLongToString(punchTimeRule.getStartLateTimeLong())));
-	
-			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0)
-					.getPunchDate()) + " " + convertTimeLongToString(punchTimeRule.getWorkTimeLong())));
+			startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartEarlyTimeLong());
+
+			startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime()+ punchTimeRule.getStartLateTimeLong());
+
+			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong());
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
@@ -1017,19 +1014,14 @@ public class PunchServiceImpl implements PunchService {
 			Calendar afternoonArriveTime = Calendar.getInstance();
 			Calendar workTime = Calendar.getInstance();
 			Calendar arriveCalendar = Calendar.getInstance();
-			startMinTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getStartEarlyTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getStartEarlyTime()):punchTimeRule.getStartEarlyTimeLong()))));
-			startMaxTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getStartLateTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getStartLateTime()):punchTimeRule.getStartLateTimeLong()))));
+			startMinTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartEarlyTimeLong());
+			startMaxTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getStartLateTimeLong());
 					 
-			noonLeaveTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getNoonLeaveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getNoonLeaveTime()):punchTimeRule.getNoonLeaveTimeLong()))));
+			noonLeaveTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getNoonLeaveTimeLong());
 			 
-			afternoonArriveTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate())+ " "
-					+ convertTimeLongToString((punchTimeRule.getAfternoonArriveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getAfternoonArriveTime()):punchTimeRule.getAfternoonArriveTimeLong()))));
+			afternoonArriveTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getAfternoonArriveTimeLong());
  
-			workTime.setTime(datetimeSF.get().parse(dateSF.get().format(punchLogs.get(0).getPunchDate()) + " " 
-			+ convertTimeLongToString((punchTimeRule.getWorkTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getWorkTime()):punchTimeRule.getWorkTimeLong()))));
+			workTime.setTimeInMillis(punchLogs.get(0).getPunchDate().getTime() + punchTimeRule.getWorkTimeLong());
 			long realWorkTime = 0L;
 			if(null == pdl.getMorningPunchStatus()){
 				
@@ -1235,8 +1227,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private PunchClockResponse createPunchLog(PunchClockCommand cmd, String punchTime) {
-		// TODO Auto-generated method stub
-		byte punchCode =ClockCode.FAIL.getCode();
+		//
+		byte punchCode;
 		try{
 			punchCode= verifyPunchClock(cmd).getCode();
 		}catch(Exception e){	
@@ -1273,8 +1265,7 @@ public class PunchServiceImpl implements PunchService {
 		try {
 			punCalendar.setTime(datetimeSF.get().parse(punchTime));
 		} catch (ParseException e) {
-
-			e.printStackTrace();
+            LOGGER.error("parse punchTime error punch Time = " + punchTime,e);
 		}
 		PunchRule pr = getPunchRule(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), userId);
 		if (null == pr  )
@@ -1310,7 +1301,7 @@ public class PunchServiceImpl implements PunchService {
 			yesterdaySplitTime = yesterdayPtr.getDaySplitTimeLong();
 		else if(null != yesterdayPtr && null != yesterdayPtr.getDaySplitTime())
 			yesterdaySplitTime = convertTimeToGMTMillisecond(yesterdayPtr.getDaySplitTime());
-
+        //TODO: 用日期来处理
 		if ( punchTimeLong+86400000 < yesterdaySplitTime) {
 			//取前一天的ptr,如果周期分界点>打卡时间+86400000 则算前一天
 			punCalendar.setTime(yesterday.getTime());
@@ -1326,8 +1317,8 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchCode(punchCode);
 		punchLog.setPunchStatus(punchCode);
 		punchProvider.createPunchLog(punchLog);
-		//刷新这一天的数据
-		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
+//		//刷新这一天的数据
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
 		    this.dbProvider.execute((status) -> {
 		    	try {
 					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
@@ -1340,8 +1331,8 @@ public class PunchServiceImpl implements PunchService {
 				}
 		        return null;
 		    });
-		    return null;
-		});
+//		    return null;
+//		});
 		response.setPunchTime(punchTime);
 
 		return response;
@@ -5310,7 +5301,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid target type or  Id parameter in the command");
 		}
-		
+		//z注释map和rule 的关系
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId,
 				targetType, targetId);
 		if(map == null){
@@ -5320,15 +5311,13 @@ public class PunchServiceImpl implements PunchService {
 			map.setTargetId(targetId);
 			map.setTargetType(targetType);
 			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
+			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			PunchRule pr = new PunchRule();
 			pr.setOwnerId(ownerId);
 			pr.setOwnerType(ownerType);
 			pr.setName(targetId+"rule");
 			pr.setCreatorUid(UserContext.current().getUser().getId());
-			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			this.punchProvider.createPunchRule(pr);
 			map.setPunchRuleId(pr.getId());
 			this.punchProvider.createPunchRuleOwnerMap(map);
@@ -5523,8 +5512,9 @@ public class PunchServiceImpl implements PunchService {
 		startCalendar.set(Calendar.MILLISECOND, 0);
 		endCalendar.setTime(startCalendar.getTime());
 		endCalendar.add(Calendar.MONTH, 1);
-		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,new ListingQueryBuilderCallback()  {
-			
+		List<PunchScheduling> punchSchedulings = punchSchedulingProvider.queryPunchSchedulings(null, Integer.MAX_VALUE,
+                new ListingQueryBuilderCallback()  {
+			//TODO 联表查询
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 					SelectQuery<? extends Record> query) {
@@ -5553,7 +5543,7 @@ public class PunchServiceImpl implements PunchService {
 						dto.setTimeRuleName(timeRule.getName());
 						dto.setTimeRuleDescription(timeRule.getDescription());
 					}else{
-
+                        //TODO : 减少IO 做成MAP
 						LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_DEFAULT_SCOPE, PUNCH_TIME_RULE_NAME,"zh_CN");
 						dto.setTimeRuleName( scheduleLocaleString==null?"":scheduleLocaleString.getText());
 					}
@@ -5566,7 +5556,7 @@ public class PunchServiceImpl implements PunchService {
 		 
 		response.setTimeRules(listPunchTimeRuleList(cmd2).getTimeRules());
 		return response;
-	} 
+	}
 	private PunchRuleOwnerMap getUsefulRuleMap(String ownerType, Long ownerId, String targetType,
 			Long targetId) {
 		// TODO Auto-generated method stub
