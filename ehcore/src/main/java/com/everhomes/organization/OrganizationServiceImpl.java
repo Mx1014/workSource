@@ -59,6 +59,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.common.QuestionMetaActionData;
@@ -106,6 +107,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -125,6 +127,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -5067,7 +5070,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					Condition cond = null;
 
 					if(cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())){
-						cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
+						cond = Tables.EH_ORGANIZATION_MEMBERS. ORGANIZATION_ID.eq(org.getId());
 					}
 					if(cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode())){
 						groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -9633,6 +9636,57 @@ System.out.println();
 //		titleMap.put("jobPosition", "岗位");
 //		titleMap.put("jobLevel", "职级");
 		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
+	}
+
+	@Override
+	public ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd) {
+		if(cmd.getOrganizationId() == null){
+			LOGGER.error("No OrganizationId enter ="+cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "No OrganizationId enter!");
+		}
+		Organization org = this.checkOrganization(cmd.getOrganizationId());
+		if(null == org){
+			LOGGER.error("organization is not matched ="+cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "organization is not matched!");
+		}
+
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+ 		List<OrganizationMember> organizationMembers = organizationProvider.listUsersOfEnterprise(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+
+				//控制用户状态为可用
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+				//控制用户type为user
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.equal(OrganizationMemberTargetType.USER.getCode()));
+				//查找组织ID等于输入参数的记录
+				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS. ORGANIZATION_ID.eq(org.getId()));
+				//query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+				return query;
+			}
+		});
+		
+		List<OrganizationContactDTO> dtos = organizationMembers.stream().map(r->{
+			
+			User userInfo = this.userProvider.findUserById(r.getTargetId());
+			if(userInfo == null){
+				LOGGER.error("Nick name is not found ="+cmd.getOrganizationId());
+				r.setNickName("");
+			}else{
+				r.setNickName(userInfo.getNickName());
+			}
+			return ConvertHelper.convert(r, OrganizationContactDTO.class);
+			
+			}).collect(Collectors.toList());
+
+		ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
+		response.setNextPageAnchor(locator.getAnchor());
+		response.setMembers(dtos);
+
+		return response;
 	}
 
 

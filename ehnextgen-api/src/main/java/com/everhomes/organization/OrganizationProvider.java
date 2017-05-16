@@ -319,4 +319,13 @@ public interface OrganizationProvider {
 	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
 	
 	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
+	
+	/**
+	 * 查询企业下的用户
+	 * @param locator
+	 * @param pageSize
+	 * @param queryBuilderCallback
+	 * @return
+	 */
+	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 } 
