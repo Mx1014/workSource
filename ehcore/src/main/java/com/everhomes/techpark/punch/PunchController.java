@@ -50,6 +50,7 @@ import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 @RequestMapping("/techpark/punch")
 public class PunchController extends ControllerBase {
 
+	
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchController.class);
 

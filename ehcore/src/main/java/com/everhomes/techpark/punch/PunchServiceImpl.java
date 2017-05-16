@@ -190,23 +190,14 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Service
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="\\download\\";
-	private static final String PUNCH_STATUS_SCOPE ="punch.status";
-	private static final String PUNCH_DEFAULT_SCOPE ="punch.default";
-	private static final String PUNCH_PUSH_SCOPE ="punch.push";
-	private static final String PUNCH_EXCEL_SCOPE ="punch.excel";
-	private static final String EXCEL_SCHEDULE = "schedule";
-	private static final String EXCEL_RULE = "rule";
-	private static final String PUNCH_REMINDER ="1";
-	private static final String PUNCH_TIME_RULE_NAME = "timeRuleName";
-
-	@Autowired
+ 
 	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
  
 
     private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
-        protected SimpleDateFormat initialValue() {
+    	protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     }; 
@@ -300,7 +291,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == status){
 			return "";
 		}
-		LocaleString localeString = localeStringProvider.find( PUNCH_STATUS_SCOPE, status.toString(),
+		LocaleString localeString = localeStringProvider.find( PunchConstants.PUNCH_STATUS_SCOPE, status.toString(),
 				UserContext.current().getUser().getLocale());
 		if(null == localeString)
 			return "";
@@ -4741,8 +4732,8 @@ public class PunchServiceImpl implements PunchService {
 		anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
 		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
 
-		//推送消息
-		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_PUSH_SCOPE, PUNCH_REMINDER,"zh_CN");
+		//推送消息 
+		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
 		if(null == scheduleLocaleString ){
 			return;
 		}
@@ -5467,8 +5458,8 @@ public class PunchServiceImpl implements PunchService {
 						dto.setTimeRuleName(timeRule.getName());
 						dto.setTimeRuleDescription(timeRule.getDescription());
 					}else{
-
-						LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_DEFAULT_SCOPE, PUNCH_TIME_RULE_NAME,"zh_CN");
+ 
+						LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_DEFAULT_SCOPE, PunchConstants.PUNCH_TIME_RULE_NAME,"zh_CN");  
 						dto.setTimeRuleName( scheduleLocaleString==null?"":scheduleLocaleString.getText());
 					}
 				}
@@ -5571,11 +5562,11 @@ public class PunchServiceImpl implements PunchService {
 		 
 		Row row = sheet.createRow(sheet.getLastRowNum());
 		int i =-1 ;
-
-		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
+ 
+		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
 
-		LocaleString ruleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_RULE ,
+		LocaleString ruleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_RULE , 
 				UserContext.current().getUser().getLocale());
 		row.createCell(++i).setCellValue(scheduleLocaleString==null?"":scheduleLocaleString.getText());
 		row.createCell(++i).setCellValue(ruleLocaleString==null?"":ruleLocaleString.getText());
