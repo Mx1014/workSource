@@ -257,10 +257,10 @@ public class MenuTest  extends LoginAuthTestCase {
     
     @Test
     public void testAes() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-    byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
-//    	byte[] key = "Huawei123".getBytes();
+    	//byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
+    	byte[] key = "0123456789012345".getBytes();
     	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-    	String ivText = "dd9f310b00e92c2905d358b565661d6d";
+    	String ivText = "614146a825e5a67448f22a27ae8aa778";
     	byte[] ivData = StringHelper.fromHexString(ivText);
     	IvParameterSpec iv = new IvParameterSpec(ivData);
     	cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), iv);
@@ -271,19 +271,21 @@ public class MenuTest  extends LoginAuthTestCase {
 
     }
     
-//    @Test
-//    public void testAes2() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-//    	byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
-//    	String data = "dd9f310b00e92c2905d358b565661d6d8894c7f0bb1d398cd1a0b7be580ac04c";
-//    	byte[] input = StringHelper.fromHexString(data);
-//    	byte[] iv = new byte[16];
-//    	IvParameterSpec iv = new IvParameterSpec(key);
-//    	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-//    	Key inputKey = new SecretKeySpec(key, "AES", );
-//    	cipher.init(Cipher.DECRYPT_MODE, inputKey);
-//    	LOGGER.info("input=" + input.length);
-//		byte[] b = cipher.doFinal(input);
-//		LOGGER.info(new String(b));
-//    }
-//    
+    @Test
+    public void testAes2() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+    	byte[] key = "0123456789012345".getBytes();
+    	String data = "04743015ee22f445e2a09141400d1822";
+//    	String data = "39e4a020e90c79b5fb6026b94f69ae4c"; //ok
+    	String ivText = "614146a825e5a67448f22a27ae8aa778";
+    	byte[] input = StringHelper.fromHexString(data);
+    	byte[] biv = StringHelper.fromHexString(ivText);
+    	IvParameterSpec iv = new IvParameterSpec(biv);
+    	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+    	Key inputKey = new SecretKeySpec(key, "AES");
+    	cipher.init(Cipher.DECRYPT_MODE, inputKey, iv);
+    	LOGGER.info("input=" + input.length);
+		byte[] b = cipher.doFinal(input);
+		LOGGER.info(new String(b));
+    }
+    
 }

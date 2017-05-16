@@ -918,6 +918,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
+    @Override
+    public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd) {
+    	if(LOGGER.isInfoEnabled()) {
+    		LOGGER.info("syncTimer cmd=" + cmd);
+    	}
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+    	QueryDoorMessageCommand queryCmd = new QueryDoorMessageCommand();
+    	queryCmd.setHardwareId(cmd.getHardwareId());
+    	msgGenerator.invalidSyncTimer(doorAccess.getId());
+    	
+    	return queryDoorMessageByDoorId(queryCmd);
+    }
+    
     public void processIncomeMessageResp(List<DoorMessage> inputs) {
         if(inputs == null) {
             return;
@@ -942,10 +959,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         User user = UserContext.current().getUser();
         cmd.setHardwareId(cmd.getHardwareId().toUpperCase());
         
-        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
-        if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
-        }
+//        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+//        if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
+//        }
         
         DoorAccess doorGroup = null;
         if(cmd.getGroupId() != null && (!cmd.getGroupId().equals(0l))) {
@@ -958,30 +975,27 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         final DoorAccess dg = doorGroup;
         
-        doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
+        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
+            	AesServerKey aesServerKey = null;
                 DoorAccess doorAcc = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
                 if(doorAcc != null) {
-                    doorAcc.setName(cmd.getName());
-                    doorAcc.setDescription(cmd.getDescription());
-                    doorAcc.setAddress(cmd.getAddress());
-                    doorAcc.setCreatorUserId(user.getId());
-                    doorAcc.setActiveUserId(user.getId());
-                    doorAcc.setOwnerId(cmd.getOwnerId());
-                    doorAcc.setOwnerType(cmd.getOwnerType());
-                    doorAcc.setGroupid(cmd.getGroupId());
-                    doorAccessProvider.updateDoorAccess(doorAcc);
-                    return doorAcc;
+                		aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAcc.getId());
+                		doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
+                		doorAccessProvider.updateDoorAccess(doorAcc);
                     }
                 
                 String aesKey = "";
                 if(dg != null) {
                 	aesKey = dg.getAesIv();
-                }
+                	}
+                if( (aesKey == null || aesKey.isEmpty()) && aesServerKey != null) {
+                	aesKey = aesServerKey.getSecret();
+                	}
                 if(aesKey == null || aesKey.isEmpty()) {
-                	aesKey = AclinkUtils.generateAESKey();	
-                }
+                	aesKey = AclinkUtils.generateAESKey();
+                	}
                 
                 String aesIv = AclinkUtils.generateAESIV(aesKey);
                 
@@ -1018,10 +1032,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 aclink.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                 aclink.setDoorId(doorAcc.getId());
-                aclink.setDeviceName("ZLTODO");
+                aclink.setDeviceName(cmd.getName());
                 aclinkProvider.createAclink(aclink);
                 
-                AesServerKey aesServerKey = new AesServerKey();
+                aesServerKey = new AesServerKey();
                 aesServerKey.setCreateTimeMs(System.currentTimeMillis());
                 aesServerKey.setDoorId(doorAcc.getId());
                 aesServerKey.setSecret(aesKey);
@@ -1051,7 +1065,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
-        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), "ZLTODO",
+        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), cmd.getName(),
                 doorAccess.getCreateTime().getTime(), doorAccess.getUuid(), doorMessage);
         
         doorMessage.setDoorId(doorAccess.getId());
@@ -1125,22 +1139,23 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     
                     //create device name command
-                    doorCommand = new DoorCommand();
-                    doorCommand.setDoorId(doorAccess.getId());
-                    doorCommand.setOwnerId(doorAccess.getOwnerId());
-                    doorCommand.setOwnerType(doorAccess.getOwnerType());
-                    doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
-                    doorCommand.setCmdType((byte)0);
-                    doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
-                    doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
-                    doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
+//                    doorCommand = new DoorCommand();
+//                    doorCommand.setDoorId(doorAccess.getId());
+//                    doorCommand.setOwnerId(doorAccess.getOwnerId());
+//                    doorCommand.setOwnerType(doorAccess.getOwnerType());
+//                    doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
+//                    doorCommand.setCmdType((byte)0);
+//                    doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
+//                    doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
+//                    doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
                     
                     //Generate a message body for command
 //                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
 //                            , doorAccess.getAesIv(), doorAccess.getName()));
                     
-                    doorCommandProvider.createDoorCommand(doorCommand);
-                    return doorCommand;
+//                    doorCommandProvider.createDoorCommand(doorCommand);
+//                    return doorCommand;
+                    return null;
                 }
             });
             
