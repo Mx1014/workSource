@@ -3586,7 +3586,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
 		StatEquipmentTasksResponse response = new StatEquipmentTasksResponse();
 		
-		int offset = cmd.getOffset() == null ? 0 : cmd.getOffset();
+		int offset = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
 		List<TaskCountDTO> tasks = equipmentProvider.statEquipmentTasks(cmd.getOwnerId(), cmd.getOwnerType(), 
@@ -3594,7 +3594,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				offset, pageSize+1);
 		if(tasks != null && tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
-			response.setOffset(offset + 1);
+			response.setNextPageAnchor(offset + 1);
 		}
 
 		
