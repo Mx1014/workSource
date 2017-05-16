@@ -140,7 +140,7 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
         SearchResponse rsp = builder.execute().actionGet();
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("query warehouse :{}", rsp);
+            LOGGER.debug("query warehouse :{}", builder);
         }
 
         List<Long> ids = getIds(rsp);
