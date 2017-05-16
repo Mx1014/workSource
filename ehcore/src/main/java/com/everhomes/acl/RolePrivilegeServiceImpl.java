@@ -5,6 +5,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
@@ -2386,7 +2387,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
 
-			List<ServiceModuleDTO> serviceModules = getServiceModuleManageByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId())
+			List<ServiceModuleDTO> serviceModules = getServiceModuleManageByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId());
 			if(serviceModules.size() == 0){
 				dto.setAllFlag(AllFlagType.YES.getCode());
 			}else{
@@ -2429,7 +2430,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd){
 
-		
+		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
+			LOGGER.error("params allFlag is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params allFlag is null.");
+		}
+
+		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag()) && (null == cmd.getModuleIds() || cmd.getModuleIds().size() == 0)){
+			LOGGER.error("params moduleIds is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params moduleIds is null.");
+		}
+
+		checkTargetId(cmd.getTargetType(), cmd.getTargetId());
 
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -2437,39 +2450,83 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(namespaceId);
-		authorization.setAllFlag(AllFlagType.NO.getCode());
 		authorization.setCreateUid(user.getId());
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		dbProvider.execute((TransactionStatus status) -> {
-			for (Long moduleId: cmd.getModuleIds()) {
-				authorization.setAuthId(moduleId);
+
+			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+				authorization.setAuthId(0L);
 				authorizationProvider.createAuthorization(authorization);
-
-
+			}else{
+				for (Long moduleId: cmd.getModuleIds()) {
+					authorization.setAuthId(moduleId);
+					authorizationProvider.createAuthorization(authorization);
+				}
 			}
+
 			return null;
 		});
 
-		/**
-		 * 分配权限
-		 */
-		assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(), cmd.getModuleId().toString(),cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
+//		/**
+//		 * 分配权限
+//		 */
+//		assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(), cmd.getModuleId().toString(),cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
+//
+//		/**
+//		 * 分配模块
+//		 */
+//		ServiceModuleAssignment serviceModuleAssignment = new ServiceModuleAssignment();
+//		serviceModuleAssignment.setCreateUid(UserContext.current().getUser().getId());
+//		serviceModuleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+//		serviceModuleAssignment.setOwnerId(org.getId());
+//		serviceModuleAssignment.setNamespaceId(UserContext.getCurrentNamespaceId());
+//		serviceModuleAssignment.setOrganizationId(org.getId());
+//		serviceModuleAssignment.setTargetType(EntityType.USER.getCode());
+//		serviceModuleAssignment.setTargetId(member.getTargetId());
+//		serviceModuleAssignment.setModuleId(cmd.getModuleId());
+//		serviceModuleProvider.createServiceModuleAssignment(serviceModuleAssignment);
 
-		/**
-		 * 分配模块
-		 */
-		ServiceModuleAssignment serviceModuleAssignment = new ServiceModuleAssignment();
-		serviceModuleAssignment.setCreateUid(UserContext.current().getUser().getId());
-		serviceModuleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-		serviceModuleAssignment.setOwnerId(org.getId());
-		serviceModuleAssignment.setNamespaceId(UserContext.getCurrentNamespaceId());
-		serviceModuleAssignment.setOrganizationId(org.getId());
-		serviceModuleAssignment.setTargetType(EntityType.USER.getCode());
-		serviceModuleAssignment.setTargetId(member.getTargetId());
-		serviceModuleAssignment.setModuleId(cmd.getModuleId());
-		serviceModuleProvider.createServiceModuleAssignment(serviceModuleAssignment);
+	}
 
+	private void checkTargetId(String targetType, Long targetId){
+		if(null == EntityType.fromCode(targetType)){
+			LOGGER.error("params targetType is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetType is null.");
+		}
+
+		if(null == targetId){
+			LOGGER.error("params targetId is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targetId is null.");
+		}
+
+		if(EntityType.USER == EntityType.fromCode(targetType)){
+			checkUser(targetId);
+		}else if(EntityType.ORGANIZATIONS == EntityType.fromCode(targetType)){
+			checkOrganization(targetId);
+		}
+	}
+
+	private User checkUser(Long userId){
+		User user = userProvider.findUserById(userId);
+		if(null == user){
+			LOGGER.error("Unable to find the user. user = {}", userId);
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"user non-existent.");
+		}
+		return user;
+	}
+
+	private Organization checkOrganization(Long organizationId) {
+		Organization org = organizationProvider.findOrganizationById(organizationId);
+		if(org == null){
+			LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
+		return org;
 	}
 
 	public static void main(String[] args) {
