@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerId: 物品所属类型id</li>
  *     <li>name: 物品名称</li>
  *     <li>materialNumber: 物品编码</li>
+ *     <li>categoryId: 物品分类id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
  * </ul>
@@ -22,9 +23,19 @@ public class SearchWarehouseMaterialsCommand {
 
     private String materialNumber;
 
+    private Long categoryId;
+
     private Long pageAnchor;
 
     private Integer pageSize;
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public String getMaterialNumber() {
         return materialNumber;

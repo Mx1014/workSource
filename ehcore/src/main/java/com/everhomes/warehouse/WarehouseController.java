@@ -8,10 +8,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
-import com.everhomes.search.WarehouseMaterialCategorySearcher;
-import com.everhomes.search.WarehouseMaterialSearcher;
-import com.everhomes.search.WarehouseSearcher;
-import com.everhomes.search.WarehouseStockSearcher;
+import com.everhomes.search.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -50,6 +47,9 @@ public class WarehouseController extends ControllerBase {
 
     @Autowired
     private WarehouseStockSearcher warehouseStockSearcher;
+
+    @Autowired
+    private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
     /**
      * <b>URL: /warehouse/updateWarehouse</b>
@@ -300,7 +300,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchWarehouseStockLogsResponse.class)
     public RestResponse searchWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd) {
 
-//        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
+        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

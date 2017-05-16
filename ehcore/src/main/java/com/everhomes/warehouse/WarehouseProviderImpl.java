@@ -10,13 +10,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.warehouse.Status;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentsDao;
-import com.everhomes.server.schema.tables.daos.EhWarehouseMaterialCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhWarehouseMaterialsDao;
-import com.everhomes.server.schema.tables.daos.EhWarehousesDao;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
-import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
-import com.everhomes.server.schema.tables.pojos.EhWarehouses;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -294,12 +289,57 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public void creatWarehouseStock(WarehouseStocks stock) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseStocks.class));
 
+        stock.setId(id);
+        stock.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        stock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        stock.setStatus(Status.ACTIVE.getCode());
+        LOGGER.info("creatWarehouseStock: " + stock);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseStocks.class, id));
+        EhWarehouseStocksDao dao = new EhWarehouseStocksDao(context.configuration());
+        dao.insert(stock);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWarehouseStocks.class, null);
+    }
+
+    @Override
+    public void creatWarehouseStockLogs(WarehouseStockLogs log) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseStockLogs.class));
+
+        log.setId(id);
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("creatWarehouseStockLogs: " + log);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseStockLogs.class, id));
+        EhWarehouseStockLogsDao dao = new EhWarehouseStockLogsDao(context.configuration());
+        dao.insert(log);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWarehouseStockLogs.class, null);
+    }
+
+    @Override
+    public WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId) {
+        return null;
+    }
+
+    @Override
+    public List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize) {
+        return null;
     }
 
     @Override
     public void updateWarehouseStock(WarehouseStocks stock) {
+        assert(stock.getId() != null);
 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseStocks.class, stock.getId()));
+        EhWarehouseStocksDao dao = new EhWarehouseStocksDao(context.configuration());
+        stock.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(stock);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWarehouseStocks.class, stock.getId());
     }
 
     @Override

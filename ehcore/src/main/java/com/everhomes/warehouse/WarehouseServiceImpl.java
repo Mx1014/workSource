@@ -1,9 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.everhomes.rest.warehouse.*;
-import com.everhomes.search.WarehouseMaterialCategorySearcher;
-import com.everhomes.search.WarehouseMaterialSearcher;
-import com.everhomes.search.WarehouseSearcher;
+import com.everhomes.search.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -38,6 +36,12 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private WarehouseMaterialSearcher warehouseMaterialSearcher;
+
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
+
+    @Autowired
+    private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -254,8 +258,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     private WarehouseMaterialCategoryDTO processWarehouseMaterialCategoryTree(List<WarehouseMaterialCategoryDTO> dtos, WarehouseMaterialCategoryDTO dto){
 
         List<WarehouseMaterialCategoryDTO> trees = new ArrayList<WarehouseMaterialCategoryDTO>();
-        WarehouseMaterialCategoryDTO allTreeDTO = ConvertHelper.convert(dto, WarehouseMaterialCategoryDTO.class);
-        trees.add(allTreeDTO);
         for (WarehouseMaterialCategoryDTO treeDTO : dtos) {
             if(treeDTO.getParentId().equals(dto.getId())){
                 WarehouseMaterialCategoryDTO categoryTreeDTO= processWarehouseMaterialCategoryTree(dtos, treeDTO);
@@ -367,6 +369,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+            Long uid = UserContext.current().getUser().getId();
             cmd.getStocks().forEach(stock -> {
                 WarehouseStocks materialStock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(
                         stock.getWarehouseId(), stock.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -375,8 +378,16 @@ public class WarehouseServiceImpl implements WarehouseService {
                     if(WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
                         materialStock.setAmount(materialStock.getAmount() + stock.getAmount());
                         warehouseProvider.updateWarehouseStock(materialStock);
+                        warehouseStockSearcher.feedDoc(materialStock);
 
-                        WarehouseStockLogs log = new WarehouseStockLogs();
+                        WarehouseStockLogs log = ConvertHelper.convert(materialStock, WarehouseStockLogs.class);
+                        log.setRequestType(cmd.getRequestType());
+                        log.setDeliveryAmount(stock.getAmount());
+                        log.setStockAmount(materialStock.getAmount());
+                        log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
+                        log.setDeliveryUid(uid);
+                        warehouseProvider.creatWarehouseStockLogs(log);
+                        warehouseStockLogSearcher.feedDoc(log);
                     } else if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
                         if(materialStock.getAmount().compareTo(stock.getAmount()) < 0) {
                             LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
@@ -384,6 +395,19 @@ public class WarehouseServiceImpl implements WarehouseService {
                             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
                                     "warehouse stock is not enough");
                         }
+
+                        materialStock.setAmount(materialStock.getAmount() - stock.getAmount());
+                        warehouseProvider.updateWarehouseStock(materialStock);
+                        warehouseStockSearcher.feedDoc(materialStock);
+
+                        WarehouseStockLogs log = ConvertHelper.convert(materialStock, WarehouseStockLogs.class);
+                        log.setRequestType(cmd.getRequestType());
+                        log.setDeliveryAmount(stock.getAmount());
+                        log.setStockAmount(materialStock.getAmount());
+                        log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
+                        log.setDeliveryUid(uid);
+                        warehouseProvider.creatWarehouseStockLogs(log);
+                        warehouseStockLogSearcher.feedDoc(log);
                     }
                 } else {
                     if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
@@ -399,10 +423,18 @@ public class WarehouseServiceImpl implements WarehouseService {
                     materialStock.setWarehouseId(stock.getWarehouseId());
                     materialStock.setMaterialId(stock.getMaterialId());
                     materialStock.setAmount(stock.getAmount());
-                    materialStock.setCreatorUid(UserContext.current().getUser().getId());
+                    materialStock.setCreatorUid(uid);
                     warehouseProvider.creatWarehouseStock(materialStock);
+                    warehouseStockSearcher.feedDoc(materialStock);
 
-                    WarehouseStockLogs log = new WarehouseStockLogs();
+                    WarehouseStockLogs log = ConvertHelper.convert(materialStock, WarehouseStockLogs.class);
+                    log.setRequestType(cmd.getRequestType());
+                    log.setDeliveryAmount(stock.getAmount());
+                    log.setStockAmount(materialStock.getAmount());
+                    log.setRequestSource(WarehouseStockRequestSource.MANUAL_INPUT.getCode());
+                    log.setDeliveryUid(uid);
+                    warehouseProvider.creatWarehouseStockLogs(log);
+                    warehouseStockLogSearcher.feedDoc(log);
                 }
             });
 

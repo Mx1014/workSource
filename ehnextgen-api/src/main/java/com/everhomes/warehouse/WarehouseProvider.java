@@ -26,6 +26,9 @@ public interface WarehouseProvider {
     WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
     List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId);
 
+    void creatWarehouseStockLogs(WarehouseStockLogs log);
+    WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId);
+
     void creatWarehouseStock(WarehouseStocks stock);
     void updateWarehouseStock(WarehouseStocks stock);
     WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId);
@@ -39,6 +42,7 @@ public interface WarehouseProvider {
     List<WarehouseMaterialCategories> listWarehouseMaterialCategories(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseMaterials> listWarehouseMaterials(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize);
+    List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize);
 
     List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId);
 }

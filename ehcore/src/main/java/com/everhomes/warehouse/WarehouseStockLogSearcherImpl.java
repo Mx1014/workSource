@@ -2,12 +2,14 @@ package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
-import com.everhomes.rest.warehouse.SearchWarehouseStocksResponse;
-import com.everhomes.rest.warehouse.WarehouseStockDTO;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsCommand;
+import com.everhomes.rest.warehouse.SearchWarehouseStockLogsResponse;
+import com.everhomes.rest.warehouse.WarehouseStockLogDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.search.WarehouseStockSearcher;
+import com.everhomes.search.WarehouseStockLogSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -25,18 +27,16 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ying.xiong on 2017/5/15.
+ * Created by ying.xiong on 2017/5/16.
  */
-@Component
-public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements WarehouseStockSearcher {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseStockSearcherImpl.class);
+public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch implements WarehouseStockLogSearcher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseStockLogSearcherImpl.class);
 
     @Autowired
     private WarehouseProvider warehouseProvider;
@@ -44,21 +44,24 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
     @Autowired
     private ConfigurationProvider configProvider;
 
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
     @Override
     public void deleteById(Long id) {
         deleteById(id.toString());
     }
 
     @Override
-    public void bulkUpdate(List<WarehouseStocks> stocks) {
+    public void bulkUpdate(List<WarehouseStockLogs> logs) {
         BulkRequestBuilder brb = getClient().prepareBulk();
-        for (WarehouseStocks stock : stocks) {
+        for (WarehouseStockLogs log : logs) {
 
-            XContentBuilder source = createDoc(stock);
+            XContentBuilder source = createDoc(log);
             if(null != source) {
-                LOGGER.info("warehouse stock id:" + stock.getId());
+                LOGGER.info("warehouse stock log id:" + log.getId());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(stock.getId().toString()).source(source));
+                        .id(log.getId().toString()).source(source));
             }
 
         }
@@ -68,10 +71,10 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
     }
 
     @Override
-    public void feedDoc(WarehouseStocks stock) {
-        XContentBuilder source = createDoc(stock);
+    public void feedDoc(WarehouseStockLogs log) {
+        XContentBuilder source = createDoc(log);
 
-        feedDoc(stock.getId().toString(), source);
+        feedDoc(log.getId().toString(), source);
     }
 
     @Override
@@ -81,10 +84,10 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<WarehouseStocks> stocks = warehouseProvider.listWarehouseStocks(locator, pageSize);
+            List<WarehouseStockLogs> logs = warehouseProvider.listWarehouseStockLogs(locator, pageSize);
 
-            if(stocks.size() > 0) {
-                this.bulkUpdate(stocks);
+            if(logs.size() > 0) {
+                this.bulkUpdate(logs);
             }
 
             if(locator.getAnchor() == null) {
@@ -95,26 +98,25 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         this.optimize(1);
         this.refresh();
 
-        LOGGER.info("sync for warehouse stocks ok");
+        LOGGER.info("sync for warehouse stock logs ok");
     }
 
     @Override
-    public SearchWarehouseStocksResponse query(SearchWarehouseStocksCommand cmd) {
+    public SearchWarehouseStockLogsResponse query(SearchWarehouseStockLogsCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
-        if(cmd.getName() == null || cmd.getName().isEmpty()) {
+        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getName())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);
+            qb = QueryBuilders.multiMatchQuery(cmd.getMaterialName())
+                    .field("materialName", 5.0f)
+                    .field("materialName.pinyin_prefix", 2.0f)
+                    .field("materialName.pinyin_gram", 1.0f);
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name");
+            builder.addHighlightedField("materialName");
 
         }
-
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
@@ -123,8 +125,20 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
         }
 
+        if(cmd.getMaterialId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialId", cmd.getMaterialId()));
+        }
+
+        if(cmd.getRequestType() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestType", cmd.getRequestType()));
+        }
+
         if(cmd.getMaterialNumber() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
+        }
+
+        if(cmd.getRequestName() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("requestName", cmd.getRequestName()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -140,12 +154,12 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("query warehouse stocks :{}", rsp);
+            LOGGER.debug("query warehouse stock logs :{}", builder);
         }
 
         List<Long> ids = getIds(rsp);
 
-        SearchWarehouseStocksResponse response = new SearchWarehouseStocksResponse();
+        SearchWarehouseStockLogsResponse response = new SearchWarehouseStockLogsResponse();
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
@@ -153,10 +167,21 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             response.setNextPageAnchor(null);
         }
 
-        List<WarehouseStockDTO> stockDTOs = new ArrayList<WarehouseStockDTO>();
+        List<WarehouseStockLogDTO> logDTOs = new ArrayList<WarehouseStockLogDTO>();
         for(Long id : ids) {
-            WarehouseStocks stock = warehouseProvider.findWarehouseStocks(id, cmd.getOwnerType(), cmd.getOwnerId());
-            WarehouseStockDTO dto = ConvertHelper.convert(stock, WarehouseStockDTO.class);
+            WarehouseStockLogs log = warehouseProvider.findWarehouseStockLogs(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseStockLogDTO dto = ConvertHelper.convert(log, WarehouseStockLogDTO.class);
+
+            List<OrganizationMember> requests = organizationProvider.listOrganizationMembers(log.getRequestUid());
+            if(requests != null && requests.size() > 0) {
+                dto.setRequestUserName(requests.get(0).getContactName());
+            }
+
+            List<OrganizationMember> deliveries = organizationProvider.listOrganizationMembers(log.getDeliveryUid());
+            if(deliveries != null && deliveries.size() > 0) {
+                dto.setRequestUserName(deliveries.get(0).getContactName());
+            }
+
             Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
             if(warehouse != null) {
                 dto.setWarehouseName(warehouse.getName());
@@ -166,40 +191,42 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             if(material != null) {
                 dto.setMaterialName(material.getName());
                 dto.setMaterialNumber(material.getMaterialNumber());
-                dto.setCategoryId(material.getCategoryId());
                 dto.setUnitId(material.getUnitId());
-
-                WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
-                if(category != null) {
-                    dto.setCategoryName(category.getName());
-                }
 
                 WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(unit != null) {
                     dto.setUnitName(unit.getName());
                 }
             }
-            stockDTOs.add(dto);
+            logDTOs.add(dto);
         }
-        response.setStockDTOs(stockDTOs);
+        response.setStockLogDTOs(logDTOs);
 
         return response;
     }
 
-    private XContentBuilder createDoc(WarehouseStocks stock){
+    private XContentBuilder createDoc(WarehouseStockLogs log){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("namespaceId", stock.getNamespaceId());
-            b.field("ownerId", stock.getOwnerId());
-            b.field("ownerType", stock.getOwnerType());
-            b.field("warehouseId", stock.getWarehouseId());
-            b.field("materialId", stock.getMaterialId());
-            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(stock.getMaterialId(), stock.getOwnerType(), stock.getOwnerId());
+            b.field("namespaceId", log.getNamespaceId());
+            b.field("ownerId", log.getOwnerId());
+            b.field("ownerType", log.getOwnerType());
+            b.field("warehouseId", log.getWarehouseId());
+            b.field("materialId", log.getMaterialId());
+            b.field("requestType", log.getRequestType());
+            b.field("requestUid", log.getRequestUid());
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembers(log.getRequestUid());
+            if(members != null && members.size() > 0) {
+                b.field("requestName", members.get(0).getContactName());
+            } else {
+                b.field("requestName", "");
+            }
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId());
             if(material != null) {
-                b.field("name", material.getName());
+                b.field("materialName", material.getName());
                 b.field("materialNumber", material.getMaterialNumber());
             } else {
-                b.field("name", "");
+                b.field("materialName", "");
                 b.field("materialNumber", "");
             }
 
@@ -208,13 +235,13 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create warehouse stock  " + stock.getId() + " error");
+            LOGGER.error("Create warehouse stock log  " + log.getId() + " error");
             return null;
         }
     }
 
     @Override
     public String getIndexType() {
-        return SearchUtils.WAREHOUSE_STOCK;
+        return SearchUtils.WAREHOUSE_STOCK_LOG;
     }
 }

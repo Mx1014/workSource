@@ -119,6 +119,9 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
 
+        if(cmd.getCategoryId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
+        }
         if(cmd.getMaterialNumber() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
@@ -180,6 +183,7 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
             b.field("ownerType", material.getOwnerType());
             b.field("name", material.getName());
             b.field("materialNumber", material.getMaterialNumber());
+            b.field("categoryId", material.getCategoryId());
 
             b.endObject();
             return b;
