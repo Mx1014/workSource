@@ -113,12 +113,22 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<Authorization> listManageAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType){
+	public List<Authorization> listManageAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType){
 		return listAuthorizations(ownerType, ownerId, targetType, targetId, authType, null, IdentityType.MANAGE.getCode(), false);
 	}
 
 	@Override
-	public List<Authorization> listOrdinaryAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType) {
+	public List<Authorization> listManageAuthorizations(String ownerType, Long ownerId, String authType, Long authId){
+		return listTargetAuthorizations(ownerType, ownerId, authType, authId, IdentityType.MANAGE.getCode());
+	}
+
+	@Override
+	public List<Authorization> listOrdinaryAuthorizations(String ownerType, Long ownerId, String authType, Long authId) {
+		return listTargetAuthorizations(ownerType, ownerId, authType, authId, IdentityType.ORDINARY.getCode());
+	}
+
+	@Override
+	public List<Authorization> listOrdinaryAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType) {
 		return listAuthorizations(ownerType, ownerId, targetType, targetId, authType, null, IdentityType.ORDINARY.getCode(), false);
 	}
 

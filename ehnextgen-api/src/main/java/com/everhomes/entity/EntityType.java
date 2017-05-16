@@ -54,6 +54,7 @@ public enum EntityType {
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
+    SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins");
 
     private String code;

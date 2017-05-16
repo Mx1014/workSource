@@ -72,22 +72,6 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/createServiceModuleAdministrators</b>
-     * <p>创建业务模块管理员</p>
-     */
-    @RequestMapping("createServiceModuleAdministrators")
-    @RestReturn(value=String.class)
-    public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
-//        rolePrivilegeService.createServiceModuleAdmin(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
      * <b>URL: /acl/authorizationServiceModule</b>
      * <p>业务模块授权</p>
      */
@@ -98,37 +82,6 @@ public class AclController extends ControllerBase {
         resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         rolePrivilegeService.authorizationServiceModule(cmd);
         RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /acl/listServiceModuleAdministrators</b>
-     * <p>业务模块管理员列表</p>
-     */
-    @RequestMapping("listServiceModuleAdministrators")
-    @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
-    public RestResponse listServiceModuleAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
-        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /acl/deleteServiceModuleAdministrators</b>
-     * <p>删除业务模块管理员</p>
-     */
-    @RequestMapping("deleteServiceModuleAdministrators")
-    @RestReturn(value=String.class)
-    public RestResponse deleteServiceModuleAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
-        rolePrivilegeService.deleteServiceModuleAdministrators(cmd);
-        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -508,4 +461,44 @@ public class AclController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /acl/createServiceModuleAdministrators</b>
+     * <p>创建业务模块管理员</p>
+     */
+    @RequestMapping("createServiceModuleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
+        rolePrivilegeService.createServiceModuleAdministrators(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listServiceModuleAdministrators</b>
+     * <p>业务模块管理员列表</p>
+     */
+    @RequestMapping("listServiceModuleAdministrators")
+    @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
+    public RestResponse listServiceModuleAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/deleteServiceModuleAdministrators</b>
+     * <p>删除业务模块管理员</p>
+     */
+    @RequestMapping("deleteServiceModuleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse deleteServiceModuleAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+        rolePrivilegeService.deleteServiceModuleAdministrators(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

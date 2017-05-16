@@ -21,6 +21,7 @@ package com.everhomes.rest.common;
  * </ul>
  */
 public enum EntityType {
+    NAMESPACE("EhNamespaces"),
     USER("EhUsers"),
     GROUP("EhGroups"),
     FORUM("EhForums"),
@@ -34,6 +35,8 @@ public enum EntityType {
     ORGANIZATIONS("EhOrganizations"),
     BUILDING("EhBuildings"),
     SERVICE_MODULE("EhServiceModules"),
+    ROLE("EhAclRoles"),
+    RESOURCE_CATEGORY("EhResourceCategories"),
     ZUOLIN_ADMIN("EhZuolinAdmins");
 
     private String code;
@@ -49,31 +52,6 @@ public enum EntityType {
     public static EntityType fromCode(String code) {
         if(code == null)
             return null;
-        
-        if(code.equalsIgnoreCase(USER.getCode()))
-            return USER;
-        else if(code.equalsIgnoreCase(GROUP.getCode()))
-            return GROUP;
-        else if(code.equalsIgnoreCase(FORUM.getCode()))
-            return FORUM;
-        else if(code.equalsIgnoreCase(ADDRESS.getCode()))
-            return ADDRESS;
-        else if(code.equalsIgnoreCase(CATEGORY.getCode()))
-            return CATEGORY;
-        else if(code.equalsIgnoreCase(COMMUNITY.getCode()))
-            return COMMUNITY;
-        else if(code.equalsIgnoreCase(FAMILY.getCode()))
-            return FAMILY;
-        else if(code.equalsIgnoreCase(POST.getCode()))
-            return POST;
-        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
-            return ORGANIZATIONS;
-        else if(code.equalsIgnoreCase("EhFamilies"))
-            return FAMILY;
-        else if(code.equalsIgnoreCase("EhTopics"))
-            return TOPIC;
-        else if(code.equalsIgnoreCase("EhBuildings"))
-        	return BUILDING;
         for (EntityType entityType : EntityType.values()) {
             if (entityType.getCode().equals(code)) {
                 return entityType;

@@ -23,7 +23,6 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.DateUtil;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -33,7 +32,6 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -1403,38 +1401,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public void createServiceModuleAdmin(CreateServiceModuleAdminCommand cmd){
-
-		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-
-		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
-		command.setOrganizationId(org.getId());
-		command.setAccountName(cmd.getContactName());
-		command.setAccountPhone(cmd.getContactToken());
-		OrganizationMember member = organizationService.createOrganizationAccount(command, null);
-
-		/**
-		 * 分配权限
-		 */
-		assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(), cmd.getModuleId().toString(),cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
-
-		/**
-		 * 分配模块
-		 */
-		ServiceModuleAssignment serviceModuleAssignment = new ServiceModuleAssignment();
-		serviceModuleAssignment.setCreateUid(UserContext.current().getUser().getId());
-		serviceModuleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-		serviceModuleAssignment.setOwnerId(org.getId());
-		serviceModuleAssignment.setNamespaceId(UserContext.getCurrentNamespaceId());
-		serviceModuleAssignment.setOrganizationId(org.getId());
-		serviceModuleAssignment.setTargetType(EntityType.USER.getCode());
-		serviceModuleAssignment.setTargetId(member.getTargetId());
-		serviceModuleAssignment.setModuleId(cmd.getModuleId());
-		serviceModuleProvider.createServiceModuleAssignment(serviceModuleAssignment);
-
-	}
-
-	@Override
 	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
 		User user = UserContext.current().getUser();
 		if(null != privilegeIds){
@@ -1479,31 +1445,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			moduleIds.add(moduleId);
 		}
 		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType);
-	}
-
-
-	@Override
-	public List<OrganizationContactDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd) {
-
-		List<OrganizationContactDTO> contactDTOs = new ArrayList<>();
-
-		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(cmd.getOwnerType());
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(cmd.getOwnerId()));
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(cmd.getModuleId()));
-
-		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOrganizationId());
-
-		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
-			if(EntityType.USER ==EntityType.fromCode(serviceModuleAssignment.getTargetType())){
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceModuleAssignment.getTargetId(), cmd.getOrganizationId());
-				if(null != member){
-					OrganizationContactDTO contactDTO = ConvertHelper.convert(member,OrganizationContactDTO.class);
-					contactDTOs.add(contactDTO);
-				}
-			}
-		}
-		
-		return contactDTOs;
 	}
 
 	@Override
@@ -2305,7 +2246,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<RoleAuthorizationsDTO> listRoleAdministrators(ListRoleAdministratorsCommand cmd) {
-		List<Authorization> authorizations = authorizationProvider.listTargetAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId(), IdentityType.MANAGE.getCode());
+		List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getRoleId());
 		return authorizations.stream().map((r) ->{
 			RoleAuthorizationsDTO dto = ConvertHelper.convert(r, RoleAuthorizationsDTO.class);
 			if(EntityType.USER == EntityType.fromCode(r.getTargetType())){
@@ -2348,7 +2289,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
 		authorization.setAuthType(EntityType.ROLE.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
-		authorization.setNamespaceId(UserContext.getCurrentNamespaceId());
+		authorization.setNamespaceId(namespaceId);
 		authorization.setAllFlag(AllFlagType.NO.getCode());
 		authorization.setCreateUid(user.getId());
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -2378,7 +2319,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public void deleteRoleAdministrators(DeleteRoleAdministratorsCommand cmd) {
-		List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.ROLE.getCode());
+		List<Authorization> authorizations = authorizationProvider.listManageAuthorizationsByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.ROLE.getCode());
 		List<Long> roleIds = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
 			for (Authorization authorization: authorizations) {
@@ -2419,8 +2360,45 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return dto;
 	}
 
+	@Override
+	public List<ServiceModuleAuthorizationsDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd) {
+		List<Authorization> authorizations = authorizationProvider.listManageAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.ROLE.getCode(), cmd.getModuleId());
+		return authorizations.stream().map((r) ->{
+			ServiceModuleAuthorizationsDTO dto = ConvertHelper.convert(r, ServiceModuleAuthorizationsDTO.class);
+
+			if(EntityType.USER == EntityType.fromCode(r.getTargetType())){
+				OrganizationMember member = null;
+				if(EntityType.fromCode(cmd.getOwnerType()) == EntityType.ORGANIZATIONS){
+					member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), cmd.getOwnerId());
+				}
+				if(null == member){
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(r.getTargetId(), IdentifierType.MOBILE.getCode());
+					if(null != userIdentifier){
+						dto.setIdentifierToken(userIdentifier.getIdentifierToken());
+					}
+					User user = userProvider.findUserById(r.getTargetId());
+					if(null != user){
+						dto.setTargetName(user.getNickName());
+					}
+				}else{
+					dto.setIdentifierToken(member.getContactToken());
+					dto.setTargetName(member.getContactName());
+				}
+			}
+
+			List<ServiceModuleDTO> serviceModules = getServiceModuleManageByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId())
+			if(serviceModules.size() == 0){
+				dto.setAllFlag(AllFlagType.YES.getCode());
+			}else{
+				dto.setAllFlag(AllFlagType.NO.getCode());
+			}
+			dto.setModules(serviceModules);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+
 	private List<RoleDTO> getRoleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId){
-		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizations(ownerType, ownerId, targetType, targetId ,EntityType.ROLE.getCode());
+		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizationsByTarget(ownerType, ownerId, targetType, targetId ,EntityType.ROLE.getCode());
 		List<RoleDTO> roles = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
 			Role role = aclProvider.getRoleById(authorization.getAuthId());
@@ -2431,7 +2409,68 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return roles;
 	}
 
+	private List<ServiceModuleDTO> getServiceModuleManageByTarget(String ownerType, Long ownerId, String targetType, Long targetId){
+		List<Authorization> authorizations =  authorizationProvider.listManageAuthorizationsByTarget(ownerType, ownerId, targetType, targetId ,EntityType.SERVICE_MODULE.getCode());
+		List<ServiceModuleDTO> serviceModules = new ArrayList<>();
 
+		for (Authorization authorization: authorizations) {
+			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+				return serviceModules;
+			}
+
+			ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(authorization.getAuthId());
+			if(null != serviceModule){
+				serviceModules.add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+			}
+		}
+		return serviceModules;
+	}
+
+	@Override
+	public void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd){
+
+		
+
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+		authorization.setIdentityType(IdentityType.MANAGE.getCode());
+		authorization.setNamespaceId(namespaceId);
+		authorization.setAllFlag(AllFlagType.NO.getCode());
+		authorization.setCreateUid(user.getId());
+		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		dbProvider.execute((TransactionStatus status) -> {
+			for (Long moduleId: cmd.getModuleIds()) {
+				authorization.setAuthId(moduleId);
+				authorizationProvider.createAuthorization(authorization);
+
+
+			}
+			return null;
+		});
+
+		/**
+		 * 分配权限
+		 */
+		assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(), cmd.getModuleId().toString(),cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
+
+		/**
+		 * 分配模块
+		 */
+		ServiceModuleAssignment serviceModuleAssignment = new ServiceModuleAssignment();
+		serviceModuleAssignment.setCreateUid(UserContext.current().getUser().getId());
+		serviceModuleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+		serviceModuleAssignment.setOwnerId(org.getId());
+		serviceModuleAssignment.setNamespaceId(UserContext.getCurrentNamespaceId());
+		serviceModuleAssignment.setOrganizationId(org.getId());
+		serviceModuleAssignment.setTargetType(EntityType.USER.getCode());
+		serviceModuleAssignment.setTargetId(member.getTargetId());
+		serviceModuleAssignment.setModuleId(cmd.getModuleId());
+		serviceModuleProvider.createServiceModuleAssignment(serviceModuleAssignment);
+
+	}
 
 	public static void main(String[] args) {
 //		System.out.println(GeoHashUtils.encode(41.843665, 123.455102));

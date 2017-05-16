@@ -169,7 +169,7 @@ public interface RolePrivilegeService {
 	 * 创建业务模块管理员
 	 * @param cmd
      */
-	void createServiceModuleAdmin(CreateServiceModuleAdminCommand cmd);
+	void createServiceModuleAdministrators(CreateServiceModuleAdministratorsCommand cmd);
 
 
 	/**
@@ -177,7 +177,7 @@ public interface RolePrivilegeService {
 	 * @param cmd
 	 * @return
      */
-	List<OrganizationContactDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
+	List<ServiceModuleAuthorizationsDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
 
 	/**
 	 * 超级管理员列表
