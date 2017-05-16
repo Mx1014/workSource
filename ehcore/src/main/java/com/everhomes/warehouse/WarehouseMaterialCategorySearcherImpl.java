@@ -116,7 +116,7 @@ public class WarehouseMaterialCategorySearcherImpl extends AbstractElasticSearch
 
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
 
         if(cmd.getParentId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("parentId", cmd.getParentId()));

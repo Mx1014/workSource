@@ -364,6 +364,10 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
+//        ownerType: 库存所属类型 eg：EhOrganizations
+//        ownerId: 库存所属类型id
+//        requestType: 操作类型 参考WarehouseStockRequestType
+//        stocks: 库存列表 参考WarehouseMaterialStock
 
     }
 

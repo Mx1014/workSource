@@ -432,7 +432,7 @@ public class WarehouseController extends ControllerBase {
 
         List<WarehouseMaterialUnitDTO> units = warehouseService.listWarehouseMaterialUnits(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(units);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
