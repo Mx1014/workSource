@@ -76,7 +76,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListTalentCategoryCommand cmd = new ListTalentCategoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 
 		ListTalentCategoryRestResponse response = httpClientService.restPost(url, cmd, ListTalentCategoryRestResponse.class);
 		assertNotNull(response);
@@ -97,7 +97,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		CreateOrUpdateTalentCategoryCommand cmd = new CreateOrUpdateTalentCategoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		List<TalentCategoryDTO> talentCategoryDTOList = new ArrayList<>();
 		TalentCategoryDTO talentCategoryDTO = new TalentCategoryDTO();
 		talentCategoryDTO.setName("我是分类");
@@ -123,7 +123,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		DeleteTalentCategoryCommand cmd = new DeleteTalentCategoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -145,7 +145,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		ListTalentCommand cmd = new ListTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 //		cmd.setCategoryId(1L);
 //		cmd.setGender((byte)1);
 //		cmd.setExperience((byte)1);
@@ -176,7 +176,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		CreateOrUpdateTalentCommand cmd = new CreateOrUpdateTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 //		cmd.setId(1L);
 		cmd.setName("tt_test");
 		cmd.setAvatarUri("https://www.baidu.com");
@@ -208,7 +208,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		EnableTalentCommand cmd = new EnableTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(2L);
 		cmd.setEnabled((byte)1);
 
@@ -231,7 +231,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		DeleteTalentCommand cmd = new DeleteTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -256,7 +256,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		TopTalentCommand cmd = new TopTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -278,7 +278,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		ImportTalentCommand cmd = new ImportTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -297,7 +297,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		GetTalentDetailCommand cmd = new GetTalentDetailCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(1L);
 
 		GetTalentDetailRestResponse response = httpClientService.restPost(url, cmd, GetTalentDetailRestResponse.class);
@@ -319,7 +319,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListTalentQueryHistoryCommand cmd = new ListTalentQueryHistoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 
 		ListTalentQueryHistoryRestResponse response = httpClientService.restPost(url, cmd, ListTalentQueryHistoryRestResponse.class);
 		assertNotNull(response);
@@ -341,7 +341,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		DeleteTalentQueryHistoryCommand cmd = new DeleteTalentQueryHistoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 		cmd.setId(1L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
@@ -361,7 +361,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ClearTalentQueryHistoryCommand cmd = new ClearTalentQueryHistoryCommand();
-		cmd.setOrganizationId(999992L);
+		cmd.setOrganizationId(1000750L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -393,7 +393,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 	}
 
 	private void logon() {
-		String userIdentifier = "13510551322";
+		String userIdentifier = "tt";
 		String plainTexPassword = "123456";
 		Integer namespaceId = 999992;
 		logon(namespaceId, userIdentifier, plainTexPassword);

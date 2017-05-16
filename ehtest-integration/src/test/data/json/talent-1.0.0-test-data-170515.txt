@@ -1,0 +1,19 @@
+{
+	"eh_acls":
+	[
+		{
+			"id": 115963,
+			"owner_type": "EhOrganizations",
+			"owner_id": 1000750,
+			"grant_type": 1,
+			"privilege_id": 10,
+			"role_id": 11,
+			"order_seq": 0,
+			"creator_uid": 226707,
+			"create_time": "2017-02-09 10:07:37",
+			"namespace_id": 999992,
+			"role_type": "EhUsers",
+			"scope": "EhOrganizations1000750.admin"
+		}
+	]
+}
