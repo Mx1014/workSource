@@ -9,13 +9,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -27,8 +34,10 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.Rentalv2Controller;
+import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowButtonStatus;
@@ -68,9 +77,16 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.zxing.Result;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
 	@Autowired
 	private GeneralApprovalValProvider generalApprovalValProvider;
 	@Autowired
@@ -78,6 +94,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
 
+    
+    private StringTemplateLoader templateLoader;
+    
+    private Configuration templateConfig;
 	@Autowired
 	private FlowService flowService;
 
@@ -206,15 +226,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		return processGeneralFormDTO(form);
 	}
 
-	private ThreadLocal<List<String>> topNumFieldNames = new ThreadLocal<List<String>>() {
-		protected List<String> initialValue() {
-			return new ArrayList<>();
+	private ThreadLocal<Map<String,Integer>> topNumFieldNames = new ThreadLocal<Map<String,Integer>>() {
+		protected  Map<String,Integer> initialValue() {
+			return new HashMap<>();
 		}
 	};
 
-	private ThreadLocal<List<String>> allNumFieldNames = new ThreadLocal<List<String>>() {
-		protected List<String> initialValue() {
-			return new ArrayList<>();
+	private ThreadLocal<Map<String,Integer>> allNumFieldNames = new ThreadLocal<Map<String,Integer>>() {
+		protected Map<String,Integer> initialValue() {
+			return new HashMap<>();
 		}
 	};
 
@@ -236,14 +256,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	}
 
 	/** 找到filedDTOS里面的数字类型的字段名称 */
-	private List<String> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
+	private Map<String,Integer> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
 			String superFieldName) {
-		List<String> fieldNames = new ArrayList<>();
+		Map<String,Integer> fieldNames = new HashMap<>();
 
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
-			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode()))
-				fieldNames.add(superFieldName == null ? fieldDTO.getFieldDisplayName()
-						: (superFieldName + "." + fieldDTO.getFieldDisplayName()));
+			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
+				fieldNames.put(superFieldName == null ? fieldDTO.getFieldDisplayName()
+						: (superFieldName + "." + fieldDTO.getFieldDisplayName()),1);
+				}
 		}
 		return fieldNames;
 	}
@@ -251,14 +272,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	/**
 	 * 找到filedDTOS里面的数字类型的字段名称+子表单类型的内部数字类型名称 现在只支持一层的子表单
 	 * */
-	private List<String> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
-		List<String> fieldNames = new ArrayList<>();
-		fieldNames.addAll(findTopNumFieldNames(fieldDTOs, null));
+	private Map<String,Integer> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
+		Map<String,Integer> fieldNames = new HashMap<>();
+		fieldNames.putAll(findTopNumFieldNames(fieldDTOs, null));
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
 			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())) {
 				GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(
 						fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
-				fieldNames.addAll(findTopNumFieldNames(subFromExtra.getFormFields(),
+				fieldNames.putAll(findTopNumFieldNames(subFromExtra.getFormFields(),
 						fieldDTO.getFieldDisplayName()));
 			}
 		}
@@ -266,25 +287,28 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	}
 
 	/** 检查客户端传的fieldDTO是否合法 */
-	private void checkFieldDTO(GeneralFormFieldDTO fieldDTO, List<String> list) {
+	private void checkFieldDTO(GeneralFormFieldDTO fieldDTO, Map<String,Integer> map) {
 		switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
 		case SUBFORM:
 			// 对于子表单要检查所有的字段
 			GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
 					GeneralFormSubformDTO.class);
-			List<String> subNameList = findTopNumFieldNames(subFromExtra.getFormFields(),
+			Map<String,Integer> subNameMap = findTopNumFieldNames(subFromExtra.getFormFields(),
 					fieldDTO.getFieldDisplayName());
-			subNameList.addAll(topNumFieldNames.get());
+			subNameMap.putAll(topNumFieldNames.get());
 			for (GeneralFormFieldDTO subFormFieldDTO : subFromExtra.getFormFields()) {
 
-				checkFieldDTO(subFormFieldDTO, subNameList);
+				checkFieldDTO(subFormFieldDTO, subNameMap);
 			}
 			break;
 		case NUMBER_TEXT:
 			// 对于数字要检查默认公式
 			GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
 					GeneralFormNumDTO.class);
-			checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get());
+			if(!checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get())){ 
+				throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+						GeneralApprovalServiceErrorCode.ERROR_FORMULA_CHECK, "ERROR_FORMULA_CHECK");	
+			}
 			break;
 		default:
 			break;
@@ -292,16 +316,95 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	}
 
 	/**
-	 * 检验数字文本框的默认公式 1. SUM（）里面必须是子表单变量，SUM（变量）算一个变量 2. 两个变量之间必须有+、-、*、/中的一个符号 3.
-	 * 变量与纯数字之间必须有+、-、*、/中的一个符号 4. 括号必须成对出现
+	* @param defaultValue
+	* 公式
+	* @param map
+	* 允许的参数和参数被replace的值--一般是1
+	* @return 如果校验通过,返回true, 否则返回 false;
+	 * 检验数字文本框的默认公式 
+	 * 1. SUM（）里面必须是子表单变量，SUM（变量）算一个变量 
+	 * 2. 两个变量之间必须有+、-、*、/中的一个符号
+	 * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号 
+	 * 4. 括号必须成对出现
 	 * 
 	 * @param list
 	 */
-	private void checkNumberDefaultValue(String defaultValue, List<String> list) {
+	@Override
+	public Boolean checkNumberDefaultValue(String defaultValue, Map<String,Integer> map) {
 		// TODO Auto-generated method stub
-
+		//1.去空格
+		defaultValue = defaultValue.trim();
+		//2验证变量-把变量都置为0
+        try {
+            Template freeMarkerTemplate = null;
+            String templateKey = "templateKey";
+            try {
+                templateConfig.getTemplate(templateKey, "UTF8");
+            }catch(Exception e) {  
+            } 
+            String templateText = defaultValue;
+            templateLoader.putTemplate(templateKey, templateText);
+            freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+            if(freeMarkerTemplate != null) {
+            	defaultValue =  FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, map);
+            }
+        } catch(Exception e) {
+            if(LOGGER.isErrorEnabled()) {
+                LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map, e);
+    			return false;
+            }
+        }
+		//3replace sum
+        defaultValue.replace("sum", "");
+		//4验证()是成对出现并后接数字
+        char[] valueArray = defaultValue.toCharArray();
+        int anchor = 0;
+        
+        for(int i = 0 ;i<=defaultValue.length();i++){
+        	if(valueArray[i] == '('){
+        		anchor++;
+        		if(valueArray[i+1] == '+'||valueArray[i+1] == '-'||valueArray[i+1] == '*'||valueArray[i+1] == '\\'){
+                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+                    return false;
+        		}
+        	}
+        	else if(valueArray[i] == ')'){
+            	anchor--;
+        		if(valueArray[i-1] == '+'||valueArray[i-1] == '-'||valueArray[i-1] == '*'||valueArray[i-1] == '\\'){
+                    LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+                    return false;
+        		}
+        	}
+        	if(anchor <0){ 
+                LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+                return false;
+        	}  
+        }
+    	if(anchor != 0){ 
+            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+            return false;
+    	}  
+		//5 正则表达式验证
+    	String regex = "^\\d+([\\+\\-\\*\\/]{1}\\d+)*$"; 
+    	if(!match(regex, defaultValue)){ 
+            LOGGER.error("Invalid defaultValue [" + defaultValue + "]or map " + map );
+            return false;
+    	}
+    	return true;
 	}
 
+	/**
+	* @param regex
+	* 正则表达式字符串
+	* @param str
+	* 要匹配的字符串
+	* @return 如果str 符合 regex的正则表达式格式,返回true, 否则返回 false;
+	*/
+	private static boolean match(String regex, String str) {
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(str);
+		return matcher.matches();
+	}
 	@Override
 	public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
 		return this.dbProvider.execute((TransactionStatus status) -> {

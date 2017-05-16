@@ -1,5 +1,7 @@
 package com.everhomes.general_approval;
 
+import java.util.Map;
+
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
@@ -43,5 +45,7 @@ public interface GeneralApprovalService {
 	void enableGeneralApproval(GeneralApprovalIdCommand cmd);
 
 	void disableGeneralApproval(GeneralApprovalIdCommand cmd);
+
+	Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
 
 }
