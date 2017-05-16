@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.general_form;
 
 import com.everhomes.util.StringHelper;
 
@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class ListApprovalFormsCommand {
+public class ListGeneralFormsCommand {
 	private Long ownerId;
 	private String ownerType;
 

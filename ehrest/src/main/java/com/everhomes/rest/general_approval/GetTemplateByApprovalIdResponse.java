@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_form.GeneralFormFieldDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>projectType: 项目类型</li>
  * <li>formOriginId: 表单 ID</li>
  * <li>formVersion: 表单当前版本信息</li>
- * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>formFields: 表单控件数据 {@link GeneralFormFieldDTO}</li>
  * <li>values: form表单对应的值信息 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  * @author janson

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.general_form.GeneralFormDTO;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.util.ConvertHelper;
+
+import javax.validation.Valid;
 
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
@@ -320,4 +323,21 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /techpark/entry/getTemplateById</b>
+	 * <p> 获取表单的信息 </p>
+	 * @return GeneralFormDTO 表单的数据信息
+	 */
+	@RequestMapping("getTemplateById")
+	@RestReturn(value=GeneralFormDTO.class)
+	public RestResponse getTemplateById(@Valid GetTemplateByIdCommand cmd) {
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
 }

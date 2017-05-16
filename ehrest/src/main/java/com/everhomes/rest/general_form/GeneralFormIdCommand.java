@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.general_form;
 
 import com.everhomes.util.StringHelper;
 
@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class ApprovalFormIdCommand {
+public class GeneralFormIdCommand {
 	private Long formOriginId;
 
 	public Long getFormOriginId() {

@@ -3,11 +3,11 @@ package com.everhomes.general_approval;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tools.ant.types.FileList.FileName;
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -25,9 +25,9 @@ import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_form.GeneralFormDataSourceType;
+import com.everhomes.rest.general_form.GeneralFormFieldDTO;
+import com.everhomes.rest.general_form.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;

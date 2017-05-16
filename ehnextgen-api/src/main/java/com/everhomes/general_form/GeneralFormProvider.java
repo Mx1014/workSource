@@ -1,9 +1,9 @@
-package com.everhomes.general_approval;
-
-import java.util.List;
+package com.everhomes.general_form;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface GeneralFormProvider {
 
@@ -16,7 +16,7 @@ public interface GeneralFormProvider {
 	GeneralForm getGeneralFormById(Long id);
 
 	List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
-			ListingQueryBuilderCallback queryBuilderCallback);
+                                        ListingQueryBuilderCallback queryBuilderCallback);
  
 
 	GeneralForm getActiveGeneralFormByOriginId(Long formOriginId);

@@ -1,25 +1,25 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.general_form;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
+ * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字，对应的 form 表单里面的名字</li>
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
  * <li>fieldExtra: 不同的字段类型，还有额外的数据信息。
- * 数字类型：{@link com.everhomes.rest.general_approval.GeneralFormNumDTO}
- * 文本类型：{@link com.everhomes.rest.general_approval.GeneralFormTextDTO}
- * 图片类型：{@link com.everhomes.rest.general_approval.GeneralFormImageDTO}
- * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO}
+ * 数字类型：{@link GeneralFormNumDTO}
+ * 文本类型：{@link GeneralFormTextDTO}
+ * 图片类型：{@link GeneralFormImageDTO}
+ * 文件类型：{@link GeneralFormFileDTO}
  * </li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
- * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
- * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
- * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
- * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
+ * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link GeneralFormDataVisibleType}</li>
+ * <li>validatorType: 校验方式 {@link GeneralFormValidatorType}</li>
+ * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
+ * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
  * <li>fieldValue: 字段值（查询详情时才会有值）</li>
  * </ul>
  * @author janson

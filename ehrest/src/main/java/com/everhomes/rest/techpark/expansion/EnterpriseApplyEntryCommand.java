@@ -3,7 +3,11 @@ package com.everhomes.rest.techpark.expansion;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -22,6 +26,8 @@ import com.everhomes.util.StringHelper;
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * <li>addressId：门牌id</li>
  * <li>buildingId：楼栋id</li>
+ * <li>requestFormId：申请表单id</li>
+ * <li>formValues: 审批项中，每项对应的值{@link com.everhomes.rest.general_approval.PostApprovalFormItem} </li>
  * </ul>
  */
 public class EnterpriseApplyEntryCommand {
@@ -57,6 +63,27 @@ public class EnterpriseApplyEntryCommand {
 
 	private Long addressId;
 	private Long buildingId;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	private Long requestFormId;
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
+
+	public Long getRequestFormId() {
+		return requestFormId;
+	}
+
+	public void setRequestFormId(Long requestFormId) {
+		this.requestFormId = requestFormId;
+	}
 
 	public Long getAddressId() {
 		return addressId;

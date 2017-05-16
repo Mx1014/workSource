@@ -37,9 +37,10 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
  * <li>issuerType：发布人类型  {@link com.everhomes.rest.techpark.expansion.LeaseIssuerType  NORMAL_USER：普通用户或公司，ORGANIZATION：物业公司}</li>
  * <li>longitude：经度</li>
  * <li>latitude：纬度</li>
- * <li>generalFormId：表单id</li>
+ * <li>leasePromotionFormId：招租表单id</li>
  * <li>customFormFlag：是否启用表单 {@link com.everhomes.rest.techpark.expansion.LeasePromotionFlag  0 ：否  1 是}</li>
- * <li>formValues：表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>formValues：招租表单字段列表 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
+ * <li>requestFormId：申请表单id</li>
  * </ul>
  */
 public class BuildingForRentDTO {
@@ -79,18 +80,28 @@ public class BuildingForRentDTO {
 	private String buildingDetailUrl;
 	private Byte deleteFlag;
 
-	private Long generalFormId;
+	private Long leasePromotionFormId;
 	private Byte customFormFlag;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
 
-	public Long getGeneralFormId() {
-		return generalFormId;
+	private Long requestFormId;
+
+	public Long getRequestFormId() {
+		return requestFormId;
 	}
 
-	public void setGeneralFormId(Long generalFormId) {
-		this.generalFormId = generalFormId;
+	public void setRequestFormId(Long requestFormId) {
+		this.requestFormId = requestFormId;
+	}
+
+	public Long getLeasePromotionFormId() {
+		return leasePromotionFormId;
+	}
+
+	public void setLeasePromotionFormId(Long leasePromotionFormId) {
+		this.leasePromotionFormId = leasePromotionFormId;
 	}
 
 	public Byte getCustomFormFlag() {

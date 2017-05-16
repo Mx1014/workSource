@@ -1,16 +1,17 @@
 package com.everhomes.rest.general_approval;
 
+import com.everhomes.rest.general_form.GeneralFormFieldType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
+ * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字</li>
  * <li>fieldValue: 提交的数据
  * 数字值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 文本值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
- * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue.java}
+ * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue}
  * </li>
  * <ul>
  * @author janson

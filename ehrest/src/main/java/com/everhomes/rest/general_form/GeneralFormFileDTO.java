@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_approval;
+package com.everhomes.rest.general_form;
 
 import com.everhomes.util.StringHelper;
 
