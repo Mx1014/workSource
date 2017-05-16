@@ -393,7 +393,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 	}
 
 	private void logon() {
-		String userIdentifier = "tt";
+		String userIdentifier = "13510551322";
 		String plainTexPassword = "123456";
 		Integer namespaceId = 999992;
 		logon(namespaceId, userIdentifier, plainTexPassword);
