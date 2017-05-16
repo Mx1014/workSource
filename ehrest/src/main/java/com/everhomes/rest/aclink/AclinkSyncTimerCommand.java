@@ -4,6 +4,14 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>hardwareId: 门禁 mac 地址</li>
+ * <li>currentTime: 门禁设备当前时间</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class AclinkSyncTimerCommand {
     @NotNull
     String hardwareId;

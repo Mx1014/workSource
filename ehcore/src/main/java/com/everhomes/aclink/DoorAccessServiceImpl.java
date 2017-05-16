@@ -1395,6 +1395,37 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return newAuths;
     }
     
+    private AesUserKey genarateQrUserKey(User user, DoorAuth doorAuth) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
+        if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
+            //The door is delete, set it to invalid
+            doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+            doorAuthProvider.updateDoorAuth(doorAuth);
+            return null;
+        }
+        
+    	AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+    	AesUserKey aesUserKey = new AesUserKey();
+		aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
+		aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
+		aesUserKey.setCreatorUid(user.getId());
+		aesUserKey.setUserId(doorAuth.getUserId());
+		aesUserKey.setDoorId(doorAccess.getId());
+		aesUserKey.setAuthId(doorAuth.getId());
+		if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+		    aesUserKey.setExpireTimeMs(System.currentTimeMillis() + getQrTimeout());//origin is KEY_TICK_7_DAY
+		    aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
+		} else {
+		    aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+		    aesUserKey.setKeyType(AesUserKeyType.TEMP.getCode());
+		    }
+		
+		aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
+		aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
+    	aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
+    	return aesUserKey;
+    }
+    
     private AesUserKey generateAesUserKey(User user, DoorAuth doorAuth) {
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
         if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
@@ -1422,7 +1453,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     aesUserKey.setDoorId(doorAccess.getId());
                     aesUserKey.setAuthId(doorAuth.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + getQrTimeout());//origin is KEY_TICK_7_DAY
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + KEY_TICK_7_DAY);
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -1938,7 +1969,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         
-        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+        AesUserKey aesUserKey = genarateQrUserKey(user, auth);
         if(aesUserKey == null) {
             LOGGER.error("aesUserKey created error");
             return;
