@@ -1692,16 +1692,22 @@ public class FlowServiceImpl implements FlowService {
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
-			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()),
 	                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
 	        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
 	        messageDto.setBody(dataStr);
 	        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
-
             FlowCaseDetailActionData actionData = new FlowCaseDetailActionData();
             actionData.setFlowCaseId(flowCase.getId());
-            actionData.setFlowUserType(dto.getFlowUserType());
+
+            // 根据当前发送消息的用户是否是申请人，来确定 FlowUserType
+            if (Objects.equals(flowCase.getApplyUserId(), userId)) {
+                actionData.setFlowUserType(FlowUserType.APPLIER.getCode());
+            } else {
+                actionData.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+            }
+
             actionData.setModuleId(ctx.getModule().getModuleId());
 
 	        RouterMetaObject rmo = new RouterMetaObject();

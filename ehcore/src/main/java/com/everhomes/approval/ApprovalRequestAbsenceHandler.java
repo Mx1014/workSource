@@ -25,11 +25,15 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
 import javassist.runtime.DotClass;
 
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.joda.time.Hours;
 import org.omg.CORBA.PRIVATE_MEMBER;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +49,11 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+import ch.qos.logback.classic.Logger;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
@@ -83,7 +92,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	//时间相加减需要带上这个差值
 	private static final Long MILLISECONDGMT=8*3600*1000L;
 	private static final Long DAY_MILLISECONDGMT=24*3600*1000L;
+
 	
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ApprovalRequestDefaultHandler.class);
 //	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 //	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 //	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -292,19 +303,34 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	private List<ApprovalDayActualTime> calculateActualResult(Long userId, PunchRule punchRule, List<TimeRange> timeRangeList) {
 		List<ApprovalDayActualTime> approvalDayActualTimeList = new ArrayList<>();
 		timeRangeList.forEach(a->{
-//			//如果不跨天
-//			if (punchService.isSameDay(new Date(a.getFromTime()), new Date(a.getEndTime()))) {
-//				Date fromTime = new Date(a.getFromTime());
-//				PunchTimeRule fromPunchTimeRule = punchService.getPunchTimeRuleByRuleIdAndDate(punchRule.getId(), fromTime) ; 
-//				//3. 如果请假时长大于等于应该上班时长，则记录实际请假时长为1天
-//				a.setActualResult(calculateOneDayTime(a.getFromTime(), a.getEndTime(), fromPunchTimeRule));
-//				//4. 计算每天的具体时长
-//				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
-//				actualTime.setUserId(userId);
-//				actualTime.setTimeDate(new java.sql.Date(a.getFromTime()));
-//				actualTime.setActualResult(a.getActualResult());
-//				approvalDayActualTimeList.add(actualTime);
-//			} else {
+			//如果不跨天
+			if (punchService.isSameDay(new Date(a.getFromTime()), new Date(a.getEndTime()))) {
+				//1.用昨天的规则计算一下时间 注意:起止时间要加一天的毫秒数
+				Calendar yestCalendar = Calendar.getInstance();
+				yestCalendar.setTimeInMillis(a.getFromTime()); 
+				yestCalendar.add(Calendar.DAY_OF_MONTH, -1);
+				PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), yestCalendar.getTime()) ;
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(a.getFromTime());
+				long fromTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L;
+				calendar.setTimeInMillis(a.getEndTime());
+				long endTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L; 
+				long yesterdayTime = calculateOneDayTime( fromTime+ DAY_MILLISECONDGMT, endTime  + DAY_MILLISECONDGMT, dto);
+				//2.用今天的规则计算一下时间
+				Calendar todayCalendar = Calendar.getInstance();
+				todayCalendar.setTimeInMillis(a.getFromTime());  
+				dto = processTimeRuleDTO(punchRule.getId(), todayCalendar.getTime()) ;
+				long todayTime = calculateOneDayTime( fromTime,endTime, dto);
+				//3.把用昨天规则计算的和今天规则计算的加起来
+				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
+				actualTime.setUserId(userId);
+				actualTime.setTimeDate(new java.sql.Date(a.getFromTime()));
+				MyDate myDate = new MyDate();
+				caculateAbsentDate(myDate, yesterdayTime+todayTime);
+				actualTime.setActualResult(myDate.toString());
+				a.setActualResult(myDate.toString());
+				approvalDayActualTimeList.add(actualTime);
+			} else {
 //				//如果跨天
 //				//(一)直接计算天数，起止时间分别在最晚上班时间之前，起止时间分别在最早下班之后，开始时间在最晚上班之前且结束时间在最早下班时间之后，开始时间在最早下班时间之后且结束时间在最晚上班时间之前
 				Date fromTime = new Date(a.getFromTime());
@@ -362,7 +388,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 					MyDate myDate = processMyDate(fromTime,endTime,punchRule);
 					a.setActualResult(myDate.toString());
 					
-//				}
+				}
 //			}
 			//产品的文档上是可以存在请假时长为0的
 //			if (a.getActualResult().equals(new MyDate().toString())) {
@@ -373,6 +399,37 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		});
 		return approvalDayActualTimeList;
 	}
+
+	private long calculateOneDayTime(long fromTime, long endTime, PunchTimeRuleDTO dto) {
+		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
+ 		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
+		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
+			return 0L;
+		// 确定起始时间:
+		//1.如果fromTime在一天最早上班时间之前,则用最早上班时间
+		//如果fromTime 在午休时间之内 则用午休结束时间
+		if(fromTime < dto.getStartEarlyTime())
+			fromTime = dto.getStartEarlyTime();
+		else if((fromTime > dto.getNoonLeaveTime()) && (fromTime < dto.getAfternoonArriveTime()))
+			fromTime = dto.getAfternoonArriveTime();
+		//2.如果endTime在最早下班时间之后则用最早下班时间,否则用endTime
+		//如果endTime在午休时间之内则用午休开始时间
+		if(endTime > dto.getEndEarlyTime())
+			endTime = dto.getEndEarlyTime();
+		else if((endTime > dto.getNoonLeaveTime()) && (endTime < dto.getAfternoonArriveTime()))
+			endTime = dto.getNoonLeaveTime();
+		//3. 两者相减计算请假时间:如果小于0则设置为0
+		long deltaMs = endTime - fromTime;
+		if(deltaMs < 0)
+			return 0L;
+		//3.如果中间有午休(开始时间小于午休开始时间,结束时间大于午休结束时间)减去午休
+		if ( (fromTime < dto.getNoonLeaveTime()) && (endTime > dto.getAfternoonArriveTime())){
+			deltaMs = deltaMs - (dto.getAfternoonArriveTime() -dto.getNoonLeaveTime() );
+		}
+			
+		return deltaMs;
+	}
+
 
 	private MyDate processMyDate(Date fromTime, Date endTime, PunchRule punchRule) {
 		MyDate myDate = new MyDate(); 
@@ -483,7 +540,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			int days = myDate.getDays()+1;
 			myDate.setDays(days);
 		}
-		caculateAbsentDate(myDate,endTimeLong,actualLong);
+		caculateAbsentDate(myDate,actualLong);
 	}
 	/**
 	 * 计算请假开始日的时间
@@ -511,12 +568,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			//4.最早下班时间<x
 			//不管了
 		}
-		caculateAbsentDate(myDate,fromTimeLong,actualLong);
+		caculateAbsentDate(myDate, actualLong);
 	}
 	/**
 	 * 把时间Long转换成日,时,分,秒
 	 * */
-	private void caculateAbsentDate(MyDate myDate, Long timeLong, long actualLong) {
+	private void caculateAbsentDate(MyDate myDate,  long actualLong) {
 		actualLong = actualLong / 1000 / 60;
 		int minutes = myDate.getMinutes() + Long.valueOf(actualLong % 60).intValue();
 		int hous = myDate.getHours() + Long.valueOf(actualLong / 60).intValue();

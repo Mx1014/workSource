@@ -52,20 +52,20 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10039, 50634, '�
 
 
 -- merge from shenye201704 by xiongying 20170509
-update eh_equipment_inspection_tasks t set t.namespace_id = (select o.namespace_id from eh_organizations o where o.id = t.owner_id);
-update eh_equipment_inspection_item_results r set r.standard_id = (select t.standard_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_item_results r set r.equipment_id = (select t.equipment_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_item_results r set r.community_id = (select t.target_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_item_results r set r.inspection_category_id =(select t.inspection_category_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_item_results r set r.namespace_id = (select t.namespace_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
+UPDATE eh_equipment_inspection_tasks t SET t.namespace_id = (SELECT o.namespace_id FROM eh_organizations o WHERE o.id = t.owner_id);
+UPDATE eh_equipment_inspection_item_results r SET r.standard_id = (SELECT t.standard_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_item_results r SET r.equipment_id = (SELECT t.equipment_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_item_results r SET r.community_id = (SELECT t.target_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_item_results r SET r.inspection_category_id =(SELECT t.inspection_category_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_item_results r SET r.namespace_id = (SELECT t.namespace_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
 
-update eh_equipment_inspection_task_logs r set r.community_id = (select t.target_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_task_logs r set r.inspection_category_id = (select t.inspection_category_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
-update eh_equipment_inspection_task_logs r set r.namespace_id = (select t.namespace_id from eh_equipment_inspection_tasks t where t.id = r.task_id);
+UPDATE eh_equipment_inspection_task_logs r SET r.community_id = (SELECT t.target_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_task_logs r SET r.inspection_category_id = (SELECT t.inspection_category_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
+UPDATE eh_equipment_inspection_task_logs r SET r.namespace_id = (SELECT t.namespace_id FROM eh_equipment_inspection_tasks t WHERE t.id = r.task_id);
 
 
-update eh_web_menus set data_type = 'react:/equipment-inspection/equipment-list' where name like '巡检对象';
-update eh_web_menus set data_type = '' where id = 20850;
+UPDATE eh_web_menus SET data_type = 'react:/equipment-inspection/equipment-list' WHERE NAME LIKE '巡检对象';
+UPDATE eh_web_menus SET data_type = '' WHERE id = 20850;
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
 VALUES (20851, '总览', 20850, NULL, 'react:/equipment-inspection/statistics-pandect', 0, 2, '/20000/20800/20850/20851', 'park', 310);
@@ -288,16 +288,16 @@ VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000
 
 
 -- 车辆放行导出excel无数据提示，add by tt, 20170510（清华）
-select max(id) into @id from `eh_locale_strings`; 
+SELECT MAX(id) INTO @id FROM `eh_locale_strings`; 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'parking.clearance', '10011', 'zh_CN', '没有数据');
 
 
 -- 修改帖子评论发消息内容模板，add by tt, 20170511
-update eh_locale_templates set text = '新的评论\t${userName}评论了你的帖子「${postName}」。' where  scope = 'forum.notification' and code  =  2;
-update eh_locale_templates set text = '新的回复\t${userName}回复了你在帖子「${postName}」 的评论。' where  scope = 'forum.notification' and code  =  3;
+UPDATE eh_locale_templates SET TEXT = '新的评论\t${userName}评论了你的帖子「${postName}」。' WHERE  scope = 'forum.notification' AND CODE  =  2;
+UPDATE eh_locale_templates SET TEXT = '新的回复\t${userName}回复了你在帖子「${postName}」 的评论。' WHERE  scope = 'forum.notification' AND CODE  =  3;
 
 -- by dengs 20170512 国际化 邮件发送
-select max(id) into @id from eh_locale_strings;
+SELECT MAX(id) INTO @id FROM eh_locale_strings;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10001', 'zh_CN', '的申请单');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10002', 'zh_CN', '见邮件附件');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10003', 'zh_CN', '审批');
@@ -305,7 +305,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10005', 'zh_CN', '申请类型,申请来源,服务机构');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1,'serviceAlliance.request.notification', '10006', 'zh_CN', '姓名,联系电话,企业');
 
-select max(id) into @id from eh_locale_templates;
+SELECT MAX(id) INTO @id FROM eh_locale_templates;
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`,`locale`, `description`, `text`)
     VALUES(@id:=@id+1, 'serviceAlliance.request.notification', 4, 'zh_CN', '提交申请通知给机构和管理员', '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>${title}</title></head><body><p>预订人：${creatorName}</p><p>手机号：${creatorMobile}</p><p>公司名称：${creatorOrganization}</p><p>服务名称：${serviceOrgName}</p>${note}</body></html>');
 INSERT INTO `eh_locale_templates`(`id`, `scope`, `code`,`locale`, `description`, `text`)
@@ -320,3 +320,52 @@ DELETE FROM `eh_web_menu_scopes` WHERE `menu_id`=40540;
 DELETE FROM `eh_web_menu_privileges` WHERE `menu_id`=40540;
 DELETE FROM `eh_web_menus` WHERE `id`=40540;
 
+-- added by wh 加考勤排班各域空间的菜单
+ 
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 1, 2); 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999993, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999994, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999990, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999991, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999989, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999988, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999987, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999986, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999985, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999982, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999981, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999980, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999979, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999978, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999977, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999976, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50634, '', 'EhNamespaces', 999975, 2); 
+
+-- 康利添加举报管理菜单 add by yanjun 201705152031
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 51000, '', 'EhNamespaces', 999978, 2);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999978, 51000, '举报管理', NULL, 2);

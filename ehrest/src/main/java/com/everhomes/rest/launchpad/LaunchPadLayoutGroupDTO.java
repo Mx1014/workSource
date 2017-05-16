@@ -17,8 +17,6 @@ import com.everhomes.util.StringHelper;
  * <li>separatorHeight: 组底部分隔条高度</li>
  * <li>columnCount: 组件一行显示的图标数，目前针对Navigator</li>
  * <li>editFlag: 0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
- * <li>customFlag: 0-不采用扩充 1- 扩充widget的样式，没有配置或者0的时候不采用扩充 详情{@link com.everhomes.rest.launchpad.CustomFlagType}</li>
- * <li>designConfig: json格式，说明：widget的扩充样式</li>
  * </ul>
  */
 public class LaunchPadLayoutGroupDTO {
@@ -31,8 +29,6 @@ public class LaunchPadLayoutGroupDTO {
     private Double separatorHeight;
     private Integer columnCount;
     private Byte editFlag;
-    private Byte customFlag;
-    private String designConfig;
 
     public String getGroupName() {
         return groupName;
@@ -105,22 +101,6 @@ public class LaunchPadLayoutGroupDTO {
 	public void setEditFlag(Byte editFlag) {
 		this.editFlag = editFlag;
 	}
-
-    public Byte getCustomFlag() {
-        return customFlag;
-    }
-
-    public void setCustomFlag(Byte customFlag) {
-        this.customFlag = customFlag;
-    }
-
-    public String getDesignConfig() {
-        return designConfig;
-    }
-
-    public void setDesignConfig(String designConfig) {
-        this.designConfig = designConfig;
-    }
 
     @Override
     public int hashCode() {

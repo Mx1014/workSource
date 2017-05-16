@@ -64,6 +64,7 @@ public class PunchController extends ControllerBase {
 	 * 增加打卡异常申报
 	 * </p>
 	 */
+	@Deprecated
 	@RequestMapping("addPunchExceptionRequest")
 	@RestReturn(value = String.class)
 	public RestResponse addPunchExceptionRequest(
