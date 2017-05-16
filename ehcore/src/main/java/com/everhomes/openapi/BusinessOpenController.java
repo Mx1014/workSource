@@ -792,10 +792,11 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	
     /**
-     * <b>URL: /openapi/</b> 
+     * <b>URL: /openapi/listUsersOfEnterprise</b> 
      */
     @RequestMapping("listUsersOfEnterprise")
     @RestReturn(value=OrganizationContactDTO.class)
+    @RequireAuthentication(false)
     public RestResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd) {
     	ListOrganizationContactCommandResponse memberResponse = this.organizationService.listUsersOfEnterprise(cmd);
 		RestResponse response =  new RestResponse(memberResponse);
