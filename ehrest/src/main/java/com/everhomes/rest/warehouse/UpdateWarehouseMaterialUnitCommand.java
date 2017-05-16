@@ -1,41 +1,26 @@
 package com.everhomes.rest.warehouse;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 物品单位id</li>
  *     <li>ownerType: 物品单位所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 物品单位所属类型id</li>
- *     <li>name: 物品单位名</li>
+ *     <li>units: 物品单位信息 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialUnitDTO}</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
 public class UpdateWarehouseMaterialUnitCommand {
 
-    private Long id;
-
     private String ownerType;
 
     private Long ownerId;
 
-    private String name;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    @ItemType(WarehouseMaterialUnitDTO.class)
+    private List<WarehouseMaterialUnitDTO> units;
 
     public Long getOwnerId() {
         return ownerId;
@@ -51,6 +36,14 @@ public class UpdateWarehouseMaterialUnitCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public List<WarehouseMaterialUnitDTO> getUnits() {
+        return units;
+    }
+
+    public void setUnits(List<WarehouseMaterialUnitDTO> units) {
+        this.units = units;
     }
 
     @Override

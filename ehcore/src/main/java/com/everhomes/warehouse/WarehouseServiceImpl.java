@@ -442,6 +442,52 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    public void updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd) {
+        Long uid = UserContext.current().getUser().getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+        //不带id的create，其他的看unit表中的id在不在cmd里面 不在的删掉
+        List<Long> updateUnitIds = new ArrayList<Long>();
+        if(cmd.getUnits() != null && cmd.getUnits().size() > 0) {
+            cmd.getUnits().forEach(dto -> {
+                if(dto.getId() == null) {
+                    WarehouseUnits unit = ConvertHelper.convert(dto, WarehouseUnits.class);
+                    unit.setCreatorUid(uid);
+                    unit.setNamespaceId(namespaceId);
+                    warehouseProvider.creatWarehouseUnit(unit);
+                    updateUnitIds.add(unit.getId());
+                } else {
+                    WarehouseUnits unit = warehouseProvider.findWarehouseUnits(dto.getId(), dto.getOwnerType(), dto.getOwnerId());
+                    if(unit != null) {
+                        updateUnitIds.add(unit.getId());
+                        if(!unit.getName().equals(dto.getName())) {
+                            unit.setName(dto.getName());
+                            warehouseProvider.updateWarehouseUnit(unit);
+                        }
+                    }
+                }
+            });
+        }
+
+        List<WarehouseUnits> units = warehouseProvider.listWarehouseMaterialUnits(cmd.getOwnerType(), cmd.getOwnerId());
+        for(WarehouseUnits unit : units) {
+            if(!updateUnitIds.contains(unit.getId())) {
+                unit.setStatus(Status.INACTIVE.getCode());
+                unit.setDeletorUid(uid);
+                unit.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                warehouseProvider.updateWarehouseUnit(unit);
+            }
+        }
+    }
+
+    @Override
+    public WarehouseMaterialUnitDTO findWarehouseMaterialUnit(DeleteWarehouseMaterialUnitCommand cmd) {
+        WarehouseUnits unit = warehouseProvider.findWarehouseUnits(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+        WarehouseMaterialUnitDTO dto = ConvertHelper.convert(unit, WarehouseMaterialUnitDTO.class);
+        return dto;
+    }
+
+    @Override
     public List<WarehouseMaterialUnitDTO> listWarehouseMaterialUnits(ListWarehouseMaterialUnitsCommand cmd) {
         List<WarehouseMaterialUnitDTO> dtos = warehouseProvider.listWarehouseMaterialUnits(cmd.getOwnerType(), cmd.getOwnerId()).stream().map(unit -> {
             WarehouseMaterialUnitDTO dto = ConvertHelper.convert(unit, WarehouseMaterialUnitDTO.class);

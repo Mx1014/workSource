@@ -25,4 +25,7 @@ public interface WarehouseService {
 
     List<WarehouseMaterialUnitDTO> listWarehouseMaterialUnits(ListWarehouseMaterialUnitsCommand cmd);
 
+    void updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd);
+    WarehouseMaterialUnitDTO findWarehouseMaterialUnit(DeleteWarehouseMaterialUnitCommand cmd);
+
 }

@@ -553,12 +553,85 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize) {
-        return null;
+        List<WarehouseStocks> stocks = new ArrayList<WarehouseStocks>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhWarehouseStocks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
+
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+                query.addConditions(Tables.EH_WAREHOUSE_STOCKS.ID.lt(locator.getAnchor()));
+            }
+            query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
+            query.addOrderBy(Tables.EH_WAREHOUSE_STOCKS.ID.desc());
+            query.addLimit(pageSize - stocks.size());
+
+            query.fetch().map((r) -> {
+                stocks.add(ConvertHelper.convert(r, WarehouseStocks.class));
+                return null;
+            });
+
+            if (stocks.size() >= pageSize) {
+                locator.setAnchor(stocks.get(stocks.size() - 1).getId());
+                return IterationMapReduceCallback.AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return IterationMapReduceCallback.AfterAction.next;
+        });
+
+        return stocks;
     }
 
     @Override
     public WarehouseUnits findWarehouseUnits(Long id, String ownerType, Long ownerId) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.ID.eq(id));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
+
+        List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseUnits.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
+
+    @Override
+    public void creatWarehouseUnit(WarehouseUnits unit) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseUnits.class));
+
+        unit.setId(id);
+        unit.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        unit.setStatus(Status.ACTIVE.getCode());
+        LOGGER.info("creatWarehouseUnit: " + unit);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseUnits.class, id));
+        EhWarehouseUnitsDao dao = new EhWarehouseUnitsDao(context.configuration());
+        dao.insert(unit);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWarehouseUnits.class, null);
+    }
+
+    @Override
+    public void updateWarehouseUnit(WarehouseUnits unit) {
+        assert(unit.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseUnits.class, unit.getId()));
+        EhWarehouseUnitsDao dao = new EhWarehouseUnitsDao(context.configuration());
+        dao.update(unit);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWarehouseUnits.class, unit.getId());
     }
 
     @Override

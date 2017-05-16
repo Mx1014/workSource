@@ -382,7 +382,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd) {
 
-//        warehouseService.updateWarehouseMaterialUnit(cmd);
+        warehouseService.updateWarehouseMaterialUnit(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -414,9 +414,9 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = WarehouseMaterialUnitDTO.class)
     public RestResponse findWarehouseMaterialUnit(DeleteWarehouseMaterialUnitCommand cmd) {
 
-//        WarehouseMaterialUnitDTO unit = warehouseService.findWarehouseMaterialUnit(cmd);
+        WarehouseMaterialUnitDTO unit = warehouseService.findWarehouseMaterialUnit(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(unit);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

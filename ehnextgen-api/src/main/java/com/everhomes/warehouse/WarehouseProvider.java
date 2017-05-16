@@ -44,5 +44,7 @@ public interface WarehouseProvider {
     List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize);
 
+    void creatWarehouseUnit(WarehouseUnits unit);
+    void updateWarehouseUnit(WarehouseUnits unit);
     List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId);
 }
