@@ -1583,7 +1583,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setConfirmUserCount(confirmUserCount);
         //已支付和待支付, 待支付 = 已确认 - 已支付
         Integer payUserCount = 0;
-        if(dto.getChargeFlag() == ActivityChargeFlag.CHARGE.getCode()){
+        if(dto.getChargeFlag() != null && dto.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
         	condition = Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode());
             condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
         	payUserCount = activityProvider.countActivityRosterByCondition(dto.getActivityId(), condition);
@@ -1592,7 +1592,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setUnPayUserCount(confirmUserCount - payUserCount);
         }
         //已签到和待签到，待签到 = 已确认|已支付 - 已签到
-        if(dto.getCheckinFlag() == ActivitySignupFlag.SIGNUP.getCode().intValue()){
+        if(dto.getCheckinFlag() !=null && dto.getCheckinFlag().intValue() == ActivitySignupFlag.SIGNUP.getCode().intValue()){
         	condition = Tables.EH_ACTIVITY_ROSTER.CHECKIN_FLAG.eq(CheckInStatus.CHECKIN.getCode());
             condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
         	Integer checkinUserCount = activityProvider.countActivityRosterByCondition(dto.getActivityId(), condition);
@@ -2063,6 +2063,11 @@ public class ActivityServiceImpl implements ActivityService {
         	}
         }
         //返回倒计时 add by yanjun 20170510 end
+        
+        //填充报名信息的统计数据 start  add by yanjun 20170503
+        populateRosterStatistics(dto);
+        //填充报名信息的统计数据  end
+        
         
         fixupVideoInfo(dto);//added by janson
         response.setActivity(dto);
