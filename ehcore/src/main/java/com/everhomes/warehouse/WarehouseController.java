@@ -165,10 +165,10 @@ public class WarehouseController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /warehouse/findWarehouseMaterialCategory</b>
+     * <b>URL: /warehouse/listWarehouseMaterialCategory</b>
      * <p>查询物品分类列表</p>
      */
-    @RequestMapping("findWarehouseMaterialCategory")
+    @RequestMapping("listWarehouseMaterialCategory")
     @RestReturn(value = WarehouseMaterialCategoryDTO.class)
     public RestResponse listWarehouseMaterialCategory(DeleteWarehouseMaterialCategoryCommand cmd) {
 
