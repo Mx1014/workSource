@@ -26,11 +26,14 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javassist.runtime.DotClass;
 
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.common.joda.time.Hours;
 import org.omg.CORBA.PRIVATE_MEMBER;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +50,10 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+import ch.qos.logback.classic.Logger;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
@@ -85,7 +92,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	//时间相加减需要带上这个差值
 	private static final Long MILLISECONDGMT=8*3600*1000L;
 	private static final Long DAY_MILLISECONDGMT=24*3600*1000L;
+
 	
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ApprovalRequestDefaultHandler.class);
 //	private static final SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
 //	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 //	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -296,17 +305,22 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		timeRangeList.forEach(a->{
 			//如果不跨天
 			if (punchService.isSameDay(new Date(a.getFromTime()), new Date(a.getEndTime()))) {
-				//1.用昨天的规则计算一下时间
+				//1.用昨天的规则计算一下时间 注意:起止时间要加一天的毫秒数
 				Calendar yestCalendar = Calendar.getInstance();
 				yestCalendar.setTimeInMillis(a.getFromTime()); 
 				yestCalendar.add(Calendar.DAY_OF_MONTH, -1);
 				PunchTimeRuleDTO dto = processTimeRuleDTO(punchRule.getId(), yestCalendar.getTime()) ;
-				long yesterdayTime = calculateOneDayTime(a.getFromTime(), a.getEndTime(), dto);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTimeInMillis(a.getFromTime());
+				long fromTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L;
+				calendar.setTimeInMillis(a.getEndTime());
+				long endTime = calendar.get(Calendar.HOUR_OF_DAY)*3600*1000L +calendar.get(Calendar.MINUTE)*60*1000L +calendar.get(Calendar.SECOND)*1000L; 
+				long yesterdayTime = calculateOneDayTime( fromTime+ DAY_MILLISECONDGMT, endTime  + DAY_MILLISECONDGMT, dto);
 				//2.用今天的规则计算一下时间
 				Calendar todayCalendar = Calendar.getInstance();
 				todayCalendar.setTimeInMillis(a.getFromTime());  
 				dto = processTimeRuleDTO(punchRule.getId(), todayCalendar.getTime()) ;
-				long todayTime = calculateOneDayTime(a.getFromTime(), a.getEndTime(), dto);
+				long todayTime = calculateOneDayTime( fromTime,endTime, dto);
 				//3.把用昨天规则计算的和今天规则计算的加起来
 				ApprovalDayActualTime actualTime = new ApprovalDayActualTime();
 				actualTime.setUserId(userId);
@@ -388,6 +402,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 	private long calculateOneDayTime(long fromTime, long endTime, PunchTimeRuleDTO dto) {
 		//如果fromTime超过了最早下班时间或者endTime早于最早上班时间,return 0
+ 		LOGGER.debug("fromtime ="+fromTime+",endtime ="+endTime+",dto = "+dto);
 		if(fromTime > dto.getEndEarlyTime() || endTime < dto.getStartEarlyTime())
 			return 0L;
 		// 确定起始时间:
