@@ -92,7 +92,7 @@ CREATE TABLE `eh_warehouse_stock_logs` (
   `warehouse_id` BIGINT NOT NULL COMMENT 'id of eh_warehouses',
   `material_id` BIGINT NOT NULL COMMENT 'eh_warehouse_materials',
   `delivery_amount` BIGINT NOT NULL DEFAULT 0,
-  `stock_amount` BIGINT NOT NULL DEFAULT 0,
+  `stock_amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'rest amount after delivery',
   `request_uid` BIGINT,
   `delivery_uid` BIGINT,
   `create_time` DATETIME,

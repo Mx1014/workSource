@@ -133,6 +133,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(cmd.getId() == null) {
             category.setNamespaceId(UserContext.getCurrentNamespaceId());
             category.setCreatorUid(UserContext.current().getUser().getId());
+            category.setPath("");
             WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
             if(parent != null) {
                 category.setPath(parent.getPath());
@@ -233,6 +234,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(cmd.getCategoryId() == null || cmd.getCategoryId() == 0L) {
             category.setId(0L);
             category.setName("全部");
+            category.setPath("");
         } else {
             category = verifyWarehouseMaterialCategories(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
         }
@@ -364,11 +366,47 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
-//        ownerType: 库存所属类型 eg：EhOrganizations
-//        ownerId: 库存所属类型id
-//        requestType: 操作类型 参考WarehouseStockRequestType
-//        stocks: 库存列表 参考WarehouseMaterialStock
+        if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+            cmd.getStocks().forEach(stock -> {
+                WarehouseStocks materialStock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(
+                        stock.getWarehouseId(), stock.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
 
+                if(materialStock != null) {
+                    if(WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
+                        materialStock.setAmount(materialStock.getAmount() + stock.getAmount());
+                        warehouseProvider.updateWarehouseStock(materialStock);
+
+                        WarehouseStockLogs log = new WarehouseStockLogs();
+                    } else if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
+                        if(materialStock.getAmount().compareTo(stock.getAmount()) < 0) {
+                            LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
+                                    + ", materialId = " + stock.getMaterialId());
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                    "warehouse stock is not enough");
+                        }
+                    }
+                } else {
+                    if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
+                        LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
+                                + ", materialId = " + stock.getMaterialId());
+                        throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                "warehouse stock is not enough");
+                    }
+                    materialStock = new WarehouseStocks();
+                    materialStock.setNamespaceId(UserContext.getCurrentNamespaceId());
+                    materialStock.setOwnerId(cmd.getOwnerId());
+                    materialStock.setOwnerType(cmd.getOwnerType());
+                    materialStock.setWarehouseId(stock.getWarehouseId());
+                    materialStock.setMaterialId(stock.getMaterialId());
+                    materialStock.setAmount(stock.getAmount());
+                    materialStock.setCreatorUid(UserContext.current().getUser().getId());
+                    warehouseProvider.creatWarehouseStock(materialStock);
+
+                    WarehouseStockLogs log = new WarehouseStockLogs();
+                }
+            });
+
+        }
     }
 
     @Override

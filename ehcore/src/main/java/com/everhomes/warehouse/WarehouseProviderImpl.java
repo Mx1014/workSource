@@ -293,12 +293,44 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public void creatWarehouseStock(WarehouseStocks stock) {
+
+    }
+
+    @Override
+    public void updateWarehouseStock(WarehouseStocks stock) {
+
+    }
+
+    @Override
     public WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.ID.eq(id));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
+
+        List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseStocks.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
+
+    @Override
+    public WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.WAREHOUSE_ID.eq(warehouseId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
         query.fetch().map((r) -> {

@@ -26,7 +26,10 @@ public interface WarehouseProvider {
     WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
     List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId);
 
+    void creatWarehouseStock(WarehouseStocks stock);
+    void updateWarehouseStock(WarehouseStocks stock);
     WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId);
+    WarehouseStocks findWarehouseStocksByWarehouseAndMaterial(Long warehouseId, Long materialId, String ownerType, Long ownerId);
     List<WarehouseStocks> listWarehouseStocks(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmountByMaterialId(Long materialId, String ownerType, Long ownerId);
