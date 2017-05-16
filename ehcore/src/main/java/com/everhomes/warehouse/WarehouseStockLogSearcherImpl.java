@@ -27,6 +27,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.List;
 /**
  * Created by ying.xiong on 2017/5/16.
  */
+@Component
 public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch implements WarehouseStockLogSearcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseStockLogSearcherImpl.class);
 
