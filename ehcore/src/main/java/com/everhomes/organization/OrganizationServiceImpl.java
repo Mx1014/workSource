@@ -9644,11 +9644,12 @@ System.out.println();
 			LOGGER.error("No OrganizationId enter ="+cmd.getOrganizationId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "No OrganizationId enter!");
 		}
-		Organization org = this.checkOrganization(cmd.getOrganizationId());
-		if(null == org){
-			LOGGER.error("organization is not matched ="+cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "organization is not matched!");
-		}
+		
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        String tag = "listUsersOfEnterprise";
+        Organization org = checkEnterpriseParameter(cmd.getOrganizationId(), userId, tag);
+        
 
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
