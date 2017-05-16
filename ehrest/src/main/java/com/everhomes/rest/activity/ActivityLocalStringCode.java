@@ -17,7 +17,10 @@ public interface ActivityLocalStringCode {
 	 static final int ACTIVITY_INCOMPATIBLE = 10;
 	 static final int ACTIVITY_TIME = 11;
 	 
-	 static final int ACTIVITY_PAY_SUBJECT = 10020;
+	 static final int ACTIVITY_PAY_FEE = 10020;
+	 static final int ACTIVITY_TO_CONFIRM = 10021;
+	 static final int ACTIVITY_HAVE_CONFIRM = 10022;
+	 static final int ACTIVITY_TO_PAY = 10023;
 	 
 	 
 }

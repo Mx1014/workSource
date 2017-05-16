@@ -47,6 +47,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ActivityDetailActionData;
+import com.everhomes.rest.common.ActivityEnrollDetailActionData;
 import com.everhomes.rest.common.Router;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
@@ -56,6 +57,7 @@ import com.everhomes.rest.group.RequestToJoinGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
@@ -474,10 +476,36 @@ public class ActivityServiceImpl implements ActivityService {
 	            map.put("userName", user.getNickName());
 	            map.put("postName", activity.getSubject());
 	            
-	            //创建带链接跳转的消息头    add by yanjun 20170513 
-	        	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
-	        	
-	            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR, meta);
+	            
+	            if(activity.getConfirmFlag() == 0){
+	            	 //创建带链接跳转的消息头    add by yanjun 20170513 
+	            	
+	            	ActivityDetailActionData actionData = new ActivityDetailActionData();
+	        		actionData.setForumId(post.getForumId());
+	        		actionData.setTopicId(post.getId());
+	        		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+	        		
+	        		Map<String, String> meta = createActivityRouterMeta(url, null);
+		        	
+		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR, meta);
+		            
+	            }else{
+	            	 //创建带链接跳转的消息头    add by yanjun 20170513 
+	            	
+	            	ActivityEnrollDetailActionData actionData = new ActivityEnrollDetailActionData();
+	        		actionData.setActivityId(activity.getId());
+	        		String url =  RouterBuilder.build(Router.ACTIVITY_ENROLL_DETAIL, actionData);
+	        		
+	        		String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+	        				String.valueOf(ActivityLocalStringCode.ACTIVITY_TO_CONFIRM), 
+	        				UserContext.current().getUser().getLocale(), 
+	        				"Activity Wait to Confirm");
+	        		
+		        	Map<String, String> meta = createActivityRouterMeta(url, subject);
+		        	
+		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
+	            }
+	           
 	            
 	            return dto;
 	        });
@@ -511,7 +539,7 @@ public class ActivityServiceImpl implements ActivityService {
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
 		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
-				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_SUBJECT), 
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE), 
 				UserContext.current().getUser().getLocale(), 
 				"activity roster pay");
 		
@@ -1755,13 +1783,20 @@ public class ActivityServiceImpl implements ActivityService {
         if (item.getUid().longValue() != 0L) {
         	if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode()){
         		Map<String, String> map = new HashMap<String, String>();
-            	map.put("userName", user.getNickName());
             	map.put("postName", activity.getSubject());
             	
-            	//创建带链接跳转的消息头    add by yanjun 20170513
-            	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
-            	 
-            	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER, meta);
+            	//创建带链接跳转的消息头    add by yanjun 20170513 
+            	ActivityDetailActionData actionData = new ActivityDetailActionData();
+        		actionData.setForumId(post.getForumId());
+        		actionData.setTopicId(post.getId());
+        		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+        		String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+        				String.valueOf(ActivityLocalStringCode.ACTIVITY_HAVE_CONFIRM), 
+        				UserContext.current().getUser().getLocale(), 
+        				"Activity Have been Confirm");
+        		Map<String, String> meta = createActivityRouterMeta(url, subject);
+	            sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_USER_HAVE_CONFIRM, meta);
+            	
         	}else{
         		GetRosterOrderSettingCommand setCmd = new GetRosterOrderSettingCommand();
         		setCmd.setNamespaceId(user.getNamespaceId());
@@ -1775,8 +1810,17 @@ public class ActivityServiceImpl implements ActivityService {
             	map.put("payTimeDays", days.toString());
             	map.put("payTimeHours", hours.toString());
             	
+            	ActivityDetailActionData actionData = new ActivityDetailActionData();
+        		actionData.setForumId(post.getForumId());
+        		actionData.setTopicId(post.getId());
+        		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+        		String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+        				String.valueOf(ActivityLocalStringCode.ACTIVITY_TO_PAY), 
+        				UserContext.current().getUser().getLocale(), 
+        				"Activity To Been Pay");
+        		
             	//创建带链接跳转的消息头    add by yanjun 20170513
-            	Map<String, String> meta = createActivityDetailMeta(post.getForumId(), post.getId());
+            	Map<String, String> meta = createActivityRouterMeta(url, subject);
             	 
             	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY, meta);
         	}
@@ -4721,16 +4765,15 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 	}
 	
-	private Map<String, String> createActivityDetailMeta(Long forumId, Long topicId){
+	private Map<String, String> createActivityRouterMeta(String url, String subject){
 		Map<String, String> meta = new HashMap<String, String>();
 		RouterMetaObject routerMetaObject = new RouterMetaObject();
-		ActivityDetailActionData actionData = new ActivityDetailActionData();
-		actionData.setForumId(forumId);
-		actionData.setTopicId(topicId);
-		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
 		routerMetaObject.setUrl(url);
-		meta.put("meta-object-type", "message.router");
-		meta.put("meta-object", routerMetaObject.toString());
+		meta.put(MessageMetaConstant.META_OBJECT_TYPE, "message.router");
+		meta.put(MessageMetaConstant.META_OBJECT, routerMetaObject.toString());
+		if(subject != null){
+			meta.put(MessageMetaConstant.MESSAGE_SUBJECT, subject);
+		}
 		return meta;
 	}
 
