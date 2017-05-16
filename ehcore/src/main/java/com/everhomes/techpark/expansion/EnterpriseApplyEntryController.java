@@ -325,13 +325,13 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/getTemplateById</b>
+	 * <b>URL: /techpark/entry/getFormTemplateByFormId</b>
 	 * <p> 获取表单的信息 </p>
 	 * @return GeneralFormDTO 表单的数据信息
 	 */
-	@RequestMapping("getTemplateById")
+	@RequestMapping("getFormTemplateByFormId")
 	@RestReturn(value=GeneralFormDTO.class)
-	public RestResponse getTemplateById(@Valid GetTemplateByIdCommand cmd) {
+	public RestResponse getFormTemplateByFormId(@Valid GetFormTemplateByFormIdCommand cmd) {
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
