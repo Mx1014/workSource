@@ -1900,4 +1900,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
 	VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999978', '0', '0', '0', '/home', 'Bizs1', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRwbVpETmxPV1E1TVRNNE1XVXpZVFl4WVRoaU1XUmtNRGxpWW1ZNFkyVXlOZw', '1', '1', '56', '', '8', '0', '1', '0', NULL, '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL, NULL, '0', NULL);
 
+INSERT INTO `eh_namespaces` (`id`, `name`) VALUES ('999978', '康利');
 
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+        VALUES((@menu_scope_id := @menu_scope_id + 1), 50660,'', 'EhNamespaces', 999978,2);
