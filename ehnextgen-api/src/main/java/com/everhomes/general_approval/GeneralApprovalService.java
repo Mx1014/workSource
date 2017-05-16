@@ -40,4 +40,8 @@ public interface GeneralApprovalService {
 
 	GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
 
+	void enableGeneralApproval(GeneralApprovalIdCommand cmd);
+
+	void disableGeneralApproval(GeneralApprovalIdCommand cmd);
+
 }
