@@ -2,12 +2,12 @@ package com.everhomes.warehouse;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.warehouse.SearchWarehousesCommand;
-import com.everhomes.rest.warehouse.SearchWarehousesResponse;
-import com.everhomes.rest.warehouse.WarehouseDTO;
+import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
+import com.everhomes.rest.warehouse.SearchWarehouseStocksResponse;
+import com.everhomes.rest.warehouse.WarehouseStockDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.search.WarehouseSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -35,8 +35,8 @@ import java.util.List;
  * Created by ying.xiong on 2017/5/15.
  */
 @Component
-public class WarehouseSearcherImpl extends AbstractElasticSearch implements WarehouseSearcher {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseSearcherImpl.class);
+public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements WarehouseStockSearcher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseStockSearcherImpl.class);
 
     @Autowired
     private WarehouseProvider warehouseProvider;
@@ -50,15 +50,15 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
     }
 
     @Override
-    public void bulkUpdate(List<Warehouses> warehouses) {
+    public void bulkUpdate(List<WarehouseStocks> stocks) {
         BulkRequestBuilder brb = getClient().prepareBulk();
-        for (Warehouses warehouse : warehouses) {
+        for (WarehouseStocks stock : stocks) {
 
-            XContentBuilder source = createDoc(warehouse);
+            XContentBuilder source = createDoc(stock);
             if(null != source) {
-                LOGGER.info("warehouse id:" + warehouse.getId());
+                LOGGER.info("warehouse stock id:" + stock.getId());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(warehouse.getId().toString()).source(source));
+                        .id(stock.getId().toString()).source(source));
             }
 
         }
@@ -68,15 +68,10 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
     }
 
     @Override
-    public String getIndexType() {
-        return SearchUtils.WAREHOUSE;
-    }
+    public void feedDoc(WarehouseStocks stock) {
+        XContentBuilder source = createDoc(stock);
 
-    @Override
-    public void feedDoc(Warehouses warehouse) {
-        XContentBuilder source = createDoc(warehouse);
-
-        feedDoc(warehouse.getId().toString(), source);
+        feedDoc(stock.getId().toString(), source);
     }
 
     @Override
@@ -86,10 +81,10 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
 
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<Warehouses> warehouses = warehouseProvider.listWarehouses(locator, pageSize);
+            List<WarehouseStocks> stocks = warehouseProvider.listWarehouseStocks(locator, pageSize);
 
-            if(warehouses.size() > 0) {
-                this.bulkUpdate(warehouses);
+            if(stocks.size() > 0) {
+                this.bulkUpdate(stocks);
             }
 
             if(locator.getAnchor() == null) {
@@ -100,11 +95,11 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         this.optimize(1);
         this.refresh();
 
-        LOGGER.info("sync for warehouses ok");
+        LOGGER.info("sync for warehouse stocks ok");
     }
 
     @Override
-    public SearchWarehousesResponse query(SearchWarehousesCommand cmd) {
+    public SearchWarehouseStocksResponse query(SearchWarehouseStocksCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
@@ -124,8 +119,12 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 
-        if(cmd.getStatus() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        if(cmd.getWarehouseId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
+        }
+
+        if(cmd.getMaterialNumber() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -139,13 +138,14 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
         builder.setQuery(qb);
 
         SearchResponse rsp = builder.execute().actionGet();
+
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("query warehouse :{}", rsp);
+            LOGGER.debug("query warehouse stocks :{}", rsp);
         }
 
         List<Long> ids = getIds(rsp);
 
-        SearchWarehousesResponse response = new SearchWarehousesResponse();
+        SearchWarehouseStocksResponse response = new SearchWarehouseStocksResponse();
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
@@ -153,32 +153,67 @@ public class WarehouseSearcherImpl extends AbstractElasticSearch implements Ware
             response.setNextPageAnchor(null);
         }
 
-        List<WarehouseDTO> warehouseDTOs = new ArrayList<WarehouseDTO>();
+        List<WarehouseStockDTO> stockDTOs = new ArrayList<WarehouseStockDTO>();
         for(Long id : ids) {
-            Warehouses warehouse = warehouseProvider.findWarehouse(id, cmd.getOwnerType(), cmd.getOwnerId());
-            WarehouseDTO dto = ConvertHelper.convert(warehouse, WarehouseDTO.class);
-            warehouseDTOs.add(dto);
+            WarehouseStocks stock = warehouseProvider.findWarehouseStocks(id, cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseStockDTO dto = ConvertHelper.convert(stock, WarehouseStockDTO.class);
+            Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+            if(warehouse != null) {
+                dto.setWarehouseName(warehouse.getName());
+            }
+
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(dto.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+            if(material != null) {
+                dto.setMaterialName(material.getName());
+                dto.setMaterialNumber(material.getMaterialNumber());
+                dto.setCategoryId(material.getCategoryId());
+                dto.setUnitId(material.getUnitId());
+
+                WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
+                if(category != null) {
+                    dto.setCategoryName(category.getName());
+                }
+
+                WarehouseUnits unit = warehouseProvider.findWarehouseUnits(material.getUnitId(), cmd.getOwnerType(), cmd.getOwnerId());
+                if(unit != null) {
+                    dto.setUnitName(unit.getName());
+                }
+            }
+            stockDTOs.add(dto);
         }
-        response.setWarehouseDTOs(warehouseDTOs);
+        response.setStockDTOs(stockDTOs);
 
         return response;
     }
 
-    private XContentBuilder createDoc(Warehouses warehouse){
+    private XContentBuilder createDoc(WarehouseStocks stock){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("namespaceId", warehouse.getNamespaceId());
-            b.field("ownerId", warehouse.getOwnerId());
-            b.field("ownerType", warehouse.getOwnerType());
-            b.field("status", warehouse.getStatus());
-            b.field("name", warehouse.getName());
+            b.field("namespaceId", stock.getNamespaceId());
+            b.field("ownerId", stock.getOwnerId());
+            b.field("ownerType", stock.getOwnerType());
+            b.field("warehouseId", stock.getWarehouseId());
+            WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(stock.getMaterialId(), stock.getOwnerType(), stock.getOwnerId());
+            if(material != null) {
+                b.field("name", material.getName());
+                b.field("materialNumber", material.getMaterialNumber());
+            } else {
+                b.field("name", "");
+                b.field("materialNumber", "");
+            }
+
 
 
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create warehouse " + warehouse.getId() + " error");
+            LOGGER.error("Create warehouse stock  " + stock.getId() + " error");
             return null;
         }
+    }
+
+    @Override
+    public String getIndexType() {
+        return SearchUtils.WAREHOUSE_STOCK;
     }
 }
