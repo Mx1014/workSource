@@ -1,8 +1,10 @@
 package com.everhomes.rest.warehouse;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
@@ -37,6 +39,9 @@ public class WarehouseMaterialCategoryDTO {
     private String categoryNumber;
 
     private Timestamp updateTime;
+
+    @ItemType(WarehouseMaterialCategoryDTO.class)
+    private List<WarehouseMaterialCategoryDTO> childrens;
 
     public Timestamp getUpdateTime() {
         return updateTime;
@@ -108,6 +113,14 @@ public class WarehouseMaterialCategoryDTO {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public List<WarehouseMaterialCategoryDTO> getChildrens() {
+        return childrens;
+    }
+
+    public void setChildrens(List<WarehouseMaterialCategoryDTO> childrens) {
+        this.childrens = childrens;
     }
 
     @Override

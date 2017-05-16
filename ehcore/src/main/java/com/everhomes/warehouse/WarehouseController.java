@@ -11,6 +11,7 @@ import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.WarehouseMaterialCategorySearcher;
 import com.everhomes.search.WarehouseMaterialSearcher;
 import com.everhomes.search.WarehouseSearcher;
+import com.everhomes.search.WarehouseStockSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -46,6 +47,9 @@ public class WarehouseController extends ControllerBase {
 
     @Autowired
     private WarehouseMaterialSearcher warehouseMaterialSearcher;
+
+    @Autowired
+    private WarehouseStockSearcher warehouseStockSearcher;
 
     /**
      * <b>URL: /warehouse/updateWarehouse</b>
@@ -161,6 +165,22 @@ public class WarehouseController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /warehouse/findWarehouseMaterialCategory</b>
+     * <p>查询物品分类列表</p>
+     */
+    @RequestMapping("findWarehouseMaterialCategory")
+    @RestReturn(value = WarehouseMaterialCategoryDTO.class)
+    public RestResponse listWarehouseMaterialCategory(DeleteWarehouseMaterialCategoryCommand cmd) {
+
+        WarehouseMaterialCategoryDTO category = warehouseService.listWarehouseMaterialCategory(cmd);
+
+        RestResponse response = new RestResponse(category);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /warehouse/searchWarehouseMaterialCategories</b>
      * <p>查看物品分类</p>
      */
@@ -248,7 +268,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
 
-//       warehouseService.updateWarehouseStock(cmd);
+       warehouseService.updateWarehouseStock(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -264,7 +284,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchWarehouseStocksResponse.class)
     public RestResponse searchWarehouseStocks(SearchWarehouseStocksCommand cmd) {
 
-//        SearchWarehouseStocksResponse stocks = warehouseStockSearcher.query(cmd);
+        SearchWarehouseStocksResponse stocks = warehouseStockSearcher.query(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -410,7 +430,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = WarehouseMaterialUnitDTO.class, collection = true)
     public RestResponse listWarehouseMaterialUnits(ListWarehouseMaterialUnitsCommand cmd) {
 
-//        List<WarehouseMaterialUnitDTO> units = warehouseService.listWarehouseMaterialUnits(cmd);
+        List<WarehouseMaterialUnitDTO> units = warehouseService.listWarehouseMaterialUnits(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

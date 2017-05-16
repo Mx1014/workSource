@@ -19,7 +19,6 @@ import java.sql.Timestamp;
  *     <li>categoryName: 物品分类名称</li>
  *     <li>unitId: 单位id</li>
  *     <li>unitName: 单位名</li>
- *     <li>amount: 库存数</li>
  *     <li>updateTime: 更新时间</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.

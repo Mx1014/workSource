@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/5/12.
@@ -226,6 +228,38 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    public WarehouseMaterialCategoryDTO listWarehouseMaterialCategory(DeleteWarehouseMaterialCategoryCommand cmd) {
+        WarehouseMaterialCategories category = verifyWarehouseMaterialCategories(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
+        WarehouseMaterialCategoryDTO dto = ConvertHelper.convert(category, WarehouseMaterialCategoryDTO.class);
+
+        List<WarehouseMaterialCategories> children = warehouseProvider.listAllChildWarehouseMaterialCategories(category.getPath() + "/%");
+        if(children != null && children.size() > 0) {
+            List<WarehouseMaterialCategoryDTO> childrenDto = children.stream().map(child -> {
+                WarehouseMaterialCategoryDTO childDto = ConvertHelper.convert(child, WarehouseMaterialCategoryDTO.class);
+                return childDto;
+            }).collect(Collectors.toList());
+            dto = this.processWarehouseMaterialCategoryTree(childrenDto, dto);
+        }
+        return dto;
+    }
+
+    private WarehouseMaterialCategoryDTO processWarehouseMaterialCategoryTree(List<WarehouseMaterialCategoryDTO> dtos, WarehouseMaterialCategoryDTO dto){
+
+        List<WarehouseMaterialCategoryDTO> trees = new ArrayList<WarehouseMaterialCategoryDTO>();
+        WarehouseMaterialCategoryDTO allTreeDTO = ConvertHelper.convert(dto, WarehouseMaterialCategoryDTO.class);
+        trees.add(allTreeDTO);
+        for (WarehouseMaterialCategoryDTO treeDTO : dtos) {
+            if(treeDTO.getParentId().equals(dto.getId())){
+                WarehouseMaterialCategoryDTO categoryTreeDTO= processWarehouseMaterialCategoryTree(dtos, treeDTO);
+                trees.add(categoryTreeDTO);
+            }
+        }
+
+        dto.setChildrens(trees);
+        return dto;
+    }
+
+    @Override
     public WarehouseMaterialDTO updateWarehouseMaterial(UpdateWarehouseMaterialCommand cmd) {
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
         checkMaterialNumber(material.getId(), material.getMaterialNumber(),material.getOwnerType(),material.getOwnerId());
@@ -320,5 +354,19 @@ public class WarehouseServiceImpl implements WarehouseService {
             dto.setUnitName(unit.getName());
         }
         return dto;
+    }
+
+    @Override
+    public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
+
+    }
+
+    @Override
+    public List<WarehouseMaterialUnitDTO> listWarehouseMaterialUnits(ListWarehouseMaterialUnitsCommand cmd) {
+        List<WarehouseMaterialUnitDTO> dtos = warehouseProvider.listWarehouseMaterialUnits(cmd.getOwnerType(), cmd.getOwnerId()).stream().map(unit -> {
+            WarehouseMaterialUnitDTO dto = ConvertHelper.convert(unit, WarehouseMaterialUnitDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
+        return dtos;
     }
 }

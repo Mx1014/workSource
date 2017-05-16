@@ -17,10 +17,7 @@ import com.everhomes.server.schema.tables.daos.EhWarehousesDao;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterialCategories;
 import com.everhomes.server.schema.tables.pojos.EhWarehouseMaterials;
 import com.everhomes.server.schema.tables.pojos.EhWarehouses;
-import com.everhomes.server.schema.tables.records.EhWarehouseMaterialCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhWarehouseMaterialsRecord;
-import com.everhomes.server.schema.tables.records.EhWarehouseStocksRecord;
-import com.everhomes.server.schema.tables.records.EhWarehousesRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -192,6 +189,25 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public List<WarehouseMaterialCategories> listAllChildWarehouseMaterialCategories(String superiorPath) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        List<WarehouseMaterialCategories> result  = new ArrayList<WarehouseMaterialCategories>();
+        SelectQuery<EhWarehouseMaterialCategoriesRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES);
+
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.PATH.like(superiorPath));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.STATUS.eq(Status.ACTIVE.getCode()));
+
+
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseMaterialCategories.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public void creatWarehouseMaterials(WarehouseMaterials materials) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseMaterials.class));
 
@@ -274,6 +290,25 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         });
 
         return result;
+    }
+
+    @Override
+    public WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.ID.eq(id));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseStocks.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
     }
 
     @Override
@@ -445,7 +480,29 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize) {
+        return null;
+    }
+
+    @Override
     public WarehouseUnits findWarehouseUnits(Long id, String ownerType, Long ownerId) {
         return null;
+    }
+
+    @Override
+    public List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
+
+        List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseUnits.class));
+            return null;
+        });
+
+        return result;
     }
 }

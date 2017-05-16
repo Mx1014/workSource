@@ -18,6 +18,7 @@ public interface WarehouseProvider {
     void updateWarehouseMaterialCategories(WarehouseMaterialCategories category);
     WarehouseMaterialCategories findWarehouseMaterialCategories(Long id, String ownerType, Long ownerId);
     WarehouseMaterialCategories findWarehouseMaterialCategoriesByNumber(String categoryNumber, String ownerType, Long ownerId);
+    List<WarehouseMaterialCategories> listAllChildWarehouseMaterialCategories(String superiorPath);
 
     void creatWarehouseMaterials(WarehouseMaterials materials);
     void updateWarehouseMaterials(WarehouseMaterials materials);
@@ -25,6 +26,7 @@ public interface WarehouseProvider {
     WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
     List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId);
 
+    WarehouseStocks findWarehouseStocks(Long id, String ownerType, Long ownerId);
     List<WarehouseStocks> listWarehouseStocks(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmountByMaterialId(Long materialId, String ownerType, Long ownerId);
@@ -33,4 +35,7 @@ public interface WarehouseProvider {
     List<Warehouses> listWarehouses(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseMaterialCategories> listWarehouseMaterialCategories(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseMaterials> listWarehouseMaterials(CrossShardListingLocator locator, Integer pageSize);
+    List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize);
+
+    List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId);
 }
