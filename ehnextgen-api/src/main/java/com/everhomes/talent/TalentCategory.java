@@ -8,10 +8,18 @@ public class TalentCategory extends EhTalentCategories {
 	
 	private static final long serialVersionUID = -1049038217375098169L;
 	
+	private static final TalentCategory talentCategory = new TalentCategory(otherId(), otherName());
+	
+	public TalentCategory() {
+		super();
+	}
+
+	public TalentCategory(Long id, String name) {
+		super.setId(id);
+		super.setName(name);
+	}
+
 	public static TalentCategory other() {
-		TalentCategory talentCategory = new TalentCategory();
-		talentCategory.setId(otherId());
-		talentCategory.setName(otherName());
 		return talentCategory;
 	}
 	

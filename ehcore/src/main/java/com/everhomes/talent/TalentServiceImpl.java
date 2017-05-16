@@ -131,30 +131,34 @@ public class TalentServiceImpl implements TalentService {
 
 	private void updateTalentCategory(TalentCategoryDTO talentCategoryDTO) {
 		TalentCategory talentCategory = findTalentCategoryById(talentCategoryDTO.getId());
+		if (talentCategory == TalentCategory.other()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		}
 		talentCategory.setName(talentCategoryDTO.getName());
 		talentCategoryProvider.updateTalentCategory(talentCategory);
 	}
 
 	private TalentCategory findTalentCategoryById(Long id) {
-		if (id.longValue() == TalentCategory.otherId().longValue()) {
-			return TalentCategory.other();
-		}else {
+		if (id.longValue() != TalentCategory.otherId().longValue()) {
 			TalentCategory talentCategory = talentCategoryProvider.findTalentCategoryById(id);
-			if (talentCategory == null || talentCategory.getNamespaceId().intValue() != namespaceId().intValue()) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+			if (talentCategory != null && talentCategory.getNamespaceId().intValue() == namespaceId().intValue() 
+					&& talentCategory.getStatus().byteValue() == CommonStatus.ACTIVE.getCode()) {
+				return talentCategory;
 			}
-			return talentCategory;
 		}
+		return TalentCategory.other();
 	}
 	
 	@Override
 	public void deleteTalentCategory(DeleteTalentCategoryCommand cmd) {
-		if (cmd.getId().longValue() != TalentCategory.otherId().longValue()) {
-			TalentCategory talentCategory = findTalentCategoryById(cmd.getId());
-			talentCategory.setStatus(CommonStatus.INACTIVE.getCode());
-			talentCategoryProvider.updateTalentCategory(talentCategory);
+		TalentCategory talentCategory = findTalentCategoryById(cmd.getId());
+		if (talentCategory == TalentCategory.other()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
+		talentCategory.setStatus(CommonStatus.INACTIVE.getCode());
+		talentCategoryProvider.updateTalentCategory(talentCategory);
 	}
 
 	@Override
@@ -180,6 +184,11 @@ public class TalentServiceImpl implements TalentService {
 		TalentQueryHistory talentQueryHistory = talentQueryHistoryProvider.findTalentQueryHistoryByKeyword(userId(), keyword);
 		if (talentQueryHistory != null) {
 			talentQueryHistoryProvider.deleteTalentQueryHistory(talentQueryHistory);
+		}else {
+			talentQueryHistory = new TalentQueryHistory();
+			talentQueryHistory.setKeyword(keyword);
+			talentQueryHistory.setNamespaceId(namespaceId());
+			talentQueryHistory.setStatus(CommonStatus.ACTIVE.getCode());
 		}
 		talentQueryHistoryProvider.createTalentQueryHistory(talentQueryHistory);
 	}
@@ -237,7 +246,8 @@ public class TalentServiceImpl implements TalentService {
 	private Talent findTalentById(Long id, Integer namespaceId, String ownerType, Long ownerId) {
 		Talent talent = talentProvider.findTalentById(id);
 		if (talent == null || talent.getNamespaceId().intValue() != namespaceId.intValue() 
-				|| !talent.getOwnerType().equals(ownerType) || talent.getOwnerId().longValue() != ownerId.longValue()) {
+				|| !talent.getOwnerType().equals(ownerType) || talent.getOwnerId().longValue() != ownerId.longValue() 
+				|| talent.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
@@ -355,7 +365,8 @@ public class TalentServiceImpl implements TalentService {
 	
 	private TalentQueryHistory findTalentQueryHistoryById(Long id) {
 		TalentQueryHistory talentQueryHistory = talentQueryHistoryProvider.findTalentQueryHistoryById(id);
-		if (talentQueryHistory == null || talentQueryHistory.getCreatorUid().longValue() != userId().longValue()) {
+		if (talentQueryHistory == null || talentQueryHistory.getCreatorUid().longValue() != userId().longValue()
+				|| talentQueryHistory.getStatus().byteValue() != CommonStatus.ACTIVE.getCode()) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}

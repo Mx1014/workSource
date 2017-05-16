@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.test.junit.talent;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,8 +71,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 	private static final String CLEAR_TALENT_QUERY_HISTORY_URL = "/talent/clearTalentQueryHistory";
 
 
-	//1. 分类列表
-	//@Test
+	//1. 分类列表（已完成）
+	@Test
 	public void testListTalentCategory() {
 		String url = LIST_TALENT_CATEGORY_URL;
 		logon();
@@ -90,8 +92,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//2. 新增或更新分类
-	//@Test
+	//2. 新增或更新分类（已完成）
+	@Test
 	public void testCreateOrUpdateTalentCategory() {
 		String url = CREATE_OR_UPDATE_TALENT_CATEGORY_URL;
 		logon();
@@ -116,8 +118,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//3. 删除分类
-	//@Test
+	//3. 删除分类（已完成）
+	@Test
 	public void testDeleteTalentCategory() {
 		String url = DELETE_TALENT_CATEGORY_URL;
 		logon();
@@ -136,8 +138,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//4. 人才列表
-	//@Test
+	//4. 人才列表（已完成）
+	@Test
 	public void testListTalent() {
 		String url = LIST_TALENT_URL;
 		logon();
@@ -150,8 +152,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 //		cmd.setGender((byte)1);
 //		cmd.setExperience((byte)1);
 //		cmd.setDegree((byte)1);
-//		cmd.setKeyword("");
-//		cmd.setPageAnchor(1L);
+//		cmd.setKeyword("分类");
+//		cmd.setPageAnchor(0L);
 		cmd.setPageSize(2);
 //		cmd.setHistoryFlag((byte)1);
 
@@ -167,8 +169,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		assertEquals(2, list.size());
 	}
 
-	//5. 创建或更新人才信息
-	//@Test
+	//5. 创建或更新人才信息（已完成）
+//	@Test
 	public void testCreateOrUpdateTalent() {
 		String url = CREATE_OR_UPDATE_TALENT_URL;
 		logon();
@@ -178,7 +180,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		cmd.setOwnerId(240111044331051304L);
 		cmd.setOrganizationId(1000750L);
 //		cmd.setId(1L);
-		cmd.setName("tt_test");
+		cmd.setName("tt_testxx");
 		cmd.setAvatarUri("https://www.baidu.com");
 		cmd.setPosition("软件");
 		cmd.setCategoryId(1L);
@@ -193,14 +195,14 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.NAME.eq("tt_test")).fetchOne();
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.NAME.eq("tt_testxx")).fetchOne();
 		assertNotNull(record);
 		assertEquals("13265767391", record.getValue(Tables.EH_TALENTS.PHONE));
 
 	}
 
-	//6. 打开/关闭人才信息
-	//@Test
+	//6. 打开/关闭人才信息（已完成）
+	@Test
 	public void testEnableTalent() {
 		String url = ENABLE_TALENT_URL;
 		logon();
@@ -210,7 +212,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		cmd.setOwnerId(240111044331051304L);
 		cmd.setOrganizationId(1000750L);
 		cmd.setId(2L);
-		cmd.setEnabled((byte)1);
+		cmd.setEnabled((byte)0);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -218,12 +220,12 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 		Record record = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(2L)).fetchOne();
 		assertNotNull(record);
-		assertEquals((byte)1, record.getValue(Tables.EH_TALENTS.ENABLED).byteValue());
+		assertEquals((byte)0, record.getValue(Tables.EH_TALENTS.ENABLED).byteValue());
 		
 	}
 
-	//7. 删除人才信息
-	//@Test
+	//7. 删除人才信息（已完成）
+	@Test
 	public void testDeleteTalent() {
 		String url = DELETE_TALENT_URL;
 		logon();
@@ -244,20 +246,20 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//8. 置顶人才信息
-	//@Test
+	//8. 置顶人才信息（已完成）
+	@Test
 	public void testTopTalent() {
 		String url = TOP_TALENT_URL;
 		logon();
 
-		Record record1 = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(1L)).fetchOne();
+		Record record1 = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.ID.eq(2L)).fetchOne();
 		assertNotNull(record1);
 		
 		TopTalentCommand cmd = new TopTalentCommand();
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
 		cmd.setOrganizationId(1000750L);
-		cmd.setId(1L);
+		cmd.setId(2L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
@@ -270,8 +272,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 	}
 
 	//9. 导入人才信息
-	//@Test
-	public void testImportTalent() {
+	@Test
+	public void testImportTalent() throws IOException {
 		String url = IMPORT_TALENT_URL;
 		logon();
 
@@ -279,17 +281,17 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(240111044331051304L);
 		cmd.setOrganizationId(1000750L);
-
-		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
+		File file = new File(new File("").getCanonicalPath() + "/src/test/data/excel/talent_template.xlsx");
+		RestResponseBase response = httpClientService.postFile(url, cmd, file, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		
-
+		Result<Record> result = dbProvider.getDslContext().select().from(Tables.EH_TALENTS).where(Tables.EH_TALENTS.NAME.like("import%")).fetch();
+		assertEquals(3, result.size());
 	}
 
-	//10. 获取人才信息详情
-	//@Test
+	//10. 获取人才信息详情（已完成）
+	@Test
 	public void testGetTalentDetail() {
 		String url = GET_TALENT_DETAIL_URL;
 		logon();
@@ -312,8 +314,8 @@ public class TalentTest extends BaseLoginAuthTestCase {
 		
 	}
 
-	//11. 人才信息查询记录
-	//@Test
+	//11. 人才信息查询记录（已完成）
+	@Test
 	public void testListTalentQueryHistory() {
 		String url = LIST_TALENT_QUERY_HISTORY_URL;
 		logon();
@@ -330,12 +332,12 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 		List<TalentQueryHistoryDTO> list = myResponse.getTalentQueryHistories();
 		assertNotNull(list);
-		assertEquals(2, list.size());
+		assertEquals(3, list.size());
 		
 	}
 
-	//12. 删除人才信息查询记录
-	//@Test
+	//12. 删除人才信息查询记录（已完成）
+	@Test
 	public void testDeleteTalentQueryHistory() {
 		String url = DELETE_TALENT_QUERY_HISTORY_URL;
 		logon();
@@ -354,7 +356,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 	}
 
-	//13. 清空人才信息查询记录
+	//13. 清空人才信息查询记录（已完成）
 	@Test
 	public void testClearTalentQueryHistory() {
 		String url = CLEAR_TALENT_QUERY_HISTORY_URL;

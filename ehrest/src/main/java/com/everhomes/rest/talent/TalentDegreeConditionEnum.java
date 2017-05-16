@@ -6,13 +6,14 @@ package com.everhomes.rest.talent;
  * <ul>
  * <li>UNDER_SECONDARY: 1，中专以下</li>
  * <li>OVER_SECONDARY: 2，中专及以上</li>
- * <li>OVER_BACHELOR: 3，本科及以上</li>
- * <li>OVER_MASTER: 4，硕士及以上</li>
- * <li>OVER_DOCTOR: 5，博士及以上</li>
+ * <li>OVER_COLLEGE: 3，大专及以上</li>
+ * <li>OVER_BACHELOR: 4，本科及以上</li>
+ * <li>OVER_MASTER: 5，硕士及以上</li>
+ * <li>OVER_DOCTOR: 6，博士及以上</li>
  * </ul>
  */
 public enum TalentDegreeConditionEnum {
-	UNDER_SECONDARY((byte)1), OVER_SECONDARY((byte)2), OVER_BACHELOR((byte)3), OVER_MASTER((byte)4), OVER_DOCTOR((byte)5);
+	UNDER_SECONDARY((byte)1), OVER_SECONDARY((byte)2), OVER_COLLEGE((byte)3), OVER_BACHELOR((byte)4), OVER_MASTER((byte)5), OVER_DOCTOR((byte)6);
 	
 	private byte code;
 

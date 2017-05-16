@@ -124,6 +124,8 @@ public class TalentProviderImpl implements TalentProvider {
 				step.and(Tables.EH_TALENTS.DEGREE.le(TalentDegreeEnum.SECONDARY.getCode()));
 			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_SECONDARY.getCode()) {
 				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.SECONDARY.getCode()));
+			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_COLLEGE.getCode()) {
+				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.COLLEGE.getCode()));
 			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_BACHELOR.getCode()) {
 				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.BACHELOR.getCode()));
 			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_MASTER.getCode()) {
