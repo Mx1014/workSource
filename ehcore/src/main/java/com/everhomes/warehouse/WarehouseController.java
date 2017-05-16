@@ -1,5 +1,6 @@
 package com.everhomes.warehouse;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -11,6 +12,7 @@ import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -452,7 +454,7 @@ public class WarehouseController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-//        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterialCategories(cmd, files[0], userId);
+        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterialCategories(cmd, files[0], userId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -473,7 +475,7 @@ public class WarehouseController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-//        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterials(cmd, files[0], userId);
+        ImportDataResponse importDataResponse = warehouseService.importWarehouseMaterials(cmd, files[0], userId);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -487,9 +489,97 @@ public class WarehouseController extends ControllerBase {
     @RequestMapping("exportWarehouseStockLogs")
     public HttpServletResponse exportWarehouseStockLogs(@Valid SearchWarehouseStockLogsCommand cmd, HttpServletResponse response) {
 
-//        HttpServletResponse commandResponse = warehouseService.exportWarehouseStockLogs(cmd, response);
-//
-//        return commandResponse;
-        return null;
+        HttpServletResponse commandResponse = warehouseService.exportWarehouseStockLogs(cmd, response);
+        return commandResponse;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseMaterialCategoryIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseMaterialCategoryIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseMaterialCategoryIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseMaterialCategorySearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseMaterialsIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseMaterialsIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseMaterialsIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseMaterialSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseStockLogIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseStockLogIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseStockLogIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseStockLogSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseStockIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseStockIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseStockIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseStockSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
 }

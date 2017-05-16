@@ -37,6 +37,7 @@ public interface WarehouseProvider {
     Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId);
     Long getWarehouseStockAmountByMaterialId(Long materialId, String ownerType, Long ownerId);
     WarehouseUnits findWarehouseUnits(Long id, String ownerType, Long ownerId);
+    WarehouseUnits findWarehouseUnitByName(String name, String ownerType, Long ownerId);
 
     List<Warehouses> listWarehouses(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseMaterialCategories> listWarehouseMaterialCategories(CrossShardListingLocator locator, Integer pageSize);

@@ -1,17 +1,25 @@
 package com.everhomes.warehouse;
 
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -495,4 +503,102 @@ public class WarehouseServiceImpl implements WarehouseService {
         }).collect(Collectors.toList());
         return dtos;
     }
+
+    @Override
+    public HttpServletResponse exportWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd, HttpServletResponse response) {
+        return null;
+    }
+
+    @Override
+    public ImportDataResponse importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode());
+        return importDataResponse;
+    }
+
+    @Override
+    public ImportDataResponse importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIALS.getCode());
+        return importDataResponse;
+    }
+
+    private ImportDataResponse importData(ImportOwnerCommand cmd, MultipartFile mfile,
+                                          Long userId, String dataType) {
+        ImportDataResponse importDataResponse = new ImportDataResponse();
+        try {
+            //解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if(null == resultList || resultList.isEmpty()){
+                LOGGER.error("File content is empty。userId="+userId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+                        "File content is empty");
+            }
+            LOGGER.debug("Start import data...,total:" + resultList.size());
+
+            List<String> errorDataLogs = null;
+            //导入数据，返回导入错误的日志数据集
+            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIALS.getCode())) {
+//                errorDataLogs = importWarehouseMaterialsData(cmd, convertToStrList(resultList, 6), userId);
+            }
+
+            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode())) {
+//                errorDataLogs = importWarehouseMaterialCategoriesData(cmd, convertEquipmentToStrList(resultList), userId);
+            }
+
+            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+            if(null == errorDataLogs || errorDataLogs.isEmpty()){
+                LOGGER.debug("Data import all success...");
+            }else{
+                //记录导入错误日志
+                for (String log : errorDataLogs) {
+                    LOGGER.error(log);
+                }
+            }
+
+            importDataResponse.setTotalCount((long)resultList.size()-1);
+            importDataResponse.setFailCount((long)errorDataLogs.size());
+            importDataResponse.setLogs(errorDataLogs);
+        } catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        return importDataResponse;
+    }
+
+//    private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list){
+//        List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
+//        int row = 1;
+//        for (Object o : list) {
+//            if(row < 3){
+//                row ++;
+//                continue;
+//            }
+//            RowResult r = (RowResult)o;
+//            ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+//            if(null != r.getA())
+//                data.setName(r.getA().trim());
+//            if(null != r.getB())
+//                data.setDisplayName(r.getB().trim());
+//            if(null != r.getC())
+//                data.setAdminName(r.getC().trim());
+//            if(null != r.getD())
+//                data.setAdminToken(r.getD().trim());
+//            if(null != r.getE())
+//                data.setEmail(r.getE().trim());
+//            if(null != r.getF())
+//                data.setBuildingName(r.getF().trim());
+//            if(null != r.getG())
+//                data.setAddress(r.getG().trim());
+//            if(null != r.getH())
+//                data.setContact(r.getH().trim());
+//            if(null != r.getI())
+//                data.setNumber(r.getI().trim());
+//            if(null != r.getJ())
+//                data.setCheckinDate(r.getJ().trim());
+//            if(null != r.getK())
+//                data.setDescription(r.getK().trim());
+//            datas.add(data);
+//        }
+//        return datas;
+//    }
 }

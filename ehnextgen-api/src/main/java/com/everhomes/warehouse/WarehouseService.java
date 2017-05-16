@@ -1,7 +1,10 @@
 package com.everhomes.warehouse;
 
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -27,5 +30,9 @@ public interface WarehouseService {
 
     void updateWarehouseMaterialUnit(UpdateWarehouseMaterialUnitCommand cmd);
     WarehouseMaterialUnitDTO findWarehouseMaterialUnit(DeleteWarehouseMaterialUnitCommand cmd);
+
+    ImportDataResponse importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+    ImportDataResponse importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
+    HttpServletResponse exportWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd, HttpServletResponse response);
 
 }

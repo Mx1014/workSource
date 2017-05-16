@@ -608,6 +608,26 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public WarehouseUnits findWarehouseUnitByName(String name, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseUnitsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_UNITS);
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.NAME.eq(name));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_UNITS.STATUS.eq(Status.ACTIVE.getCode()));
+
+        List<WarehouseUnits> result = new ArrayList<WarehouseUnits>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseUnits.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
+
+    @Override
     public void creatWarehouseUnit(WarehouseUnits unit) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseUnits.class));
 
