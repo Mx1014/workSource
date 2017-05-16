@@ -176,8 +176,9 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         Object v = redisTemplate.opsForValue().get(key);
-        if(v == null) {
+        if(v == null || v.toString().equals("0")) {
         	redisTemplate.opsForValue().set(key, "1", 3600, TimeUnit.SECONDS);
+        	v = null;
         }
         
         List<DoorCommand> cmds = ctx.getOrderMessages();
@@ -256,5 +257,16 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         smsg.setSeq(new Long(r.nextInt(300)));
         
         return smsg;
+    }
+    
+    @Override
+    public void invalidSyncTimer(Long doorId) {
+        String key = String.format(MESSAGE_SYNC, doorId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object v = redisTemplate.opsForValue().get(key);
+        if(v == null) {
+        	redisTemplate.opsForValue().set(key, "0", 3600, TimeUnit.SECONDS);
+        }
     }
 }

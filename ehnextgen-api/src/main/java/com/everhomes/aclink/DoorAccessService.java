@@ -125,4 +125,6 @@ public interface DoorAccessService {
 
 	AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
 
+	public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
+
 }
