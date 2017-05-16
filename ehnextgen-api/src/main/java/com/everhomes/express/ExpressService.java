@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.express;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.AddExpressUserCommand;
 import com.everhomes.rest.express.CancelExpressOrderCommand;
 import com.everhomes.rest.express.CreateExpressOrderCommand;
@@ -44,7 +45,7 @@ public interface ExpressService {
 	public ListExpressUserResponse listExpressUser(ListExpressUserCommand cmd);
 
 
-	public void addExpressUser(AddExpressUserCommand cmd);
+	public RestResponse addExpressUser(AddExpressUserCommand cmd);
 
 
 	public void deleteExpressUser(DeleteExpressUserCommand cmd);

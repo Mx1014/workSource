@@ -83,8 +83,8 @@ public class ExpressController extends ControllerBase {
 	@RequestMapping("addExpressUser")
 	@RestReturn(String.class)
 	public RestResponse addExpressUser(AddExpressUserCommand cmd){
-		expressService.addExpressUser(cmd);
-		return new RestResponse();
+		RestResponse response = expressService.addExpressUser(cmd);
+		return response != null ? response : new RestResponse();
 	}
 
 	/**

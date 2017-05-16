@@ -3,10 +3,11 @@ INSERT INTO `eh_express_companies` (`id`, `namespace_id`, `owner_type`, `owner_i
 select max(id) into @id from `eh_locale_strings`;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'express', '10000', 'zh_CN', '订单状态错误');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'express', '10001', 'zh_CN', '您没有相关权限');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'express', '10002', 'zh_CN', '用户（%s）未注册，无法添加');
 
 -- 添加菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40700, '快递管理', 40000, NULL, NULL, 1, 2, '/40000/70100', 'park', 495, 40700);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '权限设置', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '快递员管理', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40720, '订单记录', 40700, NULL, 'react:/deliver-management/order-record/40700', 0, 2, '/40000/40700/40720', 'park', 497, 40700);
 
 -- 添加权限

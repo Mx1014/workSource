@@ -3,6 +3,7 @@ package com.everhomes.express;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -18,9 +19,11 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.express.AddExpressUserCommand;
@@ -123,6 +126,9 @@ public class ExpressServiceImpl implements ExpressService {
 	@Autowired
 	private OrderUtil orderUtil;
 	
+	@Autowired
+	private LocaleStringService localeStringService;
+	
 	@Override
 	public ListServiceAddressResponse listServiceAddress(ListServiceAddressCommand cmd) {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
@@ -186,18 +192,41 @@ public class ExpressServiceImpl implements ExpressService {
 	} 
 
 	@Override
-	public void addExpressUser(AddExpressUserCommand cmd) {
+	public RestResponse addExpressUser(AddExpressUserCommand cmd) {
 		if (cmd.getExpressCompanyId() == null || cmd.getServiceAddressId() == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		checkAdmin(owner);
+		RestResponse restResponse = checkExpressUser(cmd.getExpressUsers());
+		if (restResponse != null) {
+			return restResponse;
+		}
 		if (cmd.getExpressUsers() != null) {
 			dbProvider.execute(s->{
 				cmd.getExpressUsers().forEach(r->addExpressUser(owner, r, cmd));
 				return null;
 			});
 		}
+		return null;
+	}
+
+	private RestResponse checkExpressUser(List<CreateExpressUserDTO> expressUsers) {
+		if (expressUsers != null && !expressUsers.isEmpty()) {
+			List<String> errors = new ArrayList<>();
+			expressUsers.forEach(e->{
+				if (e.getUserId() == null || e.getUserId() == 0L) {
+					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberById(e.getOrganizationMemberId());
+					errors.add(organizationMember.getContactToken());
+				}
+			});
+			if (!errors.isEmpty()) {
+				String error = localeStringService.getLocalizedString(ExpressServiceErrorCode.SCOPE, String.valueOf(ExpressServiceErrorCode.NOT_SIGNED_USER_ERROR), UserContext.current().getUser().getLocale(), "");
+				String description = String.format(error, String.join("、", errors));
+				return new RestResponse(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.NOT_SIGNED_USER_ERROR, description);
+			}
+		}
+		return null;
 	}
 
 	private boolean checkAdmin(ExpressOwner owner) {
@@ -234,7 +263,7 @@ public class ExpressServiceImpl implements ExpressService {
 	}
 	
 	private ExpressUser checkExistsExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
-		return expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), owner.getUserId(), cmd.getServiceAddressId(), cmd.getExpressCompanyId());
+		return expressUserProvider.findExpressUserByUserId(owner.getNamespaceId(), owner.getOwnerType(), owner.getOwnerId(), createExpressUserDTO.getUserId(), cmd.getServiceAddressId(), cmd.getExpressCompanyId());
 	}
 
 	@Override
