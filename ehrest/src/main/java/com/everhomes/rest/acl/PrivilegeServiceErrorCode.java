@@ -5,6 +5,6 @@ public interface PrivilegeServiceErrorCode {
     static final String SCOPE = "privilege";
     
     static final int ERROR_INVALID_PARAMETER = 100011;
-    
 
+    static final int ERROR_ADMIN_EXISTS = 100051;
 }

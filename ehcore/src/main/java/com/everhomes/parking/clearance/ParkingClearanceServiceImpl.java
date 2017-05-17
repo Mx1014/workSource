@@ -245,7 +245,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                             operator.getParkingLotId(),//
                             EntityType.USER.getCode(),//
                             operator.getOperatorId(),//
-                            null,//
                             new ArrayList<>(Collections.singletonList(privilegeId))
                     );
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
