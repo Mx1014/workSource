@@ -659,11 +659,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		}
 
+		OrganizationDTO organizationDTO = processOrganizationCommunity(ConvertHelper.convert(organization, OrganizationDTO.class));
+
 		if(null == org){
 			org = new OrganizationDetail();
+			org.setOrganizationId(organization.getId());
 		}
-		org.setOrganizationId(organization.getId());
-		org.setDisplayName(organization.getName());
 
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
 		//modify by dengs,20170512,将经纬度转换成 OrganizationDetailDTO 里面的类型，不改动dto，暂时不影响客户端。后面考虑将dto的经纬度改成Double
@@ -674,6 +675,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//end
 		dto.setEmailDomain(org.getEmailDomain());
 		dto.setName(organization.getName());
+		dto.setCommunityId(organizationDTO.getCommunityId());
+		dto.setCommunityName(organizationDTO.getCommunityName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
 			dto.setCheckinDate(org.getCheckinDate().getTime());
@@ -9181,7 +9184,12 @@ System.out.println();
 //		}
 
 		return organizations.stream().map(r->{
-			return ConvertHelper.convert(r, OrganizationDTO.class);
+			OrganizationDTO dto = processOrganizationCommunity(ConvertHelper.convert(r, OrganizationDTO.class));
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(dto.getId());
+			if(null != detail){
+				dto.setDisplayName(detail.getDisplayName());
+			}
+			return dto;
 			}).collect(Collectors.toList());
 	}
 
