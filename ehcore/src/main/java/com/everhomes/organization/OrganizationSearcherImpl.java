@@ -200,7 +200,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
+        builder.setFrom(pageNum * pageSize).setSize(pageSize);
         
         builder.setQuery(qb);
         
@@ -212,12 +212,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         List<Long> ids = getIds(rsp);
         GroupQueryResult result = new GroupQueryResult();
-        if(ids.size() > filter.getPageSize()) {
-            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
-            ids.remove(ids.size() - 1);
-         } else {
-            result.setPageAnchor(null);    
-            }
+//        if(ids.size() > filter.getPageSize()) {
+//            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+//            ids.remove(ids.size() - 1);
+//         } else {
+//            result.setPageAnchor(null);
+//            }
         
         result.setIds(ids);
         
