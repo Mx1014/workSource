@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder.Case;
 
+import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -1895,15 +1896,18 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	
 
 	@Override
-	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator) {
+	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_TYPES);
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_TYPES.STATUS
+				.equal(status);
 		if(null!=namespaceId){
-			Condition condition = Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID
-					.equal(namespaceId);
-			step.where(condition);
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID
+					.equal(namespaceId));
 		}
+		step.where(condition);
+
 		List<RentalResourceType> result = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_TYPES.ID.desc()).fetch()
 				.map((r) -> {

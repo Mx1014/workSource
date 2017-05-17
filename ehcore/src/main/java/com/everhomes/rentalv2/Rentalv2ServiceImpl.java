@@ -5121,8 +5121,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor()); 
-		
-		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(cmd.getNamespaceId(), locator);
+
+		Byte status = ResourceTypeStatus.NORMAL.getCode();
+		if (null != cmd.getStatus()) {
+			status = ResourceTypeStatus.CUSTOM.getCode();
+		}
+
+		List<RentalResourceType> resourceTypes =  this.rentalv2Provider.findRentalResourceTypes(cmd.getNamespaceId(), status, locator);
 		if(null==resourceTypes)
 			return response;
 
