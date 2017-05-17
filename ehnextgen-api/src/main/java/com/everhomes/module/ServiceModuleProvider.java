@@ -1,13 +1,12 @@
 // @formatter:off
 package com.everhomes.module;
 
-import org.jooq.Condition;
-
 import java.util.List;
 
+import org.jooq.Condition;
 
 public interface ServiceModuleProvider {
-	
+
 	List<ServiceModulePrivilege> listServiceModulePrivileges(Long moduleId, ServiceModulePrivilegeType privilegeType);
 
 	List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType);
@@ -26,9 +25,8 @@ public interface ServiceModuleProvider {
 
 	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId);
 
-
 	List<ServiceModule> listServiceModule(Integer level, Byte type);
-	
+
 	List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy);
 
 	List<ServiceModulePrivilege> listServiceModulePrivileges(List<Long> moduleIds, ServiceModulePrivilegeType privilegeType);
@@ -40,4 +38,19 @@ public interface ServiceModuleProvider {
 	List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId);
 
 	List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types);
+
+	Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation reltaion);
+
+	void batchCreateServiceModuleAssignment(List<ServiceModuleAssignment> moduleAssignmentList);
+
+	ServiceModuleAssignmentRelation findServiceModuleAssignmentRelationById(Long id);
+
+	List<ServiceModuleAssignment> findServiceModuleAssignmentListByRelationId(Long id);
+
+	void deleteServiceModuleAssignmentRelationById(Long id);
+	
+	void deleteServiceModuleAssignments(List<ServiceModuleAssignment> assignments);
+	
+	List<ServiceModuleAssignmentRelation> listServiceModuleAssignmentRelations(String ownerType, Long ownerId);
+
 }

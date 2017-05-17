@@ -1,6 +1,8 @@
 package com.everhomes.module;
 
 
+import java.util.List;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -11,6 +13,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.TreeWebMenusCommand;
 import com.everhomes.rest.module.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,6 +92,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("assignmentServiceModule")
     @RestReturn(value=String.class)
     public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
+    	this.serviceModuleService.assignmentServiceModule(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -102,6 +106,7 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteServiceModuleAssignmentRelation")
     @RestReturn(value=String.class)
     public RestResponse deleteServiceModuleAssignmentRelation(@Valid DeleteServiceModuleAssignmentRelationCommand cmd) {
+    	this.serviceModuleService.deleteServiceModuleAssignmentRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -115,7 +120,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("listServiceModuleAssignmentRelations")
     @RestReturn(value=ServiceModuleAssignmentRelationDTO.class, collection = true)
     public RestResponse listServiceModuleAssignmentRelations(@Valid ListServiceModuleAssignmentRelationsCommand cmd) {
-        RestResponse response =  new RestResponse();
+    	List<ServiceModuleAssignmentRelationDTO> relationList = this.serviceModuleService.listServiceModuleAssignmentRelations(cmd);
+    	RestResponse response =  new RestResponse(relationList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
