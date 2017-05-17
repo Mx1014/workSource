@@ -13,9 +13,6 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityRosterStatus;
-import com.everhomes.rest.activity.GetRosterOrderSettingCommand;
-import com.everhomes.rest.activity.RosterOrderSettingDTO;
-import com.everhomes.user.UserContext;
 
 import net.greghaines.jesque.Job;
 
@@ -50,13 +47,10 @@ public class RosterPayTimeoutServiceImpl implements RosterPayTimeoutService, App
     
     @Override
     public void pushTimeout(ActivityRoster roster) {
-    	GetRosterOrderSettingCommand cmd = new GetRosterOrderSettingCommand();
-    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-    	RosterOrderSettingDTO dto = activityService.getRosterOrderSetting(cmd);
-    	if(dto != null && dto.getTime() != null) {
+    	if(roster != null && roster.getOrderExpireTime() != null) {
     		final Job job = new Job(RosterPayTimeoutAction.class.getName(), new Object[]{String.valueOf(roster.getId()) });
-    		if(roster.getOrderStartTime().getTime() + dto.getTime() > (System.currentTimeMillis()+10l) ) {
-    			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, roster.getOrderStartTime().getTime() + dto.getTime().longValue());	
+    		if(roster.getOrderExpireTime().getTime() > (System.currentTimeMillis()+10l) ) {
+    			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, roster.getOrderExpireTime().getTime());	
     		} else {
     			jesqueClientFactory.getClientPool().enqueue(queueNoDelay, job);
     		}

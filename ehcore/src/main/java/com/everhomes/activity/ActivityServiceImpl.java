@@ -444,13 +444,9 @@ public class ActivityServiceImpl implements ActivityService {
 	 	            }
 	            }
 	           
-	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，用于定时取消订单  add by yanjun 20170516
+	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，过期时间，用于定时取消订单  add by yanjun 20170516
 	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
-	            	Long orderNo = this.onlinePayService.createBillId(DateHelper
-	        				.currentGMTTime().getTime());
-	            	roster.setOrderNo(orderNo);
-	            	roster.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
-	            	roster.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	            	populateNewRosterOrder(roster);
 	            }
 	            
 //	            activityProvider.createActivityRoster(roster);
@@ -525,6 +521,25 @@ public class ActivityServiceImpl implements ActivityService {
 	 }
     
     /**
+     * 填充新订单信息，订单id、支付状态、时间等
+     * @param roster
+     */
+    private void populateNewRosterOrder(ActivityRoster roster){
+    	Long orderNo = this.onlinePayService.createBillId(DateHelper
+				.currentGMTTime().getTime());
+    	roster.setOrderNo(orderNo);
+    	roster.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
+    	
+    	GetRosterOrderSettingCommand settingCmd = new GetRosterOrderSettingCommand();
+    	settingCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+    	RosterOrderSettingDTO dto = this.getRosterOrderSetting(settingCmd);
+    	
+    	Long nowTime = DateHelper.currentGMTTime().getTime();
+    	roster.setOrderStartTime(new Timestamp(nowTime));
+    	roster.setOrderExpireTime(new Timestamp(nowTime + dto.getTime()));
+    }
+    
+    /**
      * 删除应过期的活动
      * @param activityId
      */
@@ -534,11 +549,7 @@ public class ActivityServiceImpl implements ActivityService {
     		return;
     	}
     	
-    	GetRosterOrderSettingCommand  cmd = new GetRosterOrderSettingCommand ();
-    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-    	RosterOrderSettingDTO dto = this.getRosterOrderSetting(cmd);
-    	Long orderStartTime = DateHelper.currentGMTTime().getTime() - dto.getTime();
-    	List<ActivityRoster> listRoster = activityProvider.findExpireRostersByActivityId(activityId, orderStartTime);
+    	List<ActivityRoster> listRoster = activityProvider.findExpireRostersByActivityId(activityId);
     	if(listRoster != null){
     		for(int i=0; i< listRoster.size(); i++){
     			ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
@@ -1785,13 +1796,10 @@ public class ActivityServiceImpl implements ActivityService {
             item.setConfirmFamilyId(cmd.getConfirmFamilyId());
             item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
             
-            //设置订单开始时间，用于定时取消订单
+            //设置订单开始时间, 结束时间，用于定时取消订单
             if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-            	Long orderNo = this.onlinePayService.createBillId(DateHelper
-        				.currentGMTTime().getTime());
-            	item.setOrderNo(orderNo);
-            	item.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            	item.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
+            	populateNewRosterOrder(item);
+            	
             	//启动定时器，当时间超过设定时间时，取消订单。
             	rosterPayTimeoutService.pushTimeout(item);
             }
@@ -1837,12 +1845,9 @@ public class ActivityServiceImpl implements ActivityService {
 	            sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_USER_HAVE_CONFIRM, meta);
             	
         	}else{
-        		GetRosterOrderSettingCommand setCmd = new GetRosterOrderSettingCommand();
-        		setCmd.setNamespaceId(user.getNamespaceId());
-        		RosterOrderSettingDTO settingDto = this.getRosterOrderSetting(setCmd);
-        		
-        		Integer days = (int) (settingDto.getTime() / 1000 / 3600 / 24);
-    			Integer hours  = (int) (settingDto.getTime() / 1000 / 3600 % 24);
+        		Long durationTime = item.getOrderExpireTime().getTime() - item.getOrderStartTime().getTime();
+        		Integer days = (int) (durationTime / 1000 / 3600 / 24);
+    			Integer hours  = (int) (durationTime / 1000 / 3600 % 24);
         		
         		Map<String, String> map = new HashMap<String, String>();
         		map.put("postName", activity.getSubject());
@@ -2056,13 +2061,6 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 
-        //返回倒计时 add by yanjun 20170510 start
-        GetRosterOrderSettingCommand gcmd = new GetRosterOrderSettingCommand();
-        gcmd.setNamespaceId(UserContext.getCurrentNamespaceId());
-        RosterOrderSettingDTO  rosterOrderSettingDTO = this.getRosterOrderSetting(gcmd);
-        Long  nowTime = DateHelper.currentGMTTime().getTime();
-        //返回倒计时 add by yanjun 20170510 end
-        
         //返回系统当前时间 add by yanjun 20170510
         dto.setSystemTime(DateHelper.currentGMTTime().getTime());
         
@@ -2096,7 +2094,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setUserPayFlag(userRoster == null || userRoster.getPayFlag() == null ? ActivityRosterPayFlag.UNPAY.getCode() : userRoster.getPayFlag());
         if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()  && userRoster != null && userRoster.getOrderStartTime() != null &&
         		(userRoster.getPayFlag() == null || userRoster.getPayFlag().byteValue() == ActivityRosterPayFlag.UNPAY.getCode())){
-        	Long countdown =  userRoster.getOrderStartTime().getTime() + rosterOrderSettingDTO.getTime() - nowTime;
+        	Long countdown =  userRoster.getOrderExpireTime().getTime() - DateHelper.currentGMTTime().getTime();
         	if(countdown > 0){
         		dto.setUserOrderCountdown(countdown);
         	}
@@ -2146,14 +2144,16 @@ public class ActivityServiceImpl implements ActivityService {
 				}
 
             }
-            
-            //返回倒计时 add by yanjun 20170510 start
-            if(d.getPayFlag() != null && d.getPayFlag() == ActivityRosterPayFlag.UNPAY.getCode() && d.getOrderStartTime() != null){
-            	Long countdown =  d.getOrderStartTime().getTime() + rosterOrderSettingDTO.getTime() - nowTime;
-            	if(countdown > 0){
-            		d.setOrderCountdown(countdown);
-            	}
-            }
+//            
+//            //返回倒计时 add by yanjun 20170510 start
+//            if(d.getPayFlag() != null && d.getPayFlag() == ActivityRosterPayFlag.UNPAY.getCode() && d.getOrderStartTime() != null){
+//            	Long countdown =  d.getOrderExpireTime().getTime() - DateHelper.currentGMTTime().getTime();
+//            	if(countdown > 0){
+//            		d.setOrderCountdown(countdown);
+//            	}else{
+//            		d.setOrderCountdown(0L);
+//            	}
+//            }
             //返回倒计时 add by yanjun 20170510 end
             
             return d;

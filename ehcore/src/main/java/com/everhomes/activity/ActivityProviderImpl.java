@@ -1201,7 +1201,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 
 	@Override
-	public List<ActivityRoster> findExpireRostersByActivityId(Long activityId, Long orderStartTime) {
+	public List<ActivityRoster> findExpireRostersByActivityId(Long activityId) {
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
 
 		AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
@@ -1210,7 +1210,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 		this.dbProvider.iterationMapReduce(shardIterator, null, (context, obj) -> {
 			SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId));
-			query.addConditions(Tables.EH_ACTIVITY_ROSTER.ORDER_START_TIME.lt(new Timestamp(orderStartTime)));
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.ORDER_EXPIRE_TIME.lt(new Timestamp(DateHelper.currentGMTTime().getTime())));
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.UNPAY.getCode()));
 			query.fetch().map((r) -> {

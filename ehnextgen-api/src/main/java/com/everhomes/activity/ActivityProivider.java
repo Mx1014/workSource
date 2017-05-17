@@ -131,5 +131,5 @@ public interface ActivityProivider {
 	 */
 	List<Object[]> statisticsOrganization();
 	
-	List<ActivityRoster> findExpireRostersByActivityId(Long activityId, Long orderStartTime);
+	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
 }
