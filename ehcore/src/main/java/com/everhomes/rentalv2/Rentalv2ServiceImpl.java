@@ -713,11 +713,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			setRentalRuleSiteNumbers(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId(), cmd.getSiteNumbers());
 
 			// set half day time intervals
-			if(cmd.getRentalType().equals(RentalType.HALFDAY.getCode())) {
-				//先删除
-				rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId());
-				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
-			}
+			//先删除
+			rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId());
+			setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getHalfDayTimeIntervals());
 
 			//time intervals
 			//先删除
