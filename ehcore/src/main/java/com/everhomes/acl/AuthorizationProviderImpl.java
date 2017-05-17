@@ -113,7 +113,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<Authorization> listManageAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType){
+	public List<Authorization> listManageAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId){
 		return listAuthorizations(ownerType, ownerId, targetType, targetId, authType, null, IdentityType.MANAGE.getCode(), false);
 	}
 
@@ -128,7 +128,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<Authorization> listOrdinaryAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType) {
+	public List<Authorization> listOrdinaryAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId) {
 		return listAuthorizations(ownerType, ownerId, targetType, targetId, authType, null, IdentityType.ORDINARY.getCode(), false);
 	}
 

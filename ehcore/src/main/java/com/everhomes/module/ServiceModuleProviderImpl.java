@@ -73,6 +73,26 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
+	public ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId) {
+		List<ServiceModulePrivilege> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
+		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_ID.eq(privilegeId);
+		cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.MODULE_ID.eq(moduleId));
+		query.addConditions(cond);
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_PRIVILEGES.DEFAULT_ORDER);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModulePrivilege.class));
+			return null;
+		});
+
+		if(results.size() > 0){
+			return results.get(0);
+		}
+		return null;
+	}
+
+	@Override
 	public List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType) {
 		List<ServiceModulePrivilege> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
