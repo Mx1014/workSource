@@ -255,6 +255,11 @@ public class ActivityServiceImpl implements ActivityService {
 	@Autowired
 	private RosterOrderSettingProvider rosterOrderSettingProvider;
 	
+	@Autowired
+	private RosterPayTimeoutService rosterPayTimeoutService;
+	
+	
+	
     @PostConstruct
     public void setup() {
         workerPoolFactory.getWorkerPool().addQueue(WarnActivityBeginningAction.QUEUE_NAME);
@@ -435,8 +440,7 @@ public class ActivityServiceImpl implements ActivityService {
 	 	            }
 	            }
 	           
-	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，用于定时取消订单
-	    		//TODO 启动定时器，定时取消
+	            //收费且不需要确认的报名下一步就是支付了，所以先生成订单。设置订单开始时间，用于定时取消订单  add by yanjun 20170516
 	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
 	            	Long orderNo = this.onlinePayService.createBillId(DateHelper
 	        				.currentGMTTime().getTime());
@@ -446,6 +450,11 @@ public class ActivityServiceImpl implements ActivityService {
 	            
 //	            activityProvider.createActivityRoster(roster);
 	            createActivityRoster(roster);
+	            
+	            //启动定时器，当时间超过设定时间时，取消订单。 条件与前面设置订单号、订单开始时间一致。放在此处是因为定时器需要rosterId   add by yanjun 20170516
+	            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode() && activity.getConfirmFlag() == 0){
+	            	rosterPayTimeoutService.pushTimeout(roster);
+	            }
 	            
 	            activityProvider.updateActivity(activity);
 //	            return status;
@@ -505,8 +514,6 @@ public class ActivityServiceImpl implements ActivityService {
 		        	
 		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
 	            }
-	           
-	            
 	            return dto;
 	        });
         }).first();
@@ -1672,7 +1679,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     private Long getFamilyId() {
         User user = UserContext.current().getUser();
-        if (user.getAddressId() != null) {
+        if (user != null && user.getAddressId() != null) {
             Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
             if (family == null) {
                 return null;
@@ -1749,12 +1756,14 @@ public class ActivityServiceImpl implements ActivityService {
             item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
             
             //设置订单开始时间，用于定时取消订单
-    		//TODO 启动定时器，定时取消
             if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
             	Long orderNo = this.onlinePayService.createBillId(DateHelper
         				.currentGMTTime().getTime());
             	item.setOrderNo(orderNo);
             	item.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            	//TODO 启动定时器，定时取消
+            	//启动定时器，当时间超过设定时间时，取消订单。
+            	rosterPayTimeoutService.pushTimeout(item);
             }
             activityProvider.updateRoster(item);
             return status;

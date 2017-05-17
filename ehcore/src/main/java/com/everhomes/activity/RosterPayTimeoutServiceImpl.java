@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityRosterPayFlag;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.GetRosterOrderSettingCommand;
 import com.everhomes.rest.activity.RosterOrderSettingDTO;
 import com.everhomes.user.UserContext;
@@ -51,10 +53,10 @@ public class RosterPayTimeoutServiceImpl implements RosterPayTimeoutService, App
     	GetRosterOrderSettingCommand cmd = new GetRosterOrderSettingCommand();
     	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
     	RosterOrderSettingDTO dto = activityService.getRosterOrderSetting(cmd);
-    	if(dto != null) {
+    	if(dto != null && dto.getTime() != null) {
     		final Job job = new Job(RosterPayTimeoutAction.class.getName(), new Object[]{String.valueOf(roster.getId()) });
     		if(roster.getOrderStartTime().getTime() + dto.getTime() > (System.currentTimeMillis()+10l) ) {
-    			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, roster.getOrderStartTime().getTime() + dto.getTime());	
+    			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, roster.getOrderStartTime().getTime() + dto.getTime().longValue());	
     		} else {
     			jesqueClientFactory.getClientPool().enqueue(queueNoDelay, job);
     		}
@@ -66,10 +68,23 @@ public class RosterPayTimeoutServiceImpl implements RosterPayTimeoutService, App
     
     @Override
     public void cancelTimeoutOrder(Long rosterId) {
+
     	ActivityRoster roster = activityProvider.findRosterById(rosterId);
-    	ActivityCancelSignupCommand cmd = new ActivityCancelSignupCommand();
-    	cmd.setActivityId(roster.getActivityId());
-    	cmd.setUserId(roster.getUid());
-    	activityService.cancelSignup(cmd);
+    	if(roster == null ){
+    		LOGGER.error("Roster not found error! rosterId=" + rosterId);
+    		return;
+    	}
+    	
+    	if(roster.getStatus() == null || roster.getStatus() != ActivityRosterStatus.NORMAL.getCode()){
+    		LOGGER.warn("Roster status is innormal! do not need cancel. rosterId=" + rosterId);
+    		return;
+    	}
+    	
+    	if(roster.getPayFlag() == null || roster.getPayFlag().byteValue() == ActivityRosterPayFlag.UNPAY.getCode()){
+    		ActivityCancelSignupCommand cmd = new ActivityCancelSignupCommand();
+        	cmd.setActivityId(roster.getActivityId());
+        	cmd.setUserId(roster.getUid());
+        	activityService.cancelSignup(cmd);
+    	}
     }
 }

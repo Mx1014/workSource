@@ -130,7 +130,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         return ConvertHelper.convert(result, Activity.class);
     }
-    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#activity.id,#uid}")})
+    
+    @Caching(evict = { @CacheEvict(value="findRosterByUidAndActivityId",key="{#activity.id,#uid}"),
+    		@CacheEvict(value="findRosterById", allEntries=true)})
     @Override
     public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
         ActivityRoster[] rosters = new ActivityRoster[1];
@@ -158,7 +160,6 @@ public class ActivityProviderImpl implements ActivityProivider {
 	            dao.update(rosters[0]);
 	            //dao.delete(rosters[0]);
 	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
-	            
 	            
 	            // decrease count
 	            
