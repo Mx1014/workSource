@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * 查询资源列表
  * <li>communityId: 园区id-暂时不做</li>
  * <li>namespaceId: 域空间</li>
- * <li>menuType: 菜单dataType 后面添加一个status值 CUSTOM(3)表示是内部会议室 {@link com.everhomes.rest.rentalv2.admin.ResourceTypeStatus}</li>
+ * <li>status: 菜单dataType 后面添加一个status值 CUSTOM(3)表示是内部会议室 {@link com.everhomes.rest.rentalv2.admin.ResourceTypeStatus}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize:每页数量 </li>
  * </ul>
