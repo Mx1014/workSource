@@ -34,6 +34,7 @@ import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
@@ -1600,9 +1601,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 //			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
 			
 			pmTaskProvider.deleteTaskTarget(pmTaskTarget);
-			
+
+			//
 			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
-					EntityType.USER.getCode(), cmd.getTargetId(), 20100L, null);
+					EntityType.USER.getCode(), cmd.getTargetId(), ServiceModuleConstants.PM_TASK_MODULE, null);
 			if (null != pmTaskTarget2) {
 				rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 						EntityType.USER.getCode(), cmd.getTargetId(), "pmtask", privilegeIds);

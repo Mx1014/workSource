@@ -130,4 +130,6 @@ public interface PrivilegeConstants {
 
     long PUBLISH_NOTICE_TOPIC    = 10155L;// 发布公告
 
+    long ALL_SERVICE_MODULE = 10000L;
+
 }

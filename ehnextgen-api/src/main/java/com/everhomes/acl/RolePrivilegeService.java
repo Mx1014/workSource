@@ -262,6 +262,17 @@ public interface RolePrivilegeService {
 	List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd);
 
 	/**
+	 *
+	 * @param ownerType
+	 * @param ownerId
+	 * @param targetType
+	 * @param targetId
+	 * @param scope
+     * @param privilegeId
+     */
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  Long privilegeId);
+
+	/**
 	 * 分配权限
 	 * @param ownerType
 	 * @param ownerId
@@ -284,11 +295,58 @@ public interface RolePrivilegeService {
      */
 	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
 
-	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds);
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleId
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, ServiceModulePrivilegeType type);
 
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleId
+	 * @param privilegeIds
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds, ServiceModulePrivilegeType type);
+
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+     * @param privilegeIds
+     */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> privilegeIds);
 
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+     */
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId);
+
+	/**
+	 *
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+	 * @param moduleIds
+     * @param type
+     */
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, ServiceModulePrivilegeType type);
 
 	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 
@@ -333,4 +391,6 @@ public interface RolePrivilegeService {
 
 	AclPrivilegeInfoResponse getPrivilegeInfosByRoleId(
 			ListPrivilegesByRoleIdCommand cmd);
+
+	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
 }

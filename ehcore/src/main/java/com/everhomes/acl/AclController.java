@@ -380,6 +380,19 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/updateServiceModuleAuthorizedMember</b>
+     * <p>创建业务模块先的业务授权人员</p>
+     */
+    @RequestMapping("updateServiceModuleAuthorizedMember")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceModuleAuthorizedMember(@Valid CreateServiceModuleAuthorizedMemberCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/deleteServiceModuleAuthorizedMember</b>
      * <p>删除业务授权人员</p>
      */
@@ -469,6 +482,20 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createServiceModuleAdministrators(@Valid CreateServiceModuleAdministratorsCommand cmd) {
         rolePrivilegeService.createServiceModuleAdministrators(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/updateServiceModuleAdministrators</b>
+     * <p>修改业务模块管理员</p>
+     */
+    @RequestMapping("updateServiceModuleAdministrators")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceModuleAdministrators(@Valid UpdateServiceModuleAdministratorsCommand cmd) {
+        rolePrivilegeService.updateServiceModuleAdministrators(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

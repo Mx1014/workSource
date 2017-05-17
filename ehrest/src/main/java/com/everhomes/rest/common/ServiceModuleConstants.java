@@ -6,4 +6,6 @@ package com.everhomes.rest.common;
 public interface ServiceModuleConstants {
 
     long TOPIC_NOTICE_MODULE = 10100; //论坛公告模块
+
+    Long PM_TASK_MODULE = 20100L; // 物业报修模块id
 }
