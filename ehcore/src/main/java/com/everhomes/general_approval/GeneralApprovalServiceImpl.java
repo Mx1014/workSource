@@ -1,11 +1,7 @@
 package com.everhomes.general_approval;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.text.Normalizer.Form;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,25 +18,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rentalv2.Rentalv2Controller;
-import com.everhomes.rentalv2.Rentalv2ServiceImpl;
-import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -56,9 +43,9 @@ import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.GeneralFormNumDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
+import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
@@ -76,8 +63,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.google.zxing.Result;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
