@@ -17,11 +17,11 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
-import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
-import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialResponse;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
@@ -35,15 +35,16 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
-import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
 import com.everhomes.rest.videoconf.GetNamespaceListResponse;
+import com.everhomes.rest.videoconf.GetTrialVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfAccountSaleRuleCommand;
 import com.everhomes.rest.videoconf.ListConfCategoryCommand;
 import com.everhomes.rest.videoconf.ListConfCategoryResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
@@ -56,7 +57,6 @@ import com.everhomes.rest.videoconf.ListOrderByAccountCommand;
 import com.everhomes.rest.videoconf.ListOrderByAccountResponse;
 import com.everhomes.rest.videoconf.ListReservationConfCommand;
 import com.everhomes.rest.videoconf.ListReservationConfResponse;
-import com.everhomes.rest.videoconf.ListConfAccountSaleRuleCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListUnassignAccountsByOrderCommand;
@@ -84,6 +84,7 @@ import com.everhomes.rest.videoconf.StartVideoConfResponse;
 import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
@@ -1421,6 +1422,35 @@ public class VideoConfController  extends ControllerBase{
 		
 		videoConfService.deleteConfEnterprise(cmd);
 
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: /conf/checkVideoConfAccountTrial</b>
+	 * 检测公司是否有获取试用的资格
+	 */
+	@RequestMapping("checkVideoConfAccountTrial")
+	@RestReturn(CheckVideoConfAccountTrialResponse.class)
+	public RestResponse checkVideoConfAccountTrial(CheckVideoConfAccountTrialCommand cmd){
+		CheckVideoConfAccountTrialResponse resp = videoConfService.checkVideoConfAccountTrial(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /conf/getTrialVideoConfAccount</b>
+	 * 获取一个测试账号
+	 */
+	@RequestMapping("getTrialVideoConfAccount")
+	@RestReturn(String.class)
+	public RestResponse getTrialVideoConfAccount(GetTrialVideoConfAccountCommand cmd){		
+		videoConfService.getTrialVideoConfAccount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
