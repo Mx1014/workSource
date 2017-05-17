@@ -365,6 +365,10 @@ public class ActivityServiceImpl implements ActivityService {
     //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
+    	
+    	//先删除已经过期未支付的活动 add by yanjun 20170417
+    	this.cancelExpireRosters(cmd.getActivityId());
+    	
     	// 把锁放在查询语句的外面，update by tt, 20170210
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
@@ -445,6 +449,7 @@ public class ActivityServiceImpl implements ActivityService {
 	            	Long orderNo = this.onlinePayService.createBillId(DateHelper
 	        				.currentGMTTime().getTime());
 	            	roster.setOrderNo(orderNo);
+	            	roster.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
 	            	roster.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	            }
 	            
@@ -519,6 +524,31 @@ public class ActivityServiceImpl implements ActivityService {
         }).first();
 	 }
     
+    /**
+     * 删除应过期的活动
+     * @param activityId
+     */
+    private void cancelExpireRosters(Long activityId){
+    	Activity activity = activityProvider.findActivityById(activityId);
+    	if(activity == null || activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() != ActivityChargeFlag.CHARGE.getCode()){
+    		return;
+    	}
+    	
+    	GetRosterOrderSettingCommand  cmd = new GetRosterOrderSettingCommand ();
+    	cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+    	RosterOrderSettingDTO dto = this.getRosterOrderSetting(cmd);
+    	Long orderStartTime = DateHelper.currentGMTTime().getTime() - dto.getTime();
+    	List<ActivityRoster> listRoster = activityProvider.findExpireRostersByActivityId(activityId, orderStartTime);
+    	if(listRoster != null){
+    		for(int i=0; i< listRoster.size(); i++){
+    			ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
+        		cancelCmd.setActivityId(listRoster.get(i).getActivityId());
+        		cancelCmd.setUserId(listRoster.get(i).getUid());
+        		this.cancelSignup(cancelCmd);
+    		}
+    		
+    	}
+    }
 
 	@Override
 	public CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd) {
@@ -1761,7 +1791,7 @@ public class ActivityServiceImpl implements ActivityService {
         				.currentGMTTime().getTime());
             	item.setOrderNo(orderNo);
             	item.setOrderStartTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            	//TODO 启动定时器，定时取消
+            	item.setPayFlag(ActivityRosterPayFlag.UNPAY.getCode());
             	//启动定时器，当时间超过设定时间时，取消订单。
             	rosterPayTimeoutService.pushTimeout(item);
             }

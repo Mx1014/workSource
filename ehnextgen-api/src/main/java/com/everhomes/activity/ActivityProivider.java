@@ -112,4 +112,6 @@ public interface ActivityProivider {
 	List<Object[]> statisticsRosterTag();
 	
 	List<Object[]> statisticsActivityTag();
+	
+	List<ActivityRoster> findExpireRostersByActivityId(Long activityId, Long orderStartTime);
 }
