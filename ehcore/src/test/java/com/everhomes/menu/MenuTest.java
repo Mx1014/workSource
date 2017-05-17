@@ -1,5 +1,6 @@
 package com.everhomes.menu;
 
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -256,16 +257,17 @@ public class MenuTest  extends LoginAuthTestCase {
     }
     
     @Test
-    public void testAes() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public void testAes() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
     	//byte[] key = Base64.decodeBase64("sh4lsdrHOxEseJf0dDrnVA==");
-    	byte[] key = "0123456789012345".getBytes();
+//    	byte[] key = "0123456789012345".getBytes();
+    	byte[] key = {0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,0x0008,0x0009,0x0000,0x0001,0x0002,0x0003,0x0004,0x0005};
     	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
     	String ivText = "614146a825e5a67448f22a27ae8aa778";
     	byte[] ivData = StringHelper.fromHexString(ivText);
     	IvParameterSpec iv = new IvParameterSpec(ivData);
     	cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), iv);
     	String data = "abcd1234";
-		byte[] b = cipher.doFinal(data.getBytes());
+		byte[] b = cipher.doFinal(data.getBytes("utf-8"));
 		LOGGER.info("key=" + key.length);
 		LOGGER.info(StringHelper.toHexString(b));
 

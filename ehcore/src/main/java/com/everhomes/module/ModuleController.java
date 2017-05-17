@@ -13,7 +13,11 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.TreeWebMenusCommand;
 import com.everhomes.rest.module.*;
+<<<<<<< HEAD
 
+=======
+import com.everhomes.user.UserContext;
+>>>>>>> 7abf7205c04f01f814bede6c6cfcb899ceff9b84
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
