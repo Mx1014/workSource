@@ -256,7 +256,7 @@ public class ExpressServiceImpl implements ExpressService {
 			expressUser.setExpressCompanyId(cmd.getExpressCompanyId());
 			expressUser.setOrganizationId(createExpressUserDTO.getOrganizationId());
 			expressUser.setOrganizationMemberId(createExpressUserDTO.getOrganizationMemberId());
-			expressUser.setUserId(owner.getUserId());
+			expressUser.setUserId(createExpressUserDTO.getUserId());
 			expressUser.setStatus(CommonStatus.ACTIVE.getCode());
 			expressUserProvider.createExpressUser(expressUser);
 		}
