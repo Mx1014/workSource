@@ -366,7 +366,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
     	// 把锁放在查询语句的外面，update by tt, 20170210
-        return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
 		        User user = UserContext.current().getUser();

@@ -48,12 +48,12 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					"no activity.");
 		}
 		//检验支付结果和应价格是否相等
-		checkPayAmount(cmd.getPayAccount(), activity.getChargePrice());
+		checkPayAmount(cmd.getPayAmount(), activity.getChargePrice());
 		//支付宝回调时，可能会同时回调多次，
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode() + roster.getId()).enter(()-> {
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
-			roster.setPayTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			roster.setPayAmount(new BigDecimal(cmd.getPayAccount()));
+			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayTime())));
+			roster.setPayAmount(new BigDecimal(cmd.getPayAmount()));
 			activityProvider.updateRoster(roster);
 			return null;
 		});
@@ -63,13 +63,14 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	public void payFail(PayCallbackCommand cmd) {
 		if(LOGGER.isDebugEnabled())
 			LOGGER.error("onlinePayBillFail");
-		ActivityRoster roster = activityProvider.findRosterById(Long.valueOf(cmd.getOrderNo()));
+		ActivityRoster roster = activityProvider.findRosterByOrderNo(Long.valueOf(cmd.getOrderNo()));
 		if(roster == null){
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
 					"no roster.");
 		}
 		ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
 		cancelCmd.setActivityId(roster.getActivityId());
+		cancelCmd.setUserId(roster.getUid());
 		activityService.cancelSignup(cancelCmd);
 	}
 	
