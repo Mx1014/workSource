@@ -629,6 +629,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                     }
                 }
             }
+        } catch (RuntimeErrorException e) {
+            // 命中黑名单的异常则抛出去
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Failed to check the user-agent in http/https header, userAgents={}", userAgents, e);
         }
