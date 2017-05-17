@@ -1306,6 +1306,37 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_PM_TASK_HISTORY_ADDRESSES.ID.max()).from(Tables.EH_PM_TASK_HISTORY_ADDRESSES).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhWarehouses.class, Tables.EH_WAREHOUSES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSES.ID.max()).from(Tables.EH_WAREHOUSES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseMaterials.class, Tables.EH_WAREHOUSE_MATERIALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_MATERIALS.ID.max()).from(Tables.EH_WAREHOUSE_MATERIALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseMaterialCategories.class, Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.ID.max()).from(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseStocks.class, Tables.EH_WAREHOUSE_STOCKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_STOCKS.ID.max()).from(Tables.EH_WAREHOUSE_STOCKS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseStockLogs.class, Tables.EH_WAREHOUSE_STOCK_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.max()).from(Tables.EH_WAREHOUSE_STOCK_LOGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseRequests.class, Tables.EH_WAREHOUSE_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_REQUESTS.ID.max()).from(Tables.EH_WAREHOUSE_REQUESTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseRequestMaterials.class, Tables.EH_WAREHOUSE_REQUEST_MATERIALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.max()).from(Tables.EH_WAREHOUSE_REQUEST_MATERIALS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhWarehouseUnits.class, Tables.EH_WAREHOUSE_UNITS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_WAREHOUSE_UNITS.ID.max()).from(Tables.EH_WAREHOUSE_UNITS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
