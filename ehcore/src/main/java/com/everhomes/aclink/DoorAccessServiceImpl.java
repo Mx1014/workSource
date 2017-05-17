@@ -59,6 +59,8 @@ import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
 import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
 import com.everhomes.aclink.huarun.AclinkSimpleQRCodeInvitation;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
@@ -90,6 +92,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -628,6 +631,30 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         UserInfo user = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());
+        
+        if(user == null) {
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user is not found");
+        }
+        if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_HUARUN_GROUP.getCode())) {
+        	List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), user.getId(), OrganizationGroupType.ENTERPRISE);
+        	if(dtos == null || dtos.isEmpty()) {
+        		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "the input user haven't companies");	
+        	}
+        	OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+			if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+				user.setNickName(om.getContactName());
+			}
+			
+        	AclinkHuarunSyncUser syncUser = new AclinkHuarunSyncUser();
+        	syncUser.setPhone(user.getPhones().get(0));
+        	syncUser.setUsername(user.getNickName());
+        	syncUser.setOrganization(dtos.get(0).getName());
+        	AclinkHuarunSyncUserResp resp = aclinkHuarunService.syncUser(syncUser);
+        	if(resp.getStatus() < 0) {
+        		throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "huarun response error " + resp.getDescription());
+        	}
+        	
+        }
         
         DoorAuth doorAuth = ConvertHelper.convert(cmd, DoorAuth.class);
         DoorAuthDTO rlt = null;

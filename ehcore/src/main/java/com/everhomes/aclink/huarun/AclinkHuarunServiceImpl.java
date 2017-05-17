@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +27,8 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
@@ -34,6 +39,11 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
 	
     @Autowired
     private ConfigurationProvider  configProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
     
     private Gson gson = new Gson();
     private Random randomGenerator = new Random();
@@ -104,6 +114,17 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
 		        	getCode.setType("1");
 	        	}
 	        	
+	        	String key = String.format("dooraccess:%%s:huarun", phone);
+            Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            Object v = redisTemplate.opsForValue().get(key);
+            if(v != null) {
+            	AclinkGetSimpleQRCodeResp redisResp = new AclinkGetSimpleQRCodeResp();
+            	redisResp.setQrcode(v.toString());
+            	redisResp.setStatus("0");
+            	return redisResp;
+            }
+	        	
 	        	MessageDigest md = MessageDigest.getInstance("MD5");
 	        	String md5 = "SA" + getCode.getAuth(); 
 	        	md.update(md5.getBytes());
@@ -117,6 +138,7 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
             }
             
             AclinkGetSimpleQRCodeResp resp = (AclinkGetSimpleQRCodeResp)StringHelper.fromJsonString(body, AclinkGetSimpleQRCodeResp.class);
+            redisTemplate.opsForValue().set(key, resp.getQrcode(), 2, TimeUnit.HOURS);
             return resp;
         } catch (Exception e) {
             LOGGER.error("huarun request error", e);
