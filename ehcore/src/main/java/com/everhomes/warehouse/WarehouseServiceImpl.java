@@ -316,7 +316,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(unit != null) {
             dto.setUnitName(unit.getName());
         }
-        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories((dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId()));
+        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
         if(category != null) {
             dto.setCategoryName(category.getName());
         }
