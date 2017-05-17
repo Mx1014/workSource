@@ -18,3 +18,16 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES(@eh_locale_templates_id := @eh_locale_templates_id + 1, 'activity.notification','10','zh_CN','活动被管理员同意，通知活动报名者进行支付','你报名的活动「${postName}」已被确认，请在${payTimeDays}天${payTimeHours}小时之内尽快完成支付。','0');
 
 
+-- 活动报名表新增organization_id后，刷新数据  add by yanjun 20170517
+UPDATE eh_activity_roster r
+SET r.organization_id = (SELECT
+                           a.id
+                         FROM eh_organizations a,
+                           eh_organization_members b,
+                           eh_activities c
+                         WHERE a.id = b.organization_id
+                             AND a.namespace_id = c.namespace_id
+                             AND c.id = r.activity_id
+                             AND r.uid = b.target_id
+                             AND b.target_type = 'USER'
+                         LIMIT 1 );

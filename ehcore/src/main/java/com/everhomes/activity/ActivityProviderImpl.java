@@ -1163,13 +1163,45 @@ public class ActivityProviderImpl implements ActivityProivider {
 		return response;
 	}
 	
-	public void statisticsOrganization(){
-		
+	@Override
+	public List<Object[]> statisticsOrganization(){
+		final List<Object[]>  response = new ArrayList<Object[]>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
+				null, (DSLContext context, Object reducingContext) -> {
+
+					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+
+					//已支付
+//					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+//					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+//					condition = condition.and(chargeCondition);
+
+					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ORGANIZATION_ID, 
+							Tables.EH_ORGANIZATIONS.NAME, 
+							DSL.count(), 
+							DSL.countDistinct(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID))
+							.from(Tables.EH_ACTIVITY_ROSTER)
+							.join(Tables.EH_ACTIVITIES)
+							.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+							.leftOuterJoin(Tables.EH_ORGANIZATIONS)
+							.on(Tables.EH_ACTIVITY_ROSTER.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+							.where(condition)
+							.groupBy(Tables.EH_ACTIVITY_ROSTER.ORGANIZATION_ID)
+							.orderBy(DSL.count().desc())
+							.fetchInto(Object[].class);
+
+					if(list != null){
+						response.addAll(list);
+					}
+					return true;
+				});
+
+		return response;
 	}
 
 	@Override
 	public List<ActivityRoster> findExpireRostersByActivityId(Long activityId, Long orderStartTime) {
-		// TODO Auto-generated method stub
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
 
 		AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);

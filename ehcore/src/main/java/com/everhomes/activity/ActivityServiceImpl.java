@@ -4926,8 +4926,26 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		StatisticsOrganizationResponse response = new StatisticsOrganizationResponse();
+		List<StatisticsOrganizationDTO> listDto = new ArrayList<StatisticsOrganizationDTO>();
+		
+		List<Object[]> listOrganization = activityProvider.statisticsOrganization();
+		if(listOrganization != null){
+			listOrganization.forEach(r -> {
+				StatisticsOrganizationDTO tempDto = new StatisticsOrganizationDTO();
+				if(r[0] != null){
+					tempDto.setOrgId((Long)r[0]);
+				}
+				if(r[1] != null){
+					tempDto.setOrgName((String)r[1]);
+				}
+				tempDto.setSignPeopleCount((Integer)r[2]);
+				tempDto.setSignActivityCount((Integer)r[3]);
+				listDto.add(tempDto);
+			});
+		}
+		response.setList(listDto);
+		return response;
 	}
 
 	@Override

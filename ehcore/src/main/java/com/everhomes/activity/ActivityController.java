@@ -762,15 +762,7 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("statisticsOrganization")
     @RestReturn(value=StatisticsOrganizationResponse.class)
     public RestResponse statisticsOrganization(StatisticsOrganizationCommand cmd){
-    	StatisticsOrganizationResponse result = new StatisticsOrganizationResponse();
-    	result.setList(new ArrayList<StatisticsOrganizationDTO>());
-    	for(int i= 0; i<10 ;i++){
-    		StatisticsOrganizationDTO item = new StatisticsOrganizationDTO();
-    		item.setOrgName("企业名称" + i);
-    		item.setSignActivityCount(i+10);
-    		item.setSignPeopleCount(i+ 100);
-    		result.getList().add(item);
-    	}
+    	StatisticsOrganizationResponse result = activityService.statisticsOrganization(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

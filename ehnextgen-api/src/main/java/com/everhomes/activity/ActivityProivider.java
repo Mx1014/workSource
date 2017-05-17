@@ -107,11 +107,29 @@ public interface ActivityProivider {
 	
 	List<Activity> statisticsActivity(Integer namespaceId, Long startTime, Long endTime, String tag);
 	
+	/**
+	 * 返回值object[]的格式如下：{Long, Integer} - {活动Id，报名人数}
+	 * @return
+	 */
 	List<Object[]> statisticsRosterPay(List<Long> activityIds);
 	
+	/**
+	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名人数}
+	 * @return
+	 */
 	List<Object[]> statisticsRosterTag();
 	
+	/**
+	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名活动数}
+	 * @return
+	 */
 	List<Object[]> statisticsActivityTag();
+	
+	/**
+	 * 返回值object[]的格式如下：{Long, String, Integer, Integer} - {机构Id， 机构名称， 报名人数，报名活动数}
+	 * @return
+	 */
+	List<Object[]> statisticsOrganization();
 	
 	List<ActivityRoster> findExpireRostersByActivityId(Long activityId, Long orderStartTime);
 }
