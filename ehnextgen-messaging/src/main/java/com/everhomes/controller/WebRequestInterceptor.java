@@ -128,7 +128,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             Map<String, String> userAgents = getUserAgent(request);
             // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
             // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
-            checkUserAgent(userAgents);
+            checkUserAgent(request.getRequestURI(), userAgents);
             
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
@@ -600,7 +600,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         return null;
     }
     
-    private void checkUserAgent(Map<String, String> userAgents) {
+    private void checkUserAgent(String uri, Map<String, String> userAgents) {
+        // 由于电商服务器、统一支付服务器、第三方服务器都可能不修改user-agent，从而会误杀；
+        // 为了避免此情况，只对注册接口进行限制 by lqs 20170517
+        if(uri == null || !uri.contains("/user/signup")) {
+            return;
+        }
+        
         if(userAgents == null) {
             return;
         }
@@ -623,7 +629,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 entryValue = entry.getValue();
                 for(String segment : segments) {
                     if((entryKey != null && entryKey.contains(segment)) || (entryValue != null && entryValue.contains(segment))) {
-                        LOGGER.error("User agent is in blacklist, userAgentKey={}, userAgentValue={}, blacklist={}", entryKey, entryValue, blacklist);
+                        LOGGER.error("User agent is in blacklist, uri={}, userAgentKey={}, userAgentValue={}, blacklist={}", uri, entryKey, entryValue, blacklist);
                         throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                                 UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
                     }
