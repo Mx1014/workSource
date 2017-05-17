@@ -3,6 +3,8 @@ package com.everhomes.rest.techpark.punch;
 /**
  * <ul>审批后的状态
  * 
+ *<li>NONENTRY(16): 未入职</li>
+ *<li>RESIGNED(15): 已离职</li>
  *<li>FORGOT(14): 忘打卡</li>
  *<li>HALFOUTWORK(13):  半天公出</li>
  *<li>HALFEXCHANGE(12):  半天调休</li>
@@ -20,7 +22,10 @@ package com.everhomes.rest.techpark.punch;
  * <li>NORMAL(0): 正常</li>
  * </ul>
  */
-public enum ApprovalStatus { 
+public enum ApprovalStatus {
+
+	NONENTRY((byte) 16),
+	RESIGNED((byte) 15),
 	FORGOT((byte)14),
 	HALFOUTWORK((byte)13),
 	HALFEXCHANGE((byte)12),

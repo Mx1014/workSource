@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
@@ -43,6 +47,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -57,6 +62,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private GeneralFormProvider generalFormProvider;
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Autowired
 	private FlowService flowService;
@@ -219,26 +226,55 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-		//
+		//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+		List<OrganizationCommunity> communityList = null;
+		if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+			 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+		}
 		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
-								.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
+						ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+						List<OrganizationCommunity> communityList = null;
+						
+						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+						if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+							 Condition conditionOR = null;
+							 for (OrganizationCommunity organizationCommunity : communityList) {
+								Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+										.and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+								if(conditionOR==null){
+									conditionOR = condition;
+								}else{
+									conditionOR.or(condition);
+								}
+							 }
+							 if(conditionOR!=null)
+								 query.addConditions(conditionOR);
+						}else{
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
+									.getOwnerId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
+									.getOwnerType()));
+						}
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
 								.ne(GeneralFormStatus.INVALID.getCode()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
 								.getModuleId()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
 								.getModuleType()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
-								.getProjectId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
-								.getProjectType()));
+						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
+						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
+						if(entityType == EntityType.COMMUNITY){
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
+									.getProjectId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
+									.getProjectType()));
+						}
 						return query;
 					}
 				});

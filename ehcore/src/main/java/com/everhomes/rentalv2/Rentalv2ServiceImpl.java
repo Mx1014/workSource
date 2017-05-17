@@ -3115,7 +3115,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rentalRefundOrder.setResourceTypeId(order.getResourceTypeId());
 						rentalRefundOrder.setAmount(refundCmd.getRefundAmount());
 						//微信直接退款，支付宝置为退款中 
-						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getVendorType())){
+						//update by wuhan 2017-5-15 :支付宝也和微信一样退款
+//						if(billMap.getVendorType().equals(VendorType.WEI_XIN.getVendorType())){
 							PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refoundApi, refundCmd, PayZuolinRefundResponse.class);
 							if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
 								//退款成功保存退款单信息，修改bill状态
@@ -3128,11 +3129,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 										RentalServiceErrorCode.ERROR_REFOUND_ERROR,
 												"bill  refound error"); 
 							}	
-						}
-						else{
-							rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
-							order.setStatus(SiteBillStatus.REFUNDING.getCode());
-						}
+//						}
+//						else{
+//							rentalRefundOrder.setStatus(SiteBillStatus.REFUNDING.getCode());
+//							order.setStatus(SiteBillStatus.REFUNDING.getCode());
+//						}
 						this.rentalv2Provider.createRentalRefundOrder(rentalRefundOrder);
 					}
 				}
@@ -3710,7 +3711,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				else{
 					LOGGER.error("待付款订单:id ["+bill.getId()+"]付款金额有问题： 应该付款金额："+bill.getPayTotalMoney()+"实际付款金额："+bill.getPaidMoney());
- 
+
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : price is not right!");  
 				}
 			}else if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
 				LOGGER.error("待付款订单:id ["+bill.getId()+"] 状态已经是成功预约");

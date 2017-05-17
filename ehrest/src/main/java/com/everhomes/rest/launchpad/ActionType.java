@@ -45,11 +45,15 @@ package com.everhomes.rest.launchpad;
  * <li>POST_LIST(62): 帖子列表（无参数）</li>
  * <li>ACLINK_REMOTE_OPEN(63): 门禁远程开门</li>
  * <li>ACTIVITY_DETAIL(64): 活动详情</li>
+ * 如果要使用路由uri的形式，请移步{@link com.everhomes.rest.common.Router}
  * </ul>
  */
 public enum ActionType {
+
+      // 如果要使用路由uri的形式，请移步{@link com.everhomes.rest.common.Router}
+
       NONE((byte)0),MORE_BUTTON((byte)1),NAVIGATION((byte)2),FAMILY_DETAILS((byte)3),GROUP_DETAILS((byte)4),
-      WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9, "zl://post/d?forumId=${forumId}&topicId=${topicId}"),
+      WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9),
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),OFFICIAL_URL((byte)13),
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
       POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),
@@ -60,7 +64,7 @@ public enum ActionType {
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
       ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55), FLOW_TASKS( (byte)56 ), PARKING_CLEARANCE((byte) 57), PARKING_CLEARANCE_TASK((byte) 58),
       CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63), 
-      ACTIVITY_DETAIL((byte)64, "zl://activity/d?forumId=${forumId}&topicId=${topicId}");
+      ACTIVITY_DETAIL((byte)64);
       
     private byte code;
     private String url;

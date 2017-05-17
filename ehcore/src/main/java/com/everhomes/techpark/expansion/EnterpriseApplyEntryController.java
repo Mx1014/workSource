@@ -49,6 +49,12 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
 		res.setDetails(dtos.stream().map((c) ->{
 			EnterpriseDetailDTO dto = ConvertHelper.convert(c, EnterpriseDetailDTO.class);
+			//modify by dengs,20170512,将经纬度转换成 OrganizationDetailDTO 里面的类型，不改动dto，暂时不影响客户端。后面考虑将dto的经纬度改成Double
+			if(null != c.getLatitude())
+				dto.setLatitude(Double.valueOf(c.getLatitude()));
+			if(null != c.getLongitude())
+				dto.setLongitude(Double.valueOf(c.getLongitude()));
+			//end
 			dto.setEnterpriseId(c.getOrganizationId());
 			dto.setEnterpriseName(c.getDisplayName());
 			if(dto.getEnterpriseName() == null)

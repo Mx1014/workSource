@@ -1,46 +1,44 @@
 package com.everhomes.rest.user;
 
-import java.util.List;
-
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
+import java.util.List;
 
 /**
  * 
- * @author elians
- *         <ul>
- *         <li>id:用户id</li>
- *         <li>accountName:用户名</li>
- *         <li>nickName:用户昵称</li>
- *         <li>avatarUrl:用户头像url</li>
- *         <li>avatarUri:用户头像url</li>
- *         <li>statusLine:用户状态</li>
- *         <li>gender:用户性别.0代表未知，1为男性，2为女性</li>
- *         <li>birthday:用户生日</li>
- *         <li>homeTown:家乡id</li>
- *         <li>hometownName:名字</li>
- *         <li>company:公司</li>
- *         <li>school:学校</li>
- *         <li>occupation:职业</li>
- *         <li>communityId:小区ID</li>
- *         <li>communityName:小区名</li>
- *         <li>addressId:地址id</li>
- *         <li>address:地址</li>
- *         <li>phones:手机</li>
- *         <li>emails:邮箱</li>
- *         <li>regionId:城市ID</li>
- *         <li>regionName:城市名</li>
- *         <li>regionPath:城市路径</li>
- *         <li>uuid:用户唯一的标识</li> 
- *         <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
- *         <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
- *         <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
- *         <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
- *         <li>registerDays: 用户注册天数</li>
- *         </ul>
+ *  <ul>
+ *  <li>id:用户id</li>
+ *  <li>accountName:用户名</li>
+ *  <li>nickName:用户昵称</li>
+ *  <li>avatarUrl:用户头像url</li>
+ *  <li>avatarUri:用户头像url</li>
+ *  <li>statusLine:用户状态</li>
+ *  <li>gender:用户性别.0代表未知，1为男性，2为女性</li>
+ *  <li>birthday:用户生日</li>
+ *  <li>homeTown:家乡id</li>
+ *  <li>hometownName:名字</li>
+ *  <li>company:公司</li>
+ *  <li>school:学校</li>
+ *  <li>occupation:职业</li>
+ *  <li>communityId:小区ID</li>
+ *  <li>communityName:小区名</li>
+ *  <li>addressId:地址id</li>
+ *  <li>address:地址</li>
+ *  <li>phones:手机</li>
+ *  <li>emails:邮箱</li>
+ *  <li>regionId:城市ID</li>
+ *  <li>regionName:城市名</li>
+ *  <li>regionPath:城市路径</li>
+ *  <li>uuid:用户唯一的标识</li>
+ *  <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
+ *  <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ *  <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
+ *  <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
+ *  <li>registerDays: 用户注册天数</li>
+ *  </ul>
  **/
 public class UserInfo {
 
