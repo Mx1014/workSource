@@ -2,6 +2,7 @@ package com.everhomes.aclink.huarun;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -59,6 +61,7 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
         HttpEntity<String> requestEntity = new HttpEntity<String>(body, headers);
         SimpleClientHttpRequestFactory asyncRequestFactory = new HuarunSimpleClientHttpRequestFactory();
         template.setRequestFactory(asyncRequestFactory);
+        template.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
         ResponseEntity<String> future = template.exchange(url, HttpMethod.POST, requestEntity, String.class);
         return future;
     }
@@ -92,7 +95,9 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
         			n = 9944;
         		}
 	        	getCode.setAuth(String.valueOf(n));
-        		getCode.setPhone(phone);
+	        	if(getCode.getPhone() == null) {
+	        		getCode.setPhone(phone);	
+	        	}
 	        	if(getCode.getInvitation() == null) {
 		        	getCode.setType("0");
 	        	} else {
@@ -116,6 +121,35 @@ public class AclinkHuarunServiceImpl implements AclinkHuarunService {
         } catch (Exception e) {
             LOGGER.error("huarun request error", e);
             return null;
-        }    	
+        }
+    }
+    
+    @Override
+    public AclinkHuarunSyncUserResp syncUser(AclinkHuarunSyncUser syncUser) {
+        try {
+    		int n = randomGenerator.nextInt(9999);
+    		if(n < 1000) {
+    			n = 9944;
+    		}
+    		syncUser.setAuth(String.valueOf(n));
+        	
+        	MessageDigest md = MessageDigest.getInstance("MD5");
+        	String md5 = "SA" + syncUser.getAuth(); 
+        	md.update(md5.getBytes());
+        	String rlt = StringHelper.toHexString(md.digest()).toUpperCase();
+        	syncUser.setMd5(rlt);
+    	
+        ResponseEntity<String> future = this.restCall("/crland/syncUser", syncUser);
+        String body = future.getBody();
+        if(LOGGER.isDebugEnabled()) {
+        	LOGGER.debug("huarun verifyUser" + body);	
+        }
+        
+        AclinkHuarunSyncUserResp resp = (AclinkHuarunSyncUserResp)StringHelper.fromJsonString(body, AclinkHuarunSyncUserResp.class);
+        return resp;
+    } catch (Exception e) {
+        LOGGER.error("huarun request error", e);
+        return null;
+    }
     }
 }
