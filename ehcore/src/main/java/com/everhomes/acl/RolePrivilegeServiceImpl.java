@@ -100,11 +100,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> privilegeIds = new ArrayList<>();
 
 		List<Long> ids = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		LOGGER.info("Get user privilegeIds={}", StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
-
 		ids = this.getAllResourcePrivilegeIds(cmd.getOrganizationId(), user.getId());
+		LOGGER.info("Get All resource privilegeIds={}", StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
@@ -739,22 +742,30 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 		List<Long> ids = this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
+		LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", organizationId, userId, StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
 		for (CommunityDTO communityDTO:communityDTOs) {
 			List<Long> pIds = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
+			LOGGER.info("Get COMMUNITY ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), userId, StringHelper.toJsonString(ids));
+
 			if(null != pIds){
 				privilegeIds.addAll(pIds);
 			}
 			if(pIds.size() == 0){
 				for (OrganizationDTO dto: organizationDTOs) {
 					ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), dto.getId());
+					LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), dto.getId(), StringHelper.toJsonString(ids));
+
 					if(null != ids){
 						privilegeIds.addAll(ids);
 					}
 				}
 				ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), organizationId);
+				LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), organizationId, StringHelper.toJsonString(ids));
+
 				if(null != ids){
 					privilegeIds.addAll(ids);
 				}
