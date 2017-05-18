@@ -4,6 +4,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialsCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialsResponse;
 import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.SearchUtils;
 import com.everhomes.search.WarehouseRequestMaterialSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
 
     @Override
     public String getIndexType() {
-        return null;
-    }
-
-    @Override
-    public List<String> analyze(String analyzer, String input) {
-        return super.analyze(analyzer, input);
+        return SearchUtils.WAREHOUSE_REQUEST_MATERIAL;
     }
 
     @Override

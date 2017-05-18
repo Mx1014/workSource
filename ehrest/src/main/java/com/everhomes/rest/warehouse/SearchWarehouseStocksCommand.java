@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>warehouseId: 仓库id</li>
  *     <li>name: 物品名称</li>
  *     <li>materialNumber: 物品编码</li>
+ *     <li>categoryId: 物品分类id</li>
  *     <li>pageAnchor: 锚点</li>
  *     <li>pageSize: 页面大小</li>
  * </ul>
@@ -25,6 +26,8 @@ public class SearchWarehouseStocksCommand {
     private String name;
 
     private String materialNumber;
+
+    private Long categoryId;
 
     private Long pageAnchor;
 
@@ -44,6 +47,14 @@ public class SearchWarehouseStocksCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getMaterialNumber() {
