@@ -16,6 +16,8 @@ public class SearchWarehouseStockLogsResponse {
 
     private Long nextPageAnchor;
 
+    private Long total;
+
     @ItemType(WarehouseStockLogDTO.class)
     private List<WarehouseStockLogDTO> stockLogDTOs;
 
@@ -33,6 +35,14 @@ public class SearchWarehouseStockLogsResponse {
 
     public void setStockLogDTOs(List<WarehouseStockLogDTO> stockLogDTOs) {
         this.stockLogDTOs = stockLogDTOs;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
     }
 
     @Override

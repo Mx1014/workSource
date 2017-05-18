@@ -24,6 +24,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,8 +161,9 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         }
 
         List<Long> ids = getIds(rsp);
-
+        Long total = getTotal(rsp);
         SearchWarehouseStockLogsResponse response = new SearchWarehouseStockLogsResponse();
+        response.setTotal(total);
         if(ids.size() > pageSize) {
             response.setNextPageAnchor(anchor + 1);
             ids.remove(ids.size() - 1);
@@ -205,7 +207,6 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             logDTOs.add(dto);
         }
         response.setStockLogDTOs(logDTOs);
-
         return response;
     }
 
@@ -249,6 +250,12 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             LOGGER.error("Create warehouse stock log  " + log.getId() + " error");
             return null;
         }
+    }
+
+    private Long getTotal(SearchResponse rsp) {
+        List<Long> results = new ArrayList<Long>();
+        Long totalHits= rsp.getHits().getTotalHits();
+        return totalHits;
     }
 
     @Override
