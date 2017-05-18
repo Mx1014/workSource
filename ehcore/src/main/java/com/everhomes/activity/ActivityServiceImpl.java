@@ -4375,7 +4375,7 @@ public class ActivityServiceImpl implements ActivityService {
 		SetActivityWarningCommand warningCmd = new SetActivityWarningCommand();
 		warningCmd.setNamespaceId(cmd.getNamespaceId());
 		warningCmd.setDays(cmd.getWarningDays());
-		warningCmd.setHours(cmd.getOrderHours());
+		warningCmd.setHours(cmd.getWarningHours());
 		ActivityWarningResponse  warningResponse  = this.setActivityWarning(warningCmd);
 		timeResponse.setWarningDays(warningResponse.getDays());
 		timeResponse.setWarningHours(warningResponse.getHours());
