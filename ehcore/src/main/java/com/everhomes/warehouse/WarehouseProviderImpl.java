@@ -670,4 +670,78 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
         return result;
     }
+
+    @Override
+    public void creatWarehouseRequest(WarehouseRequests request) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequests.class));
+
+        request.setId(id);
+        request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        request.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        LOGGER.info("creatWarehouseRequest: " + request);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequests.class, id));
+        EhWarehouseRequestsDao dao = new EhWarehouseRequestsDao(context.configuration());
+        dao.insert(request);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWarehouseRequests.class, null);
+    }
+
+    @Override
+    public void updateWarehouseRequest(WarehouseRequests request) {
+
+    }
+
+    @Override
+    public void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarehouseRequestMaterials.class));
+        requestMaterial.setId(id);
+        LOGGER.info("creatWarehouseRequestMaterial: " + requestMaterial);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, id));
+        EhWarehouseRequestMaterialsDao dao = new EhWarehouseRequestMaterialsDao(context.configuration());
+        dao.insert(requestMaterial);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhWarehouseRequestMaterials.class, null);
+    }
+
+    @Override
+    public void updateWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
+
+    }
+
+    @Override
+    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseRequestMaterials> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseRequestMaterials.class));
+            return null;
+        });
+        return result;
+    }
+
+    @Override
+    public WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseRequestsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUESTS);
+        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.ID.eq(id));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUESTS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseRequests> result = new ArrayList<WarehouseRequests>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseRequests.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
 }

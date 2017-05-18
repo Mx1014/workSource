@@ -319,7 +319,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse createRequest(CreateRequestCommand cmd) {
 
-//        warehouseService.createRequest(cmd);
+        warehouseService.createRequest(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -336,7 +336,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = WarehouseRequestDetailsDTO.class)
     public RestResponse findRequest(FindRequestCommand cmd) {
 
-//        WarehouseRequestDetailsDTO request = warehouseService.findRequest(cmd);
+        WarehouseRequestDetailsDTO request = warehouseService.findRequest(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

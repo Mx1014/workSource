@@ -1,6 +1,16 @@
 package com.everhomes.warehouse;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
@@ -56,7 +66,16 @@ public class WarehouseServiceImpl implements WarehouseService {
     private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
     @Autowired
+    private WarehouseRequestMaterialSearcher warehouseRequestMaterialSearcher;
+
+    @Autowired
     private DbProvider dbProvider;
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -633,7 +652,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             material.setBrand(s[4]);
             material.setItemNo(s[5]);
-            material.setReferencePrice(new BigDecimal(s[6]));
+            if(!StringUtils.isEmpty(s[6])) {
+                if(!isNumber(s[6])) {
+                    LOGGER.error("warehouse material reference price is wrong, data = {}", str);
+                    String log = "warehouse material reference price is wrong, data = " + str;
+                    errorDataLogs.add(log);
+                    continue;
+                }
+                material.setReferencePrice(new BigDecimal(s[6]));
+            }
 //                	*单位
             if(StringUtils.isEmpty(s[7])){
                 LOGGER.error("warehouse material unit is null, data = {}", str);
@@ -655,6 +682,21 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseMaterialSearcher.feedDoc(material);
         }
         return errorDataLogs;
+    }
+
+    //金额验证
+    public static boolean isNumber(String str)
+    {
+        java.util.regex.Pattern pattern=java.util.regex.Pattern.compile("^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$"); // 判断小数点后2位的数字的正则表达式
+        java.util.regex.Matcher match=pattern.matcher(str);
+        if(match.matches()==false)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private List<String> importWarehouseMaterialCategoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
@@ -755,5 +797,116 @@ public class WarehouseServiceImpl implements WarehouseService {
             result.add(sb.toString());
         }
         return result;
+    }
+
+    @Override
+    public void createRequest(CreateRequestCommand cmd) {
+        Long uid = UserContext.current().getUser().getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        dbProvider.execute((TransactionStatus status) -> {
+            WarehouseRequests request = ConvertHelper.convert(cmd, WarehouseRequests.class);
+            request.setNamespaceId(namespaceId);
+            request.setRequestUid(uid);
+            request.setCreatorUid(uid);
+            request.setReviewResult(ReviewResult.NONE.getCode());
+            request.setDeliveryFlag(DeliveryFlag.NO.getCode());
+            warehouseProvider.creatWarehouseRequest(request);
+            Long requestId = request.getId();
+            if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+                cmd.getStocks().forEach(stock -> {
+                    WarehouseRequestMaterials material = ConvertHelper.convert(stock, WarehouseRequestMaterials.class);
+                    material.setNamespaceId(request.getNamespaceId());
+                    material.setOwnerId(request.getOwnerId());
+                    material.setOwnerType(request.getOwnerType());
+                    material.setRequestId(requestId);
+                    material.setRequestType(request.getRequestType());
+                    material.setRequestSource(WarehouseStockRequestSource.REQUEST.getCode());
+                    material.setReviewResult(ReviewResult.NONE.getCode());
+                    material.setDeliveryFlag(DeliveryFlag.NO.getCode());
+                    warehouseProvider.creatWarehouseRequestMaterial(material);
+                    warehouseRequestMaterialSearcher.feedDoc(material);
+                });
+            }
+            //新建flowcase
+            Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.WAREHOUSE_REQUEST,
+                    FlowModuleType.NO_MODULE.getCode(), cmd.getOwnerId(), FlowOwnerType.WAREHOUSE_REQUEST.getCode());
+            if(null == flow) {
+                LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
+                throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_ENABLE_FLOW,
+                        "Enable request flow not found.");
+            }
+            CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+
+            createFlowCaseCommand.setTitle("领用申请");
+            createFlowCaseCommand.setApplyUserId(request.getCreatorUid());
+            createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+            createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+            createFlowCaseCommand.setReferId(request.getId());
+            createFlowCaseCommand.setReferType(EntityType.WAREHOUSE_REQUEST.getCode());
+            createFlowCaseCommand.setContent(request.getRemark());
+
+            createFlowCaseCommand.setProjectId(request.getOwnerId());
+            createFlowCaseCommand.setProjectType(EntityType.ORGANIZATIONS.getCode());
+
+            flowService.createFlowCase(createFlowCaseCommand);
+            return null;
+        });
+    }
+
+    @Override
+    public WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd) {
+        WarehouseRequestDetailsDTO dto = new WarehouseRequestDetailsDTO();
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+        if(request != null) {
+            dto = ConvertHelper.convert(request, WarehouseRequestDetailsDTO.class);
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
+            if(members != null && members.size() > 0) {
+                dto.setRequestUserName(members.get(0).getContactName());
+                dto.setRequestUserContact(members.get(0).getContactToken());
+            }
+
+            Organization organization = organizationProvider.findOrganizationById(dto.getRequestOrganizationId());
+            if(organization != null) {
+                dto.setRequestOrganizationName(organization.getName());
+            }
+
+            List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+            if(materials != null && materials.size() > 0) {
+                List<WarehouseRequestMaterialDetailDTO> materialDetailDTOs = materials.stream().map(material -> {
+                    WarehouseRequestMaterialDetailDTO materialDetailDTO = ConvertHelper.convert(material, WarehouseRequestMaterialDetailDTO.class);
+                    WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+                    materialDetailDTO.setDeliveryAmount(material.getAmount());
+                    if(warehouseMaterial != null) {
+                        materialDetailDTO.setMaterialName(warehouseMaterial.getName());
+                        materialDetailDTO.setMaterialNumber(warehouseMaterial.getMaterialNumber());
+                        materialDetailDTO.setBrand(warehouseMaterial.getBrand());
+                        materialDetailDTO.setItemNo(warehouseMaterial.getItemNo());
+                        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(warehouseMaterial.getCategoryId(),  material.getOwnerType(), material.getOwnerId());
+                        if(category != null) {
+                            materialDetailDTO.setCategoryName(category.getName());
+                        }
+
+                        Warehouses warehouse = warehouseProvider.findWarehouse(material.getWarehouseId(), material.getOwnerType(), material.getOwnerId());
+                        if(warehouse != null) {
+                            materialDetailDTO.setWarehouseName(warehouse.getName());
+                        }
+
+                        WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(material.getWarehouseId(), material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+                        if(stock != null) {
+                            materialDetailDTO.setStockAmount(stock.getAmount());
+                        }
+                    }
+                    materialDetailDTO.setRequestUid(request.getRequestUid());
+                    if(members != null && members.size() > 0) {
+                        materialDetailDTO.setRequestUserName(members.get(0).getContactName());
+                    }
+
+                    return materialDetailDTO;
+                }).collect(Collectors.toList());
+                dto.setMaterialDetailDTOs(materialDetailDTOs);
+            }
+        }
+
+        return dto;
     }
 }

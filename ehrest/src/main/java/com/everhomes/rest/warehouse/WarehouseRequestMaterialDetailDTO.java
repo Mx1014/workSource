@@ -37,6 +37,8 @@ public class WarehouseRequestMaterialDetailDTO {
 
     private Long requestUid;
 
+    private String requestUserName;
+
     private Long materialId;
 
     private String materialName;
@@ -60,6 +62,14 @@ public class WarehouseRequestMaterialDetailDTO {
     private Timestamp deliveryTime;
 
     private Byte deliveryFlag;
+
+    public String getRequestUserName() {
+        return requestUserName;
+    }
+
+    public void setRequestUserName(String requestUserName) {
+        this.requestUserName = requestUserName;
+    }
 
     public String getBrand() {
         return brand;

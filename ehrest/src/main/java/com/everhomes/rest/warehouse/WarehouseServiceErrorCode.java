@@ -15,4 +15,6 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_IN_USE = 10008;//物品分类有关联物品
     static final int ERROR_WAREHOUSE_MATERIAL_RELATED_TO_WAREHOUSE = 10009;//物品有库存引用
     static final int ERROR_WAREHOUSE_STOCK_SHORTAGE = 10010;//库存不足
+    static final int ERROR_ENABLE_FLOW = 10011;//请启用工作流
+    static final int ERROR_FLOW_NODE_PARAM = 10012;//工作流节点参数错误
 }

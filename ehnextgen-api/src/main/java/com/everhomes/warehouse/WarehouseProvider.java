@@ -48,4 +48,12 @@ public interface WarehouseProvider {
     void creatWarehouseUnit(WarehouseUnits unit);
     void updateWarehouseUnit(WarehouseUnits unit);
     List<WarehouseUnits> listWarehouseMaterialUnits(String ownerType, Long ownerId);
+
+    void creatWarehouseRequest(WarehouseRequests request);
+    WarehouseRequests findWarehouseRequests(Long id, String ownerType, Long ownerId);
+    void updateWarehouseRequest(WarehouseRequests request);
+
+    void creatWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial);
+    void updateWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial);
+    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId);
 }

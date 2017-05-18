@@ -35,4 +35,6 @@ public interface WarehouseService {
     ImportDataResponse importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
     HttpServletResponse exportWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd, HttpServletResponse response);
 
+    void createRequest(CreateRequestCommand cmd);
+    WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd);
 }
