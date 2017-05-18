@@ -1,28 +1,5 @@
 package com.everhomes.module;
 
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-
-
-
-
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-
-
-
-
-
-import com.everhomes.acl.AclProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
@@ -31,364 +8,441 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
-import com.everhomes.rest.acl.ListServiceModulesCommand;
-import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
-import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.acl.ServiceModuleTreeVType;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.common.EntityType;
-import com.everhomes.rest.module.AssignmentServiceModuleCommand;
-import com.everhomes.rest.module.AssignmentTarget;
-import com.everhomes.rest.module.DeleteServiceModuleAssignmentRelationCommand;
-import com.everhomes.rest.module.ListServiceModuleAssignmentRelationsCommand;
-import com.everhomes.rest.module.Project;
-import com.everhomes.rest.module.ServiceModuleOut;
-import com.everhomes.rest.module.ServiceModuleScopeApplyPolicy;
-import com.everhomes.rest.module.ServiceModuleType;
+import com.everhomes.rest.module.*;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceModuleServiceImpl implements ServiceModuleService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModuleServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModuleServiceImpl.class);
 
-	@Autowired
-	private CommunityProvider communityProvider;
-	
-	@Autowired
-	private OrganizationProvider organizationProvider;
+    @Autowired
+    private CommunityProvider communityProvider;
 
-	@Autowired
-	private ServiceModuleProvider serviceModuleProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
-	@Autowired
-	private AclProvider aclProvider;
+    @Autowired
+    private ServiceModuleProvider serviceModuleProvider;
 
-	@Autowired
-	private DbProvider dbProvider;
+    @Autowired
+    private UserProvider userProvider;
 
-	@Override
-	public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
-		// checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+    @Autowired
+    private DbProvider dbProvider;
 
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 
-		if (null == scopes || scopes.size() == 0) {
-			scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-		}
+    @Override
+    public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
+        // checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel(), ServiceModuleType.PARK.getCode());
-		if (scopes.size() != 0)
-			list = filterList(list, scopes);
+        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 
-		List<ServiceModuleDTO> temp = list.stream().map(r -> {
-			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-			return dto;
-		}).collect(Collectors.toList());
-		// List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
-		//
-		// for(ServiceModuleDTO s: temp) {
-		// getChildServiceModules(temp, s);
-		// if(s.getParentId() == 0) {
-		// result.add(s);
-		// }
-		// }
+        if (null == scopes || scopes.size() == 0) {
+            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+        }
 
-		return temp;
-	}
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel(), ServiceModuleType.PARK.getCode());
+        if (scopes.size() != 0)
+            list = filterList(list, scopes);
 
-	@Override
-	public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        List<ServiceModuleDTO> temp = list.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
+        // List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
+        //
+        // for(ServiceModuleDTO s: temp) {
+        // getChildServiceModules(temp, s);
+        // if(s.getParentId() == 0) {
+        // result.add(s);
+        // }
+        // }
 
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+        return temp;
+    }
 
-		if (null == scopes || scopes.size() == 0) {
-			scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-		}
+    @Override
+    public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 
-		List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
-		if (scopes.size() != 0)
-			list = filterList(list, scopes);
+        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 
-		List<ServiceModuleDTO> temp = list.stream().map(r -> {
-			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-			return dto;
-		}).collect(Collectors.toList());
+        if (null == scopes || scopes.size() == 0) {
+            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+        }
 
-		List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
+        if (scopes.size() != 0)
+            list = filterList(list, scopes);
 
-		for (ServiceModuleDTO s : temp) {
-			getChildServiceModules(temp, s);
-			if (s.getParentId() == 0) {
-				result.add(s);
-			}
-		}
-		return result;
-	}
+        List<ServiceModuleDTO> temp = list.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
 
-	@Override
-	public List<ServiceModuleDTO> listServiceModulePrivileges(ListServiceModulePrivilegesCommand cmd) {
-		Integer startLevel = 2; // 从二级开始查询
-		List<Byte> types = cmd.getTypes();
+        List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
 
-		// 默认查询左邻运营后台需要的模块，即园区模块和左邻运营方需要的系统管理模块
-		if (null == types || types.size() == 0) {
-			types = new ArrayList<>();
-			types.add(ServiceModuleType.PARK.getCode());
-			types.add(ServiceModuleType.MANAGER.getCode());
-		}
+        for (ServiceModuleDTO s : temp) {
+            getChildServiceModules(temp, s);
+            if (s.getParentId() == 0) {
+                result.add(s);
+            }
+        }
+        return result;
+    }
 
-		List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(startLevel, types);
+    @Override
+    public List<ServiceModuleDTO> listServiceModulePrivileges(ListServiceModulePrivilegesCommand cmd) {
+        Integer startLevel = 2; // 从二级开始查询
+        List<Byte> types = cmd.getTypes();
 
-		List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> {
-			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-			return dto;
-		}).collect(Collectors.toList());
+        // 默认查询左邻运营后台需要的模块，即园区模块和左邻运营方需要的系统管理模块
+        if (null == types || types.size() == 0) {
+            types = new ArrayList<>();
+            types.add(ServiceModuleType.PARK.getCode());
+            types.add(ServiceModuleType.MANAGER.getCode());
+        }
 
-		List<ServiceModuleDTO> results = new ArrayList<ServiceModuleDTO>();
+        List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(startLevel, types);
 
-		for (ServiceModuleDTO s : dtos) {
+        List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
 
-			// 获取子节点
-			getChildServiceModules(dtos, s);
+        List<ServiceModuleDTO> results = new ArrayList<ServiceModuleDTO>();
 
-			// 以startLevel级别作为每个模块的根节点
-			if (s.getLevel() == startLevel) {
-				results.add(s);
-			}
-		}
+        for (ServiceModuleDTO s : dtos) {
 
-		return results;
-	}
+            // 获取子节点
+            getChildServiceModules(dtos, s);
 
-	private List<ServiceModule> filterList(List<ServiceModule> modules, List<ServiceModuleScope> scopes) {
-		List<ServiceModule> result = new ArrayList<ServiceModule>();
-		outer: for (ServiceModule m : modules) {
-			for (ServiceModuleScope s : scopes) {
-				if (s.getModuleId().equals(m.getId())) {
-					result.add(m);
-					continue outer;
-				}
-			}
-		}
-		return result;
-	}
+            // 以startLevel级别作为每个模块的根节点
+            if (s.getLevel() == startLevel) {
+                results.add(s);
+            }
+        }
 
-	private ServiceModuleDTO getChildServiceModules(List<ServiceModuleDTO> list, ServiceModuleDTO dto) {
+        return results;
+    }
 
-		List<ServiceModuleDTO> childrens = new ArrayList<ServiceModuleDTO>();
+    private List<ServiceModule> filterList(List<ServiceModule> modules, List<ServiceModuleScope> scopes) {
+        List<ServiceModule> result = new ArrayList<ServiceModule>();
+        outer:
+        for (ServiceModule m : modules) {
+            for (ServiceModuleScope s : scopes) {
+                if (s.getModuleId().equals(m.getId())) {
+                    result.add(m);
+                    continue outer;
+                }
+            }
+        }
+        return result;
+    }
 
-		if (dto.getLevel() == 1) {
-			dto.setvType(ServiceModuleTreeVType.MODULE_CATEGORY.getCode());
-		} else if (dto.getLevel() == 2) {
-			dto.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
-		} else if (dto.getLevel() == 3) {
-			dto.setvType(ServiceModuleTreeVType.PRIVILEGE_CATEGORY.getCode());
-		}
+    private ServiceModuleDTO getChildServiceModules(List<ServiceModuleDTO> list, ServiceModuleDTO dto) {
 
-		for (ServiceModuleDTO serviceModuleDTO : list) {
-			serviceModuleDTO.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
-			if (dto.getId().equals(serviceModuleDTO.getParentId())) {
-				childrens.add(getChildServiceModules(list, serviceModuleDTO));
-			}
-		}
-		if (childrens.size() > 0)
-			dto.setServiceModules(childrens);
-		else {
-			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
-			List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
-			for (ServiceModulePrivilege modulePrivilege : modulePrivileges) {
-				ServiceModuleDTO p = new ServiceModuleDTO();
-				p.setId(modulePrivilege.getPrivilegeId());
-				p.setName(modulePrivilege.getRemark());
-				p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
-				ps.add(p);
-			}
-			dto.setServiceModules(ps);
-		}
+        List<ServiceModuleDTO> childrens = new ArrayList<ServiceModuleDTO>();
 
-		return dto;
-	}
+        if (dto.getLevel() == 1) {
+            dto.setvType(ServiceModuleTreeVType.MODULE_CATEGORY.getCode());
+        } else if (dto.getLevel() == 2) {
+            dto.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
+        } else if (dto.getLevel() == 3) {
+            dto.setvType(ServiceModuleTreeVType.PRIVILEGE_CATEGORY.getCode());
+        }
 
-	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId) {
-		if (null == ownerId) {
-			LOGGER.error("OwnerId cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OwnerId cannot be null.");
-		}
+        for (ServiceModuleDTO serviceModuleDTO : list) {
+            serviceModuleDTO.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
+            if (dto.getId().equals(serviceModuleDTO.getParentId())) {
+                childrens.add(getChildServiceModules(list, serviceModuleDTO));
+            }
+        }
+        if (childrens.size() > 0)
+            dto.setServiceModules(childrens);
+        else {
+            List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
+            List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
+            for (ServiceModulePrivilege modulePrivilege : modulePrivileges) {
+                ServiceModuleDTO p = new ServiceModuleDTO();
+                p.setId(modulePrivilege.getPrivilegeId());
+                p.setName(modulePrivilege.getRemark());
+                p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+                ps.add(p);
+            }
+            dto.setServiceModules(ps);
+        }
 
-		if (StringUtils.isBlank(ownerType)) {
-			LOGGER.error("OwnerType cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OwnerType cannot be null.");
-		}
-	}
+        return dto;
+    }
 
-	@Override
-	public void assignmentServiceModule(AssignmentServiceModuleCommand cmd) {
-		if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
-			LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
-		}
+    private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId) {
+        if (null == ownerId) {
+            LOGGER.error("OwnerId cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OwnerId cannot be null.");
+        }
 
-		List<AssignmentTarget> targets = cmd.getTargets();
-		List<Project> projects = cmd.getProjects();
-		List<Long> moduleIds = cmd.getModuleIds();
-		// 1.先保存relation表的一条记录
-		ServiceModuleAssignmentRelation relation = new ServiceModuleAssignmentRelation();
-		relation.setOwnerId(cmd.getOwnerId());
-		relation.setOwnerType(cmd.getOwnerType());
-		relation.setAllModuleFlag(cmd.getAllModuleFlag());
-		relation.setTargetJson(StringHelper.toJsonString(targets));
-		relation.setOwnerJson(StringHelper.toJsonString(projects));
-		relation.setModuleJson(StringHelper.toJsonString(moduleIds));
-		relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		relation.setOperatorUid(UserContext.current().getUser().getId());
-		relation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		relation.setCreatorUid(UserContext.current().getUser().getId());
+        if (StringUtils.isBlank(ownerType)) {
+            LOGGER.error("OwnerType cannot be null.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "OwnerType cannot be null.");
+        }
+    }
 
-		// 2.再保存assigment表的多条记录
-		Long relation_id = this.serviceModuleProvider.createModuleAssignmentRetion(relation);
-		List<ServiceModuleAssignment> assignmentList = new ArrayList<ServiceModuleAssignment>();
-		for (AssignmentTarget target : targets) {
-			if(target.getTargetId() == null || target.getTargetType() == null){
-				LOGGER.error("target is illegal. cmd = {}",cmd);
-				break;
-			}
-			for (Long moduleId : moduleIds) {
-				if(moduleId == null){
-					LOGGER.error("moduleId is illegal. cmd = {}",cmd);
-					break;
-				}
-				for (Project project : projects) {
-					if(project.getProjectId() == null || project.getProjectType() == null){
-						LOGGER.error("project is illegal. cmd = {}",cmd);
-						break;
-					}
-					ServiceModuleAssignment assignment = new ServiceModuleAssignment();
-					assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
-					// !后补
-					assignment.setOrganizationId(0L);
-					assignment.setTargetId(target.getTargetId());
-					assignment.setTargetType(target.getTargetType());
-					assignment.setOwnerType(project.getProjectType());
-					assignment.setOwnerId(project.getProjectId());
-					assignment.setModuleId(moduleId);
-					assignment.setCreateUid(UserContext.current().getUser().getId());
-					assignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					assignment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					assignment.setAssignmentType((byte) 0);
-					assignment.setAllModuleFlag(cmd.getAllModuleFlag());
-					assignment.setIncludeChildFlag(target.getIncludeChildFlag());
-					assignment.setRelationId(relation_id);
-					assignmentList.add(assignment);
-				}
-			}
-		}
+    @Override
+    public void assignmentServiceModule(AssignmentServiceModuleCommand cmd) {
+        if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
+            LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
+        }
 
-		this.serviceModuleProvider.batchCreateServiceModuleAssignment(assignmentList);
-	}
+        List<AssignmentTarget> targets = cmd.getTargets();
+        List<Project> projects = cmd.getProjects();
+        List<Long> moduleIds = cmd.getModuleIds();
 
-	@Override
-	public void deleteServiceModuleAssignmentRelation(DeleteServiceModuleAssignmentRelationCommand cmd) {
-		// 1.1 查詢relation表的記錄
-		ServiceModuleAssignmentRelation relation = this.serviceModuleProvider.findServiceModuleAssignmentRelationById(cmd.getId());
-		if (relation == null) {
-			LOGGER.error("ServiceModuleAssignmentRelation is not matched. cmd = {}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelation is not matched.");
-		}
-		// 1.2刪除relation表的记录
-		this.serviceModuleProvider.deleteServiceModuleAssignmentRelationById(cmd.getId());
-		// 2.1查询assignment表的多条记录
-		List<ServiceModuleAssignment> assignments = this.serviceModuleProvider.findServiceModuleAssignmentListByRelationId(cmd.getId());
-		if (assignments == null) {
-			LOGGER.error("ServiceModuleAssignment is not matched. cmd = {}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignment is not matched.");
-		}
-		// 2.2删除assignment表的多条记录
-		this.serviceModuleProvider.deleteServiceModuleAssignments(assignments);
+        boolean isCreate = (cmd.getId() == null);
+        boolean isUpdate = (cmd.getId() != null && cmd.getId() != 0);
 
-	}
+        this.dbProvider.execute((status) -> {
 
-	@Override
-	public List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations(ListServiceModuleAssignmentRelationsCommand cmd) {
+            //判断业务关系ID是否存在，分别进行保存和更新操作
+            // 1.先保存relation表的一条记录
+            // 1.1组装relation对象
+            ServiceModuleAssignmentRelation relation = new ServiceModuleAssignmentRelation();
+            if (isCreate) {
+                relation.setOwnerId(cmd.getOwnerId());
+                relation.setOwnerType(cmd.getOwnerType());
+                relation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                relation.setCreatorUid(UserContext.current().getUser().getId());
+            } else if (isUpdate) {//更新
+                relation = this.serviceModuleProvider.findServiceModuleAssignmentRelationById(cmd.getId());
+            }
+            relation.setAllModuleFlag(cmd.getAllModuleFlag());
+            relation.setTargetJson(StringHelper.toJsonString(targets));
+            relation.setOwnerJson(StringHelper.toJsonString(projects));
+            relation.setModuleJson(StringHelper.toJsonString(moduleIds));
+            relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            relation.setOperatorUid(UserContext.current().getUser().getId());
 
-		Type targetType = new TypeToken<List<AssignmentTarget>>() {}.getType();
-		Type projectType = new TypeToken<List<Project>>() {}.getType();
-		Type modulesType = new TypeToken<List<Long>>() {}.getType();
+            // 1.2保存更新，并指定relation_id
+            Long relation_id = 0L;
+            if (isCreate) {
+                relation_id = this.serviceModuleProvider.createModuleAssignmentRetion(relation);
+            } else if (isUpdate) {
+                this.serviceModuleProvider.updateServiceModuleAssignmentRelation(relation);
+                relation_id = relation.getId();
+            }
 
-		if (cmd.getOwnerId() == null || cmd.getOwnerType() == null) {
-			LOGGER.error("ListServiceModuleAssignmentRelationsCommand is not completed. cmd = {}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ListServiceModuleAssignmentRelationsCommand is not matched.");
-		}
+            // 2.再保存assigment表的多条记录
+            if (isUpdate) {
+                //删除
+                List<ServiceModuleAssignment> assignmentList = this.serviceModuleProvider.findServiceModuleAssignmentListByRelationId(relation_id);
+                this.serviceModuleProvider.deleteServiceModuleAssignments(assignmentList);
+            }
+            List<ServiceModuleAssignment> assignmentList = new ArrayList<>();
+            for (AssignmentTarget target : targets) {
+                if (target.getTargetId() == null || target.getTargetType() == null) {
+                    LOGGER.error("target is illegal. cmd = {}", cmd);
+                    break;
+                }
+                checkTarget(target.getTargetType(),target.getTargetId());
+                for (Long moduleId : moduleIds) {
+                    if (moduleId == null) {
+                        LOGGER.error("moduleId is illegal. cmd = {}", cmd);
+                        break;
+                    }
+                    for (Project project : projects) {
+                        if (project.getProjectId() == null || project.getProjectType() == null) {
+                            LOGGER.error("project is illegal. cmd = {}", cmd);
+                            break;
+                        }
+                        ServiceModuleAssignment assignment = new ServiceModuleAssignment();
+                        assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
+                        assignment.setOrganizationId(0L);
+                        assignment.setTargetId(target.getTargetId());
+                        assignment.setTargetType(target.getTargetType());
+                        assignment.setOwnerType(project.getProjectType());
+                        assignment.setOwnerId(project.getProjectId());
+                        assignment.setModuleId(moduleId);
+                        assignment.setCreateUid(UserContext.current().getUser().getId());
+                        assignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        assignment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                        assignment.setAssignmentType((byte) 0);
+                        assignment.setAllModuleFlag(cmd.getAllModuleFlag());
+                        assignment.setIncludeChildFlag(target.getIncludeChildFlag());
+                        assignment.setRelationId(relation_id);
+                        assignmentList.add(assignment);
+                    }
+                }
+            }
+            this.serviceModuleProvider.batchCreateServiceModuleAssignment(assignmentList);
+            return null;
+        });
 
-		// 根据owenerType和owenerId查询出多条relatios表记录
-		List<ServiceModuleAssignmentRelation> relations = this.serviceModuleProvider.listServiceModuleAssignmentRelations(cmd.getOwnerType(), cmd.getOwnerId());
-		if (relations == null || relations.size() == 0) {
-			LOGGER.error("ServiceModuleAssignmentRelations is not found. cmd = {}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelations is not found.");
-		}
-		List<ServiceModuleAssignmentRelationDTO> results = relations.stream().map(r -> {
-			ServiceModuleAssignmentRelationDTO dto = new ServiceModuleAssignmentRelationDTO();
-			dto.setId(r.getId());
-			dto.setOwnerType(r.getOwnerType());
-			dto.setOwnerId(r.getOwnerId());
-			dto.setAllModuleFlag(r.getAllModuleFlag());
+    }
 
-			//处理targets
-			List<AssignmentTarget> targets = GsonUtil.fromJson(r.getTargetJson(), targetType);
-			for (AssignmentTarget target : targets) {
-				// 机构
-				if (EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS) {
-					Organization organization= this.organizationProvider.findOrganizationById(target.getTargetId());
-					if(organization == null){
-						LOGGER.error("JsonParse Organization is not matched. cmd = {}", cmd);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Organization is not matched.");
-					}
-					target.setTargetName(organization.getName());
-				}
-			}
-			dto.setTargets(targets);
+    @Override
+    public void deleteServiceModuleAssignmentRelation(DeleteServiceModuleAssignmentRelationCommand cmd) {
+        this.dbProvider.execute((status) -> {
+            // 1.1 查詢relation表的記錄
+            ServiceModuleAssignmentRelation relation = this.serviceModuleProvider.findServiceModuleAssignmentRelationById(cmd.getId());
+            if (relation == null) {
+                LOGGER.error("ServiceModuleAssignmentRelation is not matched. cmd = {}", cmd);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelation is not matched.");
+            }
+            // 1.2刪除relation表的记录
+            this.serviceModuleProvider.deleteServiceModuleAssignmentRelationById(cmd.getId());
+            // 2.1查询assignment表的多条记录
+            List<ServiceModuleAssignment> assignments = this.serviceModuleProvider.findServiceModuleAssignmentListByRelationId(cmd.getId());
+            if (assignments == null) {
+                LOGGER.error("ServiceModuleAssignment is not matched. cmd = {}", cmd);
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignment is not matched.");
+            }
+            // 2.2删除assignment表的多条记录
+            this.serviceModuleProvider.deleteServiceModuleAssignments(assignments);
+            return null;
+        });
+    }
 
-			//处理owners
-			List<Project> owners = GsonUtil.fromJson(r.getOwnerJson(), projectType);
-			for (Project owner : owners) {
-				// 小区
-				if (EntityType.fromCode(owner.getProjectType()) == EntityType.COMMUNITY) {
-					Community community = this.communityProvider.findCommunityById(owner.getProjectId());
-					if(community == null){
-						LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
-					}
-					owner.setProjectName(community.getName());
-				} else if (EntityType.fromCode(owner.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 子项目
-					ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(owner.getProjectId());
-					if(resourceCategory == null){
-						LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
-					}
-					owner.setProjectName(resourceCategory.getName());
-				}
-			}
-			dto.setProjects(owners);
+    @Override
+    public List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations(ListServiceModuleAssignmentRelationsCommand cmd) {
 
-			//处理modules
-			List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
-			List<ServiceModuleOut> modulesOut = new ArrayList<ServiceModuleOut>();
-			for(Long moduleId:moduleIds){
-				ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
-				modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
-			}
-			dto.setModules(modulesOut);
-			
-			return ConvertHelper.convert(dto, ServiceModuleAssignmentRelationDTO.class);
-		}).collect(Collectors.toList());
+        Type targetType = new TypeToken<List<AssignmentTarget>>() {
+        }.getType();
+        Type projectType = new TypeToken<List<Project>>() {
+        }.getType();
+        Type modulesType = new TypeToken<List<Long>>() {
+        }.getType();
 
-		return results;
-	}
+        if (cmd.getOwnerId() == null || cmd.getOwnerType() == null) {
+            LOGGER.error("ListServiceModuleAssignmentRelationsCommand is not completed. cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ListServiceModuleAssignmentRelationsCommand is not matched.");
+        }
+
+        // 根据owenerType和owenerId查询出多条relatios表记录
+        List<ServiceModuleAssignmentRelation> relations = this.serviceModuleProvider.listServiceModuleAssignmentRelations(cmd.getOwnerType(), cmd.getOwnerId());
+        if (relations == null || relations.size() == 0) {
+            LOGGER.error("ServiceModuleAssignmentRelations is not found. cmd = {}", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelations is not found.");
+        }
+        List<ServiceModuleAssignmentRelationDTO> results = relations.stream().map(r -> {
+            ServiceModuleAssignmentRelationDTO dto = new ServiceModuleAssignmentRelationDTO();
+            dto.setId(r.getId());
+            dto.setOwnerType(r.getOwnerType());
+            dto.setOwnerId(r.getOwnerId());
+            dto.setAllModuleFlag(r.getAllModuleFlag());
+
+            //处理targets
+            List<AssignmentTarget> targets = GsonUtil.fromJson(r.getTargetJson(), targetType);
+            for (AssignmentTarget target : targets) {
+                // 机构
+                if (EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS) {
+                    Organization organization = this.organizationProvider.findOrganizationById(target.getTargetId());
+                    if (organization == null) {
+                        LOGGER.error("JsonParse Organization is not matched. cmd = {}", cmd);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Organization is not matched.");
+                    }
+                    target.setTargetName(organization.getName());
+                }
+            }
+            dto.setTargets(targets);
+
+            //处理owners
+            List<Project> owners = GsonUtil.fromJson(r.getOwnerJson(), projectType);
+            for (Project owner : owners) {
+                // 小区
+                if (EntityType.fromCode(owner.getProjectType()) == EntityType.COMMUNITY) {
+                    Community community = this.communityProvider.findCommunityById(owner.getProjectId());
+                    if (community == null) {
+                        LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
+                    }
+                    owner.setProjectName(community.getName());
+                } else if (EntityType.fromCode(owner.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 子项目
+                    ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(owner.getProjectId());
+                    if (resourceCategory == null) {
+                        LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
+                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
+                    }
+                    owner.setProjectName(resourceCategory.getName());
+                }
+            }
+            dto.setProjects(owners);
+
+            //处理modules
+            List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
+            List<ServiceModuleOut> modulesOut = new ArrayList<>();
+            for (Long moduleId : moduleIds) {
+                ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
+                modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
+            }
+            dto.setModules(modulesOut);
+
+            return ConvertHelper.convert(dto, ServiceModuleAssignmentRelationDTO.class);
+        }).collect(Collectors.toList());
+
+        return results;
+    }
+
+    private void checkTarget(String targetType, Long targetId) {
+        if (null == com.everhomes.entity.EntityType.fromCode(targetType)) {
+            LOGGER.error("params targetType is null");
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "params targetType is null.");
+        }
+
+        if (null == targetId) {
+            LOGGER.error("params targetId is null");
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "params targetId is null.");
+        }
+
+        if (com.everhomes.entity.EntityType.USER == com.everhomes.entity.EntityType.fromCode(targetType)) {
+            checkUser(targetId);
+        } else if (com.everhomes.entity.EntityType.ORGANIZATIONS == com.everhomes.entity.EntityType.fromCode(targetType)) {
+            checkOrganization(targetId);
+        }
+    }
+
+    private User checkUser(Long userId) {
+        User user = userProvider.findUserById(userId);
+        if (null == user) {
+            LOGGER.error("Unable to find the user. user = {}", userId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "user non-existent.");
+        }
+        return user;
+    }
+
+    private Organization checkOrganization(Long organizationId) {
+        Organization org = organizationProvider.findOrganizationById(organizationId);
+        if (org == null) {
+            LOGGER.error("Unable to find the organization.organizationId = {}", organizationId);
+            throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+                    "Unable to find the organization.");
+        }
+        return org;
+    }
 }
+

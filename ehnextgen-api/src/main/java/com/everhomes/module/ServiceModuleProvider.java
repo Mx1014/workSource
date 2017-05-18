@@ -7,52 +7,53 @@ import org.jooq.Condition;
 
 public interface ServiceModuleProvider {
 
-	List<ServiceModulePrivilege> listServiceModulePrivileges(Long moduleId, ServiceModulePrivilegeType privilegeType);
+    List<ServiceModulePrivilege> listServiceModulePrivileges(Long moduleId, ServiceModulePrivilegeType privilegeType);
 
-	List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType);
+    List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType);
 
-	Long createServiceModuleAssignment(ServiceModuleAssignment serviceModuleAssignment);
+    Long createServiceModuleAssignment(ServiceModuleAssignment serviceModuleAssignment);
 
-	List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId);
+    List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId);
 
-	void deleteServiceModuleAssignmentById(Long id);
+    void deleteServiceModuleAssignmentById(Long id);
 
-	ServiceModule findServiceModuleById(Long id);
+    ServiceModule findServiceModuleById(Long id);
 
-	List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId, List<Long> moduleIds);
+    List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId, List<Long> moduleIds);
 
-	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetId(String targetType, Long targetId, Long organizationId);
+    List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetId(String targetType, Long targetId, Long organizationId);
 
-	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId);
+    List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId);
 
-	List<ServiceModule> listServiceModule(Integer level, Byte type);
+    List<ServiceModule> listServiceModule(Integer level, Byte type);
 
-	List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy);
+    List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy);
 
-	List<ServiceModulePrivilege> listServiceModulePrivileges(List<Long> moduleIds, ServiceModulePrivilegeType privilegeType);
+    List<ServiceModulePrivilege> listServiceModulePrivileges(List<Long> moduleIds, ServiceModulePrivilegeType privilegeType);
 
-	List<ServiceModuleAssignment> listResourceAssignments(String targetType, List<Long> targetIds, Long organizationId, List<Long> moduleIds);
+    List<ServiceModuleAssignment> listResourceAssignments(String targetType, List<Long> targetIds, Long organizationId, List<Long> moduleIds);
 
-	List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId);
+    List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId);
 
-	List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId);
+    List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId);
 
-	List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types);
+    List<ServiceModule> listServiceModule(Integer startLevel, List<Byte> types);
 
-	Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation reltaion);
+    Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation reltaion);
 
-	void batchCreateServiceModuleAssignment(List<ServiceModuleAssignment> moduleAssignmentList);
+    void batchCreateServiceModuleAssignment(List<ServiceModuleAssignment> moduleAssignmentList);
 
-	ServiceModuleAssignmentRelation findServiceModuleAssignmentRelationById(Long id);
+    ServiceModuleAssignmentRelation findServiceModuleAssignmentRelationById(Long id);
 
-	List<ServiceModuleAssignment> findServiceModuleAssignmentListByRelationId(Long id);
+    List<ServiceModuleAssignment> findServiceModuleAssignmentListByRelationId(Long id);
 
-	void deleteServiceModuleAssignmentRelationById(Long id);
-	
-	void deleteServiceModuleAssignments(List<ServiceModuleAssignment> assignments);
-	
-	List<ServiceModuleAssignmentRelation> listServiceModuleAssignmentRelations(String ownerType, Long ownerId);
+    void deleteServiceModuleAssignmentRelationById(Long id);
 
-	ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId);
+    void deleteServiceModuleAssignments(List<ServiceModuleAssignment> assignments);
 
+    List<ServiceModuleAssignmentRelation> listServiceModuleAssignmentRelations(String ownerType, Long ownerId);
+
+    ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId);
+
+    void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
 }
