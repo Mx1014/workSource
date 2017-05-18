@@ -3671,6 +3671,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode", encoder.encode(data));
+				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
 				dataMap.put("qrCode", Base64.encodeBase64String(data));
 			}
 
@@ -3702,8 +3703,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
 				byte[] data=out.toByteArray();
-//				BASE64Encoder encoder=new BASE64Encoder();
+				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode1", encoder.encode(data));
+				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
 				dataMap.put("qrCode1", Base64.encodeBase64String(data));
 			}
 
@@ -3712,6 +3714,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode2", encoder.encode(data));
+				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
 				dataMap.put("qrCode2", Base64.encodeBase64String(data));
 			}
 
