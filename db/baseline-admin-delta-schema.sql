@@ -13,7 +13,7 @@ ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_creator_uid`(`creator_uid`);
 ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_acl_role_create_time`(`create_time`);
 
 
--- 授权表，包括模块管理员授权和模块下的用户和部门权限授权以及角色授权
+-- 授权表，包括模块管理员角色管理员授权
 CREATE TABLE `eh_authorizations` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
@@ -25,6 +25,22 @@ CREATE TABLE `eh_authorizations` (
   `auth_type` varchar(64) NOT NULL COMMENT 'EhServiceModules, EhRoles',
   `auth_id` bigint(20) NOT NULL,
   `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
+  `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 用户授权关系
+CREATE TABLE `eh_authorization_relations` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `module_id` bigint(20) NOT NULL,
+  `target_json` text,
+  `project_json` text,
+  `privilege_json` text,
   `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
   `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
