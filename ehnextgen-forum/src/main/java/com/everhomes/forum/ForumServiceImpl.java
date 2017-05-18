@@ -1527,7 +1527,7 @@ public class ForumServiceImpl implements ForumService {
         if(null != cond){
         	condition = condition.and(cond);
         }
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), null);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
         
         
         if(LOGGER.isInfoEnabled()) {
@@ -1550,7 +1550,7 @@ public class ForumServiceImpl implements ForumService {
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             
-            //新增暂存活动，后台管理员在web端要看到暂存的活动
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
             if(needTemporary != null && needTemporary.byteValue() == 1){
             	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
             }else{
@@ -2517,7 +2517,14 @@ public class ForumServiceImpl implements ForumService {
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
+            
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
             }
@@ -2672,7 +2679,14 @@ public class ForumServiceImpl implements ForumService {
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
+            
             if(null != condition){
             	query.addConditions(condition);
             }
