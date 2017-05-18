@@ -264,9 +264,6 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         String key = String.format(MESSAGE_SYNC, doorId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Object v = redisTemplate.opsForValue().get(key);
-        if(v == null) {
-        	redisTemplate.opsForValue().set(key, "0", 3600, TimeUnit.SECONDS);
-        }
+        redisTemplate.opsForValue().set(key, "0", 3600, TimeUnit.SECONDS);
     }
 }
