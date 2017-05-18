@@ -307,7 +307,7 @@ public class WarehouseController extends ControllerBase {
 
         SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(logs);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -341,7 +341,7 @@ public class WarehouseController extends ControllerBase {
 
         WarehouseRequestDetailsDTO request = warehouseService.findRequest(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(request);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -357,7 +357,7 @@ public class WarehouseController extends ControllerBase {
 
         SearchRequestsResponse requests = warehouseService.searchOneselfRequests(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(requests);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -373,7 +373,7 @@ public class WarehouseController extends ControllerBase {
 
         SearchRequestsResponse requests = warehouseService.searchRequests(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(requests);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
