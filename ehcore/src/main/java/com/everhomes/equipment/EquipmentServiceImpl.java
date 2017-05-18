@@ -3667,12 +3667,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode", encoder.encode(data));
-				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
-				dataMap.put("qrCode", Base64.encodeBase64String(data));
+				dataMap.put("qrCode", data);
 			}
 
 			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
@@ -3701,21 +3700,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto1.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
-				BASE64Encoder encoder=new BASE64Encoder();
+//				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode1", encoder.encode(data));
-				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
-				dataMap.put("qrCode1", Base64.encodeBase64String(data));
+				dataMap.put("qrCode1", data);
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto2.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto2.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode2", encoder.encode(data));
-				LOGGER.info("BASE64ENCODE: {}", Base64.encodeBase64String(data));
-				dataMap.put("qrCode2", Base64.encodeBase64String(data));
+				dataMap.put("qrCode2", data);
 			}
 
 			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
