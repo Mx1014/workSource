@@ -248,9 +248,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 		relation.setOwnerJson(StringHelper.toJsonString(projects));
 		relation.setModuleJson(StringHelper.toJsonString(moduleIds));
 		relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		relation.setUpdateUid(UserContext.current().getUser().getId());
+		relation.setOperatorUid(UserContext.current().getUser().getId());
 		relation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		relation.setCreateUid(UserContext.current().getUser().getId());
+		relation.setCreatorUid(UserContext.current().getUser().getId());
 
 		// 2.再保存assigment表的多条记录
 		Long relation_id = this.serviceModuleProvider.createModuleAssignmentRetion(relation);
