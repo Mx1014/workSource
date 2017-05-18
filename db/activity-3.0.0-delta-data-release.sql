@@ -31,3 +31,6 @@ SET r.organization_id = (SELECT
                              AND r.uid = b.target_id
                              AND b.target_type = 'USER'
                          LIMIT 1 );
+                         
+-- 刷新活动tag，将null和''的刷成'其他'，方便统计  add by yanjun 20170518
+UPDATE eh_activities ac SET ac.tag = '其他' WHERE ac.tag IS NULL OR ac.tag = '';
