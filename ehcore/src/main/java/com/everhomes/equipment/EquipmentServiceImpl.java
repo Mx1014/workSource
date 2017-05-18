@@ -30,6 +30,7 @@ import com.everhomes.util.*;
 
 import com.everhomes.util.doc.DocUtil;
 import com.google.zxing.WriterException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -3668,8 +3669,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
 				byte[] data=out.toByteArray();
-				BASE64Encoder encoder=new BASE64Encoder();
-				dataMap.put("qrCode", encoder.encode(data));
+//				BASE64Encoder encoder=new BASE64Encoder();
+//				dataMap.put("qrCode", encoder.encode(data));
+				dataMap.put("qrCode", Base64.encodeBase64String(data));
 			}
 
 			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
@@ -3700,15 +3702,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
 				byte[] data=out.toByteArray();
-				BASE64Encoder encoder=new BASE64Encoder();
-				dataMap.put("qrCode1", encoder.encode(data));
+//				BASE64Encoder encoder=new BASE64Encoder();
+//				dataMap.put("qrCode1", encoder.encode(data));
+				dataMap.put("qrCode1", Base64.encodeBase64String(data));
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
 				ByteArrayOutputStream out = generateQRCode(dto2.getQrCodeToken());
 				byte[] data=out.toByteArray();
-				BASE64Encoder encoder=new BASE64Encoder();
-				dataMap.put("qrCode2", encoder.encode(data));
+//				BASE64Encoder encoder=new BASE64Encoder();
+//				dataMap.put("qrCode2", encoder.encode(data));
+				dataMap.put("qrCode2", Base64.encodeBase64String(data));
 			}
 
 			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
