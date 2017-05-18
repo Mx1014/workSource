@@ -18,6 +18,8 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.community.ResourceCategoryType;
+import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.Project;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -2544,14 +2546,22 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public void createServiceModuleAuthorizedMember(CreateServiceModuleAuthorizedMemberCommand cmd) {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 
-		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
+			LOGGER.error("params targets is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targets is null.");
+		}
 
-		List<Privilege> pivileges = getPrivilegeOrdinaryByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+		if(null == cmd.getProjects() || cmd.getProjects().size() == 0){
+			LOGGER.error("params projects is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params projects is null.");
+		}
 
-		if(null != pivileges){
-			LOGGER.error("This user has been added to the list of permissions.");
-			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_PERMISSIONS_LIST_EXISTS,
-					"This user has been added to the list of permissions.");
+		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
+			LOGGER.error("params allFlag is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params allFlag is null.");
 		}
 
 		if(null == AllFlagType.fromCode(cmd.getAllFlag())){
@@ -2577,6 +2587,18 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		dbProvider.execute((TransactionStatus status) -> {
+			for (AssignmentTarget target: cmd.getTargets()) {
+				checkTarget(target.getTargetType(), target.getTargetId());
+				for (Project project: cmd.getProjects()) {
+					List<Authorization> authorizations =  authorizationProvider.listOrdinaryAuthorizationsByTarget(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId() , EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+					//如果用户已经在模块的授权列表
+					if(authorizations.size() > 0){
+						
+					}
+				}
+			}
+
+
 			authorizationProvider.createAuthorization(authorization);
 			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
 				//给对象分配模块的全部权限
