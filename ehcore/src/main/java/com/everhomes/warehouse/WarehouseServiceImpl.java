@@ -15,7 +15,6 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -908,5 +907,20 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
 
         return dto;
+    }
+
+    @Override
+    public SearchRequestsResponse searchOneselfRequests(SearchOneselfRequestsCommand cmd) {
+        QueryRequestCommand command = ConvertHelper.convert(cmd , QueryRequestCommand.class);
+        command.setRequestUid(UserContext.current().getUser().getId());
+        List<Long> ids = warehouseRequestMaterialSearcher.query(command);
+        return null;
+    }
+
+    @Override
+    public SearchRequestsResponse searchRequests(SearchRequestsCommand cmd) {
+        QueryRequestCommand command = ConvertHelper.convert(cmd , QueryRequestCommand.class);
+        List<Long> ids = warehouseRequestMaterialSearcher.query(command);
+        return null;
     }
 }

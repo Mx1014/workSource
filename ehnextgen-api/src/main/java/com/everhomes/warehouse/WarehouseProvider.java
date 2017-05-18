@@ -44,6 +44,7 @@ public interface WarehouseProvider {
     List<WarehouseMaterials> listWarehouseMaterials(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseStocks> listWarehouseStocks(CrossShardListingLocator locator, Integer pageSize);
     List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize);
+    List<WarehouseRequestMaterials> listWarehouseRequestMaterials(CrossShardListingLocator locator, Integer pageSize);
 
     void creatWarehouseUnit(WarehouseUnits unit);
     void updateWarehouseUnit(WarehouseUnits unit);

@@ -1,8 +1,8 @@
 package com.everhomes.search;
 
+import com.everhomes.rest.warehouse.QueryRequestCommand;
+import com.everhomes.rest.warehouse.SearchRequestsResponse;
 import com.everhomes.rest.warehouse.SearchWarehouseMaterialsCommand;
-import com.everhomes.rest.warehouse.SearchWarehouseMaterialsResponse;
-import com.everhomes.warehouse.WarehouseMaterials;
 import com.everhomes.warehouse.WarehouseRequestMaterials;
 
 import java.util.List;
@@ -16,5 +16,5 @@ public interface WarehouseRequestMaterialSearcher {
     void bulkUpdate(List<WarehouseRequestMaterials> materials);
     void feedDoc(WarehouseRequestMaterials material);
     void syncFromDb();
-    SearchWarehouseMaterialsResponse query(SearchWarehouseMaterialsCommand cmd);
+    List<Long> query(QueryRequestCommand cmd);
 }

@@ -322,12 +322,91 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseStockLogsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCK_LOGS);
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.eq(id));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseStockLogs> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseStockLogs.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
     }
 
     @Override
     public List<WarehouseStockLogs> listWarehouseStockLogs(CrossShardListingLocator locator, Integer pageSize) {
-        return null;
+        List<WarehouseStockLogs> logs = new ArrayList<>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhWarehouseStockLogs.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhWarehouseStockLogsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCK_LOGS);
+
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+                query.addConditions(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.lt(locator.getAnchor()));
+            }
+            query.addOrderBy(Tables.EH_WAREHOUSE_STOCK_LOGS.ID.desc());
+            query.addLimit(pageSize - logs.size());
+
+            query.fetch().map((r) -> {
+                logs.add(ConvertHelper.convert(r, WarehouseStockLogs.class));
+                return null;
+            });
+
+            if (logs.size() >= pageSize) {
+                locator.setAnchor(logs.get(logs.size() - 1).getId());
+                return IterationMapReduceCallback.AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return IterationMapReduceCallback.AfterAction.next;
+        });
+
+        return logs;
+    }
+
+    @Override
+    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(CrossShardListingLocator locator, Integer pageSize) {
+        List<WarehouseRequestMaterials> materials = new ArrayList<>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhWarehouseRequestMaterials.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
+
+            if(locator.getAnchor() != null && locator.getAnchor() != 0L){
+                query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.lt(locator.getAnchor()));
+            }
+            query.addOrderBy(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.desc());
+            query.addLimit(pageSize - materials.size());
+
+            query.fetch().map((r) -> {
+                materials.add(ConvertHelper.convert(r, WarehouseRequestMaterials.class));
+                return null;
+            });
+
+            if (materials.size() >= pageSize) {
+                locator.setAnchor(materials.get(materials.size() - 1).getId());
+                return IterationMapReduceCallback.AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return IterationMapReduceCallback.AfterAction.next;
+        });
+
+        return materials;
     }
 
     @Override

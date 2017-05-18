@@ -37,4 +37,7 @@ public interface WarehouseService {
 
     void createRequest(CreateRequestCommand cmd);
     WarehouseRequestDetailsDTO findRequest(FindRequestCommand cmd);
+
+    SearchRequestsResponse searchOneselfRequests(SearchOneselfRequestsCommand cmd);
+    SearchRequestsResponse searchRequests(SearchRequestsCommand cmd);
 }

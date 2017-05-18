@@ -53,6 +53,9 @@ public class WarehouseController extends ControllerBase {
     @Autowired
     private WarehouseStockLogSearcher warehouseStockLogSearcher;
 
+    @Autowired
+    private WarehouseRequestMaterialSearcher warehouseRequestMaterialSearcher;
+
     /**
      * <b>URL: /warehouse/updateWarehouse</b>
      * <p>创建或修改仓库</p>
@@ -288,7 +291,7 @@ public class WarehouseController extends ControllerBase {
 
         SearchWarehouseStocksResponse stocks = warehouseStockSearcher.query(cmd);
 
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(stocks);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -352,7 +355,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchRequestsResponse.class)
     public RestResponse searchOneselfRequests(SearchOneselfRequestsCommand cmd) {
 
-//        SearchRequestsResponse requests = warehouseService.searchOneselfRequests(cmd);
+        SearchRequestsResponse requests = warehouseService.searchOneselfRequests(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -368,7 +371,7 @@ public class WarehouseController extends ControllerBase {
     @RestReturn(value = SearchRequestsResponse.class)
     public RestResponse searchRequests(SearchRequestsCommand cmd) {
 
-//        SearchRequestsResponse requests = warehouseService.SearchRequestsCommand(cmd);
+        SearchRequestsResponse requests = warehouseService.searchRequests(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -577,6 +580,24 @@ public class WarehouseController extends ControllerBase {
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         warehouseSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+
+    /**
+     * <b>URL: /warehouse/syncWarehouseRequestMaterialIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncWarehouseRequestMaterialIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncWarehouseRequestMaterialIndex() {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+        warehouseRequestMaterialSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
