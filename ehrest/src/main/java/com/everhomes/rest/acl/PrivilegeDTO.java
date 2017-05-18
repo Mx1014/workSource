@@ -15,6 +15,14 @@ public class PrivilegeDTO  implements Serializable {
 	private Long privilegeId;
 	private String    privilegeName;
 
+	public PrivilegeDTO(){
+
+	}
+	public PrivilegeDTO(Long privilegeId, String privilegeName){
+		this.privilegeId = privilegeId;
+		this.privilegeName = privilegeName;
+	}
+
 	public Long getPrivilegeId() {
 		return privilegeId;
 	}

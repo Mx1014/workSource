@@ -12,7 +12,9 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAuthorizationRelationsDao;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhAuthorizationRelations;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
 import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
@@ -30,6 +32,7 @@ import org.springframework.util.StringUtils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class AuthorizationProviderImpl implements AuthorizationProvider {
@@ -102,9 +105,23 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		return result;
 	}
 
-//	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, Long moduleId queryBuilderCallback){
-//
-//	}
+	@Override
+	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId){
+		return listAuthorizationRelations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_TYPE.eq(ownerType));
+				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.OWNER_ID.eq(ownerId));
+				query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID.eq(moduleId));
+				return query;
+			}
+		});
+	}
+
+	@Override
+	public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId){
+		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId);
+	}
 
 
 		@Override
@@ -188,6 +205,23 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public long createAuthorizations(List<Authorization> authorizations) {
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(Authorization.class), (long)authorizations.size());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		List<EhAuthorizations> auths = new ArrayList<>();
+		for (Authorization authorization: authorizations) {
+			authorization.setId(id);
+			if(null == authorization.getCreateTime())
+				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			id ++;
+			auths.add(ConvertHelper.convert(authorization, EhAuthorizations.class));
+		}
+		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
+		dao.insert(auths);
+		return id;
+	}
+
+	@Override
 	public void updateAuthorization(Authorization authorization) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
 		if(null == authorization.getUpdateTime())
@@ -213,5 +247,41 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizations.class, id);
+	}
+
+	@Override
+	public AuthorizationRelation findAuthorizationRelationById(Long id){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), AuthorizationRelation.class);
+	}
+
+	@Override
+	public Long createAuthorizationRelation(AuthorizationRelation authorizationRelation) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(AuthorizationRelation.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		if(null == authorizationRelation.getCreateTime())
+			authorizationRelation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		authorizationRelation.setId(id);
+		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());
+		dao.insert(authorizationRelation);
+		return id;
+	}
+
+	@Override
+	public void deleteAuthorizationRelationById(Long id){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAuthorizationRelations.class, id);
+	}
+
+	@Override
+	public void updateAuthorizationRelation(AuthorizationRelation authorizationRelation) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(AuthorizationRelation.class));
+		if(null == authorizationRelation.getUpdateTime())
+			authorizationRelation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhAuthorizationRelationsDao dao = new EhAuthorizationRelationsDao(context.configuration());
+		dao.update(authorizationRelation);
 	}
 }

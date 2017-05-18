@@ -354,12 +354,12 @@ public class AclController extends ControllerBase {
 
 
     /**
-     * <b>URL: /acl/listServiceModuleAuthorizedMembers</b>
-     * <p>业务模块里面的业务授权人员</p>
+     * <b>URL: /acl/listAuthorizationRelations</b>
+     * <p>对象授权关系列表</p>
      */
-    @RequestMapping("listServiceModuleAuthorizedMembers")
-    @RestReturn(value=ServiceModuleAuthorizationsDTO.class, collection = true)
-    public RestResponse listServiceModuleAuthorizedMembers(@Valid ListServiceModuleAdministratorsCommand cmd) {
+    @RequestMapping("listAuthorizationRelations")
+    @RestReturn(value=ListAuthorizationRelationsResponse.class)
+    public RestResponse listAuthorizationRelations(@Valid ListAuthorizationRelationsCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -367,12 +367,12 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/createServiceModuleAuthorizedMember</b>
-     * <p>创建业务模块先的业务授权人员</p>
+     * <b>URL: /acl/createAuthorizationRelation</b>
+     * <p>创建对象授权关系</p>
      */
-    @RequestMapping("createServiceModuleAuthorizedMember")
+    @RequestMapping("createAuthorizationRelation")
     @RestReturn(value=String.class)
-    public RestResponse createServiceModuleAuthorizedMember(@Valid CreateServiceModuleAuthorizedMemberCommand cmd) {
+    public RestResponse createAuthorizationRelation(@Valid CreateAuthorizationRelationCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -380,12 +380,12 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/updateServiceModuleAuthorizedMember</b>
-     * <p>创建业务模块先的业务授权人员</p>
+     * <b>URL: /acl/updateAuthorizationRelation</b>
+     * <p>修改对象授权关系</p>
      */
-    @RequestMapping("updateServiceModuleAuthorizedMember")
+    @RequestMapping("updateAuthorizationRelation")
     @RestReturn(value=String.class)
-    public RestResponse updateServiceModuleAuthorizedMember(@Valid CreateServiceModuleAuthorizedMemberCommand cmd) {
+    public RestResponse updateAuthorizationRelation(@Valid UpdateAuthorizationRelationCommand cmd) {
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -393,12 +393,12 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/deleteServiceModuleAuthorizedMember</b>
+     * <b>URL: /acl/deleteAuthorizationRelation</b>
      * <p>删除业务授权人员</p>
      */
-    @RequestMapping("deleteServiceModuleAuthorizedMember")
+    @RequestMapping("deleteAuthorizationRelation")
     @RestReturn(value=String.class)
-    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteServiceModuleAuthorizedMemberCommand cmd) {
+    public RestResponse deleteAuthorizationRelation(@Valid DeleteAuthorizationRelationCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -16,6 +16,8 @@ public interface AuthorizationProvider {
 
     Long createAuthorization(Authorization authorization);
 
+    long createAuthorizations(List<Authorization> authorizations);
+
     void updateAuthorization(Authorization authorization);
 
     List<Authorization> deleteAuthorization(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
@@ -34,4 +36,15 @@ public interface AuthorizationProvider {
 
     List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 
+    List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId);
+
+    List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId);
+
+    Long createAuthorizationRelation(AuthorizationRelation authorizationRelation);
+
+    void deleteAuthorizationRelationById(Long id);
+
+    void updateAuthorizationRelation(AuthorizationRelation authorizationRelation);
+
+    AuthorizationRelation findAuthorizationRelationById(Long id);
 }

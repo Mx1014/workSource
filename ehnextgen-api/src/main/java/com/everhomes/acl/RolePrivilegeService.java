@@ -394,12 +394,12 @@ public interface RolePrivilegeService {
 
 	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
 
-	List<ServiceModuleAuthorizationsDTO> listServiceModuleAuthorizedMembers(ListServiceModuleAdministratorsCommand cmd);
+	void createAuthorizationRelation(CreateAuthorizationRelationCommand cmd);
 
-	void createServiceModuleAuthorizedMember(CreateServiceModuleAuthorizedMemberCommand cmd);
+	ListAuthorizationRelationsResponse listAuthorizationRelations(ListAuthorizationRelationsCommand cmd);
 
-	void updateServiceModuleAuthorizedMember(CreateServiceModuleAuthorizedMemberCommand cmd);
+	void updateAuthorizationRelation(UpdateAuthorizationRelationCommand cmd);
 
-	void deleteServiceModuleAuthorizedMember(DeleteServiceModuleAuthorizedMemberCommand cmd);
+	void deleteAuthorizationRelation(DeleteAuthorizationRelationCommand cmd);
 
 }
