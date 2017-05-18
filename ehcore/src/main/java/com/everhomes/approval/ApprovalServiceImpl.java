@@ -1584,6 +1584,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 										sendMessageToCreator(approvalRequest, null);
 										// 3. 最终同意回调业务方法
 										handler.processFinalApprove(approvalRequest);
+										
+										// 4.对于请假的,要计算入每个月的考勤统计
+										handler.calculateRangeStat(approvalRequest);
 									} else {
 										// 如果存在下一级别的审批人，说明此单审批未结束
 										// 1. 修改审批状态为同意

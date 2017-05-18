@@ -183,6 +183,21 @@ public class BusinessController extends ControllerBase {
     }
 
     /**
+     * <p>测试事务</p>
+     * <b>URL: /business/testTransaction</b>
+     */
+    // @RequireAuthentication(false)
+    @RequestMapping("testTransaction")
+    @RestReturn(value = String.class)
+    public RestResponse testTransaction(){
+        businessService.testTransaction();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <p>切换电商运营数据源</p>
      * <b>URL: /business/switchBusinessPromotionDataSource</b>
      */

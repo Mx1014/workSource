@@ -21,6 +21,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.reserver.CreateReserverOrderCommand;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ApartmentFloorDTO;
@@ -55,6 +57,7 @@ import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
 import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
 import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
@@ -77,6 +80,8 @@ import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -119,6 +124,9 @@ public class BusinessOpenController extends ControllerBase {
 
 	@Autowired
 	private FlowService flowService;
+	
+	@Autowired
+	private OrganizationService organizationService;
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -782,4 +790,17 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+    /**
+     * <b>URL: /openapi/</b> 
+     */
+    @RequestMapping("listUsersOfEnterprise")
+    @RestReturn(value=OrganizationContactDTO.class)
+    public RestResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd) {
+    	ListOrganizationContactCommandResponse memberResponse = this.organizationService.listUsersOfEnterprise(cmd);
+		RestResponse response =  new RestResponse(memberResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+    	return response;
+    }
 }

@@ -227,8 +227,10 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				punchProvider.updatePunchDayLog(punchDayLog);
 			}else if (punchDayLog.getPunchTimesPerDay().byteValue() == PunchTimesPerDay.FORTH.getCode().byteValue() && 
-					punchExceptionApproval.getMorningApprovalStatus() != null && punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() &&
-					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
+					punchExceptionApproval.getMorningApprovalStatus() != null && (punchExceptionApproval.getMorningApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode() 
+					||punchDayLog.getMorningStatus().byteValue() == PunchStatus.NORMAL.getCode())&&
+					punchExceptionApproval.getAfternoonApprovalStatus() != null && punchExceptionApproval.getAfternoonApprovalStatus().byteValue() == PunchStatus.NORMAL.getCode()
+					||punchDayLog.getAfternoonStatus().byteValue() == PunchStatus.NORMAL.getCode()) {
 				punchDayLog.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 				punchProvider.updatePunchDayLog(punchDayLog);
 			}

@@ -1,39 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USERS;
-import static com.everhomes.server.schema.Tables.EH_USER_COMMUNITIES;
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import com.everhomes.rest.group.GroupMemberStatus;
-import org.apache.commons.collections.CollectionUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOffsetStep;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
@@ -50,6 +17,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -59,44 +27,31 @@ import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhUserCommunitiesDao;
-import com.everhomes.server.schema.tables.daos.EhUserGroupsDao;
-import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationRosterDao;
-import com.everhomes.server.schema.tables.daos.EhUserInvitationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserLikesDao;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
-import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
-import com.everhomes.server.schema.tables.pojos.EhUserGroups;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
-import com.everhomes.server.schema.tables.pojos.EhUserLikes;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
 import com.everhomes.server.schema.tables.records.EhUsersRecord;
-import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.everhomes.util.MapReduceCallback;
 import com.everhomes.util.RecordHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.jooq.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.*;
 
 import static com.everhomes.server.schema.Tables.*;
 
@@ -1509,5 +1464,33 @@ public class UserProviderImpl implements UserProvider {
 
     }
 
+    @Override
+    public UserNotificationSetting findUserNotificationSetting(String ownerType, Long ownerId, String targetType, Long targetId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_USER_NOTIFICATION_SETTINGS)
+                .where(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_TYPE.eq(targetType))
+                .and(Tables.EH_USER_NOTIFICATION_SETTINGS.TARGET_ID.eq(targetId))
+                .fetchAnyInto(UserNotificationSetting.class);
+    }
 
+    @Override
+    public void updateUserNotificationSetting(UserNotificationSetting setting) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.update(setting);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserNotificationSettings.class, setting.getId());
+    }
+
+    @Override
+    public long createUserNotificationSetting(UserNotificationSetting setting) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserNotificationSettings.class));
+        setting.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhUserNotificationSettingsDao dao = new EhUserNotificationSettingsDao(context.configuration());
+        dao.insert(setting);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserNotificationSettings.class, id);
+        return id;
+    }
 }

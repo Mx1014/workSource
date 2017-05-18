@@ -1,33 +1,6 @@
 // @formatter:off
 package com.everhomes.pusher;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-
-import net.greghaines.jesque.Job;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -35,53 +8,53 @@ import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBusMessageClassRegistry;
-import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.device.Device;
 import com.everhomes.device.DeviceProvider;
-import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.ApnsServiceFactory;
-import com.everhomes.messaging.NotifyMessage;
 import com.everhomes.messaging.PushMessageResolver;
 import com.everhomes.messaging.PusherService;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.DeviceMessage;
-import com.everhomes.rest.messaging.DeviceMessageType;
 import com.everhomes.rest.messaging.DeviceMessages;
-import com.everhomes.rest.messaging.MessagingPriorityConstants;
 import com.everhomes.rest.pusher.PushMessageCommand;
 import com.everhomes.rest.pusher.RecentMessageCommand;
 import com.everhomes.rest.rpc.server.DeviceRequestPdu;
-import com.everhomes.rest.rpc.server.PingRequestPdu;
-import com.everhomes.rest.rpc.server.PingResponsePdu;
 import com.everhomes.rest.rpc.server.PusherNotifyPdu;
 import com.everhomes.rest.user.UserLoginStatus;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.Gson;
-import com.notnoop.apns.APNS;
-import com.notnoop.apns.ApnsService;
-import com.notnoop.apns.ApnsServiceBuilder;
-import com.notnoop.apns.EnhancedApnsNotification;
-import com.notnoop.apns.PayloadBuilder;
+import com.notnoop.apns.*;
 import com.notnoop.exceptions.NetworkIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
@@ -228,7 +201,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert().substring(0, 20));
         } else {
             payloadBuilder = payloadBuilder.alertBody(devMessage.getAlert());
-            }
+        }
         
         payloadBuilder = payloadBuilder
         //.alertAction(devMessage.getAction())
@@ -321,7 +294,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             }
             
     }
-    
+
     private String getPlatform(UserLogin destLogin) {
         if(destLogin.getStatus() == UserLoginStatus.LOGGED_OFF) {
             LOGGER.error("Pushing message, destLogin loggedoff, destLogin=" + destLogin);
@@ -376,7 +349,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         PushMessageResolver messageResolver = PlatformContext.getComponent(beanName);
         if(null == messageResolver) {
             messageResolver = PlatformContext.getComponent(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT);
-            }
+        }
         //assert(messageResolver != null)
         DeviceMessage devMessage = messageResolver.resolvMessage(senderLogin, destLogin, msg);
         
@@ -390,7 +363,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         } else {
             //Android or other here
             pushMessageAndroid(senderLogin, destLogin, msgId, msg, platform, devMessage);
-            
         }
     }
     
@@ -407,7 +379,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         Cert tmp = this.certProvider.findCertByName(cert.getName());
         if(tmp != null) {
             this.certProvider.deleteCert(tmp);
-            }
+        }
         
         this.certProvider.createCert(cert);
         
@@ -516,7 +488,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
                     return t.join();
                 } catch(Exception e) {
                     LOGGER.warn("get request device error " + e.getMessage());
-                return null;    
+                    return null;
                 }
                 
             }).forEach((pdu) -> {

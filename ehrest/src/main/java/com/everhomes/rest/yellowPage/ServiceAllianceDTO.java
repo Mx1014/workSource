@@ -11,7 +11,7 @@ import java.util.List;
  * <ul>
  *  <li>id: id</li>
  *  <li>parentId: 父id</li>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型 参考{@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>

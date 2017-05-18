@@ -141,7 +141,7 @@ public class ExcelUtils {
     private void buildResponse() throws UnsupportedEncodingException {
         fileName = fileName + ".xlsx";
         response.setContentType("application/msexcel");
-        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8"));
+        response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
     }
 
     private ByteArrayOutputStream buildExcel(String[] propertyNames, String[] titleNames, int[] titleSize, List<?> dataList) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
