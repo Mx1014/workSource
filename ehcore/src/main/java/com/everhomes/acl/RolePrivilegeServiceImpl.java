@@ -2593,7 +2593,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					List<Authorization> authorizations =  authorizationProvider.listOrdinaryAuthorizationsByTarget(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId() , EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
 					//如果用户已经在模块的授权列表
 					if(authorizations.size() > 0){
-						
+
 					}
 				}
 			}
@@ -2616,9 +2616,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 
-		checkTarget(cmd.getTargetType(), cmd.getTargetId());
+		if(null == cmd.getTargets() || cmd.getTargets().size() == 0){
+			LOGGER.error("params targets is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params targets is null.");
+		}
 
-		List<Privilege> pivileges = getPrivilegeOrdinaryByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+		AssignmentTarget target = cmd.getTargets().get(0);
+
+		checkTarget(target.getTargetType(), target.getTargetId());
+
+		List<Privilege> pivileges = getPrivilegeOrdinaryByTarget(cmd.getOwnerType(), cmd.getOwnerId(), target.getTargetType(), target.getTargetId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
 
 		if(null == pivileges){
 			LOGGER.error("This user has not been added to the permissions list.");
