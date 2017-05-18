@@ -3,8 +3,6 @@ package com.everhomes.module;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +20,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
 import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -40,7 +37,6 @@ import com.everhomes.server.schema.tables.records.EhServiceModuleScopesRecord;
 import com.everhomes.server.schema.tables.records.EhServiceModulesRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component
 public class ServiceModuleProviderImpl implements ServiceModuleProvider {
@@ -356,26 +352,27 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
-	public Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation reltaion) {
+	public Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation relation) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
-		EhServiceModuleAssignmentRelations record = new EhServiceModuleAssignmentRelations();
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAssignmentRelations.class));
+		relation.setId(id);
 		EhServiceModuleAssignmentRelationsDao dao = new EhServiceModuleAssignmentRelationsDao(context.configuration());
-		dao.insert(record);
-
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAssignmentRelations.class, null);
-		return null;
+		dao.insert(relation);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAssignmentRelations.class, id);
+		return id;
 
 	}
 
 	@Override
 	public void batchCreateServiceModuleAssignment(List<ServiceModuleAssignment> moduleAssignmentList) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAssignments.class), Long.valueOf(moduleAssignmentList.size()));
 		List<EhServiceModuleAssignments> records = new ArrayList<EhServiceModuleAssignments>();
-		for (ServiceModuleAssignment moduleAssignment : moduleAssignmentList) {
-			EhServiceModuleAssignments record = ConvertHelper.convert(moduleAssignment, EhServiceModuleAssignments.class);
+		for(int i = 0; i < moduleAssignmentList.size(); i++){
+			moduleAssignmentList.get(i).setId(id);
+			EhServiceModuleAssignments record = ConvertHelper.convert(moduleAssignmentList.get(i), EhServiceModuleAssignments.class);
 			records.add(record);
+			id++ ;
 		}
 		EhServiceModuleAssignmentsDao dao = new EhServiceModuleAssignmentsDao(context.configuration());
 		dao.insert(records);
@@ -389,7 +386,6 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		EhServiceModuleAssignmentRelationsDao dao = new EhServiceModuleAssignmentRelationsDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), ServiceModuleAssignmentRelation.class);
 	}
-
 
 	@Override
 	public List<ServiceModuleAssignment> findServiceModuleAssignmentListByRelationId(Long id) {
@@ -412,11 +408,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	@Override
 	public void deleteServiceModuleAssignments(List<ServiceModuleAssignment> assignments) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		List<Long> ids = assignments.stream().map(r ->{ return r.getId(); }).collect(Collectors.toList());
+		List<Long> ids = assignments.stream().map(r -> {
+			return r.getId();
+		}).collect(Collectors.toList());
 		EhServiceModuleAssignmentsDao dao = new EhServiceModuleAssignmentsDao(context.configuration());
 		dao.deleteById(ids);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleAssignmentsDao.class, null);
-		
+
 	}
 
 	@Override
@@ -426,12 +424,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS.OWNER_ID.eq(ownerId).and(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS.OWNER_TYPE.endsWith(ownerType));
 		SelectQuery<EhServiceModuleAssignmentRelationsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS);
 		query.addConditions(condition);
-		query.fetch().map(r ->{
+		query.fetch().map(r -> {
 			results.add(ConvertHelper.convert(r, ServiceModuleAssignmentRelation.class));
 			return null;
 		});
 		return results;
 	}
-
 
 }

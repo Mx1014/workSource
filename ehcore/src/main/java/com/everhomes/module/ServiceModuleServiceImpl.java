@@ -6,26 +6,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
+
+
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+
+
+
+
 import com.everhomes.acl.AclProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategory;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
 import com.everhomes.rest.acl.ListServiceModulesCommand;
 import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.acl.ServiceModuleTreeVType;
+import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.AssignmentServiceModuleCommand;
 import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.DeleteServiceModuleAssignmentRelationCommand;
 import com.everhomes.rest.module.ListServiceModuleAssignmentRelationsCommand;
 import com.everhomes.rest.module.Project;
+import com.everhomes.rest.module.ServiceModuleOut;
 import com.everhomes.rest.module.ServiceModuleScopeApplyPolicy;
 import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.user.UserContext;
@@ -38,6 +55,12 @@ import com.google.gson.reflect.TypeToken;
 @Service
 public class ServiceModuleServiceImpl implements ServiceModuleService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModuleServiceImpl.class);
+
+	@Autowired
+	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Autowired
 	private ServiceModuleProvider serviceModuleProvider;
@@ -225,21 +248,32 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 		relation.setOwnerJson(StringHelper.toJsonString(projects));
 		relation.setModuleJson(StringHelper.toJsonString(moduleIds));
 		relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		// uuid应该为String
-		relation.setUpdateUid(UserContext.current().getUser().getId());
+		relation.setOperatorUid(UserContext.current().getUser().getId());
 		relation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		// uuid应该为String
-		relation.setCreateUid(UserContext.current().getUser().getId());
+		relation.setCreatorUid(UserContext.current().getUser().getId());
 
 		// 2.再保存assigment表的多条记录
 		Long relation_id = this.serviceModuleProvider.createModuleAssignmentRetion(relation);
 		List<ServiceModuleAssignment> assignmentList = new ArrayList<ServiceModuleAssignment>();
 		for (AssignmentTarget target : targets) {
+			if(target.getTargetId() == null || target.getTargetType() == null){
+				LOGGER.error("target is illegal. cmd = {}",cmd);
+				break;
+			}
 			for (Long moduleId : moduleIds) {
+				if(moduleId == null){
+					LOGGER.error("moduleId is illegal. cmd = {}",cmd);
+					break;
+				}
 				for (Project project : projects) {
+					if(project.getProjectId() == null || project.getProjectType() == null){
+						LOGGER.error("project is illegal. cmd = {}",cmd);
+						break;
+					}
 					ServiceModuleAssignment assignment = new ServiceModuleAssignment();
 					assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
-					// !后补 assignment.setOrganizationId();
+					// !后补
+					assignment.setOrganizationId(0L);
 					assignment.setTargetId(target.getTargetId());
 					assignment.setTargetType(target.getTargetType());
 					assignment.setOwnerType(project.getProjectType());
@@ -305,9 +339,53 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 			dto.setOwnerType(r.getOwnerType());
 			dto.setOwnerId(r.getOwnerId());
 			dto.setAllModuleFlag(r.getAllModuleFlag());
-			dto.setTargets(GsonUtil.fromJson(r.getTargetJson(), targetType));
-			dto.setProjects(GsonUtil.fromJson(r.getTargetJson(), projectType));
-			dto.setModules(GsonUtil.fromJson(r.getTargetJson(), modulesType));
+
+			//处理targets
+			List<AssignmentTarget> targets = GsonUtil.fromJson(r.getTargetJson(), targetType);
+			for (AssignmentTarget target : targets) {
+				// 机构
+				if (EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS) {
+					Organization organization= this.organizationProvider.findOrganizationById(target.getTargetId());
+					if(organization == null){
+						LOGGER.error("JsonParse Organization is not matched. cmd = {}", cmd);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Organization is not matched.");
+					}
+					target.setTargetName(organization.getName());
+				}
+			}
+			dto.setTargets(targets);
+
+			//处理owners
+			List<Project> owners = GsonUtil.fromJson(r.getOwnerJson(), projectType);
+			for (Project owner : owners) {
+				// 小区
+				if (EntityType.fromCode(owner.getProjectType()) == EntityType.COMMUNITY) {
+					Community community = this.communityProvider.findCommunityById(owner.getProjectId());
+					if(community == null){
+						LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
+					}
+					owner.setProjectName(community.getName());
+				} else if (EntityType.fromCode(owner.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 子项目
+					ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(owner.getProjectId());
+					if(resourceCategory == null){
+						LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
+					}
+					owner.setProjectName(resourceCategory.getName());
+				}
+			}
+			dto.setProjects(owners);
+
+			//处理modules
+			List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
+			List<ServiceModuleOut> modulesOut = new ArrayList<ServiceModuleOut>();
+			for(Long moduleId:moduleIds){
+				ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
+				modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
+			}
+			dto.setModules(modulesOut);
+			
 			return ConvertHelper.convert(dto, ServiceModuleAssignmentRelationDTO.class);
 		}).collect(Collectors.toList());
 
