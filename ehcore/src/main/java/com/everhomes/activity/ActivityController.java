@@ -733,8 +733,8 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("statisticsSummary")
     @RestReturn(value=StatisticsSummaryResponse.class)
-    public RestResponse statisticsSummary(){
-    	StatisticsSummaryResponse result = activityService.statisticsSummary();
+    public RestResponse statisticsSummary(StatisticsSummaryCommand cmd){
+    	StatisticsSummaryResponse result = activityService.statisticsSummary(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -777,16 +777,6 @@ public class ActivityController extends ControllerBase {
     @RestReturn(value=StatisticsTagResponse.class)
     public RestResponse statisticsTag(StatisticsTagCommand cmd){
     	StatisticsTagResponse result = activityService.statisticsTag(cmd);
-//    	result.setList(new ArrayList<StatisticsTagDTO>());
-//    	for(int i= 0; i<10 ;i++){
-//    		StatisticsTagDTO item = new StatisticsTagDTO();
-//    		item.setTagName("Tag" + i);
-//    		item.setSignPeopleCount(10 + i);
-//    		item.setSignPeopleRate(0.1);
-//    		item.setCreateActivityCount(2 + i);
-//    		item.setCreateActivityRate(0.1);
-//    		result.getList().add(item);
-//    	}
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

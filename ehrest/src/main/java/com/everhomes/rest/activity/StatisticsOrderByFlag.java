@@ -5,8 +5,8 @@ package com.everhomes.rest.activity;
  *  <li>PEOPLE_COUNT_ASC: 2， 报名人数升序</li>
  *  <li>PUBLISH_TIME_DESC: 3， 发布时间降序</li>
  *  <li>PUBLISH_TIME_ASC: 4， 发布时间升序</li>
- *  <li>ACTIVITY_COUNT_DESC: 5， 发布时间升序</li>
- *  <li>ACTIVITY_COUNT_ASC: 6， 发布时间升序</li>
+ *  <li>ACTIVITY_COUNT_DESC: 5， 发布活动数降序</li>
+ *  <li>ACTIVITY_COUNT_ASC: 6， 发布活动数升序</li>
  * </ul>
  */
 public enum StatisticsOrderByFlag {

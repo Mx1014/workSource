@@ -101,11 +101,12 @@ public interface ActivityProivider {
 	
 	Integer countActivityRoster(Long activityId, Integer status);
 	
-	Integer countActivity(Integer namespaceId, Timestamp startTime, Timestamp endTime);
 	
-	Integer countActivityRoster(Integer namespaceId, Timestamp startTime, Timestamp endTime, UserGender userGender);
+	Integer countActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime);
 	
-	List<Activity> statisticsActivity(Integer namespaceId, Long startTime, Long endTime, String tag);
+	Integer countActivityRoster(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, UserGender userGender);
+	
+	List<Activity> statisticsActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Long startTime, Long endTime, String tag);
 	
 	/**
 	 * 返回值object[]的格式如下：{Long, Integer} - {活动Id，报名人数}
@@ -117,19 +118,19 @@ public interface ActivityProivider {
 	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名人数}
 	 * @return
 	 */
-	List<Object[]> statisticsRosterTag();
+	List<Object[]> statisticsRosterTag(Integer namespaceId, Long categoryId, Long contentCategoryId);
 	
 	/**
 	 * 返回值object[]的格式如下：{String, Integer} - {标签名称，报名活动数}
 	 * @return
 	 */
-	List<Object[]> statisticsActivityTag();
+	List<Object[]> statisticsActivityTag(Integer namespaceId, Long categoryId, Long contentCategoryId);
 	
 	/**
 	 * 返回值object[]的格式如下：{Long, String, Integer, Integer} - {机构Id， 机构名称， 报名人数，报名活动数}
 	 * @return
 	 */
-	List<Object[]> statisticsOrganization();
+	List<Object[]> statisticsOrganization(Integer namespaceId, Long categoryId, Long contentCategoryId);
 	
 	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
 }

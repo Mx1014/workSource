@@ -4822,32 +4822,32 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public StatisticsSummaryResponse statisticsSummary() {
+	public StatisticsSummaryResponse statisticsSummary(StatisticsSummaryCommand cmd) {
 		StatisticsSummaryResponse response = new StatisticsSummaryResponse();
-		Integer nameSpaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		Integer activityCount = activityProvider.countActivity(nameSpaceId, null, null);
-		Integer activityDayCount = activityProvider.countActivity(nameSpaceId, this.getTimesmorning(), this.getTimesnight());
-		Integer activityMonthCount = activityProvider.countActivity(nameSpaceId, this.getTimesMonthmorning(), this.getTimesMonthnight());
-		Integer activityWeekCount = activityProvider.countActivity(nameSpaceId, this.getTimesWeekmorning(), this.getTimesWeeknight());
+		Integer activityCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null);
+		Integer activityDayCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight());
+		Integer activityMonthCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight());
+		Integer activityWeekCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight());
 		
 		response.setActivityCount(activityCount);
 		response.setActivityDayCount(activityDayCount);
 		response.setActivityMonthCount(activityMonthCount);
 		response.setActivityWeekCount(activityWeekCount);
 		
-		Integer rosterCount = activityProvider.countActivityRoster(nameSpaceId, null, null, null);
-		Integer rosterDayCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesmorning(), this.getTimesnight(), null);
-		Integer rosterMonthCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesMonthmorning(), this.getTimesMonthnight(), null);
-		Integer rosterWeekCount = activityProvider.countActivityRoster(nameSpaceId, this.getTimesWeekmorning(), this.getTimesWeeknight(), null);
+		Integer rosterCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, null);
+		Integer rosterDayCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), null);
+		Integer rosterMonthCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), null);
+		Integer rosterWeekCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), null);
 		
 		response.setRosterCount(rosterCount);
 		response.setRosterDayCount(rosterDayCount);
 		response.setRosterMonthCount(rosterMonthCount);
 		response.setRosterWeekCount(rosterWeekCount);
 		
-		Integer manCount = activityProvider.countActivityRoster(nameSpaceId, null, null, UserGender.MALE);
-		Integer womanCount = activityProvider.countActivityRoster(nameSpaceId, null, null, UserGender.FEMALE);
+		Integer manCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.MALE);
+		Integer womanCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.FEMALE);
 		
 		response.setManCount(manCount);
 		response.setWomanCount(womanCount);
@@ -4859,7 +4859,7 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd) {
 		StatisticsActivityResponse response = new StatisticsActivityResponse();
 		List<StatisticsActivityDTO> listDto = new ArrayList<StatisticsActivityDTO>();
-		List<Activity> results = activityProvider.statisticsActivity(UserContext.getCurrentNamespaceId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag());
+		List<Activity> results = activityProvider.statisticsActivity(UserContext.getCurrentNamespaceId(), cmd.getCategoryId(), cmd.getContentCategoryId(), cmd.getStartTime(), cmd.getEndTime(), cmd.getTag());
 		List<Long> activityIds = new ArrayList<Long>();
 		
 		if(results != null){
@@ -4928,8 +4928,9 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd) {
 		StatisticsOrganizationResponse response = new StatisticsOrganizationResponse();
 		List<StatisticsOrganizationDTO> listDto = new ArrayList<StatisticsOrganizationDTO>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Object[]> listOrganization = activityProvider.statisticsOrganization();
+		List<Object[]> listOrganization = activityProvider.statisticsOrganization(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
 		if(listOrganization != null){
 			listOrganization.forEach(r -> {
 				StatisticsOrganizationDTO tempDto = new StatisticsOrganizationDTO();
@@ -4952,9 +4953,10 @@ public class ActivityServiceImpl implements ActivityService {
 	public StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd) {
 		StatisticsTagResponse response = new StatisticsTagResponse();
 		List<StatisticsTagDTO> listDto = new ArrayList<StatisticsTagDTO>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Object[]> listActivityTag = activityProvider.statisticsActivityTag();
-		List<Object[]> listRosterTag = activityProvider.statisticsRosterTag();
+		List<Object[]> listActivityTag = activityProvider.statisticsActivityTag(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
+		List<Object[]> listRosterTag = activityProvider.statisticsRosterTag(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId());
 		
 		final Integer[] activityCount = new Integer[1];
 		activityCount[0] = 0;

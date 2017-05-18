@@ -970,17 +970,20 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public  Integer countActivity(Integer nameSpaceId, Timestamp startTime, Timestamp endTime){
+	public  Integer countActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime){
 		final Integer[]  count = new Integer[1];
 		count[0] = 0;
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
-					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(nameSpaceId);
 					
-					//官方活动
-					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
-					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
-					condition = condition.and(officeCondition);
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
 					
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 					if(startTime != null && endTime != null){
@@ -997,26 +1000,26 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public Integer countActivityRoster(Integer nameSpaceId, Timestamp startTime, Timestamp endTime, UserGender userGender){
+	public Integer countActivityRoster(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, UserGender userGender){
 		final Integer[]  count = new Integer[1];
 		count[0] = 0;
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
 					
-					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(nameSpaceId);
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
+					
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
-					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode()));
 					
-					//官方活动
-					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
-					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
-					condition = condition.and(officeCondition);
-					
-					//已支付
-					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
-					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-					condition = condition.and(chargeCondition);
+					//已确认并且已支付
+					condition = addConfirmAndPay(condition);
 					
 					if(startTime != null && endTime != null){
 						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
@@ -1045,17 +1048,19 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 
 	@Override
-	public List<Activity> statisticsActivity(Integer namespaceId, Long startTime, Long endTime, String tag) {
+	public List<Activity> statisticsActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Long startTime, Long endTime, String tag) {
 
 		List<Activity> list = new ArrayList<Activity>();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
 					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
-
-					//官方活动
-					Condition officeCondition = Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode());
-					officeCondition = officeCondition.or(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(Long.valueOf(OfficialFlag.YES.getCode())));
-					condition = condition.and(officeCondition);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
 
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 					if(startTime != null && endTime != null){
@@ -1085,10 +1090,8 @@ public class ActivityProviderImpl implements ActivityProivider {
 					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.in(activityIds));
 
-					//已支付
-					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
-					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-					condition = condition.and(chargeCondition);
+					//已确认并且已支付
+					condition = addConfirmAndPay(condition);
 					
 					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID, DSL.count())
 							.from(Tables.EH_ACTIVITY_ROSTER)
@@ -1107,18 +1110,24 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public List<Object[]> statisticsRosterTag(){
+	public List<Object[]> statisticsRosterTag(Integer namespaceId, Long categoryId, Long contentCategoryId){
 		final List<Object[]>  response = new ArrayList<Object[]>();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
 					
-					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
-					//已支付
-					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
-					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-					condition = condition.and(chargeCondition);
+					//已确认并且已支付
+					condition = addConfirmAndPay(condition);
 					
 					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
 							.from(Tables.EH_ACTIVITY_ROSTER)
@@ -1137,18 +1146,21 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public List<Object[]> statisticsActivityTag(){
+	public List<Object[]> statisticsActivityTag(Integer namespaceId, Long categoryId, Long contentCategoryId){
 		final List<Object[]>  response = new ArrayList<Object[]>();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
 					
-					Condition condition = Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode());
+					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
-//					//已支付
-//					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
-//					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-//					condition = condition.and(chargeCondition);
-					
 					List<Object[]> list = context.select(Tables.EH_ACTIVITIES.TAG, DSL.count())
 							.from(Tables.EH_ACTIVITIES)
 							.where(condition)
@@ -1164,18 +1176,24 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public List<Object[]> statisticsOrganization(){
+	public List<Object[]> statisticsOrganization(Integer namespaceId, Long categoryId, Long contentCategoryId){
 		final List<Object[]>  response = new ArrayList<Object[]>();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
 				null, (DSLContext context, Object reducingContext) -> {
-
-					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
+					Condition condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+					//活动类型、内容类型
+					if(categoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(categoryId));
+					}
+					if(contentCategoryId != null){
+						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
+					}
+					
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
-					//已支付
-//					Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
-//					chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
-//					condition = condition.and(chargeCondition);
+					//已确认并且已支付
+					condition = addConfirmAndPay(condition);
 
 					List<Object[]> list = context.select(Tables.EH_ACTIVITY_ROSTER.ORGANIZATION_ID, 
 							Tables.EH_ORGANIZATIONS.NAME, 
@@ -1200,6 +1218,25 @@ public class ActivityProviderImpl implements ActivityProivider {
 		return response;
 	}
 
+	/**
+	 * 添加已确认并且已支付的条件
+	 * @param condition
+	 * @return
+	 */
+	private Condition addConfirmAndPay(Condition condition){
+		//已确认
+		if(condition == null){
+			condition = Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode());
+		}else{
+			condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode()));
+		}
+		//不用支付或者已支付
+		Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+		chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.PAY.getCode()));
+		condition = condition.and(chargeCondition);
+		
+		return condition;
+	}
 	@Override
 	public List<ActivityRoster> findExpireRostersByActivityId(Long activityId) {
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();

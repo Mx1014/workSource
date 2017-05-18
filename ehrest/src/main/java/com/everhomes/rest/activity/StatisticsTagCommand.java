@@ -1,38 +1,34 @@
 package com.everhomes.rest.activity;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *     <li>startTime: 统计开始时间</li>
- *     <li>endTime: 统计结束时间</li>
- *      <li>orderBy: 排序方式 1-报名人数降序，2-报名人数升序，3-发布时间降序，4-发布时间升序</li>
+ *      <li>categoryId: 活动类型id</li>
+ *   	<li>contentCategoryId: 内容类型ID，{@link com.everhomes.rest.category.CategoryConstants}</li>
+ *      <li>orderBy: 排序方式 1-报名人数降序，2-报名人数升序，3-发布时间降序，4-发布时间升序，5-发布活动数升序，6-发布活动数升序 参考 {@link com.everhomes.rest.activity.StatisticsOrderByFlag}</li>
  * </ul>
  */
 public class StatisticsTagCommand {
 
-    private Long startTime;
-    
-    private Long endTime;
-
+	private Long categoryId;
+	private Long contentCategoryId;
     private Byte orderBy;
-
-	public Long getStartTime() {
-		return startTime;
+    
+	public Long getCategoryId() {
+		return categoryId;
 	}
 
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
 
-	public Long getEndTime() {
-		return endTime;
+	public Long getContentCategoryId() {
+		return contentCategoryId;
 	}
 
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
 	}
 
 	public Byte getOrderBy() {

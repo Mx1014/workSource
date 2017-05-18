@@ -168,7 +168,7 @@ public interface ActivityService {
 	 * 统计总览
 	 * @return
 	 */
-	StatisticsSummaryResponse statisticsSummary();
+	StatisticsSummaryResponse statisticsSummary(StatisticsSummaryCommand cmd);
 	/**
 	 * 按活动统计
 	 * @param cmd
