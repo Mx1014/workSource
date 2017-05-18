@@ -151,6 +151,15 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		return id;
 	}
 
+	@Override
+	public void updateAuthorization(Authorization authorization) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
+		if(null == authorization.getUpdateTime())
+			authorization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());
+		dao.update(authorization);
+	}
+
 
 
 	@Override

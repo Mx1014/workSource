@@ -16,6 +16,8 @@ public interface AuthorizationProvider {
 
     Long createAuthorization(Authorization authorization);
 
+    void updateAuthorization(Authorization authorization);
+
     List<Authorization> deleteAuthorization(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
 
     void deleteAuthorizationById(Long id);

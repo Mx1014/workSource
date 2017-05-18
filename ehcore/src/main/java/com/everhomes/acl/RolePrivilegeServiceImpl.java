@@ -2292,7 +2292,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(namespaceId);
 		authorization.setAllFlag(AllFlagType.NO.getCode());
-		authorization.setCreateUid(user.getId());
+		authorization.setCreatorUid(user.getId());
+		authorization.setOperatorUid(user.getId());
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -2424,7 +2425,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
 		authorization.setIdentityType(IdentityType.MANAGE.getCode());
 		authorization.setNamespaceId(namespaceId);
-		authorization.setCreateUid(user.getId());
+		authorization.setCreatorUid(user.getId());
+		authorization.setOperatorUid(user.getId());
 		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
 		dbProvider.execute((TransactionStatus status) -> {
@@ -2522,23 +2524,30 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ServiceModuleAuthorizationsDTO> listServiceModuleAuthorizedMembers(ListServiceModuleAdministratorsCommand cmd) {
 
-		List<Authorization> authorizations = authorizationProvider.listOrdinaryAuthorizations(cmd.getOwnerType(), cmd.getOwnerId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+		List<Authorization> authorizations = authorizationProvider.listOrdinaryAuthorizations(null, null, EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
 
-		return authorizations.stream().map((r) ->{
-			ServiceModuleAuthorizationsDTO dto = ConvertHelper.convert(r, ServiceModuleAuthorizationsDTO.class);
+		Map<String, String> keyMap = new HashMap<>();
 
-			processServiceModuleAuthorization(dto);
+		for (Authorization authorization: authorizations) {
+			if(null != keyMap.get(authorization.getTargetType()+authorization.getTargetId())){
+				ServiceModuleAuthorizationsDTO dto = ConvertHelper.convert(authorization, ServiceModuleAuthorizationsDTO.class);
+				processServiceModuleAuthorization(dto);
 
-			if(AllFlagType.NO == AllFlagType.fromCode(r.getAllFlag())) {
-				List<Privilege> privileges = getPrivilegeOrdinaryByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId(), r.getAuthType(), r.getAuthId());
-				dto.setModules(privileges.stream().map((p) -> {
-					ServiceModuleDTO module = ConvertHelper.convert(p, ServiceModuleDTO.class);
-					module.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
-					return module;
-				}).collect(Collectors.toList()));
+			}else{
+				keyMap.put(authorization.getTargetType()+authorization.getTargetId(), authorization.getTargetType()+authorization.getTargetId());
 			}
-			return dto;
-		}).collect(Collectors.toList());
+
+
+//			if(AllFlagType.NO == AllFlagType.fromCode(r.getAllFlag())) {
+//				List<Privilege> privileges = getPrivilegeOrdinaryByTarget(r.getOwnerType(), r.getOwnerId(), r.getTargetType(), r.getTargetId(), r.getAuthType(), r.getAuthId());
+//				dto.setModules(privileges.stream().map((p) -> {
+//					ServiceModuleDTO module = ConvertHelper.convert(p, ServiceModuleDTO.class);
+//					module.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+//					return module;
+//				}).collect(Collectors.toList()));
+//			}
+		}
+		return null;
 	}
 
 
@@ -2578,33 +2587,43 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
-		authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-		authorization.setAuthId(cmd.getModuleId());
-		authorization.setIdentityType(IdentityType.ORDINARY.getCode());
-		authorization.setNamespaceId(namespaceId);
-		authorization.setCreateUid(user.getId());
-		authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
 		dbProvider.execute((TransactionStatus status) -> {
+			Authorization authorization = ConvertHelper.convert(cmd, Authorization.class);
+			authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+			authorization.setAuthId(cmd.getModuleId());
+			authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+			authorization.setNamespaceId(namespaceId);
+
 			for (AssignmentTarget target: cmd.getTargets()) {
 				checkTarget(target.getTargetType(), target.getTargetId());
 				for (Project project: cmd.getProjects()) {
 					List<Authorization> authorizations =  authorizationProvider.listOrdinaryAuthorizationsByTarget(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId() , EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
-					//如果用户已经在模块的授权列表
+					//如果用户已经在模块的授权列表,，则修改下操作人
 					if(authorizations.size() > 0){
+						authorization = authorizations.get(0);
+						authorization.setOperatorUid(user.getId());
+						authorizationProvider.updateAuthorization(authorization);
 
+						//删除人员拥有的模块全部权限
+						if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+							deleteAcls(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+						//删除人员拥有的模块部分权限
+						}else{
+							deleteAcls(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthId(), ServiceModulePrivilegeType.ORDINARY);
+						}
+					}else{
+						authorization.setCreatorUid(user.getId());
+						authorization.setOperatorUid(user.getId());
+						authorizationProvider.createAuthorization(authorization);
+					}
+
+					if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
+						//给对象分配模块的全部权限
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+					}else{
+						assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), cmd.getPrivilegeIds());
 					}
 				}
-			}
-
-
-			authorizationProvider.createAuthorization(authorization);
-			if(AllFlagType.fromCode(authorization.getAllFlag()) == AllFlagType.YES){
-				//给对象分配模块的全部权限
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), authorization.getAuthId(), ServiceModulePrivilegeType.ORDINARY_ALL);
-			}else{
-				assignmentPrivileges(authorization.getOwnerType(), authorization.getOwnerId(), authorization.getTargetType(), authorization.getTargetId(), authorization.getAuthType() + authorization.getAuthId(), cmd.getPrivilegeIds());
 			}
 			return null;
 		});
@@ -2646,7 +2665,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params privilegeIds is null.");
 		}
 		dbProvider.execute((TransactionStatus status) -> {
-			deleteServiceModuleAuthorizedMember(ConvertHelper.convert(cmd, DeleteServiceModuleAuthorizedMemberCommand.class));
 			createServiceModuleAuthorizedMember(ConvertHelper.convert(cmd, CreateServiceModuleAuthorizedMemberCommand.class));
 			return null;
 		});
@@ -2658,7 +2676,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		checkTarget(cmd.getTargetType(), cmd.getTargetId());
 
-		List<Privilege> pivileges = getPrivilegeOrdinaryByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
+		List<Privilege> pivileges = getPrivilegeOrdinaryByTarget(null, null, cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), cmd.getModuleId());
 
 		if(null == pivileges){
 			LOGGER.error("This user has not been added to the permissions list.");
