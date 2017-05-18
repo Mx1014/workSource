@@ -8,12 +8,14 @@ import com.everhomes.search.WarehouseRequestMaterialSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * Created by ying.xiong on 2017/5/18.
  */
+@Component
 public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch implements WarehouseRequestMaterialSearcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseSearcherImpl.class);
 
