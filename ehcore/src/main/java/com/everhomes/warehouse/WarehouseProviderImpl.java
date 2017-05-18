@@ -768,7 +768,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public void updateWarehouseRequest(WarehouseRequests request) {
+        assert(request.getId() != null);
 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequests.class, request.getId()));
+        EhWarehouseRequestsDao dao = new EhWarehouseRequestsDao(context.configuration());
+        dao.update(request);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWarehouseRequests.class, request.getId());
     }
 
     @Override
@@ -786,7 +792,13 @@ public class WarehouseProviderImpl implements WarehouseProvider {
 
     @Override
     public void updateWarehouseRequestMaterial(WarehouseRequestMaterials requestMaterial) {
+        assert(requestMaterial.getId() != null);
 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarehouseRequestMaterials.class, requestMaterial.getId()));
+        EhWarehouseRequestMaterialsDao dao = new EhWarehouseRequestMaterialsDao(context.configuration());
+        dao.update(requestMaterial);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhWarehouseRequestMaterials.class, requestMaterial.getId());
     }
 
     @Override
@@ -794,6 +806,22 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseRequestMaterials> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseRequestMaterials.class));
+            return null;
+        });
+        return result;
+    }
+
+    @Override
+    public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.ID.in(ids));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
 

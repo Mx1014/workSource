@@ -86,7 +86,7 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-
+        ctx.getFlowCase().getStatus();
     }
 
     @Override

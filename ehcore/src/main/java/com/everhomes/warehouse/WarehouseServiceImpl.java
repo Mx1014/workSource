@@ -1,6 +1,7 @@
 package com.everhomes.warehouse;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
@@ -15,6 +16,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
 import com.everhomes.search.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -75,6 +77,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private ConfigurationProvider configProvider;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -872,34 +877,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
             if(materials != null && materials.size() > 0) {
                 List<WarehouseRequestMaterialDetailDTO> materialDetailDTOs = materials.stream().map(material -> {
-                    WarehouseRequestMaterialDetailDTO materialDetailDTO = ConvertHelper.convert(material, WarehouseRequestMaterialDetailDTO.class);
-                    WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
-                    materialDetailDTO.setDeliveryAmount(material.getAmount());
-                    if(warehouseMaterial != null) {
-                        materialDetailDTO.setMaterialName(warehouseMaterial.getName());
-                        materialDetailDTO.setMaterialNumber(warehouseMaterial.getMaterialNumber());
-                        materialDetailDTO.setBrand(warehouseMaterial.getBrand());
-                        materialDetailDTO.setItemNo(warehouseMaterial.getItemNo());
-                        WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(warehouseMaterial.getCategoryId(),  material.getOwnerType(), material.getOwnerId());
-                        if(category != null) {
-                            materialDetailDTO.setCategoryName(category.getName());
-                        }
-
-                        Warehouses warehouse = warehouseProvider.findWarehouse(material.getWarehouseId(), material.getOwnerType(), material.getOwnerId());
-                        if(warehouse != null) {
-                            materialDetailDTO.setWarehouseName(warehouse.getName());
-                        }
-
-                        WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(material.getWarehouseId(), material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
-                        if(stock != null) {
-                            materialDetailDTO.setStockAmount(stock.getAmount());
-                        }
-                    }
+                    WarehouseRequestMaterialDetailDTO materialDetailDTO = convertToDetail(material);
                     materialDetailDTO.setRequestUid(request.getRequestUid());
                     if(members != null && members.size() > 0) {
                         materialDetailDTO.setRequestUserName(members.get(0).getContactName());
                     }
-
                     return materialDetailDTO;
                 }).collect(Collectors.toList());
                 dto.setMaterialDetailDTOs(materialDetailDTOs);
@@ -909,18 +891,105 @@ public class WarehouseServiceImpl implements WarehouseService {
         return dto;
     }
 
+    private WarehouseRequestMaterialDetailDTO convertToDetail(WarehouseRequestMaterials material) {
+        WarehouseRequestMaterialDetailDTO materialDetailDTO = ConvertHelper.convert(material, WarehouseRequestMaterialDetailDTO.class);
+        WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+        materialDetailDTO.setDeliveryAmount(material.getAmount());
+        if(warehouseMaterial != null) {
+            materialDetailDTO.setMaterialName(warehouseMaterial.getName());
+            materialDetailDTO.setMaterialNumber(warehouseMaterial.getMaterialNumber());
+            materialDetailDTO.setBrand(warehouseMaterial.getBrand());
+            materialDetailDTO.setItemNo(warehouseMaterial.getItemNo());
+            WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(warehouseMaterial.getCategoryId(),  material.getOwnerType(), material.getOwnerId());
+            if(category != null) {
+                materialDetailDTO.setCategoryName(category.getName());
+            }
+
+            Warehouses warehouse = warehouseProvider.findWarehouse(material.getWarehouseId(), material.getOwnerType(), material.getOwnerId());
+            if(warehouse != null) {
+                materialDetailDTO.setWarehouseName(warehouse.getName());
+            }
+
+            WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(material.getWarehouseId(), material.getMaterialId(), material.getOwnerType(), material.getOwnerId());
+            if(stock != null) {
+                materialDetailDTO.setStockAmount(stock.getAmount());
+            }
+        }
+
+        return materialDetailDTO;
+    }
+
     @Override
     public SearchRequestsResponse searchOneselfRequests(SearchOneselfRequestsCommand cmd) {
         QueryRequestCommand command = ConvertHelper.convert(cmd , QueryRequestCommand.class);
         command.setRequestUid(UserContext.current().getUser().getId());
         List<Long> ids = warehouseRequestMaterialSearcher.query(command);
-        return null;
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor);
+        return response;
     }
 
     @Override
     public SearchRequestsResponse searchRequests(SearchRequestsCommand cmd) {
         QueryRequestCommand command = ConvertHelper.convert(cmd , QueryRequestCommand.class);
         List<Long> ids = warehouseRequestMaterialSearcher.query(command);
-        return null;
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        SearchRequestsResponse response = getWarehouseRequestMaterials(ids, cmd.getOwnerType(), cmd.getOwnerId(), pageSize, anchor);
+        return response;
+    }
+
+    private SearchRequestsResponse getWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId, Integer pageSize, Long anchor) {
+        SearchRequestsResponse response = new SearchRequestsResponse();
+        if(ids.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+        } else {
+            response.setNextPageAnchor(null);
+        }
+        List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(ids, ownerType, ownerId);
+        if(requestMaterials != null && requestMaterials.size() > 0) {
+            List<WarehouseRequestMaterialDTO> requestDTOs = requestMaterials.stream().map(requestMaterial -> {
+                WarehouseRequestMaterialDTO dto = ConvertHelper.convert(requestMaterial, WarehouseRequestMaterialDTO.class);
+                dto.setRequestAmount(requestMaterial.getAmount());
+
+                WarehouseMaterials warehouseMaterial = warehouseProvider.findWarehouseMaterials(requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId());
+                if(warehouseMaterial != null) {
+                    dto.setMaterialName(warehouseMaterial.getName());
+                    dto.setMaterialNumber(warehouseMaterial.getMaterialNumber());
+                }
+                Warehouses warehouse = warehouseProvider.findWarehouse(requestMaterial.getWarehouseId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId());
+                if(warehouse != null) {
+                    dto.setWarehouseName(warehouse.getName());
+                }
+
+                WarehouseStocks stock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(requestMaterial.getWarehouseId(), requestMaterial.getMaterialId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId());
+                if(stock != null) {
+                    dto.setStockAmount(stock.getAmount());
+                }
+
+                WarehouseRequests request = warehouseProvider.findWarehouseRequests(requestMaterial.getRequestId(), requestMaterial.getOwnerType(), requestMaterial.getOwnerId());
+                if(request != null) {
+                    dto.setRequestUid(request.getRequestUid());
+                    dto.setCreateTime(request.getCreateTime());
+                    List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
+                    if(members != null && members.size() > 0) {
+                        dto.setRequestUserName(members.get(0).getContactName());
+                    }
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            response.setRequestDTOs(requestDTOs);
+        }
+
+        return response;
+
     }
 }

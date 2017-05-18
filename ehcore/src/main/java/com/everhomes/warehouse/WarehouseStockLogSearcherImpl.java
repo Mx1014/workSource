@@ -181,7 +181,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
 
             List<OrganizationMember> deliveries = organizationProvider.listOrganizationMembers(log.getDeliveryUid());
             if(deliveries != null && deliveries.size() > 0) {
-                dto.setRequestUserName(deliveries.get(0).getContactName());
+                dto.setDeliveryUserName(deliveries.get(0).getContactName());
             }
 
             Warehouses warehouse = warehouseProvider.findWarehouse(dto.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
