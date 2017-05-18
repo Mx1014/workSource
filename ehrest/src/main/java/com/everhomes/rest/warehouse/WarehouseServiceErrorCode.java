@@ -16,5 +16,6 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_WAREHOUSE_MATERIAL_RELATED_TO_WAREHOUSE = 10009;//物品有库存引用
     static final int ERROR_WAREHOUSE_STOCK_SHORTAGE = 10010;//库存不足
     static final int ERROR_ENABLE_FLOW = 10011;//请启用工作流
-    static final int ERROR_FLOW_NODE_PARAM = 10012;//工作流节点参数错误
+    static final int ERROR_CREATE_EXCEL = 10012;//创建excel失败
+    static final int ERROR_DOWNLOAD_EXCEL = 10013;//下载excel失败
 }

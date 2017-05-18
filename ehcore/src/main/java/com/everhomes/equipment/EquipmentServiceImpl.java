@@ -1709,7 +1709,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
 		List<EquipmentAccessoriesDTO> dtos = accessories.getAccessories();
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())

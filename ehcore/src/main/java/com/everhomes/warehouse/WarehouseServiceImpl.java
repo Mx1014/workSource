@@ -25,6 +25,10 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +37,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +50,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class WarehouseServiceImpl implements WarehouseService {
-
+    final String downloadDir ="\\download\\";
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseServiceImpl.class);
 
     @Autowired
@@ -547,7 +552,128 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public HttpServletResponse exportWarehouseStockLogs(SearchWarehouseStockLogsCommand cmd, HttpServletResponse response) {
-        return null;
+        Integer pageSize = Integer.MAX_VALUE;
+        cmd.setPageSize(pageSize);
+
+        SearchWarehouseStockLogsResponse logs = warehouseStockLogSearcher.query(cmd);
+        List<WarehouseStockLogDTO> dtos = logs.getStockLogDTOs();
+
+        URL rootPath = WarehouseServiceImpl.class.getResource("/");
+        String filePath =rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
+        filePath = filePath + "WarehouseStockLogs"+System.currentTimeMillis()+".xlsx";
+        //新建了一个文件
+        this.createWarehouseStockLogsBook(filePath, dtos);
+
+        return download(filePath,response);
+    }
+
+    public void createWarehouseStockLogsBook(String path,List<WarehouseStockLogDTO> dtos) {
+        Workbook wb = new XSSFWorkbook();
+        Sheet sheet = wb.createSheet("WarehouseStockLogs");
+
+        this.createWarehouseStockLogsBookSheetHead(sheet);
+        for (WarehouseStockLogDTO dto : dtos ) {
+            this.setNewWarehouseStockLogsBookRow(sheet, dto);
+        }
+
+        try {
+            FileOutputStream out = new FileOutputStream(path);
+
+            wb.write(out);
+            wb.close();
+            out.close();
+
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
+                    WarehouseServiceErrorCode.ERROR_CREATE_EXCEL,
+                    e.getLocalizedMessage());
+        }
+
+    }
+
+    private void createWarehouseStockLogsBookSheetHead(Sheet sheet){
+
+        Row row = sheet.createRow(sheet.getLastRowNum());
+        int i =-1 ;
+        row.createCell(++i).setCellValue("所属仓库");
+        row.createCell(++i).setCellValue("类型");
+        row.createCell(++i).setCellValue("物品编号");
+        row.createCell(++i).setCellValue("物品名称");
+        row.createCell(++i).setCellValue("数量");
+        row.createCell(++i).setCellValue("单位");
+        row.createCell(++i).setCellValue("申请人");
+        row.createCell(++i).setCellValue("操作人");
+        row.createCell(++i).setCellValue("操作时间");
+    }
+
+    private void setNewWarehouseStockLogsBookRow(Sheet sheet ,WarehouseStockLogDTO dto){
+        Row row = sheet.createRow(sheet.getLastRowNum()+1);
+        int i = -1;
+        row.createCell(++i).setCellValue(dto.getWarehouseName());
+        if(WarehouseStockRequestType.fromCode(dto.getRequestType()) != null) {
+            row.createCell(++i).setCellValue(WarehouseStockRequestType.fromCode(dto.getRequestType()).getName());
+        } else {
+            row.createCell(++i).setCellValue("");
+        }
+
+        row.createCell(++i).setCellValue(dto.getMaterialNumber());
+        row.createCell(++i).setCellValue(dto.getMaterialName());
+        if(WarehouseStockRequestType.STOCK_IN.equals(WarehouseStockRequestType.fromCode(dto.getRequestType()))) {
+            row.createCell(++i).setCellValue("+" + dto.getDeliveryAmount());
+        } else if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(dto.getRequestType()))) {
+            row.createCell(++i).setCellValue("-" + dto.getDeliveryAmount());
+        } else {
+            row.createCell(++i).setCellValue("");
+        }
+
+        row.createCell(++i).setCellValue(dto.getUnitName());
+        row.createCell(++i).setCellValue(dto.getRequestUserName());
+        row.createCell(++i).setCellValue(dto.getDeliveryUserName());
+        row.createCell(++i).setCellValue(dto.getCreateTime());
+
+    }
+
+    public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {
+                file.delete();
+            }
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
+                    WarehouseServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
+                    ex.getLocalizedMessage());
+
+        }
+        return response;
     }
 
     @Override

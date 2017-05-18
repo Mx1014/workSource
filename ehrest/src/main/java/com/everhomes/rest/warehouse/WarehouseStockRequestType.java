@@ -10,16 +10,21 @@ import com.everhomes.util.StringHelper;
  * Created by ying.xiong on 2017/5/11.
  */
 public enum WarehouseStockRequestType {
-    STOCK_IN((byte)0), STOCK_OUT((byte)1);
+    STOCK_IN((byte)0, "入库"), STOCK_OUT((byte)1, "出库");
 
     private byte code;
+    private String name;
 
-    private WarehouseStockRequestType(byte code){
+    private WarehouseStockRequestType(byte code, String name){
         this.code = code;
+        this.name = name;
     }
 
     public byte getCode() {
         return code;
+    }
+    public String getName() {
+        return name;
     }
 
     public static WarehouseStockRequestType fromCode(Byte code) {
