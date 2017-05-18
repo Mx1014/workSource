@@ -398,7 +398,7 @@ public class AclController extends ControllerBase {
      */
     @RequestMapping("deleteServiceModuleAuthorizedMember")
     @RestReturn(value=String.class)
-    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteRoleAdministratorsCommand cmd) {
+    public RestResponse deleteServiceModuleAuthorizedMember(@Valid DeleteServiceModuleAuthorizedMemberCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

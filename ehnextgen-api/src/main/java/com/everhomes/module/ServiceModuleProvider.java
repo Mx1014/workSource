@@ -53,4 +53,6 @@ public interface ServiceModuleProvider {
 	
 	List<ServiceModuleAssignmentRelation> listServiceModuleAssignmentRelations(String ownerType, Long ownerId);
 
+	ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId);
+
 }

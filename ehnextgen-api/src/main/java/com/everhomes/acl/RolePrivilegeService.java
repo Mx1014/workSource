@@ -393,4 +393,13 @@ public interface RolePrivilegeService {
 			ListPrivilegesByRoleIdCommand cmd);
 
 	void updateServiceModuleAdministrators(UpdateServiceModuleAdministratorsCommand cmd);
+
+	List<ServiceModuleAuthorizationsDTO> listServiceModuleAuthorizedMembers(ListServiceModuleAdministratorsCommand cmd);
+
+	void createServiceModuleAuthorizedMember(CreateServiceModuleAuthorizedMemberCommand cmd);
+
+	void updateServiceModuleAuthorizedMember(CreateServiceModuleAuthorizedMemberCommand cmd);
+
+	void deleteServiceModuleAuthorizedMember(DeleteServiceModuleAuthorizedMemberCommand cmd);
+
 }

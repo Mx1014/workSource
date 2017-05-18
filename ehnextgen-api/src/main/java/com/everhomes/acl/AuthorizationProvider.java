@@ -26,7 +26,7 @@ public interface AuthorizationProvider {
 
     List<Authorization> listOrdinaryAuthorizations(String ownerType, Long ownerId, String authType, Long authId);
 
-    List<Authorization> listManageAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType);
+    List<Authorization> listManageAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId);
 
-    List<Authorization> listOrdinaryAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType);
+    List<Authorization> listOrdinaryAuthorizationsByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId);
 }
