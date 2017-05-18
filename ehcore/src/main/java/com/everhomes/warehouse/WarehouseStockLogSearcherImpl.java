@@ -156,7 +156,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("query warehouse stock logs :{}", builder);
+            LOGGER.debug("query warehouse stock logs :{}, rsp :{}", builder, rsp);
         }
 
         List<Long> ids = getIds(rsp);
