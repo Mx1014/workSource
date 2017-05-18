@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>enterpriseId: 企业id</li>
  * </ul>
  */
-public class CheckVideoConfAccountTrialCommand {
+public class GetVideoConfTrialAccountCommand {
 	
 	private Long enterpriseId;
 

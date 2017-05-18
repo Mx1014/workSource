@@ -4,7 +4,7 @@ package com.everhomes.rest.videoconf;
 * <li>trialFlag：0-reject  2-OK {@link com.everhomes.rest.videoconf.TrialFlag}</li>
 * </ul>
 */
-public class CheckVideoConfAccountTrialResponse {
+public class CheckVideoConfTrialAccountResponse {
 
 	private byte trialFlag;
 

@@ -7,8 +7,8 @@ import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
-import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialCommand;
-import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialResponse;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountResponse;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
@@ -21,7 +21,7 @@ import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
-import com.everhomes.rest.videoconf.GetTrialVideoConfAccountCommand;
+import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
@@ -158,7 +158,7 @@ public interface VideoConfService {
 	VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd);
 	
 	void deleteConfEnterprise(DeleteConfEnterpriseCommand cmd);
-	CheckVideoConfAccountTrialResponse checkVideoConfAccountTrial(
-			CheckVideoConfAccountTrialCommand cmd);
-	void getTrialVideoConfAccount(GetTrialVideoConfAccountCommand cmd);
+	CheckVideoConfTrialAccountResponse checkVideoConfTrialAccount(
+			CheckVideoConfTrialAccountCommand cmd);
+	void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd);
 }

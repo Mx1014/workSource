@@ -20,8 +20,8 @@ import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
-import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialCommand;
-import com.everhomes.rest.videoconf.CheckVideoConfAccountTrialResponse;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountResponse;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
@@ -40,7 +40,7 @@ import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
 import com.everhomes.rest.videoconf.GetNamespaceListResponse;
-import com.everhomes.rest.videoconf.GetTrialVideoConfAccountCommand;
+import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
@@ -1433,10 +1433,10 @@ public class VideoConfController  extends ControllerBase{
 	 * <b>URL: /conf/checkVideoConfAccountTrial</b>
 	 * 检测公司是否有获取试用的资格
 	 */
-	@RequestMapping("checkVideoConfAccountTrial")
-	@RestReturn(CheckVideoConfAccountTrialResponse.class)
-	public RestResponse checkVideoConfAccountTrial(CheckVideoConfAccountTrialCommand cmd){
-		CheckVideoConfAccountTrialResponse resp = videoConfService.checkVideoConfAccountTrial(cmd);
+	@RequestMapping("checkVideoConfTrialAccount")
+	@RestReturn(CheckVideoConfTrialAccountResponse.class)
+	public RestResponse checkVideoConfTrialAccount(CheckVideoConfTrialAccountCommand cmd){
+		CheckVideoConfTrialAccountResponse resp = videoConfService.checkVideoConfTrialAccount(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1444,13 +1444,13 @@ public class VideoConfController  extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /conf/getTrialVideoConfAccount</b>
+	 * <b>URL: /conf/getVideoConfTrialAccount</b>
 	 * 获取一个测试账号
 	 */
-	@RequestMapping("getTrialVideoConfAccount")
+	@RequestMapping("getVideoConfTrialAccount")
 	@RestReturn(String.class)
-	public RestResponse getTrialVideoConfAccount(GetTrialVideoConfAccountCommand cmd){		
-		videoConfService.getTrialVideoConfAccount(cmd);
+	public RestResponse getVideoConfTrialAccount(GetVideoConfTrialAccountCommand cmd){		
+		videoConfService.getVideoTrialConfAccount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
