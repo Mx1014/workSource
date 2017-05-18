@@ -14,6 +14,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhAuthorizations;
+import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord;
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -72,6 +73,41 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		if(null != pageSize)
+			pageSize = pageSize + 1;
+		List<AuthorizationRelation> result  = new ArrayList<>();
+		SelectQuery<EhAuthorizationRelationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATION_RELATIONS);
+
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_AUTHORIZATION_RELATIONS.ID.lt(locator.getAnchor()));
+
+		query.addOrderBy(Tables.EH_AUTHORIZATION_RELATIONS.ID.desc());
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, AuthorizationRelation.class));
+			return null;
+		});
+		if(null != locator)
+			locator.setAnchor(null);
+
+		if(null != pageSize && result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
+
+//	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, Long moduleId queryBuilderCallback){
+//
+//	}
+
+
+		@Override
 	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag){
 		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
 			@Override
