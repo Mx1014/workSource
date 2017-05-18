@@ -4,6 +4,7 @@ package com.everhomes.rest.acl;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.module.AssignmentTarget;
 import com.everhomes.rest.module.Project;
+import com.everhomes.rest.module.ServiceModuleOut;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public class ServiceModuleAssignmentRelationDTO {
 	@ItemType(AssignmentTarget.class)
 	private List<AssignmentTarget> targets;
 
-	@ItemType(ServiceModuleDTO.class)
-	private List<ServiceModuleDTO> modules;
+	@ItemType(ServiceModuleOut.class)
+	private List<ServiceModuleOut> modules;
 
 	@ItemType(Project.class)
 	private List<Project> projects;
@@ -78,11 +79,11 @@ public class ServiceModuleAssignmentRelationDTO {
 		this.targets = targets;
 	}
 
-	public List<ServiceModuleDTO> getModules() {
+	public List<ServiceModuleOut> getModules() {
 		return modules;
 	}
 
-	public void setModules(List<ServiceModuleDTO> modules) {
+	public void setModules(List<ServiceModuleOut> modules) {
 		this.modules = modules;
 	}
 
