@@ -4363,7 +4363,7 @@ public class ActivityServiceImpl implements ActivityService {
 			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours, rosterOrderSetting.getTime());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 100, 1, (100*24+1)*3600*1000L);
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L);
 	}
 	
 
