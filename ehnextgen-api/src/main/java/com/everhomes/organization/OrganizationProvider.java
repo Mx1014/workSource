@@ -328,4 +328,6 @@ public interface OrganizationProvider {
 	 * @return
 	 */
 	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 } 
