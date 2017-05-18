@@ -174,9 +174,11 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             WarehouseStockLogs log = warehouseProvider.findWarehouseStockLogs(id, cmd.getOwnerType(), cmd.getOwnerId());
             WarehouseStockLogDTO dto = ConvertHelper.convert(log, WarehouseStockLogDTO.class);
 
-            List<OrganizationMember> requests = organizationProvider.listOrganizationMembers(log.getRequestUid());
-            if(requests != null && requests.size() > 0) {
-                dto.setRequestUserName(requests.get(0).getContactName());
+            if(log.getRequestUid() != null) {
+                List<OrganizationMember> requests = organizationProvider.listOrganizationMembers(log.getRequestUid());
+                if(requests != null && requests.size() > 0) {
+                    dto.setRequestUserName(requests.get(0).getContactName());
+                }
             }
 
             List<OrganizationMember> deliveries = organizationProvider.listOrganizationMembers(log.getDeliveryUid());
@@ -216,13 +218,20 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             b.field("warehouseId", log.getWarehouseId());
             b.field("materialId", log.getMaterialId());
             b.field("requestType", log.getRequestType());
-            b.field("requestUid", log.getRequestUid());
-            List<OrganizationMember> members = organizationProvider.listOrganizationMembers(log.getRequestUid());
-            if(members != null && members.size() > 0) {
-                b.field("requestName", members.get(0).getContactName());
+
+            if(log.getRequestUid() != null) {
+                b.field("requestUid", log.getRequestUid());
+                List<OrganizationMember> members = organizationProvider.listOrganizationMembers(log.getRequestUid());
+                if(members != null && members.size() > 0) {
+                    b.field("requestName", members.get(0).getContactName());
+                } else {
+                    b.field("requestName", "");
+                }
             } else {
+                b.field("requestUid", "");
                 b.field("requestName", "");
             }
+
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(log.getMaterialId(), log.getOwnerType(), log.getOwnerId());
             if(material != null) {
                 b.field("materialName", material.getName());

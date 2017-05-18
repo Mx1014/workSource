@@ -182,7 +182,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
                 b.field("materialName", "");
             }
             WarehouseRequests request = warehouseProvider.findWarehouseRequests(material.getRequestId(), material.getOwnerType(), material.getOwnerId());
-            if(request != null) {
+            if(request != null && request.getRequestUid() != null) {
                 b.field("requestUid", request.getRequestUid());
                 List<OrganizationMember> members = organizationProvider.listOrganizationMembers(request.getRequestUid());
                 if(members != null && members.size() > 0) {

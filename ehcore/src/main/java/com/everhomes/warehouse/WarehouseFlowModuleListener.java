@@ -8,11 +8,14 @@ import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralForm;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.warehouse.CreateRequestCommand;
+import com.everhomes.rest.warehouse.ReviewResult;
+import com.everhomes.search.WarehouseRequestMaterialSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -39,6 +42,12 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private WarehouseProvider warehouseProvider;
+
+    @Autowired
+    private WarehouseRequestMaterialSearcher warehouseRequestMaterialSearcher;
 
     @Override
     public FlowModuleInfo initModule() {
@@ -86,7 +95,37 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        ctx.getFlowCase().getStatus();
+        FlowCase flowCase = ctx.getFlowCase();
+        Long operatorId = ctx.getOperator().getId();
+        Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(), flowCase.getProjectType(), flowCase.getProjectId());
+        if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+            request.setUpdateTime(current);
+            warehouseProvider.updateWarehouseRequest(request);
+            updateWarehouseRequestMaterial(request, operatorId);
+        }
+
+        else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            request.setReviewResult(ReviewResult.QUALIFIED.getCode());
+            request.setUpdateTime(current);
+            warehouseProvider.updateWarehouseRequest(request);
+            updateWarehouseRequestMaterial(request, operatorId);
+        }
+    }
+
+    private void updateWarehouseRequestMaterial(WarehouseRequests request, Long operatorId) {
+        List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId());
+        if(materials != null && materials.size() > 0) {
+            Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+            materials.forEach(material -> {
+                material.setReviewResult(request.getReviewResult());
+                material.setReviewUid(operatorId);
+                material.setReviewTime(current);
+                warehouseProvider.updateWarehouseRequestMaterial(material);
+                warehouseRequestMaterialSearcher.feedDoc(material);
+            });
+        }
     }
 
     @Override

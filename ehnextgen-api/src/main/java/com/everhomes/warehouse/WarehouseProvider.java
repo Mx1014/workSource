@@ -24,7 +24,7 @@ public interface WarehouseProvider {
     void updateWarehouseMaterials(WarehouseMaterials materials);
     WarehouseMaterials findWarehouseMaterials(Long id, String ownerType, Long ownerId);
     WarehouseMaterials findWarehouseMaterialsByNumber(String materialNumber, String ownerType, Long ownerId);
-    List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId);
+    List<WarehouseMaterials> listWarehouseMaterialsByCategory(String categoryPath, String ownerType, Long ownerId);
 
     void creatWarehouseStockLogs(WarehouseStockLogs log);
     WarehouseStockLogs findWarehouseStockLogs(Long id, String ownerType, Long ownerId);

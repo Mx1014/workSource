@@ -270,10 +270,10 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public List<WarehouseMaterials> listWarehouseMaterialsByCategory(Long categoryId, String ownerType, Long ownerId) {
+    public List<WarehouseMaterials> listWarehouseMaterialsByCategory(String categoryPath, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIALS);
-        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_ID.eq(categoryId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.CATEGORY_PATH.like(categoryPath + "%"));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.STATUS.eq(Status.ACTIVE.getCode()));

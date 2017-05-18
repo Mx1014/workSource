@@ -243,7 +243,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseMaterialCategories category = verifyWarehouseMaterialCategories(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
 
         //该分类下有关联任何物品时，该分类不可删除
-        List<WarehouseMaterials> materials = warehouseProvider.listWarehouseMaterialsByCategory(cmd.getCategoryId(), cmd.getOwnerType(), cmd.getOwnerId());
+        List<WarehouseMaterials> materials = warehouseProvider.listWarehouseMaterialsByCategory(category.getPath(), category.getOwnerType(), category.getOwnerId());
         if(materials != null && materials.size() > 0) {
             LOGGER.error("the category has attach to active material, categoryId = " + cmd.getCategoryId()
                     + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId());
@@ -850,7 +850,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             createFlowCaseCommand.setContent(request.getRemark());
 
             createFlowCaseCommand.setProjectId(request.getOwnerId());
-            createFlowCaseCommand.setProjectType(EntityType.ORGANIZATIONS.getCode());
+            createFlowCaseCommand.setProjectType(request.getOwnerType());
 
             flowService.createFlowCase(createFlowCaseCommand);
             return null;
@@ -863,11 +863,14 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
         if(request != null) {
             dto = ConvertHelper.convert(request, WarehouseRequestDetailsDTO.class);
-            List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
-            if(members != null && members.size() > 0) {
-                dto.setRequestUserName(members.get(0).getContactName());
-                dto.setRequestUserContact(members.get(0).getContactToken());
+            if(dto.getRequestUid() != null) {
+                List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
+                if(members != null && members.size() > 0) {
+                    dto.setRequestUserName(members.get(0).getContactName());
+                    dto.setRequestUserContact(members.get(0).getContactToken());
+                }
             }
+
 
             Organization organization = organizationProvider.findOrganizationById(dto.getRequestOrganizationId());
             if(organization != null) {
@@ -876,12 +879,11 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
             if(materials != null && materials.size() > 0) {
+                String requestUserName = dto.getRequestUserName();
                 List<WarehouseRequestMaterialDetailDTO> materialDetailDTOs = materials.stream().map(material -> {
                     WarehouseRequestMaterialDetailDTO materialDetailDTO = convertToDetail(material);
                     materialDetailDTO.setRequestUid(request.getRequestUid());
-                    if(members != null && members.size() > 0) {
-                        materialDetailDTO.setRequestUserName(members.get(0).getContactName());
-                    }
+                    materialDetailDTO.setRequestUserName(requestUserName);
                     return materialDetailDTO;
                 }).collect(Collectors.toList());
                 dto.setMaterialDetailDTOs(materialDetailDTOs);
@@ -979,9 +981,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                 if(request != null) {
                     dto.setRequestUid(request.getRequestUid());
                     dto.setCreateTime(request.getCreateTime());
-                    List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
-                    if(members != null && members.size() > 0) {
-                        dto.setRequestUserName(members.get(0).getContactName());
+                    if(dto.getRequestUid() != null) {
+                        List<OrganizationMember> members = organizationProvider.listOrganizationMembers(dto.getRequestUid());
+                        if(members != null && members.size() > 0) {
+                            dto.setRequestUserName(members.get(0).getContactName());
+                        }
                     }
                 }
                 return dto;
