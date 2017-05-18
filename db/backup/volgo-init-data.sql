@@ -860,13 +860,13 @@ UPDATE eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRveE1tRmlPVEJq
 
 	
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
-	VALUES(88, '企业服务', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', 1, 0, 1, 1,'pm_admin');
+	VALUES(88, '企业服务', 'cs://1/image/aW1hZ2UvTVRvMk9ETTFOalZqTVRkak1EZG1NV1E1T0RJMk1qUTVNV05rWkdFNFptSmtaZw', 1, 0, 1, 1,'pm_admin');
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
-	VALUES(89, '园区服务', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', 1, 0, 1, 1,'pm_admin');
+	VALUES(89, '园区服务', 'cs://1/image/aW1hZ2UvTVRvMk9ETTFOalZqTVRkak1EZG1NV1E1T0RJMk1qUTVNV05rWkdFNFptSmtaZw', 1, 0, 1, 1,'pm_admin');
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
-	VALUES(90, '企业服务', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', 1, 0, 1, 1,'park_tourist');
+	VALUES(90, '企业服务', 'cs://1/image/aW1hZ2UvTVRvMk9ETTFOalZqTVRkak1EZG1NV1E1T0RJMk1qUTVNV05rWkdFNFptSmtaZw', 1, 0, 1, 1,'park_tourist');
 INSERT INTO `eh_item_service_categries`(`id`, `name`, `icon_uri`, `order`, `align`, `status`, `namespace_id`, `scene_type`)
-	VALUES(91, '园区服务', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', 1, 0, 1, 1,'park_tourist');
+	VALUES(91, '园区服务', 'cs://1/image/aW1hZ2UvTVRvMk9ETTFOalZqTVRkak1EZG1NV1E1T0RJMk1qUTVNV05rWkdFNFptSmtaZw', 1, 0, 1, 1,'park_tourist');
 
 INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
     VALUES ('200879', 'community', '240111044331058733', '0', '服务联盟', '服务联盟', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '1', '');
