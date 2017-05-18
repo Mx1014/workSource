@@ -22,6 +22,10 @@ import java.util.List;
  */
 public class ServiceModuleAuthorizationsDTO {
 
+	private String ownerType;
+
+	private Long ownerId;
+
 	private Long targetId;
 
 	private String targetType;
@@ -105,6 +109,22 @@ public class ServiceModuleAuthorizationsDTO {
 
 	public void setAllFlag(Byte allFlag) {
 		this.allFlag = allFlag;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

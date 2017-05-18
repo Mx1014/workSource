@@ -1310,6 +1310,14 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWebMenus.class, Tables.EH_WEB_MENUS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_WEB_MENUS.ID.max()).from(Tables.EH_WEB_MENUS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhWebMenus.class, Tables.EH_WEB_MENUS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhWebMenus.class, Tables.EH_WEB_MENUS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

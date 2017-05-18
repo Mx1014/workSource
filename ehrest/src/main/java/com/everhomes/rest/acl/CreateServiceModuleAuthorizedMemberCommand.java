@@ -2,6 +2,8 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.module.AssignmentTarget;
+import com.everhomes.rest.module.Project;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -21,23 +23,22 @@ import java.util.List;
  */
 public class CreateServiceModuleAuthorizedMemberCommand {
 
-	@NotNull
 	private Long organizationId;
 
-	@NotNull
 	private String ownerType;
 
-	@NotNull
 	private Long ownerId;
-
-	private Long targetId;
-
-	private String targetType;
 
 	private Byte allFlag;
 
 	@NotNull
 	private Long moduleId;
+
+	@ItemType(AssignmentTarget.class)
+	private List<AssignmentTarget> targets;
+
+	@ItemType(Project.class)
+	private List<Project> projects;
 
 	@NotNull
 	@ItemType(Long.class)
@@ -67,22 +68,6 @@ public class CreateServiceModuleAuthorizedMemberCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getTargetId() {
-		return targetId;
-	}
-
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
-
-	public String getTargetType() {
-		return targetType;
-	}
-
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
 	public Byte getAllFlag() {
 		return allFlag;
 	}
@@ -105,6 +90,22 @@ public class CreateServiceModuleAuthorizedMemberCommand {
 
 	public void setPrivilegeIds(List<Long> privilegeIds) {
 		this.privilegeIds = privilegeIds;
+	}
+
+	public List<AssignmentTarget> getTargets() {
+		return targets;
+	}
+
+	public void setTargets(List<AssignmentTarget> targets) {
+		this.targets = targets;
+	}
+
+	public List<Project> getProjects() {
+		return projects;
+	}
+
+	public void setProjects(List<Project> projects) {
+		this.projects = projects;
 	}
 
 	@Override

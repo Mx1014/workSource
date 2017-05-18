@@ -26,9 +26,10 @@ CREATE TABLE `eh_authorizations` (
   `auth_id` bigint(20) NOT NULL,
   `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
   `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
-  `create_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
+  `operator_uid` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -42,8 +43,8 @@ CREATE TABLE `eh_service_module_assignment_relations` (
   `owner_json` text,
   `module_json` text,
   `update_time` datetime DEFAULT NULL,
-  `update_uid` bigint(20) NOT NULL,
-  `create_uid` bigint(20) NOT NULL,
+  `operator_uid` bigint(20) NOT NULL,
+  `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

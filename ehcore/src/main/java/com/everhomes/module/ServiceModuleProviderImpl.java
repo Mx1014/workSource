@@ -1,28 +1,10 @@
 // @formatter:off
 package com.everhomes.module;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleAssignment;
-import com.everhomes.module.ServiceModulePrivilege;
-import com.everhomes.module.ServiceModulePrivilegeType;
-import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.module.ServiceModuleScope;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.module.ServiceModuleStatus;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhServiceModules;
-import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
-import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -33,13 +15,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.module.ServiceModuleStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhServiceModules;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentRelationsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
+import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignmentRelations;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
+import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentRelationsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceModuleAssignmentsRecord;
+import com.everhomes.server.schema.tables.records.EhServiceModulePrivilegesRecord;
+import com.everhomes.server.schema.tables.records.EhServiceModuleScopesRecord;
+import com.everhomes.server.schema.tables.records.EhServiceModulesRecord;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ServiceModuleProviderImpl implements ServiceModuleProvider {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceModuleProviderImpl.class);
 
 	@Autowired
@@ -54,7 +55,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
 		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.MODULE_ID.eq(moduleId);
-		if(null != privilegeType){
+		if (null != privilegeType) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_TYPE.eq(privilegeType.getCode()));
 		}
 		query.addConditions(cond);
@@ -68,12 +69,32 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
+	public ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId) {
+		List<ServiceModulePrivilege> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
+		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_ID.eq(privilegeId);
+		cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.MODULE_ID.eq(moduleId));
+		query.addConditions(cond);
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_PRIVILEGES.DEFAULT_ORDER);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModulePrivilege.class));
+			return null;
+		});
+
+		if(results.size() > 0){
+			return results.get(0);
+		}
+		return null;
+	}
+
+	@Override
 	public List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType) {
 		List<ServiceModulePrivilege> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
 		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_ID.eq(privilegeId);
-		if(null != privilegeType){
+		if (null != privilegeType) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_TYPE.eq(privilegeType.getCode()));
 		}
 		query.addConditions(cond);
@@ -92,7 +113,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
 		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.MODULE_ID.in(moduleIds);
-		if(null != privilegeType){
+		if (null != privilegeType) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_TYPE.eq(privilegeType.getCode()));
 		}
 		query.addConditions(cond);
@@ -138,7 +159,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
-		if(null != condition){
+		if (null != condition) {
 			cond = cond.and(condition);
 		}
 		query.addConditions(cond);
@@ -152,7 +173,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
-	public List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId){
+	public List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId) {
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(moduleId);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType));
@@ -166,10 +187,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
-		if(null != organizationId){
+		if (null != organizationId) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
 		}
-		if(null != moduleIds && moduleIds.size() >0){
+		if (null != moduleIds && moduleIds.size() > 0) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
 		}
 		query.addConditions(cond);
@@ -190,10 +211,10 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.in(targetIds));
 
-		if(null != organizationId){
+		if (null != organizationId) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
 		}
-		if(null != moduleIds && moduleIds.size() >0){
+		if (null != moduleIds && moduleIds.size() > 0) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
 		}
 		query.addConditions(cond);
@@ -213,7 +234,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
-		if(null != organizationId){
+		if (null != organizationId) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
 		}
 		query.addConditions(cond);
@@ -249,14 +270,14 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
-		if(null != organizationId){
+		if (null != organizationId) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
 		}
 
-		if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+		if (!org.springframework.util.StringUtils.isEmpty(targetType)) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
 		}
-		if(null != targetId){
+		if (null != targetId) {
 			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
 		}
 		query.addConditions(cond);
@@ -273,13 +294,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		List<ServiceModule> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
 		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
-		
+
 		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
-		if(null != level)
+		if (null != level)
 			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.eq(level));
-		if(null != type)
+		if (null != type)
 			cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.eq(type));
-		
+
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			results.add(ConvertHelper.convert(r, ServiceModule.class));
@@ -295,9 +316,9 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
 
 		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
-		if(null != startLevel)
+		if (null != startLevel)
 			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.ge(startLevel));
-		if(null != types && types.size() > 0)
+		if (null != types && types.size() > 0)
 			cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.in(types));
 
 		query.addConditions(cond);
@@ -307,19 +328,19 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		});
 		return results;
 	}
-	
+
 	@Override
 	public List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy) {
 		List<ServiceModuleScope> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleScopes.class));
 		SelectQuery<EhServiceModuleScopesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_SCOPES);
-		
+
 		Condition cond = Tables.EH_SERVICE_MODULE_SCOPES.NAMESPACE_ID.eq(namespaceId);
-		if(!StringUtils.isEmpty(ownerType))
+		if (!StringUtils.isEmpty(ownerType))
 			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_TYPE.eq(ownerType));
-		if(null != ownerId)
+		if (null != ownerId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_ID.eq(ownerId));
-		if(null != applyPolicy)
+		if (null != applyPolicy)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.APPLY_POLICY.eq(applyPolicy));
 
 		query.addConditions(cond);
@@ -329,4 +350,85 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		});
 		return results;
 	}
+
+	@Override
+	public Long createModuleAssignmentRetion(ServiceModuleAssignmentRelation relation) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAssignmentRelations.class));
+		relation.setId(id);
+		EhServiceModuleAssignmentRelationsDao dao = new EhServiceModuleAssignmentRelationsDao(context.configuration());
+		dao.insert(relation);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAssignmentRelations.class, id);
+		return id;
+
+	}
+
+	@Override
+	public void batchCreateServiceModuleAssignment(List<ServiceModuleAssignment> moduleAssignmentList) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAssignments.class), Long.valueOf(moduleAssignmentList.size()));
+		List<EhServiceModuleAssignments> records = new ArrayList<EhServiceModuleAssignments>();
+		for(int i = 0; i < moduleAssignmentList.size(); i++){
+			moduleAssignmentList.get(i).setId(id);
+			EhServiceModuleAssignments record = ConvertHelper.convert(moduleAssignmentList.get(i), EhServiceModuleAssignments.class);
+			records.add(record);
+			id++ ;
+		}
+		EhServiceModuleAssignmentsDao dao = new EhServiceModuleAssignmentsDao(context.configuration());
+		dao.insert(records);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhServiceModuleAssignments.class, null);
+	}
+
+	@Override
+	public ServiceModuleAssignmentRelation findServiceModuleAssignmentRelationById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhServiceModuleAssignmentRelationsDao dao = new EhServiceModuleAssignmentRelationsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceModuleAssignmentRelation.class);
+	}
+
+	@Override
+	public List<ServiceModuleAssignment> findServiceModuleAssignmentListByRelationId(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition conditon = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.RELATION_ID.eq(id);
+		List<ServiceModuleAssignment> list = context.select().from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).where(conditon).fetch().map(r -> {
+			return ConvertHelper.convert(r, ServiceModuleAssignment.class);
+		});
+		return list;
+	}
+
+	@Override
+	public void deleteServiceModuleAssignmentRelationById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceModuleAssignmentRelationsDao dao = new EhServiceModuleAssignmentRelationsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleAssignmentRelations.class, id);
+	}
+
+	@Override
+	public void deleteServiceModuleAssignments(List<ServiceModuleAssignment> assignments) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		List<Long> ids = assignments.stream().map(r -> {
+			return r.getId();
+		}).collect(Collectors.toList());
+		EhServiceModuleAssignmentsDao dao = new EhServiceModuleAssignmentsDao(context.configuration());
+		dao.deleteById(ids);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhServiceModuleAssignmentsDao.class, null);
+
+	}
+
+	@Override
+	public List<ServiceModuleAssignmentRelation> listServiceModuleAssignmentRelations(String ownerType, Long ownerId) {
+		List<ServiceModuleAssignmentRelation> results = new ArrayList<ServiceModuleAssignmentRelation>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS.OWNER_ID.eq(ownerId).and(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS.OWNER_TYPE.endsWith(ownerType));
+		SelectQuery<EhServiceModuleAssignmentRelationsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENT_RELATIONS);
+		query.addConditions(condition);
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignmentRelation.class));
+			return null;
+		});
+		return results;
+	}
+
 }
