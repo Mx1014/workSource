@@ -147,7 +147,7 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
 
             if(locator.getAnchor() != null)
                 query.addConditions(Tables.EH_AES_SERVER_KEY.ID.gt(locator.getAnchor()));
-            query.addOrderBy(Tables.EH_AES_SERVER_KEY.ID.asc());
+            query.addOrderBy(Tables.EH_AES_SERVER_KEY.ID.desc());//always got the last one aes server key
             query.addLimit(count - objs.size());
 
             query.fetch().map((r) -> {
