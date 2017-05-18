@@ -44,6 +44,7 @@ import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
+import com.everhomes.rest.aclink.AclinkSyncTimerCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
@@ -642,6 +643,20 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value=AclinkLogListResponse.class)
     public RestResponse createAclinkLog(@Valid AclinkLogCreateCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createAclinkLog(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/syncTimer</b>
+     * <p>同步门禁时间</p>
+     * @return 同步门禁时间
+     */
+    @RequestMapping("syncTimer")
+    @RestReturn(value=QueryDoorMessageResponse.class)
+    public RestResponse syncTimer(@Valid AclinkSyncTimerCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.syncTimerMessage(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -13,4 +13,6 @@ public interface AclinkMsgGenerator {
 
     AclinkWebSocketMessage generateTimeMessage(Long doorId);
 
+	void invalidSyncTimer(Long doorId);
+
 }
