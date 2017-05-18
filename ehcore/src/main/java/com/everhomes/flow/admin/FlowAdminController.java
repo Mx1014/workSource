@@ -234,7 +234,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/createFlowUserSelection</b>
      * <p> 创建一波用户选择项 </p>
-     * @return
      */
     @RequestMapping("createFlowUserSelection")
     @RestReturn(value=ListFlowUserSelectionResponse.class)
@@ -275,8 +274,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowNodeReminder</b>
-     * <p> 创建一波用户选择项 </p>
-     * @return
+     * <p>设置用户提醒</p>
      */
     @RequestMapping("updateFlowNodeReminder")
     @RestReturn(value=FlowNodeDetailDTO.class)

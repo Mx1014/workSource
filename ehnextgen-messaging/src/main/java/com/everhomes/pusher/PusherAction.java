@@ -49,7 +49,7 @@ public class PusherAction implements Runnable {
         }
         
      
-//        LOGGER.info("action: pushing to: " + identify);
+//        LOGGER.info("build: pushing to: " + identify);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Pushing message(ios msg flush), namespaceId=" + partner + ", deviceId=" + identify);
         }

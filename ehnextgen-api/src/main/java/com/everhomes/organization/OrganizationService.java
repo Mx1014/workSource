@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.*;
 
@@ -199,7 +200,10 @@ public interface OrganizationService {
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
-	OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
+
+    OrganizationMemberDTO processUserForMemberWithoutMessage(UserIdentifier identifier);
+
+    OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
 	List<Organization> getSyncDatas(CrossShardListingLocator locator);
@@ -316,7 +320,7 @@ public interface OrganizationService {
 	 * @param organizationId
      * @return
      */
-	OrganizationDTO getMemberTopDepartment(OrganizationGroupType organizationGroupType, String token, Long organizationId);
+	OrganizationDTO getMemberTopDepartment(List<String> groupTypes, String token, Long organizationId);
 	
 	/**
 	 * 获取机构下面所有人员
@@ -437,4 +441,11 @@ public interface OrganizationService {
 	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
 
 	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+	
+	/**
+	 * 查询企业下的用户
+	 * @param cmd
+	 * @return ListOrganizationContactCommandResponse
+	 */
+	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 }

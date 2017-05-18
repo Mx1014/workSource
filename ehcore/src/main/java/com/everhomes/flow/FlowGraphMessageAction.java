@@ -1,13 +1,11 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.util.DateHelper;
+
+import java.sql.Timestamp;
 
 public class FlowGraphMessageAction extends FlowGraphAction {
 
@@ -62,13 +60,12 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		ft.setJson(dto.toString());
 		
 		if(timeoutAtTick == null) {
-			timeoutAtTick = 0l;
+			timeoutAtTick = 0L;
 		}
-//		Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
-		Long timeoutTick = System.currentTimeMillis() + timeoutAtTick * 60 * 1000l;
+		// Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
+		Long timeoutTick = System.currentTimeMillis() + timeoutAtTick * 60 * 1000L;
 		ft.setTimeoutTick(new Timestamp(timeoutTick));
 		
 		ctx.getTimeouts().add(ft);
 	}
-
 }

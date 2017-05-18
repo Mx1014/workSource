@@ -30,7 +30,6 @@ public class LaunchPadLayoutGroupDTO {
     private Integer columnCount;
     private Byte editFlag;
 
-   
     public String getGroupName() {
         return groupName;
     }
@@ -103,7 +102,7 @@ public class LaunchPadLayoutGroupDTO {
 		this.editFlag = editFlag;
 	}
 
-	@Override
+    @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

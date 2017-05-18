@@ -20,6 +20,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -543,5 +544,18 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 			}
     	});    	
     }
-    
+
+    /**
+     * 查询flowCase的某个节点的最大stepCount
+     */
+    @Override
+    public Long findMaxStepCountByNodeEnterLog(Long nodeId, Long caseId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select(DSL.max(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT))
+                .from(Tables.EH_FLOW_EVENT_LOGS)
+                .where(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId))
+                .and(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId))
+                .and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
+                .fetchAnyInto(Long.class);
+    }
 }

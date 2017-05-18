@@ -748,6 +748,20 @@ CREATE TABLE `eh_approval_op_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_approval_range_statistics`;
+CREATE TABLE `eh_approval_range_statistics` (
+  `id` BIGINT NOT NULL,
+  `punch_month` VARCHAR(8) COMMENT 'yyyymm',
+  `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
+  `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
+  `user_id` BIGINT COMMENT 'user id',
+  `approval_type` TINYINT NOT NULL COMMENT '1. ask for leave, 2. forget to punch',
+  `category_id` BIGINT COMMENT 'concrete category id',
+  `actual_result` VARCHAR(128) COMMENT 'actual result, e.g 1day3hours 1.3.0',
+  `creator_uid` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 申请记录表
 DROP TABLE IF EXISTS `eh_approval_requests`;
@@ -2861,7 +2875,12 @@ CREATE TABLE `eh_equipment_inspection_item_results` (
   `item_unit` VARCHAR(32),
   `item_value` VARCHAR(128),
   `normal_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: abnormal; 1: normal',
-  
+  `create_time` DATETIME,
+  `community_id` BIGINT,
+  `standard_id` BIGINT,
+  `equipment_id` BIGINT,
+  `inspection_category_id` BIGINT,
+  `namespace_id` INTEGER,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -2954,7 +2973,9 @@ CREATE TABLE `eh_equipment_inspection_task_logs` (
   `parameter_value` VARCHAR(1024),
   `process_time` DATETIME,
   `create_time` DATETIME,
-
+  `inspection_category_id` BIGINT,
+  `community_id` BIGINT,
+  `namespace_id` INTEGER,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -3266,10 +3287,15 @@ CREATE TABLE `eh_feedbacks` (
   `feedback_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: report, 2-complaint, 3-correct',
   `target_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: post, 2: address, 3: forum',
   `target_id` BIGINT NOT NULL DEFAULT 0,
-  `content_category` BIGINT NOT NULL DEFAULT 0 COMMENT '0: other, 1: product bug, 2: product improvement, 3: version problem, 11: sensitive info, 12: copyright problem, 13: violent pornography, 14: fraud&fake, 15: disturbance, 21: rumor, 22: malicious marketing, 23: induction',
+  `content_category` BIGINT NOT NULL DEFAULT 0 COMMENT '0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13-暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治',
   `proof_resource_uri` VARCHAR(1024),
-
-  PRIMARY KEY (`id`)
+  `status` TINYINT DEFAULT 0 COMMENT '0: does not handle, 1: have handled',
+  `verify_type` TINYINT COMMENT '0: verify false, 1: verify true',
+  `handle_type` TINYINT COMMENT '0: none, 1 delete',
+  `namespace_id` INTEGER,
+  `handle_time` DATETIME,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_feedbacks_target_id` (`target_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -3936,6 +3962,16 @@ CREATE TABLE `eh_general_forms` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_group_member_logs`;
+CREATE TABLE `eh_group_member_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `group_member_id` BIGINT,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'the same as group member status',
+  `creator_uid` BIGINT,
+  `process_message` TEXT,
+  `create_time` datetime(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of eh_groups sharding group
@@ -6619,6 +6655,23 @@ CREATE TABLE `eh_punch_rules` (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 ;
 
 
+DROP TABLE IF EXISTS `eh_punch_schedulings`;
+CREATE TABLE `eh_punch_schedulings` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `owner_type` VARCHAR(128) COMMENT 'owner resource(user/organization) type',
+  `owner_id` BIGINT COMMENT 'owner resource(user/organization) id',
+  `target_type` VARCHAR(128) COMMENT 'target resource(user/organization) type',
+  `target_id` BIGINT COMMENT 'target resource(user/organization) id',
+  `rule_date` DATE COMMENT 'date',
+  `punch_rule_id` BIGINT COMMENT 'eh_punch_rules id  ',
+  `time_rule_id` BIGINT COMMENT 'eh_punch_time_rules id --null:not work day',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
+  `operate_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- 打卡统计表-个人报表-每日生成
 --
@@ -6648,9 +6701,10 @@ CREATE TABLE `eh_punch_statistics` (
   `description` VARCHAR(256),
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-
+  `exts` VARCHAR(1024) COMMENT 'json string exts:eq[{"name":"事假","timeCount":"1天2小时"},{"name":"丧假","timeCount":"3天2小时30分钟"}]',
+  `user_status` TINYINT DEFAULT 0 COMMENT '0:normal普通 1:NONENTRY未入职 2:RESIGNED已离职',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -6665,16 +6719,25 @@ CREATE TABLE `eh_punch_time_rules` (
   `start_early_time` TIME COMMENT 'how early can i arrive',
   `start_late_time` TIME COMMENT 'how late can i arrive ',
   `work_time` TIME COMMENT 'how long do i must be work',
-  `noon_leave_time` TIME ,
-  `afternoon_arrive_time` TIME ,
+  `noon_leave_time` TIME,
+  `afternoon_arrive_time` TIME,
   `punch_times_per_day` TINYINT NOT NULL DEFAULT 2 COMMENT 'how many times should punch everyday :2/4',
-  `creator_uid` BIGINT ,
-  `create_time` DATETIME ,
-  `operator_uid` BIGINT ,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `operator_uid` BIGINT,
   `operate_time` DATETIME,
-  `day_split_time` TIME DEFAULT '05:00:00' COMMENT 'the time a day begin',
+  `day_split_time` time DEFAULT '05:00:00' COMMENT 'the time a day begin',
+  `description` VARCHAR(128) COMMENT 'rule description',
+  `target_type` VARCHAR(128) COMMENT 'target resource(user/organization) type',
+  `target_id` BIGINT COMMENT 'target resource(user/organization) id',
+  `start_early_time_long` BIGINT COMMENT 'how early can i arrive',
+  `start_late_time_long` BIGINT COMMENT 'how late can i arrive ',
+  `work_time_long` BIGINT COMMENT 'how long do i must be work',
+  `noon_leave_time_long` BIGINT,
+  `afternoon_arrive_time_long` BIGINT,
+  `day_split_time_long` BIGINT DEFAULT '18000000' COMMENT 'the time a day begin',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -9583,6 +9646,22 @@ CREATE TABLE `eh_user_locations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_user_notification_settings`;
+CREATE TABLE `eh_user_notification_settings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `app_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'default to messaging app itself',
+  `owner_type` VARCHAR(128) NOT NULL COMMENT 'e.g: EhUsers',
+  `owner_id` BIGINT NOT NULL COMMENT 'owner type identify token',
+  `target_type` VARCHAR(128) NOT NULL COMMENT 'e.g: EhUsers',
+  `target_id` BIGINT NOT NULL COMMENT 'target type identify token',
+  `mute_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: mute',
+  `creator_uid` BIGINT,
+  `create_time` datetime(3),
+  `update_uid` BIGINT,
+  `update_time` datetime(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- member of eh_users partition

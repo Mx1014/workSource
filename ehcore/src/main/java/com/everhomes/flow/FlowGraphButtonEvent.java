@@ -84,32 +84,34 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 
 	@Override
 	public void fire(FlowCaseState ctx) {
-		FlowGraphButton btn = ctx.getFlowGraph().getGraphButton(cmd.getButtonId());
-		FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
-		ctx.setStepType(nextStep);
-		
-		FlowLogType logType = FlowLogType.BUTTON_FIRED;
-		FlowEventLog log = null;
-		FlowEventLog tracker = null;
-		FlowCase flowCase = ctx.getFlowCase();
-		Long oldStep = flowCase.getStepCount();
-		
-		//current state change to next step
-		FlowGraphNode current = ctx.getCurrentNode();
-		FlowGraphNode next = null;
-		
-		UserInfo applier = userService.getUserSnapshotInfo(flowCase.getApplyUserId());
-		Map<String, Object> templateMap = new HashMap<>();
-		templateMap.put("nodeName", current.getFlowNode().getNodeName());
-		templateMap.put("applierName", applier.getNickName());
-		
-		switch(nextStep) {
+        FlowGraphButton btn = ctx.getFlowGraph().getGraphButton(cmd.getButtonId());
+        Integer gotoLevel = btn.getFlowButton().getGotoLevel();
+
+        FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
+        ctx.setStepType(nextStep);
+
+        FlowLogType logType = FlowLogType.BUTTON_FIRED;
+        FlowEventLog log = null;
+        FlowEventLog tracker = null;
+        FlowCase flowCase = ctx.getFlowCase();
+        Long oldStep = flowCase.getStepCount();
+
+        //current state change to next step
+        FlowGraphNode current = ctx.getCurrentNode();
+        FlowGraphNode next = null;
+
+        UserInfo applier = userService.getUserSnapshotInfo(flowCase.getApplyUserId());
+        Map<String, Object> templateMap = new HashMap<>();
+        templateMap.put("nodeName", current.getFlowNode().getNodeName());
+        templateMap.put("applierName", applier.getNickName());
+
+        switch(nextStep) {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
 			next = null;
-			if(!btn.getFlowButton().getGotoLevel().equals(0) && btn.getFlowButton().getGotoLevel() < ctx.getFlowGraph().getNodes().size()) {
-				next = ctx.getFlowGraph().getNodes().get(btn.getFlowButton().getGotoLevel());
+			if(!gotoLevel.equals(0) && gotoLevel < ctx.getFlowGraph().getNodes().size()) {
+				next = ctx.getFlowGraph().getNodes().get(gotoLevel);
 			}
 			if(next == null) {
 				//get next level
@@ -140,8 +142,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
             tracker = new FlowEventLog();
 			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
 			tracker.setStepCount(ctx.getFlowCase().getStepCount());
-			
-			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
+
+            if (!gotoLevel.equals(0) && gotoLevel < ctx.getFlowGraph().getNodes().size()) {
+                next = ctx.getFlowGraph().getNodes().get(gotoLevel);
+            } else {
+                next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel() - 1);
+            }
+
 			ctx.setNextNode(next);
 			if(subject == null) {
 				subject = new FlowSubject();

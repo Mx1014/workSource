@@ -144,4 +144,25 @@ public interface UserService {
     ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd);
 	UserLogin reSynThridUser(InitBizInfoCommand cmd);
 	InitBizInfoDTO findInitBizInfo();
+
+    /**
+     * 设置会话消息免打扰
+     * @param cmd
+     * @return
+     */
+    UserNotificationSettingDTO updateUserNotificationSetting(UpdateUserNotificationSettingCommand cmd);
+
+    /**
+     * 获取会话消息免打扰设置
+     * @param cmd
+     * @return
+     */
+    UserNotificationSettingDTO getUserNotificationSetting(GetUserNotificationSettingCommand cmd);
+
+    /**
+     * 根据会话获取用户信息
+     * @param cmd
+     * @return
+     */
+    MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
 }

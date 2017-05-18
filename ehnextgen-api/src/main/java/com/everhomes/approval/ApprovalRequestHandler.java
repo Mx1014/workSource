@@ -39,5 +39,7 @@ public interface ApprovalRequestHandler {
 
 	BriefApprovalRequestDTO processApprovalRequestByScene(
 			ApprovalRequest approvalRequest);
+
+	void calculateRangeStat(ApprovalRequest approvalRequest);
 	
 }
