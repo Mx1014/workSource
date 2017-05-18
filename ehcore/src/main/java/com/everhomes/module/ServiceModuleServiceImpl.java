@@ -9,6 +9,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
 import com.everhomes.user.User;
@@ -241,7 +242,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             relation.setAllModuleFlag(cmd.getAllModuleFlag());
             relation.setTargetJson(StringHelper.toJsonString(targets));
             relation.setOwnerJson(StringHelper.toJsonString(projects));
-            relation.setModuleJson(StringHelper.toJsonString(moduleIds));
+            if(cmd.getAllModuleFlag() == AllFlagType.NO.getCode()){
+                relation.setModuleJson(StringHelper.toJsonString(moduleIds));
+            }else{
+                relation.setModuleJson("");
+            }
             relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             relation.setOperatorUid(UserContext.current().getUser().getId());
 
@@ -266,33 +271,26 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     LOGGER.error("target is illegal. cmd = {}", cmd);
                     break;
                 }
-                checkTarget(target.getTargetType(),target.getTargetId());
-                for (Long moduleId : moduleIds) {
-                    if (moduleId == null) {
-                        LOGGER.error("moduleId is illegal. cmd = {}", cmd);
+                checkTarget(target.getTargetType(), target.getTargetId());
+                for (Project project : projects) {
+                    if (project.getProjectId() == null || project.getProjectType() == null) {
+                        LOGGER.error("project is illegal. cmd = {}", cmd);
                         break;
                     }
-                    for (Project project : projects) {
-                        if (project.getProjectId() == null || project.getProjectType() == null) {
-                            LOGGER.error("project is illegal. cmd = {}", cmd);
-                            break;
-                        }
-                        ServiceModuleAssignment assignment = new ServiceModuleAssignment();
-                        assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
-                        assignment.setOrganizationId(0L);
-                        assignment.setTargetId(target.getTargetId());
-                        assignment.setTargetType(target.getTargetType());
-                        assignment.setOwnerType(project.getProjectType());
-                        assignment.setOwnerId(project.getProjectId());
-                        assignment.setModuleId(moduleId);
-                        assignment.setCreateUid(UserContext.current().getUser().getId());
-                        assignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        assignment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                        assignment.setAssignmentType((byte) 0);
-                        assignment.setAllModuleFlag(cmd.getAllModuleFlag());
-                        assignment.setIncludeChildFlag(target.getIncludeChildFlag());
-                        assignment.setRelationId(relation_id);
+                    if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.YES) {
+                        //只循环1次
+                        ServiceModuleAssignment assignment = buildAssignment(target, project, 0L, AllFlagType.YES.getCode(), relation_id);
                         assignmentList.add(assignment);
+                    } else if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.NO) {
+                        //循环多次
+                        for (Long moduleId : moduleIds) {
+                            if (moduleId == null) {
+                                LOGGER.error("moduleId is illegal. cmd = {}", cmd);
+                                break;
+                            }
+                            ServiceModuleAssignment assignment = buildAssignment(target, project, moduleId, AllFlagType.NO.getCode(), relation_id);
+                            assignmentList.add(assignment);
+                        }
                     }
                 }
             }
@@ -391,13 +389,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             dto.setProjects(owners);
 
             //处理modules
-            List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
             List<ServiceModuleOut> modulesOut = new ArrayList<>();
-            for (Long moduleId : moduleIds) {
-                ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
-                modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
+            if(r.getAllModuleFlag() == AllFlagType.NO.getCode()){
+                List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
+                for (Long moduleId : moduleIds) {
+                    ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
+                    modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
+                }
+                dto.setModules(modulesOut);
             }
-            dto.setModules(modulesOut);
+
 
             return ConvertHelper.convert(dto, ServiceModuleAssignmentRelationDTO.class);
         }).collect(Collectors.toList());
@@ -443,6 +444,25 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     "Unable to find the organization.");
         }
         return org;
+    }
+
+    private ServiceModuleAssignment buildAssignment(AssignmentTarget target, Project project, Long moduleId, byte AllModuleFlag, Long relation_id) {
+        ServiceModuleAssignment assignment = new ServiceModuleAssignment();
+        assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
+        assignment.setOrganizationId(0L);
+        assignment.setTargetId(target.getTargetId());
+        assignment.setTargetType(target.getTargetType());
+        assignment.setOwnerType(project.getProjectType());
+        assignment.setOwnerId(project.getProjectId());
+        assignment.setModuleId(moduleId);
+        assignment.setCreateUid(UserContext.current().getUser().getId());
+        assignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        assignment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        assignment.setAssignmentType((byte) 0);
+        assignment.setAllModuleFlag(AllModuleFlag);
+        assignment.setIncludeChildFlag(target.getIncludeChildFlag());
+        assignment.setRelationId(relation_id);
+        return assignment;
     }
 }
 
