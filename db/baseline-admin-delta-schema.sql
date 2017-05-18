@@ -37,6 +37,8 @@ CREATE TABLE `eh_authorizations` (
 CREATE TABLE `eh_authorization_relations` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
+  `owner_id` bigint(20) NOT NULL,
   `module_id` bigint(20) NOT NULL,
   `target_json` text,
   `project_json` text,
