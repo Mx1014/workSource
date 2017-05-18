@@ -783,6 +783,14 @@ public class ForumServiceImpl implements ForumService {
                     this.forumProvider.updatePost(post);
                     return null;
                 });
+                this.postSearcher.deleteById(post.getId());
+                Activity activity = activityProvider.findSnapshotByPostId(postId);
+                if(activity != null){
+                	activity.setStatus((byte)0);
+            		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            		activityProvider.updateActivity(activity);
+                }
+                
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
