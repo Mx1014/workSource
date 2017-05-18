@@ -9654,22 +9654,24 @@ System.out.println();
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-
- 		List<OrganizationMember> organizationMembers = organizationProvider.listUsersOfEnterprise(locator, pageSize, new ListingQueryBuilderCallback() {
+		
+		ListingQueryBuilderCallback callback = new ListingQueryBuilderCallback() {
+			
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
-
 				//控制用户状态为可用
 				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 				//控制用户type为user
 				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.equal(OrganizationMemberTargetType.USER.getCode()));
 				//查找组织ID等于输入参数的记录
 				query.addConditions(Tables.EH_ORGANIZATION_MEMBERS. ORGANIZATION_ID.eq(org.getId()));
-				//query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+				//控制只查找手机用户contactType=0
+				//query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TYPE.eq(value));
 				return query;
 			}
-		});
-		
+		};
+
+ 		List<OrganizationMember> organizationMembers = organizationProvider.listUsersOfEnterprise(locator, pageSize, callback);
 		List<OrganizationContactDTO> dtos = organizationMembers.stream().map(r->{
 			
 			User userInfo = this.userProvider.findUserById(r.getTargetId());
@@ -9682,10 +9684,13 @@ System.out.println();
 			return ConvertHelper.convert(r, OrganizationContactDTO.class);
 			
 			}).collect(Collectors.toList());
+		
+		Integer totalRecords =  organizationProvider.countUsersOfEnterprise(locator, callback);
 
 		ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
 		response.setNextPageAnchor(locator.getAnchor());
 		response.setMembers(dtos);
+		response.setTotalCount(totalRecords);
 
 		return response;
 	}

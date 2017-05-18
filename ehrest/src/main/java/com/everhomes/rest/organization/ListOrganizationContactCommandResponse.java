@@ -18,6 +18,8 @@ public class ListOrganizationContactCommandResponse {
 
 	private Long nextPageAnchor;
 	
+	private Integer totalCount;
+	
 	@ItemType(OrganizationContactDTO.class)
     private List<OrganizationContactDTO> members;
 	public ListOrganizationContactCommandResponse() {
@@ -47,6 +49,14 @@ public class ListOrganizationContactCommandResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
