@@ -3671,7 +3671,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode", encoder.encode(data));
-				dataMap.put("qrCode", data);
+				dataMap.put("qrCode", data.toString());
 			}
 
 			String savePath = filePath + dto.getId()+ "-" + dto.getName() + ".doc";
@@ -3704,7 +3704,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode1", encoder.encode(data));
-				dataMap.put("qrCode1", data);
+				dataMap.put("qrCode1", data.toString());
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
@@ -3712,7 +3712,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				byte[] data=out.toByteArray();
 //				BASE64Encoder encoder=new BASE64Encoder();
 //				dataMap.put("qrCode2", encoder.encode(data));
-				dataMap.put("qrCode2", data);
+				dataMap.put("qrCode2", data.toString());
 			}
 
 			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
