@@ -22,6 +22,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
@@ -764,6 +765,7 @@ public class ForumServiceImpl implements ForumService {
                     if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
 						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
 					}
+                    
                    return null;
                 });
                 
@@ -771,6 +773,27 @@ public class ForumServiceImpl implements ForumService {
                 if(handler != null) {
                     handler.postProcessEmbeddedObject(post);
                 } 
+                
+                //进行退款，取消报名   add by yanjun 20170519
+                if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+                	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+                	if (activity != null) {
+                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId());
+                		for( int i=0; i< activityRosters.size(); i++){
+                			//如果有退款，先退款再取消订单
+                			ActivityRoster tempRoster = activityRosters.get(i);
+                			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+                				activityService.signupOrderRefund(activity, user.getId());
+                				
+                				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+                				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+      			             	activityProvider.updateRoster(tempRoster);
+                			}
+                			
+                		}
+            		}
+				}
+                
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
@@ -825,6 +848,18 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+    }
+    
+    private Long getFamilyId() {
+        User user = UserContext.current().getUser();
+        if (user != null && user.getAddressId() != null) {
+            Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+            if (family == null) {
+                return null;
+            }
+            return family.getId();
+        }
+        return null;
     }
     
     //当创建者删除活动时发消息通知已报名的人

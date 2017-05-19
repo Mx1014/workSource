@@ -187,5 +187,7 @@ public interface ActivityService {
 	 * @return
 	 */
 	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
+	
+	void signupOrderRefund(Activity activity, Long userId);
 }
 

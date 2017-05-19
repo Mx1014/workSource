@@ -1255,7 +1255,7 @@ public class ActivityServiceImpl implements ActivityService {
         }).first();
     }
 
-	private void signupOrderRefund(Activity activity, Long userId){
+	public void signupOrderRefund(Activity activity, Long userId){
 		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
 		
 		//只有需要支付并已经支付的才需要退款
@@ -4343,7 +4343,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		RosterOrderSetting rosterOrderSetting = rosterOrderSettingProvider.findRosterOrderSettingByNamespace(cmd.getNamespaceId());
 		if (rosterOrderSetting != null && rosterOrderSetting.getId() != null) {
-			rosterOrderSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
 			
@@ -4351,7 +4351,7 @@ public class ActivityServiceImpl implements ActivityService {
 		}else {
 			rosterOrderSetting = new RosterOrderSetting();
 			rosterOrderSetting.setNamespaceId(cmd.getNamespaceId());
-			rosterOrderSetting.setTime((long) ((cmd.getDays()*24+cmd.getHours())*3600*1000));
+			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
@@ -4843,28 +4843,40 @@ public class ActivityServiceImpl implements ActivityService {
 		StatisticsSummaryResponse response = new StatisticsSummaryResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		Integer activityCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null);
-		Integer activityDayCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight());
-		Integer activityMonthCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight());
-		Integer activityWeekCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight());
+		Integer activityCount = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, false);
+		
+		Integer activityDayCountCreate = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), false);
+		Integer activityDayCountDelete = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), true);
+		
+		Integer activityMonthCountCreate = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), false);
+		Integer activityMonthCountDelete = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), true);
+		
+		Integer activityWeekCountCreate = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), false);
+		Integer activityWeekCountDelete = activityProvider.countActivity(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), true);
 		
 		response.setActivityCount(activityCount);
-		response.setActivityDayCount(activityDayCount);
-		response.setActivityMonthCount(activityMonthCount);
-		response.setActivityWeekCount(activityWeekCount);
+		response.setActivityDayCount(activityDayCountCreate - activityDayCountDelete);
+		response.setActivityMonthCount(activityMonthCountCreate- activityMonthCountDelete);
+		response.setActivityWeekCount(activityWeekCountCreate - activityWeekCountDelete);
 		
-		Integer rosterCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, null);
-		Integer rosterDayCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), null);
-		Integer rosterMonthCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), null);
-		Integer rosterWeekCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), null);
+		Integer rosterCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, null, false);
+		
+		Integer rosterDayCountCreate = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), null, false);
+		Integer rosterDayCountCancel = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesmorning(), this.getTimesnight(), null, true);
+		
+		Integer rosterMonthCountCreate = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), null, false);
+		Integer rosterMonthCountCancel = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesMonthmorning(), this.getTimesMonthnight(), null, true);
+		
+		Integer rosterWeekCountCreate = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), null, false);
+		Integer rosterWeekCountCancel = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), this.getTimesWeekmorning(), this.getTimesWeeknight(), null, true);
 		
 		response.setRosterCount(rosterCount);
-		response.setRosterDayCount(rosterDayCount);
-		response.setRosterMonthCount(rosterMonthCount);
-		response.setRosterWeekCount(rosterWeekCount);
+		response.setRosterDayCount(rosterDayCountCreate - rosterDayCountCancel);
+		response.setRosterMonthCount(rosterMonthCountCreate - rosterMonthCountCancel);
+		response.setRosterWeekCount(rosterWeekCountCreate - rosterWeekCountCancel);
 		
-		Integer manCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.MALE);
-		Integer womanCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.FEMALE);
+		Integer manCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.MALE, true);
+		Integer womanCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.FEMALE, true);
 		
 		response.setManCount(manCount);
 		response.setWomanCount(womanCount);

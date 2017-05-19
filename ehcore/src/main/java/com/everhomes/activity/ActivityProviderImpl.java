@@ -157,6 +157,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
 	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
 	            rosters[0].setStatus(ActivityRosterStatus.CANCEL.getCode());
+	            rosters[0].setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));;
 	            dao.update(rosters[0]);
 	            //dao.delete(rosters[0]);
 	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
@@ -974,7 +975,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public  Integer countActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime){
+	public  Integer countActivity(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, boolean isDelete){
 		final Integer[]  count = new Integer[1];
 		count[0] = 0;
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
@@ -989,11 +990,20 @@ public class ActivityProviderImpl implements ActivityProivider {
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
 					
-					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
-					if(startTime != null && endTime != null){
-						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
-						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(endTime));
+					if(isDelete){
+						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.INACTIVE.getCode()));
+						if(startTime != null && endTime != null){
+							condition = condition.and(Tables.EH_ACTIVITIES.DELETE_TIME.ge(startTime));
+							condition = condition.and(Tables.EH_ACTIVITIES.DELETE_TIME.lt(endTime));
+						}
+					}else{
+						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+						if(startTime != null && endTime != null){
+							condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
+							condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(endTime));
+						}
 					}
+					
 					Integer c = context.selectCount().from(Tables.EH_ACTIVITIES).where(condition).fetchOneInto(Integer.class);
 					if(c != null){
 						count[0] += c;
@@ -1004,7 +1014,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public Integer countActivityRoster(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, UserGender userGender){
+	public Integer countActivityRoster(Integer namespaceId, Long categoryId, Long contentCategoryId, Timestamp startTime, Timestamp endTime, UserGender userGender, boolean isCancel){
 		final Integer[]  count = new Integer[1];
 		count[0] = 0;
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhActivities.class),
@@ -1019,15 +1029,28 @@ public class ActivityProviderImpl implements ActivityProivider {
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
 					
-					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
-					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
-					
-					//已确认并且已支付
-					condition = addConfirmAndPay(condition);
-					
-					if(startTime != null && endTime != null){
-						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.ge(startTime));
-						condition = condition.and(Tables.EH_ACTIVITIES.CREATE_TIME.lt(endTime));
+					//已确认、已退款（需要支付的话）
+					if(isCancel){
+						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.CANCEL.getCode()));
+						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode()));
+						//不用支付或者已支付
+						Condition chargeCondition = Tables.EH_ACTIVITIES.CHARGE_FLAG.eq(ActivityChargeFlag.UNCHARGE.getCode());
+						chargeCondition = chargeCondition.or(Tables.EH_ACTIVITY_ROSTER.PAY_FLAG.eq(ActivityRosterPayFlag.REFUND.getCode()));
+						condition = condition.and(chargeCondition);
+						if(startTime != null && endTime != null){
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.ge(startTime));
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.lt(endTime));
+						}
+						
+					}else{
+						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+						//已确认并且已支付
+						condition = addConfirmAndPay(condition);
+						if(startTime != null && endTime != null){
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.ge(startTime));
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.lt(endTime));
+						}
 					}
 					
 					//性别
