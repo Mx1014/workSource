@@ -95,6 +95,7 @@ import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.GetBizConfHolder;
 import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
+import com.everhomes.rest.videoconf.TrialFlag;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
@@ -2895,15 +2896,70 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public CheckVideoConfTrialAccountResponse checkVideoConfTrialAccount(
-			CheckVideoConfTrialAccountCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+			CheckVideoConfTrialAccountCommand cmd) { 
+		CheckVideoConfTrialAccountResponse response = new CheckVideoConfTrialAccountResponse();
+		response.setTrialFlag(TrialFlag.OK.getCode());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		if(enterprise != null && enterprise.getTrialAccountAmount() >0) {
+			response.setTrialFlag(TrialFlag.REJECT.getCode());
+		}
+		return response;
 	}
 
 	@Override
 	public void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
+		if (null == categories || categories.size() == 0){
+			//没有初始化categories表,没有添加6方账号
+			LOGGER.error("didnt found data in database : sql [ select * from eh_conf_account_categories where  conf_type=4;]");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_CATEGORY_NOT_FOUND,  "HAVE NO CATEGORY");
+		}
+		if(enterprise != null && enterprise.getTrialAccountAmount() >0) {
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_CAN_NOT_TRIAL_MORE,  "you can only have one chance to trial");
+		}
+		//创建一个试用账号
+		CreateConfAccountOrderCommand cmd2 = new CreateConfAccountOrderCommand(); 
+		cmd2.setEnterpriseId(cmd.getEnterpriseId());
+		cmd2.setAmount(new BigDecimal(0));
+		cmd2.setBuyChannel((byte) 0);
+		//到期日期手动设置为15天
+		Calendar expiredDate = Calendar.getInstance();
+		expiredDate.add(Calendar.DAY_OF_MONTH, 15);
+		cmd2.setExpiredDate(expiredDate.getTimeInMillis());
+		cmd2.setAccountCategoryId(categories.get(0));
+		cmd2.setQuantity(1);
+		cmd2.setPeriod(0);
+		cmd2.setInvoiceFlag((byte) 0);
+		cmd2.setMakeOutFlag((byte) 0);
+		createConfAccountOrder(cmd2);  
+		//查是否有活跃账号
+		if(enterprise != null && enterprise.getActiveAccountAmount() >0) {
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT,  "has active account");
+		}
 	}
+
+	
+
+	@Scheduled(cron = "0 0 11 * * ?") 
+	private void scheduledExpirationReminder(){
+		//提前三天提醒试用的
+		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, 3);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+		for(ConfOrders order : orders){
+			sendSMStoTrial(account.getOwnerId())
+		}
+		//提前7天提醒正式的
+		categories = vcProvider.findAccountCategoriesByNotInConfType((byte) 4); 
+		calendar.add(Calendar.DAY_OF_MONTH, 4); 
+		orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+	}
+	
 	
 }

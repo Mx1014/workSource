@@ -15,4 +15,6 @@ public interface ConfServiceErrorCode {
     static final int CONF_INVOICE_BODY=10009; 
     static final int ERROR_INVALID_ENTERPRISE=10010; 
     static final int CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT=10011; 
+    static final int CONF_CATEGORY_NOT_FOUND =10012; 
+    static final int CONF_CAN_NOT_TRIAL_MORE =10013; 
 }

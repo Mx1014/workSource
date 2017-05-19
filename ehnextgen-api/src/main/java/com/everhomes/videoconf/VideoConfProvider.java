@@ -1,6 +1,7 @@
 package com.everhomes.videoconf;
 
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
@@ -113,6 +114,8 @@ public interface VideoConfProvider {
 	boolean allTrialEnterpriseAccounts(Long enterpriseId);
 	List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime);
 	Long listConfTimeByAccount(Long accountId);
-	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize);
+	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize); 
+	List<Long> findAccountCategoriesByNotInConfType(byte b);
+	List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories, Calendar calendar);
 	
 }
