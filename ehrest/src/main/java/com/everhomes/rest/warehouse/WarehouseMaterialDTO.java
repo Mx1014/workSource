@@ -3,6 +3,7 @@ package com.everhomes.rest.warehouse;
 import com.everhomes.util.StringHelper;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
  *     <li>specificationInformation: 规格信息</li>
  *     <li>categoryName: 物品分类名</li>
  *     <li>unitName: 单位名</li>
+ *     <li>updateTime: 最后更新时间</li>
  * </ul>
  * Created by ying.xiong on 2017/5/11.
  */
@@ -48,6 +50,16 @@ public class WarehouseMaterialDTO {
     private String unitName;
 
     private String specificationInformation;
+
+    private Timestamp updateTime;
+
+    public Timestamp getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Timestamp updateTime) {
+        this.updateTime = updateTime;
+    }
 
     public String getBrand() {
         return brand;
