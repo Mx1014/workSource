@@ -8,8 +8,6 @@ insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values
 
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10023','zh_CN','活动待支付');
 
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消报名');
-
 -- 增加通知支付的消息模板 add by yanjun 20170513
 -- 增加通知支付的消息模板 add by yanjun 20170513
 SET @eh_locale_templates_id = (SELECT MAX(id) FROM eh_locale_templates); 
@@ -36,3 +34,8 @@ SET r.organization_id = (SELECT
                          
 -- 刷新活动tag，将null和''的刷成'其他'，方便统计  add by yanjun 20170518
 UPDATE eh_activities ac SET ac.tag = '其他' WHERE ac.tag IS NULL OR ac.tag = '';
+
+-- 添加中文字段，当取消报名时用于提示超过截止日期  add by yanjun 20170519
+SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消报名');
+
