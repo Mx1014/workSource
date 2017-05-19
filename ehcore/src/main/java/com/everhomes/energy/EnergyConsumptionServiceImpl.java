@@ -2050,23 +2050,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 BigDecimal realAmount = new BigDecimal(0);
                 BigDecimal realCost = new BigDecimal(0);
 
-                try {
-                	double ra = Double.valueOf(engine.eval(amountFormula).toString());
-                    realAmount = BigDecimal.valueOf(ra);
-                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
-//                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-                } catch (ScriptException e) {
-                    String paramsStr = "{AMOUNT:" + amount +
-                            ", TIMES:" + rateSetting.getSettingValue() +
-                            "}";
-                    LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
-                    e.printStackTrace();
-                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
-                }
+//                try {
+//                	double ra = Double.valueOf(engine.eval(amountFormula).toString());
+//                    realAmount = BigDecimal.valueOf(ra);
+//                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+////                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+//                } catch (ScriptException e) {
+//                    String paramsStr = "{AMOUNT:" + amount +
+//                            ", TIMES:" + rateSetting.getSettingValue() +
+//                            "}";
+//                    LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
+//                    e.printStackTrace();
+//                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+//                }
 
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
-//                    engine.put(MeterFormulaVariable.AMOUNT.getCode(), realAmount);
+                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), amount);
                     realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
                 }
 
