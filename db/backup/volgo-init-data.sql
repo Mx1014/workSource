@@ -995,6 +995,7 @@ update eh_launch_pad_items set default_order = 20 where item_label = '左邻会�
 update eh_launch_pad_items set display_flag = 0 where item_label = '公共会议室';
 	
 	
+update eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&isfromindex=0&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '新品推荐';
 	
 	
 	
