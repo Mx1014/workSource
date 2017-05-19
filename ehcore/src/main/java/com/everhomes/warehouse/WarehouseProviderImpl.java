@@ -7,6 +7,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.EquipmentInspectionStandards;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.warehouse.DeliveryFlag;
 import com.everhomes.rest.warehouse.Status;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -802,12 +803,48 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public WarehouseRequestMaterials findWarehouseRequestMaterials(Long requestId, Long warehouseId, Long materialId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.WAREHOUSE_ID.eq(warehouseId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.MATERIAL_ID.eq(materialId));
+
+        List<WarehouseRequestMaterials> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseRequestMaterials.class));
+            return null;
+        });
+        if(result.size()==0)
+            return null;
+
+        return result.get(0);
+    }
+
+    @Override
     public List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+
+        List<WarehouseRequestMaterials> result = new ArrayList<>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseRequestMaterials.class));
+            return null;
+        });
+        return result;
+    }
+
+    @Override
+    public List<WarehouseRequestMaterials> listUnDeliveryWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseRequestMaterialsRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_REQUEST_MATERIALS);
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.REQUEST_ID.eq(requestId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_REQUEST_MATERIALS.DELIVERY_FLAG.eq(DeliveryFlag.NO.getCode()));
 
         List<WarehouseRequestMaterials> result = new ArrayList<>();
         query.fetch().map((r) -> {

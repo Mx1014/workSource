@@ -424,6 +424,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             Long uid = UserContext.current().getUser().getId();
+            Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime())
             cmd.getStocks().forEach(stock -> {
                 WarehouseStocks materialStock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(
                         stock.getWarehouseId(), stock.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -449,6 +450,34 @@ public class WarehouseServiceImpl implements WarehouseService {
                             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
                                     "warehouse stock is not enough");
                         }
+
+                        WarehouseRequestMaterials requestMaterial = warehouseProvider.findWarehouseRequestMaterials(cmd.getRequestId(), stock.getWarehouseId(), stock.getMaterialId());
+                        if(requestMaterial == null) {
+                            LOGGER.error("WarehouseRequestMaterials is not exist, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
+                                    + ", materialId = " + stock.getMaterialId());
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                    "WarehouseRequestMaterials is not exist");
+                        }
+
+                        if(!ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(requestMaterial.getReviewResult()))) {
+                            LOGGER.error("WarehouseRequestMaterials is not qualified, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
+                                    + ", materialId = " + stock.getMaterialId());
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                    "WarehouseRequestMaterials is not qualified");
+                        }
+
+                        if(DeliveryFlag.YES.equals(DeliveryFlag.fromStatus(requestMaterial.getDeliveryFlag()))) {
+                            LOGGER.error("WarehouseRequestMaterials is already delivery, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
+                                    + ", materialId = " + stock.getMaterialId());
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                    "WarehouseRequestMaterials is already delivery");
+                        }
+
+                        requestMaterial.setDeliveryFlag(DeliveryFlag.YES.getCode());
+                        requestMaterial.setDeliveryUid(uid);
+                        requestMaterial.setDeliveryTime(current);
+                        warehouseProvider.updateWarehouseRequestMaterial(requestMaterial);
+                        warehouseRequestMaterialSearcher.feedDoc(requestMaterial);
 
                         materialStock.setAmount(materialStock.getAmount() - stock.getAmount());
                         warehouseProvider.updateWarehouseStock(materialStock);
@@ -492,6 +521,14 @@ public class WarehouseServiceImpl implements WarehouseService {
                 }
             });
 
+            //申请下面的都出库了则申请也出库
+            List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+            if(requestMaterials == null || requestMaterials.size() == 0) {
+                WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
+                request.setDeliveryFlag(DeliveryFlag.YES.getCode());
+                request.setUpdateTime(current);
+                warehouseProvider.updateWarehouseRequest(request);
+            }
         }
     }
 

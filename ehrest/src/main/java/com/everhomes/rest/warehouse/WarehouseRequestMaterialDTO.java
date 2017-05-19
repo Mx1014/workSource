@@ -26,6 +26,8 @@ public class WarehouseRequestMaterialDTO {
 
     private Long id;
 
+    private Long requestId;
+
     private Long materialId;
 
     private String materialName;
@@ -49,6 +51,14 @@ public class WarehouseRequestMaterialDTO {
     private Byte deliveryFlag;
 
     private Timestamp createTime;
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
 
     public Long getMaterialId() {
         return materialId;

@@ -22,8 +22,18 @@ public class UpdateWarehouseStockCommand {
 
     private Byte requestType;
 
+    private Long requestId;
+
     @ItemType(WarehouseMaterialStock.class)
     private List<WarehouseMaterialStock> stocks;
+
+    public Long getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(Long requestId) {
+        this.requestId = requestId;
+    }
 
     public Byte getRequestType() {
         return requestType;

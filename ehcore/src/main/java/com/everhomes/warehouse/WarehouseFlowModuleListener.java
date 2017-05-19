@@ -103,18 +103,18 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
             request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
             request.setUpdateTime(current);
             warehouseProvider.updateWarehouseRequest(request);
-            updateWarehouseRequestMaterial(request, operatorId);
+            updateWarehouseRequestMaterials(request, operatorId);
         }
 
         else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
             request.setReviewResult(ReviewResult.QUALIFIED.getCode());
             request.setUpdateTime(current);
             warehouseProvider.updateWarehouseRequest(request);
-            updateWarehouseRequestMaterial(request, operatorId);
+            updateWarehouseRequestMaterials(request, operatorId);
         }
     }
 
-    private void updateWarehouseRequestMaterial(WarehouseRequests request, Long operatorId) {
+    private void updateWarehouseRequestMaterials(WarehouseRequests request, Long operatorId) {
         List<WarehouseRequestMaterials> materials = warehouseProvider.listWarehouseRequestMaterials(request.getId(), request.getOwnerType(), request.getOwnerId());
         if(materials != null && materials.size() > 0) {
             Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
