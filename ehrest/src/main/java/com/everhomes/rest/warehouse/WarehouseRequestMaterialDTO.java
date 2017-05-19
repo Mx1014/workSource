@@ -6,7 +6,8 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- *     <li>id: ud</li>
+ *     <li>id: id</li>
+ *     <li>materialId: 物品id</li>
  *     <li>materialName: 物品名称</li>
  *     <li>materialNumber: 物品编码</li>
  *     <li>requestAmount: 申请数量</li>
@@ -24,6 +25,8 @@ import java.sql.Timestamp;
 public class WarehouseRequestMaterialDTO {
 
     private Long id;
+
+    private Long materialId;
 
     private String materialName;
 
@@ -46,6 +49,14 @@ public class WarehouseRequestMaterialDTO {
     private Byte deliveryFlag;
 
     private Timestamp createTime;
+
+    public Long getMaterialId() {
+        return materialId;
+    }
+
+    public void setMaterialId(Long materialId) {
+        this.materialId = materialId;
+    }
 
     public Timestamp getCreateTime() {
         return createTime;
