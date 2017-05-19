@@ -1029,6 +1029,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 						condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(contentCategoryId));
 					}
 					
+					//不统计创建者
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.UID.ne(Tables.EH_ACTIVITIES.CREATOR_UID));
+					
 					//已确认、已退款（需要支付的话）
 					if(isCancel){
 						condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.CANCEL.getCode()));
@@ -1117,6 +1120,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 					Condition condition = Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode());
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.in(activityIds));
 
+					//不统计创建者
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.UID.ne(Tables.EH_ACTIVITIES.CREATOR_UID));
+					
 					//已确认并且已支付
 					condition = addConfirmAndPay(condition);
 					
@@ -1153,6 +1159,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
+					//不统计创建者
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.UID.ne(Tables.EH_ACTIVITIES.CREATOR_UID));
+					
 					//已确认并且已支付
 					condition = addConfirmAndPay(condition);
 					
@@ -1219,6 +1228,9 @@ public class ActivityProviderImpl implements ActivityProivider {
 					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
 					condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
 
+					//不统计创建者
+					condition = condition.and(Tables.EH_ACTIVITY_ROSTER.UID.ne(Tables.EH_ACTIVITIES.CREATOR_UID));
+					
 					//已确认并且已支付
 					condition = addConfirmAndPay(condition);
 
