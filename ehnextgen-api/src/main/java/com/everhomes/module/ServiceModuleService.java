@@ -9,6 +9,7 @@ import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.module.AssignmentServiceModuleCommand;
 import com.everhomes.rest.module.DeleteServiceModuleAssignmentRelationCommand;
 import com.everhomes.rest.module.ListServiceModuleAssignmentRelationsCommand;
+import com.everhomes.rest.module.TreeServiceModuleCommand;
 
 public interface ServiceModuleService {
 	List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd);
@@ -22,4 +23,6 @@ public interface ServiceModuleService {
 	void deleteServiceModuleAssignmentRelation(DeleteServiceModuleAssignmentRelationCommand cmd);
 	
 	List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations(ListServiceModuleAssignmentRelationsCommand cmd);
+
+	List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd);
 }

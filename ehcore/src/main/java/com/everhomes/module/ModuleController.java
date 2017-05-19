@@ -74,6 +74,7 @@ public class ModuleController extends ControllerBase {
 	@RequestMapping("treeServiceModules")
 	@RestReturn(value = ServiceModuleDTO.class, collection = true)
 	public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
+		List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

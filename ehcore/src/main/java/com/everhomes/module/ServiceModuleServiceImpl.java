@@ -85,33 +85,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
-        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-
-        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
-
-        if (null == scopes || scopes.size() == 0) {
-            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-        }
-
-        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
-        if (scopes.size() != 0)
-            list = filterList(list, scopes);
-
-        List<ServiceModuleDTO> temp = list.stream().map(r -> {
-            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-            return dto;
-        }).collect(Collectors.toList());
-
-        List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
-
-        for (ServiceModuleDTO s : temp) {
-            getChildServiceModules(temp, s);
-            if (s.getParentId() == 0) {
-                result.add(s);
-            }
-        }
-        return result;
+        return this.serviceModulesAsTree(cmd.getOwnerType(), cmd.getOwnerId());
     }
 
     @Override
@@ -242,9 +216,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             relation.setAllModuleFlag(cmd.getAllModuleFlag());
             relation.setTargetJson(StringHelper.toJsonString(targets));
             relation.setOwnerJson(StringHelper.toJsonString(projects));
-            if(cmd.getAllModuleFlag() == AllFlagType.NO.getCode()){
+            if (cmd.getAllModuleFlag() == AllFlagType.NO.getCode()) {
                 relation.setModuleJson(StringHelper.toJsonString(moduleIds));
-            }else{
+            } else {
                 relation.setModuleJson("");
             }
             relation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -390,7 +364,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
             //处理modules
             List<ServiceModuleOut> modulesOut = new ArrayList<>();
-            if(r.getAllModuleFlag() == AllFlagType.NO.getCode()){
+            if (r.getAllModuleFlag() == AllFlagType.NO.getCode()) {
                 List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
                 for (Long moduleId : moduleIds) {
                     ServiceModule module = this.serviceModuleProvider.findServiceModuleById(moduleId);
@@ -404,6 +378,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }).collect(Collectors.toList());
 
         return results;
+    }
+
+    @Override
+    public List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd) {
+        return this.serviceModulesAsTree(cmd.getOwnerType(), cmd.getOwnerId());
     }
 
     private void checkTarget(String targetType, Long targetId) {
@@ -463,6 +442,43 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         assignment.setIncludeChildFlag(target.getIncludeChildFlag());
         assignment.setRelationId(relation_id);
         return assignment;
+    }
+
+    /**
+     * 树形结构loadServiceModule
+     * @param ownerType
+     * @param ownerId
+     * @return
+     */
+    private List<ServiceModuleDTO> serviceModulesAsTree(String ownerType, Long ownerId) {
+        checkOwnerIdAndOwnerType(ownerType, ownerId);
+
+        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+
+        if (null == scopes || scopes.size() == 0) {
+            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+        }
+
+        //过滤出与scopes匹配的serviceModule
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
+        if (scopes.size() != 0)
+            list = filterList(list, scopes);
+
+        List<ServiceModuleDTO> temp = list.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
+
+        List<ServiceModuleDTO> result = new ArrayList<>();
+
+        for (ServiceModuleDTO s : temp) {
+            getChildServiceModules(temp, s);
+            if (s.getParentId() == 0) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 }
 
