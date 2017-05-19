@@ -227,7 +227,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		checkFieldDTOs(fieldDTOs);
+		//checkFieldDTOs(fieldDTOs);
 		dto.setFormFields(fieldDTOs);
 		return dto;
 	}
