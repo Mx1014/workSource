@@ -855,7 +855,7 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/ listUserRelatedEnterprises</b>
+     * <b>URL: /org/ listUserRelatexdEnterprises</b>
      * <p>列出个人相关的企业</p>
      * @return {@link OrganizationDetailDTO}
      */
@@ -1312,4 +1312,272 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
+/***********************************************************************************New***********************************************************************************/
+
+	/**
+	 * <b>URL: /org/listOrganizationPersonnelsV2</b>
+	 * <p>查看(查找)员工列表</p>
+	 */
+	@RequestMapping("listOrganizationPersonnelsV2")
+	@RestReturn(value = ListPersonnelsV2CommandResponse.class)
+	public RestResponse listOrganizationPersonnelsV2(@Valid ListPersonnelsV2Command cmd){
+		ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return null;
+	}
+
+	/**
+	 * <b>URL: /org/addOrganizationMemberBasic</b>
+	 * <p>新增员工基本信息</p>
+	 */
+	@RequestMapping("addOrganizationMemberBasic")
+	@RestReturn(value = String.class)
+	public RestResponse addOrganizationMemberBasic(@Valid AddOrganizationMemberBasicCommand cmd) {
+		this.organizationService.addOrganizationMemberBasic(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getOrganizationMemberBasic</b>
+	 * <p>获取员工档案详情基本信息</p>
+	 */
+	@RequestMapping("getOrganizationMemberBasic")
+	@RestReturn(value = OrganizationMemberBasicDTO.class)
+	public RestResponse getOrganizationMemberBasic(@Valid AddOrganizationMemberBasicCommand cmd){
+		OrganizationMemberBasicDTO res = this.organizationService.getOrganizationMemberBasic(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationMemberPersonal</b>
+	 * <p>修改员工档案详情个人信息</p>
+	 */
+	@RequestMapping("updateOrganizationMemberPersonal")
+	@RestReturn(value = String.class)
+	public RestResponse updateOrganizationMemberPersonal(@Valid UpdateOrganizationMemberPersonalCommand cmd) {
+		this.organizationService.updateOrganizationMemberPersonal(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getOrganizationMemberPersonal</b>
+	 * <p>获取员工档案详情个人信息</p>
+	 */
+	@RequestMapping("getOrganizationMemberPersonal")
+	@RestReturn(value = OrganizationMemberPersonalDTO.class)
+	public RestResponse getOrganizationMemberPersonal(@Valid UpdateOrganizationMemberPersonalCommand cmd) {
+		OrganizationMemberPersonalDTO res = this.organizationService.getOrganizationMemberPersonal(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationMemberContacts</b>
+	 * <p>修改员工档案详情联系方式</p>
+	 */
+	@RequestMapping("updateOrganizationMemberContacts")
+	@RestReturn(value = String.class)
+	public RestResponse updateOrganizationMemberContacts(@Valid UpdateOrganizationMemberContactsCommand cmd) {
+		this.organizationService.updateOrganizationMemberContacts(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getOrganizationMemberContacts</b>
+	 * <p>获取员工档案详情联系方式</p>
+	 */
+	@RequestMapping("getOrganizationMemberContacts")
+	@RestReturn(value = OrganizationMemberContactsDTO.class)
+	public RestResponse getOrganizationMemberContacts(@Valid UpdateOrganizationMemberContactsCommand cmd) {
+		OrganizationMemberContactsDTO res = this.organizationService.getOrganizationMemberContacts(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/addOrganizationMemberEducations</b>
+	 * <p>新增员工档案详情教育信息</p>
+	 */
+	@RequestMapping("addOrganizationMemberEducations")
+	@RestReturn(value = String.class)
+	public RestResponse addOrganizationMemberEducations(@Valid AddOrganizationMemberEducationsCommand cmd) {
+		this.organizationService.addOrganizationMemberEducations(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationMemberEducations</b>
+	 * <p>列出员工档案详情教育信息</p>
+	 */
+	@RequestMapping("listOrganizationMemberEducations")
+	@RestReturn(value = ListOrganizationMemberEducationsResponse.class)
+	public RestResponse listOrganizationMemberEducations(@Valid AddOrganizationMemberEducationsCommand cmd) {
+		ListOrganizationMemberEducationsResponse res = this.organizationService.listOrganizationMemberEducations(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/addOrganizationMemberWorkExps</b>
+	 * <p>新增员工档案详情工作经历</p>
+	 */
+	@RequestMapping("addOrganizationMemberWorkExps")
+	@RestReturn(value = String.class)
+	public RestResponse addOrganizationMemberWorkExps(@Valid AddOrganizationMemberWorkExpsCommand cmd) {
+		this.organizationService.addOrganizationMemberWorkExps(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationMemberWorkExps</b>
+	 * <p>列出员工档案详情工作经历</p>
+	 */
+	@RequestMapping("listOrganizationMemberWorkExps")
+	@RestReturn(value = ListOrganizationMemberWorkExpsResponse.class)
+	public RestResponse listOrganizationMemberWorkExps(@Valid AddOrganizationMemberWorkExpsCommand cmd) {
+		ListOrganizationMemberWorkExpsResponse res = this.organizationService.listOrganizationMemberWorkExps(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationMemberNumbers</b>
+	 * <p>修改员工档案详情卡号信息</p>
+	 */
+	@RequestMapping("updateOrganizationMemberNumbers")
+	@RestReturn(value = String.class)
+	public RestResponse updateOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
+		this.organizationService.updateOrganizationMemberNumbers(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getOrganizationMemberNumbers</b>
+	 * <p>获取员工档案详情卡号信息</p>
+	 */
+	@RequestMapping("getOrganizationMemberNumbers")
+	@RestReturn(value = OrganizationMemberNumbersDTO.class)
+	public RestResponse getOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
+		OrganizationMemberNumbersDTO res = this.organizationService.getOrganizationMemberNumbers(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /org/addOrganizationMemberInsurances</b>
+	 * <p>新增员工档案详情保险信息</p>
+	 */
+	@RequestMapping("addOrganizationMemberInsurances")
+	@RestReturn(value = String.class)
+	public RestResponse addOrganizationMemberInsurances(@Valid AddOrganizationMemberInsurancesCommand cmd) {
+		this.organizationService.addOrganizationMemberInsurances(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationMemberInsurances</b>
+	 * <p>列举员工档案详情保险信息</p>
+	 */
+	@RequestMapping("listOrganizationMemberInsurances")
+	@RestReturn(value = ListOrganizationMemberInsurancesResponse.class)
+	public RestResponse listOrganizationMemberInsurances(@Valid AddOrganizationMemberInsurancesCommand cmd) {
+		ListOrganizationMemberInsurancesResponse res = this.organizationService.listOrganizationMemberInsurances(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /org/addOrganizationMemberContracts</b>
+	 * <p>新增员工档案详情合同信息</p>
+	 */
+	@RequestMapping("addOrganizationMemberContracts")
+	@RestReturn(value = String.class)
+	public RestResponse addOrganizationMemberContracts(@Valid AddOrganizationMemberContractsCommand cmd) {
+		this.organizationService.addOrganizationMemberContracts(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationMemberContracts</b>
+	 * <p>列举员工档案详情合同信息</p>
+	 */
+	@RequestMapping("addOrganizationMemberContracts")
+	@RestReturn(value = ListOrganizationMemberContractsResponse.class)
+	public RestResponse listOrganizationMemberContracts(@Valid AddOrganizationMemberContractsCommand cmd) {
+		ListOrganizationMemberContractsResponse res = this.organizationService.listOrganizationMemberContracts(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationEmployeeStatus</b>
+	 * <p>修改员工状态</p>
+	 */
+	@RequestMapping("updateOrganizationEmployeeStatus")
+	@RestReturn(value = String.class)
+	public RestResponse updateOrganizationEmployeeStatus(@Valid UpdateOrganizationEmployeeStatusCommand cmd) {
+		this.organizationService.updateOrganizationEmployeeStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+
+	/**
+	 * <b>URL: /org/...</b>
+	 * <p>在职记录</p>
+	 */
+
+	/**
+	 * <b>URL: /org/...</b>
+	 * <p>档案修改记录</p>
+	 */
 }

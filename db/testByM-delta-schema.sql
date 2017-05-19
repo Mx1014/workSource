@@ -6,9 +6,11 @@ SET FOREIGN_KEY_CHECKS=0;
 -- DROP TABLE IF EXISTS `eh_organization_member_details`;
 CREATE TABLE `eh_organization_member_details` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member id' ,
+  `member_id` BIGINT NOT NULL COMMENT 'id for members， reference for eh_organization_member employee_no' ,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `birthday` DATE COMMENT 'members'' birthday',
+  `birthday` DATE COMMENT 'the birthday of the member',
+  `organization_id` BIGINT NOT NULL COMMENT 'reference for eh_organization_member organization_id' ,
+  `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
   `marital_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: undisclosured, 1: married, 2: unmarried',
   `political_status` VARCHAR(128) COMMENT '政治面貌',
   `native_place` VARCHAR(128) COMMENT '籍贯',
@@ -21,8 +23,8 @@ CREATE TABLE `eh_organization_member_details` (
   `emergency_name` VARCHAR(128) COMMENT 'emergency contact name',
   `emergency_contact` VARCHAR(128) COMMENT 'emergency contact tel-number',
   `address` VARCHAR(255) COMMENT 'address for the member',
-  `employee_type` VARCHAR(64) COMMENT 'full-time, part-time, internship, labor dispatch',
-  `employee_status` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'on the job, probation, leave the job',
+  `employee_type` TINYINT COMMENT '0: full-time, 1: part-time, 2: internship, 3: labor dispatch',
+  `employee_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: probation, 1: on the job, 2: leave the job',
   `employment_time` DATE NOT NULL COMMENT '转正日期',
   `dimission_time` DATE COMMENT '离职日期',
   `salary_card_number` VARCHAR(128) COMMENT '工资卡号',
@@ -40,12 +42,12 @@ CREATE TABLE `eh_organization_member_details` (
 -- DROP TABLE IF EXISTS `eh_organization_member_education`;
 CREATE TABLE `eh_organization_member_educations` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member id',
+  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `schoole_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the member''s school name',
   `degree` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'doctor, master, bachelor, etc',
   `major` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the major of the member',
-  `enrollment_time` DATE NOT NULL COMMENT 'commencement time',
+  `enrollment_time` DATE NOT NULL COMMENT 'the time to start a new semester',
   `graduation_time` DATE NOT NULL COMMENT 'when the member graduated form the school',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
@@ -60,11 +62,11 @@ CREATE TABLE `eh_organization_member_educations` (
 -- DROP TABLE IF EXISTS `eh_organization_member_working`;
 CREATE TABLE `eh_organization_member_work_experiences` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member id',
+  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `enterprise_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of company',
   `position` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the position of the member',
-  `job_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'full-time, part-time',
+  `job_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: full-time, 1: part-time',
   `entry_time` DATE NOT NULL COMMENT 'timing of start the job',
   `departure_time` DATE NOT NULL COMMENT 'timing of quit the job',
   `creator_uid` BIGINT,
@@ -80,7 +82,7 @@ CREATE TABLE `eh_organization_member_work_experiences` (
 -- DROP TABLE IF EXISTS `eh_organization_member_insurance`;
 CREATE TABLE `eh_organization_member_insurances` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member id',
+  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of the insurance',
   `enterprise` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the company name of the insurance',
@@ -100,7 +102,7 @@ CREATE TABLE `eh_organization_member_insurances` (
 -- DROP TABLE IF EXISTS `eh_organization_member_contract`;
 CREATE TABLE `eh_organization_member_contract` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member id',
+  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `contract_number` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the number of the contract',
   `start_time` DATE NOT NULL COMMENT '生效时间',
@@ -119,14 +121,14 @@ CREATE TABLE `eh_organization_member_contract` (
 CREATE TABLE `eh_organization_member_profile_logs` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `operation_type` VARCHAR(32),
-  `operator_uid` BIGINT,
-  `resource_type` VARCHAR(32) COMMENT 'operation related resource type',
-  `resource_id` BIGINT COMMENT 'operation related resource id',
-  `result_code` INTEGER COMMENT '0: common positive result, otherwise, application defined result code',
-  `reason` VARCHAR(256),
-  `original_content` LONGTEXT COMMENT 'use json format',
-  `audit_content` LONGTEXT,
+  `operation_type` VARCHAR(32) COMMENT 'add,update,delete',
+  `operator_uid` BIGINT COMMENT 'id of operator',
+  `resource_type` VARCHAR(32) COMMENT 'the type of table',
+  `resource_id` BIGINT COMMENT 'reference for table_id',
+  `result_code` INTEGER COMMENT '0: unsucceed, 1: succeed',
+  `reason` VARCHAR(256) COMMENT 'operation notes',
+  `original_content` LONGTEXT COMMENT 'original records, use json format',
+  `audit_content` LONGTEXT COMMENT 'modified records, use json format',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
