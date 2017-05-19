@@ -8,7 +8,7 @@ insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values
 
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10023','zh_CN','活动待支付');
 
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消');
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消报名');
 
 -- 增加通知支付的消息模板 add by yanjun 20170513
 -- 增加通知支付的消息模板 add by yanjun 20170513
