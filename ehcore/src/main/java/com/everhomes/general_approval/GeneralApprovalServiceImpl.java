@@ -244,7 +244,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private Map<String,Integer> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
 			String superFieldName) {
 		Map<String,Integer> fieldNames = new HashMap<>();
-
+		if(null == fieldDTOs)
+			return fieldNames;
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
 			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
 				fieldNames.put(superFieldName == null ? fieldDTO.getFieldDisplayName()
@@ -260,6 +261,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private Map<String,Integer> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
 		Map<String,Integer> fieldNames = new HashMap<>();
 		fieldNames.putAll(findTopNumFieldNames(fieldDTOs, null));
+		if(null == fieldDTOs)
+			return fieldNames;
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
 			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())) {
 				GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(
