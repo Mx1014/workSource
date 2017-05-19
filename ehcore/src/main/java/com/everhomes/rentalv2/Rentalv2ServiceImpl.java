@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -919,6 +920,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		proccessCells(rentalSite);
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 
+		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+		String detailUrl = configurationProvider.getValue(ConfigConstants.RENTAL_RESOURCE_DETAIL_URL, "");
+		detailUrl = String.format(detailUrl, UserContext.getCurrentNamespaceId(), rentalSite.getId());
+
+		rSiteDTO.setDetailUrl(detailUrl);
 		rSiteDTO.setResourceTypeId(resourceType.getId());
 		rSiteDTO.setPayMode(resourceType.getPayMode());
 
