@@ -97,7 +97,7 @@ public interface ActivityProivider {
 
 	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
 	
-	List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer cancelStatus, Integer offset, int pageSize);
+	List<ActivityRoster> listActivityRoster(Long activityId, Long excludeUserId, Integer status, Integer cancelStatus, Integer offset, int pageSize);
 	
 	Integer countActivityRoster(Long activityId, Integer status);
 	

@@ -555,6 +555,7 @@ public class ActivityServiceImpl implements ActivityService {
     			ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
         		cancelCmd.setActivityId(listRoster.get(i).getActivityId());
         		cancelCmd.setUserId(listRoster.get(i).getUid());
+        		cancelCmd.setCancelType(ActivityCancelType.EXPIRE_AUTO.getCode());
         		this.cancelSignup(cancelCmd);
     		}
     		
@@ -917,7 +918,13 @@ public class ActivityServiceImpl implements ActivityService {
         }
         Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
         
-		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getStatus(), cmd.getCancelStatus(), offset, pageSize+1);
+        //默认排除创建者，当取全部的时候加上创建者   add by yanju 20170519
+        Long excludeUserId  = activity.getCreatorUid();
+        if(cmd.getStatus() == null){
+        	excludeUserId = null;
+        }
+        
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), excludeUserId, cmd.getStatus(), cmd.getCancelStatus(), offset, pageSize+1);
 		Integer nextPageOffset = null;
 		if (rosters.size() > pageSize) {
 			rosters.remove(rosters.size()-1);
@@ -933,9 +940,9 @@ public class ActivityServiceImpl implements ActivityService {
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
 		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
-		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, 1, 0, 100000);
-		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), null, 2, 0, 100000);
-		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, 0, 0, 100000);
+		List<ActivityRoster> rostersConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 1, 0, 100000);
+		List<ActivityRoster> rostersRejects = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 2, 0, 100000);
+		List<ActivityRoster> rostersUnConfirms = activityProvider.listActivityRoster(cmd.getActivityId(), null, null, 0, 0, 100000);
 		
 		rosters.addAll(rostersConfirms);
 		rosters.addAll(rostersRejects);
@@ -1185,6 +1192,16 @@ public class ActivityServiceImpl implements ActivityService {
 	                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                         ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 	             }
+	             
+	             //手动取消 要检查过期时间  add by yanjun 20170519
+	             if(cmd.getCancelType() == null || cmd.getCancelType().byteValue()== ActivityCancelType.HAND.getCode()){
+	            	 if(activity.getSignupEndTime() != null && activity.getSignupEndTime().getTime() < DateHelper.currentGMTTime().getTime()){
+	            		 LOGGER.error("handle activity error, Can not cancel cause after signupEndTime. id={}", cmd.getActivityId());
+		                 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                         ActivityServiceErrorCode.ERROR_CANCEL_BEYOND_SIGNUP_TIME, "Fail, Cause after signupEndTime");
+	            	 }
+	             }
+	             
 	             Post post = forumProvider.findPostById(activity.getPostId());
 	             if (post == null) {
 	                 LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
@@ -4892,24 +4909,24 @@ public class ActivityServiceImpl implements ActivityService {
 		StatisticsActivityDTO temp = null;
 		for(int i= 0; i< listDto.size(); i++){
 			for(int j=i+1; j< listDto.size(); j++){
-				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
-					if(listDto.get(j).getEnrollUserCount().intValue() > listDto.get(i).getEnrollUserCount()){
+				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PUBLISH_TIME_DESC.getCode()){
+					if(listDto.get(j).getCreateTime().longValue() > listDto.get(i).getCreateTime()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
-					} 
+					}
 				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_ASC.getCode()){
 					if(listDto.get(j).getEnrollUserCount().intValue() < listDto.get(i).getEnrollUserCount()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
 					} 
-				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PUBLISH_TIME_DESC.getCode()){
-					if(listDto.get(j).getCreateTime().longValue() > listDto.get(i).getCreateTime()){
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
+					if(listDto.get(j).getEnrollUserCount().intValue() > listDto.get(i).getEnrollUserCount()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
-					}
+					} 
 				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PUBLISH_TIME_ASC.getCode()){
 					if(listDto.get(j).getCreateTime().longValue() < listDto.get(i).getCreateTime()){
 						temp = listDto.get(i);
@@ -5008,24 +5025,24 @@ public class ActivityServiceImpl implements ActivityService {
 		StatisticsTagDTO temp = null;
 		for(int i= 0; i< listDto.size(); i++){
 			for(int j=i+1; j< listDto.size(); j++){
-				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
-					if(listDto.get(j).getSignPeopleCount().intValue() > listDto.get(i).getSignPeopleCount()){
+				if(cmd.getOrderBy() == null || cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.ACTIVITY_COUNT_DESC.getCode()){
+					if(listDto.get(j).getCreateActivityCount().longValue() > listDto.get(i).getCreateActivityCount()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
-					} 
+					}
 				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_ASC.getCode()){
 					if(listDto.get(j).getSignPeopleCount().intValue() < listDto.get(i).getSignPeopleCount()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
 					} 
-				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.ACTIVITY_COUNT_DESC.getCode()){
-					if(listDto.get(j).getCreateActivityCount().longValue() > listDto.get(i).getCreateActivityCount()){
+				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.PEOPLE_COUNT_DESC.getCode()){
+					if(listDto.get(j).getSignPeopleCount().intValue() > listDto.get(i).getSignPeopleCount()){
 						temp = listDto.get(i);
 						listDto.set(i, listDto.get(j));
 						listDto.set(j, temp);
-					}
+					} 
 				}else if(cmd.getOrderBy().byteValue()==StatisticsOrderByFlag.ACTIVITY_COUNT_ASC.getCode()){
 					if(listDto.get(j).getCreateActivityCount().longValue() < listDto.get(i).getCreateActivityCount()){
 						temp = listDto.get(i);

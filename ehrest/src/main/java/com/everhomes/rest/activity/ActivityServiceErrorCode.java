@@ -28,5 +28,6 @@ public interface ActivityServiceErrorCode {
 	static final int ERROR_CONVERT_TO_COMMON_ORDER_FAIL = 10022;
 	static final int ERROR_PAYAMOUNT_ERROR = 10023;
 	static final int ERROR_ORDERTYPE_NO_FIND = 10024;
+	static final int ERROR_CANCEL_BEYOND_SIGNUP_TIME = 10025;
 
 }

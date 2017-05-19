@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCancelType;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityRosterStatus;
 
@@ -78,6 +79,7 @@ public class RosterPayTimeoutServiceImpl implements RosterPayTimeoutService, App
     		ActivityCancelSignupCommand cmd = new ActivityCancelSignupCommand();
         	cmd.setActivityId(roster.getActivityId());
         	cmd.setUserId(roster.getUid());
+        	cmd.setCancelType(ActivityCancelType.EXPIRE_AUTO.getCode());
         	activityService.cancelSignup(cmd);
     	}
     }

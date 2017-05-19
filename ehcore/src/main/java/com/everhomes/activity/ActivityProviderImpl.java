@@ -941,7 +941,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	}
 	
 	@Override
-	public List<ActivityRoster> listActivityRoster(Long activityId, Integer status, Integer cancelStatus, Integer pageOffset, int pageSize) {
+	public List<ActivityRoster> listActivityRoster(Long activityId, Long excludeUserId, Integer status, Integer cancelStatus, Integer pageOffset, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
 		SelectQuery<EhActivityRosterRecord>  query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
@@ -949,10 +949,14 @@ public class ActivityProviderImpl implements ActivityProivider {
 		if(status != null){
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(status.byteValue()));
 		}
+		
+		if(excludeUserId != null){
+			query.addConditions(Tables.EH_ACTIVITY_ROSTER.UID.ne(excludeUserId));
+		}
 		if(cancelStatus != null){
 			query.addConditions(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(cancelStatus.byteValue()));
 		}
-		query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.abs());
+		query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc());
 		query.addLimit(pageOffset, pageSize);
 		return query.fetch().map(r->ConvertHelper.convert(r, ActivityRoster.class));
 	}

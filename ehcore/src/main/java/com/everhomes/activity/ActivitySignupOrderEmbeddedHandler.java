@@ -14,6 +14,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCancelType;
 import com.everhomes.rest.activity.ActivityRosterPayFlag;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.order.OrderType;
@@ -71,6 +72,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		ActivityCancelSignupCommand cancelCmd = new ActivityCancelSignupCommand();
 		cancelCmd.setActivityId(roster.getActivityId());
 		cancelCmd.setUserId(roster.getUid());
+		cancelCmd.setCancelType(ActivityCancelType.PAY_FAIL.getCode());
 		activityService.cancelSignup(cancelCmd);
 	}
 	
