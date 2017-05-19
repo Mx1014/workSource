@@ -881,7 +881,9 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 	VALUES ('10615', '公共会议室', '0', NULL, '2', '1', '0');
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
 	VALUES ('10616', 'VIP车位', '0', NULL, '2', '1', '0');
-	
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
+	VALUES ('10617', '左邻会议室', '0', NULL, '2', '1', '0');
+
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -975,7 +977,19 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40840,'', 'EhNamespaces', @namespace_id,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40850,'', 'EhNamespaces', @namespace_id,2);
 	
+
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
+	VALUES ('10617', '左邻会议室', '0', NULL, '2', '1', '0');
+
+UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.male.url';
+UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.female.url';	
 	
+--SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+	
+--INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+--    VALUES ((@item_id := @item_id + 1), 1, '0', '0', '0', '/home', 'Bizs', '左邻会议室', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRveU0yWXpNemd3WmpVeU1tVTNOV0ZtTkRneE1HUmlaVFEwWmpkaE1UbG1NQQ', '1', '1', '49', '{"resourceTypeId":10616,"pageType":0}', 0, '0', '1', '0', '', '0', NULL, NULL, NULL, '0', 'pm_admin', 0, NULL);
+--INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+--    VALUES ((@item_id := @item_id + 1), 1, '0', '0', '0', '/home', 'Bizs', '左邻会议室', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRveU0yWXpNemd3WmpVeU1tVTNOV0ZtTkRneE1HUmlaVFEwWmpkaE1UbG1NQQ', '1', '1', '49', '{"resourceTypeId":10616,"pageType":0}', 0, '0', '1', '0', '', '0', NULL, NULL, NULL, '0', 'park_tourist', 0, NULL);
 	
 	
 	
