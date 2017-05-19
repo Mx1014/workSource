@@ -16,7 +16,7 @@ ALTER TABLE `eh_activities` ADD COLUMN `charge_flag` TINYINT(4) DEFAULT '0' NULL
 ALTER TABLE `eh_activities` ADD COLUMN `charge_price` DECIMAL(10, 2) NULL COMMENT 'charge_price';
 
 
--- 订单过期时间的设置表
+-- 订单过期时间的设置表  add by yanjun 20170502
 CREATE TABLE `eh_roster_order_settings` (
    `id` BIGINT(20) NOT NULL,
    `namespace_id` INT(11) NOT NULL COMMENT 'namespace id',
@@ -27,3 +27,6 @@ CREATE TABLE `eh_roster_order_settings` (
    `operator_uid` BIGINT(20) DEFAULT NULL,
    PRIMARY KEY (`id`)
  ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 增加取消时间，用于统计  add by yanjun 20170519
+ALTER TABLE `eh_activity_roster` ADD COLUMN `cancel_time` DATETIME NULL;
