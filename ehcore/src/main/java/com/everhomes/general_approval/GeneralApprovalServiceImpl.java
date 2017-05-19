@@ -290,6 +290,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			// 对于数字要检查默认公式
 			GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
 					GeneralFormNumDTO.class);
+			if (null == numberExtra.getDefaultValue())
+				break;
 			if(!checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get())){ 
 				throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
 						GeneralApprovalServiceErrorCode.ERROR_FORMULA_CHECK, "ERROR_FORMULA_CHECK");	
