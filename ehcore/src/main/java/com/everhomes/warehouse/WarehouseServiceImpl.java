@@ -424,7 +424,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             Long uid = UserContext.current().getUser().getId();
-            Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime())
+            Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
             cmd.getStocks().forEach(stock -> {
                 WarehouseStocks materialStock = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(
                         stock.getWarehouseId(), stock.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
