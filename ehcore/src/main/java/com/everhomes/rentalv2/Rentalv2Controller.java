@@ -3,10 +3,12 @@ package com.everhomes.rentalv2;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.oauth2.RequireOAuth2Authentication;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,6 +166,7 @@ public class Rentalv2Controller extends ControllerBase {
 	 */
 	@RequestMapping("findRentalSiteById")
 	@RestReturn(value = RentalSiteDTO.class)
+	@RequireAuthentication()
 	public RestResponse findRentalSiteById(@Valid FindRentalSiteByIdCommand cmd) {
 
 		RestResponse response = new RestResponse(rentalService.findRentalSiteById(cmd));
