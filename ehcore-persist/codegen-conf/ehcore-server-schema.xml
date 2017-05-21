@@ -151,12 +151,12 @@
         eh_oauth2_client_tokens | eh_oauth2_servers |
         eh_sms_logs |
 		eh_previews |
-
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
         eh_energy_meter_price_config |
         eh_user_notification_settings | eh_group_member_logs |
+        eh_general_form_vals | eh_lease_configs2 |
 
         </includes>
 
