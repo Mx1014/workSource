@@ -1,5 +1,5 @@
 
-ALTER TABLE `eh_buildings` ADD COLUMN `custom_form_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_general_form';
+ALTER TABLE `eh_buildings` ADD COLUMN `general_form_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_general_form';
 ALTER TABLE `eh_buildings` ADD COLUMN `custom_form_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not add custom field, 1: add custom field';
 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `longitude` DOUBLE DEFAULT NULL;

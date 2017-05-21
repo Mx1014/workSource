@@ -6,7 +6,7 @@ package com.everhomes.rest.general_form;
  * <li>sourceId: 业务ID</li>
  * </ul>
  */
-public class getGeneralFormValuesCommand {
+public class GetGeneralFormValuesCommand {
     private String sourceType;
     private Long sourceId;
 

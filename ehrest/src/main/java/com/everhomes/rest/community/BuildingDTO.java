@@ -118,7 +118,7 @@ public class BuildingDTO {
 	private List<BuildingAttachmentDTO> attachments;
 
 	@ItemType(PostApprovalFormItem.class)
-	private List<PostApprovalFormItem> formFields;
+	private List<PostApprovalFormItem> formValues;
 
 	private Long generalFormId;
 	private Byte customFormFlag;
@@ -139,12 +139,12 @@ public class BuildingDTO {
 		this.customFormFlag = customFormFlag;
 	}
 
-	public List<PostApprovalFormItem> getFormFields() {
-		return formFields;
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
 	}
 
-	public void setFormFields(List<PostApprovalFormItem> formFields) {
-		this.formFields = formFields;
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
 	}
 
 	public String getDetailUrl() {

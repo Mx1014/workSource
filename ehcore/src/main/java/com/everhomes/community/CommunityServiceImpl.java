@@ -10,12 +10,18 @@ import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_form.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_form.addGeneralFormValuesCommand;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -225,6 +231,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private GeneralFormService generalFormService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -696,7 +706,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	}
 
-    private void populateBuildingDTO( BuildingDTO building) {
+    private void populateBuildingDTO(BuildingDTO building) {
         if(building == null) {
             return;
         }
@@ -710,6 +720,12 @@ public class CommunityServiceImpl implements CommunityService {
                 LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
             }
         }
+
+		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+		cmd.setSourceType(EntityType.BUILDING.getCode());
+		cmd.setSourceId(building.getId());
+		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
+		building.setFormValues(formValues);
     }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
@@ -906,20 +922,29 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		if(cmd.getId() == null) {
-			
-			LOGGER.info("add building");
-			this.communityProvider.createBuilding(userId, building);
-		} else {
-			LOGGER.info("update building");
-			building.setId(cmd.getId());
-			Building b = this.communityProvider.findBuildingById(cmd.getId());
-			building.setCreatorUid(b.getCreatorUid());
-			building.setCreateTime(b.getCreateTime());
-			building.setNamespaceId(b.getNamespaceId());
-			this.communityProvider.updateBuilding(building);
-		}
-		
+
+		dbProvider.execute((TransactionStatus status) -> {
+			if (cmd.getId() == null) {
+
+				LOGGER.info("add building");
+				this.communityProvider.createBuilding(userId, building);
+				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+						building.getId(), cmd.getCustomFormFlag());
+			} else {
+				LOGGER.info("update building");
+				building.setId(cmd.getId());
+				Building b = this.communityProvider.findBuildingById(cmd.getId());
+				building.setCreatorUid(b.getCreatorUid());
+				building.setCreateTime(b.getCreateTime());
+				building.setNamespaceId(b.getNamespaceId());
+				this.communityProvider.updateBuilding(building);
+
+				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
+				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+						building.getId(), cmd.getCustomFormFlag());
+			}
+			return null;
+		});
 		processBuildingAttachments(userId, cmd.getAttachments(), building);
 		
 		populateBuilding(building);
@@ -929,7 +954,17 @@ public class CommunityServiceImpl implements CommunityService {
 		
 	}
 
-
+	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
+		Long sourceId, Byte customFormFlag) {
+		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
+			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
+			cmd.setGeneralFormId(generalFormId);
+			cmd.setValues(formValues);
+			cmd.setSourceId(sourceId);
+			cmd.setSourceType(sourceType);
+			generalFormService.addGeneralFormValues(cmd);
+		}
+	}
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		

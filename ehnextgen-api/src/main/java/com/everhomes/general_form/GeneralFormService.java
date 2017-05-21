@@ -19,7 +19,7 @@ public interface GeneralFormService {
 
 	GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd);
 
-	List<PostApprovalFormItem> getGeneralFormValues(getGeneralFormValuesCommand cmd);
+	List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd);
 
 	void addGeneralFormValues(addGeneralFormValuesCommand cmd);
 }

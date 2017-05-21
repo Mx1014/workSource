@@ -12,10 +12,15 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_form.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_form.addGeneralFormValuesCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.techpark.expansion.*;
@@ -139,6 +144,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     private AddressProvider addressProvider;
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private GeneralFormService generalFormService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
 			GetEnterpriseDetailByIdCommand cmd) {
@@ -345,6 +355,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		
         FlowCase flowCase = dbProvider.execute(status -> {
+
+        	//对接表单
+			if (null != cmd.getRequestFormId()) {
+
+			}
         	//added by Janson
         	String projectType = EntityType.COMMUNITY.getCode();
         	
@@ -644,6 +659,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
+			dto.setLeasePromotionFormId(c.getGeneralFormId());
 
 			populateRentDTO(dto);
 
@@ -698,8 +714,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			return ad;
 		}).collect(Collectors.toList()));
-
+		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
 		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
+
+		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+		cmd.setSourceType(EntityType.LEASEPROMOTION.getCode());
+		cmd.setSourceId(dto.getId());
+		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
+		dto.setFormValues(formValues);
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -718,80 +740,103 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Override
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd){
-        if (null == cmd.getIssuerType())
-            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
-        LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 
-        if (null != cmd.getEnterTime())
-		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
-		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
-		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
-		if (null==cmd.getRentType())
-			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
-		leasePromotion.setRentType(cmd.getRentType());
+		return dbProvider.execute((TransactionStatus status) -> {
+			if (null == cmd.getIssuerType())
+				cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+			LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 
-		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
-		
-		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
-		
-		/**
-		 * 重新添加
-		 */
-		if (null != attachmentDTOs) {
-			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-				attachment.setLeaseId(leasePromotion.getId());
-				attachment.setCreatorUid(leasePromotion.getCreateUid());
-				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			if (null != cmd.getEnterTime())
+				leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+			leasePromotion.setCreateUid(UserContext.current().getUser().getId());
+			leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+			if (null==cmd.getRentType())
+				cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
+			leasePromotion.setRentType(cmd.getRentType());
+			leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
+
+			addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+					leasePromotion.getId(), cmd.getCustomFormFlag());
+
+			List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
+
+			/**
+			 * 重新添加
+			 */
+			if (null != attachmentDTOs) {
+				for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+					LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+					attachment.setLeaseId(leasePromotion.getId());
+					attachment.setCreatorUid(leasePromotion.getCreateUid());
+					enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+				}
 			}
+
+			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+			populateRentDTO(dto);
+
+			return dto;
+		});
+	}
+
+	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
+		Long sourceId, Byte customFormFlag) {
+		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
+			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
+			cmd.setGeneralFormId(generalFormId);
+			cmd.setValues(formValues);
+			cmd.setSourceId(sourceId);
+			cmd.setSourceType(sourceType);
+			generalFormService.addGeneralFormValues(cmd);
 		}
-
-		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
-
-		populateRentDTO(dto);
-
-		return dto;
 	}
 
 	@Override
 	public BuildingForRentDTO updateLeasePromotion(UpdateLeasePromotionCommand cmd){
-		
-		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-		LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
 
-		if (null != cmd.getEnterTime())
-			leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+		return dbProvider.execute((TransactionStatus status) -> {
 
-		leasePromotion.setIssuerType(lease.getIssuerType());
-		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
-		leasePromotion.setCreateTime(lease.getCreateTime());
-		leasePromotion.setCreateUid(lease.getCreateUid());
-		enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
-		
-		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
-		
-		/**
-		 * 先删除全部图片
-		 */
-		enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
+			LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+			LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
 
-		/**
-		 * 重新添加
-		 */
-		if (null != attachmentDTOs) {
-			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-				attachment.setLeaseId(leasePromotion.getId());
-				attachment.setCreatorUid(leasePromotion.getCreateUid());
-				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			if (null != cmd.getEnterTime())
+				leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+
+			leasePromotion.setIssuerType(lease.getIssuerType());
+			leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+			leasePromotion.setCreateTime(lease.getCreateTime());
+			leasePromotion.setCreateUid(lease.getCreateUid());
+			enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
+
+			generalFormValProvider.deleteGeneralFormVals(EntityType.LEASEPROMOTION.getCode(), leasePromotion.getId());
+			addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+					leasePromotion.getId(), cmd.getCustomFormFlag());
+			List<BuildingForRentAttachmentDTO> attachmentDTOs = cmd.getAttachments();
+
+			/**
+			 * 先删除全部图片
+			 */
+			enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
+
+			/**
+			 * 重新添加
+			 */
+			if (null != attachmentDTOs) {
+				for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+					LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+					attachment.setLeaseId(leasePromotion.getId());
+					attachment.setCreatorUid(leasePromotion.getCreateUid());
+					enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+				}
 			}
-		}
 
-		BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
-		populateRentDTO(dto);
+			populateRentDTO(dto);
 
-		return dto;
+			return dto;
+		});
 	}
 
 	private List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId) {
@@ -805,6 +850,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(id);
 
         BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+
+		dto.setLeasePromotionFormId(leasePromotion.getGeneralFormId());
 
 		populateRentDTO(dto);
 
