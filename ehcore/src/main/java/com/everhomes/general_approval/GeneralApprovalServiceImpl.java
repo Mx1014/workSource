@@ -280,8 +280,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
 		case SUBFORM:
 			// 对于子表单要检查所有的字段
+
 			GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
 					GeneralFormSubformDTO.class);
+			LOGGER.debug("FIELD EXTRA"+fieldDTO.getFieldExtra());
+			LOGGER.debug("field extra dto "+subFromExtra);
 			Map<String,Integer> subNameMap = findTopNumFieldNames(subFromExtra.getFormFields(),
 					fieldDTO.getFieldDisplayName());
 			subNameMap.putAll(topNumFieldNames.get());
