@@ -1101,7 +1101,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
 
-        if (null == config) {
+		LeasePromotionConfigDTO dto = new LeasePromotionConfigDTO();
+		List<LeasePromotionConfig2> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+        if (null != configs) {
+			configs.forEach(c -> {
+				String name = c.getConfigName();
+				switch (name) {
+					case "rentAmountFlag": dto.setRentAmountFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "issuingLeaseFlag": dto.setIssuingLeaseFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "issuerManageFlag": dto.setIssuerManageFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "parkIntroduceFlag": dto.setParkIndroduceFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
+					case "displayNameStr": dto.setDisplayNameStr(c.getConfigValue()); break;
+					case "displayOrderStr": dto.setDisplayOrderStr(c.getConfigValue()); break;
+					default: break;
+				}
+			});
+		}
+
+		if (null == config) {
             LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "LeaseIssuerConfig not found.");

@@ -30,4 +30,6 @@ public interface EnterpriseLeaseIssuerProvider {
     LeaseIssuer fingLeaseIssersByOrganizationId(Integer namespaceId, Long organizationId);
 
     LeaseIssuer findLeaseIssersByContact(Integer namespaceId, String contact);
+
+    List<LeasePromotionConfig2> listLeasePromotionConfigByNamespaceId(Integer namespaceId);
 }
