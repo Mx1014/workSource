@@ -356,14 +356,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
         FlowCase flowCase = dbProvider.execute(status -> {
 
-        	//对接表单
-			if (null != cmd.getRequestFormId()) {
-
-			}
         	//added by Janson
         	String projectType = EntityType.COMMUNITY.getCode();
         	
             enterpriseApplyEntryProvider.createApplyEntry(request);
+
+			//对接表单
+			if (null != cmd.getRequestFormId()) {
+				addGeneralFormInfo(cmd.getRequestFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+						request.getId(), LeasePromotionFlag.ENABLED.getCode());
+			}
+
             Long projectId = cmd.getCommunityId();
             EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
             opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 

@@ -10,6 +10,9 @@ package com.everhomes.rest.techpark.expansion;
  * <li>parkIndroduceFlag: 园区介绍是否显示</li>
  * <li>renewFlag: 续租是否显示</li>
  * <li>areaSearchFlag: 是否支持面积搜索</li>
+ * <li>consultFlag: 是否支持面积搜索</li>
+ * <li>displayNameStr: 显示名称字符串</li>
+ * <li>displayOrderStr: 显示排序，与名称对应</li>
  * </ul>
  */
 public class LeasePromotionConfigDTO {
@@ -21,6 +24,33 @@ public class LeasePromotionConfigDTO {
     private Byte parkIndroduceFlag;
     private Byte renewFlag;
     private Byte areaSearchFlag;
+    private Byte consultFlag;
+    private String displayNameStr;
+    private String displayOrderStr;
+
+    public Byte getConsultFlag() {
+        return consultFlag;
+    }
+
+    public void setConsultFlag(Byte consultFlag) {
+        this.consultFlag = consultFlag;
+    }
+
+    public String getDisplayNameStr() {
+        return displayNameStr;
+    }
+
+    public void setDisplayNameStr(String displayNameStr) {
+        this.displayNameStr = displayNameStr;
+    }
+
+    public String getDisplayOrderStr() {
+        return displayOrderStr;
+    }
+
+    public void setDisplayOrderStr(String displayOrderStr) {
+        this.displayOrderStr = displayOrderStr;
+    }
 
     public Byte getAreaSearchFlag() {
         return areaSearchFlag;
