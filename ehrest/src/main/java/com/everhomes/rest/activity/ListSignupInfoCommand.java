@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>activityId: 活动id</li>
  * <li>status: 状态，0待确认、1已确认、2已驳回、不填则为全部</li>
+ * <li>cancelStatus: 状态，0: cancel, 1: reject, 2:normal 参考{@link com.everhomes.rest.activity.ActivityRosterStatus}</li>
  * <li>pageSize: 每页大小</li>
  * <li>pageOffset: 页码</li>
  * </ul>
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
 public class ListSignupInfoCommand {
 	private Long activityId;
 	private Integer status;
+	private Integer cancelStatus;
 	private Integer pageSize;
 	private Integer pageOffset;
 
@@ -48,6 +50,14 @@ public class ListSignupInfoCommand {
 
 	public void setStatus(Integer status) {
 		this.status = status;
+	}
+
+	public Integer getCancelStatus() {
+		return cancelStatus;
+	}
+
+	public void setCancelStatus(Integer cancelStatus) {
+		this.cancelStatus = cancelStatus;
 	}
 
 	@Override

@@ -4,6 +4,8 @@ import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
@@ -25,7 +27,9 @@ public interface ActivityService {
     void createPost(ActivityPostCommand cmd, Long postId);
 
     ActivityDTO signup(ActivitySignupCommand cmd);
-
+    
+    CommonOrderDTO createSignupOrder(CreateSignupOrderCommand cmd);
+    
     ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd);
 
     ActivityDTO checkin(ActivityCheckinCommand cmd);
@@ -102,6 +106,14 @@ public interface ActivityService {
 	ActivityWarningResponse setActivityWarning(SetActivityWarningCommand cmd);
 
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
+	
+	ActivityTimeResponse setActivityTime(SetActivityTimeCommand cmd);
+
+	ActivityTimeResponse getActivityTime(GetActivityTimeCommand cmd);
+	
+	RosterOrderSettingDTO setRosterOrderSetting(SetRosterOrderSettingCommand cmd);
+
+	RosterOrderSettingDTO getRosterOrderSetting(GetRosterOrderSettingCommand cmd);
 
 	void activityWarningSchedule();
 	
@@ -150,4 +162,32 @@ public interface ActivityService {
 
 	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
 
-	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);}
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);
+	
+	/**
+	 * 统计总览
+	 * @return
+	 */
+	StatisticsSummaryResponse statisticsSummary(StatisticsSummaryCommand cmd);
+	/**
+	 * 按活动统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsActivityResponse statisticsActivity(StatisticsActivityCommand cmd);
+	/**
+	 * 按企业统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsOrganizationResponse statisticsOrganization(StatisticsOrganizationCommand cmd);
+	/**
+	 * 按标签统计
+	 * @param cmd
+	 * @return
+	 */
+	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
+	
+	void signupOrderRefund(Activity activity, Long userId);
+}
+

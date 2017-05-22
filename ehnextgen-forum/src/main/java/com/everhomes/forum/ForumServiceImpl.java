@@ -22,6 +22,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupMember;
@@ -112,6 +113,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private ActivityService activityService;
+    
+    @Autowired
+    private ActivityProivider activityProvider;
     
     @Autowired
     private DbProvider dbProvider;
@@ -235,6 +239,12 @@ public class ForumServiceImpl implements ForumService {
 
         // 阻止黑名单用户发帖(临时解决方案)
         this.checkUserBlacklist(creatorUid);
+        
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----start
+        if(cmd.getOldId() != null){
+        	this.deletePost(cmd.getForumId(), cmd.getOldId(), true, null, null, null);
+        }
+        //如果是之前暂存过的帖子，参数中要传oldId，用户删除老数据  add by yanjun 20170515  ----end
 
         Post post = processTopicCommand(creatorUid, cmd);
 
@@ -755,6 +765,7 @@ public class ForumServiceImpl implements ForumService {
                     if (post.getCreatorUid().longValue() == userId.longValue() && embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
 						sendMessageWhenCreatorDeleteActivity(post.getEmbeddedId(), userId);
 					}
+                    
                    return null;
                 });
                 
@@ -762,10 +773,51 @@ public class ForumServiceImpl implements ForumService {
                 if(handler != null) {
                     handler.postProcessEmbeddedObject(post);
                 } 
+                
+                //进行退款，取消报名   add by yanjun 20170519
+                if (embededAppId.longValue() == AppConstants.APPID_ACTIVITY) {
+                	Activity activity = activityProivider.findActivityById(post.getEmbeddedId());
+                	if (activity != null) {
+                		List<ActivityRoster> activityRosters = activityProivider.listRosters(activity.getId());
+                		for( int i=0; i< activityRosters.size(); i++){
+                			//如果有退款，先退款再取消订单
+                			ActivityRoster tempRoster = activityRosters.get(i);
+                			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
+                				activityService.signupOrderRefund(activity, user.getId());
+                				
+                				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
+                				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+      			             	activityProvider.updateRoster(tempRoster);
+                			}
+                			
+                		}
+            		}
+				}
+                
             } catch(Exception e) {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
-        } else {
+        }else if(PostStatus.fromCode(post.getStatus()) == PostStatus.WAITING_FOR_CONFIRMATION) {
+        	post.setStatus(PostStatus.INACTIVE.getCode());
+            post.setDeleterUid(userId);
+            post.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            try {
+                this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                    this.forumProvider.updatePost(post);
+                    return null;
+                });
+                this.postSearcher.deleteById(post.getId());
+                Activity activity = activityProvider.findSnapshotByPostId(postId);
+                if(activity != null){
+                	activity.setStatus((byte)0);
+            		activity.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            		activityProvider.updateActivity(activity);
+                }
+                
+            } catch(Exception e) {
+                LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
+            }
+        }else {
             //Added by Janson
             if(deleteUserPost) {
                 try {
@@ -796,6 +848,18 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
         }
+    }
+    
+    private Long getFamilyId() {
+        User user = UserContext.current().getUser();
+        if (user != null && user.getAddressId() != null) {
+            Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+            if (family == null) {
+                return null;
+            }
+            return family.getId();
+        }
+        return null;
     }
     
     //当创建者删除活动时发消息通知已报名的人
@@ -930,7 +994,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -1080,7 +1145,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(operatorId, posts, communityId, false);
@@ -1132,7 +1198,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
         	
@@ -1336,7 +1403,7 @@ public class ForumServiceImpl implements ForumService {
 	        	 condition = condition.and(privateCond);
 	         }
 	         
-	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
 	    	 if(LOGGER.isInfoEnabled()) {
 	             long endTime = System.currentTimeMillis();
 	             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1419,7 +1486,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -1506,7 +1573,7 @@ public class ForumServiceImpl implements ForumService {
         if(null != cond){
         	condition = condition.and(cond);
         }
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getNeedTemporary());
         
         
         if(LOGGER.isInfoEnabled()) {
@@ -1518,7 +1585,7 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(locator.getAnchor(), dtos);
     }
     
-    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Byte needTemporary ){
     	User user = UserContext.current().getUser();
         Long userId = user.getId();
     	
@@ -1528,7 +1595,13 @@ public class ForumServiceImpl implements ForumService {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+            if(needTemporary != null && needTemporary.byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
             
             if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
@@ -1555,7 +1628,8 @@ public class ForumServiceImpl implements ForumService {
         locator.setAnchor(null);
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            locator.setAnchor(posts.get(posts.size() - 1).getId());
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            locator.setAnchor(posts.get(posts.size() - 1).getCreateTime().getTime());
         }
         
         populatePosts(user.getId(), posts, null, false);
@@ -1693,7 +1767,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(operatorId, posts, null, true);
@@ -2449,7 +2524,7 @@ public class ForumServiceImpl implements ForumService {
 //        Long nextPageAnchor = null;
 //        if(posts.size() > pageSize) {
 //            posts.remove(posts.size() - 1);
-//            nextPageAnchor = posts.get(posts.size() - 1).getId();
+//            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
 //        }
 //        
 //        populatePosts(userId, posts, communityId, false);
@@ -2490,7 +2565,14 @@ public class ForumServiceImpl implements ForumService {
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
+            
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
             }
@@ -2506,7 +2588,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -2645,7 +2728,14 @@ public class ForumServiceImpl implements ForumService {
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
-            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            //新增暂存活动，后台管理员在web端要看到暂存的活动  add by yanjun 20170518
+            if(cmd.getNeedTemporary() != null && cmd.getNeedTemporary().byteValue() == 1){
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.in(PostStatus.ACTIVE.getCode(), PostStatus.WAITING_FOR_CONFIRMATION.getCode()));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            }
+            
             if(null != condition){
             	query.addConditions(condition);
             }
@@ -2656,7 +2746,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, cmd.getCommunityId(), false);
@@ -2732,6 +2823,11 @@ public class ForumServiceImpl implements ForumService {
         
         //添加人数限制，add by tt, 20161012
         post.setMaxQuantity(cmd.getMaxQuantity());
+        
+        //添加活动状态，用于暂存或者立刻发布，不传默认2是立刻发布 add by yanjun 20170510
+        if(cmd.getStatus() != null){
+        	post.setStatus(cmd.getStatus());
+        }
         
         return post;
     }
@@ -4308,7 +4404,7 @@ public class ForumServiceImpl implements ForumService {
 		}
     	
     	condition = condition.and(visibleCondition);
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus, null);
         
         ListPostCommandResponse response = new ListPostCommandResponse();
         response.setPosts(dtos);
@@ -5258,7 +5354,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -5442,7 +5539,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null);
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, null, null);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activity topics, userId=" + operatorId + ", size=" + dtos.size() 
@@ -5512,7 +5609,9 @@ public class ForumServiceImpl implements ForumService {
         });
         
         //此处按id排序而不是创建时间，因为有可能创建时间是一样的，那样在分界点的数据就会有问题
-        totalPostList.sort((post1, post2)->post1.getId().longValue() > post2.getId().longValue()?-1:1);
+        
+        //上面的注释已经过期，此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+        totalPostList.sort((post1, post2)->post1.getCreateTime().getTime() > post2.getCreateTime().getTime()?-1:1);
         
         //取前21条，多一条是为了后面判断是否有下一页
         List<Post> resultPostList = totalPostList.subList(0, totalPostList.size()>thisPageSize+1?thisPageSize+1:totalPostList.size());
@@ -5522,7 +5621,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(resultPostList.size() > thisPageSize) {
         	resultPostList.remove(resultPostList.size() - 1);
-            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getId();
+        	 //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, resultPostList, communityId, false);
@@ -5532,6 +5632,33 @@ public class ForumServiceImpl implements ForumService {
         }).collect(Collectors.toList());
         
         return new ListUserGroupPostResponse(nextPageAnchor, postDtoList);
+	}
+
+	@Override
+	public void publisTopic(PublishTopicCommand cmd) {
+		Activity activity = activityProvider.findSnapshotByPostId(cmd.getTopicId());
+		if(activity == null){
+			 LOGGER.error("invalid post id=", cmd.getTopicId());
+	            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + cmd.getTopicId());
+		}
+
+		Post post = forumProvider.findPostById(activity.getPostId());
+		if(post == null){
+			LOGGER.error("Forum post not found, topicId=" + activity.getPostId());
+			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
+		}
+		
+		this.dbProvider.execute((status) -> {
+			activity.setStatus(PostStatus.ACTIVE.getCode());
+			post.setStatus(PostStatus.ACTIVE.getCode());
+			activityProvider.updateActivity(activity);
+			forumProvider.updatePost(post);
+			
+			return null;
+		});
+		
 	}
     
 }
