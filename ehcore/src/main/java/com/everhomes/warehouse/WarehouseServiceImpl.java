@@ -5,13 +5,15 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.*;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.ImportFileResultLog;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
@@ -85,6 +87,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private ImportFileService importFileService;
 
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
@@ -713,21 +718,21 @@ public class WarehouseServiceImpl implements WarehouseService {
         return response;
     }
 
-    @Override
-    public ImportDataResponse importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
-        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode());
-        return importDataResponse;
-    }
+//    @Override
+//    public ImportDataResponse importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+//        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode());
+//        return importDataResponse;
+//    }
+//
+//    @Override
+//    public ImportDataResponse importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+//        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIALS.getCode());
+//        return importDataResponse;
+//    }
 
     @Override
-    public ImportDataResponse importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
-        ImportDataResponse importDataResponse = importData(cmd, mfile, userId, ImportDataType.WAREHOUSE_MATERIALS.getCode());
-        return importDataResponse;
-    }
-
-    private ImportDataResponse importData(ImportOwnerCommand cmd, MultipartFile mfile,
-                                          Long userId, String dataType) {
-        ImportDataResponse importDataResponse = new ImportDataResponse();
+    public ImportFileTaskDTO importWarehouseMaterialCategories(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        ImportFileTask task = new ImportFileTask();
         try {
             //解析excel
             List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
@@ -737,49 +742,135 @@ public class WarehouseServiceImpl implements WarehouseService {
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
                         "File content is empty");
             }
-            LOGGER.debug("Start import data...,total:" + resultList.size());
+            task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+            task.setOwnerId(cmd.getOwnerId());
+            task.setType(ImportFileTaskType.WAREHOUSE_MATERIAL_CATEGORY.getCode());
+            task.setCreatorUid(userId);
+            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<String> datas = handleImportWarehouseMaterialCategoriesData(resultList);
+                    if(datas.size() > 0){
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
 
-            List<String> errorDataLogs = null;
-            //导入数据，返回导入错误的日志数据集
-            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIALS.getCode())) {
-                errorDataLogs = importWarehouseMaterialsData(cmd, handleImportWarehouseMaterialsData(resultList), userId);
-            }
-
-            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode())) {
-                errorDataLogs = importWarehouseMaterialCategoriesData(cmd, handleImportWarehouseMaterialCategoriesData(resultList), userId);
-            }
-
-            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
-            if(null == errorDataLogs || errorDataLogs.isEmpty()){
-                LOGGER.debug("Data import all success...");
-            }else{
-                //记录导入错误日志
-                for (String log : errorDataLogs) {
-                    LOGGER.error(log);
+                    List<ImportFileResultLog<String>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
+                    response.setTotalCount((long)datas.size());
+                    response.setFailCount((long)results.size());
+                    response.setLogs(results);
+                    return response;
                 }
-            }
+            }, task);
 
-            importDataResponse.setTotalCount((long)resultList.size()-1);
-            importDataResponse.setFailCount((long)errorDataLogs.size());
-            importDataResponse.setLogs(errorDataLogs);
         } catch (IOException e) {
             LOGGER.error("File can not be resolved...");
             e.printStackTrace();
         }
-        return importDataResponse;
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
-    private List<String> importWarehouseMaterialsData(ImportOwnerCommand cmd, List<String> list, Long userId){
-        List<String> errorDataLogs = new ArrayList<>();
+    @Override
+    public ImportFileTaskDTO importWarehouseMaterials(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
+        ImportFileTask task = new ImportFileTask();
+        try {
+            //解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if(null == resultList || resultList.isEmpty()){
+                LOGGER.error("File content is empty。userId="+userId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+                        "File content is empty");
+            }
+            task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+            task.setOwnerId(cmd.getOwnerId());
+            task.setType(ImportFileTaskType.WAREHOUSE_MATERIAL_CATEGORY.getCode());
+            task.setCreatorUid(userId);
+            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<String> datas = handleImportWarehouseMaterialsData(resultList);
+                    if(datas.size() > 0){
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<String>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
+                    response.setTotalCount((long)datas.size());
+                    response.setFailCount((long)results.size());
+                    response.setLogs(results);
+                    return response;
+                }
+            }, task);
+
+        } catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+//    private ImportDataResponse importData(ImportOwnerCommand cmd, MultipartFile mfile,
+//                                          Long userId, String dataType) {
+//        ImportDataResponse importDataResponse = new ImportDataResponse();
+//        try {
+//            //解析excel
+//            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+//
+//            if(null == resultList || resultList.isEmpty()){
+//                LOGGER.error("File content is empty。userId="+userId);
+//                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+//                        "File content is empty");
+//            }
+//            LOGGER.debug("Start import data...,total:" + resultList.size());
+//
+//            List<String> errorDataLogs = null;
+//            //导入数据，返回导入错误的日志数据集
+//            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIALS.getCode())) {
+//                errorDataLogs = importWarehouseMaterialsData(cmd, handleImportWarehouseMaterialsData(resultList), userId);
+//            }
+//
+//            if(StringUtils.equals(dataType, ImportDataType.WAREHOUSE_MATERIAL_CATEGORIES.getCode())) {
+//                errorDataLogs = importWarehouseMaterialCategoriesData(cmd, handleImportWarehouseMaterialCategoriesData(resultList), userId);
+//            }
+//
+//            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+//            if(null == errorDataLogs || errorDataLogs.isEmpty()){
+//                LOGGER.debug("Data import all success...");
+//            }else{
+//                //记录导入错误日志
+//                for (String log : errorDataLogs) {
+//                    LOGGER.error(log);
+//                }
+//            }
+//
+//            importDataResponse.setTotalCount((long)resultList.size()-1);
+//            importDataResponse.setFailCount((long)errorDataLogs.size());
+//            importDataResponse.setLogs(errorDataLogs);
+//        } catch (IOException e) {
+//            LOGGER.error("File can not be resolved...");
+//            e.printStackTrace();
+//        }
+//        return importDataResponse;
+//    }
+
+    private List<ImportFileResultLog<String>> importWarehouseMaterialsData(ImportOwnerCommand cmd, List<String> list, Long userId){
+        List<ImportFileResultLog<String>> errorDataLogs = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
         for (String str : list) {
+            ImportFileResultLog<String> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             String[] s = str.split("\\|\\|");
             WarehouseMaterials material = new WarehouseMaterials();
 
             if(StringUtils.isEmpty(s[0])){
                 LOGGER.error("warehouse material name is null, data = {}", str);
-                String log = "warehouse material name is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material name is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NAME_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -787,7 +878,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             if(StringUtils.isEmpty(s[1])){
                 LOGGER.error("warehouse material number is null, data = {}", str);
-                String log = "warehouse material number is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material number is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -795,7 +888,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             WarehouseMaterials exist = warehouseProvider.findWarehouseMaterialsByNumber(s[1], cmd.getOwnerType(), cmd.getOwnerId());
             if(exist != null) {
                 LOGGER.error("materialNumber already exist, data = {}, cmd = {}" , str, cmd);
-                String log = "materialNumber already exist, data = " + str + "cmd = " + cmd.toString();
+                log.setData(str);
+                log.setErrorLog("materialNumber already exist");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -803,14 +898,18 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             if(StringUtils.isEmpty(s[3])){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
-                String log = "warehouse material category number is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material category number is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
             WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[3], cmd.getOwnerType(), cmd.getOwnerId());
             if(category == null) {
                 LOGGER.error("warehouse material category number cannot find category, data = {}, cmd = {}" , str, cmd);
-                String log = "warehouse material category number cannot find category, data = " + str + "cmd = " + cmd.toString();
+                log.setData(str);
+                log.setErrorLog("warehouse material category number cannot find category");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -822,16 +921,20 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(!StringUtils.isEmpty(s[6])) {
                 if(!isNumber(s[6])) {
                     LOGGER.error("warehouse material reference price is wrong, data = {}", str);
-                    String log = "warehouse material reference price is wrong, data = " + str;
+                    log.setData(str);
+                    log.setErrorLog("warehouse material reference price is wrong");
+                    log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_PRICE);
                     errorDataLogs.add(log);
                     continue;
                 }
                 material.setReferencePrice(new BigDecimal(s[6]));
             }
-//                	*单位
+
             if(StringUtils.isEmpty(s[7])){
                 LOGGER.error("warehouse material unit is null, data = {}", str);
-                String log = "warehouse material unit is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material unit is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_UNIT_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -866,16 +969,19 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-    private List<String> importWarehouseMaterialCategoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
-        List<String> errorDataLogs = new ArrayList<>();
+    private List<ImportFileResultLog<String>> importWarehouseMaterialCategoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
+        List<ImportFileResultLog<String>> errorDataLogs = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         for (String str : list) {
+            ImportFileResultLog<String> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             String[] s = str.split("\\|\\|");
             WarehouseMaterialCategories category = new WarehouseMaterialCategories();
 
             if(StringUtils.isEmpty(s[0])){
                 LOGGER.error("warehouse material category name is null, data = {}", str);
-                String log = "warehouse material category name is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material category name is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -883,7 +989,9 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             if(StringUtils.isEmpty(s[1])){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
-                String log = "warehouse material category number is null, data = " + str;
+                log.setData(str);
+                log.setErrorLog("warehouse material category number is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_IS_NULL);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -891,7 +999,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             WarehouseMaterialCategories exist = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[1], cmd.getOwnerType(), cmd.getOwnerId());
             if(exist != null) {
                 LOGGER.error("material categoty number already exist, data = {}, cmd = {}" , str, cmd);
-                String log = "material categoty number already exist, data = " + str + "cmd = " + cmd.toString();
+                log.setData(str);
+                log.setErrorLog("material categoty number already exist");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST);
                 errorDataLogs.add(log);
                 continue;
             }
@@ -901,7 +1011,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[3], cmd.getOwnerType(), cmd.getOwnerId());
                 if(parent == null) {
                     LOGGER.error("material categoty parent number is not exist, data = {}, cmd = {}" , str, cmd);
-                    String log = "material categoty parent number is not exist, data = " + str + "cmd = " + cmd.toString();
+                    log.setData(str);
+                    log.setErrorLog("material categoty parent number is not exist");
+                    log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST);
                     errorDataLogs.add(log);
                     continue;
                 }

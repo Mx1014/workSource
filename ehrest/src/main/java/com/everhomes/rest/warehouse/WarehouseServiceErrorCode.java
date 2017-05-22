@@ -18,4 +18,12 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_ENABLE_FLOW = 10011;//请启用工作流
     static final int ERROR_CREATE_EXCEL = 10012;//创建excel失败
     static final int ERROR_DOWNLOAD_EXCEL = 10013;//下载excel失败
+
+    static final int ERROR_WAREHOUSE_MATERIAL_NAME_IS_NULL = 10014;
+    static final int ERROR_WAREHOUSE_MATERIAL_NUMBER_IS_NULL = 10015;
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_IS_NULL = 10016;
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER = 10017;
+    static final int ERROR_WAREHOUSE_MATERIAL_PRICE = 10018;
+    static final int ERROR_WAREHOUSE_MATERIAL_UNIT_IS_NULL = 10019;
+    static final int ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL = 10020;
 }
