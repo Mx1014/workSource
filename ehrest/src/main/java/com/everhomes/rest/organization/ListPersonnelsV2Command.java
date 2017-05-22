@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Copied by Ryan on 2017/5/18.
  * <ul>
  * <li>organizationId：政府机构id</li>
  * <li>pageAnchor: 页码</li>

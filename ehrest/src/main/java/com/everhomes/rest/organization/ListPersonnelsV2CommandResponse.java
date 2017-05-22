@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by Ryan on 2017/5/18.
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
  * <li>members：机构成员信息，参考{@link com.everhomes.rest.organization.OrganizationMemberV2DTO}</li>
