@@ -56,4 +56,5 @@ public interface ServiceModuleProvider {
     ServiceModulePrivilege getServiceModulePrivilegesByModuleIdAndPrivilegeId(Long moduleId, Long privilegeId);
 
     void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
+
 }

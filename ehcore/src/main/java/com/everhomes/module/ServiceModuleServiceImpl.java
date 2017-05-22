@@ -4,6 +4,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
@@ -12,6 +13,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -21,6 +23,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,7 +89,21 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
-        return this.serviceModulesAsTree(cmd.getOwnerType(), cmd.getOwnerId());
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+
+        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        //过滤出与scopes匹配的serviceModule
+        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+
+        List<ServiceModuleDTO> result = new ArrayList<>();
+
+        for (ServiceModuleDTO s : tempList) {
+            getChildServiceModules(tempList, s);
+            if (s.getParentId() == 0) {
+                result.add(s);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -382,7 +400,24 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd) {
-        return this.serviceModulesAsTree(cmd.getOwnerType(), cmd.getOwnerId());
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+
+        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+        //过滤出与scopes匹配的serviceModule
+        List<ServiceModuleDTO> tempList = filterByScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
+
+        return this.getServiceModuleAsLevelTree(tempList, 0L);
+    }
+
+    @Override
+    public ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd) {
+        checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+        ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+        if (null == serviceModule) {
+            LOGGER.error("Unable to find the serviceModule. serviceModuleId = {}", cmd.getModuleId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unable to find the serviceModule.");
+        }
+        return ConvertHelper.convert(serviceModule, ServiceModuleDTO.class);
     }
 
     private void checkTarget(String targetType, Long targetId) {
@@ -446,6 +481,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     /**
      * 树形结构loadServiceModule
+     *
      * @param ownerType
      * @param ownerId
      * @return
@@ -480,5 +516,43 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
         return result;
     }
-}
 
+    private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {
+        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+
+        if (null == scopes || scopes.size() == 0) {
+            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+        }
+
+        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
+        if (scopes.size() != 0)
+            list = filterList(list, scopes);
+
+        List<ServiceModuleDTO> temp = list.stream().map(r -> {
+            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
+        return temp;
+    }
+
+    /**
+     * 获取serviceModule的树形目录（level  = 2）
+     *
+     * @param tempList
+     * @param parentId
+     * @return
+     */
+    private List<ServiceModuleDTO> getServiceModuleAsLevelTree(List<ServiceModuleDTO> tempList, Long parentId) {
+        List<ServiceModuleDTO> results = new ArrayList<>();
+        Iterator<ServiceModuleDTO> iter = tempList.iterator();
+        while (iter.hasNext()) {
+            ServiceModuleDTO current = iter.next();
+            if (current.getParentId().equals(parentId) && iter.next().getLevel() < 3) {
+                List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
+                current.setServiceModules(c_node);
+                results.add(current);
+            }
+        }
+        return results;
+    }
+}

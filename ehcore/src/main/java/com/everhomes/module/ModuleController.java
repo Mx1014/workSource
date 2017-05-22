@@ -44,7 +44,8 @@ public class ModuleController extends ControllerBase {
 	@RequestMapping("getServiceModule")
 	@RestReturn(value = ServiceModuleDTO.class)
 	public RestResponse getServiceModule(@Valid GetServiceModuleCommand cmd) {
-		RestResponse response = new RestResponse();
+		ServiceModuleDTO dto = serviceModuleService.getServiceModule(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -59,7 +60,8 @@ public class ModuleController extends ControllerBase {
 	@RequestMapping("listServiceModules")
 	@RestReturn(value = ServiceModuleDTO.class, collection = true)
 	public RestResponse listServiceModules(@Valid ListServiceModulesCommand cmd) {
-		RestResponse response = new RestResponse();
+		List<ServiceModuleDTO> dto = serviceModuleService.listServiceModules(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -75,7 +77,7 @@ public class ModuleController extends ControllerBase {
 	@RestReturn(value = ServiceModuleDTO.class, collection = true)
 	public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
 		List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -90,7 +92,8 @@ public class ModuleController extends ControllerBase {
 	@RequestMapping("listServiceModulePrivileges")
 	@RestReturn(value = ServiceModuleDTO.class, collection = true)
 	public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
-		RestResponse response = new RestResponse(serviceModuleService.listServiceModulePrivileges(cmd));
+		List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulePrivileges(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
