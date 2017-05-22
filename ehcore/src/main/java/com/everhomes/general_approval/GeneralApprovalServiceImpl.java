@@ -227,7 +227,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		//checkFieldDTOs(fieldDTOs);
+		checkFieldDTOs(fieldDTOs);
 		dto.setFormFields(fieldDTOs);
 		return dto;
 	}
@@ -269,6 +269,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 						fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
 				fieldNames.putAll(findTopNumFieldNames(subFromExtra.getFormFields(),
 						fieldDTO.getFieldDisplayName()));
+			}else if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
 			}
 		}
 		return fieldNames;
@@ -317,7 +318,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	 * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号 
 	 * 4. 括号必须成对出现
 	 * 
-	 * @param list
+	 * @param defaultValue 公式-默认值
+	 * @param map 合法的变量名map
 	 */
 	@Override
 	public Boolean checkNumberDefaultValue(String defaultValue, Map<String,Integer> map) {
