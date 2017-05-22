@@ -189,5 +189,10 @@ public interface ActivityService {
 	StatisticsTagResponse statisticsTag(StatisticsTagCommand cmd);
 	
 	void signupOrderRefund(Activity activity, Long userId);
+	
+	/**
+	 * 同步报名人数
+	 */
+	void syncActivitySignupAttendeeCount();
 }
 

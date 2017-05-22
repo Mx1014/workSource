@@ -133,4 +133,6 @@ public interface ActivityProivider {
 	List<Object[]> statisticsOrganization(Integer namespaceId, Long categoryId, Long contentCategoryId);
 	
 	List<ActivityRoster> findExpireRostersByActivityId(Long activityId);
+	
+	List<Long> listActivityIds();
 }
