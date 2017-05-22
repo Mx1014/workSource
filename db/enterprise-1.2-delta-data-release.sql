@@ -1,0 +1,1 @@
+-- 初始化organization表中是否设置了企业管理员标记，add by tt, 20170522
