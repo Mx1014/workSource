@@ -9346,25 +9346,31 @@ System.out.println();
 
 	@Override
 	public List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd) {
-		List<OrganizationDTO> organizationDTOs = new ArrayList<>();
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getModuleId());
+		assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
 
-		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getOrganizationId(), cmd.getModuleId());
-		assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getOrganizationId(), 0L)); //负责全部业务模块的对象，也要查询出来
+		//将targetType = EntityType.ORGANIZATIONS的assigments过滤出targetId的set集合
+		Set<Long> targetIdSet = new HashSet<>();
 		for (ServiceModuleAssignment assignment: assignments) {
-			if(EntityType.fromCode(assignment.getTargetType()) == EntityType.ORGANIZATIONS){
-				Organization organization = organizationProvider.findOrganizationById(assignment.getTargetId());
-
-				if(null != organization && OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE){
-					if(null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0){
-						organizationDTOs.add(ConvertHelper.convert(organization, OrganizationDTO.class));
-					}else{
-						if(cmd.getGroupTypes().contains(organization.getGroupType())){
-							organizationDTOs.add(ConvertHelper.convert(organization, OrganizationDTO.class));
-						}
+			if (EntityType.fromCode(assignment.getTargetType()) == EntityType.ORGANIZATIONS) {
+				targetIdSet.add(assignment.getTargetId());
+			}
+		}
+		//循环查找targetIdSet
+		List<OrganizationDTO> organizationDTOs =targetIdSet.stream().map(r ->{
+			Organization organization = organizationProvider.findOrganizationById(r);
+			if(null != organization && OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE){
+				if(null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0){//未指定机构类型
+					return ConvertHelper.convert(organization, OrganizationDTO.class);
+				}else{
+					if(cmd.getGroupTypes().contains(organization.getGroupType())){//符合指定机构类型
+						return ConvertHelper.convert(organization, OrganizationDTO.class);
 					}
 				}
 			}
-		}
+			return null;
+		}).collect(Collectors.toList());
+
 		return organizationDTOs;
 	}
 

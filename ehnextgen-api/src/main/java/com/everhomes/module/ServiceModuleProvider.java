@@ -13,7 +13,7 @@ public interface ServiceModuleProvider {
 
     Long createServiceModuleAssignment(ServiceModuleAssignment serviceModuleAssignment);
 
-    List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId);
+    List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition);
 
     void deleteServiceModuleAssignmentById(Long id);
 
@@ -33,7 +33,7 @@ public interface ServiceModuleProvider {
 
     List<ServiceModuleAssignment> listResourceAssignments(String targetType, List<Long> targetIds, Long organizationId, List<Long> moduleIds);
 
-    List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId);
+    List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long moduleId);
 
     List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId);
 

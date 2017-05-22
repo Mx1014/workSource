@@ -415,7 +415,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         ServiceModule serviceModule = this.serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
         if (null == serviceModule) {
             LOGGER.error("Unable to find the serviceModule. serviceModuleId = {}", cmd.getModuleId());
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unable to find the serviceModule.");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+ "Unable to find the serviceModule.");
         }
         return ConvertHelper.convert(serviceModule, ServiceModuleDTO.class);
     }
@@ -477,44 +478,6 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         assignment.setIncludeChildFlag(target.getIncludeChildFlag());
         assignment.setRelationId(relation_id);
         return assignment;
-    }
-
-    /**
-     * 树形结构loadServiceModule
-     *
-     * @param ownerType
-     * @param ownerId
-     * @return
-     */
-    private List<ServiceModuleDTO> serviceModulesAsTree(String ownerType, Long ownerId) {
-        checkOwnerIdAndOwnerType(ownerType, ownerId);
-
-        Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-        List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, ownerType, ownerId, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-
-        if (null == scopes || scopes.size() == 0) {
-            scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null, null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
-        }
-
-        //过滤出与scopes匹配的serviceModule
-        List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
-        if (scopes.size() != 0)
-            list = filterList(list, scopes);
-
-        List<ServiceModuleDTO> temp = list.stream().map(r -> {
-            ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
-            return dto;
-        }).collect(Collectors.toList());
-
-        List<ServiceModuleDTO> result = new ArrayList<>();
-
-        for (ServiceModuleDTO s : temp) {
-            getChildServiceModules(temp, s);
-            if (s.getParentId() == 0) {
-                result.add(s);
-            }
-        }
-        return result;
     }
 
     private List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId) {

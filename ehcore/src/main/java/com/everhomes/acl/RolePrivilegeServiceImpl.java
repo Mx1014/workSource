@@ -1686,7 +1686,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<AuthorizationServiceModuleDTO> dtos = new ArrayList<>();
 		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.ORGANIZATIONS.getCode());
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(cmd.getOrganizationId()));
-		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOwnerId());
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignments(condition);
 		String key = "";
 		AuthorizationServiceModuleDTO dto = null;
 		for (ServiceModuleAssignment assignment: assignments) {

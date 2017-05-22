@@ -29,121 +29,118 @@ import com.everhomes.rest.module.TreeServiceModuleCommand;
 @RequestMapping("/module")
 public class ModuleController extends ControllerBase {
 
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
+    @Autowired
+    private ServiceModuleService serviceModuleService;
 
-	@Autowired
-	private ServiceModuleService serviceModuleService;
+    /**
+     * <b>URL: /module/getServiceModule</b>
+     * <p>
+     * 获取业务模块信息
+     * </p>
+     */
+    @RequestMapping("getServiceModule")
+    @RestReturn(value = ServiceModuleDTO.class)
+    public RestResponse getServiceModule(@Valid GetServiceModuleCommand cmd) {
+        ServiceModuleDTO dto = serviceModuleService.getServiceModule(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/getServiceModule</b>
-	 * <p>
-	 * 获取业务模块信息
-	 * </p>
-	 */
-	@RequestMapping("getServiceModule")
-	@RestReturn(value = ServiceModuleDTO.class)
-	public RestResponse getServiceModule(@Valid GetServiceModuleCommand cmd) {
-		ServiceModuleDTO dto = serviceModuleService.getServiceModule(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/listServiceModules</b>
+     * <p>
+     * 业务模块列表
+     * </p>
+     */
+    @RequestMapping("listServiceModules")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModules(@Valid ListServiceModulesCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.listServiceModules(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/listServiceModules</b>
-	 * <p>
-	 * 业务模块列表
-	 * </p>
-	 */
-	@RequestMapping("listServiceModules")
-	@RestReturn(value = ServiceModuleDTO.class, collection = true)
-	public RestResponse listServiceModules(@Valid ListServiceModulesCommand cmd) {
-		List<ServiceModuleDTO> dto = serviceModuleService.listServiceModules(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/treeServiceModules</b>
+     * <p>
+     * 树状结构的业务模块列表
+     * </p>
+     */
+    @RequestMapping("treeServiceModules")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/treeServiceModules</b>
-	 * <p>
-	 * 树状结构的业务模块列表
-	 * </p>
-	 */
-	@RequestMapping("treeServiceModules")
-	@RestReturn(value = ServiceModuleDTO.class, collection = true)
-	public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
-		List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/listServiceModulePrivileges</b>
+     * <p>
+     * 业务模块权限列表
+     * </p>
+     */
+    @RequestMapping("listServiceModulePrivileges")
+    @RestReturn(value = ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
+        List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulePrivileges(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/listServiceModulePrivileges</b>
-	 * <p>
-	 * 业务模块权限列表
-	 * </p>
-	 */
-	@RequestMapping("listServiceModulePrivileges")
-	@RestReturn(value = ServiceModuleDTO.class, collection = true)
-	public RestResponse listServiceModulePrivileges(@Valid ListServiceModulePrivilegesCommand cmd) {
-		List<ServiceModuleDTO> dto = serviceModuleService.listServiceModulePrivileges(cmd);
-		RestResponse response = new RestResponse(dto);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/assignmentServiceModule</b>
+     * <p>
+     * 业务模块分配，包括添加和编辑
+     * </p>
+     */
+    @RequestMapping("assignmentServiceModule")
+    @RestReturn(value = String.class)
+    public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
+        this.serviceModuleService.assignmentServiceModule(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/assignmentServiceModule</b>
-	 * <p>
-	 * 业务模块分配，包括添加和编辑
-	 * </p>
-	 */
-	@RequestMapping("assignmentServiceModule")
-	@RestReturn(value = String.class)
-	public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
-		this.serviceModuleService.assignmentServiceModule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/deleteAssignmentServiceModule</b>
+     * <p>
+     * 删除业务模块分配关系
+     * </p>
+     */
+    @RequestMapping("deleteServiceModuleAssignmentRelation")
+    @RestReturn(value = String.class)
+    public RestResponse deleteServiceModuleAssignmentRelation(@Valid DeleteServiceModuleAssignmentRelationCommand cmd) {
+        this.serviceModuleService.deleteServiceModuleAssignmentRelation(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
-	/**
-	 * <b>URL: /module/deleteAssignmentServiceModule</b>
-	 * <p>
-	 * 删除业务模块分配关系
-	 * </p>
-	 */
-	@RequestMapping("deleteServiceModuleAssignmentRelation")
-	@RestReturn(value = String.class)
-	public RestResponse deleteServiceModuleAssignmentRelation(@Valid DeleteServiceModuleAssignmentRelationCommand cmd) {
-		this.serviceModuleService.deleteServiceModuleAssignmentRelation(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /module/listServiceModuleAssignmentRelations</b>
-	 * <p>
-	 * 业务模块分配关系列表
-	 * </p>
-	 */
-	@RequestMapping("listServiceModuleAssignmentRelations")
-	@RestReturn(value = ServiceModuleAssignmentRelationDTO.class, collection = true)
-	public RestResponse listServiceModuleAssignmentRelations(@Valid ListServiceModuleAssignmentRelationsCommand cmd) {
-		List<ServiceModuleAssignmentRelationDTO> relationList = this.serviceModuleService.listServiceModuleAssignmentRelations(cmd);
-		RestResponse response = new RestResponse(relationList);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+    /**
+     * <b>URL: /module/listServiceModuleAssignmentRelations</b>
+     * <p>
+     * 业务模块分配关系列表
+     * </p>
+     */
+    @RequestMapping("listServiceModuleAssignmentRelations")
+    @RestReturn(value = ServiceModuleAssignmentRelationDTO.class, collection = true)
+    public RestResponse listServiceModuleAssignmentRelations(@Valid ListServiceModuleAssignmentRelationsCommand cmd) {
+        List<ServiceModuleAssignmentRelationDTO> relationList = this.serviceModuleService.listServiceModuleAssignmentRelations(cmd);
+        RestResponse response = new RestResponse(relationList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

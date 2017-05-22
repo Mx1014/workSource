@@ -164,15 +164,18 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId) {
+    public List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition) {
         List<ServiceModuleAssignment> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
-        Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+        // 不再以organization作为条件进行判断
+        // Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+//        if (null != condition) {
+//            cond = cond.and(condition);
+//        }
         if (null != condition) {
-            cond = cond.and(condition);
+            query.addConditions(condition);
         }
-        query.addConditions(cond);
         query.addOrderBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE);
         query.addOrderBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID);
         query.fetch().map((r) -> {
@@ -183,11 +186,11 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
-    public List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long organizationId, Long moduleId) {
+    public List<ServiceModuleAssignment> listServiceModuleAssignmentByModuleId(String ownerType, Long ownerId, Long moduleId) {
         Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(moduleId);
         cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
         cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType));
-        return listServiceModuleAssignments(cond, organizationId);
+        return listServiceModuleAssignments(cond);
     }
 
     @Override
