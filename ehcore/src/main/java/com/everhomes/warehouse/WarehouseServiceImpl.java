@@ -750,14 +750,14 @@ public class WarehouseServiceImpl implements WarehouseService {
                 @Override
                 public ImportFileResponse importFile() {
                     ImportFileResponse response = new ImportFileResponse();
-                    List<String> datas = handleImportWarehouseMaterialCategoriesData(resultList);
+                    List<ImportWarehouseMaterialCategoryDataDTO> datas = handleImportWarehouseMaterialCategoriesData(resultList);
                     if(datas.size() > 0){
                         //设置导出报错的结果excel的标题
                         response.setTitle(datas.get(0));
                         datas.remove(0);
                     }
 
-                    List<ImportFileResultLog<String>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
+                    List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
                     response.setTotalCount((long)datas.size());
                     response.setFailCount((long)results.size());
                     response.setLogs(results);
@@ -792,13 +792,13 @@ public class WarehouseServiceImpl implements WarehouseService {
                 @Override
                 public ImportFileResponse importFile() {
                     ImportFileResponse response = new ImportFileResponse();
-                    List<String> datas = handleImportWarehouseMaterialsData(resultList);
+                    List<ImportWarehouseMaterialDataDTO> datas = handleImportWarehouseMaterialsData(resultList);
                     if(datas.size() > 0){
                         //设置导出报错的结果excel的标题
                         response.setTitle(datas.get(0));
                         datas.remove(0);
                     }
-                    List<ImportFileResultLog<String>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
+                    List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> results = importWarehouseMaterialsData(cmd, datas, userId);
                     response.setTotalCount((long)datas.size());
                     response.setFailCount((long)results.size());
                     response.setLogs(results);
@@ -857,16 +857,15 @@ public class WarehouseServiceImpl implements WarehouseService {
 //        return importDataResponse;
 //    }
 
-    private List<ImportFileResultLog<String>> importWarehouseMaterialsData(ImportOwnerCommand cmd, List<String> list, Long userId){
-        List<ImportFileResultLog<String>> errorDataLogs = new ArrayList<>();
+    private List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> importWarehouseMaterialsData(ImportOwnerCommand cmd, List<ImportWarehouseMaterialDataDTO> list, Long userId){
+        List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> errorDataLogs = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-        for (String str : list) {
-            ImportFileResultLog<String> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
-            String[] s = str.split("\\|\\|");
+        for (ImportWarehouseMaterialDataDTO str : list) {
+            ImportFileResultLog<ImportWarehouseMaterialDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             WarehouseMaterials material = new WarehouseMaterials();
 
-            if(StringUtils.isEmpty(s[0])){
+            if(StringUtils.isEmpty(str.getName())){
                 LOGGER.error("warehouse material name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material name is null");
@@ -874,9 +873,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            material.setName(s[0]);
+            material.setName(str.getName());
 
-            if(StringUtils.isEmpty(s[1])){
+            if(StringUtils.isEmpty(str.getMaterialNumber())){
                 LOGGER.error("warehouse material number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material number is null");
@@ -885,7 +884,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
 
-            WarehouseMaterials exist = warehouseProvider.findWarehouseMaterialsByNumber(s[1], cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterials exist = warehouseProvider.findWarehouseMaterialsByNumber(str.getMaterialNumber(), cmd.getOwnerType(), cmd.getOwnerId());
             if(exist != null) {
                 LOGGER.error("materialNumber already exist, data = {}, cmd = {}" , str, cmd);
                 log.setData(str);
@@ -894,9 +893,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            material.setMaterialNumber(s[1]);
+            material.setMaterialNumber(str.getMaterialNumber());
 
-            if(StringUtils.isEmpty(s[3])){
+            if(StringUtils.isEmpty(str.getCategoryNumber())){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category number is null");
@@ -904,7 +903,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[3], cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
             if(category == null) {
                 LOGGER.error("warehouse material category number cannot find category, data = {}, cmd = {}" , str, cmd);
                 log.setData(str);
@@ -916,10 +915,10 @@ public class WarehouseServiceImpl implements WarehouseService {
             material.setCategoryPath(category.getPath());
             material.setCategoryId(category.getId());
 
-            material.setBrand(s[4]);
-            material.setItemNo(s[5]);
-            if(!StringUtils.isEmpty(s[6])) {
-                if(!isNumber(s[6])) {
+            material.setBrand(str.getBrand());
+            material.setItemNo(str.getItemNo());
+            if(!StringUtils.isEmpty(str.getReferencePrice())) {
+                if(!isNumber(str.getReferencePrice())) {
                     LOGGER.error("warehouse material reference price is wrong, data = {}", str);
                     log.setData(str);
                     log.setErrorLog("warehouse material reference price is wrong");
@@ -927,10 +926,10 @@ public class WarehouseServiceImpl implements WarehouseService {
                     errorDataLogs.add(log);
                     continue;
                 }
-                material.setReferencePrice(new BigDecimal(s[6]));
+                material.setReferencePrice(new BigDecimal(str.getReferencePrice()));
             }
 
-            if(StringUtils.isEmpty(s[7])){
+            if(StringUtils.isEmpty(str.getUnitName())){
                 LOGGER.error("warehouse material unit is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material unit is null");
@@ -938,11 +937,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            WarehouseUnits unit = warehouseProvider.findWarehouseUnitByName(s[7], cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseUnits unit = warehouseProvider.findWarehouseUnitByName(str.getUnitName(), cmd.getOwnerType(), cmd.getOwnerId());
             if(unit != null) {
                 material.setUnitId(unit.getId());
             }
-            material.setSpecificationInformation(s[8]);
+            material.setSpecificationInformation(str.getSpecificationInformation());
 
             material.setOwnerType(cmd.getOwnerType());
             material.setOwnerId(cmd.getOwnerId());
@@ -969,15 +968,14 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
     }
 
-    private List<ImportFileResultLog<String>> importWarehouseMaterialCategoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
-        List<ImportFileResultLog<String>> errorDataLogs = new ArrayList<>();
+    private List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> importWarehouseMaterialCategoriesData(ImportOwnerCommand cmd, List<ImportWarehouseMaterialCategoryDataDTO> list, Long userId){
+        List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> errorDataLogs = new ArrayList<>();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        for (String str : list) {
-            ImportFileResultLog<String> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
-            String[] s = str.split("\\|\\|");
+        for (ImportWarehouseMaterialCategoryDataDTO str : list) {
+            ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             WarehouseMaterialCategories category = new WarehouseMaterialCategories();
 
-            if(StringUtils.isEmpty(s[0])){
+            if(StringUtils.isEmpty(str.getName())){
                 LOGGER.error("warehouse material category name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category name is null");
@@ -985,9 +983,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            category.setName(s[0]);
+            category.setName(str.getName());
 
-            if(StringUtils.isEmpty(s[1])){
+            if(StringUtils.isEmpty(str.getCategoryNumber())){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category number is null");
@@ -996,7 +994,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
 
-            WarehouseMaterialCategories exist = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[1], cmd.getOwnerType(), cmd.getOwnerId());
+            WarehouseMaterialCategories exist = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
             if(exist != null) {
                 LOGGER.error("material categoty number already exist, data = {}, cmd = {}" , str, cmd);
                 log.setData(str);
@@ -1005,10 +1003,10 @@ public class WarehouseServiceImpl implements WarehouseService {
                 errorDataLogs.add(log);
                 continue;
             }
-            category.setCategoryNumber(s[1]);
+            category.setCategoryNumber(str.getCategoryNumber());
             category.setPath("");
-            if(!StringUtils.isEmpty(s[3])) {
-                WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategoriesByNumber(s[3], cmd.getOwnerType(), cmd.getOwnerId());
+            if(!StringUtils.isEmpty(str.getParentCategoryNumber())) {
+                WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getParentCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(parent == null) {
                     LOGGER.error("material categoty parent number is not exist, data = {}, cmd = {}" , str, cmd);
                     log.setData(str);
@@ -1033,8 +1031,8 @@ public class WarehouseServiceImpl implements WarehouseService {
         return errorDataLogs;
     }
 
-    private List<String> handleImportWarehouseMaterialsData(List list){
-        List<String> result = new ArrayList<>();
+    private List<ImportWarehouseMaterialDataDTO> handleImportWarehouseMaterialsData(List list){
+        List<ImportWarehouseMaterialDataDTO> result = new ArrayList<>();
         int row = 1;
         for (Object o : list) {
             if(row < 3){
@@ -1042,24 +1040,33 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             RowResult r = (RowResult)o;
-            StringBuffer sb = new StringBuffer();
-            sb.append(r.getA()).append("||");
-            sb.append(r.getB()).append("||");
-            sb.append(r.getC()).append("||");
-            sb.append(r.getD()).append("||");
-            sb.append(r.getE()).append("||");
-            sb.append(r.getF()).append("||");
-            sb.append(r.getG()).append("||");
-            sb.append(r.getH()).append("||");
-            sb.append(r.getI()).append("||");
+            ImportWarehouseMaterialDataDTO data = new ImportWarehouseMaterialDataDTO();
+            if(null != r.getA())
+                data.setName(r.getA().trim());
+            if(null != r.getB())
+                data.setMaterialNumber(r.getB().trim());
+            if(null != r.getC())
+                data.setCategoryName(r.getC().trim());
+            if(null != r.getD())
+                data.setCategoryNumber(r.getD().trim());
+            if(null != r.getE())
+                data.setBrand(r.getE().trim());
+            if(null != r.getF())
+                data.setItemNo(r.getF().trim());
+            if(null != r.getG())
+                data.setReferencePrice(r.getG().trim());
+            if(null != r.getH())
+                data.setUnitName(r.getH().trim());
+            if(null != r.getI())
+                data.setSpecificationInformation(r.getI().trim());
 
-            result.add(sb.toString());
+            result.add(data);
         }
         return result;
     }
 
-    private List<String> handleImportWarehouseMaterialCategoriesData(List list){
-        List<String> result = new ArrayList<>();
+    private List<ImportWarehouseMaterialCategoryDataDTO> handleImportWarehouseMaterialCategoriesData(List list){
+        List<ImportWarehouseMaterialCategoryDataDTO> result = new ArrayList<>();
         int row = 1;
         for (Object o : list) {
             if(row < 3){
@@ -1067,13 +1074,17 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             RowResult r = (RowResult)o;
-            StringBuffer sb = new StringBuffer();
-            sb.append(r.getA()).append("||");
-            sb.append(r.getB()).append("||");
-            sb.append(r.getC()).append("||");
-            sb.append(r.getD()).append("||");
+            ImportWarehouseMaterialCategoryDataDTO data = new ImportWarehouseMaterialCategoryDataDTO();
+            if(null != r.getA())
+                data.setName(r.getA().trim());
+            if(null != r.getB())
+                data.setCategoryNumber(r.getB().trim());
+            if(null != r.getC())
+                data.setParentCategoryName(r.getC().trim());
+            if(null != r.getD())
+                data.setParentCategoryNumber(r.getD().trim());
 
-            result.add(sb.toString());
+            result.add(data);
         }
         return result;
     }
