@@ -937,7 +937,7 @@ public class AdminController extends ControllerBase {
     public RestResponse testSendMail(@RequestParam("toMail") String toMail){
     	String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
         MailHandler handler = PlatformContext.getComponent(handlerName);
-        handler.sendMail(999987, null, toMail, "the mail subject", "the mail body");
+        handler.sendMail(0, null, toMail, "the mail subject", "the mail body");
     	return new RestResponse();
     }
     

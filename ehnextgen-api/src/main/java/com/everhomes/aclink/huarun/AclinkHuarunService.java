@@ -13,4 +13,6 @@ public interface AclinkHuarunService {
 
 	AclinkGetSimpleQRCodeResp getSimpleQRCode(AclinkGetSimpleQRCode getCode);
 
+	AclinkHuarunSyncUserResp syncUser(AclinkHuarunSyncUser syncUser);
+
 }

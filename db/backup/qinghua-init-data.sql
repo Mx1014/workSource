@@ -2612,3 +2612,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 更改服务联盟是否支持审批, add by tt, 20170510
 select max(id) into @id from `eh_service_alliance_jump_module`;
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES (@id+1, 999984, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
+
+
+-- 添加业务授权模块范围
+SET @id = (SELECT MAX(id) FROM  eh_service_module_scopes );
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+	VALUES ((@id := @id + 1, '999984', '60200', '业务授权', 'EhNamespaces', '999984', NULL, '2');
+
