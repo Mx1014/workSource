@@ -1341,8 +1341,8 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("listOrganizationPersonnelsV2")
     @RestReturn(value = ListPersonnelsV2CommandResponse.class)
     public RestResponse listOrganizationPersonnelsV2(@Valid ListPersonnelsV2Command cmd) {
-        //ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
-        RestResponse response = new RestResponse();
+        ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return null;
@@ -1355,7 +1355,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("addOrganizationMemberBasic")
     @RestReturn(value = String.class)
     public RestResponse addOrganizationMemberBasic(@Valid AddOrganizationMemberBasicCommand cmd) {
-        //this.organizationService.addOrganizationMemberBasic(cmd);
+        this.organizationService.addOrganizationMemberBasic(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1468,7 +1468,7 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse addOrganizationMemberWorkExps(@Valid AddOrganizationMemberWorkExpsCommand cmd) {
         this.organizationService.addOrganizationMemberWorkExps(cmd);
-        RestResponse response = new RestResponse(res);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1564,7 +1564,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/listOrganizationMemberContracts</b>
      * <p>列举员工档案详情合同信息</p>
      */
-    @RequestMapping("addOrganizationMemberContracts")
+    @RequestMapping("listOrganizationMemberContracts")
     @RestReturn(value = ListOrganizationMemberContractsResponse.class)
     public RestResponse listOrganizationMemberContracts(@Valid ListOrganizationMemberContractsCommand cmd) {
         ListOrganizationMemberContractsResponse res = this.organizationService.listOrganizationMemberContracts(cmd);

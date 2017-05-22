@@ -9535,6 +9535,106 @@ System.out.println();
 		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
 
+	@Override
+	public ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
+		return null;
+	}
+
+	@Override
+	public void addOrganizationMemberBasic(AddOrganizationMemberBasicCommand cmd) {
+
+	}
+
+	@Override
+	public OrganizationMemberBasicDTO getOrganizationMemberBasic(GetOrganizationMemberBasicCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void updateOrganizationMemberPersonal(UpdateOrganizationMemberPersonalCommand cmd) {
+
+	}
+
+	@Override
+	public OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd) {
+
+	}
+
+	@Override
+	public OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
+
+	}
+
+	@Override
+	public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void addOrganizationMemberWorkExps(AddOrganizationMemberWorkExpsCommand cmd) {
+
+	}
+
+	@Override
+	public ListOrganizationMemberWorkExpsResponse listOrganizationMemberWorkExps(ListOrganizationMemberWorkExpsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd) {
+
+	}
+
+	@Override
+	public OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd) {
+
+	}
+
+	@Override
+	public ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
+
+	}
+
+	@Override
+	public ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
+
+	}
+
+	@Override
+	public ListMemberJobRecordsCommandResponse listMemberJobRecords(ListMemberJobRecordsCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ListMemberProfileRecordsCommandResponse listMemberProfileRecords(ListMemberProfileRecordsCommand cmd) {
+		return null;
+	}
+
 
 }
 

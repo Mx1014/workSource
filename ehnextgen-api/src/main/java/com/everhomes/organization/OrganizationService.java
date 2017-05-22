@@ -437,4 +437,27 @@ public interface OrganizationService {
 	ImportFileResponse<ImportOrganizationContactDataDTO> getImportFileResult(GetImportFileResultCommand cmd);
 
 	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
+
+	/****** new interface ******/
+	ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
+	void addOrganizationMemberBasic(AddOrganizationMemberBasicCommand cmd);
+	OrganizationMemberBasicDTO getOrganizationMemberBasic(GetOrganizationMemberBasicCommand cmd);
+	void updateOrganizationMemberPersonal(UpdateOrganizationMemberPersonalCommand cmd);
+	OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd);
+	void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd);
+	OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd);
+	void addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
+	ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
+	void addOrganizationMemberWorkExps(AddOrganizationMemberWorkExpsCommand cmd);
+	ListOrganizationMemberWorkExpsResponse listOrganizationMemberWorkExps(ListOrganizationMemberWorkExpsCommand cmd);
+	void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd);
+	OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd);
+	void addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
+	ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
+	void addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
+	ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
+	void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
+	ListMemberJobRecordsCommandResponse listMemberJobRecords(ListMemberJobRecordsCommand cmd);
+	ListMemberProfileRecordsCommandResponse listMemberProfileRecords(ListMemberProfileRecordsCommand cmd);
+
 }
