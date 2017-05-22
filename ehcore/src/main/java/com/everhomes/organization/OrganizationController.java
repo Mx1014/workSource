@@ -1341,8 +1341,8 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("listOrganizationPersonnelsV2")
     @RestReturn(value = ListPersonnelsV2CommandResponse.class)
     public RestResponse listOrganizationPersonnelsV2(@Valid ListPersonnelsV2Command cmd) {
-        ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
-        RestResponse response = new RestResponse(res);
+        //ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return null;
@@ -1355,7 +1355,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("addOrganizationMemberBasic")
     @RestReturn(value = String.class)
     public RestResponse addOrganizationMemberBasic(@Valid AddOrganizationMemberBasicCommand cmd) {
-        this.organizationService.addOrganizationMemberBasic(cmd);
+        //this.organizationService.addOrganizationMemberBasic(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
