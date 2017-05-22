@@ -59,6 +59,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.business.listUsersOfEnterpriseCommand;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.common.ImportFileResponse;
@@ -731,6 +732,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long communityId = cmd.getCommunityId();
 
 		String keywords = cmd.getKeywords();
+		
+		Byte setAdminFlag = cmd.getSetAdminFlag();
 
 		if(!StringUtils.isEmpty(keywords)){
 			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);

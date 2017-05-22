@@ -7,7 +7,7 @@ package com.everhomes.rest.organization;
  * <li>communityId: 小区ID</li>
  * <li>buildingId: 楼栋ID</li>
  * <li>keywords: 关键字搜索</li>
- * <li>setAdminFlag: 按是否设置了管理员来查询，add by tt, 20170522</li>
+ * <li>setAdminFlag: 1是0否，按是否设置了管理员来查询，add by tt, 20170522</li>
  * </ul>
  * @author sfyan
  *
