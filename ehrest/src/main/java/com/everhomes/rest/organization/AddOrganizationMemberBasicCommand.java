@@ -14,13 +14,13 @@ import java.util.List;
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>contactName：成员名称</li>
  * <li>contactToken：联系信息</li>
- * <li>gender：性别</li>
- * <li>employeeNo：工号</li>
+ * <li>gender：性别，0: 保密 1: 男性 2: 女性</li>
+ * <li>employeeNo：员工编号(与memberId关联)</li>
  * <li>contactDescription：描述</li>
  * <li>departmentIds：员工部门</li>
  * <li>jobPositionIds：员工岗位</li>
  * <li>jobLevelIds: 员工职级</li>
- * <li>employeeType: 员工类型，包含全职、兼职、实习、劳动派遣</li>
+ * <li>employeeType: 员工类型，0: 全职 1: 兼职 2: 实习 3: 劳动派遣</li>
  * <li>memberId: 员工编号</li>
  * <li>checkInTime: 入职日期</li>
  * </ul>
@@ -39,9 +39,9 @@ public class AddOrganizationMemberBasicCommand {
 	private String contactToken;
 	
 	private Byte gender;
-	
+
 	private String employeeNo;
-	
+
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
 

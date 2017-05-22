@@ -9,34 +9,27 @@ import java.util.List;
 
 /**
  * <ul>
-
- * <li>organizationId: 小区id</li>
- * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
- * <li>targetId：注册用户对应的userId，未注册填0</li>
- * <li>memberGroup：组织角色类型 参考{@link com.everhomes.rest.organization.pm.PmMemberGroup}</li>
+ * <li>memberId：员工编号</li>
  * <li>contactName：成员名称</li>
- * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
- * <li>contactToken：成员标识</li>
- * <li>contactDescription：描述</li>
- * <li>status：状态</li>
- * <li>roles：角色列表</li>
+ * <li>organizationId: 小区id</li>
+ * <li>gender：性别，0：保密 1：男性 2：女性</li>
  * <li>departments：部门列表</li>
- * <li>groups：群组列表</li>
- * <li>employeeNo：工号</li>
- * <li>initial：首字母</li>
- * <li>proccesingTaskCount：执行任务数量</li>
- * <li>executiveFlag：是否高管 1-是 0-否</li>
- * <li>position：职位</li>
- * <li>idNumber：身份证号码</li>
+ * <li>jobPositions: 岗位</li>
+ * <li>jobLevels: 职级</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职</li>
+ * <li>checkInTime：入职时间</li>
+ * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
+ * <li>contactToken：联系号码</li>
+ * <li>avatar: 成员头像</li>
  * </ul>
  */
 public class OrganizationMemberBasicDTO {
-	@NotNull
+    @NotNull
     private Long memberId;
 
     private String contactName;
 
-    private Byte   gender;
+    private Byte gender;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> departments;
@@ -51,10 +44,11 @@ public class OrganizationMemberBasicDTO {
 
     private String checkInTime;
 
-    private Byte   contactType;
+    private Byte contactType;
     private String contactToken;
 
-    private String   avatar;
+    private String avatar;
+
     /*
     @NotNull
     private Long   organizationId;
@@ -80,8 +74,21 @@ public class OrganizationMemberBasicDTO {
     private String groupPath;
     private String position;
     private String idNumber;
+    targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
+    targetId：注册用户对应的userId，未注册填0</li>
+    memberGroup：组织角色类型 参考{@link com.everhomes.rest.organization.pm.PmMemberGroup}</li>
+    contactDescription：描述</li>
+    status：状态</li>
+    roles：角色列表</li>
+    groups：群组列表</li>
+    employeeNo：工号</li>
+    initial：首字母</li>
+    proccesingTaskCount：执行任务数量</li>
+    executiveFlag：是否高管 1-是 0-否</li>
+    position：职位</li>
+    idNumber：身份证号码</li>
     */
-	public OrganizationMemberBasicDTO() {
+    public OrganizationMemberBasicDTO() {
     }
 
     public Long getMemberId() {

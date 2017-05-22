@@ -120,8 +120,11 @@ CREATE TABLE `eh_organization_member_contract` (
 -- DROP TABLE IF EXISTS `eh_organization_member_profile_logs`;
 CREATE TABLE `eh_organization_member_profile_logs` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
+  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `person_change_type` VARCHAR(64) COMMENT '人员变动类型:入职,转正,离职;变更部门,岗位,职级',
   `operation_type` VARCHAR(32) COMMENT 'add,update,delete',
+  `operation_time` DATETIME NOT NULL COMMENT 'when the information of the employee has been changed',
   `operator_uid` BIGINT COMMENT 'id of operator',
   `resource_type` VARCHAR(32) COMMENT 'the type of table',
   `resource_id` BIGINT COMMENT 'reference for table_id',

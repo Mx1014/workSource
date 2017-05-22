@@ -11,22 +11,21 @@ import java.util.List;
  * <ul>
  * <li>memerId: 员工编号</li>
  * <li>contactName：成员名称</li>
- * <li>gender: 成员性别</li>
+ * <li>gender: 成员性别，0：保密 1：男性 2：女性</li>
  * <li>departments：部门列表</li>
  * <li>jobPositions: 岗位</li>
  * <li>jobLevels: 职级</li>
  * <li>organizationId: 小区id</li>
  * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
  * <li>contactToken：成员标识</li>
- * <li>employeeStatus：员工状态</li>
- * <li>employmentTime：入职时间</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职</li>
+ * <li>employmentTime：转正时间</li>
  * <li>contractEndTime: 合同时间</li>
- * <li>profileIntegrity: 档案完整度</li>
+ * <li>profileIntegrity: 档案完整度,0-100%</li>
  * <li>avatar: 成员头像</li>
- * <li>visibleFlag: 成员隐藏性</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
- * <li>roles：角色列表</li>
  * <li>groups：群组列表</li>
  * </ul>
  */
@@ -82,6 +81,7 @@ public class OrganizationMemberV2DTO {
     private String nickName;
     private Long creatorUid;
     private String groupType;
+    roles：角色列表
     private String groupPath;
     */
 

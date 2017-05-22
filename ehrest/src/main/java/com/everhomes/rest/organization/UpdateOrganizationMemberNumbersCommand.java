@@ -3,7 +3,7 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by M on 2017/5/18.
+ * Created by R on 2017/5/18.
  * <ul>
  *     <li>memberId: 员工编号</li>
  *     <li>salaryCardNumber: 工资卡号</li>

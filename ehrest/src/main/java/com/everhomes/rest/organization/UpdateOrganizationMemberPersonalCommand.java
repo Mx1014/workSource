@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>memberId: 员工编号</li>
  * <li>enName：英文名</li>
  * <li>birthday: 出生日期</li>
- * <li>maritalFlag: 婚姻状况</li>
+ * <li>maritalFlag: 婚姻状况，0：保密 1：已婚 2：未婚</li>
  * <li>politicalStatus: 政治面貌</li>
  * <li>nativePlace: 籍贯</li>
  * <li>regResidence: 户口</li>
