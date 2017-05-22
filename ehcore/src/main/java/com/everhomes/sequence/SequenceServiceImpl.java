@@ -1312,8 +1312,26 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEnergyMonthStatistics.class, Tables.EH_ENERGY_MONTH_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_MONTH_STATISTICS.ID.max()).from(Tables.EH_ENERGY_MONTH_STATISTICS).fetchOne().value1();
         });
-        syncTableSequence(null, EhPreviews.class, Tables.EH_PREVIEWS.getName(), (dbContext) -> {
+		syncTableSequence(null, EhPreviews.class, Tables.EH_PREVIEWS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PREVIEWS.ID.max()).from(Tables.EH_PREVIEWS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressCompanies.class, Tables.EH_EXPRESS_COMPANIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_COMPANIES.ID.max()).from(Tables.EH_EXPRESS_COMPANIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressUsers.class, Tables.EH_EXPRESS_USERS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_USERS.ID.max()).from(Tables.EH_EXPRESS_USERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressAddresses.class, Tables.EH_EXPRESS_ADDRESSES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ADDRESSES.ID.max()).from(Tables.EH_EXPRESS_ADDRESSES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressOrders.class, Tables.EH_EXPRESS_ORDERS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ORDERS.ID.max()).from(Tables.EH_EXPRESS_ORDERS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressQueryHistories.class, Tables.EH_EXPRESS_QUERY_HISTORIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_QUERY_HISTORIES.ID.max()).from(Tables.EH_EXPRESS_QUERY_HISTORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhExpressOrderLogs.class, Tables.EH_EXPRESS_ORDER_LOGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EXPRESS_ORDER_LOGS.ID.max()).from(Tables.EH_EXPRESS_ORDER_LOGS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhImportFileTasks.class, Tables.EH_IMPORT_FILE_TASKS.getName(), (dbContext) -> {

@@ -155,7 +155,8 @@
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
-        eh_energy_meter_price_config |
+		eh_express_service_addresses | eh_express_companies | eh_express_users | eh_express_addresses | 
+		eh_express_orders | eh_express_query_histories | eh_express_order_logs
         eh_user_notification_settings | eh_group_member_logs |
 
         </includes>
