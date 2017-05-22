@@ -281,7 +281,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		case SUBFORM:
 			// 对于子表单要检查所有的字段
 
-			GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
+			GeneralFormSubformDTO subFromExtra = JSONObject.parseObject(fieldDTO.getFieldExtra(),
 					GeneralFormSubformDTO.class);
 			LOGGER.debug("FIELD EXTRA"+fieldDTO.getFieldExtra());
 			LOGGER.debug("field extra dto "+subFromExtra);
