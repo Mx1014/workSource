@@ -1332,7 +1332,7 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
 
-/***********************************************************************************New***********************************************************************************/
+/*New*/
 
     /**
      * <b>URL: /org/listOrganizationPersonnelsV2</b>
@@ -1340,7 +1340,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listOrganizationPersonnelsV2")
     @RestReturn(value = ListPersonnelsV2CommandResponse.class)
-    public RestResponse listOrganizationPersonnelsV2(@Valid ListPersonnelsV2Command cmd) {
+    public RestResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
         ListPersonnelsV2CommandResponse res = organizationService.listOrganizationPersonnelsV2(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
