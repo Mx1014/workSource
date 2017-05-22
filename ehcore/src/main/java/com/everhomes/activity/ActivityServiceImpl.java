@@ -100,6 +100,8 @@ import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -5140,5 +5142,39 @@ public class ActivityServiceImpl implements ActivityService {
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));  
         cal.set(Calendar.HOUR_OF_DAY, 24);  
         return new Timestamp(cal.getTime().getTime());  
-    }  
+    }
+
+	@Override
+	public void syncActivitySignupAttendeeCount() {
+		List<Long> listIds = activityProvider.listActivityIds();
+		if(listIds != null){
+			for(int i=0; i< listIds.size(); i++){
+				Long activityId = listIds.get(i);
+				this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+activityId).enter(()-> {
+					Activity activity = activityProvider.findActivityById(activityId);
+					
+					//找不到活动不同步
+					if(activity == null){
+						return null;
+					}
+					//已确认为已报名
+			        Condition condition = Tables.EH_ACTIVITY_ROSTER.CONFIRM_FLAG.eq(ConfirmStatus.CONFIRMED.getCode());
+			        condition = condition.and(Tables.EH_ACTIVITY_ROSTER.STATUS.eq(ActivityRosterStatus.NORMAL.getCode()));
+			        Integer confirmUserCount = activityProvider.countActivityRosterByCondition(activityId, condition);
+			        
+			        //数量相等不需要同步
+			        if(activity.getSignupAttendeeCount() != null &&  activity.getSignupAttendeeCount().intValue() == confirmUserCount){
+			        	return null;
+			        }
+			        
+			        Integer oldSignupAttendeeCount = activity.getSignupAttendeeCount();
+			        activity.setSignupAttendeeCount(confirmUserCount);
+			        activityProvider.updateActivity(activity);
+			        LOGGER.warn("Activity signupAttendeeCount warning Id=" + activityId + " old signupAttendeeCount=" + oldSignupAttendeeCount + " calculate count=" + confirmUserCount);
+					return null;
+				});
+			}
+		}
+		
+	}  
 }

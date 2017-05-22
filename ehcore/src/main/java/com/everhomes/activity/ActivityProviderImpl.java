@@ -1310,4 +1310,14 @@ public class ActivityProviderImpl implements ActivityProivider {
         return rosters;
 	}
 
+	@Override
+	public List<Long> listActivityIds() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		List<Long> result = context.select(Tables.EH_ACTIVITIES.ID).from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()))
+			.fetchInto(Long.class);
+		return result;
+	}
+
 }
