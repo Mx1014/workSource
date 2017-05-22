@@ -1008,6 +1008,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             	AesServerKey aesServerKey = null;
                 DoorAccess doorAcc = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
                 if(doorAcc != null) {
+                	if(doorAcc.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
+                		return doorAcc;
+                	}
                 		aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAcc.getId());
                 		doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
                 		doorAccessProvider.updateDoorAccess(doorAcc);
@@ -1093,7 +1096,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
         String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), cmd.getName(),
-                doorAccess.getCreateTime().getTime(), doorAccess.getUuid(), doorMessage);
+        		new Date().getTime(), doorAccess.getUuid(), doorMessage);
         
         doorMessage.setDoorId(doorAccess.getId());
         doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
@@ -1122,9 +1125,12 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 public DoorCommand doInTransaction(TransactionStatus arg0) {
                     doorAccess.setStatus(DoorAccessStatus.ACTIVE.getCode());
                     doorAccessProvider.updateDoorAccess(doorAccess);
+                    
                     DoorCommand doorCommand = doorCommandProvider.queryActiveDoorCommand(cmd.getDoorId());
-                    doorCommand.setStatus(DoorCommandStatus.PROCESS.getCode());
-                    doorCommandProvider.updateDoorCommand(doorCommand);
+                    if(doorCommand != null) {
+                    	doorCommand.setStatus(DoorCommandStatus.PROCESS.getCode());
+                     doorCommandProvider.updateDoorCommand(doorCommand);
+                     }
                     
                     //Create auth
                     DoorAuth doorAuth = new DoorAuth();
