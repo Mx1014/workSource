@@ -1345,7 +1345,7 @@ public class OrganizationController extends ControllerBase {
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-        return null;
+        return response;
     }
 
     /**
