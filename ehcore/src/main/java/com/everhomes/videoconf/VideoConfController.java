@@ -81,6 +81,7 @@ import com.everhomes.rest.videoconf.SetWarningContactorCommand;
 import com.everhomes.rest.videoconf.SourceVideoConfAccountStatistics;
 import com.everhomes.rest.videoconf.StartVideoConfCommand;
 import com.everhomes.rest.videoconf.StartVideoConfResponse;
+import com.everhomes.rest.videoconf.TestSendPhoneMsgCommand;
 import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
@@ -1451,6 +1452,22 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(String.class)
 	public RestResponse getVideoConfTrialAccount(GetVideoConfTrialAccountCommand cmd){		
 		videoConfService.getVideoTrialConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: /conf/testSendPhoneMsg</b>
+	 * 获取一个测试账号
+	 */
+	@RequestMapping("testSendPhoneMsg")
+	@RestReturn(String.class)
+	@RequireAuthentication(false)
+	public RestResponse testSendPhoneMsg(TestSendPhoneMsgCommand cmd){		
+		videoConfService.testSendPhoneMsg(cmd.getPhoneNum(), cmd.getTemplateId(), cmd.getNamespaceId());
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

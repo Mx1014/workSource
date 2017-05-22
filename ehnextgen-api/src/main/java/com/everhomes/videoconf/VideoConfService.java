@@ -161,4 +161,5 @@ public interface VideoConfService {
 	CheckVideoConfTrialAccountResponse checkVideoConfTrialAccount(
 			CheckVideoConfTrialAccountCommand cmd);
 	void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd);
+	void testSendPhoneMsg(String phoneNum, int templateId, int namespaceId);
 }
