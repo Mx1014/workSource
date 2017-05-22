@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
  * <li>educations: 对应的教育信息，参考{@link com.everhomes.rest.organization.OrganizationMemberEducationsDTO}</li>
  * </ul>

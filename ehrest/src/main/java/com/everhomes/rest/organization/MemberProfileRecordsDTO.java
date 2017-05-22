@@ -3,7 +3,6 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by R on 2017/5/22.
  * <ul>
  * <li>memberId: 员工编号</li>
  * <li>operationTime: 修改时间</li>

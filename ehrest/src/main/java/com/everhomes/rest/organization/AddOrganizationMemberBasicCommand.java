@@ -14,7 +14,7 @@ import java.util.List;
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>contactName：成员名称</li>
  * <li>contactToken：联系信息</li>
- * <li>gender：性别，0: 保密 1: 男性 2: 女性</li>
+ * <li>gender：性别</li>
  * <li>employeeNo：员工编号(与memberId关联)</li>
  * <li>contactDescription：描述</li>
  * <li>departmentIds：员工部门</li>
@@ -33,11 +33,11 @@ public class AddOrganizationMemberBasicCommand {
 	private String targetType;
 	
 	private Long   targetId;
-	
+
 	private String contactName;
-	
+
 	private String contactToken;
-	
+
 	private Byte gender;
 
 	private String employeeNo;

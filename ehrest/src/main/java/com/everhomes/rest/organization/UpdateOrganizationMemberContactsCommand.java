@@ -3,7 +3,6 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by R on 2017/5/18.
  * <ul>
  * <li>email: 邮箱</li>
  * <li>weChat: 微信号码</li>

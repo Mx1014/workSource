@@ -9581,6 +9581,11 @@ System.out.println();
 	}
 
 	@Override
+	public void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd) {
+
+	}
+
+	@Override
 	public void addOrganizationMemberWorkExps(AddOrganizationMemberWorkExpsCommand cmd) {
 
 	}
@@ -9588,6 +9593,11 @@ System.out.println();
 	@Override
 	public ListOrganizationMemberWorkExpsResponse listOrganizationMemberWorkExps(ListOrganizationMemberWorkExpsCommand cmd) {
 		return null;
+	}
+
+	@Override
+	public void deleteOrganizationMemberWorkExps(DeleteOrganizationMemberWorkExps cmd) {
+
 	}
 
 	@Override
@@ -9611,6 +9621,11 @@ System.out.println();
 	}
 
 	@Override
+	public void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd) {
+
+	}
+
+	@Override
 	public void addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
 
 	}
@@ -9618,6 +9633,11 @@ System.out.println();
 	@Override
 	public ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
 		return null;
+	}
+
+	@Override
+	public void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd) {
+
 	}
 
 	@Override

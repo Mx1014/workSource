@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
  * <li>workExps: 对应的工作经历，参考{@link com.everhomes.rest.organization.OrganizationMemberWorkExpsDTO}</li>
  * </ul>

@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
  * <li>memberJobRecords: 对应的人员变动信息，参考{@link com.everhomes.rest.organization.MemberJobRecordsDTO}</li>
  * </ul>

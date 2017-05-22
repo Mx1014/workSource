@@ -3,8 +3,8 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
+ * <id>id: 教育信息编号</id>
  * <li>memberId: 员工编号</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  */
 
 public class OrganizationMemberEducationsDTO {
+
+    private Long id;
 
     private Long memberId;
 
@@ -29,6 +31,14 @@ public class OrganizationMemberEducationsDTO {
     private String graduationTime;
 
     public OrganizationMemberEducationsDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getMemberId() {

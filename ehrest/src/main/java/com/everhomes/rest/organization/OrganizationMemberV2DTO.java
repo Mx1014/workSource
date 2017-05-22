@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * Created by Ryan on 2017/5/18.
  * <ul>
+ * <li>id: 表增序号</li>
  * <li>memerId: 员工编号</li>
  * <li>contactName：成员名称</li>
  * <li>gender: 成员性别，0：保密 1：男性 2：女性</li>
@@ -30,6 +31,9 @@ import java.util.List;
  * </ul>
  */
 public class OrganizationMemberV2DTO {
+
+    @NotNull
+    private Long id;
 
     @NotNull
     private Long memberId;
@@ -57,8 +61,10 @@ public class OrganizationMemberV2DTO {
 
     private String contactToken;
 
+    @NotNull
     private Byte employeeStatus;
 
+    @NotNull
     private String employmentTime;
 
     private String contractEndTime;
@@ -93,6 +99,14 @@ public class OrganizationMemberV2DTO {
     private List<OrganizationDTO> groups;
 
     public OrganizationMemberV2DTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getMemberId() {

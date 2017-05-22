@@ -3,12 +3,11 @@ package com.everhomes.rest.organization;
 import com.everhomes.util.StringHelper;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
- *     <li>memberId: 员工编号</li>
- *     <li>salaryCardNumber: 工资卡号</li>
- *     <li>socialSecurityNumber: 公积金卡号</li>
- *     <li>providentFundNumber: 社保卡号</li>
+ * <li>memberId: 员工编号</li>
+ * <li>salaryCardNumber: 工资卡号</li>
+ * <li>socialSecurityNumber: 公积金卡号</li>
+ * <li>providentFundNumber: 社保卡号</li>
  * </ul>
  */
 public class OrganizationMemberNumbersDTO {

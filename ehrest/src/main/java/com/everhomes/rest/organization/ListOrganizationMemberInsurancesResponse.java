@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * Created by R on 2017/5/19.
  * <ul>
  * <li>insurances: 对应的工作经历，参考{@link com.everhomes.rest.organization.OrganizationMemberInsurancesDTO}</li>
  * </ul>

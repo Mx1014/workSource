@@ -1,8 +1,8 @@
 package com.everhomes.rest.organization;
 
 /**
- * Created by Ryan on 2017/5/19.
  * <ul>
+ * <li>id: 工作经历信息编号</li>
  * <li>memberId: 员工编号</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
@@ -12,6 +12,8 @@ package com.everhomes.rest.organization;
  * </ul>
  */
 public class OrganizationMemberWorkExpsDTO {
+
+    private Long id;
 
     private Long memberId;
 
@@ -26,6 +28,14 @@ public class OrganizationMemberWorkExpsDTO {
     private String graduationTime;
 
     public OrganizationMemberWorkExpsDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getMemberId() {
