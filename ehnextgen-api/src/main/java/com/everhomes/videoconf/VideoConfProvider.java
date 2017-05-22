@@ -114,8 +114,8 @@ public interface VideoConfProvider {
 	boolean allTrialEnterpriseAccounts(Long enterpriseId);
 	List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime);
 	Long listConfTimeByAccount(Long accountId);
-	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize); 
-	List<Long> findAccountCategoriesByNotInConfType(byte b);
+	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize);  
 	List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories, Calendar calendar);
+	List<Long> findAccountCategoriesByNotInConfType(Byte confType);
 	
 }

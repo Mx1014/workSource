@@ -99,6 +99,11 @@ public interface SmsTemplateCode {
     int PM_TASK_ASSIGN_NODE_CODE= 47;
     int PM_TASK_ASSIGN_NODE_SUPERVISE_CODE= 48;
     int PM_TASK_PROCESSING_BUTTON_APPROVE_CODE= 49;
-
+    
+    // 视频会议短信
+    int VIDEO_EXPIRATION_REMINDER = 51;
+    int VIDEO_TRIAL_EXPIRATION_REMINDER = 52;
+    
+    
 
 }

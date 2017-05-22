@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -54,9 +56,12 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.asset.FindAssetBillCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.park.RechargeOrderDTO;
@@ -175,6 +180,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfServiceImpl.class);
 	
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
+ 
 	
 	@Autowired
 	private VideoConfProvider vcProvider;
@@ -2944,6 +2950,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Scheduled(cron = "0 0 11 * * ?") 
 	private void scheduledExpirationReminder(){
 		//提前三天提醒试用的
+		
 		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, 3);
@@ -2953,12 +2960,63 @@ public class VideoConfServiceImpl implements VideoConfService {
 		calendar.set(Calendar.MILLISECOND, 0);
 		List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
 		for(ConfOrders order : orders){
-			sendSMStoTrial(account.getOwnerId())
+			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_TRIAL_EXPIRATION_REMINDER);
 		}
 		//提前7天提醒正式的
 		categories = vcProvider.findAccountCategoriesByNotInConfType((byte) 4); 
 		calendar.add(Calendar.DAY_OF_MONTH, 4); 
 		orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+		for(ConfOrders order : orders){
+			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_EXPIRATION_REMINDER);
+		}
+	} 
+
+	private void sendExpirationRemi1derPhoneMsg(ConfOrders order ,Calendar calendar , int templateId) {
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		String phoneNum = findContactNumber(order);
+		if(null != phoneNum)
+			return; 
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    int pageSize =Integer.MAX_VALUE;
+		List<ConfOrderAccountMap> orderMap = vcProvider.findOrderAccountByOrderId(order.getId(), locator, pageSize+1);
+		StringBuilder accountName = new StringBuilder();
+	
+		orderMap.stream().map(r -> {
+			processAccountName(accountName,r,phoneNum);
+			return null;
+		}).collect(Collectors.toList()); 
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("accountName", accountName);
+		smsProvider.addToTupleList(variables, "date", dateSF.format(calendar.getTime())); 
+		String templateLocale = RentalNotificationTemplateCode.locale; 
+		
+		smsProvider.sendSms(orderMap.get(0).getConfAccountNamespaceId(), phoneNum, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
+		
+	} 
+
+	private void processAccountName(StringBuilder accountName, ConfOrderAccountMap r,String phoneNum) {
+		ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
+		if(!accountName.equals(""))
+			accountName.append(",");
+
+		if(null != account.getOwnerId()){
+
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(account.getOwnerId(), IdentifierType.MOBILE.getCode()) ;
+			if(null != userIdentifier)
+				accountName.append(userIdentifier.getIdentifierToken());
+		}else{
+			accountName.append(phoneNum);
+		}
+		
+	}
+
+	private String findContactNumber(ConfOrders order) {
+		if(null != order.getBuyerContact())
+			return order.getBuyerContact();
+
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+		if(null != userIdentifier)
+			return userIdentifier.getIdentifierToken();
+		return null;
 	}
 	
 	

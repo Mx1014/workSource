@@ -3,9 +3,11 @@ package com.everhomes.videoconf;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 
 
@@ -27,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -1561,6 +1564,51 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<Long> findAccountCategoriesByNotInConfType(Byte confType) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+		List<Long> accountCategories = new ArrayList<Long>();
+		
+		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
+		
+		if(confType != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.ne(confType));
+		
+		query.fetch().map((r) ->{
+			accountCategories.add(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
+			return null;
+        });
+		
+		return accountCategories;
+	}
+
+	@Override
+	public List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories,
+			Calendar calendar) {
+		List<ConfOrders> results = new ArrayList<ConfOrders>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ORDERS.ACCOUNT_CATEGORY_ID.in(categories));
+		query.addConditions(Tables.EH_CONF_ORDERS.EXPIRED_DATE.greaterOrEqual(new Timestamp(calendar.getTimeInMillis())));
+		calendar.add(Calendar.DAY_OF_MONTH, 1); 
+		query.addConditions(Tables.EH_CONF_ORDERS.EXPIRED_DATE.lt(new Timestamp(calendar.getTimeInMillis()))); 
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ConfOrders.class));
+            return null;
+		});
+ 
+
+		return results;
 	}
 	
 }
