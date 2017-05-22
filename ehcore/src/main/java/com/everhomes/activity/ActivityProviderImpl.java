@@ -995,6 +995,11 @@ public class ActivityProviderImpl implements ActivityProivider {
 						if(startTime != null && endTime != null){
 							condition = condition.and(Tables.EH_ACTIVITIES.DELETE_TIME.ge(startTime));
 							condition = condition.and(Tables.EH_ACTIVITIES.DELETE_TIME.lt(endTime));
+							
+							//当前时间段内创建活动不算，防止：当天创建活动并当前取消，这时新增没有增加而取消增加了一笔
+							Condition otherCondition = Tables.EH_ACTIVITIES.CREATE_TIME.lt(startTime);
+							otherCondition = otherCondition.or(Tables.EH_ACTIVITIES.CREATE_TIME.ge(endTime));
+							condition = condition.and(otherCondition);
 						}
 					}else{
 						condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
@@ -1044,9 +1049,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.ge(startTime));
 							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.lt(endTime));
 							
-							//当前时间段内创建的活动不算，防止：当天报名并当前取消，这时新增没有增加而取消增加了一笔
-							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.le(startTime));
-							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.gt(endTime));
+							//当前时间段内报名不算，防止：当天报名并当前取消，这时新增没有增加而取消增加了一笔
+							Condition otherCondition = Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.lt(startTime);
+							otherCondition = otherCondition.or(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.ge(endTime));
+							condition = condition.and(otherCondition);
 						}
 						
 					}else{

@@ -994,7 +994,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -1144,7 +1145,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(operatorId, posts, communityId, false);
@@ -1196,7 +1198,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
         	
@@ -1625,7 +1628,8 @@ public class ForumServiceImpl implements ForumService {
         locator.setAnchor(null);
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            locator.setAnchor(posts.get(posts.size() - 1).getId());
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            locator.setAnchor(posts.get(posts.size() - 1).getCreateTime().getTime());
         }
         
         populatePosts(user.getId(), posts, null, false);
@@ -1763,7 +1767,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(operatorId, posts, null, true);
@@ -2519,7 +2524,7 @@ public class ForumServiceImpl implements ForumService {
 //        Long nextPageAnchor = null;
 //        if(posts.size() > pageSize) {
 //            posts.remove(posts.size() - 1);
-//            nextPageAnchor = posts.get(posts.size() - 1).getId();
+//            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
 //        }
 //        
 //        populatePosts(userId, posts, communityId, false);
@@ -2583,7 +2588,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -2740,7 +2746,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, cmd.getCommunityId(), false);
@@ -5347,7 +5354,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = posts.get(posts.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, posts, communityId, false);
@@ -5601,7 +5609,9 @@ public class ForumServiceImpl implements ForumService {
         });
         
         //此处按id排序而不是创建时间，因为有可能创建时间是一样的，那样在分界点的数据就会有问题
-        totalPostList.sort((post1, post2)->post1.getId().longValue() > post2.getId().longValue()?-1:1);
+        
+        //上面的注释已经过期，此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+        totalPostList.sort((post1, post2)->post1.getCreateTime().getTime() > post2.getCreateTime().getTime()?-1:1);
         
         //取前21条，多一条是为了后面判断是否有下一页
         List<Post> resultPostList = totalPostList.subList(0, totalPostList.size()>thisPageSize+1?thisPageSize+1:totalPostList.size());
@@ -5611,7 +5621,8 @@ public class ForumServiceImpl implements ForumService {
         Long nextPageAnchor = null;
         if(resultPostList.size() > thisPageSize) {
         	resultPostList.remove(resultPostList.size() - 1);
-            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getId();
+        	 //此处使用创建时间排序 ， 因为查询接口queryPosts使用了创建时间排序 add by yanjun 20170522
+            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getCreateTime().getTime();
         }
         
         populatePosts(userId, resultPostList, communityId, false);

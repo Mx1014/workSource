@@ -672,7 +672,10 @@ public class ForumProviderImpl implements ForumProvider {
         }
             
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+        	//query.addConditions(Tables.EH_FORUM_POSTS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_FORUM_POSTS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
         }
         
         query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
@@ -689,7 +692,9 @@ public class ForumProviderImpl implements ForumProvider {
         }).collect(Collectors.toList());
         
         if(posts.size() > 0) {
-            locator.setAnchor(posts.get(posts.size() -1).getId());
+        	//后台发布活动：开放时间选择可早于当前时间（包括开始、结束及报名截止时间，同时刷新活动发布时间为活动开始时间前24小时） (活动2.6.0的)
+        	//此时ID和CREATE_TIME的顺序不一致，此处改用创建时间排序 ，  add by yanjun 20170522
+            locator.setAnchor(posts.get(posts.size() -1).getCreateTime().getTime());
         }
         
         long endTime = System.currentTimeMillis();
