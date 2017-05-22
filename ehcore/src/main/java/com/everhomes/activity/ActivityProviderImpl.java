@@ -1043,6 +1043,10 @@ public class ActivityProviderImpl implements ActivityProivider {
 						if(startTime != null && endTime != null){
 							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.ge(startTime));
 							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CANCEL_TIME.lt(endTime));
+							
+							//当前时间段内创建的活动不算，防止：当天报名并当前取消，这时新增没有增加而取消增加了一笔
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.le(startTime));
+							condition = condition.and(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.gt(endTime));
 						}
 						
 					}else{
