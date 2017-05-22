@@ -2992,7 +2992,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 		smsProvider.sendSms(orderMap.get(0).getConfAccountNamespaceId(), phoneNum, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
 		
 	} 
+	@Override
+	public void testSendPhoneMsg(String phoneNum,int templateId,int namespaceId){
 
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("accountName", "账号1");
+		smsProvider.addToTupleList(variables, "date", "2017年5月22日"); 
+		String templateLocale = RentalNotificationTemplateCode.locale; 
+		smsProvider.sendSms(namespaceId, phoneNum, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
+	}
 	private void processAccountName(StringBuilder accountName, ConfOrderAccountMap r,String phoneNum) {
 		ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
 		if(!accountName.equals(""))
