@@ -1750,144 +1750,151 @@ public class ActivityServiceImpl implements ActivityService {
     //活动确认
     @Override
     public ActivityDTO confirm(ActivityConfirmCommand cmd) {
-        ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
-        if (item == null) {
-            LOGGER.error("cannnot find roster record in database");
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
-                    "cannnot find roster record in database id=" + cmd.getRosterId());
-        }
-        Activity activity = activityProvider.findActivityById(item.getActivityId());
-        if (activity == null) {
-            LOGGER.error("cannnot find activity record in database");
-            // TODO
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
-                            + cmd.getRosterId());
-        }
-        Post post = forumProvider.findPostById(activity.getPostId());
-        //validate post status
-        if (post == null) {
-            LOGGER.error("cannnot find post record in database");
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
-                    "cannnot find post record in database id=" + cmd.getRosterId());
-        }
-        
-        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
-        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
-        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
-					"beyond contraint quantity!");
-		}
-        
-        // 后台管理系统确认不用判断是不是创建者
-        User user = UserContext.current().getUser();
-//        if (post.getCreatorUid().longValue() != user.getId().longValue()) {
-//            LOGGER.error("the user is invalid.cannot confirm");
-//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-//                    ActivityServiceErrorCode.ERROR_INVALID_USER,
-//                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
-//        }
-        dbProvider.execute(status -> {
- //           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
-        	
-        	
-        	//因为使用新规则已报名=已确认 start。  add by yanjun 20170503
-            //1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
-        	int adult = item.getAdultCount() == null ? 0 : item.getAdultCount();
-            int child = item.getChildCount() == null ? 0 : item.getChildCount();
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
-            if(user.getAddressId()!=null){
-                activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
-            }
-           //因为使用新规则已报名=已确认 end
-        	
-            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
-                    + item.getChildCount());
-            activity.setConfirmFamilyCount(activity.getConfirmFamilyCount() + 1);
-            activity.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
-            activityProvider.updateActivity(activity);
-            item.setConfirmUid(user.getId());
-            item.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            item.setConfirmFamilyId(cmd.getConfirmFamilyId());
-            item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
-            
-            //设置订单开始时间, 结束时间，用于定时取消订单
-            if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
-            	populateNewRosterOrder(item);
-            	
-            	//启动定时器，当时间超过设定时间时，取消订单。
-            	rosterPayTimeoutService.pushTimeout(item);
-            }
-            activityProvider.updateRoster(item);
-            return status;
-        });
+    	ActivityRoster itemTemp = activityProvider.findRosterById(cmd.getRosterId());
+    	if (itemTemp == null) {
+    		LOGGER.error("cannnot find roster record in database");
+    		throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    				ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER,
+    				"cannnot find roster record in database id=" + cmd.getRosterId());
+    	}
 
-        ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-        dto.setActivityId(activity.getId());
-        dto.setForumId(post.getForumId());
-        dto.setPosterUrl(getActivityPosterUrl(activity));
-        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-        dto.setUserActivityStatus(getActivityStatus(item).getCode());
-        dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(activity.getStartTime().toString());
-        dto.setStopTime(activity.getEndTime().toString());
-        dto.setSignupEndTime(getSignupEndTime(activity).toString());
-        dto.setGroupId(activity.getGroupId());
-        fixupVideoInfo(dto);//added by janson
-        
-        //管理员同意活动的报名
-        if (item.getUid().longValue() != 0L) {
-        	if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode()){
-        		Map<String, String> map = new HashMap<String, String>();
-            	map.put("postName", activity.getSubject());
-            	
-            	//创建带链接跳转的消息头    add by yanjun 20170513 
-            	ActivityDetailActionData actionData = new ActivityDetailActionData();
-        		actionData.setForumId(post.getForumId());
-        		actionData.setTopicId(post.getId());
-        		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
-        		String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
-        				String.valueOf(ActivityLocalStringCode.ACTIVITY_HAVE_CONFIRM), 
-        				UserContext.current().getUser().getLocale(), 
-        				"Activity Have been Confirm");
-        		Map<String, String> meta = createActivityRouterMeta(url, subject);
-	            sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_USER_HAVE_CONFIRM, meta);
-            	
-        	}else{
-        		Long durationTime = item.getOrderExpireTime().getTime() - item.getOrderStartTime().getTime();
-        		Integer days = (int) (durationTime / 1000 / 3600 / 24);
-    			Integer hours  = (int) (durationTime / 1000 / 3600 % 24);
-        		
-        		Map<String, String> map = new HashMap<String, String>();
-        		map.put("postName", activity.getSubject());
-            	map.put("payTimeDays", days.toString());
-            	map.put("payTimeHours", hours.toString());
-            	
-            	ActivityDetailActionData actionData = new ActivityDetailActionData();
-        		actionData.setForumId(post.getForumId());
-        		actionData.setTopicId(post.getId());
-        		String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
-        		String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
-        				String.valueOf(ActivityLocalStringCode.ACTIVITY_TO_PAY), 
-        				UserContext.current().getUser().getLocale(), 
-        				"Activity To Been Pay");
-        		
-            	//创建带链接跳转的消息头    add by yanjun 20170513
-            	Map<String, String> meta = createActivityRouterMeta(url, subject);
-            	 
-            	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY, meta);
-        	}
-        	
-		}
-        return dto;
+    	//在锁内部更新报名和活动信息  add by yanjun 20170522
+    	return (ActivityDTO) this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+itemTemp.getActivityId()).enter(()-> {
+    		
+    		//在锁内部重新活动信息  add by yanjun 20170522
+    		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
+    		Activity activity = activityProvider.findActivityById(item.getActivityId());
+    		if (activity == null) {
+    			LOGGER.error("cannnot find activity record in database");
+    			// TODO
+    			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    					ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "cannnot find activity record in database id="
+    							+ cmd.getRosterId());
+    		}
+    		Post post = forumProvider.findPostById(activity.getPostId());
+    		//validate post status
+    		if (post == null) {
+    			LOGGER.error("cannnot find post record in database");
+    			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    					ActivityServiceErrorCode.ERROR_INVALID_POST_ID,
+    					"cannnot find post record in database id=" + cmd.getRosterId());
+    		}
+
+    		// 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
+    		if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+    			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    					ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+    					"beyond contraint quantity!");
+    		}
+
+    		// 后台管理系统确认不用判断是不是创建者
+    		User user = UserContext.current().getUser();
+    		//        if (post.getCreatorUid().longValue() != user.getId().longValue()) {
+    		//            LOGGER.error("the user is invalid.cannot confirm");
+    		//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    		//                    ActivityServiceErrorCode.ERROR_INVALID_USER,
+    		//                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
+    		//        }
+    		dbProvider.execute(status -> {
+    			//           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
+
+
+    			//因为使用新规则已报名=已确认 start。  add by yanjun 20170503
+    			//1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+    			int adult = item.getAdultCount() == null ? 0 : item.getAdultCount();
+    			int child = item.getChildCount() == null ? 0 : item.getChildCount();
+    			activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
+    			if(user.getAddressId()!=null){
+    				activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
+    			}
+    			//因为使用新规则已报名=已确认 end
+
+    			activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
+    			+ item.getChildCount());
+    			activity.setConfirmFamilyCount(activity.getConfirmFamilyCount() + 1);
+    			activity.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+    			activityProvider.updateActivity(activity);
+    			item.setConfirmUid(user.getId());
+    			item.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    			item.setConfirmFamilyId(cmd.getConfirmFamilyId());
+    			item.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+
+    			//设置订单开始时间, 结束时间，用于定时取消订单
+    			if(activity.getChargeFlag() != null && activity.getChargeFlag().byteValue() == ActivityChargeFlag.CHARGE.getCode()){
+    				populateNewRosterOrder(item);
+
+    				//启动定时器，当时间超过设定时间时，取消订单。
+    				rosterPayTimeoutService.pushTimeout(item);
+    			}
+    			activityProvider.updateRoster(item);
+    			return status;
+    		});
+
+    		ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+    		dto.setActivityId(activity.getId());
+    		dto.setForumId(post.getForumId());
+    		dto.setPosterUrl(getActivityPosterUrl(activity));
+    		dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+    		dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+    		dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+    		dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+    		dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+    		dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+    		dto.setUserActivityStatus(getActivityStatus(item).getCode());
+    		dto.setProcessStatus(getStatus(activity).getCode());
+    		dto.setFamilyId(activity.getCreatorFamilyId());
+    		dto.setStartTime(activity.getStartTime().toString());
+    		dto.setStopTime(activity.getEndTime().toString());
+    		dto.setSignupEndTime(getSignupEndTime(activity).toString());
+    		dto.setGroupId(activity.getGroupId());
+    		fixupVideoInfo(dto);//added by janson
+
+    		//管理员同意活动的报名
+    		if (item.getUid().longValue() != 0L) {
+    			if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode()){
+    				Map<String, String> map = new HashMap<String, String>();
+    				map.put("postName", activity.getSubject());
+
+    				//创建带链接跳转的消息头    add by yanjun 20170513 
+    				ActivityDetailActionData actionData = new ActivityDetailActionData();
+    				actionData.setForumId(post.getForumId());
+    				actionData.setTopicId(post.getId());
+    				String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+    				String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+    						String.valueOf(ActivityLocalStringCode.ACTIVITY_HAVE_CONFIRM), 
+    						UserContext.current().getUser().getLocale(), 
+    						"Activity Have been Confirm");
+    				Map<String, String> meta = createActivityRouterMeta(url, subject);
+    				sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_USER_HAVE_CONFIRM, meta);
+
+    			}else{
+    				Long durationTime = item.getOrderExpireTime().getTime() - item.getOrderStartTime().getTime();
+    				Integer days = (int) (durationTime / 1000 / 3600 / 24);
+    				Integer hours  = (int) (durationTime / 1000 / 3600 % 24);
+
+    				Map<String, String> map = new HashMap<String, String>();
+    				map.put("postName", activity.getSubject());
+    				map.put("payTimeDays", days.toString());
+    				map.put("payTimeHours", hours.toString());
+
+    				ActivityDetailActionData actionData = new ActivityDetailActionData();
+    				actionData.setForumId(post.getForumId());
+    				actionData.setTopicId(post.getId());
+    				String url =  RouterBuilder.build(Router.ACTIVITY_DETAIL, actionData);
+    				String subject = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE, 
+    						String.valueOf(ActivityLocalStringCode.ACTIVITY_TO_PAY), 
+    						UserContext.current().getUser().getLocale(), 
+    						"Activity To Been Pay");
+
+    				//创建带链接跳转的消息头    add by yanjun 20170513
+    				Map<String, String> meta = createActivityRouterMeta(url, subject);
+
+    				sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER_TO_PAY, meta);
+    			}
+
+    		}
+    		return dto;
+    	}).first();
     }
 
     private Post createPost(Long uid, Post p, Long familyId, String targetName) {
@@ -1957,112 +1964,121 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public void rejectPost(ActivityRejectCommand cmd) {
-        User user = UserContext.current().getUser();
-        ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
-        if (roster == null) {
-            LOGGER.error("cannot reject the roster");
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "invalid roster id");
-        }
+    	User user = UserContext.current().getUser();
+    	ActivityRoster rosterTemp = activityProvider.findRosterById(cmd.getRosterId());
+    	if (rosterTemp == null) {
+    		LOGGER.error("cannot reject the roster");
+    		throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    				ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ROSTER, "invalid roster id");
+    	}
 
-        Activity activity = activityProvider.findActivityById(roster.getActivityId());
-        if (activity == null) {
-            LOGGER.error("invalid activity.id={}", roster.getActivityId());
-            throw RuntimeErrorException
-                    .errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
-                            "invalid activity id=" + roster.getActivityId());
-        }
+    	//在锁内部更新报名和活动信息  add by yanjun 20170522
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+rosterTemp.getActivityId()).enter(()-> {
 
-        Long postId = activity.getPostId();
-        Post post = forumProvider.findPostById(postId);
-      //validate post status
-        if (post == null) {
-            LOGGER.error("invalid post.id={}", postId);
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + postId);
-        }
-        // 后台管理系统不用判断是不是创建者
-//        if (user.getId().longValue() != post.getCreatorUid().longValue()) {
-//            LOGGER.error("No permission to reject the roster.rosterId={}", cmd.getRosterId());
-//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-//                    ActivityServiceErrorCode.ERROR_INVALID_USER, "invalid post id=" + postId);
-//        }
+    		//在锁内部重新查询报名信息  add by yanjun 20170522
+    		ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
 
-        int total = roster.getAdultCount() + roster.getChildCount();
-        dbProvider.execute(status->{
-            //need lock
-//            activityProvider.deleteRoster(roster);
-            if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
-                int result = activity.getCheckinAttendeeCount() - total;
-                activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
-                if(roster.getConfirmFamilyId()!=null)
-                    activity.setConfirmFamilyCount(activity.getConfirmFamilyCount()-1);
-            }
-            if (CheckInStatus.CHECKIN.getCode().equals(roster.getCheckinFlag())) {
-                int result = activity.getCheckinAttendeeCount() - total;
-                activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
-                if(roster.getConfirmFamilyId()!=null)
-                    activity.setCheckinFamilyCount(activity.getCheckinFamilyCount()-1);
-            }
-            //因为使用新规则已报名=已确认 start。  add by yanjun 20170503
-            //1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
-//            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
-//            if(roster.getConfirmFamilyId()!=null)
-//                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
-            activityProvider.updateActivity(activity);
-            
-            roster.setConfirmFlag(ConfirmStatus.REJECT.getCode());
-            roster.setStatus(ActivityRosterStatus.REJECT.getCode());
-            activityProvider.updateRoster(roster);
-            
-            return status;
-        });
-        
-        if (roster.getUid().longValue() != 0L) {
-        	User queryUser = userProvider.findUserById(roster.getUid());
-            if (activity.getGroupId() != null) {
-                RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
-                rejectCmd.setGroupId(activity.getGroupId());
-                rejectCmd.setUserId(roster.getUid());
-                rejectCmd.setRejectText(cmd.getReason());
-                //reject to join group
-                //groupService.rejectJoinGroupRequest(rejectCmd);
-            }
-            Post comment = createPost(user.getId(), post, null, "");
-//            String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
-            String template = localeStringService.getLocalizedString(
-            		ActivityLocalStringCode.SCOPE,
-                    String.valueOf(ActivityLocalStringCode.ACTIVITY_REJECT),
-                    UserContext.current().getUser().getLocale(),
-                    "");
-            comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
-                 * 
-                 */
-                private static final long serialVersionUID = 8928858603520552572L;
+    		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+    		if (activity == null) {
+    			LOGGER.error("invalid activity.id={}", roster.getActivityId());
+    			throw RuntimeErrorException
+    			.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+    					"invalid activity id=" + roster.getActivityId());
+    		}
 
-            {
-                put("subject", activity.getSubject());
-                put("reason",cmd.getReason()==null?"":cmd.getReason());
-                put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
-                
-            }}, ""));
-//            forumProvider.createPost(comment);
-            
-            
-            
-            MessageDTO messageDto = new MessageDTO();
-            messageDto.setAppId(AppConstants.APPID_MESSAGING);
-            messageDto.setSenderUid(user.getId());
-            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), queryUser.getId().toString()));
-            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
-            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-            messageDto.setBody(comment.getContent());
-            messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-            
-            UserLogin u = userService.listUserLogins(user.getId()).get(0);
-            messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-            		queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-		}
+    		Long postId = activity.getPostId();
+    		Post post = forumProvider.findPostById(postId);
+    		//validate post status
+    		if (post == null) {
+    			LOGGER.error("invalid post.id={}", postId);
+    			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    					ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + postId);
+    		}
+    		// 后台管理系统不用判断是不是创建者
+    		//        if (user.getId().longValue() != post.getCreatorUid().longValue()) {
+    		//            LOGGER.error("No permission to reject the roster.rosterId={}", cmd.getRosterId());
+    		//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+    		//                    ActivityServiceErrorCode.ERROR_INVALID_USER, "invalid post id=" + postId);
+    		//        }
+
+    		int total = roster.getAdultCount() + roster.getChildCount();
+    		dbProvider.execute(status->{
+    			//need lock
+    			//            activityProvider.deleteRoster(roster);
+    			if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+    				int result = activity.getCheckinAttendeeCount() - total;
+    				activity.setConfirmAttendeeCount(result < 0 ? 0 : result);
+    				if(roster.getConfirmFamilyId()!=null)
+    					activity.setConfirmFamilyCount(activity.getConfirmFamilyCount()-1);
+    			}
+    			if (CheckInStatus.CHECKIN.getCode().equals(roster.getCheckinFlag())) {
+    				int result = activity.getCheckinAttendeeCount() - total;
+    				activity.setCheckinAttendeeCount(result < 0 ? 0 : result);
+    				if(roster.getConfirmFamilyId()!=null)
+    					activity.setCheckinFamilyCount(activity.getCheckinFamilyCount()-1);
+    			}
+    			//因为使用新规则已报名=已确认 start。  add by yanjun 20170503
+    			//1、signup：不需要确认的话，立刻添加到已报名人数；2、conform：添加到已报名人数；3、reject：不处理；4、cancel：如果已确认则减，如果未确认则不处理
+    			//            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()-total);
+    			//            if(roster.getConfirmFamilyId()!=null)
+    			//                activity.setSignupFamilyCount(activity.getSignupFamilyCount()-1);
+    			activityProvider.updateActivity(activity);
+
+    			roster.setConfirmFlag(ConfirmStatus.REJECT.getCode());
+    			roster.setStatus(ActivityRosterStatus.REJECT.getCode());
+    			activityProvider.updateRoster(roster);
+
+    			return status;
+    		});
+
+    		if (roster.getUid().longValue() != 0L) {
+    			User queryUser = userProvider.findUserById(roster.getUid());
+    			if (activity.getGroupId() != null) {
+    				RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
+    				rejectCmd.setGroupId(activity.getGroupId());
+    				rejectCmd.setUserId(roster.getUid());
+    				rejectCmd.setRejectText(cmd.getReason());
+    				//reject to join group
+    				//groupService.rejectJoinGroupRequest(rejectCmd);
+    			}
+    			Post comment = createPost(user.getId(), post, null, "");
+    			//            String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+    			String template = localeStringService.getLocalizedString(
+    					ActivityLocalStringCode.SCOPE,
+    					String.valueOf(ActivityLocalStringCode.ACTIVITY_REJECT),
+    					UserContext.current().getUser().getLocale(),
+    					"");
+    			comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
+    			 * 
+    			 */
+    				private static final long serialVersionUID = 8928858603520552572L;
+
+    				{
+    					put("subject", activity.getSubject());
+    					put("reason",cmd.getReason()==null?"":cmd.getReason());
+    					put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+
+    				}}, ""));
+    			//            forumProvider.createPost(comment);
+
+
+
+    			MessageDTO messageDto = new MessageDTO();
+    			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+    			messageDto.setSenderUid(user.getId());
+    			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), queryUser.getId().toString()));
+    			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+    			messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+    			messageDto.setBody(comment.getContent());
+    			messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+    			UserLogin u = userService.listUserLogins(user.getId()).get(0);
+    			messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+    					queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    		}
+
+    		return null;
+    	});
     }
 
     @Override
