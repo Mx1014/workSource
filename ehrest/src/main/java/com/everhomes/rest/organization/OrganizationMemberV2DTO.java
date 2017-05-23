@@ -7,24 +7,25 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Created by Ryan on 2017/5/18.
  * <ul>
  * <li>id: 表增序号</li>
  * <li>memerId: 员工编号</li>
  * <li>contactName：成员名称</li>
- * <li>gender: 成员性别，0：保密 1：男性 2：女性</li>
+ * <li>gender: 成员性别，0：保密 1：男性 2：女性 参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>departments：部门列表</li>
  * <li>jobPositions: 岗位</li>
  * <li>jobLevels: 职级</li>
  * <li>organizationId: 小区id</li>
  * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
  * <li>contactToken：成员标识</li>
- * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职</li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>checkInTime: 入职日期</li>
  * <li>employmentTime：转正时间</li>
  * <li>contractEndTime: 合同时间</li>
  * <li>profileIntegrity: 档案完整度,0-100%</li>
  * <li>avatar: 成员头像</li>
- * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>groups：群组列表</li>
@@ -60,6 +61,10 @@ public class OrganizationMemberV2DTO {
     private Byte contactType;
 
     private String contactToken;
+
+    private String checkInTime;
+
+    private Byte employeeType;
 
     @NotNull
     private Byte employeeStatus;
@@ -259,6 +264,22 @@ public class OrganizationMemberV2DTO {
 
     public void setGroups(List<OrganizationDTO> groups) {
         this.groups = groups;
+    }
+
+    public String getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(String checkInTime) {
+        this.checkInTime = checkInTime;
+    }
+
+    public Byte getEmployeeType() {
+        return employeeType;
+    }
+
+    public void setEmployeeType(Byte employeeType) {
+        this.employeeType = employeeType;
     }
 
     @Override

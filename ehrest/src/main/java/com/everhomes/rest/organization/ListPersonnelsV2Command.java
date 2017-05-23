@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 页码</li>
  * <li>pageSize: 每页大小</li>
  * <li>keywords: 搜索关键词</li>
- * <li>visibleFlag: 是否隐藏，0：显示 1：隐藏</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * </ul>
  */
 public class ListPersonnelsV2Command {

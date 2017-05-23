@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ *<li>id: 工作经验信息编号</li>
  * <li>enterpriseName: 公司名称</li>
  * <li>position: 职位</li>
  * <li>jobType: 工作类型</li>
@@ -12,9 +12,9 @@ import com.everhomes.util.StringHelper;
  * <li>departureTime: 离职时间</li>
  * </ul>
  */
-public class AddOrganizationMemberWorkExpsCommand {
+public class UpdateOrganizationMemberWorkExperiencesCommand {
 
-    private Long memberId;
+    private Long id;
 
     private String enterpriseName;
 
@@ -26,15 +26,15 @@ public class AddOrganizationMemberWorkExpsCommand {
 
     private String departureTime;
 
-    public AddOrganizationMemberWorkExpsCommand() {
+    public UpdateOrganizationMemberWorkExperiencesCommand() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getEnterpriseName() {
@@ -81,5 +81,4 @@ public class AddOrganizationMemberWorkExpsCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

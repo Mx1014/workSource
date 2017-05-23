@@ -1349,27 +1349,41 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/addOrganizationMemberBasic</b>
-     * <p>新增员工基本信息</p>
+     * <b>URL: /org/getOrganizationPersonnelDetailsV2</b>
+     * <p>查看员工完整档案</p>
      */
-    @RequestMapping("addOrganizationMemberBasic")
-    @RestReturn(value = String.class)
-    public RestResponse addOrganizationMemberBasic(@Valid AddOrganizationMemberBasicCommand cmd) {
-        this.organizationService.addOrganizationMemberBasic(cmd);
-        RestResponse response = new RestResponse();
+    @RequestMapping("getOrganizationPersonnelDetailsV2")
+    @RestReturn(value = PersonnelsDetailsV2Response.class)
+    public RestResponse getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
+        PersonnelsDetailsV2Response res = organizationService.getOrganizationPersonnelDetailsV2(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /org/getOrganizationMemberBasic</b>
-     * <p>获取员工档案详情基本信息</p>
+     * <b>URL: /org/addOrganizationMember</b>
+     * <p>新增员工</p>
      */
-    @RequestMapping("getOrganizationMemberBasic")
+    @RequestMapping("addOrganizationMember")
+    @RestReturn(value = OrganizationMemberV2DTO.class)
+    public RestResponse addOrganizationMember(@Valid AddOrganizationMemberCommand cmd) {
+        OrganizationMemberV2DTO res = this.organizationService.addOrganizationMember(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/getOrganizationMemberBasicInfo</b>
+     * <p>获取员工基本信息</p>
+     */
+    @RequestMapping("getOrganizationMemberBasicInfo")
     @RestReturn(value = OrganizationMemberBasicDTO.class)
-    public RestResponse getOrganizationMemberBasic(@Valid GetOrganizationMemberBasicCommand cmd) {
-        OrganizationMemberBasicDTO res = this.organizationService.getOrganizationMemberBasic(cmd);
+    public RestResponse getOrganizationMemberBasicInfo(@Valid GetOrganizationMemberBasicInfoCommand cmd) {
+        OrganizationMemberBasicDTO res = this.organizationService.getOrganizationMemberBasicInfo(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1377,56 +1391,15 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updateOrganizationMemberPersonal</b>
-     * <p>修改员工档案详情个人信息</p>
+     * <b>URL: /org/updateOrganizationMemberBasicInfo</b>
+     * <p>修改员工基本信息息</p>
      */
-    @RequestMapping("updateOrganizationMemberPersonal")
+    @RequestMapping("updateOrganizationMemberBasicInfo")
     @RestReturn(value = String.class)
-    public RestResponse updateOrganizationMemberPersonal(@Valid UpdateOrganizationMemberPersonalCommand cmd) {
-        this.organizationService.updateOrganizationMemberPersonal(cmd);
+    //@Valid
+    public RestResponse updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
+        this.organizationService.updateOrganizationMemberBasicInfo(cmd);
         RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /org/getOrganizationMemberPersonal</b>
-     * <p>获取员工档案详情个人信息</p>
-     */
-    @RequestMapping("getOrganizationMemberPersonal")
-    @RestReturn(value = OrganizationMemberPersonalDTO.class)
-    public RestResponse getOrganizationMemberPersonal(@Valid GetOrganizationMemberPersonalCommand cmd) {
-        OrganizationMemberPersonalDTO res = this.organizationService.getOrganizationMemberPersonal(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /org/updateOrganizationMemberContacts</b>
-     * <p>修改员工档案详情联系方式</p>
-     */
-    @RequestMapping("updateOrganizationMemberContacts")
-    @RestReturn(value = String.class)
-    public RestResponse updateOrganizationMemberContacts(@Valid UpdateOrganizationMemberContactsCommand cmd) {
-        this.organizationService.updateOrganizationMemberContacts(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /org/getOrganizationMemberContacts</b>
-     * <p>获取员工档案详情联系方式</p>
-     */
-    @RequestMapping("getOrganizationMemberContacts")
-    @RestReturn(value = OrganizationMemberContactsDTO.class)
-    public RestResponse getOrganizationMemberContacts(@Valid GetOrganizationMemberContactsCommand cmd) {
-        OrganizationMemberContactsDTO res = this.organizationService.getOrganizationMemberContacts(cmd);
-        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1434,26 +1407,12 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/addOrganizationMemberEducations</b>
-     * <p>新增员工档案详情教育信息</p>
+     * <p>新增员工教育信息</p>
      */
     @RequestMapping("addOrganizationMemberEducations")
-    @RestReturn(value = String.class)
+    @RestReturn(value = OrganizationMemberEducationsDTO.class)
     public RestResponse addOrganizationMemberEducations(@Valid AddOrganizationMemberEducationsCommand cmd) {
-        this.organizationService.addOrganizationMemberEducations(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /org/listOrganizationMemberEducations</b>
-     * <p>列出员工档案详情教育信息</p>
-     */
-    @RequestMapping("listOrganizationMemberEducations")
-    @RestReturn(value = ListOrganizationMemberEducationsResponse.class)
-    public RestResponse listOrganizationMemberEducations(@Valid ListOrganizationMemberEducationsCommand cmd) {
-        ListOrganizationMemberEducationsResponse res = this.organizationService.listOrganizationMemberEducations(cmd);
+        OrganizationMemberEducationsDTO res = this.organizationService.addOrganizationMemberEducations(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1462,7 +1421,7 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/deleteOrganizationMemberEducations</b>
-     * <p>删除员工档案详情教育信息</p>
+     * <p>删除员工教育信息</p>
      */
     @RequestMapping("deleteOrganizationMemberEducations")
     @RestReturn(value = String.class)
@@ -1475,13 +1434,13 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/addOrganizationMemberWorkExps</b>
-     * <p>新增员工档案详情工作经历</p>
+     * <b>URL: /org/updateOrganizationMemberEducations</b>
+     * <p>修改员工教育信息</p>
      */
-    @RequestMapping("addOrganizationMemberWorkExps")
+    @RequestMapping("updateOrganizationMemberEducations")
     @RestReturn(value = String.class)
-    public RestResponse addOrganizationMemberWorkExps(@Valid AddOrganizationMemberWorkExpsCommand cmd) {
-        this.organizationService.addOrganizationMemberWorkExps(cmd);
+    public RestResponse updateOrganizationMemberEducations(@Valid UpdateOrganizationMemberEducationsCommand cmd) {
+        this.organizationService.updateOrganizationMemberEducations(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1489,13 +1448,13 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/listOrganizationMemberWorkExps</b>
-     * <p>列出员工档案详情工作经历</p>
+     * <b>URL: /org/listOrganizationMemberEducations</b>
+     * <p>列出员工教育信息</p>
      */
-    @RequestMapping("listOrganizationMemberWorkExps")
-    @RestReturn(value = ListOrganizationMemberWorkExpsResponse.class)
-    public RestResponse listOrganizationMemberWorkExps(@Valid ListOrganizationMemberWorkExpsCommand cmd) {
-        ListOrganizationMemberWorkExpsResponse res = this.organizationService.listOrganizationMemberWorkExps(cmd);
+    @RequestMapping("listOrganizationMemberEducations")
+    @RestReturn(value = ListOrganizationMemberEducationsResponse.class)
+    public RestResponse listOrganizationMemberEducations(@Valid ListOrganizationMemberEducationsCommand cmd) {
+        ListOrganizationMemberEducationsResponse res = this.organizationService.listOrganizationMemberEducations(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1503,13 +1462,27 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/deleteOrganizationMemberWorkExps</b>
-     * <p>删除员工档案详情工作经历</p>
+     * <b>URL: /org/addOrganizationMemberWorkExperiences</b>
+     * <p>新增员工工作经历</p>
+     */
+    @RequestMapping("addOrganizationMemberWorkExperiences")
+    @RestReturn(value = OrganizationMemberWorkExperiencesDTO.class)
+    public RestResponse addOrganizationMemberWorkExperiences(@Valid AddOrganizationMemberWorkExperiencesCommand cmd) {
+        OrganizationMemberWorkExperiencesDTO res = this.organizationService.addOrganizationMemberWorkExperiences(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/deleteOrganizationMemberWorkExperiences</b>
+     * <p>删除员工工作经历</p>
      */
     @RequestMapping("deleteOrganizationMemberWorkExps")
     @RestReturn(value = String.class)
-    public RestResponse deleteOrganizationMemberWorkExps(@Valid DeleteOrganizationMemberWorkExps cmd) {
-        this.organizationService.deleteOrganizationMemberWorkExps(cmd);
+    public RestResponse deleteOrganizationMemberWorkExperiences(@Valid DeleteOrganizationMemberWorkExperiencesCommand cmd) {
+        this.organizationService.deleteOrganizationMemberWorkExperiences(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1517,13 +1490,13 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updateOrganizationMemberNumbers</b>
-     * <p>修改员工档案详情卡号信息</p>
+     * <b>URL: /org/updateOrganizationMemberWorkExperiences</b>
+     * <p>修改员工工作经历</p>
      */
-    @RequestMapping("updateOrganizationMemberNumbers")
+    @RequestMapping("updateOrganizationMemberWorkExperiences")
     @RestReturn(value = String.class)
-    public RestResponse updateOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
-        this.organizationService.updateOrganizationMemberNumbers(cmd);
+    public RestResponse updateOrganizationMemberWorkExperiences(@Valid UpdateOrganizationMemberWorkExperiencesCommand cmd) {
+        this.organizationService.updateOrganizationMemberWorkExperiences(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1531,14 +1504,14 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/getOrganizationMemberNumbers</b>
-     * <p>获取员工档案详情卡号信息</p>
+     * <b>URL: /org/listOrganizationMemberWorkExperiences</b>
+     * <p>列出员工工作经历</p>
      */
-    @RequestMapping("getOrganizationMemberNumbers")
-    @RestReturn(value = OrganizationMemberNumbersDTO.class)
-    public RestResponse getOrganizationMemberNumbers(@Valid GetOrganizationMemberNumbersCommand cmd) {
-        OrganizationMemberNumbersDTO res = this.organizationService.getOrganizationMemberNumbers(cmd);
-        RestResponse response = new RestResponse();
+    @RequestMapping("listOrganizationMemberWorkExperiences")
+    @RestReturn(value = ListOrganizationMemberWorkExperiencesResponse.class)
+    public RestResponse listOrganizationMemberWorkExperiences(@Valid ListOrganizationMemberWorkExperiencesCommand cmd) {
+        ListOrganizationMemberWorkExperiencesResponse res = this.organizationService.listOrganizationMemberWorkExperiences(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1546,26 +1519,12 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/addOrganizationMemberInsurances</b>
-     * <p>新增员工档案详情保险信息</p>
+     * <p>新增员工保险信息</p>
      */
     @RequestMapping("addOrganizationMemberInsurances")
-    @RestReturn(value = String.class)
+    @RestReturn(value = OrganizationMemberInsurancesDTO.class)
     public RestResponse addOrganizationMemberInsurances(@Valid AddOrganizationMemberInsurancesCommand cmd) {
-        this.organizationService.addOrganizationMemberInsurances(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /org/listOrganizationMemberInsurances</b>
-     * <p>列举员工档案详情保险信息</p>
-     */
-    @RequestMapping("listOrganizationMemberInsurances")
-    @RestReturn(value = ListOrganizationMemberInsurancesResponse.class)
-    public RestResponse listOrganizationMemberInsurances(@Valid ListOrganizationMemberInsurancesCommand cmd) {
-        ListOrganizationMemberInsurancesResponse res = this.organizationService.listOrganizationMemberInsurances(cmd);
+        OrganizationMemberInsurancesDTO res = this.organizationService.addOrganizationMemberInsurances(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1574,7 +1533,7 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/deleteOrganizationMemberInsurances</b>
-     * <p>删除员工档案详情保险信息</p>
+     * <p>删除员工保险信息</p>
      */
     @RequestMapping("deleteOrganizationMemberInsurances")
     @RestReturn(value = String.class)
@@ -1586,15 +1545,71 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/updateOrganizationMemberInsurances</b>
+     * <p>修改员工保险信息</p>
+     */
+    @RequestMapping("updateOrganizationMemberInsurances")
+    @RestReturn(value = String.class)
+    public RestResponse updateOrganizationMemberInsurances(@Valid UpdateOrganizationMemberInsurancesCommand cmd) {
+        this.organizationService.updateOrganizationMemberInsurances(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/listOrganizationMemberInsurances</b>
+     * <p>列举员工保险信息</p>
+     */
+    @RequestMapping("listOrganizationMemberInsurances")
+    @RestReturn(value = ListOrganizationMemberInsurancesResponse.class)
+    public RestResponse listOrganizationMemberInsurances(@Valid ListOrganizationMemberInsurancesCommand cmd) {
+        ListOrganizationMemberInsurancesResponse res = this.organizationService.listOrganizationMemberInsurances(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 
     /**
      * <b>URL: /org/addOrganizationMemberContracts</b>
-     * <p>新增员工档案详情合同信息</p>
+     * <p>新增员工合同信息</p>
      */
     @RequestMapping("addOrganizationMemberContracts")
-    @RestReturn(value = String.class)
+    @RestReturn(value = OrganizationMemberContractsDTO.class)
     public RestResponse addOrganizationMemberContracts(@Valid AddOrganizationMemberContractsCommand cmd) {
-        this.organizationService.addOrganizationMemberContracts(cmd);
+        OrganizationMemberContractsDTO res = this.organizationService.addOrganizationMemberContracts(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/deleteOrganizationMemberContracts</b>
+     * <p>删除员工合同信息</p>
+     */
+    @RequestMapping("deleteOrganizationMemberContracts")
+    @RestReturn(value = String.class)
+    public RestResponse deleteOrganizationMemberContracts(@Valid DeleteOrganizationMemberContractsCommand cmd) {
+        this.organizationService.deleteOrganizationMemberContracts(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/updateOrganizationMemberContracts</b>
+     * <p>修改员工合同信息</p>
+     */
+    @RequestMapping("updateOrganizationMemberContracts")
+    @RestReturn(value = String.class)
+    public RestResponse updateOrganizationMemberContracts(@Valid UpdateOrganizationMemberContractsCommand cmd) {
+        this.organizationService.updateOrganizationMemberContracts(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1603,7 +1618,7 @@ public class OrganizationController extends ControllerBase {
 
     /**
      * <b>URL: /org/listOrganizationMemberContracts</b>
-     * <p>列举员工档案详情合同信息</p>
+     * <p>列举员工合同信息</p>
      */
     @RequestMapping("listOrganizationMemberContracts")
     @RestReturn(value = ListOrganizationMemberContractsResponse.class)
@@ -1615,19 +1630,6 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /org/deleteOrganizationMemberContracts</b>
-     * <p>删除员工档案详情合同信息</p>
-     */
-    @RequestMapping("deleteOrganizationMemberContracts")
-    @RestReturn(value = String.class)
-    public RestResponse deleteOrganizationMemberContracts(@Valid DeleteOrganizationMemberContractsCommand cmd) {
-        this.organizationService.deleteOrganizationMemberContracts(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
 
     /**
      * <b>URL: /org/updateOrganizationEmployeeStatus</b>
@@ -1644,13 +1646,13 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/...</b>
+     * <b>URL: /org/listMemberRecordChangesByJob</b>
      * <p>查看在职变动记录</p>
      */
-    @RequestMapping("listMemberJobRecords")
-    @RestReturn(value = ListMemberJobRecordsCommandResponse.class)
-    public RestResponse listMemberJobRecords(@Valid ListMemberJobRecordsCommand cmd) {
-        ListMemberJobRecordsCommandResponse res = this.organizationService.listMemberJobRecords(cmd);
+    @RequestMapping("listMemberRecordChangesByJob")
+    @RestReturn(value = ListMemberRecordChangesByJobCommandResponse.class)
+    public RestResponse listMemberJobRecords(@Valid ListMemberRecordChangesByJobCommand cmd) {
+        ListMemberRecordChangesByJobCommandResponse res = this.organizationService.listMemberRecordChangesByJob(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1658,16 +1660,65 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/...</b>
+     * <b>URL: /org/listMemberRecordChangesByProfile</b>
      * <p>查看档案修改记录</p>
      */
-    @RequestMapping("listMemberProfileRecords")
+    @RequestMapping("listMemberRecordChangesByProfile")
     @RestReturn(value = ListMemberProfileRecordsCommandResponse.class)
     public RestResponse listMemberProfileRecords(@Valid ListMemberProfileRecordsCommand cmd) {
-        ListMemberProfileRecordsCommandResponse res = this.organizationService.listMemberProfileRecords(cmd);
+        ListMemberProfileRecordsCommandResponse res = this.organizationService.listMemberRecordChangesByProfile(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+    /*    @RequestMapping("updateOrganizationMemberNumbers")
+    @RestReturn(value = String.class)
+    public RestResponse updateOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
+        this.organizationService.updateOrganizationMemberNumbers(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+
+    @RequestMapping("getOrganizationMemberNumbers")
+    @RestReturn(value = OrganizationMemberNumbersDTO.class)
+    public RestResponse getOrganizationMemberNumbers(@Valid GetOrganizationMemberNumbersCommand cmd) {
+         res = this.organizationService.getOrganizationMemberNumbers(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
+    /*    @RequestMapping("getOrganizationMemberPersonal")
+    @RestReturn(value = OrganizationMemberPersonalDTO.class)
+    public RestResponse getOrganizationMemberPersonal(@Valid GetOrganizationMemberPersonalCommand cmd) {
+         res = this.organizationService.getOrganizationMemberPersonal(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;    }
+
+    @RequestMapping("updateOrganizationMemberContacts")
+    @RestReturn(value = String.class)
+    public RestResponse updateOrganizationMemberContacts(@Valid UpdateOrganizationMemberContactsCommand cmd) {
+        this.organizationService.updateOrganizationMemberContacts(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("getOrganizationMemberContacts")
+    @RestReturn(value = OrganizationMemberContactsDTO.class)
+    public RestResponse getOrganizationMemberContacts(@Valid GetOrganizationMemberContactsCommand cmd) {
+         res = this.organizationService.getOrganizationMemberContacts(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }*/
 }

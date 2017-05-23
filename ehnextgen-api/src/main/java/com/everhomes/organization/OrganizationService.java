@@ -19,8 +19,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.enterprise.*;
-import com.everhomes.rest.forum.*;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchApproveContactCommand;
@@ -44,7 +42,6 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
@@ -55,15 +52,6 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-
-import java.util.List;
-import java.util.Map;
-
 
 
 public interface OrganizationService {
@@ -438,30 +426,57 @@ public interface OrganizationService {
 
 	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
-	/****** new interface ******/
-	ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
-	void addOrganizationMemberBasic(AddOrganizationMemberBasicCommand cmd);
-	OrganizationMemberBasicDTO getOrganizationMemberBasic(GetOrganizationMemberBasicCommand cmd);
-	void updateOrganizationMemberPersonal(UpdateOrganizationMemberPersonalCommand cmd);
-	OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd);
-	void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd);
-	OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd);
-	void addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
-	ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
-	void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
-	void addOrganizationMemberWorkExps(AddOrganizationMemberWorkExpsCommand cmd);
-	ListOrganizationMemberWorkExpsResponse listOrganizationMemberWorkExps(ListOrganizationMemberWorkExpsCommand cmd);
-	void deleteOrganizationMemberWorkExps(DeleteOrganizationMemberWorkExps cmd);
-	void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd);
-	OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd);
-	void addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
-	ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
-	void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd);
-	void addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
-	ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
-	void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd);
-	void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
-	ListMemberJobRecordsCommandResponse listMemberJobRecords(ListMemberJobRecordsCommand cmd);
-	ListMemberProfileRecordsCommandResponse listMemberProfileRecords(ListMemberProfileRecordsCommand cmd);
+    /****** new interface ******/
+    ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
+
+    PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
+
+    OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd);
+
+    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd);
+
+    void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd);
+
+    //	OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd);
+//	void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd);
+//	OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd);
+    OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
+
+    ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
+
+    void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
+
+    void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd);
+
+    OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd);
+
+    ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
+
+    void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
+
+    void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd);
+    //	void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd);
+//	OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd);
+    OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
+
+    ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
+
+    void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd);
+
+    void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd);
+
+    OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
+
+    ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationMemberContracts (UpdateOrganizationMemberContractsCommand cmd);
+
+    void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd);
+
+    void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
+
+    ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
+
+    ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
 
 }

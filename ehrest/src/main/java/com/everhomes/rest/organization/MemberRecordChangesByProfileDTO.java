@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>auditContent: 修改内容</li>
  * </ul>
  */
-public class MemberProfileRecordsDTO {
+public class MemberRecordChangesByProfileDTO {
 
     private Long memberId;
 
@@ -23,7 +23,7 @@ public class MemberProfileRecordsDTO {
 
     private String auditContent;
 
-    public MemberProfileRecordsDTO() {
+    public MemberRecordChangesByProfileDTO() {
     }
 
     public Long getMemberId() {

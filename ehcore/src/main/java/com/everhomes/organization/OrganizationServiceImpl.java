@@ -9541,38 +9541,28 @@ System.out.println();
 	}
 
 	@Override
-	public void addOrganizationMemberBasic(AddOrganizationMemberBasicCommand cmd) {
-
-	}
-
-	@Override
-	public OrganizationMemberBasicDTO getOrganizationMemberBasic(GetOrganizationMemberBasicCommand cmd) {
+	public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
 		return null;
 	}
 
 	@Override
-	public void updateOrganizationMemberPersonal(UpdateOrganizationMemberPersonalCommand cmd) {
-
-	}
-
-	@Override
-	public OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd) {
+	public OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd) {
 		return null;
 	}
 
 	@Override
-	public void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd) {
-
-	}
-
-	@Override
-	public OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd) {
+	public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd) {
 		return null;
 	}
 
 	@Override
-	public void addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
+	public void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
 
+	}
+
+	@Override
+	public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
+		return null;
 	}
 
 	@Override
@@ -9586,33 +9576,33 @@ System.out.println();
 	}
 
 	@Override
-	public void addOrganizationMemberWorkExps(AddOrganizationMemberWorkExpsCommand cmd) {
+	public void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd) {
 
 	}
 
 	@Override
-	public ListOrganizationMemberWorkExpsResponse listOrganizationMemberWorkExps(ListOrganizationMemberWorkExpsCommand cmd) {
+	public OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd) {
 		return null;
 	}
 
 	@Override
-	public void deleteOrganizationMemberWorkExps(DeleteOrganizationMemberWorkExps cmd) {
-
-	}
-
-	@Override
-	public void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd) {
-
-	}
-
-	@Override
-	public OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd) {
+	public ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd) {
 		return null;
 	}
 
 	@Override
-	public void addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd) {
+	public void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd) {
 
+	}
+
+	@Override
+	public void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd) {
+
+	}
+
+	@Override
+	public OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd) {
+		return null;
 	}
 
 	@Override
@@ -9621,18 +9611,28 @@ System.out.println();
 	}
 
 	@Override
+	public void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd) {
+
+	}
+
+	@Override
 	public void deleteOrganizationMemberInsurances(DeleteOrganizationMemberInsurancesCommand cmd) {
 
 	}
 
 	@Override
-	public void addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
-
+	public OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
+		return null;
 	}
 
 	@Override
 	public ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
 		return null;
+	}
+
+	@Override
+	public void updateOrganizationMemberContracts(UpdateOrganizationMemberContractsCommand cmd) {
+
 	}
 
 	@Override
@@ -9646,12 +9646,12 @@ System.out.println();
 	}
 
 	@Override
-	public ListMemberJobRecordsCommandResponse listMemberJobRecords(ListMemberJobRecordsCommand cmd) {
+	public ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd) {
 		return null;
 	}
 
 	@Override
-	public ListMemberProfileRecordsCommandResponse listMemberProfileRecords(ListMemberProfileRecordsCommand cmd) {
+	public ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd) {
 		return null;
 	}
 

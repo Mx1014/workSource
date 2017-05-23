@@ -7,10 +7,10 @@ import com.everhomes.util.StringHelper;
  *<li>id: 工作经验信息编号</li>
  *</ul>
  */
-public class DeleteOrganizationMemberWorkExps {
+public class DeleteOrganizationMemberWorkExperiencesCommand {
     private Long id;
 
-    public DeleteOrganizationMemberWorkExps() {
+    public DeleteOrganizationMemberWorkExperiencesCommand() {
     }
 
     public Long getId() {

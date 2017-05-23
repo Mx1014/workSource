@@ -25,7 +25,7 @@ import java.util.List;
  * <li>checkInTime: 入职日期</li>
  * </ul>
  */
-public class AddOrganizationMemberBasicCommand {
+public class AddOrganizationMemberCommand {
 	
     @NotNull
     private Long   organizationId;
@@ -60,7 +60,7 @@ public class AddOrganizationMemberBasicCommand {
 
 	private String checkInTime;
 
-	public AddOrganizationMemberBasicCommand() {
+	public AddOrganizationMemberCommand() {
 	}
 
 	public Long getOrganizationId() {

@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>reason: 操作备注</li>
  * </ul>
  */
-public class MemberJobRecordsDTO {
+public class MemberRecordChangesByJobDTO {
 
     private Long memberId;
 
@@ -20,7 +20,7 @@ public class MemberJobRecordsDTO {
 
     private String reason;
 
-    public MemberJobRecordsDTO() {
+    public MemberRecordChangesByJobDTO() {
     }
 
     public Long getMemberId() {

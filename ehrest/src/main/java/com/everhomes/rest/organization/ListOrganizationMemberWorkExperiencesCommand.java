@@ -7,11 +7,11 @@ import com.everhomes.util.StringHelper;
  * <li>memberId: 员工编号</li>
  * </ul>
  */
-public class GetOrganizationMemberNumbersCommand {
+public class ListOrganizationMemberWorkExperiencesCommand {
 
     private Long memberId;
 
-    public GetOrganizationMemberNumbersCommand() {
+    public ListOrganizationMemberWorkExperiencesCommand() {
     }
 
     public Long getMemberId() {

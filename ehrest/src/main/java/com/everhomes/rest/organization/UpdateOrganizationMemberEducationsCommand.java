@@ -1,9 +1,10 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
- * <li>id: 工作经历信息编号</li>
- * <li>memberId: 员工编号</li>
+ * <li>id: 教育信息编号</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
  * <li>major: 专业名称</li>
@@ -11,11 +12,9 @@ package com.everhomes.rest.organization;
  * <li>graduationTime: 毕业日期</li>
  * </ul>
  */
-public class OrganizationMemberWorkExpsDTO {
+public class UpdateOrganizationMemberEducationsCommand {
 
     private Long id;
-
-    private Long memberId;
 
     private String schoolName;
 
@@ -27,7 +26,7 @@ public class OrganizationMemberWorkExpsDTO {
 
     private String graduationTime;
 
-    public OrganizationMemberWorkExpsDTO() {
+    public UpdateOrganizationMemberEducationsCommand() {
     }
 
     public Long getId() {
@@ -36,14 +35,6 @@ public class OrganizationMemberWorkExpsDTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
     }
 
     public String getSchoolName() {
@@ -84,5 +75,10 @@ public class OrganizationMemberWorkExpsDTO {
 
     public void setGraduationTime(String graduationTime) {
         this.graduationTime = graduationTime;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }
