@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.discover.ItemType;
+
 import java.util.List;
 
 /**
@@ -29,7 +31,9 @@ public class LeasePromotionConfigDTO {
     private Byte consultFlag;
 //    private String displayNameStr;
 //    private String displayOrderStr;
+    @ItemType(String.class)
     private List<String> displayNames;
+    @ItemType(Integer.class)
     private List<Integer> displayOrders;
 
     public Byte getConsultFlag() {
