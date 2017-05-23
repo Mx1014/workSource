@@ -484,13 +484,9 @@ public class PmTaskController extends ControllerBase {
      * <p>导出统计详情</p>
      */
     @RequestMapping("exportStatistics")
-    @RestReturn(value=GetStatisticsResponse.class)
-    public RestResponse exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
+    public void exportStatistics(GetStatisticsCommand cmd, HttpServletResponse resp) {
     	pmTaskService.exportStatistics(cmd, resp);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+
     }
     
     /**
