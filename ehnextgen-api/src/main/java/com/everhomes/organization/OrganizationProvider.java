@@ -1,17 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
-import com.everhomes.rest.organization.*;
-
-import org.jooq.Condition;
-
 import com.everhomes.community.Community;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
@@ -21,6 +10,14 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.organization.*;
+import org.jooq.Condition;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
@@ -302,6 +299,12 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
+ 
+ 
+	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
+			Byte operationType);
+  
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
 
@@ -311,6 +314,20 @@ public interface OrganizationProvider {
 
 	void updateImportFileTask(ImportFileTask importFileTask);
 
-	ImportFileTask findImportFileTaskById(Long id);
-
-	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);}
+	ImportFileTask findImportFileTaskById(Long id); 
+ 
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
+	
+	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
+	
+	/**
+	 * 查询企业下的用户
+	 * @param locator
+	 * @param pageSize
+	 * @param queryBuilderCallback
+	 * @return
+	 */
+	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
+} 

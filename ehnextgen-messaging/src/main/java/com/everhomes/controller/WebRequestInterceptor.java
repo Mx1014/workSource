@@ -34,6 +34,7 @@ import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Interceptor that checks REST API signatures
@@ -82,8 +83,6 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
         cleanupUserContext();
 
-        MDC.remove("seq");
-
         Long startTick = (Long) request.getAttribute(ATTR_KEY_START_TICK);
         if (startTick != null) {
             long requestExecutionMs = System.currentTimeMillis() - startTick.longValue();
@@ -96,6 +95,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         } else {
             LOGGER.debug("Complete request: {}", requestInfo);
         }
+
+        MDC.remove("seq");
+
     }
 
     @Override
@@ -124,6 +126,10 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
         try {
             Map<String, String> userAgents = getUserAgent(request);
+            // 由于服务器注册接口被攻击，从日志分析来看IP和手机号都不一样，但useragent并没有按标准的形式，故可以通过useragent来做限制，
+            // 通过配置一黑名单，含黑名单关键字的useragent会被禁止掉 by lqs 20170516
+            checkUserAgent(request.getRequestURI(), userAgents);
+            
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
@@ -592,5 +598,48 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         if (matchedCookies.size() > 0)
             return matchedCookies.get(matchedCookies.size() - 1);
         return null;
+    }
+    
+    private void checkUserAgent(String uri, Map<String, String> userAgents) {
+        // 由于电商服务器、统一支付服务器、第三方服务器都可能不修改user-agent，从而会误杀；
+        // 为了避免此情况，只对注册接口进行限制 by lqs 20170517
+        if(uri == null || !uri.contains("/user/signup")) {
+            return;
+        }
+        
+        if(userAgents == null) {
+            return;
+        }
+        
+        try {
+            String blacklist = configurationProvider.getValue("user.agent.blacklist", "");
+            if(blacklist == null || blacklist.trim().length() == 0) {
+                return;
+            }
+            
+            String[] segments = blacklist.split(",");
+            
+            Iterator<Entry<String, String>> iterator = userAgents.entrySet().iterator();
+            Entry<String, String> entry = null;
+            String entryKey = null;
+            String entryValue = null;
+            while(iterator.hasNext()) {
+                entry = iterator.next();
+                entryKey = entry.getKey();
+                entryValue = entry.getValue();
+                for(String segment : segments) {
+                    if((entryKey != null && entryKey.contains(segment)) || (entryValue != null && entryValue.contains(segment))) {
+                        LOGGER.error("User agent is in blacklist, uri={}, userAgentKey={}, userAgentValue={}, blacklist={}", uri, entryKey, entryValue, blacklist);
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                                UserServiceErrorCode.ERROR_FORBIDDEN, "Forbidden");
+                    }
+                }
+            }
+        } catch (RuntimeErrorException e) {
+            // 命中黑名单的异常则抛出去
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Failed to check the user-agent in http/https header, userAgents={}", userAgents, e);
+        }
     }
 }

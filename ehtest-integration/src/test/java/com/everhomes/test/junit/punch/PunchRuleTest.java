@@ -4,6 +4,7 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,10 +16,15 @@ import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleRestResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsRestResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingRestResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchSchedulingDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.StringHelper;
@@ -31,7 +37,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 	Long ownerId = 100600L;
 
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-
+	
 	@Before
 	public void setUp() {
 		super.setUp();
@@ -49,7 +55,7 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		String userInfoFilePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
 		String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
 		dbProvider.loadJsonFileToDatabase(filePath, false);
-
+		initRuleData();
 	}
 
 	protected void initRuleData() {
@@ -67,7 +73,8 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		dbProvider.loadJsonFileToDatabase(filePath, false);
 
 	}
-
+	private String LIST_SCHEDULING_URI =  "/punch/listPunchScheduling";
+	private String UPDATE_SCHEDULING_URI =  "/punch/updatePunchSchedulings"; 
 	private final Long MILLISECONDGMT = 8 * 3600 * 1000L;
 
 	private Long convertTimeToGMTMillisecond(Time time) {
@@ -77,132 +84,70 @@ public class PunchRuleTest extends BaseLoginAuthTestCase {
 		}
 		return null;
 	}
-
 	@Test
-	public void test() throws ParseException {
+	public void testMain(){
+		testUpdateSchedulings();
+		testListSchedulings();
+	}
+	public void testUpdateSchedulings(){
 		logon(null, userIdentifier, plainTexPassword);
 
-		String commandRelativeUri = "/punch/updateTargetPunchAllRule";
+		UpdatePunchSchedulingMonthCommand cmd = new UpdatePunchSchedulingMonthCommand();
+		List<PunchSchedulingDTO> schedulingList = new ArrayList<PunchSchedulingDTO>();
+		PunchSchedulingDTO dto1 =new PunchSchedulingDTO();
+		dto1.setOwnerType(ownerType);
+		dto1.setOwnerId(ownerId);
+		dto1.setTargetId(ownerId);
+		dto1.setTargetType(ownerType);
+		dto1.setRuleDate(1488412800000L);
+		dto1.setTimeRuleId(2L); 
+		schedulingList.add(dto1);
 
-		UpdateTargetPunchAllRuleCommand cmd = new UpdateTargetPunchAllRuleCommand();
+		PunchSchedulingDTO dto2 =new PunchSchedulingDTO();
+		dto2.setOwnerType(ownerType);
+		dto2.setOwnerId(ownerId);
+		dto2.setTargetId(ownerId);
+		dto2.setTargetType(ownerType);
+		dto2.setRuleDate(1488499200000L);
+		dto2.setTimeRuleId(2L); 
+		schedulingList.add(dto2);
+		
+		cmd.setSchedulings(schedulingList);
+		
+		RestResponse response = httpClientService.restGet(UPDATE_SCHEDULING_URI, cmd,
+				RestResponse.class, context);
 
-		cmd.setOwnerType(this.ownerType);
+		assertNotNull("The reponse of may not be null", response);
+		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
+				httpClientService.isReponseSuccess(response));
+	}
+
+	public void testListSchedulings(){
+		logon(null, userIdentifier, plainTexPassword);
+
+		ListPunchSchedulingMonthCommand cmd = new ListPunchSchedulingMonthCommand(); 
+		cmd.setOwnerType(ownerType);
 		cmd.setOwnerId(ownerId);
 		cmd.setTargetId(ownerId);
 		cmd.setTargetType(ownerType);
+		cmd.setQueryTime(1488412800000L); 
+ 
+		
+		ListPunchSchedulingRestResponse response = httpClientService.restGet(LIST_SCHEDULING_URI, cmd,
+				ListPunchSchedulingRestResponse.class, context);
 
-		cmd.setTimeRule(new PunchTimeRuleDTO());
-		cmd.getTimeRule().setName("上班9-10,中午11-14,下班18-19");
-		cmd.getTimeRule().setPunchTimesPerDay((byte) 4);
-		cmd.getTimeRule().setStartEarlyTime(9 * 3600 * 1000L);
-		cmd.getTimeRule().setStartLateTime(10 * 3600 * 1000L);
-		cmd.getTimeRule().setEndEarlyTime(18 * 3600 * 1000L);
-		cmd.getTimeRule().setNoonLeaveTime(11 * 3600 * 1000L);
-		cmd.getTimeRule().setAfternoonArriveTime(14 * 3600 * 1000L);
-		cmd.getTimeRule().setDaySplitTime(3 * 3600 * 1000L);
-
-		cmd.setWifiRule(new PunchWiFiRuleDTO());
-		cmd.getWifiRule().setName("wifi");
-		cmd.getWifiRule().setDescription("科技园·金融基地");
-		cmd.getWifiRule().setWifis(new ArrayList<PunchWiFiDTO>());
-		PunchWiFiDTO wifi = new PunchWiFiDTO();
-		wifi.setMacAddress("mac-address-01");
-		cmd.getWifiRule().getWifis().add(wifi);
-
-		cmd.setWorkdayRule(new PunchWorkdayRuleDTO());
-		cmd.getWorkdayRule().setName("排班时间");
-		cmd.getWorkdayRule().setDescription("每周只上1天班");
-		cmd.getWorkdayRule().setHolidays(new ArrayList<Long>());
-		cmd.getWorkdayRule().getHolidays().add(dateSF.parse("2016-07-27").getTime());
-		cmd.getWorkdayRule().setWorkdays(new ArrayList<Long>());
-		cmd.getWorkdayRule().getWorkdays().add(dateSF.parse("2016-07-28").getTime());
-		cmd.getWorkdayRule().setWorkWeekDates(new ArrayList<Integer>());
-		cmd.getWorkdayRule().getWorkWeekDates().add(4);
-		cmd.getWorkdayRule().getWorkWeekDates().add(5);
-
-		cmd.setLocationRule(new PunchLocationRuleDTO());
-		cmd.getLocationRule().setName("地点随便来吧");
-		cmd.getLocationRule().setDescription("科技园·金融基地");
-		cmd.getLocationRule().setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
-		PunchGeoPointDTO point = new PunchGeoPointDTO();
-		point.setDescription("科技园·金融基地-1栋(高新科技园科苑路6号)");
-		point.setLatitude(22.549205);
-		point.setLongitude(113.953529);
-		point.setDistance(300.0);
-		cmd.getLocationRule().getPunchGeoPoints().add(point);
-
-		RestResponse response = httpClientService.restGet(commandRelativeUri, cmd, RestResponse.class, context);
 		assertNotNull("The reponse of may not be null", response);
 		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
-		// // 总共1个
-
-		commandRelativeUri = "/punch/getTargetPunchAllRule";
-
-		GetTargetPunchAllRuleCommand getCMD = new GetTargetPunchAllRuleCommand();
-		getCMD.setOwnerType(this.ownerType);
-		getCMD.setOwnerId(ownerId);
-		getCMD.setTargetId(ownerId);
-		getCMD.setTargetType(ownerType);
-
-		GetTargetPunchAllRuleRestResponse getResp = httpClientService.restGet(commandRelativeUri, getCMD,
-				GetTargetPunchAllRuleRestResponse.class, context);
-
-		if (cmd.getLocationRule() != null) {
-			if (null != cmd.getLocationRule().getPunchGeoPoints())
-				assertEquals(cmd.getLocationRule().getPunchGeoPoints().size(), getResp.getResponse().getLocationRule()
-						.getPunchGeoPoints().size());
+		List<PunchSchedulingDTO> schedulings = response.getResponse().getSchedulings();
+		for(PunchSchedulingDTO sche : schedulings ){
+			if(sche.getRuleDate().equals(1488499200000L)){
+				assertEquals(2L, sche.getTimeRuleId().longValue());
+			}
 		}
-		if (cmd.getTimeRule() != null) {
-			if (null != cmd.getTimeRule().getAfternoonArriveTime())
-				assertEquals(cmd.getTimeRule().getAfternoonArriveTime().longValue(), getResp.getResponse().getTimeRule()
-						.getAfternoonArriveTime().longValue());
-			if (null != cmd.getTimeRule().getDaySplitTime())
-				assertEquals(cmd.getTimeRule().getDaySplitTime().longValue(), getResp.getResponse().getTimeRule().getDaySplitTime()
-						.longValue());
-			if (null != cmd.getTimeRule().getEndEarlyTime())
-				assertEquals(cmd.getTimeRule().getEndEarlyTime().longValue(), getResp.getResponse().getTimeRule().getEndEarlyTime()
-						.longValue());
-			if (null != cmd.getTimeRule().getNoonLeaveTime())
-				assertEquals(cmd.getTimeRule().getNoonLeaveTime().longValue(), getResp.getResponse().getTimeRule().getNoonLeaveTime()
-						.longValue());
-			if (null != cmd.getTimeRule().getPunchTimesPerDay())
-				assertEquals(cmd.getTimeRule().getPunchTimesPerDay().byteValue(), getResp.getResponse().getTimeRule()
-						.getPunchTimesPerDay().byteValue());
-			if (null != cmd.getTimeRule().getStartEarlyTime())
-				assertEquals(cmd.getTimeRule().getStartEarlyTime().longValue(), getResp.getResponse().getTimeRule()
-						.getStartEarlyTime().longValue());
-			if (null != cmd.getTimeRule().getStartLateTime())
-				assertEquals(cmd.getTimeRule().getStartLateTime().longValue(), getResp.getResponse().getTimeRule().getStartLateTime()
-						.longValue());
-		}
-		if (cmd.getWifiRule() != null) {
-			if (null != cmd.getWifiRule().getWifis())
-				assertEquals(cmd.getWifiRule().getWifis().size(), getResp.getResponse().getWifiRule().getWifis().size());
-		}
-		if (cmd.getWorkdayRule() != null) {
-			if (null != cmd.getWorkdayRule().getHolidays())
-				assertEquals(cmd.getWorkdayRule().getHolidays().size(), getResp.getResponse().getWorkdayRule().getHolidays().size());
-			if (null != cmd.getWorkdayRule().getWorkdays())
-				assertEquals(cmd.getWorkdayRule().getWorkdays().size(), getResp.getResponse().getWorkdayRule().getWorkdays().size());
-			if (null != cmd.getWorkdayRule().getWorkWeekDates())
-				assertEquals(cmd.getWorkdayRule().getWorkWeekDates().size(), getResp.getResponse().getWorkdayRule().getWorkWeekDates()
-						.size());
-		}
-		//DELETE
-		commandRelativeUri = "/punch/deleteTargetPunchAllRule";
-
-		response = httpClientService.restGet(commandRelativeUri, getCMD, RestResponse.class, context);
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		//DELETE之后 再查就没了
-		commandRelativeUri = "/punch/getTargetPunchAllRule";
-		getResp = httpClientService.restGet(commandRelativeUri, getCMD, GetTargetPunchAllRuleRestResponse.class, context);
-		assertNotNull("The reponse of may not be null", response);
-		assertTrue("The user scenes should be get from server, response=" + StringHelper.toJsonString(response),
-				httpClientService.isReponseSuccess(response));
-		assertNull(getResp.getResponse());
 	}
+	public void testListPunchTimeRules(){
 
+		
+	}
 }

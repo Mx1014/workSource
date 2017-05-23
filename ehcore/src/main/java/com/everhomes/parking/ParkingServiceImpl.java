@@ -740,7 +740,7 @@ public class ParkingServiceImpl implements ParkingService {
 				if (ParkingRequestFlowType.QUEQUE.getCode().equals(flowMode)) {
 					order = Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc();
 				}else {
-					order = Tables.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME.desc();
+					order = Tables.EH_PARKING_CARD_REQUESTS.AUDIT_SUCCEED_TIME.asc();
 				}
 			}else if (ParkingCardRequestStatus.PROCESSING.getCode() == cmd.getStatus()) {
 				order = Tables.EH_PARKING_CARD_REQUESTS.ISSUE_TIME.desc();

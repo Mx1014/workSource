@@ -3,7 +3,12 @@ package com.everhomes.rest.pmtask;
 
 /**
  * <ul>
- * <li></li>
+ * <li>mobile : 电话</li>
+ * <li>email : 邮件</li>
+ * <li>app : app端</li>
+ * <li>visit : 来访</li>
+ * <li>mailbox : 信箱</li>
+ * <li>other : 其他</li>
  * </ul>
  */
 public enum PmTaskSourceType {

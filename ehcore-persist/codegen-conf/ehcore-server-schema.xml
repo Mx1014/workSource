@@ -144,16 +144,20 @@
         eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map |  
 		eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
         eh_os_objects | eh_os_object_download_logs |
-        eh_docking_mappings |
+        eh_docking_mappings | 
+		eh_punch_schedulings | eh_approval_range_statistics | 
         eh_lease_issuers | eh_lease_configs | eh_lease_issuer_addresses |
         eh_service_alliance_golf_requests | eh_service_alliance_gym_requests | eh_service_alliance_server_requests |
         eh_oauth2_client_tokens | eh_oauth2_servers |
         eh_sms_logs |
 		eh_previews |
+
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
 		eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations
+        eh_energy_meter_price_config |
+        eh_user_notification_settings | eh_group_member_logs |
 
         </includes>
 

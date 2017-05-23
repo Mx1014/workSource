@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>startDate: 开始日期</li>
@@ -11,11 +12,14 @@ import com.everhomes.util.StringHelper;
  * <li>taskCategoryId: 服务类型id</li>
  * <li>status: 状态  1: 未处理  2: 处理中 3: 已完成  4: 已关闭 {@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * <li>keyword: 关键字</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>addressId: 门牌id</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class SearchTasksCommand {
+	private Integer namespaceId;
 	private String ownerType;
     private Long ownerId;
 	private Long startDate;
@@ -24,11 +28,18 @@ public class SearchTasksCommand {
 	private Byte status;
 	private String keyword;
 	private String buildingName;
+	private Long addressId;
 	private Long pageAnchor;
 	private Integer pageSize;
-	
-	private Long addressId;
-	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public Long getStartDate() {
 		return startDate;
 	}

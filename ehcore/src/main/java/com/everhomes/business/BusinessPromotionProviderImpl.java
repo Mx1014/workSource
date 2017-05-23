@@ -2,6 +2,8 @@
 package com.everhomes.business;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
@@ -64,6 +66,7 @@ public class BusinessPromotionProviderImpl implements BusinessPromotionProvider 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBusinessPromotionsDao dao = new EhBusinessPromotionsDao(context.configuration());
         dao.insert(promotion);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessPromotions.class, id);
         return id;
     }
 

@@ -129,6 +129,8 @@ public interface PrivilegeConstants {
     long DELETE_ACTIVITY_COMMENT1    = 10153L;// 官方活动评论删除权限
 
     long PUBLISH_NOTICE_TOPIC    = 10155L;// 发布公告
+    
+    long FEEDBACK_MANAGEMENT    = 10160L;// 举报管理模块权限
 
     long ALL_SERVICE_MODULE = 10000L;
 

@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>categoryId: 分类ID</li>
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateTaskCommand {
+	private Integer namespaceId;
 	private String ownerType;
     private Long ownerId;
 	private Long taskId;
@@ -21,6 +23,15 @@ public class UpdateTaskCommand {
 	private Byte priority;
 	private String sourceType;
 	private Long reserveTime;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
