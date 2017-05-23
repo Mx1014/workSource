@@ -72,7 +72,7 @@ public class HttpUtils {
             response = httpclient.execute(httpPost);
 
             StatusLine statusLine = response.getStatusLine();
-            LOGGER.info("Parking responseCode={}, responseProtocol", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
             int status = statusLine.getStatusCode();
 
             if(status == HttpStatus.SC_OK) {
