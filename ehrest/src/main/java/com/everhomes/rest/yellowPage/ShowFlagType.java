@@ -10,13 +10,13 @@ package com.everhomes.rest.yellowPage;
  *
  *  @author:dengs 2017年5月23日
  */
-public enum ShowOrHideType {
+public enum ShowFlagType {
 
 	SHOW((byte)1), HIDE((byte)0);
 	
 	private byte code;
 	
-	private ShowOrHideType(byte code) {
+	private ShowFlagType(byte code) {
 		this.code = code;
 	}
 	
@@ -25,9 +25,9 @@ public enum ShowOrHideType {
 	}
 	
 	
-	public static ShowOrHideType fromCode(Byte code) {
+	public static ShowFlagType fromCode(Byte code) {
 		if (code != null) {
-			for (ShowOrHideType showOrHideType : ShowOrHideType.values()) {
+			for (ShowFlagType showOrHideType : ShowFlagType.values()) {
 				if (showOrHideType.getCode() == code.byteValue()) {
 					return showOrHideType;
 				}
