@@ -846,6 +846,8 @@ UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE5qY3pNV1l4
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvNVpXUTVNV016WWpaaFpXUmlZakZtWlRrMFlURmhOREkzWXprNE4yVmtNdw', default_order = 6 WHERE namespace_id = 999990 AND item_label = '班车';
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRveVpETmxOVFJsT1dZMVpUa3lNak5sWVRJeU16UXlZVEpoWkdKbVlUWTNOQQ', default_order = 7 WHERE namespace_id = 999990 AND item_label = '旅游';
 UPDATE eh_launch_pad_items SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9EUTJOV1k1WXpBME1EY3pOR0V3TXpJM1l6QmhaakpqT1dVM1lUTTRNUQ', default_order = 8 WHERE namespace_id = 999990 AND item_label = '会议室';
+UPDATE eh_launch_pad_items SET default_order = 1 WHERE namespace_id = 999990 AND item_label = '物业服务';
+UPDATE eh_launch_pad_items SET default_order = 2 WHERE namespace_id = 999990 AND item_label = '通讯录';
 DELETE FROM eh_launch_pad_items  WHERE namespace_id = 999990 AND item_label = '送水';	
 DELETE FROM eh_launch_pad_items WHERE item_label IN ('企业采供', '企业送水', '企业代理', '企业IT服务', '项目定制', '企业人才') AND `namespace_id` = 999990;
 SET @launch_pad_item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
