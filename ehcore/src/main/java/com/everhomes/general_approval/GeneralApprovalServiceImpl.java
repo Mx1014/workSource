@@ -246,7 +246,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private Map<String,Integer> findTopNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs,
 			String superFieldName) {
 		Map<String,Integer> fieldNames = new HashMap<>();
-
+		if(null == fieldDTOs)
+			return fieldNames;
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
 			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
 				fieldNames.put(superFieldName == null ? fieldDTO.getFieldDisplayName()
@@ -262,12 +263,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private Map<String,Integer> findAllNumFieldNames(List<GeneralFormFieldDTO> fieldDTOs) {
 		Map<String,Integer> fieldNames = new HashMap<>();
 		fieldNames.putAll(findTopNumFieldNames(fieldDTOs, null));
+		if(null == fieldDTOs)
+			return fieldNames;
 		for (GeneralFormFieldDTO fieldDTO : fieldDTOs) {
 			if (fieldDTO.getFieldType().equals(GeneralFormFieldType.SUBFORM.getCode())) {
 				GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(
 						fieldDTO.getFieldExtra(), GeneralFormSubformDTO.class);
 				fieldNames.putAll(findTopNumFieldNames(subFromExtra.getFormFields(),
 						fieldDTO.getFieldDisplayName()));
+			}else if (fieldDTO.getFieldType().equals(GeneralFormFieldType.NUMBER_TEXT.getCode())){
 			}
 		}
 		return fieldNames;
@@ -278,8 +282,11 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		switch (GeneralFormFieldType.fromCode(fieldDTO.getFieldType())) {
 		case SUBFORM:
 			// 对于子表单要检查所有的字段
-			GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
+
+			GeneralFormSubformDTO subFromExtra = JSONObject.parseObject(fieldDTO.getFieldExtra(),
 					GeneralFormSubformDTO.class);
+			LOGGER.debug("FIELD EXTRA"+fieldDTO.getFieldExtra());
+			LOGGER.debug("field extra dto "+subFromExtra);
 			Map<String,Integer> subNameMap = findTopNumFieldNames(subFromExtra.getFormFields(),
 					fieldDTO.getFieldDisplayName());
 			subNameMap.putAll(topNumFieldNames.get());
@@ -292,6 +299,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			// 对于数字要检查默认公式
 			GeneralFormNumDTO numberExtra = ConvertHelper.convert(fieldDTO.getFieldExtra(),
 					GeneralFormNumDTO.class);
+			if (null == numberExtra.getDefaultValue())
+				break;
 			if(!checkNumberDefaultValue(numberExtra.getDefaultValue(), allNumFieldNames.get())){ 
 				throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
 						GeneralApprovalServiceErrorCode.ERROR_FORMULA_CHECK, "ERROR_FORMULA_CHECK");	
@@ -314,7 +323,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	 * 3. 变量与纯数字之间必须有+、-、*、/中的一个符号 
 	 * 4. 括号必须成对出现
 	 * 
-	 * @param list
+	 * @param defaultValue 公式-默认值
+	 * @param map 合法的变量名map
 	 */
 	@Override
 	public Boolean checkNumberDefaultValue(String defaultValue, Map<String,Integer> map) {
