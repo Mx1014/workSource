@@ -778,15 +778,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
-			for (OrganizationCommunityRequest req : requests) {
-				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
-				if(null != dto)
-					dtos.add(dto);
+			if (setAdminFlag == null) {
+				List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
+				for (OrganizationCommunityRequest req : requests) {
+					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
+					if(null != dto)
+						dtos.add(dto);
+				}
+			}else {
+				List<Long> organizationIds = organizationProvider.listOrganizationIdByCommunityId(communityId, setAdminFlag.getCode(), pageSize, locator);
+				for (Long organizationId : organizationIds) {
+					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
+					if(null != dto)
+						dtos.add(dto);
+				}
 			}
-
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, pageSize);
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), setAdminFlag==null?null:setAdminFlag.getCode(), locator, pageSize);
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)

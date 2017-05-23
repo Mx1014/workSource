@@ -331,4 +331,7 @@ public interface OrganizationProvider {
 	
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 	List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
+			CrossShardListingLocator locator, int pageSize);
 } 
