@@ -1,8 +1,10 @@
 package com.everhomes.parking;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +33,9 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
-	
+	@Autowired
+	private ConfigurationProvider configProvider;
+
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
 		
@@ -131,10 +135,14 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		
 		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
 
-		if (0 != order.getPrice().compareTo(payAmount)) {
-			LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Order amount is not equal to payAmount.");
+		//加一个开关，方便在beta环境测试
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (!flag) {
+			if (0 != order.getPrice().compareTo(payAmount)) {
+				LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"Order amount is not equal to payAmount.");
+			}
 		}
 
 		Long payTime = System.currentTimeMillis();
