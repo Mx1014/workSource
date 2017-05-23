@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>excludeCategories: 排除类型</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>needTemporary: 0-不需要， 1-需要， 是否需要查询暂存的活动，用于后台查询时把暂存的贴子也查出来。 不填默认0</li>
  * </ul>
  */
 public class ListTopicCommand {
@@ -25,6 +26,8 @@ public class ListTopicCommand {
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
+    
+    private Byte needTemporary;
     
     public ListTopicCommand() {
     }
@@ -76,6 +79,14 @@ public class ListTopicCommand {
 
 	public void setExcludeCategories(List<Long> excludeCategories) {
 		this.excludeCategories = excludeCategories;
+	}
+
+	public Byte getNeedTemporary() {
+		return needTemporary;
+	}
+
+	public void setNeedTemporary(Byte needTemporary) {
+		this.needTemporary = needTemporary;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -326,6 +327,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		param.put("REQUESTS",array);
 
+		LOGGER.info("param={}", param);
+
 		return param;
 	}
 
@@ -408,10 +411,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("start_date", validStart);
 	    param.put("buy_num", String.valueOf(order.getMonthCount().intValue()));
 
-		String json = post(createRequestParam(RECHARGE, param));
+		JSONObject requestParam = createRequestParam(RECHARGE, param);
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = post(requestParam);
+
+		LOGGER.info("Result={}, param={}", json, requestParam);
 
 		String entityJson = parseJson(json);
 
@@ -485,8 +489,9 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
 			httpPost.setEntity(stringEntity);
 			response = httpclient.execute(httpPost);
-
-			int status = response.getStatusLine().getStatusCode();
+			StatusLine statusLine = response.getStatusLine();
+			LOGGER.info("Parking responseCode={}, responseProtocol", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+			int status = statusLine.getStatusCode();
 
 			if (status == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
@@ -495,6 +500,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 		} catch (IOException e) {
+			LOGGER.error("Parking request error.", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Parking request error.");
 		}finally {

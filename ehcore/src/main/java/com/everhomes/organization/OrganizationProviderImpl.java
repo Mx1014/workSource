@@ -3454,4 +3454,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return result;
 	}
+
+	@Override
+	public Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		int totalRecords = query.fetchCount();
+		return totalRecords;
+	}
 }

@@ -3,17 +3,17 @@ package com.everhomes.rest.business;
 import com.everhomes.util.StringHelper;
 
 public class listUsersOfEnterpriseCommand {
-	private Long OrganizationId;
+	private Long organizationId;
 
 	private Long pageAnchor;
 	private Integer pageSize;
 
 	public Long getOrganizationId() {
-		return OrganizationId;
+		return organizationId;
 	}
 
 	public void setOrganizationId(Long organizationId) {
-		OrganizationId = organizationId;
+		this.organizationId = organizationId;
 	}
 
 	public Long getPageAnchor() {

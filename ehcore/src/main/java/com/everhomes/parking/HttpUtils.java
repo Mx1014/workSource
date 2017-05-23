@@ -6,6 +6,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -70,7 +71,9 @@ public class HttpUtils {
 
             response = httpclient.execute(httpPost);
 
-            int status = response.getStatusLine().getStatusCode();
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
 
             if(status == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
@@ -138,7 +141,9 @@ public class HttpUtils {
             }
 
             response = httpclient.execute(httpPost);
-            int status = response.getStatusLine().getStatusCode();
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
 
             if(status == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
