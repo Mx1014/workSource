@@ -42,3 +42,6 @@ insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values
 
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消报名');
 
+
+-- 在eh_activity_categories增加一个实际id，现在要将入口数据添加到此表。不同的namespace会用重复。刷新原有的数据。  add by yanjun 20170523
+UPDATE `eh_activity_categories` SET actual_id = id;
