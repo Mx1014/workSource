@@ -265,6 +265,34 @@ public class YellowPageController  extends ControllerBase {
     }
     
     /**
+   	 * <b>URL: /yellowPage/reSortOrderServiceAllianceEnterprise</b>
+   	 * <p> 更新服务联盟企业顺序 </p>
+   	 */
+    @RequestMapping("reSortOrderServiceAllianceEnterprise")
+    @RestReturn(value=String.class)
+    public RestResponse reSortOrderServiceAllianceEnterprise(@Valid ReSortOrderServiceAllianceEnterpriseCommand cmd) {
+    	 this.yellowPageService.ReSortOrderServiceAllianceEnterpriseCommand(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/showOrHideServiceAllianceEnterprise</b>
+   	 * <p> 更新服务联盟企业是否显示在app端  </p>
+   	 */
+    @RequestMapping("showOrHideServiceAllianceEnterprise")
+    @RestReturn(value=String.class)
+    public RestResponse showOrHideServiceAllianceEnterprise(@Valid ShowOrHideServiceAllianceEnterpriseCommand cmd) {
+    	 this.yellowPageService.showOrHideServiceAllianceEnterprise(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
 	 * <b>URL: /yellowPage/addNotifyTarget</b>
 	 * <p> 增加推送接收管理员</p>
 	 */

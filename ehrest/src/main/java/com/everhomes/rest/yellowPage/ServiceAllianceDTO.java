@@ -43,6 +43,8 @@ import java.util.List;
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  *  <li>jumpId : 跳转模块id</li>
+ *  <li>showOrHide : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.ShowOrHideType}</li>
+ *  <li>sortOrder : 排序序号</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -121,6 +123,10 @@ public class ServiceAllianceDTO {
 	private Byte supportType;
 
 	private Long jumpId;
+	
+	private Byte showOrHide;
+	
+	private Long sortOrder;
 
 	public String getDisplayServiceUrl() {
 		return displayServiceUrl;
@@ -362,6 +368,22 @@ public class ServiceAllianceDTO {
 
 	public void setJumpId(Long jumpId) {
 		this.jumpId = jumpId;
+	}
+
+	public Byte getShowOrHide() {
+		return showOrHide;
+	}
+
+	public void setShowOrHide(Byte showOrHide) {
+		this.showOrHide = showOrHide;
+	}
+
+	public Long getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(Long sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 	@Override

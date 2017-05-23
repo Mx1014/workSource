@@ -1422,4 +1422,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		return params;
 	}
+
+	@Override
+	public void showOrHideServiceAllianceEnterprise(ShowOrHideServiceAllianceEnterpriseCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void ReSortOrderServiceAllianceEnterpriseCommand(
+			com.everhomes.rest.yellowPage.ReSortOrderServiceAllianceEnterpriseCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 }
