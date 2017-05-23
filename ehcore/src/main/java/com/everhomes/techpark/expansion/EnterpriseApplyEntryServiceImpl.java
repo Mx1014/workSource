@@ -1101,6 +1101,24 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
 
+
+		if (null == config) {
+			LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LeaseIssuerConfig not found.");
+		}
+
+        String displayNameStr = config.getDisplayNameStr();
+        String displayOrderStr = config.getDisplayOrderStr();
+        if (null != displayNameStr) {
+        	String[] names = displayNameStr.split(",");
+        	String[] orders = displayOrderStr.split(",");
+			LeasePromotionConfigDTO dto = ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
+			dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
+			dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
+			return dto;
+		}
+
 		LeasePromotionConfigDTO dto = new LeasePromotionConfigDTO();
 		List<LeasePromotionConfig2> configs = enterpriseLeaseIssuerProvider.listLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
         if (null != configs) {
@@ -1114,20 +1132,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					case "renewFlag": dto.setRenewFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "areaSearchFlag": dto.setAreaSearchFlag(Byte.valueOf(c.getConfigValue())); break;
 					case "consultFlag": dto.setConsultFlag(Byte.valueOf(c.getConfigValue())); break;
-					case "displayNameStr": dto.setDisplayNameStr(c.getConfigValue()); break;
-					case "displayOrderStr": dto.setDisplayOrderStr(c.getConfigValue()); break;
+//					case "displayNameStr": dto.setDisplayNameStr(c.getConfigValue()); break;
+//					case "displayOrderStr": dto.setDisplayOrderStr(c.getConfigValue()); break;
 					default: break;
 				}
 			});
 		}
 
-		if (null == config) {
-            LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
-            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "LeaseIssuerConfig not found.");
-        }
-
-        return ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
+        return dto;
 
     }
 
