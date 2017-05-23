@@ -2,6 +2,8 @@ package com.everhomes.warehouse;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
@@ -91,23 +93,30 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Autowired
     private ImportFileService importFileService;
 
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
-        checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(),warehouse.getOwnerType(),warehouse.getOwnerId());
-        if(cmd.getId() == null) {
-            warehouse.setNamespaceId(UserContext.getCurrentNamespaceId());
-            warehouse.setCreatorUid(UserContext.current().getUser().getId());
-            warehouseProvider.creatWarehouse(warehouse);
-        } else {
-            Warehouses exist = verifyWarehouses(warehouse.getId(), warehouse.getOwnerType(), warehouse.getOwnerId());
-            warehouse.setNamespaceId(exist.getNamespaceId());
-            warehouse.setCreatorUid(exist.getCreatorUid());
-            warehouse.setCreateTime(exist.getCreateTime());
-            warehouseProvider.updateWarehouse(warehouse);
-        }
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode()+cmd.getWarehouseNumber()
+                +cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
+            checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId());
+            if (cmd.getId() == null) {
+                warehouse.setNamespaceId(UserContext.getCurrentNamespaceId());
+                warehouse.setCreatorUid(UserContext.current().getUser().getId());
+                warehouseProvider.creatWarehouse(warehouse);
+            } else {
+                Warehouses exist = verifyWarehouses(warehouse.getId(), warehouse.getOwnerType(), warehouse.getOwnerId());
+                warehouse.setNamespaceId(exist.getNamespaceId());
+                warehouse.setCreatorUid(exist.getCreatorUid());
+                warehouse.setCreateTime(exist.getCreateTime());
+                warehouseProvider.updateWarehouse(warehouse);
+            }
 
-        warehouseSearcher.feedDoc(warehouse);
+            warehouseSearcher.feedDoc(warehouse);
+            return null;
+        });
         WarehouseDTO dto = ConvertHelper.convert(warehouse, WarehouseDTO.class);
         return dto;
     }
@@ -182,38 +191,42 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseMaterialCategoryDTO updateWarehouseMaterialCategory(UpdateWarehouseMaterialCategoryCommand cmd) {
         WarehouseMaterialCategories category = ConvertHelper.convert(cmd, WarehouseMaterialCategories.class);
-        if(cmd.getId() == null) {
-            category.setNamespaceId(UserContext.getCurrentNamespaceId());
-            category.setCreatorUid(UserContext.current().getUser().getId());
-            category.setPath("");
-            WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
-            if(parent != null) {
-                category.setPath(parent.getPath());
-            }
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
+                +cmd.getCategoryNumber()+cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
+            if (cmd.getId() == null) {
+                category.setNamespaceId(UserContext.getCurrentNamespaceId());
+                category.setCreatorUid(UserContext.current().getUser().getId());
+                category.setPath("");
+                WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
+                if (parent != null) {
+                    category.setPath(parent.getPath());
+                }
 
-            if(category.getCategoryNumber() == null) {
-                category.setCategoryNumber(generateCategoryNumber());
+                if (category.getCategoryNumber() == null) {
+                    category.setCategoryNumber(generateCategoryNumber());
+                } else {
+                    checkCategoryNumber(category.getId(), category.getCategoryNumber(), category.getOwnerType(), category.getOwnerId());
+                }
+
+                warehouseProvider.creatWarehouseMaterialCategories(category);
             } else {
+                WarehouseMaterialCategories exist = verifyWarehouseMaterialCategories(category.getId(), category.getOwnerType(), category.getOwnerId());
+                category.setNamespaceId(exist.getNamespaceId());
+                category.setCreatorUid(exist.getCreatorUid());
+                category.setCreateTime(exist.getCreateTime());
                 checkCategoryNumber(category.getId(), category.getCategoryNumber(), category.getOwnerType(), category.getOwnerId());
+                WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
+                if (parent != null) {
+                    category.setPath(parent.getPath() + "/" + category.getId());
+                } else {
+                    category.setPath("/" + category.getId());
+                }
+                warehouseProvider.updateWarehouseMaterialCategories(category);
             }
 
-            warehouseProvider.creatWarehouseMaterialCategories(category);
-        } else {
-            WarehouseMaterialCategories exist = verifyWarehouseMaterialCategories(category.getId(), category.getOwnerType(), category.getOwnerId());
-            category.setNamespaceId(exist.getNamespaceId());
-            category.setCreatorUid(exist.getCreatorUid());
-            category.setCreateTime(exist.getCreateTime());
-            checkCategoryNumber(category.getId(), category.getCategoryNumber(),category.getOwnerType(),category.getOwnerId());
-            WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategories(category.getParentId(), category.getOwnerType(), category.getOwnerId());
-            if(parent != null) {
-                category.setPath(parent.getPath() + "/" + category.getId());
-            } else {
-                category.setPath("/" + category.getId());
-            }
-            warehouseProvider.updateWarehouseMaterialCategories(category);
-        }
-
-        warehouseMaterialCategorySearcher.feedDoc(category);
+            warehouseMaterialCategorySearcher.feedDoc(category);
+            return null;
+        });
         WarehouseMaterialCategoryDTO dto = ConvertHelper.convert(category, WarehouseMaterialCategoryDTO.class);
         return dto;
     }
@@ -322,28 +335,32 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseMaterialDTO updateWarehouseMaterial(UpdateWarehouseMaterialCommand cmd) {
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
-        checkMaterialNumber(material.getId(), material.getMaterialNumber(),material.getOwnerType(),material.getOwnerId());
-        if(cmd.getId() == null) {
-            material.setNamespaceId(UserContext.getCurrentNamespaceId());
-            material.setCreatorUid(UserContext.current().getUser().getId());
-            WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), material.getOwnerType(), material.getOwnerId());
-            if(category != null) {
-                material.setCategoryPath(category.getPath());
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode()
+                +cmd.getMaterialNumber()+cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
+            checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId());
+            if (cmd.getId() == null) {
+                material.setNamespaceId(UserContext.getCurrentNamespaceId());
+                material.setCreatorUid(UserContext.current().getUser().getId());
+                WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), material.getOwnerType(), material.getOwnerId());
+                if (category != null) {
+                    material.setCategoryPath(category.getPath());
+                }
+                warehouseProvider.creatWarehouseMaterials(material);
+            } else {
+                WarehouseMaterials exist = verifyWarehouseMaterials(material.getId(), material.getOwnerType(), material.getOwnerId());
+                material.setNamespaceId(exist.getNamespaceId());
+                material.setCreatorUid(exist.getCreatorUid());
+                material.setCreateTime(exist.getCreateTime());
+                WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), material.getOwnerType(), material.getOwnerId());
+                if (category != null) {
+                    material.setCategoryPath(category.getPath());
+                }
+                warehouseProvider.updateWarehouseMaterials(material);
             }
-            warehouseProvider.creatWarehouseMaterials(material);
-        } else {
-            WarehouseMaterials exist = verifyWarehouseMaterials(material.getId(), material.getOwnerType(), material.getOwnerId());
-            material.setNamespaceId(exist.getNamespaceId());
-            material.setCreatorUid(exist.getCreatorUid());
-            material.setCreateTime(exist.getCreateTime());
-            WarehouseMaterialCategories category = warehouseProvider.findWarehouseMaterialCategories(material.getCategoryId(), material.getOwnerType(), material.getOwnerId());
-            if(category != null) {
-                material.setCategoryPath(category.getPath());
-            }
-            warehouseProvider.updateWarehouseMaterials(material);
-        }
 
-        warehouseMaterialSearcher.feedDoc(material);
+            warehouseMaterialSearcher.feedDoc(material);
+            return null;
+        });
         WarehouseMaterialDTO dto = ConvertHelper.convert(material, WarehouseMaterialDTO.class);
         WarehouseUnits unit = warehouseProvider.findWarehouseUnits(dto.getUnitId(), dto.getOwnerType(), dto.getOwnerId());
         if(unit != null) {
