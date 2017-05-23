@@ -821,7 +821,6 @@ public class WarehouseServiceImpl implements WarehouseService {
                     if(datas.size() > 0){
                         //设置导出报错的结果excel的标题
                         response.setTitle(datas.get(0));
-                        datas.remove(0);
                     }
 
                     List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
@@ -865,7 +864,6 @@ public class WarehouseServiceImpl implements WarehouseService {
                     if(datas.size() > 0){
                         //设置导出报错的结果excel的标题
                         response.setTitle(datas.get(0));
-                        datas.remove(0);
                     }
                     List<ImportFileResultLog<ImportWarehouseMaterialDataDTO>> results = importWarehouseMaterialsData(cmd, datas, userId);
                     response.setTotalCount((long)datas.size());
