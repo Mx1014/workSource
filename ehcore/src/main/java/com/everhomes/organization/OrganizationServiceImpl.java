@@ -733,7 +733,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String keywords = cmd.getKeywords();
 		
-		Byte setAdminFlag = cmd.getSetAdminFlag();
+		TrueOrFalseFlag setAdminFlag = TrueOrFalseFlag.fromCode(cmd.getSetAdminFlag());
 
 		if(!StringUtils.isEmpty(keywords)){
 			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
@@ -762,11 +762,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
-			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
-			for (OrganizationAddress address : addresses) {
-				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
-				if(null != dto)
-					dtos.add(dto);
+			if (setAdminFlag == null) {
+				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
+				for (OrganizationAddress address : addresses) {
+					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
+					if(null != dto)
+						dtos.add(dto);
+				}
+			}else {
+				List<Long> organizationIds = organizationProvider.listOrganizationIdByBuildingId(buildingId, setAdminFlag.getCode(), pageSize, locator);
+				for (Long organizationId : organizationIds) {
+					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
+					if(null != dto)
+						dtos.add(dto);
+				}
 			}
 		}else if(null != communityId){
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
