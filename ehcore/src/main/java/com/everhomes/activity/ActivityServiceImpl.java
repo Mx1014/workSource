@@ -4893,8 +4893,8 @@ public class ActivityServiceImpl implements ActivityService {
 		response.setRosterMonthCount(rosterMonthCountCreate - rosterMonthCountCancel);
 		response.setRosterWeekCount(rosterWeekCountCreate - rosterWeekCountCancel);
 		
-		Integer manCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.MALE, true);
-		Integer womanCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.FEMALE, true);
+		Integer manCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.MALE, false);
+		Integer womanCount = activityProvider.countActivityRoster(namespaceId, cmd.getCategoryId(), cmd.getContentCategoryId(), null, null, UserGender.FEMALE, false);
 		
 		response.setManCount(manCount);
 		response.setWomanCount(womanCount);
