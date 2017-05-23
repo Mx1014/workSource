@@ -190,7 +190,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public WarehouseMaterialCategoryDTO updateWarehouseMaterialCategory(UpdateWarehouseMaterialCategoryCommand cmd) {
-        if(StringUtils.isEmpty(cmd.getName())){
+        if(StringUtils.isBlank(cmd.getName())){
             LOGGER.error("warehouse material category name is null, data = {}", cmd);
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL,
                     "categoryNumber already exist");
@@ -889,7 +889,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             ImportFileResultLog<ImportWarehouseMaterialDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             WarehouseMaterials material = new WarehouseMaterials();
 
-            if(StringUtils.isEmpty(str.getName())){
+            if(StringUtils.isBlank(str.getName())){
                 LOGGER.error("warehouse material name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material name is null");
@@ -899,7 +899,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             material.setName(str.getName());
 
-            if(StringUtils.isEmpty(str.getMaterialNumber())){
+            if(StringUtils.isBlank(str.getMaterialNumber())){
                 LOGGER.error("warehouse material number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material number is null");
@@ -919,7 +919,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             material.setMaterialNumber(str.getMaterialNumber());
 
-            if(StringUtils.isEmpty(str.getCategoryNumber())){
+            if(StringUtils.isBlank(str.getCategoryNumber())){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category number is null");
@@ -941,7 +941,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             material.setBrand(str.getBrand());
             material.setItemNo(str.getItemNo());
-            if(!StringUtils.isEmpty(str.getReferencePrice())) {
+            if(!StringUtils.isBlank(str.getReferencePrice())) {
                 if(!isNumber(str.getReferencePrice())) {
                     LOGGER.error("warehouse material reference price is wrong, data = {}", str);
                     log.setData(str);
@@ -953,7 +953,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 material.setReferencePrice(new BigDecimal(str.getReferencePrice()));
             }
 
-            if(StringUtils.isEmpty(str.getUnitName())){
+            if(StringUtils.isBlank(str.getUnitName())){
                 LOGGER.error("warehouse material unit is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material unit is null");
@@ -999,7 +999,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
             WarehouseMaterialCategories category = new WarehouseMaterialCategories();
 
-            if(StringUtils.isEmpty(str.getName())){
+            if(StringUtils.isBlank(str.getName())){
                 LOGGER.error("warehouse material category name is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category name is null");
@@ -1009,7 +1009,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             category.setName(str.getName());
 
-            if(StringUtils.isEmpty(str.getCategoryNumber())){
+            if(StringUtils.isBlank(str.getCategoryNumber())){
                 LOGGER.error("warehouse material category number is null, data = {}", str);
                 log.setData(str);
                 log.setErrorLog("warehouse material category number is null");
@@ -1029,7 +1029,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             category.setCategoryNumber(str.getCategoryNumber());
             category.setPath("");
-            if(!StringUtils.isEmpty(str.getParentCategoryNumber())) {
+            if(!StringUtils.isBlank(str.getParentCategoryNumber())) {
                 WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getParentCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
                 if(parent == null) {
                     LOGGER.error("material categoty parent number is not exist, data = {}, cmd = {}" , str, cmd);
