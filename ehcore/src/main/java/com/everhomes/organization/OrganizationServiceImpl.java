@@ -19,6 +19,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -106,6 +107,7 @@ import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -128,6 +130,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.io.*;
 import java.sql.Timestamp;
@@ -807,6 +811,39 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return resp;
 	}
 
+	@Override
+	public void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response) {
+		cmd.setPageSize(10000);
+		List<OrganizationDetailDTO> organizationDetailDTOs = listEnterprises(cmd).getDtos();
+		 if (organizationDetailDTOs != null && organizationDetailDTOs.size() > 0) {
+	            String fileName = String.format("企业信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+	            ExcelUtils excelUtils = new ExcelUtils(response, fileName, "企业信息");
+//	            
+	            List<OrganizationExportDetailDTO> data = organizationDetailDTOs.stream().map(this::convertToExportDetail).collect(Collectors.toList());
+	            String[] propertyNames = {"displayName", "emailDomain", "apartments", "signupCount", "memberCount", "serviceUserName", "admins", "address", "contact", "checkinDateString", "description"};
+	            String[] titleNames = {"企业名称", "邮箱域名", "楼栋门牌", "注册人数", "企业人数", "客服经理", "企业管理员", "地址", "咨询电话", "入驻时间", "企业介绍"};
+	            int[] titleSizes = {20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20};
+	            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, data);
+	        } else {
+	            throw errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_DATA,
+	                    "no data");
+	        }
+	}
+
+	private OrganizationExportDetailDTO convertToExportDetail(OrganizationDetailDTO organizationDetailDTO) {
+		OrganizationExportDetailDTO exportDetailDTO = ConvertHelper.convert(organizationDetailDTO, OrganizationExportDetailDTO.class);
+		String apartments = String.join("\n", exportDetailDTO.getAddresses().stream().map(AddressDTO::getAddress).collect(Collectors.toList()));
+		exportDetailDTO.setApartments(apartments);
+		String admins = String.join("\n", exportDetailDTO.getAdminMembers().stream().map(this::toAdminString).collect(Collectors.toList()));
+		exportDetailDTO.setAdmins(admins);
+		exportDetailDTO.setCheckinDateString(DateUtil.dateToStr(new Date(exportDetailDTO.getCheckinDate()), DateUtil.YMR_SLASH));
+		return exportDetailDTO;
+	}
+	
+	private String toAdminString(OrganizationContactDTO organizationContactDTO) {
+		return organizationContactDTO.getContactName()+"("+organizationContactDTO.getContactToken()+")";
+	}
+	
 	private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
 		for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
 			addExtraInfo(organizationDetailDTO);
