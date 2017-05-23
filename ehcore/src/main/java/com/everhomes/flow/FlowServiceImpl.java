@@ -3460,7 +3460,7 @@ public class FlowServiceImpl implements FlowService {
                     "flowId not exists");
         }
 
-        if (cmd.getItems() == null || cmd.getItems().size() == 0 || cmd.getItems().size() > 5) {
+        if (cmd.getItems() != null && cmd.getItems().size() > 5) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
                     "items size error!");
         }
@@ -3476,13 +3476,14 @@ public class FlowServiceImpl implements FlowService {
         this.dbProvider.execute(status -> {
             flowMarkUpdated(flow);
 
-            if (cmd.getItems() != null && cmd.getItems().size() > 0) {
-                List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
-                if (items != null && items.size() > 0) {
-                    flowEvaluateItemProvider.deleteFlowEvaluateItem(items);
-                }
+            List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(
+                    flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+            if (items != null && items.size() > 0) {
+                flowEvaluateItemProvider.deleteFlowEvaluateItem(items);
+            }
 
-                items = new ArrayList<>();
+            items = new ArrayList<>();
+            if (cmd.getItems() != null) {
                 for (FlowEvaluateItemDTO dto : cmd.getItems()) {
                     FlowEvaluateItem item = new FlowEvaluateItem();
                     item.setFlowMainId(flow.getId());
@@ -3492,7 +3493,9 @@ public class FlowServiceImpl implements FlowService {
                     item.setInputFlag(dto.getInputFlag());
                     items.add(item);
                 }
+            }
 
+            if (items.size() > 0) {
                 flowEvaluateItemProvider.createFlowEvaluateItem(items);
             }
 
