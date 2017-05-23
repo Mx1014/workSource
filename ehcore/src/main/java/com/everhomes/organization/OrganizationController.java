@@ -1479,7 +1479,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/deleteOrganizationMemberWorkExperiences</b>
      * <p>删除员工工作经历</p>
      */
-    @RequestMapping("deleteOrganizationMemberWorkExps")
+    @RequestMapping("deleteOrganizationMemberWorkExperiences")
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationMemberWorkExperiences(@Valid DeleteOrganizationMemberWorkExperiencesCommand cmd) {
         this.organizationService.deleteOrganizationMemberWorkExperiences(cmd);

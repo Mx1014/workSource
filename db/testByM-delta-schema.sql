@@ -97,10 +97,10 @@ CREATE TABLE `eh_organization_member_insurances` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
--- Table structure for the situation of members' contract
+-- Table structure for the situation of members' contracts
 -- ----------------------------
--- DROP TABLE IF EXISTS `eh_organization_member_contract`;
-CREATE TABLE `eh_organization_member_contract` (
+-- DROP TABLE IF EXISTS `eh_organization_member_contracts`;
+CREATE TABLE `eh_organization_member_contracts` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
