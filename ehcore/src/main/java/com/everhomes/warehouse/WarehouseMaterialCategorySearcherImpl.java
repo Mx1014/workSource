@@ -22,6 +22,8 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,7 +136,9 @@ public class WarehouseMaterialCategorySearcherImpl extends AbstractElasticSearch
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
-        builder.setQuery(qb);
+        if(cmd.getName() == null || cmd.getName().isEmpty()) {
+            builder.addSort(SortBuilders.fieldSort("updateTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        }
 
         SearchResponse rsp = builder.execute().actionGet();
 
@@ -180,6 +184,7 @@ public class WarehouseMaterialCategorySearcherImpl extends AbstractElasticSearch
             b.field("parentId", category.getParentId());
             b.field("name", category.getName());
             b.field("categoryNumber", category.getCategoryNumber());
+            b.field("updateTime", category.getUpdateTime());
 
 
             b.endObject();
