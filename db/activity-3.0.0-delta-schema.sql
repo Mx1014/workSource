@@ -32,4 +32,4 @@ CREATE TABLE `eh_roster_order_settings` (
 ALTER TABLE `eh_activity_roster` ADD COLUMN `cancel_time` DATETIME NULL;
 
 -- 在eh_activity_categories增加一个实际id，现在要将入口数据添加到此表。不同的namespace会用重复   add by yanjun 20170523
-ALTER TABLE `eh_activity_categories` ADD COLUMN `actual_id` BIGINT(20) NOT NULL COMMENT 'actual id, Differ from each other\n in the same namespace' AFTER `owner_id`;
+ALTER TABLE `eh_activity_categories` ADD COLUMN `entry_id` BIGINT(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace' AFTER `owner_id`;
