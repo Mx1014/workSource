@@ -3864,6 +3864,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(tasks != null && tasks.size() > 0) {
 			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
 				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				if(equipment != null) {
+					dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentLocation(equipment.getLocation());
+				}
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				if(standard != null) {
+					dto.setTaskType(standard.getStandardType());
+				}
+				if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+					List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+					if(executors != null && executors.size() > 0) {
+						dto.setExecutorName(executors.get(0).getContactName());
+					}
+				}
 				return dto;
 			}).collect(Collectors.toList());
 
