@@ -7,6 +7,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.*;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
@@ -96,6 +97,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Autowired
     private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private LocaleStringService localeStringService;
+
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
@@ -128,14 +132,19 @@ public class WarehouseServiceImpl implements WarehouseService {
                 LOGGER.error("warehouseNumber already exist, warehouseNumber = " + warehouseNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBER_ALREADY_EXIST,
-                        "warehouseNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"warehouseNumber already exist"));
+
             }
         } else {
             if(warehouse != null && !warehouse.getId().equals(warehouseId)) {
                 LOGGER.error("warehouseNumber already exist, warehouseNumber = " + warehouseNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBER_ALREADY_EXIST,
-                        "warehouseNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"warehouseNumber already exist"));
             }
         }
     }
@@ -145,7 +154,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(warehouse == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST,
-                    "仓库不存在");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"仓库不存在"));
         }
 
         return warehouse;
@@ -161,9 +172,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             LOGGER.error("warehouse stock is not null, warehouseId = " + cmd.getWarehouseId()
                     + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId()
                     + ", count stocks = " + amount);
-            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
-                    WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
-                    "仓库库存不为0");
+            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL,
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_NOT_NULL),
+                            UserContext.current().getUser().getLocale(),"仓库库存不为0"));
+
         }
         warehouse.setStatus(WarehouseStatus.INACTIVE.getCode());
         warehouse.setDeleteUid(UserContext.current().getUser().getId());
@@ -193,7 +206,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(StringUtils.isBlank(cmd.getName())){
             LOGGER.error("warehouse material category name is null, data = {}", cmd);
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL,
-                    "warehouse material category name is null");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL),
+                            UserContext.current().getUser().getLocale(),"warehouse material category name is null"));
         }
         WarehouseMaterialCategories category = ConvertHelper.convert(cmd, WarehouseMaterialCategories.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
@@ -243,14 +258,18 @@ public class WarehouseServiceImpl implements WarehouseService {
                 LOGGER.error("categoryNumber already exist, categoryNumber = " + categoryNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST,
-                        "categoryNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"categoryNumber already exist"));
             }
         } else {
             if(category != null && !category.getId().equals(categoryId)) {
                 LOGGER.error("categoryNumber already exist, categoryNumber = " + categoryNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST,
-                        "categoryNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"categoryNumber already exist"));
             }
         }
     }
@@ -260,7 +279,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(category == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST,
-                    "物品分类不存在");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"物品分类不存在"));
         }
 
         return category;
@@ -277,7 +298,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                     + ", ownerType = " + cmd.getOwnerType() + ", ownerId = " + cmd.getOwnerId());
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_IN_USE,
-                    "物品分类有关联物品");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_IN_USE),
+                            UserContext.current().getUser().getLocale(),"物品分类有关联物品"));
         }
         category.setStatus(Status.INACTIVE.getCode());
         category.setDeleteUid(UserContext.current().getUser().getId());
@@ -386,14 +409,18 @@ public class WarehouseServiceImpl implements WarehouseService {
                 LOGGER.error("materialNumber already exist, materialNumber = " + materialNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST,
-                        "materialNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"materialNumber already exist"));
             }
         } else {
             if(material != null && !material.getId().equals(materialId)) {
                 LOGGER.error("materialNumber already exist, materialNumber = " + materialNumber
                         + ", ownerType = " + ownerType + ", ownerId = " + ownerId);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST,
-                        "materialNumber already exist");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NUMBER_ALREADY_EXIST),
+                                UserContext.current().getUser().getLocale(),"materialNumber already exist"));
             }
         }
     }
@@ -403,7 +430,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(material == null) {
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST,
-                    "物品不存在");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_NOT_EXIST),
+                            UserContext.current().getUser().getLocale(),"物品不存在"));
         }
 
         return material;
@@ -421,7 +450,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                     + ", amount = " + amount);
             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE,
                     WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_RELATED_TO_WAREHOUSE,
-                    "物品有库存引用");
+                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_RELATED_TO_WAREHOUSE),
+                            UserContext.current().getUser().getLocale(),"物品有库存引用"));
         }
         material.setStatus(Status.INACTIVE.getCode());
         material.setDeleteUid(UserContext.current().getUser().getId());
@@ -475,29 +506,37 @@ public class WarehouseServiceImpl implements WarehouseService {
                             LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
                                     + ", materialId = " + stock.getMaterialId());
                             throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
-                                    "warehouse stock is not enough");
+                                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE),
+                                            UserContext.current().getUser().getLocale(),"warehouse stock is not enough"));
                         }
 
                         WarehouseRequestMaterials requestMaterial = warehouseProvider.findWarehouseRequestMaterials(cmd.getRequestId(), stock.getWarehouseId(), stock.getMaterialId());
                         if(requestMaterial == null) {
                             LOGGER.error("WarehouseRequestMaterials is not exist, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
                                     + ", materialId = " + stock.getMaterialId());
-                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
-                                    "WarehouseRequestMaterials is not exist");
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_EXIST,
+                                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_EXIST),
+                                            UserContext.current().getUser().getLocale(),"WarehouseRequestMaterials is not exist"));
                         }
 
                         if(!ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(requestMaterial.getReviewResult()))) {
                             LOGGER.error("WarehouseRequestMaterials is not qualified, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
                                     + ", materialId = " + stock.getMaterialId());
-                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
-                                    "WarehouseRequestMaterials is not qualified");
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_QUALIFIED,
+                                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_QUALIFIED),
+                                            UserContext.current().getUser().getLocale(),"WarehouseRequestMaterials is not qualified"));
                         }
 
                         if(DeliveryFlag.YES.equals(DeliveryFlag.fromStatus(requestMaterial.getDeliveryFlag()))) {
                             LOGGER.error("WarehouseRequestMaterials is already delivery, requestId = " + cmd.getRequestId() +", warehouseId = " + stock.getWarehouseId()
                                     + ", materialId = " + stock.getMaterialId());
-                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
-                                    "WarehouseRequestMaterials is already delivery");
+                            throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_ALREADY_DELIVERY,
+                                    localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                            String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_ALREADY_DELIVERY),
+                                            UserContext.current().getUser().getLocale(),"WarehouseRequestMaterials is already delivery"));
                         }
 
                         requestMaterial.setDeliveryFlag(DeliveryFlag.YES.getCode());
@@ -524,7 +563,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                         LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
                                 + ", materialId = " + stock.getMaterialId());
                         throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
-                                "warehouse stock is not enough");
+                                localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                        String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE),
+                                        UserContext.current().getUser().getLocale(),"warehouse stock is not enough"));
                     }
                     materialStock = new WarehouseStocks();
                     materialStock.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -764,7 +805,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(null == resultList || resultList.isEmpty()){
                 LOGGER.error("File content is empty。userId="+userId);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
-                        "File content is empty");
+                        localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
+                                String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
+                                UserContext.current().getUser().getLocale(),"File content is empty"));
             }
             task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             task.setOwnerId(cmd.getOwnerId());
@@ -806,7 +849,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(null == resultList || resultList.isEmpty()){
                 LOGGER.error("File content is empty。userId="+userId);
                 throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
-                        "File content is empty");
+                        localeStringService.getLocalizedString(String.valueOf(UserServiceErrorCode.SCOPE),
+                                String.valueOf(UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL),
+                                UserContext.current().getUser().getLocale(),"File content is empty"));
             }
             task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             task.setOwnerId(cmd.getOwnerId());
@@ -1147,7 +1192,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(null == flow) {
                 LOGGER.error("Enable request flow not found, moduleId={}", FlowConstants.WAREHOUSE_REQUEST);
                 throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_ENABLE_FLOW,
-                        "Enable request flow not found.");
+                        localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                String.valueOf(WarehouseServiceErrorCode.ERROR_ENABLE_FLOW),
+                                UserContext.current().getUser().getLocale(),"Enable request flow not found."));
             }
             CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 

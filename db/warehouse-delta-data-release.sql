@@ -231,4 +231,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('war
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10018', 'zh_CN', '物品参考单价格式错误');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10019', 'zh_CN', '物品单位为空');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10020', 'zh_CN', '物品分类名称为空');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10021', 'zh_CN', '申请物品不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10022', 'zh_CN', '申请物品未通过审核');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10023', 'zh_CN', '申请物品已交付');
 
