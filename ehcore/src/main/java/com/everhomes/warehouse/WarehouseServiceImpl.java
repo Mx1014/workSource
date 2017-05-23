@@ -547,9 +547,11 @@ public class WarehouseServiceImpl implements WarehouseService {
             List<WarehouseRequestMaterials> requestMaterials = warehouseProvider.listWarehouseRequestMaterials(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
             if(requestMaterials != null || requestMaterials.size() > 0) {
                 WarehouseRequests request = warehouseProvider.findWarehouseRequests(cmd.getRequestId(), cmd.getOwnerType(), cmd.getOwnerId());
-                request.setDeliveryFlag(DeliveryFlag.YES.getCode());
-                request.setUpdateTime(current);
-                warehouseProvider.updateWarehouseRequest(request);
+                if(request != null) {
+                    request.setDeliveryFlag(DeliveryFlag.YES.getCode());
+                    request.setUpdateTime(current);
+                    warehouseProvider.updateWarehouseRequest(request);
+                }
             }
         }
     }
