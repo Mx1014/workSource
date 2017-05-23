@@ -10,6 +10,7 @@ import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
@@ -47,5 +48,7 @@ public interface GeneralApprovalService {
 	void disableGeneralApproval(GeneralApprovalIdCommand cmd);
 
 	Boolean checkNumberDefaultValue(String defaultValue, Map<String, Integer> map);
+
+	ListGeneralApprovalResponse listActiveGeneralApproval(ListActiveGeneralApprovalCommand cmd);
 
 }
