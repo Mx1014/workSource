@@ -3227,6 +3227,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationAddress> listOrganizationAddressByOrganizationId(Long organizationId) {
 		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESSES)
 	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+	       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()))
 	       		 .fetch()
 	       		 .map(r->ConvertHelper.convert(r, OrganizationAddress.class));	       		 
 	}

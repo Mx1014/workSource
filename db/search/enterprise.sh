@@ -26,10 +26,11 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
             }, 
             "description":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
 	    "namespaceId":{"type":"long"},
-            "behaviorTime":{"type":"date"},
+            "createTime":{"type":"date"},
 	    "communityId":{"type":"long"},
 	    "addresses":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-	    "setAdminFlag":{"type":"integer"}
+	    "setAdminFlag":{"type":"integer"},
+	    "organizationType":{"type":"string", "index":"not_analyzed"}
         }
     }
 }

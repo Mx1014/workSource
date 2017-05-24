@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -52,6 +54,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private OrganizationService organizationService;
     
     @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
     private ConfigurationProvider  configProvider;
 	
 	@Autowired
@@ -62,6 +67,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 	
 	@Autowired
     private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+	private AddressProvider addressProvider;
 
     @Override
     public String getIndexType() {
@@ -79,6 +87,16 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             b.field("organizationType", organization.getOrganizationType());
             b.field("description", organization.getDescription());
             b.field("createTime", organization.getCreateTime());
+            b.field("setAdminFlag", organization.getSetAdminFlag());
+            List<OrganizationAddress> organizationAddresses = organizationProvider.listOrganizationAddressByOrganizationId(organization.getId());
+            List<String> addresses = new ArrayList<>();
+            if (organizationAddresses != null && !organizationAddresses.isEmpty()) {
+            	for (OrganizationAddress organizationAddress : organizationAddresses) {
+            		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+            		addresses.add(getAddress(address));
+            	}
+            	b.field("addresses", String.join(",", addresses));
+			}
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -87,7 +105,18 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         }
     }
     
-    @Override
+    private String getAddress(Address address) {
+    	if (address.getApartmentName() != null && address.getBuildingName() != null) {
+			if (address.getApartmentName().contains(address.getBuildingName())) {
+				return address.getApartmentName();
+			}else {
+				return address.getBuildingName()+"-"+address.getApartmentName();
+			}
+		}
+		return address.getAddress();
+	}
+
+	@Override
     public void deleteById(Long id) {
         deleteById(id.toString());
         
