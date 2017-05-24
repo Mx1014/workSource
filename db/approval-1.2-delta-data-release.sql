@@ -38,3 +38,10 @@ VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 
 SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999983, 51000, '表单管理', 'EhNamespaces', 999983, NULL, 2);
+
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+ VALUES((@eh_launch_pad_items_id:=@eh_launch_pad_items_id+1),'999983','0','0','0','/home','Bizs','审批','审批','cs://1/image/aW1hZ2UvTVRwak5qVTVZV1EyWkdVM1l6TTBaR1k1Tm1RMk56STVaVGt3TldGbU1HVmlOQQ','1','1','65','','4','0','1','1','','0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL,'0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES((@eh_launch_pad_items_id:=@eh_launch_pad_items_id+1),'999983','0','0','0','/home','Bizs','审批','审批','cs://1/image/aW1hZ2UvTVRwak5qVTVZV1EyWkdVM1l6TTBaR1k1Tm1RMk56STVaVGt3TldGbU1HVmlOQQ','1','1','65','','4','0','1','1','','0',NULL,NULL,NULL,'0','park_tourist','0',NULL,NULL,'0',NULL);
+

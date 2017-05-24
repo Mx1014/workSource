@@ -593,7 +593,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		if(null == cmd2.getModuleId())
 			cmd2.setModuleId(51000L);
 		if(null == cmd2.getOwnerType())
-			cmd2.setOwnerType("organization"); 
+			cmd2.setOwnerType("EhOrganizations"); 
 		
 		
 		return listGeneralApproval(cmd2);
