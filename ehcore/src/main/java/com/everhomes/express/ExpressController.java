@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.express.AddExpressUserCommand;
 import com.everhomes.rest.express.CancelExpressOrderCommand;
@@ -106,6 +107,13 @@ public class ExpressController extends ControllerBase {
 	@RestReturn(ListExpressOrderResponse.class)
 	public RestResponse listExpressOrder(ListExpressOrderCommand cmd){
 		return new RestResponse(expressService.listExpressOrder(cmd));
+	}
+	
+	@SuppressDiscover
+	@RequestMapping("listExpressOrder")
+	@RestReturn(String.class)
+	public RestResponse query(@RequestParam("query") String query){
+		return new RestResponse(expressService.query(query));
 	}
 
 	/**

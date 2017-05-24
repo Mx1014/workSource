@@ -24,6 +24,7 @@ import com.everhomes.server.schema.tables.pojos.EhExpressOrders;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class ExpressOrderProviderImpl implements ExpressOrderProvider {
@@ -101,6 +102,11 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 				.limit(condition.getPageSize()+1)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, ExpressOrder.class));
+	}
+
+	@Override
+	public Object query(String query) {
+		return StringHelper.toJsonString(getReadOnlyContext().fetch(query));
 	}
 
 	private EhExpressOrdersDao getReadWriteDao() {
