@@ -26,6 +26,7 @@ CREATE TABLE `eh_authorizations` (
   `auth_id` bigint(20) NOT NULL,
   `identity_type` varchar(64) NOT NULL COMMENT 'manage, ordinary',
   `all_flag` tinyint(4) COMMENT '0 not all, 1 all',
+  `scope` varchar(128) DEFAULT NULL,
   `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
