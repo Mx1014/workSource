@@ -234,9 +234,13 @@ public class ExpressServiceImpl implements ExpressService {
 		if (organizationCommunityList != null && !organizationCommunityList.isEmpty()) {
 			Long organizationId = organizationCommunityList.get(0).getOrganizationId();
 			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			return resolver.checkSuperAdmin(owner.getUserId(), organizationId);
+			boolean result = resolver.checkSuperAdmin(owner.getUserId(), organizationId);
+			if (result) {
+				return result;
+			}
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, organizationId="+organizationId+", userId="+owner.getUserId());
 		}
-		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error");
+		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, no organization");
 	}
 	
 	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
