@@ -1096,12 +1096,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
         String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), cmd.getName(),
-<<<<<<< HEAD
                 doorAccess.getCreateTime().getTime(), doorAccess.getUuid(), doorMessage);
-=======
-        		new Date().getTime(), doorAccess.getUuid(), doorMessage);
->>>>>>> pmtask
-        
+
         doorMessage.setDoorId(doorAccess.getId());
         doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
         AclinkMessage acMsg = new AclinkMessage();
