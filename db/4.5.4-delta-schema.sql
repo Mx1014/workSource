@@ -199,3 +199,9 @@ ALTER TABLE `eh_activity_roster` ADD COLUMN `cancel_time` DATETIME NULL;
 
 -- merge from activity-3.0.0 20170522  end
 
+
+-- merge from activity-3.0.0 20170524 start
+-- 在eh_activity_categories增加一个实际id，现在要将入口数据添加到此表。不同的namespace会用重复   add by yanjun 20170523
+ALTER TABLE `eh_activity_categories` ADD COLUMN `entry_id` BIGINT(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace' AFTER `owner_id`;
+
+-- merge from activity-3.0.0 20170524 end
