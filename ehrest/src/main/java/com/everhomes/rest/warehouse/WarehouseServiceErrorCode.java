@@ -29,4 +29,5 @@ public interface WarehouseServiceErrorCode {
     static final int ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_EXIST = 10021;//申请物品不存在
     static final int ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_NOT_QUALIFIED = 10022;//申请物品未通过审核
     static final int ERROR_WAREHOUSE_REQUEST_MATERIAL_IS_ALREADY_DELIVERY = 10023;//申请物品已交付
+    static final int ERROR_WAREHOUSE_REQUEST_MATERIAL_SHOULD_LARGER_THAN_ZERO = 10024;//warehouse stock change amount
 }

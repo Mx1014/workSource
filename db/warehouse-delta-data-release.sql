@@ -234,4 +234,5 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('war
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10021', 'zh_CN', '申请物品不存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10022', 'zh_CN', '申请物品未通过审核');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10023', 'zh_CN', '申请物品已交付');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10024', 'zh_CN', '库存变化数量应大于零');
 

@@ -482,6 +482,15 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public void updateWarehouseStock(UpdateWarehouseStockCommand cmd) {
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+            cmd.getStocks().forEach(stock -> {
+                if(stock.getAmount() <= 0) {
+                    LOGGER.error("warehouse stock change amount should larger than 0, stock: {} " + stock);
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_SHOULD_LARGER_THAN_ZERO),
+                                    UserContext.current().getUser().getLocale(),"warehouse stock change amount should larger than 0"));
+                }
+            });
             Long uid = UserContext.current().getUser().getId();
             Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
             cmd.getStocks().forEach(stock -> {
