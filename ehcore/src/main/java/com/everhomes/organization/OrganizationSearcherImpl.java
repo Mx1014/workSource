@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -66,6 +68,16 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     @Override
     public String getIndexType() {
         return SearchUtils.ENTERPRISEINDEXTYPE;
+    }
+    
+    private static Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+    
+    public static boolean isContainChinese(String str) {
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
     }
     
     private XContentBuilder createDoc(Organization organization){
@@ -160,11 +172,14 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
-        } else {//增加中文名称的权重 by xiongying20170524
+        }else if(isContainChinese(cmd.getKeyword())){//增加中文名称的权重 by xiongying20170524 中文就字符匹配，英文就加上拼音匹配， by dengs 20170524
         	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 9.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+        		.field("name", 9.0f);
+        }else{
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                .field("name", 9.0f)
+                .field("name.pinyin_prefix", 2.0f)
+                .field("name.pinyin_gram", 1.0f);    
         }
         
 //        FilterBuilder fb = null;
