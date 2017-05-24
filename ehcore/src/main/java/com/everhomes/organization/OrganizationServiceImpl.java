@@ -728,7 +728,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
 		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
-		command.setKeyword(cmd.getKeywords());
+		command.setKeyword(cmd.getKeywords());  //两个字段不一样，操蛋
 		GroupQueryResult rlt = organizationSearcher.query(command);
 		for(Long id : rlt.getIds()) {
         	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
@@ -743,88 +743,90 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
 			ListEnterprisesCommand cmd) {
-		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
-
-		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
-
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
-		Long communityId = cmd.getCommunityId();
-
-		String keywords = cmd.getKeywords();
-		
-		TrueOrFalseFlag setAdminFlag = TrueOrFalseFlag.fromCode(cmd.getSetAdminFlag());
-
-		if(!StringUtils.isEmpty(keywords)){
-			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
-			command.setKeyword(keywords);
-			GroupQueryResult rlt = this.organizationSearcher.query(command);
-	        resp.setNextPageAnchor(rlt.getPageAnchor());
-	        for(Long id : rlt.getIds()) {
-	        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
-	        	if(null != dto)
-	        		dtos.add(dto);
-	        }
-	        addExtraInfo(dtos);
-	        resp.setDtos(dtos);
-			return resp;
-		}
-
-		if(!StringUtils.isEmpty(cmd.getBuildingName())){
-			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
-			if(null != building){
-				cmd.setBuildingId(building.getId());
-			}
-		}
-
-		Long buildingId = cmd.getBuildingId();
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getPageAnchor());
-		if(null != buildingId){
-			if (setAdminFlag == null) {
-				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
-				for (OrganizationAddress address : addresses) {
-					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
-					if(null != dto)
-						dtos.add(dto);
-				}
-			}else {
-				List<Long> organizationIds = organizationProvider.listOrganizationIdByBuildingId(buildingId, setAdminFlag.getCode(), pageSize, locator);
-				for (Long organizationId : organizationIds) {
-					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
-					if(null != dto)
-						dtos.add(dto);
-				}
-			}
-		}else if(null != communityId){
-			if (setAdminFlag == null) {
-				List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
-				for (OrganizationCommunityRequest req : requests) {
-					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
-					if(null != dto)
-						dtos.add(dto);
-				}
-			}else {
-				List<Long> organizationIds = organizationProvider.listOrganizationIdByCommunityId(communityId, setAdminFlag.getCode(), pageSize, locator);
-				for (Long organizationId : organizationIds) {
-					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
-					if(null != dto)
-						dtos.add(dto);
-				}
-			}
-		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), setAdminFlag==null?null:setAdminFlag.getCode(), locator, pageSize);
-			for (Organization organization : organizations) {
-				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
-				if(null != dto)
-					dtos.add(dto);
-			}
-		}
-		addExtraInfo(dtos);
-		resp.setDtos(dtos);
-		resp.setNextPageAnchor(locator.getAnchor());
-		return resp;
+		// 更改成全部走搜索引擎
+		return listNewEnterprises(cmd);
+//		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
+//
+//		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+//
+//		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+//
+//		Long communityId = cmd.getCommunityId();
+//
+//		String keywords = cmd.getKeywords();
+//		
+//		TrueOrFalseFlag setAdminFlag = TrueOrFalseFlag.fromCode(cmd.getSetAdminFlag());
+//
+//		if(!StringUtils.isEmpty(keywords)){
+//			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+//			command.setKeyword(keywords);
+//			GroupQueryResult rlt = this.organizationSearcher.query(command);
+//	        resp.setNextPageAnchor(rlt.getPageAnchor());
+//	        for(Long id : rlt.getIds()) {
+//	        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
+//	        	if(null != dto)
+//	        		dtos.add(dto);
+//	        }
+//	        addExtraInfo(dtos);
+//	        resp.setDtos(dtos);
+//			return resp;
+//		}
+//
+//		if(!StringUtils.isEmpty(cmd.getBuildingName())){
+//			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
+//			if(null != building){
+//				cmd.setBuildingId(building.getId());
+//			}
+//		}
+//
+//		Long buildingId = cmd.getBuildingId();
+//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		CrossShardListingLocator locator = new CrossShardListingLocator();
+//		locator.setAnchor(cmd.getPageAnchor());
+//		if(null != buildingId){
+//			if (setAdminFlag == null) {
+//				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, pageSize, locator);
+//				for (OrganizationAddress address : addresses) {
+//					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
+//					if(null != dto)
+//						dtos.add(dto);
+//				}
+//			}else {
+//				List<Long> organizationIds = organizationProvider.listOrganizationIdByBuildingId(buildingId, setAdminFlag.getCode(), pageSize, locator);
+//				for (Long organizationId : organizationIds) {
+//					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
+//					if(null != dto)
+//						dtos.add(dto);
+//				}
+//			}
+//		}else if(null != communityId){
+//			if (setAdminFlag == null) {
+//				List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, pageSize, null);
+//				for (OrganizationCommunityRequest req : requests) {
+//					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
+//					if(null != dto)
+//						dtos.add(dto);
+//				}
+//			}else {
+//				List<Long> organizationIds = organizationProvider.listOrganizationIdByCommunityId(communityId, setAdminFlag.getCode(), pageSize, locator);
+//				for (Long organizationId : organizationIds) {
+//					OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organizationId, cmd.getQryAdminRoleFlag());
+//					if(null != dto)
+//						dtos.add(dto);
+//				}
+//			}
+//		}else{
+//			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), setAdminFlag==null?null:setAdminFlag.getCode(), locator, pageSize);
+//			for (Organization organization : organizations) {
+//				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
+//				if(null != dto)
+//					dtos.add(dto);
+//			}
+//		}
+//		addExtraInfo(dtos);
+//		resp.setDtos(dtos);
+//		resp.setNextPageAnchor(locator.getAnchor());
+//		return resp;
 	}
 
 	@Override
