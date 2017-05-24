@@ -42,14 +42,14 @@ public interface GeneralApprovalService {
 
 	GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
 
-	/**
-	 * 直接通过表单id获取表单
-	 */
-	GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd);
-
-	/**
-	 * 没关联工作流的表单提交数据
-	 */
-	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
+//	/**
+//	 * 直接通过表单id获取表单
+//	 */
+//	GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd);
+//
+//	/**
+//	 * 没关联工作流的表单提交数据
+//	 */
+//	GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd);
 
 }

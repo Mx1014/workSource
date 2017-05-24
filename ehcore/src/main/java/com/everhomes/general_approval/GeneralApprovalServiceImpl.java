@@ -407,16 +407,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		return processGeneralFormDTO(form);
 	}
 
-	@Override
-	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	@Override
+//	public GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 }
