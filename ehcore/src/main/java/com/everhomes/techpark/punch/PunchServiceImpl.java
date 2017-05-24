@@ -5608,7 +5608,10 @@ public class PunchServiceImpl implements PunchService {
 		File file = new File(filePath);
 		if(!file.exists())
 			file.mkdirs();
-		filePath = filePath + "PunchDetails"+System.currentTimeMillis()+".xlsx";
+
+		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
+				UserContext.current().getUser().getLocale());
+		filePath = filePath + scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+dateSF.get().format(new Date(cmd.getQueryTime()))+".xlsx";
 		//新建了一个文件
 		
 		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));
@@ -5652,12 +5655,14 @@ public class PunchServiceImpl implements PunchService {
 			}
 	}
 	private void createPunchSchedulingsBookSheetHead(Sheet sheet) {
-		 
-		Row row = sheet.createRow(sheet.getLastRowNum());
-		int i =-1 ;
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
+		Row row = sheet.createRow(sheet.getLastRowNum());
+//		scheduleLocaleString==null?"":scheduleLocaleString.getText()
+//		
+//		row = sheet.createRow(sheet.getLastRowNum()+1); 
+		int i =-1 ;
 
 		LocaleString ruleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_RULE ,
 				UserContext.current().getUser().getLocale());
