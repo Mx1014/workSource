@@ -93,6 +93,13 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 
 	}
 
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// 服务联盟的审批拼接工作流 content字符串
+		flowCase.setContent(null);
+	}
+
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
