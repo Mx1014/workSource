@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -40,7 +41,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
-
+@Component
 public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
 
