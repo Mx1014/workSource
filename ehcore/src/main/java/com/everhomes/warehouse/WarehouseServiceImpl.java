@@ -363,6 +363,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseMaterialDTO updateWarehouseMaterial(UpdateWarehouseMaterialCommand cmd) {
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
+
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode()
                 +cmd.getMaterialNumber()+cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
             checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId());
