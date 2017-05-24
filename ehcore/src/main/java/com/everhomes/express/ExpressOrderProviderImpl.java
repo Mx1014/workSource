@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -106,7 +108,8 @@ public class ExpressOrderProviderImpl implements ExpressOrderProvider {
 
 	@Override
 	public Object query(String query) {
-		return StringHelper.toJsonString(getReadOnlyContext().fetch(query));
+		Result<Record> result = getReadOnlyContext().fetch(query);
+		return result != null ? result.toString() : null;
 	}
 
 	private EhExpressOrdersDao getReadWriteDao() {
