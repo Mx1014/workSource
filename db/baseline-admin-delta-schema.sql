@@ -57,6 +57,7 @@ CREATE TABLE `eh_service_module_assignment_relations` (
   `owner_type` varchar(32) NOT NULL COMMENT 'EhOrganizations, EhCommunities',
   `owner_id` bigint(20) NOT NULL,
   `all_module_flag` tinyint(4) COMMENT '0 not all, 1 all',
+  `all_owner_flag` tinyint(4) COMMENT '0 not all, 1 all',
   `target_json` text,
   `owner_json` text,
   `module_json` text,
