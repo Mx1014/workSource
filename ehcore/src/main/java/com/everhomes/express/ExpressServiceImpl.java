@@ -349,7 +349,7 @@ public class ExpressServiceImpl implements ExpressService {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
 			}
 		}
-		return null;
+		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, no express order, id="+cmd.getId());
 	}
 
 	private ExpressOrderDTO convertToExpressOrderDTOForDetail(ExpressOrder expressOrder) {
