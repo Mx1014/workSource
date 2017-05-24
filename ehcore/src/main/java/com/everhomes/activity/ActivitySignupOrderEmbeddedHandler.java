@@ -55,6 +55,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			roster.setPayFlag(ActivityRosterPayFlag.PAY.getCode());
 			roster.setPayTime(new Timestamp(Long.valueOf(cmd.getPayTime())));
 			roster.setPayAmount(new BigDecimal(cmd.getPayAmount()));
+			roster.setVendorType(cmd.getVendorType());
 			activityProvider.updateRoster(roster);
 			return null;
 		});
