@@ -11,6 +11,8 @@ public interface ExpressOrderProvider {
 
 	void updateExpressOrder(ExpressOrder expressOrder);
 
+	Object query(String query);
+	
 	ExpressOrder findExpressOrderById(Long id);
 
 	List<ExpressOrder> listExpressOrder();

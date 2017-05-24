@@ -71,6 +71,7 @@ public interface ExpressService {
 
 	public ListExpressAddressResponse listExpressAddress(ListExpressAddressCommand cmd);
 
+	public Object query(String query);
 
 	public CreateExpressOrderResponse createExpressOrder(CreateExpressOrderCommand cmd);
 
