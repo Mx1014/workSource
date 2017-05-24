@@ -61,6 +61,8 @@ public interface ActivityProivider {
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
     ActivityCategories findActivityCategoriesById(Long id);
+    
+    ActivityCategories findActivityCategoriesByEntryId(Long entryId, Integer namespaceId);
 
     void createActivityAttachment(ActivityAttachment attachment);
 
