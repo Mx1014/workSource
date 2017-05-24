@@ -28,6 +28,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -49,6 +50,7 @@ import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
@@ -509,10 +511,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 								.getModuleId()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
 								.getModuleType()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
-								.getProjectId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
-								.getProjectType()));
+						if(null != cmd.getProjectId())
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
+						if(null != cmd.getProjectType())
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));
 						if (null != cmd.getStatus())
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
 									.getStatus()));
@@ -579,6 +581,22 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				.getApprovalId());
 		ga.setStatus(GeneralApprovalStatus.INVALID.getCode());
 		this.generalApprovalProvider.updateGeneralApproval(ga);
+	}
+
+	@Override
+	public ListGeneralApprovalResponse listActiveGeneralApproval(
+			ListActiveGeneralApprovalCommand cmd) {
+		ListGeneralApprovalCommand cmd2 = ConvertHelper.convert(cmd, ListGeneralApprovalCommand.class);
+		cmd2.setStatus(GeneralApprovalStatus.RUNNING.getCode());
+		if(null == cmd2.getModuleType())
+			cmd2.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		if(null == cmd2.getModuleId())
+			cmd2.setModuleId(51000L);
+		if(null == cmd2.getOwnerType())
+			cmd2.setOwnerType("EhOrganizations"); 
+		
+		
+		return listGeneralApproval(cmd2);
 	}
 
 }
