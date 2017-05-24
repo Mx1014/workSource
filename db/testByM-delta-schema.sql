@@ -48,7 +48,7 @@ CREATE TABLE `eh_organization_member_details` (
 -- DROP TABLE IF EXISTS `eh_organization_member_education`;
 CREATE TABLE `eh_organization_member_educations` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
+  `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `schoole_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the member''s school name',
   `degree` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'doctor, master, bachelor, etc',
@@ -68,7 +68,7 @@ CREATE TABLE `eh_organization_member_educations` (
 -- DROP TABLE IF EXISTS `eh_organization_member_working`;
 CREATE TABLE `eh_organization_member_work_experiences` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
+  `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `enterprise_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of company',
   `position` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the position of the member',
@@ -88,7 +88,7 @@ CREATE TABLE `eh_organization_member_work_experiences` (
 -- DROP TABLE IF EXISTS `eh_organization_member_insurance`;
 CREATE TABLE `eh_organization_member_insurances` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
+  `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name of the insurance',
   `enterprise` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the company name of the insurance',
@@ -108,7 +108,7 @@ CREATE TABLE `eh_organization_member_insurances` (
 -- DROP TABLE IF EXISTS `eh_organization_member_contracts`;
 CREATE TABLE `eh_organization_member_contracts` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
+  `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `contract_number` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the number of the contract',
   `start_time` DATE NOT NULL COMMENT '生效时间',
@@ -126,7 +126,7 @@ CREATE TABLE `eh_organization_member_contracts` (
 -- DROP TABLE IF EXISTS `eh_organization_member_profile_logs`;
 CREATE TABLE `eh_organization_member_profile_logs` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
-  `member_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details member_id',
+  `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `person_change_type` VARCHAR(64) COMMENT '人员变动类型:入职,转正,离职;变更部门,岗位,职级',
   `operation_type` VARCHAR(32) COMMENT 'add,update,delete',
