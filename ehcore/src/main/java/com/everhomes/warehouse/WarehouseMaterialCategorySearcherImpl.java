@@ -136,11 +136,22 @@ public class WarehouseMaterialCategorySearcherImpl extends AbstractElasticSearch
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+
         if(cmd.getName() == null || cmd.getName().isEmpty()) {
             builder.addSort(SortBuilders.fieldSort("updateTime").order(SortOrder.DESC).ignoreUnmapped(true));
         }
 
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SearchWarehouseMaterialCategories: {}", builder);
+        }
+
+
         SearchResponse rsp = builder.execute().actionGet();
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SearchWarehouseMaterialCategories response: {}", rsp);
+        }
 
         List<Long> ids = getIds(rsp);
 

@@ -104,6 +104,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSES.WAREHOUSE_NUMBER.eq(warehouseNumber));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSES.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<Warehouses> result = new ArrayList<Warehouses>();
         query.fetch().map((r) -> {
@@ -172,6 +173,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.CATEGORY_NUMBER.eq(categoryNumber));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseMaterialCategories> result = new ArrayList<WarehouseMaterialCategories>();
         query.fetch().map((r) -> {
@@ -258,6 +260,7 @@ public class WarehouseProviderImpl implements WarehouseProvider {
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.MATERIAL_NUMBER.eq(materialNumber));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIALS.STATUS.eq(Status.ACTIVE.getCode()));
 
         List<WarehouseMaterials> result = new ArrayList<WarehouseMaterials>();
         query.fetch().map((r) -> {
