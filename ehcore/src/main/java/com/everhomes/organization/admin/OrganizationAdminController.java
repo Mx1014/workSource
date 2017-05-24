@@ -858,10 +858,10 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/org/listEnterpriseByCommunityId</b>
+     * <b>URL: /admin/org/exportEnterpriseByCommunityId</b>
      * <p>后台管理 企业列表 和对于的管理员信息</p>
      */
-    @RequestMapping("listEnterpriseByCommunityId")
+    @RequestMapping("exportEnterpriseByCommunityId")
     @RestReturn(value = String.class)
     public RestResponse exportEnterpriseByCommunityId(@Valid ListEnterprisesCommand cmd, HttpServletResponse httpServletResponse) {
     	cmd.setQryAdminRoleFlag(false);

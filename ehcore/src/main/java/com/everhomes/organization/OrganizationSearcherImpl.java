@@ -93,9 +93,13 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             if (organizationAddresses != null && !organizationAddresses.isEmpty()) {
             	for (OrganizationAddress organizationAddress : organizationAddresses) {
             		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-            		addresses.add(getAddress(address));
+            		if (address != null) {
+            			addresses.add(getAddress(address));
+					}
             	}
-            	b.field("addresses", String.join(",", addresses));
+            	if (!addresses.isEmpty()) {
+            		b.field("addresses", String.join(",", addresses));
+				}
 			}
             b.endObject();
             return b;
