@@ -155,7 +155,7 @@
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
-		eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations
+		eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations |
         eh_energy_meter_price_config |
         eh_user_notification_settings | eh_group_member_logs |
 
