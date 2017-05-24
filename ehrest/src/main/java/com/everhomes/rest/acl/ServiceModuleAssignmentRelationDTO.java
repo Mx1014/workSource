@@ -22,83 +22,93 @@ import java.util.List;
  */
 public class ServiceModuleAssignmentRelationDTO {
 
-	private Long id;
+    private Long id;
 
-	private String ownerType;
+    private String ownerType;
 
-	private Long ownerId;
+    private Long ownerId;
 
-	private Byte allModuleFlag;
+    private Byte allModuleFlag;
 
-	@ItemType(AssignmentTarget.class)
-	private List<AssignmentTarget> targets;
+    private Byte allProjectFlag;
 
-	@ItemType(ServiceModuleOut.class)
-	private List<ServiceModuleOut> modules;
+    @ItemType(AssignmentTarget.class)
+    private List<AssignmentTarget> targets;
 
-	@ItemType(Project.class)
-	private List<Project> projects;
+    @ItemType(ServiceModuleOut.class)
+    private List<ServiceModuleOut> modules;
 
-	public Long getId() {
-		return id;
-	}
+    @ItemType(Project.class)
+    private List<Project> projects;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public Byte getAllModuleFlag() {
-		return allModuleFlag;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	public void setAllModuleFlag(Byte allModuleFlag) {
-		this.allModuleFlag = allModuleFlag;
-	}
+    public Byte getAllModuleFlag() {
+        return allModuleFlag;
+    }
 
-	public List<AssignmentTarget> getTargets() {
-		return targets;
-	}
+    public void setAllModuleFlag(Byte allModuleFlag) {
+        this.allModuleFlag = allModuleFlag;
+    }
 
-	public void setTargets(List<AssignmentTarget> targets) {
-		this.targets = targets;
-	}
+    public List<AssignmentTarget> getTargets() {
+        return targets;
+    }
 
-	public List<ServiceModuleOut> getModules() {
-		return modules;
-	}
+    public void setTargets(List<AssignmentTarget> targets) {
+        this.targets = targets;
+    }
 
-	public void setModules(List<ServiceModuleOut> modules) {
-		this.modules = modules;
-	}
+    public List<ServiceModuleOut> getModules() {
+        return modules;
+    }
 
-	public List<Project> getProjects() {
-		return projects;
-	}
+    public void setModules(List<ServiceModuleOut> modules) {
+        this.modules = modules;
+    }
 
-	public void setProjects(List<Project> projects) {
-		this.projects = projects;
-	}
+    public List<Project> getProjects() {
+        return projects;
+    }
 
-	@Override
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
+    public Byte getAllProjectFlag() {
+        return allProjectFlag;
+    }
+
+    public void setAllProjectFlag(Byte allProjectFlag) {
+        this.allProjectFlag = allProjectFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    
+
 }

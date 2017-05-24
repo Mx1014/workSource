@@ -37,7 +37,8 @@ public enum EntityType {
     SERVICE_MODULE("EhServiceModules"),
     ROLE("EhAclRoles"),
     RESOURCE_CATEGORY("EhResourceCategories"),
-    ZUOLIN_ADMIN("EhZuolinAdmins");
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    All("EhAll");
 
     private String code;
     

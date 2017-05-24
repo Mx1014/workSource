@@ -12,6 +12,7 @@ import java.util.List;
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型  参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>allModuleFlag: 是否全部模块,{@link com.everhomes.rest.common.AllFlagType}</li>
+ * <li>allOwnerFlag: 是否全部范围,{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>targets: 分配的对象集，参考{@link AssignmentTarget}</li>
  * <li>moduleIds: 分配的业务模块ID集合</li>
  * <li>projects: 分配的项目范围集合，参考{@link Project}</li>
@@ -19,83 +20,93 @@ import java.util.List;
  */
 public class AssignmentServiceModuleCommand {
 
-	private Long id;
+    private Long id;
 
-	private String ownerType;
+    private String ownerType;
 
-	private Long ownerId;
+    private Long ownerId;
 
-	private Byte allModuleFlag;
+    private Byte allModuleFlag;
 
-	@ItemType(AssignmentTarget.class)
-	private List<AssignmentTarget> targets;
+    private Byte allProjectFlag;
 
-	@ItemType(Long.class)
-	private List<Long> moduleIds;
+    @ItemType(AssignmentTarget.class)
+    private List<AssignmentTarget> targets;
 
-	@ItemType(Project.class)
-	private List<Project> projects;
+    @ItemType(Long.class)
+    private List<Long> moduleIds;
 
-	public Long getId() {
-		return id;
-	}
+    @ItemType(Project.class)
+    private List<Project> projects;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getOwnerType() {
-		return ownerType;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+    public String getOwnerType() {
+        return ownerType;
+    }
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
+    public Long getOwnerId() {
+        return ownerId;
+    }
 
-	public Byte getAllModuleFlag() {
-		return allModuleFlag;
-	}
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
-	public void setAllModuleFlag(Byte allModuleFlag) {
-		this.allModuleFlag = allModuleFlag;
-	}
+    public Byte getAllModuleFlag() {
+        return allModuleFlag;
+    }
 
-	public List<AssignmentTarget> getTargets() {
-		return targets;
-	}
+    public void setAllModuleFlag(Byte allModuleFlag) {
+        this.allModuleFlag = allModuleFlag;
+    }
 
-	public void setTargets(List<AssignmentTarget> targets) {
-		this.targets = targets;
-	}
+    public List<AssignmentTarget> getTargets() {
+        return targets;
+    }
 
-	public List<Long> getModuleIds() {
-		return moduleIds;
-	}
+    public void setTargets(List<AssignmentTarget> targets) {
+        this.targets = targets;
+    }
 
-	public void setModuleIds(List<Long> moduleIds) {
-		this.moduleIds = moduleIds;
-	}
+    public List<Long> getModuleIds() {
+        return moduleIds;
+    }
 
-	public List<Project> getProjects() {
-		return projects;
-	}
+    public void setModuleIds(List<Long> moduleIds) {
+        this.moduleIds = moduleIds;
+    }
 
-	public void setProjects(List<Project> projects) {
-		this.projects = projects;
-	}
+    public List<Project> getProjects() {
+        return projects;
+    }
 
-	@Override
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
+    }
+
+    public Byte getAllProjectFlag() {
+        return allProjectFlag;
+    }
+
+    public void setAllProjectFlag(Byte allProjectFlag) {
+        this.allProjectFlag = allProjectFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-    
+
 }

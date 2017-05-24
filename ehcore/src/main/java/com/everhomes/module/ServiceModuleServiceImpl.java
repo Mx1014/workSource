@@ -4,7 +4,6 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
@@ -13,7 +12,6 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
-import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -23,7 +21,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,15 +202,14 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     @Override
     public void assignmentServiceModule(AssignmentServiceModuleCommand cmd) {
-        if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
-            LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
-        }
+        //参数检查
+        checkAssignmentCommand(cmd);
 
         List<AssignmentTarget> targets = cmd.getTargets();
         List<Project> projects = cmd.getProjects();
         List<Long> moduleIds = cmd.getModuleIds();
 
+        //设置标记
         boolean isCreate = (cmd.getId() == null);
         boolean isUpdate = (cmd.getId() != null && cmd.getId() != 0);
 
@@ -231,9 +227,11 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             } else if (isUpdate) {//更新
                 relation = this.serviceModuleProvider.findServiceModuleAssignmentRelationById(cmd.getId());
             }
+
             relation.setAllModuleFlag(cmd.getAllModuleFlag());
+            relation.setAllProjectFlag(cmd.getAllProjectFlag());
             relation.setTargetJson(StringHelper.toJsonString(targets));
-            relation.setOwnerJson(StringHelper.toJsonString(projects));
+            relation.setProjectJson(StringHelper.toJsonString(projects));
             if (cmd.getAllModuleFlag() == AllFlagType.NO.getCode()) {
                 relation.setModuleJson(StringHelper.toJsonString(moduleIds));
             } else {
@@ -257,31 +255,38 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 List<ServiceModuleAssignment> assignmentList = this.serviceModuleProvider.findServiceModuleAssignmentListByRelationId(relation_id);
                 this.serviceModuleProvider.deleteServiceModuleAssignments(assignmentList);
             }
+
+            //保存assigment多条记录
             List<ServiceModuleAssignment> assignmentList = new ArrayList<>();
+            /**1.根据targetIds进行循环处理**/
             for (AssignmentTarget target : targets) {
-                if (target.getTargetId() == null || target.getTargetType() == null) {
-                    LOGGER.error("target is illegal. cmd = {}", cmd);
-                    break;
-                }
-                checkTarget(target.getTargetType(), target.getTargetId());
-                for (Project project : projects) {
-                    if (project.getProjectId() == null || project.getProjectType() == null) {
-                        LOGGER.error("project is illegal. cmd = {}", cmd);
-                        break;
-                    }
+                /**2.1如果全范围标识YES,根据范围进行一次处理**/
+                if (AllFlagType.fromCode(cmd.getAllProjectFlag()) == AllFlagType.YES) {
+                    Project project_none = new Project();
+                    project_none.setProjectId(0L);
+                    project_none.setProjectType(EntityType.All.getCode());
+                    /**3.根据moduleId进行循环处理**/
                     if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.YES) {
-                        //只循环1次
-                        ServiceModuleAssignment assignment = buildAssignment(target, project, 0L, AllFlagType.YES.getCode(), relation_id);
+                        ServiceModuleAssignment assignment = buildAssignment(target, project_none, 0L, AllFlagType.YES.getCode(), AllFlagType.YES.getCode(), relation_id);
                         assignmentList.add(assignment);
                     } else if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.NO) {
-                        //循环多次
                         for (Long moduleId : moduleIds) {
-                            if (moduleId == null) {
-                                LOGGER.error("moduleId is illegal. cmd = {}", cmd);
-                                break;
-                            }
-                            ServiceModuleAssignment assignment = buildAssignment(target, project, moduleId, AllFlagType.NO.getCode(), relation_id);
+                            ServiceModuleAssignment assignment = buildAssignment(target, project_none, moduleId, AllFlagType.YES.getCode(), AllFlagType.NO.getCode(), relation_id);
                             assignmentList.add(assignment);
+                        }
+                    }
+                    /**2.2如果全范围标识NO,根据范围进行循环处理**/
+                } else if (AllFlagType.fromCode(cmd.getAllProjectFlag()) == AllFlagType.NO) {
+                    for (Project project : projects) {
+                        /**3.根据moduleId进行循环处理**/
+                        if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.YES) {
+                            ServiceModuleAssignment assignment = buildAssignment(target, project, 0L, AllFlagType.NO.getCode(), AllFlagType.YES.getCode(), relation_id);
+                            assignmentList.add(assignment);
+                        } else if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.NO) {
+                            for (Long moduleId : moduleIds) {
+                                ServiceModuleAssignment assignment = buildAssignment(target, project, moduleId, AllFlagType.NO.getCode(), AllFlagType.NO.getCode(), relation_id);
+                                assignmentList.add(assignment);
+                            }
                         }
                     }
                 }
@@ -316,7 +321,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     }
 
     @Override
-    public List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations(ListServiceModuleAssignmentRelationsCommand cmd) {
+    public List<ServiceModuleAssignmentRelationDTO> listServiceModuleAssignmentRelations
+            (ListServiceModuleAssignmentRelationsCommand cmd) {
 
         Type targetType = new TypeToken<List<AssignmentTarget>>() {
         }.getType();
@@ -358,30 +364,37 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             }
             dto.setTargets(targets);
 
-            //处理owners
-            List<Project> owners = GsonUtil.fromJson(r.getOwnerJson(), projectType);
-            for (Project owner : owners) {
-                // 小区
-                if (EntityType.fromCode(owner.getProjectType()) == EntityType.COMMUNITY) {
-                    Community community = this.communityProvider.findCommunityById(owner.getProjectId());
-                    if (community == null) {
-                        LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
+            //处理projects
+            if (r.getAllProjectFlag() == AllFlagType.NO.getCode()) {
+                List<Project> projects = GsonUtil.fromJson(r.getProjectJson(), projectType);
+                for (Project project : projects) {
+                    // 判断园区
+                    if (EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY) {
+                        Community community = this.communityProvider.findCommunityById(project.getProjectId());
+                        if (community == null) {
+                            LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
+                        }
+                        project.setProjectName(community.getName());
+                    } else if (EntityType.fromCode(project.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 判断子项目
+                        ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
+                        if (resourceCategory == null) {
+                            LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
+                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
+                        }
+                        project.setProjectName(resourceCategory.getName());
                     }
-                    owner.setProjectName(community.getName());
-                } else if (EntityType.fromCode(owner.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 子项目
-                    ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(owner.getProjectId());
-                    if (resourceCategory == null) {
-                        LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
-                        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
-                    }
-                    owner.setProjectName(resourceCategory.getName());
                 }
+                dto.setProjects(projects);
+
+            } else if (r.getAllProjectFlag() == AllFlagType.YES.getCode()) {
+                /**如果范围全选标识为NO，则默认不设置project**/
+                dto.setAllProjectFlag(AllFlagType.YES.getCode());
             }
-            dto.setProjects(owners);
 
             //处理modules
             List<ServiceModuleOut> modulesOut = new ArrayList<>();
+            //如果模块全选标识为NO
             if (r.getAllModuleFlag() == AllFlagType.NO.getCode()) {
                 List<Long> moduleIds = GsonUtil.fromJson(r.getModuleJson(), modulesType);
                 for (Long moduleId : moduleIds) {
@@ -389,8 +402,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     modulesOut.add(ConvertHelper.convert(module, ServiceModuleOut.class));
                 }
                 dto.setModules(modulesOut);
+            } else if (r.getAllModuleFlag() == AllFlagType.YES.getCode()) {
+                /**如果模块全选标识为NO，则默认不设置modules**/
+                dto.setAllModuleFlag(AllFlagType.YES.getCode());
             }
-
 
             return ConvertHelper.convert(dto, ServiceModuleAssignmentRelationDTO.class);
         }).collect(Collectors.toList());
@@ -416,7 +431,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         if (null == serviceModule) {
             LOGGER.error("Unable to find the serviceModule. serviceModuleId = {}", cmd.getModuleId());
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
- "Unable to find the serviceModule.");
+                    "Unable to find the serviceModule.");
         }
         return ConvertHelper.convert(serviceModule, ServiceModuleDTO.class);
     }
@@ -461,7 +476,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return org;
     }
 
-    private ServiceModuleAssignment buildAssignment(AssignmentTarget target, Project project, Long moduleId, byte AllModuleFlag, Long relation_id) {
+    private ServiceModuleAssignment buildAssignment(AssignmentTarget target, Project project, Long moduleId, byte AllOwnerFlag, byte AllModuleFlag, Long relation_id) {
         ServiceModuleAssignment assignment = new ServiceModuleAssignment();
         assignment.setNamespaceId(UserContext.getCurrentNamespaceId());
         assignment.setOrganizationId(0L);
@@ -518,4 +533,37 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         }
         return results;
     }
+
+    /**
+     * 检查assignmentService更新命令参数
+     *
+     * @param cmd
+     */
+    private void checkAssignmentCommand(AssignmentServiceModuleCommand cmd) {
+        if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
+            LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
+        }
+
+        List<AssignmentTarget> targets = cmd.getTargets();
+        List<Project> projects = cmd.getProjects();
+        List<Long> moduleIds = cmd.getModuleIds();
+
+        for (AssignmentTarget target : targets) {
+            checkTarget(target.getTargetType(), target.getTargetId());
+        }
+        for (Project project : projects) {
+            if (project.getProjectId() == null || project.getProjectType() == null) {
+                LOGGER.error("project is illegal. cmd = {}", cmd);
+                break;
+            }
+        }
+        for (Long moduleId : moduleIds) {
+            if (moduleId == null) {
+                LOGGER.error("moduleId is illegal. cmd = {}", cmd);
+                break;
+            }
+        }
+    }
+
 }
