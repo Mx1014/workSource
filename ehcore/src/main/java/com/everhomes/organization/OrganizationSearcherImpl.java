@@ -160,9 +160,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
-        } else {
+        } else {//增加中文名称的权重 by xiongying20170524
         	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
+                    .field("name", 9.0f)
                     .field("name.pinyin_prefix", 2.0f)
                     .field("name.pinyin_gram", 1.0f);      
         }

@@ -7,6 +7,8 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,7 +120,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	final String downloadDir ="\\download\\";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentServiceImpl.class);
-	
+
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 	@Autowired
 	private EquipmentStandardSearcher equipmentStandardSearcher;
 	
@@ -2474,7 +2477,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
-
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -2485,10 +2487,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setEquipmentModel(s[3]);
 				equipment.setParameter(s[4]);
 				equipment.setManufacturer(s[5]);
-				equipment.setLocation(s[7]);
-				equipment.setQuantity(Long.valueOf(s[8]));
-				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
-					equipment.setRemarks(s[9]);
+				if(!StringUtils.isBlank(s[6])) {
+					equipment.setInstallationTime(dateSF);
+				}
+				if(!StringUtils.isBlank(s[7])) {
+					equipment.setRepairTime();
+				}
+				equipment.setLocation(s[8]);
+				equipment.setQuantity(Long.valueOf(s[9]));
+				if(!StringUtils.isEmpty(s[10]) && !"null".equals(s[10])) {
+					equipment.setRemarks(s[10]);
 				}
 				equipment.setNamespaceId(namespaceId);
 				equipment.setOwnerType(cmd.getOwnerType());
@@ -2509,6 +2517,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		return errorDataLogs;
 		
+	}
+
+	private Timestamp dateStrToTimestamp(String str) {
+		Timestamp ts = null;
+		try {dateSF.
+			LocalDateTime localDateTime = dateSF.parse(str);
+			ts = new Timestamp(dateSF.parse(str));
+		} catch (ParseException e) {
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validityPeriod data format is not yyyymmdd.");
+		}
+
+		return ts;
 	}
 	
 	private List<String> importEquipmentAccessoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
@@ -2592,7 +2614,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			sb.append(r.getH()).append("||");
 			sb.append(r.getI()).append("||");
 			sb.append(r.getJ()).append("||");
-				
+			sb.append(r.getK()).append("||");
+
 			
 			result.add(sb.toString());
 		}
