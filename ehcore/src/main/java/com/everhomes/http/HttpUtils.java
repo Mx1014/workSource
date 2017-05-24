@@ -262,6 +262,7 @@ public class HttpUtils {
 			httpget.setHeaders(headers);
 			ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			retVal = httpclient.execute(httpget, responseHandler);
+			retVal = new String(retVal.getBytes(HTTP.ISO_8859_1), HTTP.UTF_8);
 		} catch (IOException e) {
 			throw e;
 		} finally {

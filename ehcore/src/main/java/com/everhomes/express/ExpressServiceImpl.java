@@ -422,7 +422,7 @@ public class ExpressServiceImpl implements ExpressService {
 			CommonOrderCommand orderCmd = new CommonOrderCommand();
 			orderCmd.setBody(expressOrder.getSendName());
 			orderCmd.setOrderNo(expressOrder.getId().toString());
-			orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+			orderCmd.setOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode());
 			orderCmd.setSubject("快递订单简要描述");
 			orderCmd.setTotalFee(expressOrder.getPaySummary());
 			CommonOrderDTO dto = null;
@@ -442,10 +442,10 @@ public class ExpressServiceImpl implements ExpressService {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 			if (expressOrder == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
 			}
-			if (expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error");
+			if (!expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
 			expressOrderProvider.updateExpressOrder(expressOrder);

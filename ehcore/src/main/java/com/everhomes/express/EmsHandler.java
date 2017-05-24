@@ -225,7 +225,7 @@ public class EmsHandler implements ExpressHandler {
 		try {
 			Header[] headers = new Header[2];
 			headers[0] = new BasicHeader("version", "ems_track_cn_1.0");
-			headers[1] = new BasicHeader("authenticate", "");
+			headers[1] = new BasicHeader("authenticate", "4CCC070F8E214EBEE050030A240B4A4A");
 			result = HttpUtils.get(url, null, headers);
 		} catch (IOException e) {
 			LOGGER.error("track bill from ems error: {}", e);
