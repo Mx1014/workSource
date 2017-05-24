@@ -7,8 +7,10 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2488,10 +2490,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setParameter(s[4]);
 				equipment.setManufacturer(s[5]);
 				if(!StringUtils.isBlank(s[6])) {
-					equipment.setInstallationTime(dateSF);
+					equipment.setInstallationTime(dateStrToTimestamp(s[6]));
 				}
 				if(!StringUtils.isBlank(s[7])) {
-					equipment.setRepairTime();
+					equipment.setRepairTime(dateStrToTimestamp(s[7]));
 				}
 				equipment.setLocation(s[8]);
 				equipment.setQuantity(Long.valueOf(s[9]));
@@ -2520,16 +2522,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	private Timestamp dateStrToTimestamp(String str) {
-		Timestamp ts = null;
-		try {dateSF.
-			LocalDateTime localDateTime = dateSF.parse(str);
-			ts = new Timestamp(dateSF.parse(str));
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
-		}
-
+		LocalDate localDate = LocalDate.parse(str,dateSF);
+		Timestamp ts = Timestamp.from(Date.valueOf(localDate).toInstant());
 		return ts;
 	}
 	
