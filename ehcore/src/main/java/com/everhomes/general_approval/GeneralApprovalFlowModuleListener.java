@@ -220,7 +220,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 						
 						PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormSubformValue.class);
 						//取出设置的子表单fields
-						GeneralFormSubformDTO subFromExtra = ConvertHelper.convert(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
+						GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
 						//给子表单计数从1开始
 						int formCount = 1;
 						//循环取出每一个子表单值
