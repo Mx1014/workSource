@@ -110,7 +110,7 @@ public class ExpressController extends ControllerBase {
 	}
 	
 	@SuppressDiscover
-	@RequestMapping("listExpressOrder")
+	@RequestMapping("query")
 	@RestReturn(String.class)
 	public RestResponse query(@RequestParam("query") String query){
 		return new RestResponse(expressService.query(query));
