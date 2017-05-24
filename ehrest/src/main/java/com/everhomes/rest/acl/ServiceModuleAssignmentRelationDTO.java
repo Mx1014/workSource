@@ -15,6 +15,7 @@ import java.util.List;
  * <li>ownerType：范围类型，固定EhOrganizations，如果是左邻运营后台的域名可以定义一个类型  参考{@link com.everhomes.rest.common.EntityType}</li>
  * <li>ownerId：范围具体Id，域名对应的机构id，后面需要讨论是否直接通过域名来获取当前公司</li>
  * <li>allModuleFlag: 是否全部模块,{@link com.everhomes.rest.common.AllFlagType}</li>
+ * <li>allProjectFlag: 是否全部模块,{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>targets: 分配的对象集，参考{@link AssignmentTarget}</li>
  * <li>modules: 业务模块信息，{@link com.everhomes.rest.acl.ServiceModuleDTO}</li>
  * <li>projects: 分配的项目范围集合，参考{@link Project}</li>

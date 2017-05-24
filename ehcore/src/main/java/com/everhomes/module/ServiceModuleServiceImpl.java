@@ -375,6 +375,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                             LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
                         }
+                        project.setProjectType(EntityType.COMMUNITY.getCode());
                         project.setProjectName(community.getName());
                     } else if (EntityType.fromCode(project.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 判断子项目
                         ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
@@ -382,6 +383,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                             LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
                             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
                         }
+                        project.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
                         project.setProjectName(resourceCategory.getName());
                     }
                 }
