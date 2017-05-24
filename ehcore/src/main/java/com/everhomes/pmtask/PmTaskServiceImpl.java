@@ -1809,11 +1809,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		User user = UserContext.current().getUser();
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
+			LOGGER.info("findClaimedIdentifierByToken: {}", cmd.getKeyword());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
 			if (null == userIdentifier) {
 				return response;
 			}
 			user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			LOGGER.info("findClaimedIdentifierByToken userid: {}, userIdentifier: {}", user.getId(), userIdentifier);
 		}
 
 		Long userId = user.getId();
