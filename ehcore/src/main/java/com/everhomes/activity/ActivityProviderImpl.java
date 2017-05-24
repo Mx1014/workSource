@@ -653,6 +653,18 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         return ConvertHelper.convert(result, ActivityCategories.class);
     }
+    
+    @Override
+    public ActivityCategories findActivityCategoriesByEntryId(Long entryId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
+		return context.select()
+			.from(Tables.EH_ACTIVITY_CATEGORIES)
+			.where(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.ENTRY_ID.eq(entryId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.ENABLED.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.fetchOneInto(ActivityCategories.class);
+    }
 
     @Override
     public void createActivityAttachment(ActivityAttachment attachment) {
