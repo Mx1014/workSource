@@ -16,7 +16,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
@@ -37,8 +39,9 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 
-public abstract class GeneralApprovalFlowModuleListener implements FlowModuleListener {
+public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalFlowModuleListener.class);
@@ -52,7 +55,8 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 	protected GeneralApprovalValProvider generalApprovalValProvider;
 	@Autowired
 	protected GeneralFormProvider generalFormProvider;
-
+	private static final long MODULE_ID = 51000;
+	
 	public GeneralApprovalFlowModuleListener() {
 		for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
 			DEFUALT_FIELDS.add(value.getCode());
@@ -254,6 +258,34 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 	public void onFlowButtonFired(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public FlowModuleInfo initModule() {
+        FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
+        moduleInfo.setModuleName(module.getName());
+        moduleInfo.setModuleId(MODULE_ID);
+        return moduleInfo;
+	}
+    
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
