@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.building.Building;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
 import com.everhomes.parking.ParkingCardRequest;
 import com.everhomes.rest.flow.*;
@@ -166,6 +167,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private BuildingProvider buildingProvider;
 	@Autowired
 	private FlowCaseProvider flowCaseProvider;
+	@Autowired
+	private FamilyProvider familyProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -1832,7 +1835,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	    		response.setOrganizationList(addressDTOs);
 	    	}else if(type== NamespaceCommunityType.COMMUNITY_RESIDENTIAL) {
-	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
+//	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
 	    		List<FamilyDTO> families = new ArrayList<>();
 				familyList.forEach(f -> {
 					if(f.getCommunityId().equals(communityId))
@@ -1840,7 +1845,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 				});
 	    		response.setFamilyList(families);
 	    	}else {
-	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
+//	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
 	    		List<FamilyDTO> families = new ArrayList<>();
 				familyList.forEach(f -> {
 	    			if(f.getCommunityId().equals(communityId))
