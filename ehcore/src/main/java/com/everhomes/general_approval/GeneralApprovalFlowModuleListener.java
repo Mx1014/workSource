@@ -275,12 +275,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
         moduleInfo.setModuleId(MODULE_ID);
         return moduleInfo;
 	}
-    
-	@Override
-	public void onFlowCaseCreating(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
-	}
+     
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
