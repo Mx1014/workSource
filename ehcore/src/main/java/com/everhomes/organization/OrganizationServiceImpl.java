@@ -723,7 +723,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return dto;
 	}
 
-
+	@Override
+	public ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd) {
+		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
+		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+		SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+		command.setKeyword(cmd.getKeywords());
+		GroupQueryResult rlt = organizationSearcher.query(command);
+		for(Long id : rlt.getIds()) {
+        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
+        	if(null != dto)
+        		dtos.add(dto);
+        }
+        addExtraInfo(dtos);
+        resp.setDtos(dtos);
+		return resp;
+	}
+	
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
 			ListEnterprisesCommand cmd) {

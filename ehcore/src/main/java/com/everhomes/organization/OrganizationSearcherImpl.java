@@ -159,12 +159,27 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         QueryBuilder qb;
         
         if(StringUtils.isEmpty(cmd.getKeyword())) {
-            qb = QueryBuilders.matchAllQuery();
+        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
+        		qb = QueryBuilders.matchAllQuery();
+			}else {
+				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
+	                    .field("addresses", 5.0f);
+			}
         } else {
-        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+        	if (StringUtils.isEmpty(cmd.getBuildingName())) {
+        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                        .field("name", 5.0f)
+                        .field("name.pinyin_prefix", 2.0f)
+                        .field("name.pinyin_gram", 1.0f)
+                        .field("addresses", 5.0f);
+			}else {
+				qb = QueryBuilders.multiMatchQuery(cmd.getKeyword() + " " + cmd.getBuildingName())
+                        .field("name", 5.0f)
+                        .field("name.pinyin_prefix", 2.0f)
+                        .field("name.pinyin_gram", 1.0f)
+                        .field("addresses", 5.0f);
+			}
+        	
         }
         
 //        FilterBuilder fb = null;
@@ -196,6 +211,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
             fb = FilterBuilders.andFilter(fb, cmntyFilter);
         }
+        
+        if (cmd.getSetAdminFlag() != null) {
+        	FilterBuilder cmntyFilter = FilterBuilders.termFilter("setAdminFlag", cmd.getSetAdminFlag());
+            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+		}
+        
         qb = QueryBuilders.filteredQuery(qb, fb);
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);

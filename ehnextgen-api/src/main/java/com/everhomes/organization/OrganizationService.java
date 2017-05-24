@@ -449,4 +449,5 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
+	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
 }
