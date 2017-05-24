@@ -9,7 +9,6 @@ import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ReserveRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
-import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -269,10 +268,9 @@ public class YellowPageController  extends ControllerBase {
    	 * <p> 更新服务联盟企业顺序 </p>
    	 */
     @RequestMapping("reSortOrderServiceAllianceEnterprise")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ServiceAllianceListResponse.class)
     public RestResponse reSortOrderServiceAllianceEnterprise(@Valid ReSortOrderServiceAllianceEnterpriseCommand cmd) {
-    	 this.yellowPageService.ReSortOrderServiceAllianceEnterpriseCommand(cmd);
-    	 RestResponse response = new RestResponse();
+    	 RestResponse response = new RestResponse(this.yellowPageService.ReSortOrderServiceAllianceEnterpriseCommand(cmd));
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");
          return response;

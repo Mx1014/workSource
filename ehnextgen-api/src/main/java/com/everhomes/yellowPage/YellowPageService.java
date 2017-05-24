@@ -62,5 +62,5 @@ public interface YellowPageService {
 	/**
 	 * 交换cmd中两个服务联盟的sortOrder
 	 */
-	void ReSortOrderServiceAllianceEnterpriseCommand(ReSortOrderServiceAllianceEnterpriseCommand cmd);
+	ServiceAllianceListResponse ReSortOrderServiceAllianceEnterpriseCommand(ReSortOrderServiceAllianceEnterpriseCommand cmd);
 }

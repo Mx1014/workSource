@@ -395,6 +395,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAlliances.class));
         sa.setId(id);
+      //设置序号默认是id，by dengs,20170524.
+        sa.setSortOrder(id);
         if(sa.getStatus() == null) {
             sa.setStatus(YellowPageStatus.ACTIVE.getCode());    
         }
@@ -1079,4 +1081,52 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         return attachments;
 	}
+
+
+	@Override
+	public List<ServiceAlliances> listServiceAllianceSortOrders(Long firstId, Long secondId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId).or(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId)));
+		LOGGER.debug("Query organization, sql={}, values ={}",query.getSQL(),query.getBindValues());
+		List<ServiceAlliances>  serviceAllianceList = query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+		return serviceAllianceList;
+	}
+
+
+	/**
+	 * 交换firstId，secondId 的 sort_order字段值
+	 */
+	@Override
+	public void ReSortOrderServiceAlliance(Long firstId, Long firstOrder, Long secondId, Long secondOrder) {
+		assert(firstId != null);
+		assert(firstOrder != null);
+		assert(secondId != null);
+		assert(secondOrder != null);
+		dbProvider.execute(status->{
+			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+			UpdateConditionStep<EhServiceAlliancesRecord> firstupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
+				.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, secondOrder)
+				.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId));
+			LOGGER.debug("first update serviceAlliance sort order, sql = {}, values = {}",firstupdatesql.getSQL(),firstupdatesql.getBindValues());
+			firstupdatesql.execute();
+			UpdateConditionStep<EhServiceAlliancesRecord> secondupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
+					.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, firstOrder)
+					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId));
+			LOGGER.debug("update serviceAlliance sort order, sql = {}, values = {}",secondupdatesql.getSQL(),secondupdatesql.getBindValues());
+			secondupdatesql.execute();
+			return null;
+		});
+		
+	}
+
+
+	@Override
+	public void updateServiceAlliancesShowFlag(Long id, Byte showFlag) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		UpdateConditionStep<EhServiceAlliancesRecord> updatesql = context.update(Tables.EH_SERVICE_ALLIANCES).set(Tables.EH_SERVICE_ALLIANCES.SHOW_FLAG, showFlag).where(Tables.EH_SERVICE_ALLIANCES.ID.eq(id));
+		LOGGER.debug("update showFlag, sql = {}, values = {}",updatesql.getSQL(),updatesql.getBindValues());
+		updatesql.execute();
+	}
+
 }

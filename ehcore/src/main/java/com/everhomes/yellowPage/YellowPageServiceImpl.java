@@ -1,52 +1,16 @@
 package com.everhomes.yellowPage;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
-import com.everhomes.activity.ActivityAttachment;
-import com.everhomes.auditlog.AuditLog;
-import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.building.Building;
-import com.everhomes.building.BuildingProvider;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.reserver.ReserverEntity;
-import com.everhomes.rest.activity.ActivityAttachmentDTO;
-import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.servicehotline.GetHotlineListCommand;
-import com.everhomes.rest.servicehotline.GetHotlineListResponse;
-import com.everhomes.rest.servicehotline.ServiceType;
-import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.yellowPage.*;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceJumpModule;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.techpark.servicehotline.HotlineService;
-import com.everhomes.user.*;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.HttpEntity;
@@ -62,20 +26,97 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.everhomes.auditlog.AuditLog;
+import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.reserver.ReserverEntity;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.servicehotline.GetHotlineListCommand;
+import com.everhomes.rest.servicehotline.GetHotlineListResponse;
+import com.everhomes.rest.servicehotline.ServiceType;
+import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.yellowPage.AddNotifyTargetCommand;
+import com.everhomes.rest.yellowPage.AddYellowPageCommand;
+import com.everhomes.rest.yellowPage.AttachmentDTO;
+import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
+import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
+import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
+import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
+import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
+import com.everhomes.rest.yellowPage.GetServiceAllianceDisplayModeCommand;
+import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
+import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
+import com.everhomes.rest.yellowPage.GetYellowPageDetailCommand;
+import com.everhomes.rest.yellowPage.GetYellowPageListCommand;
+import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.JumpModuleDTO;
+import com.everhomes.rest.yellowPage.JumpType;
+import com.everhomes.rest.yellowPage.ListAttachmentsCommand;
+import com.everhomes.rest.yellowPage.ListAttachmentsResponse;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsCommand;
+import com.everhomes.rest.yellowPage.ListNotifyTargetsResponse;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.NotifyTargetDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode;
+import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceDisplayModeDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
+import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
+import com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType;
+import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
+import com.everhomes.rest.yellowPage.ShowFlagType;
+import com.everhomes.rest.yellowPage.ShowOrHideServiceAllianceEnterpriseCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
+import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
+import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
+import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
+import com.everhomes.rest.yellowPage.YellowPageDTO;
+import com.everhomes.rest.yellowPage.YellowPageListResponse;
+import com.everhomes.rest.yellowPage.YellowPageServiceErrorCode;
+import com.everhomes.rest.yellowPage.YellowPageStatus;
+import com.everhomes.rest.yellowPage.YellowPageType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.servicehotline.HotlineService;
+import com.everhomes.user.RequestTemplates;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
@@ -933,6 +974,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			if(serviceAlliance.getLatitude() != null && serviceAlliance.getLongitude() != null) {
 				serviceAlliance.setGeohash(GeoHashUtils.encode(serviceAlliance.getLatitude(), serviceAlliance.getLongitude()));
 			}
+			//设置服务联盟显示在app端，by dengs,20170524.
+			serviceAlliance.setShowFlag(ShowFlagType.SHOW.getCode());
 			
 			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
 			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
@@ -981,6 +1024,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 			serviceAlliance.setType(sa.getType());
 			serviceAlliance.setCreateTime(sa.getCreateTime());
 			serviceAlliance.setCreatorUid(sa.getCreatorUid());
+			//by dengs,20170524 序号和是否在app端显示不能更新掉了。
+			serviceAlliance.setSortOrder(sa.getSortOrder());
+			serviceAlliance.setShowFlag(sa.getShowFlag());
 			
 			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 			this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
@@ -1425,14 +1471,48 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public void showOrHideServiceAllianceEnterprise(ShowOrHideServiceAllianceEnterpriseCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		if(cmd.getId() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					" Unknown id = {}",cmd.getId());
+		}
+		ShowFlagType flagType = ShowFlagType.fromCode(cmd.getShowFlag());
+		if(flagType != null){
+			ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(cmd.getId(),null,null);
+			if(serviceAlliance == null)
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						" Unknown id = {}",cmd.getId());
+			cmd.setShowFlag(serviceAlliance.getShowFlag());
+		}
+		yellowPageProvider.updateServiceAlliancesShowFlag(cmd.getId(),cmd.getShowFlag());
 	}
 
 	@Override
-	public void ReSortOrderServiceAllianceEnterpriseCommand(
+	public ServiceAllianceListResponse ReSortOrderServiceAllianceEnterpriseCommand(
 			com.everhomes.rest.yellowPage.ReSortOrderServiceAllianceEnterpriseCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		if(cmd.getFirstId() == null || cmd.getSecondId() == null 
+				|| cmd.getFirstId().longValue() == cmd.getSecondId().longValue()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					" change sort order failed, firstId = {}, secondId = {}",cmd.getFirstId(),cmd.getSecondId());
+		}
+		//by dengs,20170524, 获取原始顺序
+		List<ServiceAlliances> serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(cmd.getFirstId(),cmd.getSecondId());
+		if(serviceAllianceList!=null && serviceAllianceList.size() == 2){
+			Long firstOrder = serviceAllianceList.get(0).getSortOrder();
+			Long secondOrder = serviceAllianceList.get(1).getSortOrder();
+			//交换顺序
+			yellowPageProvider.ReSortOrderServiceAlliance(serviceAllianceList.get(0).getId()
+					,firstOrder
+					,serviceAllianceList.get(1).getId()
+					,secondOrder);
+			serviceAllianceList.get(0).setSortOrder(secondOrder);
+			serviceAllianceList.get(1).setSortOrder(firstOrder);
+		}
+		else{
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					" change sort order failed, firstId = {}, secondId = {}",cmd.getFirstId(),cmd.getSecondId());
+		}
+		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
+		response.setDtos(serviceAllianceList.stream().map(r->ConvertHelper.convert(r, ServiceAllianceDTO.class)).collect(Collectors.toList()));
+		return response;
 	}
 }
