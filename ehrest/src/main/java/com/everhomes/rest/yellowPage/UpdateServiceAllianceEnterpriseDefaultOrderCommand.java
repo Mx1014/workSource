@@ -3,6 +3,7 @@ package com.everhomes.rest.yellowPage;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * 
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateServiceAllianceEnterpriseDefaultOrderCommand {
 	
+	@ItemType(ServiceAllianceDTO.class)
 	private List<ServiceAllianceDTO> values;
 	public List<ServiceAllianceDTO> getValues() {
 		return values;
