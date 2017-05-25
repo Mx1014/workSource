@@ -438,6 +438,8 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		// 回调是没有UserContext的，这里需要加一个
+		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
@@ -457,6 +459,8 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void payFail(PayCallbackCommand cmd) {
+		// 回调是没有UserContext的，这里需要加一个
+		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 		if (expressOrder == null) {
