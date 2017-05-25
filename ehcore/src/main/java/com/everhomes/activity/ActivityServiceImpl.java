@@ -372,7 +372,7 @@ public class ActivityServiceImpl implements ActivityService {
     	this.cancelExpireRosters(cmd.getActivityId());
     	
     	// 把锁放在查询语句的外面，update by tt, 20170210
-    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
 		        User user = UserContext.current().getUser();
@@ -646,7 +646,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
     	Activity outActivity = checkActivityExist(cmd.getActivityId());
-    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
+    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
 		    	User user = UserContext.current().getUser();
 		    	// 锁里面要重新查询活动
@@ -810,7 +810,7 @@ public class ActivityServiceImpl implements ActivityService {
 	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
 		// 签到的话活动表对应字段+1
 		if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.UN_CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.CHECKIN) {
-			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 				Activity activity = activityProvider.findActivityById(roster.getActivityId());
 				activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
 		                + (roster.getAdultCount() + roster.getChildCount()));
@@ -837,7 +837,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
 			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
@@ -1051,7 +1051,7 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	private void updateActivityWhenDeleteRoster(ActivityRoster roster) {
-		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			int total = roster.getAdultCount() + roster.getChildCount();
 			int result = 0;
 			Activity activity = activityProvider.findActivityById(roster.getActivityId());
@@ -1210,7 +1210,7 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
 		
-		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 	        	
 	        	//cmd中用户Id，该字段当前仅用于定时取消订单时无法从UserContext.current中获取用户
@@ -1793,7 +1793,7 @@ public class ActivityServiceImpl implements ActivityService {
     	}
 
     	//在锁内部更新报名和活动信息  add by yanjun 20170522
-    	return (ActivityDTO) this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+itemTemp.getActivityId()).enter(()-> {
+    	return (ActivityDTO) this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
     		
     		//在锁内部重新活动信息  add by yanjun 20170522
     		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
@@ -2007,7 +2007,7 @@ public class ActivityServiceImpl implements ActivityService {
     	}
 
     	//在锁内部更新报名和活动信息  add by yanjun 20170522
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+rosterTemp.getActivityId()).enter(()-> {
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 
     		//在锁内部重新查询报名信息  add by yanjun 20170522
     		ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
@@ -5188,7 +5188,7 @@ public class ActivityServiceImpl implements ActivityService {
 		if(listIds != null){
 			for(int i=0; i< listIds.size(); i++){
 				Long activityId = listIds.get(i);
-				this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+activityId).enter(()-> {
+				this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 					Activity activity = activityProvider.findActivityById(activityId);
 					
 					//找不到活动不同步
