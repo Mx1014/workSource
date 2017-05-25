@@ -2040,7 +2040,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
         if(resp == null) {
-        	qr.setQrCodeKey("error");
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_HUARUN_ERROR, "huarun service error");
         } else {
         	qr.setQrCodeKey(resp.getQrcode());
         }
@@ -2524,7 +2524,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(resp != null) {
         	auth.setQrKey(resp.getQrcode());	
         } else {
-        	auth.setQrKey("error");
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_HUARUN_ERROR, "huarun service error");
         }
         
         doorAuthProvider.createDoorAuth(auth);
