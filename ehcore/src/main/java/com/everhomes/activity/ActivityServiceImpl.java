@@ -382,21 +382,6 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
-		        //检查是否超过报名人数限制, add by tt, 20161012
-		        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
-		        if (activity.getConfirmFlag() != null && activity.getConfirmFlag().intValue() == 0 && activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
-		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
-							"beyond contraint quantity!");
-				}
-		        
-		        // 添加报名截止时间检查，add by tt, 20170228
-		        Timestamp signupEndTime = getSignupEndTime(activity);
-		        if (System.currentTimeMillis() > signupEndTime.getTime()) {
-		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-		                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
-							"beyond activity signup end time!");
-				}
         
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
@@ -404,7 +389,6 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
-		        
 		        
 		        //如果有正常的报名，则直接返回， ActivityDTO的处理方法有下面整合   add by yanjun 20170525
 		        ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
@@ -421,6 +405,22 @@ public class ActivityServiceImpl implements ActivityService {
 
 		        	return dto;
 		        }
+		        
+		        //检查是否超过报名人数限制, add by tt, 20161012
+		        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
+		        if (activity.getConfirmFlag() != null && activity.getConfirmFlag().intValue() == 0 && activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+							"beyond contraint quantity!");
+				}
+		        
+		        // 添加报名截止时间检查，add by tt, 20170228
+		        Timestamp signupEndTime = getSignupEndTime(activity);
+		        if (System.currentTimeMillis() > signupEndTime.getTime()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
+							"beyond activity signup end time!");
+				}
 		        
 		        ActivityRoster roster = createRoster(cmd, user, activity);
 	        	//去掉报名评论 by xiongying 20160615
