@@ -25,6 +25,8 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,6 +156,10 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
 
+        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
+            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        }
+
         SearchResponse rsp = builder.execute().actionGet();
 
         if(LOGGER.isDebugEnabled()) {
@@ -219,6 +225,7 @@ public class WarehouseStockLogSearcherImpl extends AbstractElasticSearch impleme
             b.field("warehouseId", log.getWarehouseId());
             b.field("materialId", log.getMaterialId());
             b.field("requestType", log.getRequestType());
+            b.field("createTime", log.getCreateTime());
 
             if(log.getRequestUid() != null) {
                 b.field("requestUid", log.getRequestUid());
