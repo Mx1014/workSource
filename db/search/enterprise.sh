@@ -1,10 +1,11 @@
 ELASTIC=elasticsearch:9200
-INDEX=everhomesv31x
+INDEX=everhomesv3
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/enterprise
 
 curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
 {
     "enterprise" : {
+	"_all": { "analyzer": "whitespace" },
         "properties" : {
             "name": {
                 "type": "multi_field", 
@@ -28,7 +29,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
 	    "namespaceId":{"type":"long"},
             "createTime":{"type":"date"},
 	    "communityId":{"type":"long"},
-	    "addresses":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+	    "addresses":{"type":"string", "analyzer": "standard_edge"},
 	    "setAdminFlag":{"type":"integer"},
 	    "organizationType":{"type":"string", "index":"not_analyzed"}
         }
