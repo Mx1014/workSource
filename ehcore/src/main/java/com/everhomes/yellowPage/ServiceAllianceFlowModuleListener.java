@@ -110,6 +110,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			contentBuffer.append("申请来源");
 			contentBuffer.append(" : ");
 			contentBuffer.append(parentPage.getName());
+			flowCase.setTitle(parentPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
 			
