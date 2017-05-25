@@ -12,6 +12,8 @@ import java.util.List;
 
 
 import java.util.stream.Collectors;
+
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -196,13 +198,25 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		Integer pageSize = cmd.getPageSize();
 		Long parentId = cmd.getParentId();
+
+		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
+
 		if(null == parentId){
 			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
+		}else {
+			Category parent = categoryProvider.findCategoryById(parentId);
+			if (null == parent) {
+				LOGGER.error("Category not found, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Category not found.");
+			}
+			if (CategoryAdminStatus.INACTIVE.getCode() == parent.getStatus()) {
+				return response;
+			}
 		}
-		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
-		
+
 		List<Category> list;
 		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
