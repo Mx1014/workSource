@@ -147,8 +147,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("meterNumber", 5.0f)
-                    .field("meterName", 2.0f);
+//                    .field("meterNumber", 5.0f)
+                    .field("meterName", 5.0f);
         }
 
         if (StringUtils.isNotEmpty(cmd.getOperatorName())) {
@@ -157,6 +157,10 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         }
 
         List<FilterBuilder> filterBuilders = new ArrayList<>();
+        if (StringUtils.isNotEmpty(cmd.getMeterNumber())) {
+            FilterBuilder meterNumberTerm = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber());
+            filterBuilders.add(meterNumberTerm);
+        }
         if (cmd.getCommunityId() != null) {
             FilterBuilder communityIdTerm = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
             filterBuilders.add(communityIdTerm);
