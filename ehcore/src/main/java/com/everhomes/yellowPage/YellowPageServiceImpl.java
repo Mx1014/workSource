@@ -61,6 +61,7 @@ import com.everhomes.rest.yellowPage.DeleteNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.DeleteServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.DeleteYellowPageCommand;
+import com.everhomes.rest.yellowPage.DisplayFlagType;
 import com.everhomes.rest.yellowPage.GetServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceDisplayModeCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
@@ -88,11 +89,11 @@ import com.everhomes.rest.yellowPage.ServiceAllianceListResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceSourceRequestType;
 import com.everhomes.rest.yellowPage.SetNotifyTargetStatusCommand;
-import com.everhomes.rest.yellowPage.ShowFlagType;
-import com.everhomes.rest.yellowPage.ShowOrHideServiceAllianceEnterpriseCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseDefaultOrderCommand;
+import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseDisplayFlagCommand;
 import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.VerifyNotifyTargetCommand;
 import com.everhomes.rest.yellowPage.YellowPageAattchmentDTO;
@@ -975,7 +976,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				serviceAlliance.setGeohash(GeoHashUtils.encode(serviceAlliance.getLatitude(), serviceAlliance.getLongitude()));
 			}
 			//设置服务联盟显示在app端，by dengs,20170524.
-			serviceAlliance.setShowFlag(ShowFlagType.SHOW.getCode());
+			serviceAlliance.setShowFlag(DisplayFlagType.SHOW.getCode());
 			
 			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
 			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
@@ -1470,12 +1471,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	@Override
-	public void showOrHideServiceAllianceEnterprise(ShowOrHideServiceAllianceEnterpriseCommand cmd) {
+	public void updateServiceAllianceEnterpriseDisplayFlag(UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd) {
 		if(cmd.getId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					" Unknown id = {}",cmd.getId());
 		}
-		ShowFlagType flagType = ShowFlagType.fromCode(cmd.getShowFlag());
+		DisplayFlagType flagType = DisplayFlagType.fromCode(cmd.getShowFlag());
 		if(flagType != null){
 			ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(cmd.getId(),null,null);
 			if(serviceAlliance == null)
@@ -1487,32 +1488,36 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 
 	@Override
-	public ServiceAllianceListResponse ReSortOrderServiceAllianceEnterpriseCommand(
-			com.everhomes.rest.yellowPage.ReSortOrderServiceAllianceEnterpriseCommand cmd) {
-		if(cmd.getFirstId() == null || cmd.getSecondId() == null 
-				|| cmd.getFirstId().longValue() == cmd.getSecondId().longValue()){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					" change sort order failed, firstId = {}, secondId = {}",cmd.getFirstId(),cmd.getSecondId());
-		}
-		//by dengs,20170524, 获取原始顺序
-		List<ServiceAlliances> serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(cmd.getFirstId(),cmd.getSecondId());
-		if(serviceAllianceList!=null && serviceAllianceList.size() == 2){
-			Long firstOrder = serviceAllianceList.get(0).getSortOrder();
-			Long secondOrder = serviceAllianceList.get(1).getSortOrder();
-			//交换顺序
-			yellowPageProvider.ReSortOrderServiceAlliance(serviceAllianceList.get(0).getId()
-					,firstOrder
-					,serviceAllianceList.get(1).getId()
-					,secondOrder);
-			serviceAllianceList.get(0).setSortOrder(secondOrder);
-			serviceAllianceList.get(1).setSortOrder(firstOrder);
-		}
-		else{
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					" change sort order failed, firstId = {}, secondId = {}",cmd.getFirstId(),cmd.getSecondId());
-		}
-		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
-		response.setDtos(serviceAllianceList.stream().map(r->ConvertHelper.convert(r, ServiceAllianceDTO.class)).collect(Collectors.toList()));
-		return response;
+	public ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(
+			UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
+//		List<ServiceAllianceIdItem> values = cmd.getValues();
+//		for (ServiceAllianceIdItem serviceAllianceIdItem : values) {
+//			if(serviceAllianceIdItem.getFirstId() == null || serviceAllianceIdItem.getSecondId() == null 
+//					|| serviceAllianceIdItem.getFirstId().longValue() == serviceAllianceIdItem.getSecondId().longValue()){
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//						" change sort order failed, firstId = {}, secondId = {}",serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
+//			}
+//			//by dengs,20170524, 获取原始顺序
+//			List<ServiceAlliances> serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
+//			if(serviceAllianceList!=null && serviceAllianceList.size() == 2){
+//				Long firstOrder = serviceAllianceList.get(0).getSortOrder();
+//				Long secondOrder = serviceAllianceList.get(1).getSortOrder();
+//				//交换顺序
+//				yellowPageProvider.ReSortOrderServiceAlliance(serviceAllianceList.get(0).getId()
+//						,firstOrder
+//						,serviceAllianceList.get(1).getId()
+//						,secondOrder);
+//				serviceAllianceList.get(0).setSortOrder(secondOrder);
+//				serviceAllianceList.get(1).setSortOrder(firstOrder);
+//			}
+//			else{
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//						" change sort order failed, firstId = {}, secondId = {}",serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
+//			}
+//		}
+//		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
+//		response.setDtos(serviceAllianceList.stream().map(r->ConvertHelper.convert(r, ServiceAllianceDTO.class)).collect(Collectors.toList()));
+//		return response;
+		return null;
 	}
 }

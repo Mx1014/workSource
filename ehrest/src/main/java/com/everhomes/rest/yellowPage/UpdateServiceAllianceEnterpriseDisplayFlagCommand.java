@@ -7,12 +7,12 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>
  * <li>id : 服务联盟企业id</li>
- * <li>showFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.ShowFlagType}</li>
+ * <li>showFlag : 是否在app端显示服务联盟企业, 参考 {@link com.everhomes.rest.yellowPage.DisplayFlagType}</li>
  * </ul>
  *
  *  @author:dengs 2017年5月23日
  */
-public class ShowOrHideServiceAllianceEnterpriseCommand {
+public class UpdateServiceAllianceEnterpriseDisplayFlagCommand {
 	private Long id;
 	private Byte showFlag;
 	public Long getId() {

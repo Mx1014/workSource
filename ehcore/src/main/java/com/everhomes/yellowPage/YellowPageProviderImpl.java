@@ -1085,12 +1085,13 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAlliances> listServiceAllianceSortOrders(Long firstId, Long secondId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
-		query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId).or(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId)));
-		LOGGER.debug("Query organization, sql={}, values ={}",query.getSQL(),query.getBindValues());
-		List<ServiceAlliances>  serviceAllianceList = query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
-		return serviceAllianceList;
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
+//		query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId).or(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId)));
+//		LOGGER.debug("Query organization, sql={}, values ={}",query.getSQL(),query.getBindValues());
+//		List<ServiceAlliances>  serviceAllianceList = query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+//		return serviceAllianceList;
+		return null;
 	}
 
 
@@ -1099,24 +1100,24 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	 */
 	@Override
 	public void ReSortOrderServiceAlliance(Long firstId, Long firstOrder, Long secondId, Long secondOrder) {
-		assert(firstId != null);
-		assert(firstOrder != null);
-		assert(secondId != null);
-		assert(secondOrder != null);
-		dbProvider.execute(status->{
-			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-			UpdateConditionStep<EhServiceAlliancesRecord> firstupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
-				.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, secondOrder)
-				.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId));
-			LOGGER.debug("first update serviceAlliance sort order, sql = {}, values = {}",firstupdatesql.getSQL(),firstupdatesql.getBindValues());
-			firstupdatesql.execute();
-			UpdateConditionStep<EhServiceAlliancesRecord> secondupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
-					.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, firstOrder)
-					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId));
-			LOGGER.debug("update serviceAlliance sort order, sql = {}, values = {}",secondupdatesql.getSQL(),secondupdatesql.getBindValues());
-			secondupdatesql.execute();
-			return null;
-		});
+//		assert(firstId != null);
+//		assert(firstOrder != null);
+//		assert(secondId != null);
+//		assert(secondOrder != null);
+//		dbProvider.execute(status->{
+//			DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//			UpdateConditionStep<EhServiceAlliancesRecord> firstupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
+//				.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, secondOrder)
+//				.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(firstId));
+//			LOGGER.debug("first update serviceAlliance sort order, sql = {}, values = {}",firstupdatesql.getSQL(),firstupdatesql.getBindValues());
+//			firstupdatesql.execute();
+//			UpdateConditionStep<EhServiceAlliancesRecord> secondupdatesql = context.update(Tables.EH_SERVICE_ALLIANCES)
+//					.set(Tables.EH_SERVICE_ALLIANCES.SORT_ORDER, firstOrder)
+//					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(secondId));
+//			LOGGER.debug("update serviceAlliance sort order, sql = {}, values = {}",secondupdatesql.getSQL(),secondupdatesql.getBindValues());
+//			secondupdatesql.execute();
+//			return null;
+//		});
 		
 	}
 

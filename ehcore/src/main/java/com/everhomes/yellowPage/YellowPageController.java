@@ -264,26 +264,26 @@ public class YellowPageController  extends ControllerBase {
     }
     
     /**
-   	 * <b>URL: /yellowPage/reSortOrderServiceAllianceEnterprise</b>
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDefaultOrder</b>
    	 * <p> 更新服务联盟企业顺序 </p>
    	 */
-    @RequestMapping("reSortOrderServiceAllianceEnterprise")
+    @RequestMapping("updateServiceAllianceEnterpriseDefaultOrder")
     @RestReturn(value=ServiceAllianceListResponse.class)
-    public RestResponse reSortOrderServiceAllianceEnterprise(@Valid ReSortOrderServiceAllianceEnterpriseCommand cmd) {
-    	 RestResponse response = new RestResponse(this.yellowPageService.ReSortOrderServiceAllianceEnterpriseCommand(cmd));
+    public RestResponse updateServiceAllianceEnterpriseDefaultOrder(@Valid UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
+    	 RestResponse response = new RestResponse(this.yellowPageService.updateServiceAllianceEnterpriseDefaultOrder(cmd));
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");
          return response;
     }
     
     /**
-   	 * <b>URL: /yellowPage/showOrHideServiceAllianceEnterprise</b>
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDisplayFlag</b>
    	 * <p> 更新服务联盟企业是否显示在app端  </p>
    	 */
-    @RequestMapping("showOrHideServiceAllianceEnterprise")
+    @RequestMapping("updateServiceAllianceEnterpriseDisplayFlag")
     @RestReturn(value=String.class)
-    public RestResponse showOrHideServiceAllianceEnterprise(@Valid ShowOrHideServiceAllianceEnterpriseCommand cmd) {
-    	 this.yellowPageService.showOrHideServiceAllianceEnterprise(cmd);
+    public RestResponse updateServiceAllianceEnterpriseDisplayFlag(@Valid UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd) {
+    	 this.yellowPageService.updateServiceAllianceEnterpriseDisplayFlag(cmd);
     	 RestResponse response = new RestResponse();
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");

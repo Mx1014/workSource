@@ -57,10 +57,10 @@ public interface YellowPageService {
 	/**
 	 * 设置显示或者隐藏服务联盟企业
 	 */
-	void showOrHideServiceAllianceEnterprise(ShowOrHideServiceAllianceEnterpriseCommand cmd);
+	void updateServiceAllianceEnterpriseDisplayFlag(UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd);
 
 	/**
 	 * 交换cmd中两个服务联盟的sortOrder
 	 */
-	ServiceAllianceListResponse ReSortOrderServiceAllianceEnterpriseCommand(ReSortOrderServiceAllianceEnterpriseCommand cmd);
+	ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd);
 }
