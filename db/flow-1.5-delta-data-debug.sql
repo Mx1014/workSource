@@ -26,3 +26,8 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, 10078, 1005, 'EhAclRoles', 0, 1, NOW());
+
+-- 给普通公司场景加任务管理icon
+SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+  VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 1000000, 0, 0, 0, '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRwa1ltWmlPRGN5TTJObFlUYzFNV1l3WmpZNU9UVmlZMlEyTkdRd1pUUmxNUQ', 1, 1, 56, '', 13, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'park_tourist', 0, NULL, NULL, 0, NULL);

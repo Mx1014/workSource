@@ -872,7 +872,8 @@ public class FlowServiceImpl implements FlowService {
         flowNode.setNodeName(cmd.getFlowNodeName());
         flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
         flowNode.setAutoStepType(cmd.getAutoStepType());
-        flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        flowNode.setAllowApplierUpdate(TrueOrFalseFlag.FALSE.getCode());
         flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
         flowNode.setParams(cmd.getParams());
         flowNodeProvider.updateFlowNode(flowNode);
@@ -917,15 +918,15 @@ public class FlowServiceImpl implements FlowService {
     public ListFlowUserSelectionResponse listFlowUserSelection(
             ListFlowUserSelectionCommand cmd) {
         ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+        List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
-        List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+        List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
         if (seles != null && seles.size() > 0) {
-            seles.stream().forEach((sel) -> {
+            seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
             });
         }
-
         return resp;
     }
 
@@ -1696,7 +1697,7 @@ public class FlowServiceImpl implements FlowService {
 
         for (Long userId : users) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("flowtimeout tick message, text={}, userId={}", dataStr, userId);
+                LOGGER.debug("flowtimeout tick message, text={}, userId={}, ftId={}", dataStr, userId, ft.getId());
             }
 
             MessageDTO messageDto = new MessageDTO();
@@ -1736,12 +1737,16 @@ public class FlowServiceImpl implements FlowService {
 
         if (dto.getRemindTick() != null && dto.getRemindTick() > 0 && dto.getRemindCount() != null && dto.getRemindCount() > 0) {
             dto.setRemindCount(dto.getRemindCount() - 1);
-			// dto.setTimeoutAtTick(dto.getRemindTick());
+            // dto.setTimeoutAtTick(dto.getRemindTick());
             ft.setId(null);
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
             flowTimeoutService.pushTimeout(ft);
+        } else {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
+            }
         }
         ctx.popProcessType();
     }
