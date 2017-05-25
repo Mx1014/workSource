@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.rest.parking.clearance.*;
 
 /**
@@ -38,4 +40,6 @@ public interface ParkingClearanceService {
      * 检查用户的权限
      */
     CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd);
+
+	void exportClearanceLog(SearchClearanceLogCommand cmd, HttpServletResponse response);
 }

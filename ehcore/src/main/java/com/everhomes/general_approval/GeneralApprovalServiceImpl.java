@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -22,11 +23,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rentalv2.Rentalv2Controller;
+import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
@@ -60,6 +67,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -80,6 +88,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private GeneralFormProvider generalFormProvider;
 	@Autowired
 	private GeneralApprovalProvider generalApprovalProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
     
     private StringTemplateLoader templateLoader;
@@ -495,22 +505,50 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-		//
-		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(
-				new ListingLocator(), Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+
+		//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+		List<OrganizationCommunity> communityList = null;
+		if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+			 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+		}
+		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
+				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
-								.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
+						ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(cmd.getOwnerType());
+						List<OrganizationCommunity> communityList = null;
+						
+						//modify by dengs. 20170428 如果OwnerType是 organaization，则转成所管理的  community做查询
+						if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+							 communityList = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+							 Condition conditionOR = null;
+							 for (OrganizationCommunity organizationCommunity : communityList) {
+								Condition condition = Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(organizationCommunity.getCommunityId())
+										.and(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(ServiceAllianceBelongType.COMMUNITY.getCode()));
+								if(conditionOR==null){
+									conditionOR = condition;
+								}else{
+									conditionOR.or(condition);
+								}
+							 }
+							 if(conditionOR!=null)
+								 query.addConditions(conditionOR);
+						}else{
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd
+									.getOwnerId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd
+									.getOwnerType()));
+						}
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS
 								.ne(GeneralApprovalStatus.DELETED.getCode()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd
 								.getModuleId()));
 						query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd
 								.getModuleType()));
+
 						if(null != cmd.getProjectId())
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
 						if(null != cmd.getProjectType())
@@ -518,6 +556,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 						if (null != cmd.getStatus())
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
 									.getStatus()));
+
+						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
+						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
+						if(entityType == EntityType.COMMUNITY){
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
+									.getProjectId()));
+							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
+									.getProjectType()));
+						}
 						return query;
 					}
 				});

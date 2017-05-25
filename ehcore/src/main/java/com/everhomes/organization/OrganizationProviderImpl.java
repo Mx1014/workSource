@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -88,7 +89,6 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1221,9 +1221,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		return context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
 			.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
-			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
-			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
 			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L))
 			.fetchOne()
 			.value1();
 	}
@@ -3228,7 +3228,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(!StringUtils.isEmpty(contactToken)){
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
 		}
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
 //		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
@@ -3423,5 +3424,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), ImportFileTask.class);
+	}
+
+
+	@Override
+	public List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.gt(locator.getAnchor()));
+
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID);
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		if(null!= locator)
+			locator.setAnchor(null);
+
+		if(result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
+
+	@Override
+	public Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		int totalRecords = query.fetchCount();
+		return totalRecords;
 	}
 }

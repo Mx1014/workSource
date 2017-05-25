@@ -186,7 +186,7 @@ public class BusinessController extends ControllerBase {
      * <p>测试事务</p>
      * <b>URL: /business/testTransaction</b>
      */
-    @RequireAuthentication(false)
+    // @RequireAuthentication(false)
     @RequestMapping("testTransaction")
     @RestReturn(value = String.class)
     public RestResponse testTransaction(){

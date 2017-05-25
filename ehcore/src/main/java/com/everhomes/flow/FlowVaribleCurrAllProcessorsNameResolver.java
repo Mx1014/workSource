@@ -1,13 +1,12 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
+import com.everhomes.rest.user.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.user.UserInfo;
+import java.util.List;
 
 /**
  * 当前所有节点处理人名字

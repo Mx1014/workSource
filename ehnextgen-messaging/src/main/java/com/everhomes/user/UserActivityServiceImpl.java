@@ -64,6 +64,7 @@ import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityRosterStatus;
 import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.UserActiveStatDTO;
@@ -90,6 +91,10 @@ import com.everhomes.rest.user.CommunityStatusResponse;
 import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.ContactDTO;
 import com.everhomes.rest.user.FeedbackCommand;
+import com.everhomes.rest.user.FeedbackContentCategoryType;
+import com.everhomes.rest.user.FeedbackDTO;
+import com.everhomes.rest.user.FeedbackHandleType;
+import com.everhomes.rest.user.FeedbackTargetType;
 import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldTemplateDTO;
 import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
@@ -99,6 +104,8 @@ import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
 import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListBusinessTreasureResponse;
+import com.everhomes.rest.user.ListFeedbacksCommand;
+import com.everhomes.rest.user.ListFeedbacksResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -114,6 +121,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.UpdateFeedbackCommand;
 import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -488,9 +496,23 @@ public class UserActivityServiceImpl implements UserActivityService {
     }
 
     @Override
-    public void updateFeedback(FeedbackCommand cmd) {
+    public void addFeedback(FeedbackCommand cmd) {
+    	
+    	//如果post已经被删除，则不能在举报了。 add by yanjun 20170510
+    	if(cmd.getTargetType() == FeedbackTargetType.POST.getCode()){
+    		Post post = forumProvider.findPostById(cmd.getTargetId());
+    		if(post != null && post.getStatus() != PostStatus.ACTIVE.getCode()){
+    			LOGGER.error("Forum post already deleted, " + "topicId=" + cmd.getTargetId());
+    			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+    					ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "post was deleted"); 
+    		}
+    	}
+    	
         User user = UserContext.current().getUser();
+        
         Feedback feedback = ConvertHelper.convert(cmd, Feedback.class);
+        feedback.setNamespaceId(UserContext.getCurrentNamespaceId());
+        feedback.setStatus(Byte.parseByte("0"));
         if (user == null) {
             feedback.setOwnerUid(1L);
         } else {
@@ -526,6 +548,75 @@ public class UserActivityServiceImpl implements UserActivityService {
         }
     }
 
+    @Override
+    public ListFeedbacksResponse ListFeedbacks(ListFeedbacksCommand cmd) {
+    	ListFeedbacksResponse response = new ListFeedbacksResponse();
+    	CrossShardListingLocator locator = new CrossShardListingLocator();
+    	locator.setAnchor(cmd.getPageAnchor());
+    	int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+    	List<Feedback> results = userActivityProvider.ListFeedbacks(locator, UserContext.getCurrentNamespaceId(), FeedbackTargetType.POST.getCode(), cmd.getStatus(), pageSize + 1);
+    	if (null == results)
+    		return response;
+    	Long nextPageAnchor = null;
+    	if (results != null && results.size() > pageSize) {
+    		results.remove(results.size() - 1);
+    		nextPageAnchor = results.get(results.size() - 1).getId();
+    	}
+    	
+    	List<FeedbackDTO> feedbackDtos = new ArrayList<FeedbackDTO>();
+    	results.forEach(r -> {
+    		FeedbackDTO feedbackDto = ConvertHelper.convert(r, FeedbackDTO.class);
+    		User user = userProvider.findUserById(feedbackDto.getOwnerUid());
+    		if(user != null){
+    			feedbackDto.setOwnerNickName(user.getNickName());
+    		}
+    		//获取被举报对象的标题，默认取post，其他类型不管。
+    		if(feedbackDto.getTargetType() == FeedbackTargetType.POST.getCode()){
+    			Post post = forumProvider.findPostById(feedbackDto.getTargetId());
+        		if(post != null){
+        			feedbackDto.setTargetSubject(post.getSubject());
+        			feedbackDto.setForumId(post.getForumId());
+        			feedbackDto.setTargetStatus(post.getStatus());
+        		}
+    		}
+    		FeedbackContentCategoryType contentCategory = FeedbackContentCategoryType.fromStatus(feedbackDto.getContentCategory().byteValue());
+    		feedbackDto.setContentCategoryText(contentCategory.getText());
+    		
+    		feedbackDtos.add(feedbackDto);
+    	});
+    	response.setNextPageAnchor(nextPageAnchor); 
+    	response.setFeedbackDtos(feedbackDtos);
+    	return response;
+    }
+
+	@Override
+	public void updateFeedback(UpdateFeedbackCommand cmd) {
+		Feedback feedback = userActivityProvider.findFeedbackById(cmd.getId());
+		if(feedback == null){
+			LOGGER.error("feedback is not exist");
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_INVALID_PARAMS, "feedback is not exist");
+		}
+		feedback.setStatus((byte)1);
+		feedback.setVerifyType(cmd.getVerifyType());
+		feedback.setHandleType(cmd.getHandleType());
+		//更新自己的状态
+		userActivityProvider.updateFeedback(feedback);
+		
+		//如果处理方式是删除，将相同目标帖子举报的核实状态更新为已处理，处理方式为无
+		if(feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+			userActivityProvider.updateOtherFeedback(feedback.getTargetId(), feedback.getId(), feedback.getVerifyType(), FeedbackHandleType.NONE.getCode());
+		}
+		
+		//当前只对post类型的举报做实际处理，处理的方式只有删除
+		if(feedback.getTargetType() == FeedbackTargetType.POST.getCode() && feedback.getHandleType() == FeedbackHandleType.DELETE.getCode()){
+			 Post post = forumProvider.findPostById(feedback.getTargetId());
+			 if(post != null){
+				 forumService.deletePost(post.getForumId(), post.getId(), null, null, null);
+			 }
+		}
+	}
+	
     @Override
     public void addUserFavorite(AddUserFavoriteCommand cmd) {
     	
@@ -1180,7 +1271,7 @@ public class UserActivityServiceImpl implements UserActivityService {
         dto.setPosterUrl(posterUrl);
         fixupVideoInfo(dto); // added by janson
         
-        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid);
+        ActivityRoster roster = activityProivider.findRosterByUidAndActivityId(activity.getId(), uid, ActivityRosterStatus.NORMAL.getCode());
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         
         List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());

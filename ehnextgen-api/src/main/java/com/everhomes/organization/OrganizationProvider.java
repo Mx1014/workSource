@@ -299,12 +299,10 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
- 
- 
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
 			Byte operationType);
-  
+
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
 
@@ -319,4 +317,16 @@ public interface OrganizationProvider {
 	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
 	
 	OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId);
-} 
+	
+	/**
+	 * 查询企业下的用户
+	 * @param locator
+	 * @param pageSize
+	 * @param queryBuilderCallback
+	 * @return
+	 */
+	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
+	
+	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
+}
+

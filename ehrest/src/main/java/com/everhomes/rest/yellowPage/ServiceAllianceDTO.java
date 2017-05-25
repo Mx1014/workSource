@@ -11,7 +11,7 @@ import java.util.List;
  * <ul>
  *  <li>id: id</li>
  *  <li>parentId: 父id</li>
- *  <li>ownerType: 拥有者类型：现在是comunity</li>
+ *  <li>ownerType: 拥有者类型 参考{@link com.everhomes.rest.yellowPage.ServiceAllianceBelongType}</li>
  *  <li>ownerId: 拥有者ID</li>
  *  <li>name: 企业名称</li>
  *  <li>displayName: 简称</li>
@@ -43,6 +43,7 @@ import java.util.List;
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  *  <li>jumpId : 跳转模块id</li>
+ *  <li>descriptionHeight : 折叠服务联盟高度  0:全部展开 大于0:折叠相应高度</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -121,7 +122,9 @@ public class ServiceAllianceDTO {
 	private Byte supportType;
 
 	private Long jumpId;
-
+	
+	private Integer descriptionHeight;
+	
 	public String getDisplayServiceUrl() {
 		return displayServiceUrl;
 	}
@@ -362,6 +365,14 @@ public class ServiceAllianceDTO {
 
 	public void setJumpId(Long jumpId) {
 		this.jumpId = jumpId;
+	}
+
+	public Integer getDescriptionHeight() {
+		return descriptionHeight;
+	}
+
+	public void setDescriptionHeight(Integer descriptionHeight) {
+		this.descriptionHeight = descriptionHeight;
 	}
 
 	@Override

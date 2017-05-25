@@ -24,4 +24,7 @@ public interface PunchSchedulingProvider {
 
 	PunchScheduling getPunchSchedulingByRuleDateAndTarget(Long ruleId, java.sql.Date time);
 
+	void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId, String targetType,
+			Long targetId);
+
 }

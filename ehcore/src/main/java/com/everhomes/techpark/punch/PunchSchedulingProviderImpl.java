@@ -3,7 +3,9 @@ package com.everhomes.techpark.punch;
 import java.util.Date;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteWhereStep;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPunchSchedulingsDao;
 import com.everhomes.server.schema.tables.pojos.EhPunchSchedulings;
+import com.everhomes.server.schema.tables.records.EhPunchRuleOwnerMapRecord;
 import com.everhomes.server.schema.tables.records.EhPunchSchedulingsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -130,5 +133,21 @@ public class PunchSchedulingProviderImpl implements PunchSchedulingProvider {
 			return null;
 		else 
 			return results.get(0);
+	}
+
+	@Override
+	public void deletePunchSchedulingByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId) {
+
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteWhereStep<EhPunchSchedulingsRecord> step = context.delete(Tables.EH_PUNCH_SCHEDULINGS);
+		Condition condition = Tables.EH_PUNCH_SCHEDULINGS.TARGET_ID.equal(targetId)
+				.and(Tables.EH_PUNCH_SCHEDULINGS.TARGET_TYPE.equal(targetType))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_ID.equal(ownerId))
+				.and(Tables.EH_PUNCH_SCHEDULINGS.OWNER_TYPE.equal(ownerType)) ; 
+		step.where(condition);
+		step.execute();
+	 
+		
 	}
 }

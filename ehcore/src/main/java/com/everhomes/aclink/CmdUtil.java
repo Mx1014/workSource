@@ -100,6 +100,8 @@ public class CmdUtil {
             byte[] encryptData = RSAUtil.encryptByRawPublicKey(resultArray, pubKey);
             byte[] headArr = {cmd, ver};
             resultArray = DataUtil.mergeArray(headArr, encryptData);
+            
+            LOGGER.info(StringHelper.toHexString(resultArray));
 
             return resultArray;
         } catch (Exception e) {
@@ -158,7 +160,7 @@ public class CmdUtil {
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
         int expireTime = curTime + EXPIRE_TIME;
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
-        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
+        byte[] curTimeBytes = DataUtil.intToByteArray(curTime + EXPIRE_TIME);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
         System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
         System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
@@ -173,6 +175,7 @@ public class CmdUtil {
             resultArr[1] = ver;
             System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
             return resultArr;
+//            return aeskeyEncryptResult;
         } catch (Exception e) {
         }
         return null;

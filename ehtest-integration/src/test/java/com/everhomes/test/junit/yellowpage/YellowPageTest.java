@@ -120,15 +120,26 @@ public class YellowPageTest extends BaseLoginAuthTestCase {
 		logon();
 		
 		GetServiceAllianceEnterpriseListCommand cmd = new GetServiceAllianceEnterpriseListCommand();
-		cmd.setOwnerId(ownerId);
-		cmd.setOwnerType(ownerType);
-		cmd.setParentId(2L);
-		cmd.setCategoryId(2L);
+		cmd.setOwnerId(1000001L);
+		cmd.setOwnerType("organaization");
+		cmd.setParentId(11L);
+		cmd.setSourceRequestType((byte)1);
 		
 		ListServiceAllianceEnterpriseRestResponse response = httpClientService.restPost(uri, cmd, ListServiceAllianceEnterpriseRestResponse.class);
+		System.out.println(response);
 		assertNotNull(response);
 		assertEquals(1, response.getResponse().getDtos().size());
-		assertTrue("法律事务".equals(response.getResponse().getDtos().get(0).getServiceType()));
+		assertTrue("金融服务".equals(response.getResponse().getDtos().get(0).getServiceType()));
+		
+		GetServiceAllianceEnterpriseListCommand cmdapp = new GetServiceAllianceEnterpriseListCommand();
+		cmdapp.setOwnerId(240111044331048623L);
+		cmdapp.setOwnerType("community");
+		cmdapp.setParentId(11L);
+		cmdapp.setCategoryId(100011L);
+		
+		response = httpClientService.restPost(uri, cmdapp, ListServiceAllianceEnterpriseRestResponse.class);
+		assertNotNull(response);
+		assertEquals(5, response.getResponse().getDtos().size());
 	}
 	
 	@Test

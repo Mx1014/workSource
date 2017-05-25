@@ -13,7 +13,6 @@ public class FlowTimeoutMessageDTO {
 	private Long remindTick;
 	private Long remindCount;
 	private Long operatorId;
-	private String flowUserType;
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -94,14 +93,6 @@ public class FlowTimeoutMessageDTO {
 	public void setOperatorId(Long operatorId) {
 		this.operatorId = operatorId;
 	}
-
-    public String getFlowUserType() {
-        return flowUserType;
-    }
-
-    public void setFlowUserType(String flowUserType) {
-        this.flowUserType = flowUserType;
-    }
 
     @Override
     public String toString() {
