@@ -930,7 +930,7 @@ public class ActivityServiceImpl implements ActivityService {
 		Integer nextPageOffset = null;
 		if (rosters.size() > pageSize) {
 			rosters.remove(rosters.size()-1);
-			nextPageOffset = cmd.getPageOffset() + 1;
+			nextPageOffset = pageOffset + 1;
 		}
 		
 		Integer unConfirmCount = activityProvider.countActivityRoster(cmd.getActivityId(), new Integer(ConfirmStatus.UN_CONFIRMED.getCode()));

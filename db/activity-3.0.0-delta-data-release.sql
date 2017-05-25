@@ -141,3 +141,9 @@ INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`
 INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1002756','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
 
 INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1004005','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+
+-- 1、将更新上面脚本的数据异常将entryid为1的设置path为“-1”  add by yanjun 20170525
+-- 2、更新老数据将一级入口的parentId设置成-1。  
+UPDATE eh_activity_categories SET path = '/1' WHERE entry_id = 1;
+UPDATE eh_activity_categories SET parent_id = -1 WHERE parent_id = 0;
