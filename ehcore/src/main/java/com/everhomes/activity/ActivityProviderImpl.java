@@ -842,7 +842,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 	@Override
 	public List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId) {
 		if (categoryId == null) {
-			categoryId = 0L;
+			categoryId = -1L;
 		}
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
 		
