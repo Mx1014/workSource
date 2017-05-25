@@ -275,7 +275,7 @@ public class ActivityProviderImpl implements ActivityProivider {
       
     }
 
-    @Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid}",unless="#result==null")
+    //@Cacheable(value = "findRosterByUidAndActivityId", key = "{#activityId,#uid,}",unless="#result==null")
     @Override
     public ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status) {
         ActivityRoster[] rosters = new ActivityRoster[1];
