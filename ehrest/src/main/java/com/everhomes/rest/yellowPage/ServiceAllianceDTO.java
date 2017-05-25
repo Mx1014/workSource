@@ -104,7 +104,7 @@ public class ServiceAllianceDTO {
 	private String discountDesc;
 	
 	private Byte     status;
-	private Integer  defaultOrder;
+	private Long  defaultOrder;
 	
 	private String templateType;
 	
@@ -305,10 +305,10 @@ public class ServiceAllianceDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	public Integer getDefaultOrder() {
+	public Long getDefaultOrder() {
 		return defaultOrder;
 	}
-	public void setDefaultOrder(Integer defaultOrder) {
+	public void setDefaultOrder(Long defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
 	

@@ -976,7 +976,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				serviceAlliance.setGeohash(GeoHashUtils.encode(serviceAlliance.getLatitude(), serviceAlliance.getLongitude()));
 			}
 			//设置服务联盟显示在app端，by dengs,20170524.
-			serviceAlliance.setShowFlag(DisplayFlagType.SHOW.getCode());
+			serviceAlliance.setDisplayFlag(DisplayFlagType.SHOW.getCode());
 			
 			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
 			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
@@ -1026,8 +1026,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			serviceAlliance.setCreateTime(sa.getCreateTime());
 			serviceAlliance.setCreatorUid(sa.getCreatorUid());
 			//by dengs,20170524 序号和是否在app端显示不能更新掉了。
-//			serviceAlliance.setSortOrder(sa.getSortOrder());
-			serviceAlliance.setShowFlag(sa.getShowFlag());
+			serviceAlliance.setDefaultOrder(sa.getDefaultOrder());
+			serviceAlliance.setDisplayFlag(sa.getDisplayFlag());
 			
 			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 			this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
@@ -1476,48 +1476,70 @@ public class YellowPageServiceImpl implements YellowPageService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					" Unknown id = {}",cmd.getId());
 		}
-		DisplayFlagType flagType = DisplayFlagType.fromCode(cmd.getShowFlag());
+		DisplayFlagType flagType = DisplayFlagType.fromCode(cmd.getDisplayFlag());
 		if(flagType != null){
 			ServiceAlliances serviceAlliance = yellowPageProvider.findServiceAllianceById(cmd.getId(),null,null);
 			if(serviceAlliance == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						" Unknown id = {}",cmd.getId());
-			cmd.setShowFlag(serviceAlliance.getShowFlag());
+			cmd.setDisplayFlag(serviceAlliance.getDisplayFlag());
 		}
-		yellowPageProvider.updateServiceAlliancesShowFlag(cmd.getId(),cmd.getShowFlag());
+		yellowPageProvider.updateServiceAlliancesDisplayFlag(cmd.getId(),cmd.getDisplayFlag());
 	}
 
 	@Override
 	public ServiceAllianceListResponse updateServiceAllianceEnterpriseDefaultOrder(
 			UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
-//		List<ServiceAllianceIdItem> values = cmd.getValues();
-//		for (ServiceAllianceIdItem serviceAllianceIdItem : values) {
-//			if(serviceAllianceIdItem.getFirstId() == null || serviceAllianceIdItem.getSecondId() == null 
-//					|| serviceAllianceIdItem.getFirstId().longValue() == serviceAllianceIdItem.getSecondId().longValue()){
-//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//						" change sort order failed, firstId = {}, secondId = {}",serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
-//			}
-//			//by dengs,20170524, 获取原始顺序
-//			List<ServiceAlliances> serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
-//			if(serviceAllianceList!=null && serviceAllianceList.size() == 2){
-//				Long firstOrder = serviceAllianceList.get(0).getSortOrder();
-//				Long secondOrder = serviceAllianceList.get(1).getSortOrder();
-//				//交换顺序
-//				yellowPageProvider.ReSortOrderServiceAlliance(serviceAllianceList.get(0).getId()
-//						,firstOrder
-//						,serviceAllianceList.get(1).getId()
-//						,secondOrder);
-//				serviceAllianceList.get(0).setSortOrder(secondOrder);
-//				serviceAllianceList.get(1).setSortOrder(firstOrder);
-//			}
-//			else{
-//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//						" change sort order failed, firstId = {}, secondId = {}",serviceAllianceIdItem.getFirstId(),serviceAllianceIdItem.getSecondId());
-//			}
-//		}
-//		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
-//		response.setDtos(serviceAllianceList.stream().map(r->ConvertHelper.convert(r, ServiceAllianceDTO.class)).collect(Collectors.toList()));
-//		return response;
-		return null;
+		List<ServiceAllianceDTO> values = cmd.getValues();
+		if(values == null || values.size()<2){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"can't change the order, values = {}",values);
+		}
+		//检查数据
+		Map<String,Long> idOrderMap = checkServiceAllianceEnterpriseOrder(values);
+		//注意必须使用long，否则firstDefaultOrder存的是引用，不是值
+		long firstDefaultOrder = values.get(0).getDefaultOrder();
+		List<ServiceAlliances> updateList = new ArrayList<>();
+		
+		// 1 -> size()-1 服务联盟企业  的defaultOrder依次向前赋值
+		for (int i = 1; i < values.size(); i++) {
+			ServiceAllianceDTO originalDto = values.get(i);
+			ServiceAllianceDTO replaceDto = values.get(i-1);
+			ServiceAlliances alliances = ConvertHelper.convert(replaceDto, ServiceAlliances.class);
+			alliances.setDefaultOrder(originalDto.getDefaultOrder());
+			updateList.add(alliances);
+		}
+		// size()-1 的服务联盟 的defaultOrder设置为0服务联盟企业的 defaultOrder
+		ServiceAllianceDTO originalDto = values.get(values.size()-1);
+		ServiceAlliances alliances = ConvertHelper.convert(originalDto, ServiceAlliances.class);
+		alliances.setDefaultOrder(firstDefaultOrder);
+		updateList.add(alliances);
+		yellowPageProvider.updateOrderServiceAllianceDefaultOrder(updateList);
+		
+		//返回更新后的结果
+		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
+		response.setDtos(updateList.stream().map(r->ConvertHelper.convert(r, ServiceAllianceDTO.class)).collect(Collectors.toList()));
+		return response;
+	}
+
+	/**
+	 * 检查需要排序的服务联盟集合的id和defaultOrder
+	 */
+	private Map<String, Long> checkServiceAllianceEnterpriseOrder(List<ServiceAllianceDTO> values) {
+		Map<String, Long> idOrderMap = new HashMap<String,Long>();
+		
+		List<ServiceAlliances>  serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(
+				values.stream().map(value -> value.getId()).collect(Collectors.toList()));
+		
+		for (ServiceAlliances serviceAlliances : serviceAllianceList) {
+			String key = String.valueOf(serviceAlliances.getId());
+			//检查前端传入的集合中，存在重复的服务联盟企业的情况。抛出异常。
+			if(idOrderMap.containsKey(key)){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						" repeated service alliance id = {}",key);
+			}
+			idOrderMap.put(key, serviceAlliances.getDefaultOrder());
+		}
+		return idOrderMap;
 	}
 }

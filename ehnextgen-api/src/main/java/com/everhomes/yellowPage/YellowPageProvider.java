@@ -118,18 +118,18 @@ public interface YellowPageProvider {
 	/**
 	 * 获取顺序
 	 */
-	List<ServiceAlliances> listServiceAllianceSortOrders(Long firstId, Long secondId);
+	List<ServiceAlliances> listServiceAllianceSortOrders(List<Long> idList);
 
 
 	/**
 	 * 更新顺序
 	 */
-	void ReSortOrderServiceAlliance(Long firstId, Long firstOrder, Long secondId, Long secondOrder);
+	void updateOrderServiceAllianceDefaultOrder(List<ServiceAlliances> ServiceAllianceList);
 
 
 	/**
 	 * 更新是否在app显示的字段 
 	 */
-	void updateServiceAlliancesShowFlag(Long id, Byte showFlag);
+	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
 
 }
