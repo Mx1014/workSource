@@ -246,6 +246,30 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e.setValue(order.getPayTotalMoney().toString());
 		entities.add(e);
 
+		List<RentalConfigAttachment> recommendUsers = rentalv2Provider
+				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_RECOMMEND_USER.name(), order.getId());
+		if (null != recommendUsers && recommendUsers.size() != 0) {
+
+			StringBuilder itemStr = new StringBuilder();
+			int size = recommendUsers.size();
+			for (int i = 0; i < size; i++) {
+				if (i == size -1) {
+					itemStr.append(recommendUsers.get(i).getUserName()).append("(")
+							.append(recommendUsers.get(i).getMobile()).append(")");
+				}else {
+					itemStr.append(recommendUsers.get(i).getUserName()).append("(")
+							.append(recommendUsers.get(i).getMobile()).append(")").append("、");
+				}
+			}
+
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
+					"recommendUser", RentalNotificationTemplateCode.locale, ""));
+			e.setValue(itemStr.toString());
+			entities.add(e);
+		}
+
 		List<RentalConfigAttachment> goodItems = rentalv2Provider
 				.queryRentalConfigAttachmentByOwner(AttachmentType.ORDER_GOOD_ITEM.name(), order.getId());
 		if (null != goodItems && goodItems.size() != 0) {

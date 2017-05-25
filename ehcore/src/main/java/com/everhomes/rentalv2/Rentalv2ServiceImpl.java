@@ -488,8 +488,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	        addCmd.getOpenWeekday().add(3);
 	        addCmd.getOpenWeekday().add(4);
 	        addCmd.setCloseDates(null);
-	        addCmd.setWorkdayPrice(new BigDecimal(100));
-	        addCmd.setWeekendPrice(new BigDecimal(200));
+	        addCmd.setWorkdayPrice(new BigDecimal(0));
+	        addCmd.setWeekendPrice(new BigDecimal(0));
 	        addCmd.setSiteCounts(1.0);
 	        addCmd.setCancelTime(0L);
 	        addCmd.setRefundFlag(NormalFlag.NEED.getCode());
@@ -3133,7 +3133,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								.queryRentalConfigAttachmentByIds(attachment.getGoodItems());
 						List<RentalGoodItem> goodItems = tempAttachments.stream()
 								.map(r -> ConvertHelper.convert(r, RentalGoodItem.class)).collect(Collectors.toList());
-						addGoodItems(goodItems, AttachmentType.ORDER_RECOMMEND_USER.name(), cmd.getRentalBillId());
+						addGoodItems(goodItems, AttachmentType.ORDER_GOOD_ITEM.name(), cmd.getRentalBillId());
 					}
 				}
 			}
@@ -4519,12 +4519,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setAutoAssign(defaultRule.getAutoAssign());
 			resource.setMultiUnit(defaultRule.getMultiUnit());
 			resource.setNeedPay(defaultRule.getNeedPay());
-			if(defaultRule.getNeedPay().equals(NormalFlag.NONEED.getCode())){
-				defaultRule.setWeekendPrice(new BigDecimal(0));
-				defaultRule.setWorkdayPrice(new BigDecimal(0));
-			}
+//			if(defaultRule.getNeedPay().equals(NormalFlag.NONEED.getCode())){
+//				defaultRule.setWeekendPrice(new BigDecimal(0));
+//				defaultRule.setWorkdayPrice(new BigDecimal(0));
+//			}
 			resource.setMultiTimeInterval(defaultRule.getMultiTimeInterval());
 			resource.setRentalType(defaultRule.getRentalType());
+			resource.setRentalEndTimeFlag(defaultRule.getRentalEndTimeFlag());
+			resource.setRentalStartTimeFlag(defaultRule.getRentalStartTimeFlag());
 			resource.setRentalEndTime(defaultRule.getRentalEndTime());
 			resource.setRentalStartTime(defaultRule.getRentalStartTime());
 			resource.setTimeStep(defaultRule.getTimeStep());
@@ -4537,7 +4539,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			resource.setOpenWeekday(convertOpenWeekday(defaultRule.getOpenWeekday()));
 			resource.setWorkdayPrice(defaultRule.getWorkdayPrice());
-			resource.setWeekendPrice(defaultRule.getWeekendPrice()); 
+			resource.setWeekendPrice(defaultRule.getWeekendPrice());
+			resource.setApprovingUserWeekendPrice(defaultRule.getApprovingUserWeekendPrice());
+			resource.setApprovingUserWorkdayPrice(defaultRule.getApprovingUserWorkdayPrice());
+			resource.setOrgMemberWeekendPrice(defaultRule.getOrgMemberWeekendPrice());
+			resource.setOrgMemberWorkdayPrice(defaultRule.getOrgMemberWorkdayPrice());
 
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
