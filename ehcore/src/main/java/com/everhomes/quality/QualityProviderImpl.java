@@ -2005,7 +2005,7 @@ public class QualityProviderImpl implements QualityProvider {
 		if(createTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.lt(createTime));
 		}
-		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.desc());
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
 
 		List<QualityInspectionTaskRecords> result = new ArrayList<>();
 		query.fetch().map((r) -> {
