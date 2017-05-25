@@ -2763,6 +2763,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (equipment != null) {
 				dto.setEquipmentLocation(equipment.getLocation());
 				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+				dto.setEquipmentName(equipment.getName());
 			}
 
 			return dto;
