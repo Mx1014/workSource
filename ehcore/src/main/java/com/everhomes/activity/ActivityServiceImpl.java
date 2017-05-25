@@ -371,6 +371,12 @@ public class ActivityServiceImpl implements ActivityService {
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
     	
+    	LOGGER.debug("Before  enter.");
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+    		LOGGER.debug("Enter Success.");
+    		return null;
+    	});
+    	LOGGER.debug("Exit Enter.");
     	// 把锁放在查询语句的外面，update by tt, 20170210
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
