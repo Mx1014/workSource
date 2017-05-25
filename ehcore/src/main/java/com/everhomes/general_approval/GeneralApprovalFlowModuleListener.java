@@ -228,7 +228,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 							e = new FlowCaseEntity(); 
 							e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName()); 
 							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
-							e.setValue(formCount+"");
+							e.setValue(formCount++ +"");
 							entities.add(e);
 							List<GeneralApprovalVal> subVals = new ArrayList<>();
 							//循环取出一个子表单的每一个字段值
