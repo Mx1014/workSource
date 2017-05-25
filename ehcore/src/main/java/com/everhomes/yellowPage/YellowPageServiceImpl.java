@@ -1026,7 +1026,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			serviceAlliance.setCreateTime(sa.getCreateTime());
 			serviceAlliance.setCreatorUid(sa.getCreatorUid());
 			//by dengs,20170524 序号和是否在app端显示不能更新掉了。
-			serviceAlliance.setSortOrder(sa.getSortOrder());
+//			serviceAlliance.setSortOrder(sa.getSortOrder());
 			serviceAlliance.setShowFlag(sa.getShowFlag());
 			
 			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
