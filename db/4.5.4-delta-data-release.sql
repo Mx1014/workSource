@@ -211,4 +211,9 @@ INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`
 
 -- merge from activity-3.0.0 20170524 end
 
+-- merge from activity-3.0.0 20170525 start
+-- 1、将更新上面脚本的数据异常将entryid为1的设置path为“-1”  add by yanjun 20170525
+-- 2、更新老数据将一级入口的parentId设置成-1。  
+UPDATE eh_activity_categories SET path = '/1' WHERE entry_id = 1;
+UPDATE eh_activity_categories SET parent_id = -1 WHERE parent_id = 0;
 
