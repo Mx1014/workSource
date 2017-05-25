@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>organizationId：公司id</li>
@@ -14,5 +16,10 @@ public class CheckIsLeaseIssuerCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

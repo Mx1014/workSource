@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -29,5 +31,10 @@ public class UpdateLeasePromotionStatusCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

@@ -1,6 +1,8 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 
 /**
@@ -142,5 +144,9 @@ public class ListBuildingForRentCommand {
 	public void setRentType(String rentType) {
 		this.rentType = rentType;
 	}
-    
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

@@ -55,4 +55,10 @@ public interface EnterpriseApplyEntryProvider {
 	List<LeasePromotion> listLeasePromotionsByUidAndIssuerType(long id, String issuerType);
 
 	void deleteApplyEntrysByLeasePromotionIds(List<Long> idList);
+
+	void createLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
+	LeaseFormRequest findLeaseRequestFormById(Long id);
 }

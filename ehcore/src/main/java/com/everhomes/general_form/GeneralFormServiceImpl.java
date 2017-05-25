@@ -113,47 +113,49 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	public List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd) {
 		List<PostApprovalFormItem> result = new ArrayList<>();
 		List<GeneralFormVal> vals = generalFormValProvider.queryGeneralFormVals(cmd.getSourceType(), cmd.getSourceId());
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
-				vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
-		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
-				GeneralFormFieldDTO.class);
 
-		for (GeneralFormVal val : vals) {
-			try{
+		if (null != vals && vals.size() != 0) {
+			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
+					GeneralFormFieldDTO.class);
 
-				GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs);
-				if(null == dto ){
-					LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
-					continue;
-				}
+			for (GeneralFormVal val : vals) {
+				try{
 
-				PostApprovalFormItem formVal = new PostApprovalFormItem();
-				formVal.setFieldName(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
-				formVal.setFieldType(val.getFieldType());
-				switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-					case SINGLE_LINE_TEXT:
-						formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-						result.add(formVal);
-						break;
-					case MULTI_LINE_TEXT:
-						formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-						result.add(formVal);
-						break;
-					case IMAGE:
-						//工作流images怎么传
-						PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
-						for(String uriString : imageValue.getUris()){
-							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-							formVal.setFieldValue(url);
-							PostApprovalFormItem formVal2 = ConvertHelper.convert(formVal, PostApprovalFormItem.class);
-							result.add(formVal2);
-						}
-						break;
-					case FILE:
-						//TODO:工作流需要新增类型file
-						PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-						if (null == fileValue || fileValue.getFiles() ==null )
+					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs);
+					if(null == dto ){
+						LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
+						continue;
+					}
+
+					PostApprovalFormItem formVal = new PostApprovalFormItem();
+					formVal.setFieldName(dto.getFieldDisplayName() == null ? dto.getFieldName() : dto.getFieldDisplayName());
+					formVal.setFieldType(val.getFieldType());
+					switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+						case SINGLE_LINE_TEXT:
+							formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+							result.add(formVal);
 							break;
+						case MULTI_LINE_TEXT:
+							formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+							result.add(formVal);
+							break;
+						case IMAGE:
+							//工作流images怎么传
+							PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
+							for(String uriString : imageValue.getUris()){
+								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								formVal.setFieldValue(url);
+								PostApprovalFormItem formVal2 = ConvertHelper.convert(formVal, PostApprovalFormItem.class);
+								result.add(formVal2);
+							}
+							break;
+						case FILE:
+							//TODO:工作流需要新增类型file
+							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
+							if (null == fileValue || fileValue.getFiles() ==null )
+								break;
 //						List<FlowCaseFileDTO> files = new ArrayList<>();
 //						for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
 //							FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
@@ -168,22 +170,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 //						value.setFiles(files);
 //						e.setValue(JSON.toJSONString(value));
 //						entities.add(e);
-						break;
-					case INTEGER_TEXT:
-						formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
-						result.add(formVal);
-						break;
+							break;
+						case INTEGER_TEXT:
+							formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+							result.add(formVal);
+							break;
+
+					}
+
+				}catch(NullPointerException e){
+					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
+				}catch(Exception e){
+					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
 
 				}
-
-			}catch(NullPointerException e){
-				LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
-			}catch(Exception e){
-				LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
-
 			}
 		}
-		return null;
+
+		return result;
 	}
 
 	private GeneralFormFieldDTO getFieldDTO(String fieldName, List<GeneralFormFieldDTO> fieldDTOs) {

@@ -3,8 +3,10 @@ package com.everhomes.techpark.expansion;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.general_form.GeneralFormDTO;
+import com.everhomes.rest.general_form.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	@Autowired
 	private OrganizationService organizationService;
+
+	@Autowired
+	private GeneralFormService generalFormService;
 	
 	/**
 	 * <b>URL: /techpark/entry/listEnterpriseDetails
@@ -337,8 +342,25 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 */
 	@RequestMapping("getFormTemplateByFormId")
 	@RestReturn(value=GeneralFormDTO.class)
-	public RestResponse getFormTemplateByFormId(@Valid GetFormTemplateByFormIdCommand cmd) {
+	public RestResponse getFormTemplateByFormId(@Valid GetTemplateByFormIdCommand cmd) {
 
+		GeneralFormDTO dto = generalFormService.getTemplateByFormId(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/addLeasePromotionRequestForm</b>
+	 * <p> 添加租赁表单 </p>
+	 */
+	@RequestMapping("addLeasePromotionRequestForm")
+	@RestReturn(value=String.class)
+	public RestResponse addLeasePromotionRequestForm(@Valid AddLeasePromotionRequestFormCommand cmd) {
+
+		enterpriseApplyEntryService.addLeasePromotionRequestForm(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

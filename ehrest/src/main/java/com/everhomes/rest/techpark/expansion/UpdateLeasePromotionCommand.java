@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -212,5 +213,10 @@ public class UpdateLeasePromotionCommand {
 
 	public void setRentAreas(String rentAreas) {
 		this.rentAreas = rentAreas;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

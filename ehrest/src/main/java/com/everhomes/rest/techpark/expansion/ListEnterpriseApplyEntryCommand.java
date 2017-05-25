@@ -1,6 +1,8 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>pageAnchor：锚点</li>
@@ -100,5 +102,9 @@ public class ListEnterpriseApplyEntryCommand {
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
 	}
-    
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

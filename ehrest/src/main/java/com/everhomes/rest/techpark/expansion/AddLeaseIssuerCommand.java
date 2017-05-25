@@ -2,6 +2,7 @@ package com.everhomes.rest.techpark.expansion;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
@@ -63,5 +64,10 @@ public class AddLeaseIssuerCommand {
 
     public void setEnterpriseIds(List<Long> enterpriseIds) {
         this.enterpriseIds = enterpriseIds;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

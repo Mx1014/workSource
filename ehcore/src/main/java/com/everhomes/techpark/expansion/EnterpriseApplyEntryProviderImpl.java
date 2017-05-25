@@ -10,9 +10,11 @@ import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhLeaseFormRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhLeasePromotionAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhLeasePromotionsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
+import com.everhomes.server.schema.tables.pojos.EhLeaseFormRequests;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.records.*;
@@ -382,5 +384,37 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 
 		query.execute();
 	}
-	
+
+	@Override
+	public void createLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseFormRequests.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+		leaseFormRequest.setId(id);
+		leaseFormRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.insert(leaseFormRequest);
+
+	}
+
+	@Override
+	public void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.update(leaseFormRequest);
+
+	}
+
+	@Override
+	public LeaseFormRequest findLeaseRequestFormById(Long id) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dao = new EhLeaseFormRequestsDao(context.configuration());
+
+		return ConvertHelper.convert(dao.findById(id), LeaseFormRequest.class);
+
+	}
 }

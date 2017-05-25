@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -239,4 +240,8 @@ public class CreateLeasePromotionCommand {
 		this.attachments = attachments;
 	}
 
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

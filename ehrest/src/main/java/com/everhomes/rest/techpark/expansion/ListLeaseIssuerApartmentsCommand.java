@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>communityId: 园区ID</li>
@@ -47,5 +49,10 @@ public class ListLeaseIssuerApartmentsCommand {
 
     public void setBuildingId(Long buildingId) {
         this.buildingId = buildingId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

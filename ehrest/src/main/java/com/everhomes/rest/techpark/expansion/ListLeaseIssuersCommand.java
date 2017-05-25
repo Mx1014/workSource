@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>communityId：园区id</li>
@@ -44,5 +46,10 @@ public class ListLeaseIssuersCommand {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

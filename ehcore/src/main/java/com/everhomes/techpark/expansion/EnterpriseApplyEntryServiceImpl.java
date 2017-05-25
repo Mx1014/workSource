@@ -1262,4 +1262,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		return dtos;
 	}
+
+	@Override
+	public void addLeasePromotionRequestForm(AddLeasePromotionRequestFormCommand cmd) {
+
+		LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+
+		enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+	}
 }
