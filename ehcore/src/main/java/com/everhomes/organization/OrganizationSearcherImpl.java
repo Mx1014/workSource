@@ -195,22 +195,27 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
         		qb = QueryBuilders.matchAllQuery();
 			}else {
-				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
-	                    .field("addresses", 5.0f);
+				qb = QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses");
+//				qb = QueryBuilders.multiMatchQuery(cmd.getBuildingName())
+//	                    .field("addresses", 5.0f);
 			}
         } else {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
-        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                        .field("name", 5.0f)
-                        .field("name.pinyin_prefix", 2.0f)
-                        .field("name.pinyin_gram", 1.0f)
-                        .field("addresses", 5.0f);
+//        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+//                        .field("name", 5.0f)
+//                        .field("name.pinyin_prefix", 2.0f)
+//                        .field("name.pinyin_gram", 1.0f)
+//                        .field("addresses", 5.0f);
+        		qb = QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name");
 			}else {
-				qb = QueryBuilders.multiMatchQuery(cmd.getKeyword() + " " + cmd.getBuildingName())
-                        .field("name", 5.0f)
-                        .field("name.pinyin_prefix", 2.0f)
-                        .field("name.pinyin_gram", 1.0f)
-                        .field("addresses", 5.0f);
+//				qb = QueryBuilders.multiMatchQuery(cmd.getKeyword() + " " + cmd.getBuildingName())
+//                        .field("name", 5.0f)
+//                        .field("name.pinyin_prefix", 2.0f)
+//                        .field("name.pinyin_gram", 1.0f)
+//                        .field("addresses", 5.0f);
+				qb = QueryBuilders.boolQuery()
+						.must(QueryBuilders.queryString("*"+cmd.getBuildingName()+"*").field("addresses"))
+						.must(QueryBuilders.queryString("*"+cmd.getKeyword()+"*").field("addresses").field("name"));
 			}
         	
         }
@@ -229,26 +234,32 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
       //namespaceId by xiongying 20160613
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<FilterBuilder> fbList = new ArrayList<>();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        fbList.add(fb);
         
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
         if(cmd.getCommunityId() != null) {
             FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+//            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+            fbList.add(cmntyFilter);
         }
         
         // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
         //empty判断 by xiongying 20160613
         if(!StringUtils.isEmpty(cmd.getOrganizationType())) {
         	//转小写查 by xiongying 20160524
-            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+            FilterBuilder orgTypeFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
+//            fb = FilterBuilders.andFilter(fb, orgTypeFilter);
+            fbList.add(orgTypeFilter);
         }
         
         if (cmd.getSetAdminFlag() != null) {
-        	FilterBuilder cmntyFilter = FilterBuilders.termFilter("setAdminFlag", cmd.getSetAdminFlag());
-            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        	FilterBuilder adminFlagFilter = FilterBuilders.termFilter("setAdminFlag", cmd.getSetAdminFlag());
+//            fb = FilterBuilders.andFilter(fb, adminFlagFilter);
+        	fbList.add(adminFlagFilter);
 		}
+        fb = FilterBuilders.andFilter(fbList.toArray(new FilterBuilder[fbList.size()]));
         
         qb = QueryBuilders.filteredQuery(qb, fb);
        
@@ -263,6 +274,10 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         }
         
         SearchResponse rsp = builder.execute().actionGet();
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("result from elasticsearch {}", rsp);
+        }
         
         List<Long> ids = getIds(rsp);
         GroupQueryResult result = new GroupQueryResult();
