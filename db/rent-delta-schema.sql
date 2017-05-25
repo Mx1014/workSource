@@ -10,6 +10,20 @@ ALTER TABLE `eh_lease_promotions` ADD COLUMN `latitude` DOUBLE DEFAULT NULL;
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `general_form_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_general_form';
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `custom_form_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not add custom field, 1: add custom field';
 
+CREATE TABLE `eh_lease_form_requests` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`namespace_id` INT NOT NULL DEFAULT '0',
+	`owner_id` BIGINT NOT NULL,
+	`owner_type` VARCHAR (64) NOT NULL,
+
+    `source_id` BIGINT NOT NULL,
+	`source_type` VARCHAR (64) NOT NULL,
+
+	`create_time` datetime DEFAULT NULL COMMENT 'record create time',
+
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
 CREATE TABLE `eh_lease_configs2` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
