@@ -140,8 +140,8 @@ public enum Router {
             "zl://activity/list-by-tags", ActivityActionData.class),
     ACTIVITY_DETAIL(ActionType.ACTIVITY_DETAIL,
             "zl://activity/d", ActivityDetailActionData.class),
-    ACTIVITY_ENROLL_DETAIL(ActionType.ACTIVITY_ENROLL_DETAIL,
-            "zl://activity/enroll-detail", ActivityEnrollDetailActionData.class),
+    ACTIVITY_ENROLL_DETAIL(
+    		"zl://activity/enroll-detail", ActivityEnrollDetailActionData.class),
     
     /**
      * message
