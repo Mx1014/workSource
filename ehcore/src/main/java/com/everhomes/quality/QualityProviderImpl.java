@@ -1997,6 +1997,26 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
+	public List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.OPERATOR_ID.eq(operatorId));
+
+		if(createTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.lt(createTime));
+		}
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
+
+		List<QualityInspectionTaskRecords> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
 	public List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);

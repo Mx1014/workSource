@@ -2861,7 +2861,6 @@ public class QualityServiceImpl implements QualityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
 		List<Long> taskIdlist = new ArrayList<Long>();
-
         for(final Long value : taskIds){
 
         	taskIdlist.add(value);
@@ -2877,7 +2876,16 @@ public class QualityServiceImpl implements QualityService {
 		}
 
         Collections.reverse(taskIdlist);
-        
+//		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
+//		if(taskRecords != null ) {
+//			for(QualityInspectionTaskRecords record : taskRecords) {
+//				if(!taskIdlist.contains(record.getTaskId())) {
+//					taskIdlist.add(record.getTaskId());
+//				}
+//			}
+//		}
+
+
         if(taskIdlist.size() > pageSize) {
 			taskIdlist = taskIdlist.subList(0,pageSize);
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
