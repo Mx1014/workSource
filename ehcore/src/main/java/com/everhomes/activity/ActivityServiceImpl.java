@@ -375,6 +375,7 @@ public class ActivityServiceImpl implements ActivityService {
     	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
+	        	long signupStatStartTime = System.currentTimeMillis();
 		        User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
 		        if (activity == null) {
@@ -422,6 +423,7 @@ public class ActivityServiceImpl implements ActivityService {
 							"beyond activity signup end time!");
 				}
 		        
+		        long rosterStatStartTime = System.currentTimeMillis();
 		        ActivityRoster roster = createRoster(cmd, user, activity);
 	        	//去掉报名评论 by xiongying 20160615
 	//            Post comment = new Post();
@@ -523,6 +525,9 @@ public class ActivityServiceImpl implements ActivityService {
 		        	
 		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
 	            }
+	            long signupStatEndTime = System.currentTimeMillis();
+	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
+	            		(signupStatEndTime - rosterStatStartTime), cmd);
 	            return dto;
 	        });
         }).first();
@@ -578,8 +583,10 @@ public class ActivityServiceImpl implements ActivityService {
      * @param activityId
      */
     private void cancelExpireRosters(Long activityId){
+    	long startTime = System.currentTimeMillis();
     	Activity activity = activityProvider.findActivityById(activityId);
     	if(activity == null || activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() != ActivityChargeFlag.CHARGE.getCode()){
+    		LOGGER.warn("No need to cancel expire rosters, activityId={}, activity={}", activityId, activity);
     		return;
     	}
     	
@@ -594,6 +601,8 @@ public class ActivityServiceImpl implements ActivityService {
     		}
     		
     	}
+    	long endTime = System.currentTimeMillis();
+    	LOGGER.debug("Cancel expire rosters, activityId={}, elapse={}", activityId, (endTime - startTime));
     }
 
 	@Override
@@ -1212,7 +1221,7 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
-	        	
+	        	long cancelStartTime = System.currentTimeMillis();
 	        	//cmd中用户Id，该字段当前仅用于定时取消订单时无法从UserContext.current中获取用户
 	        	User user = null;
 	        	if(cmd.getUserId() != null){
@@ -1282,7 +1291,8 @@ public class ActivityServiceImpl implements ActivityService {
 	             map.put("userName", user.getNickName());
 	             map.put("postName", activity.getSubject());
 	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
-	             
+	             long cancelEndTime = System.currentTimeMillis();
+	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
 	             return dto;
 	        	
 	        });
@@ -1290,6 +1300,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
 	public void signupOrderRefund(Activity activity, Long userId){
+		long startTime = System.currentTimeMillis();
 		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
 		
 		//只有需要支付并已经支付的才需要退款
@@ -1327,13 +1338,18 @@ public class ActivityServiceImpl implements ActivityService {
 			roster.setRefundAmount(roster.getPayAmount());
 			roster.setRefundTime(new Timestamp(timestamp));
 			activityProvider.updateRoster(roster);
+			LOGGER.debug("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 		}
 		else{
-			LOGGER.error("bill id=["+roster.getOrderNo()+"] refound error param is "+refundCmd.toString());
+			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
 							"bill  refound error"); 
-		}	
+		}
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
 	}
 	
 	/***给支付相关的参数签名*/

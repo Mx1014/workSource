@@ -135,6 +135,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     		@CacheEvict(value="findRosterById", allEntries=true)})
     @Override
     public ActivityRoster cancelSignup(Activity activity, Long uid, Long familyId) {
+    	long startTime = System.currentTimeMillis();
         ActivityRoster[] rosters = new ActivityRoster[1];
         DSLContext cxt = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivities.class,activity.getId()));
         cxt.select().from(Tables.EH_ACTIVITY_ROSTER)
@@ -153,7 +154,8 @@ public class ActivityProviderImpl implements ActivityProivider {
                 rosters[0].getActivityId()));
         if (CheckInStatus.UN_CHECKIN.getCode().equals(rosters[0].getCheckinFlag())||rosters[0].getCheckinFlag()==null) {
             LOGGER.warn("the user does not signin,can cancel the operation");
-            this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+            // TODO: 临时修改，后面重新整理 by yanjun 20170525
+            //this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	            EhActivityRosterDao dao=new EhActivityRosterDao(context.configuration());
 	            //为了保留支付信息，取消报名后保留信息，只是把状态置为已取消。 edit by yanjun 20170504  activity-3.0.0  start 
 	            rosters[0].setStatus(ActivityRosterStatus.CANCEL.getCode());
@@ -177,13 +179,16 @@ public class ActivityProviderImpl implements ActivityProivider {
 	            // update dao and push event
 	            DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
 	            
-	            return null;
-            });
+	        //    return null;
+            //});
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("provider cancelSignup elapse={}", (endTime - startTime));
             return rosters[0];
+        } else {
+	        LOGGER.error("the user was checkin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);
+	        throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
         }
-        LOGGER.error("the user was checkin,cannot cancel operation.activityId={},uid={}", activity.getId(), uid);
-        throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                ActivityServiceErrorCode.ERROR_INVILID_OPERATION, "invalid operation.the user is checkin,cannot cancel");
     }
 
     @Caching(evict={@CacheEvict(value="findActivityById",key="#activity.id")})
