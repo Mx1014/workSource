@@ -1502,11 +1502,15 @@ public class YellowPageServiceImpl implements YellowPageService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"can't change the order, values = {}",values);
 		}
-		//检查数据
-		List<ServiceAlliances>  updateList = checkServiceAllianceEnterpriseOrder(values);
+		//检查数据,并且查询原来的defaultorder，并且按照defaultorder升序生成serviceAlliancesList by dengs,20170525
+		List<ServiceAlliances>  serviceAlliancesList = checkServiceAllianceEnterpriseOrder(values);
+		List<ServiceAlliances>  updateList = new ArrayList<ServiceAlliances>();
 		
-		for (int i = 0; i < values.size(); i++) {
-			updateList.get(i).setId(values.get(i).getId());
+		for (int i = 0; i < serviceAlliancesList.size(); i++) {
+			ServiceAlliances serviceAlliances = new ServiceAlliances();
+			serviceAlliances.setId(values.get(i).getId());//原始id
+			serviceAlliances.setDefaultOrder(serviceAlliancesList.get(i).getDefaultOrder());//排序后的顺序
+			updateList.add(serviceAlliances);
 		}
 	
 		yellowPageProvider.updateOrderServiceAllianceDefaultOrder(updateList);
