@@ -118,13 +118,14 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		});
 	}
 
+
 	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(String ownerType, Long ownerId, Long moduleId){
 		return listAuthorizationRelations(null, null, ownerType, ownerId, moduleId);
 	}
 
 
-		@Override
+	@Override
 	public List<Authorization> listAuthorizations(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType, Boolean targetFlag){
 		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
 			@Override
@@ -155,6 +156,17 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_TYPE);
 					query.addGroupBy(Tables.EH_AUTHORIZATIONS.TARGET_ID);
 				}
+				return query;
+			}
+		});
+	}
+
+	@Override
+	public List<Authorization> listAuthorizationsByScope(String scope){
+		return listAuthorizations(null, null, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_AUTHORIZATIONS.SCOPE.eq(scope));
 				return query;
 			}
 		});

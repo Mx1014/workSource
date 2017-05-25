@@ -360,7 +360,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationRelations")
     @RestReturn(value=ListAuthorizationRelationsResponse.class)
     public RestResponse listAuthorizationRelations(@Valid ListAuthorizationRelationsCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationRelations(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -373,6 +373,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("createAuthorizationRelation")
     @RestReturn(value=String.class)
     public RestResponse createAuthorizationRelation(@Valid CreateAuthorizationRelationCommand cmd) {
+        rolePrivilegeService.createAuthorizationRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -386,6 +387,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("updateAuthorizationRelation")
     @RestReturn(value=String.class)
     public RestResponse updateAuthorizationRelation(@Valid UpdateAuthorizationRelationCommand cmd) {
+        rolePrivilegeService.updateAuthorizationRelation(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -399,6 +401,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteAuthorizationRelation")
     @RestReturn(value=String.class)
     public RestResponse deleteAuthorizationRelation(@Valid DeleteAuthorizationRelationCommand cmd) {
+        rolePrivilegeService.deleteAuthorizationRelation(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -523,6 +526,32 @@ public class AclController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteServiceModuleAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
         rolePrivilegeService.deleteServiceModuleAdministrators(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listServiceModulesByTarget</b>
+     * <p>查询管理员对象授权业务模块</p>
+     */
+    @RequestMapping("listServiceModulesByTarget")
+    @RestReturn(value=ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulesByTarget(@Valid ListServiceModulesByTargetCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModulesByTarget(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /acl/listServiceModulesByTarget</b>
+     * <p>查询对象模块权限</p>
+     */
+    @RequestMapping("listServiceModulesByTarget")
+    @RestReturn(value=ServiceModuleDTO.class, collection = true)
+    public RestResponse listServiceModulePrivilegesByTarget(@Valid ListServiceModulePrivilegesByTargetCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -1159,4 +1159,14 @@ public class UserController extends ControllerBase {
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
 	}
+
+	/**
+	 * <b>URL: /user/searchUsers</b>
+	 * <p>搜索用户</p>
+	 */
+	@RequestMapping(value = "searchUsers")
+	@RestReturn(value = SearchUsersResponse.class)
+	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
+		return new RestResponse("OK");
+	}
 }

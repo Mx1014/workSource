@@ -2551,29 +2551,31 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			String privilegeJson = r.getPrivilegeJson();
 			AuthorizationRelationDTO authorizationRelation = ConvertHelper.convert(r, AuthorizationRelationDTO.class);
 
-			Project[] projectArr = (Project[])StringHelper.fromJsonString(projectJson, Project[].class);
-			List<Project> projects = Arrays.asList(projectArr);
-			authorizationRelation.setProjects(projects.stream().map((p) ->{
-				if(EntityType.COMMUNITY == EntityType.fromCode(p.getProjectType())){
-					Community community = communityProvider.findCommunityById(p.getProjectId());
-					if(null == community){
-						p.setProjectName(community.getName());
-					}else{
-						LOGGER.error("Unable to find the community. communityId = {}", p.getProjectId());
-					}
+			if(AllFlagType.NO == AllFlagType.fromCode(r.getAllProjectFlag())){
+				Project[] projectArr = (Project[])StringHelper.fromJsonString(projectJson, Project[].class);
+				List<Project> projects = Arrays.asList(projectArr);
+				authorizationRelation.setProjects(projects.stream().map((p) ->{
+					if(EntityType.COMMUNITY == EntityType.fromCode(p.getProjectType())){
+						Community community = communityProvider.findCommunityById(p.getProjectId());
+						if(null == community){
+							p.setProjectName(community.getName());
+						}else{
+							LOGGER.error("Unable to find the community. communityId = {}", p.getProjectId());
+						}
 
-				}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(p.getProjectType())){
-					ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(p.getProjectId());
-					if(null == resourceCategory){
-						p.setProjectName(resourceCategory.getName());
+					}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(p.getProjectType())){
+						ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(p.getProjectId());
+						if(null == resourceCategory){
+							p.setProjectName(resourceCategory.getName());
+						}else{
+							LOGGER.error("Unable to find the resourceCategory. resourceCategoryId = {}", p.getProjectId());
+						}
 					}else{
-						LOGGER.error("Unable to find the resourceCategory. resourceCategoryId = {}", p.getProjectId());
+						LOGGER.error("Unable to find the projectType. targetType = {}", p.getProjectType());
 					}
-				}else{
-					LOGGER.error("Unable to find the projectType. targetType = {}", p.getProjectType());
-				}
-				return p;
-			}).collect(Collectors.toList()));
+					return p;
+				}).collect(Collectors.toList()));
+			}
 
 			AssignmentTarget[] targetArr = (AssignmentTarget[])StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
 			List<AssignmentTarget> targets = Arrays.asList(targetArr);
@@ -2661,20 +2663,64 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			authorizationRelation.setCreatorUid(user.getId());
 			authorizationRelation.setOperatorUid(user.getId());
 			authorizationRelation.setNamespaceId(namespaceId);
-			authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
+				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+			}
 			authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
 				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
 			}
+
+			//创建授权关系记录
 			authorizationProvider.createAuthorizationRelation(authorizationRelation);
 
-			//给对象授权
+			List<Authorization> authorizations = new ArrayList<>();
+
 			for (AssignmentTarget target: cmd.getTargets()) {
 				checkTarget(target.getTargetType(), target.getTargetId());
-				for (Project project: cmd.getProjects()) {
-					assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), false);
+
+				if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
+					for (Project project: cmd.getProjects()) {
+						//给对象授权
+						assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), false);
+
+						Authorization authorization = new Authorization();
+						authorization.setOwnerType(project.getProjectType());
+						authorization.setOwnerId(project.getProjectId());
+						authorization.setTargetType(target.getTargetType());
+						authorization.setTargetId(target.getTargetId());
+						authorization.setAllFlag(authorizationRelation.getAllFlag());
+						authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+						authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+						authorization.setNamespaceId(namespaceId);
+						authorization.setCreatorUid(user.getId());
+						authorization.setOperatorUid(user.getId());
+						authorization.setAuthId(cmd.getModuleId());
+						authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+						authorizations.add(authorization);
+					}
+				}else{
+					Authorization authorization = new Authorization();
+					authorization.setOwnerType(EntityType.All.getCode());
+					authorization.setOwnerId(0L);
+					authorization.setTargetType(target.getTargetType());
+					authorization.setTargetId(target.getTargetId());
+					authorization.setAllFlag(authorizationRelation.getAllFlag());
+					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+					authorization.setAuthId(cmd.getModuleId());
+					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+					authorization.setNamespaceId(namespaceId);
+					authorization.setCreatorUid(user.getId());
+					authorization.setOperatorUid(user.getId());
+					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+					authorizations.add(authorization);
 				}
+
 			}
+
+			//创建授权模块数据
+			authorizationProvider.createAuthorizations(authorizations);
+
 			return null;
 		});
 
@@ -2718,23 +2764,73 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 
 		AuthorizationRelation authorizationRelation = checkAuthorizationRelation(cmd.getId());
-
+		List<Authorization> authorizations = new ArrayList<>();
 		dbProvider.execute((TransactionStatus status) -> {
 			authorizationRelation.setOperatorUid(user.getId());
-			authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
+				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
+			}
 			authorizationRelation.setTargetJson(StringHelper.toJsonString(cmd.getTargets()));
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
 				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
 			}
 			authorizationProvider.updateAuthorizationRelation(authorizationRelation);
+
+			//根据关系删除授权的记录
+			deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+
 			for (AssignmentTarget target: cmd.getTargets()) {
 				checkTarget(target.getTargetType(), target.getTargetId());
-				for (Project project: cmd.getProjects()) {
-					assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), true);
+				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
+					for (Project project : cmd.getProjects()) {
+						//授权
+						assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), true);
+
+						Authorization authorization = new Authorization();
+						authorization.setOwnerType(project.getProjectType());
+						authorization.setOwnerId(project.getProjectId());
+						authorization.setTargetType(target.getTargetType());
+						authorization.setTargetId(target.getTargetId());
+						authorization.setAllFlag(authorizationRelation.getAllFlag());
+						authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+						authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+						authorization.setNamespaceId(authorizationRelation.getNamespaceId());
+						authorization.setCreatorUid(user.getId());
+						authorization.setOperatorUid(user.getId());
+						authorization.setAuthId(authorizationRelation.getModuleId());
+						authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+						authorizations.add(authorization);
+
+					}
+				} else {
+					Authorization authorization = new Authorization();
+					authorization.setOwnerType(EntityType.All.getCode());
+					authorization.setOwnerId(0L);
+					authorization.setTargetType(target.getTargetType());
+					authorization.setTargetId(target.getTargetId());
+					authorization.setAllFlag(authorizationRelation.getAllFlag());
+					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+					authorization.setAuthId(authorizationRelation.getModuleId());
+					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+					authorization.setNamespaceId(authorizationRelation.getNamespaceId());
+					authorization.setCreatorUid(user.getId());
+					authorization.setOperatorUid(user.getId());
+					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+					authorizations.add(authorization);
 				}
 			}
+
+			//创建授权模块数据
+			authorizationProvider.createAuthorizations(authorizations);
 			return null;
 		});
+	}
+
+	private void deleteAuthorizations(String scope){
+		List<Authorization> authorizations = authorizationProvider.listAuthorizationsByScope(scope);
+		for (Authorization authorization: authorizations) {
+			authorizationProvider.deleteAuthorizationById(authorization.getId());
+		}
 	}
 
 	@Override
@@ -2781,10 +2877,41 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					}
 				}
 			}
+
+			//根据关系删除授权的记录
+			deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
 			return null;
 		});
 
 	}
+
+	@Override
+	public List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd){
+		List<ServiceModule> serviceModules = getServiceModuleManageByTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId(), EntityType.SERVICE_MODULE.getCode(), null);
+
+		List<Long> parentIds = new ArrayList<>();
+		for (ServiceModule serviceModule: serviceModules) {
+			if(!parentIds.contains(serviceModule.getParentId())){
+				parentIds.add(serviceModule.getParentId());
+			}
+		}
+
+		List<ServiceModule> parentModules = serviceModuleProvider.listServiceModule(parentIds);
+		List<ServiceModuleDTO> dtos = new ArrayList<>();
+		for (ServiceModule parentModule: parentModules) {
+			ServiceModuleDTO dto = ConvertHelper.convert(parentModule, ServiceModuleDTO.class);
+			dto.setServiceModules(new ArrayList<>());
+			for (ServiceModule serviceModule: serviceModules) {
+				if(parentModule.getId().equals(serviceModule.getParentId())){
+					dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+				}
+			}
+			dtos.add(dto);
+		}
+
+		return dtos;
+	}
+
 
 	private void assignmentAcls(String ownerType, Long ownerId, String targetType, Long targetId, Byte allFlag, Long moduleId, List<Long> privilegeIds ,boolean isDelete){
 		if(isDelete){

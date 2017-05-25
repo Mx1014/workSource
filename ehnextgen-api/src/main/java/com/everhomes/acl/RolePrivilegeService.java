@@ -402,4 +402,6 @@ public interface RolePrivilegeService {
 
 	void deleteAuthorizationRelation(DeleteAuthorizationRelationCommand cmd);
 
+	List<ServiceModuleDTO> listServiceModulesByTarget(ListServiceModulesByTargetCommand cmd);
+
 }

@@ -343,6 +343,21 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
     }
 
     @Override
+    public List<ServiceModule> listServiceModule(List<Long> ids) {
+        List<ServiceModule> results = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+        SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+        Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+        cond = cond.and(Tables.EH_SERVICE_MODULES.ID.in(ids));
+        query.addConditions(cond);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, ServiceModule.class));
+            return null;
+        });
+        return results;
+    }
+
+    @Override
     public List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy) {
         List<ServiceModuleScope> results = new ArrayList<>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleScopes.class));

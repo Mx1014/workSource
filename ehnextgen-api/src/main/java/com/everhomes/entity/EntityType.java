@@ -55,7 +55,9 @@ public enum EntityType {
     PM_TASK(EhPmTasks.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles"),
     SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
-    ZUOLIN_ADMIN("EhZuolinAdmins");
+    AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
+    ZUOLIN_ADMIN("EhZuolinAdmins"),
+    All("EhAll");
 
     private String code;
     

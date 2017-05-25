@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>allFlag：是否业务模块的全部权限 1：是 0：否 ,{@link com.everhomes.rest.common.AllFlagType}</li>
+ * <li>allProjectFlag：是否全部项目 1：是 0：否 ,{@link com.everhomes.rest.common.AllFlagType}</li>
  * <li>targets: 分配的对象集，参考{@link AssignmentTarget}</li>
  * <li>privileges: 业务模块信息，{@link PrivilegeDTO}</li>
  * <li>projects: 分配的项目范围集合，参考{@link Project}</li>
@@ -19,6 +20,8 @@ import java.util.List;
 public class AuthorizationRelationDTO {
 
 	private Byte allFlag;
+
+	private Byte allProjectFlag;
 
 	@ItemType(AssignmentTarget.class)
 	private List<AssignmentTarget> targets;
@@ -62,6 +65,14 @@ public class AuthorizationRelationDTO {
 
 	public void setProjects(List<Project> projects) {
 		this.projects = projects;
+	}
+
+	public Byte getAllProjectFlag() {
+		return allProjectFlag;
+	}
+
+	public void setAllProjectFlag(Byte allProjectFlag) {
+		this.allProjectFlag = allProjectFlag;
 	}
 
 	@Override
