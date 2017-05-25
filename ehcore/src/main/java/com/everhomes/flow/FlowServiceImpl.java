@@ -204,8 +204,8 @@ public class FlowServiceImpl implements FlowService {
         obj.setStatus(FlowStatusType.CONFIG.getCode());
         obj.setOrganizationId(cmd.getOrgId());
         obj.setNamespaceId(cmd.getNamespaceId());
-        obj.setProjectId(cmd.getProjectId());
-        obj.setProjectType(cmd.getProjectType());
+        obj.setProjectType(cmd.getProjectType() != null ? cmd.getProjectType() : EntityType.COMMUNITY.getCode());
+        obj.setProjectId(cmd.getProjectId() != null ? cmd.getProjectId() : 0L);
         obj.setStringTag1(cmd.getStringTag1());
         flowListenerManager.onFlowCreating(obj);
 
@@ -872,7 +872,8 @@ public class FlowServiceImpl implements FlowService {
         flowNode.setNodeName(cmd.getFlowNodeName());
         flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
         flowNode.setAutoStepType(cmd.getAutoStepType());
-        flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        // flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+        flowNode.setAllowApplierUpdate(TrueOrFalseFlag.FALSE.getCode());
         flowNode.setAllowTimeoutAction(cmd.getAllowTimeoutAction());
         flowNode.setParams(cmd.getParams());
         flowNodeProvider.updateFlowNode(flowNode);
@@ -917,15 +918,15 @@ public class FlowServiceImpl implements FlowService {
     public ListFlowUserSelectionResponse listFlowUserSelection(
             ListFlowUserSelectionCommand cmd) {
         ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-        List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+        List<FlowUserSelectionDTO> selections = new ArrayList<>();
         resp.setSelections(selections);
-        List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
+        List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(
+                cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
         if (seles != null && seles.size() > 0) {
-            seles.stream().forEach((sel) -> {
+            seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
             });
         }
-
         return resp;
     }
 
@@ -1696,7 +1697,7 @@ public class FlowServiceImpl implements FlowService {
 
         for (Long userId : users) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("flowtimeout tick message, text={}, userId={}", dataStr, userId);
+                LOGGER.debug("flowtimeout tick message, text={}, userId={}, ftId={}", dataStr, userId, ft.getId());
             }
 
             MessageDTO messageDto = new MessageDTO();
@@ -1736,12 +1737,17 @@ public class FlowServiceImpl implements FlowService {
 
         if (dto.getRemindTick() != null && dto.getRemindTick() > 0 && dto.getRemindCount() != null && dto.getRemindCount() > 0) {
             dto.setRemindCount(dto.getRemindCount() - 1);
-			// dto.setTimeoutAtTick(dto.getRemindTick());
+            // dto.setTimeoutAtTick(dto.getRemindTick());
             ft.setId(null);
+            ft.setStatus(FlowStatusType.VALID.getCode());
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
             flowTimeoutService.pushTimeout(ft);
+        } else {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
+            }
         }
         ctx.popProcessType();
     }
@@ -1844,7 +1850,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
-        flowCase.setCurrentNodeId(0l);
+        flowCase.setCurrentNodeId(0L);
         if (flowCase.getApplyUserId() == null) {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
@@ -2113,6 +2119,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
         if (evas != null && evas.size() > 0) {
             dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
+            // dto.setNeedEvaluate((byte) 2);
         } else {
             if (1 == type && !snapshotFlow.getNeedEvaluate().equals((byte) 0)
                     && flowNode.getNodeLevel() >= snapshotFlow.getEvaluateStart()
@@ -3460,9 +3467,16 @@ public class FlowServiceImpl implements FlowService {
                     "flowId not exists");
         }
 
-        if (cmd.getItems() != null && cmd.getItems().size() > 5) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
-                    "items size error!");
+        TrueOrFalseFlag needEvaluate = TrueOrFalseFlag.fromCode(cmd.getNeedEvaluate());
+        // 开启评论的时候，评论项至少1个，至多5个
+        if (needEvaluate == TrueOrFalseFlag.TRUE) {
+            if (cmd.getItems() == null || cmd.getItems().size() < 1 || cmd.getItems().size() > 5) {
+                LOGGER.error("items size error");
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_EVALUATE_ITEM_SIZE_ERROR,
+                        "items size error!");
+            }
+        } else {
+            cmd.setItems(null);
         }
 
         // FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
@@ -3583,6 +3597,7 @@ public class FlowServiceImpl implements FlowService {
             FlowEvaluateResultDTO rltDTO = new FlowEvaluateResultDTO();
             rltDTO.setEvaluateItemId(item.getId());
             rltDTO.setName(item.getName());
+            rltDTO.setInputFlag(item.getInputFlag());
 
             if (evaMap.containsKey(item.getId())) {
                 FlowEvaluate eva = evaMap.get(item.getId());

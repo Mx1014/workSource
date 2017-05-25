@@ -9,7 +9,6 @@ import com.everhomes.util.RuntimeErrorException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
@@ -209,15 +208,18 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
                         "flow node step param error");
 			}
-			
-			tracker = new FlowEventLog();
-			if (subject.getContent() != null && subject.getContent().trim().length() > 0) {
-                if (!Objects.equals(firedUser.getId(), flowCase.getApplyUserId())) {
-                    flowService.fixupUserInfoInContext(ctx, firedUser);
-                    templateMap.put("processorName", firedUser.getNickName());
-                }
+
+            tracker = new FlowEventLog();
+
+            if (FlowUserType.fromCode(btn.getFlowButton().getFlowUserType()) != FlowUserType.APPLIER) {
+                flowService.fixupUserInfoInContext(ctx, firedUser);
+                templateMap.put("processorName", firedUser.getNickName());
+            }
+            if (subject.getContent() != null && subject.getContent().trim().length() > 0) {
                 templateMap.put("content", subject.getContent().trim());
-			} else if (cmd.getImages() != null && cmd.getImages().size() > 0) {
+                tracker.setSubjectId(subject.getId());
+            } else if (cmd.getImages() != null && cmd.getImages().size() > 0) {
+                tracker.setSubjectId(subject.getId());
                 templateMap.put("imageCount", String.valueOf(cmd.getImages().size()));
             }
 
@@ -301,7 +303,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			tracker.setFlowUserName(ctx.getOperator().getNickName());
 			if(subject.getContent() != null && !subject.getContent().isEmpty()) {
 				tracker.setSubjectId(subject.getId());	
-			} else {
+			} else if (tracker.getSubjectId() == null) {
 				tracker.setSubjectId(0L);// BUG #5431
 			}
 			
