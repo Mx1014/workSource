@@ -242,7 +242,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
         
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
             }
         
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
@@ -260,6 +260,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         } else {
     		query.addConditions(Tables.EH_SERVICE_ALLIANCES.PARENT_ID.ne(0L));
 		}
+        //by dengs,按照defaultorder排序，20170525
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
         query.addLimit(pageSize);
 
         LOGGER.info(query.toString());
@@ -1087,16 +1089,18 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 
 	/**
-	 * by dengs, 20170525，目前查询出ID和DEFAULT_ORDER
+	 * by dengs, 20170525，查询在idList中的服务联盟
 	 */
 	@Override
 	public List<ServiceAlliances> listServiceAllianceSortOrders(List<Long> idList) {
+		Long timestart = System.currentTimeMillis();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceAlliancesRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCES);
-		query.addSelect(Tables.EH_SERVICE_ALLIANCES.ID,Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER);
 		query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.in(idList));
 		LOGGER.debug("Query organization, sql={}, values ={}",query.getSQL(),query.getBindValues());
 		List<ServiceAlliances>  serviceAllianceList = query.fetch().map(r->ConvertHelper.convert(r, ServiceAlliances.class));
+		Long timeend = System.currentTimeMillis();
+		LOGGER.debug("listServiceAllianceSortOrders , time = {}ms", timeend-timestart);
 		return serviceAllianceList;
 	}
 
@@ -1111,13 +1115,16 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		for (ServiceAlliances serviceAlliances : ServiceAllianceList) {
 			Query query = context.update(Tables.EH_SERVICE_ALLIANCES)
 					.set(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER, serviceAlliances.getDefaultOrder())
-					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(serviceAlliances.getDefaultOrder()));
+					.where(Tables.EH_SERVICE_ALLIANCES.ID.eq(serviceAlliances.getId()));
 			queryList.add(query);
 			LOGGER.debug("update serviceAlliance default order, sql = {}, values = {}",query.getSQL(),query.getBindValues());
 		}
+		Long timestart = System.currentTimeMillis();
 		dbProvider.execute(status->{
 			return context.batch(queryList).execute();
 		});
+		Long timeend = System.currentTimeMillis();
+		LOGGER.debug("updateOrderServiceAllianceDefaultOrder , time = {}ms", timeend-timestart);
 	}
 
 

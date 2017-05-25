@@ -773,7 +773,13 @@ public class YellowPageServiceImpl implements YellowPageService {
       
         if(sas.size() > pageSize) {
         	sas.remove(sas.size() - 1);
-        	response.setNextPageAnchor(sas.get(sas.size() - 1).getId());
+        	 if(ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null){
+        		//modfiy by dengs,通过DEFAULT_ORDER排序了，锚点依据也变成DEFAULT_ORDER
+ 	        	response.setNextPageAnchor(sas.get(sas.size() - 1).getId());
+        	 }else{
+	        	//modfiy by dengs,通过DEFAULT_ORDER排序了，锚点依据也变成DEFAULT_ORDER
+	        	response.setNextPageAnchor(sas.get(sas.size() - 1).getDefaultOrder());
+        	 }
         }
         
         for (ServiceAlliances sa : sas){
@@ -1482,7 +1488,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			if(serviceAlliance == null)
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						" Unknown id = {}",cmd.getId());
-			cmd.setDisplayFlag(serviceAlliance.getDisplayFlag());
+			cmd.setDisplayFlag(flagType.getCode());
 		}
 		yellowPageProvider.updateServiceAlliancesDisplayFlag(cmd.getId(),cmd.getDisplayFlag());
 	}
@@ -1497,22 +1503,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 		//检查数据
 		Map<String,Long> idOrderMap = checkServiceAllianceEnterpriseOrder(values);
-		//注意必须使用long，否则firstDefaultOrder存的是引用，不是值
-		long firstDefaultOrder = values.get(0).getDefaultOrder();
 		List<ServiceAlliances> updateList = new ArrayList<>();
 		
 		// 1 -> size()-1 服务联盟企业  的defaultOrder依次向前赋值
 		for (int i = 1; i < values.size(); i++) {
 			ServiceAllianceDTO originalDto = values.get(i);
 			ServiceAllianceDTO replaceDto = values.get(i-1);
-			ServiceAlliances alliances = ConvertHelper.convert(replaceDto, ServiceAlliances.class);
-			alliances.setDefaultOrder(originalDto.getDefaultOrder());
+			ServiceAlliances alliances = new ServiceAlliances();
+			alliances.setId(replaceDto.getId());
+			alliances.setDefaultOrder(idOrderMap.get(String.valueOf(originalDto.getId())));
 			updateList.add(alliances);
 		}
 		// size()-1 的服务联盟 的defaultOrder设置为0服务联盟企业的 defaultOrder
-		ServiceAllianceDTO originalDto = values.get(values.size()-1);
-		ServiceAlliances alliances = ConvertHelper.convert(originalDto, ServiceAlliances.class);
-		alliances.setDefaultOrder(firstDefaultOrder);
+		ServiceAllianceDTO originalDto = values.get(0);
+		ServiceAllianceDTO replaceDto = values.get(values.size()-1);
+		ServiceAlliances alliances = new ServiceAlliances();
+		alliances.setId(replaceDto.getId());
+		alliances.setDefaultOrder(idOrderMap.get(String.valueOf(originalDto.getId())));
 		updateList.add(alliances);
 		yellowPageProvider.updateOrderServiceAllianceDefaultOrder(updateList);
 		
@@ -1530,6 +1537,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 		List<ServiceAlliances>  serviceAllianceList = yellowPageProvider.listServiceAllianceSortOrders(
 				values.stream().map(value -> value.getId()).collect(Collectors.toList()));
+		
+		if(values.size() != serviceAllianceList.size()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					" Uknown IDs = {}",values);
+		}
 		
 		for (ServiceAlliances serviceAlliances : serviceAllianceList) {
 			String key = String.valueOf(serviceAlliances.getId());
