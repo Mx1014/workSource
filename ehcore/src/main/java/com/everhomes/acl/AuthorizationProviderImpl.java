@@ -222,10 +222,10 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(Authorization.class));
 		List<EhAuthorizations> auths = new ArrayList<>();
 		for (Authorization authorization: authorizations) {
+			id ++;
 			authorization.setId(id);
 			if(null == authorization.getCreateTime())
 				authorization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			id ++;
 			auths.add(ConvertHelper.convert(authorization, EhAuthorizations.class));
 		}
 		EhAuthorizationsDao dao = new EhAuthorizationsDao(context.configuration());

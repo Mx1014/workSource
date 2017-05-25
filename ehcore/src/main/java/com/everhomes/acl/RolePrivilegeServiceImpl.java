@@ -2638,7 +2638,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params targets is null.");
 		}
 
-		if(null == cmd.getProjects() || cmd.getProjects().size() == 0){
+		if(null == AllFlagType.fromCode(cmd.getAllProjectFlag())){
+			LOGGER.error("params allProjectFlag is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params allProjectFlag is null.");
+		}
+
+		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)){
 			LOGGER.error("params projects is null");
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
 					"params projects is null.");
@@ -2674,52 +2680,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//创建授权关系记录
 			authorizationProvider.createAuthorizationRelation(authorizationRelation);
 
-			List<Authorization> authorizations = new ArrayList<>();
-
-			for (AssignmentTarget target: cmd.getTargets()) {
-				checkTarget(target.getTargetType(), target.getTargetId());
-
-				if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
-					for (Project project: cmd.getProjects()) {
-						//给对象授权
-						assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), false);
-
-						Authorization authorization = new Authorization();
-						authorization.setOwnerType(project.getProjectType());
-						authorization.setOwnerId(project.getProjectId());
-						authorization.setTargetType(target.getTargetType());
-						authorization.setTargetId(target.getTargetId());
-						authorization.setAllFlag(authorizationRelation.getAllFlag());
-						authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-						authorization.setIdentityType(IdentityType.ORDINARY.getCode());
-						authorization.setNamespaceId(namespaceId);
-						authorization.setCreatorUid(user.getId());
-						authorization.setOperatorUid(user.getId());
-						authorization.setAuthId(cmd.getModuleId());
-						authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-						authorizations.add(authorization);
-					}
-				}else{
-					Authorization authorization = new Authorization();
-					authorization.setOwnerType(EntityType.All.getCode());
-					authorization.setOwnerId(0L);
-					authorization.setTargetType(target.getTargetType());
-					authorization.setTargetId(target.getTargetId());
-					authorization.setAllFlag(authorizationRelation.getAllFlag());
-					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-					authorization.setAuthId(cmd.getModuleId());
-					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
-					authorization.setNamespaceId(namespaceId);
-					authorization.setCreatorUid(user.getId());
-					authorization.setOperatorUid(user.getId());
-					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-					authorizations.add(authorization);
-				}
-
-			}
-
-			//创建授权模块数据
-			authorizationProvider.createAuthorizations(authorizations);
+			//创建授权信息和权限
+			createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
 
 			return null;
 		});
@@ -2743,7 +2705,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params targets is null.");
 		}
 
-		if(null == cmd.getProjects() || cmd.getProjects().size() == 0){
+		if(null == AllFlagType.fromCode(cmd.getAllProjectFlag())){
+			LOGGER.error("params allProjectFlag is null");
+			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params allProjectFlag is null.");
+		}
+
+		if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag()) && (null == cmd.getProjects() || cmd.getProjects().size() == 0)){
 			LOGGER.error("params projects is null");
 			throw RuntimeErrorException.errorWith(PrivilegeServiceErrorCode.SCOPE, PrivilegeServiceErrorCode.ERROR_INVALID_PARAMETER,
 					"params projects is null.");
@@ -2764,8 +2732,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 
 		AuthorizationRelation authorizationRelation = checkAuthorizationRelation(cmd.getId());
-		List<Authorization> authorizations = new ArrayList<>();
+
 		dbProvider.execute((TransactionStatus status) -> {
+
+			//根据关系删除授权的记录以及关系权限
+			deleteAuthorizationsOrAclsByRelation(authorizationRelation);
 			authorizationRelation.setOperatorUid(user.getId());
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
 				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
@@ -2774,54 +2745,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
 				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
 			}
+			//修改授权关系
 			authorizationProvider.updateAuthorizationRelation(authorizationRelation);
 
-			//根据关系删除授权的记录
-			deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-
-			for (AssignmentTarget target: cmd.getTargets()) {
-				checkTarget(target.getTargetType(), target.getTargetId());
-				if (AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())) {
-					for (Project project : cmd.getProjects()) {
-						//授权
-						assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), cmd.getPrivilegeIds(), true);
-
-						Authorization authorization = new Authorization();
-						authorization.setOwnerType(project.getProjectType());
-						authorization.setOwnerId(project.getProjectId());
-						authorization.setTargetType(target.getTargetType());
-						authorization.setTargetId(target.getTargetId());
-						authorization.setAllFlag(authorizationRelation.getAllFlag());
-						authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-						authorization.setIdentityType(IdentityType.ORDINARY.getCode());
-						authorization.setNamespaceId(authorizationRelation.getNamespaceId());
-						authorization.setCreatorUid(user.getId());
-						authorization.setOperatorUid(user.getId());
-						authorization.setAuthId(authorizationRelation.getModuleId());
-						authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-						authorizations.add(authorization);
-
-					}
-				} else {
-					Authorization authorization = new Authorization();
-					authorization.setOwnerType(EntityType.All.getCode());
-					authorization.setOwnerId(0L);
-					authorization.setTargetType(target.getTargetType());
-					authorization.setTargetId(target.getTargetId());
-					authorization.setAllFlag(authorizationRelation.getAllFlag());
-					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
-					authorization.setAuthId(authorizationRelation.getModuleId());
-					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
-					authorization.setNamespaceId(authorizationRelation.getNamespaceId());
-					authorization.setCreatorUid(user.getId());
-					authorization.setOperatorUid(user.getId());
-					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-					authorizations.add(authorization);
-				}
-			}
-
-			//创建授权模块数据
-			authorizationProvider.createAuthorizations(authorizations);
+			//授权的记录以及关系权限
+			createAuthorizationsOrAclsByRelation(user, authorizationRelation, cmd.getTargets(), cmd.getProjects(), cmd.getPrivilegeIds());
 			return null;
 		});
 	}
@@ -2847,16 +2775,80 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 			authorizationProvider.deleteAuthorizationRelationById(cmd.getId());
+			deleteAuthorizationsOrAclsByRelation(authorizationRelation);
+			return null;
+		});
 
-			String projectJson = authorizationRelation.getProjectJson();
-			String targetJson = authorizationRelation.getTargetJson();
+	}
+
+	private void createAuthorizationsOrAclsByRelation(User user, AuthorizationRelation authorizationRelation, List<AssignmentTarget> targets, List<Project> projects, List<Long> privilegeIds){
+		List<Authorization> authorizations = new ArrayList<>();
+
+		for (AssignmentTarget target: targets) {
+			checkTarget(target.getTargetType(), target.getTargetId());
+			if (AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllProjectFlag())) {
+				for (Project project : projects) {
+					//授权
+					assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false);
+
+					Authorization authorization = new Authorization();
+					authorization.setOwnerType(project.getProjectType());
+					authorization.setOwnerId(project.getProjectId());
+					authorization.setTargetType(target.getTargetType());
+					authorization.setTargetId(target.getTargetId());
+					authorization.setAllFlag(authorizationRelation.getAllFlag());
+					authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+					authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+					authorization.setNamespaceId(authorizationRelation.getNamespaceId());
+					authorization.setCreatorUid(user.getId());
+					authorization.setOperatorUid(user.getId());
+					authorization.setAuthId(authorizationRelation.getModuleId());
+					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+					authorizations.add(authorization);
+
+				}
+			} else {
+				//给对象授权
+				assignmentAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false);
+
+				Authorization authorization = new Authorization();
+				authorization.setOwnerType(EntityType.All.getCode());
+				authorization.setOwnerId(0L);
+				authorization.setTargetType(target.getTargetType());
+				authorization.setTargetId(target.getTargetId());
+				authorization.setAllFlag(authorizationRelation.getAllFlag());
+				authorization.setAuthType(EntityType.SERVICE_MODULE.getCode());
+				authorization.setAuthId(authorizationRelation.getModuleId());
+				authorization.setIdentityType(IdentityType.ORDINARY.getCode());
+				authorization.setNamespaceId(authorizationRelation.getNamespaceId());
+				authorization.setCreatorUid(user.getId());
+				authorization.setOperatorUid(user.getId());
+				authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+				authorizations.add(authorization);
+			}
+		}
+
+		//创建授权模块数据
+		authorizationProvider.createAuthorizations(authorizations);
+	}
+
+	/**
+	 * 根据授权关系删除授权记录，以及权限
+	 * @param authorizationRelation
+     */
+	private void deleteAuthorizationsOrAclsByRelation(AuthorizationRelation authorizationRelation){
+		String projectJson = authorizationRelation.getProjectJson();
+		String targetJson = authorizationRelation.getTargetJson();
 //			String privilegeJson = authorizationRelation.getPrivilegeJson();
 
+		List<Project> projects = null;
+		if(AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllFlag())){
 			Project[] projectArr = (Project[])StringHelper.fromJsonString(projectJson, Project[].class);
-			List<Project> projects = Arrays.asList(projectArr);
+			projects = Arrays.asList(projectArr);
+		}
 
-			AssignmentTarget[] targetArr = (AssignmentTarget[])StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
-			List<AssignmentTarget> targets = Arrays.asList(targetArr);
+		AssignmentTarget[] targetArr = (AssignmentTarget[])StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
+		List<AssignmentTarget> targets = Arrays.asList(targetArr);
 
 //			List<Long> privilegeIds = null;
 //			//非全部的时候 查出所有的权限
@@ -2865,23 +2857,33 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //				privilegeIds = Arrays.asList(privilegeIdArr);
 //			}
 
-			for (AssignmentTarget target: targets) {
+		for (AssignmentTarget target: targets) {
+
+			if(AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllFlag())){
 				for (Project project: projects) {
 					//删除人员拥有的模块全部权限
 					if(AllFlagType.fromCode(authorizationRelation.getAllFlag()) == AllFlagType.YES){
 						deleteAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
 
-					//删除人员拥有的模块部分权限
+						//删除人员拥有的模块部分权限
 					}else{
 						deleteAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY);
 					}
 				}
-			}
+			}else{
+				//删除人员拥有的模块全部权限
+				if(AllFlagType.fromCode(authorizationRelation.getAllFlag()) == AllFlagType.YES){
+					deleteAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
 
-			//根据关系删除授权的记录
-			deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
-			return null;
-		});
+					//删除人员拥有的模块部分权限
+				}else{
+					deleteAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY);
+				}
+			}
+		}
+
+		//根据关系删除授权的记录
+		deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
 
 	}
 

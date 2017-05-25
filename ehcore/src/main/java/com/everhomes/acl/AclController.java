@@ -546,10 +546,10 @@ public class AclController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /acl/listServiceModulesByTarget</b>
+     * <b>URL: /acl/listServiceModulePrivilegesByTarget</b>
      * <p>查询对象模块权限</p>
      */
-    @RequestMapping("listServiceModulesByTarget")
+    @RequestMapping("listServiceModulePrivilegesByTarget")
     @RestReturn(value=ServiceModuleDTO.class, collection = true)
     public RestResponse listServiceModulePrivilegesByTarget(@Valid ListServiceModulePrivilegesByTargetCommand cmd) {
         RestResponse response = new RestResponse();
