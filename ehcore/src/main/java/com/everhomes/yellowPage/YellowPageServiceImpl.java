@@ -774,7 +774,6 @@ public class YellowPageServiceImpl implements YellowPageService {
         if(sas.size() > pageSize) {
         	sas.remove(sas.size() - 1);
         	 if(ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null){
-        		//modfiy by dengs,通过DEFAULT_ORDER排序了，锚点依据也变成DEFAULT_ORDER
  	        	response.setNextPageAnchor(sas.get(sas.size() - 1).getId());
         	 }else{
 	        	//modfiy by dengs,通过DEFAULT_ORDER排序了，锚点依据也变成DEFAULT_ORDER
