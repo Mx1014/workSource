@@ -191,7 +191,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
 		return dao.fetchById(ids).stream().map(o->ConvertHelper.convert(o, Organization.class)).collect(Collectors.toList());
 	}
-
+	/**modify cause member_detail by lei lv**/
 	@Override
 	public OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
