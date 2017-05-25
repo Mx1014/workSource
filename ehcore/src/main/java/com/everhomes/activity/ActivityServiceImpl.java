@@ -382,6 +382,30 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+        
+		        Post post = forumProvider.findPostById(activity.getPostId());
+		        if (post == null) {
+		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+		        }
+		        
+		        //如果有正常的报名，则直接返回， ActivityDTO的处理方法有下面整合   add by yanjun 20170525
+		        ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
+		        if(oldRoster != null){
+		        	ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+
+		        	//提取成一个方法   add  by yanjun 20170525
+		        	populateActivityDto(dto, activity, oldRoster, post);
+
+		        	fixupVideoInfo(dto);//added by janson
+
+		        	//add by yanjun 20170512
+		        	dto.setUserRosterId(oldRoster.getId());
+
+		        	return dto;
+		        }
+		        
 		        //检查是否超过报名人数限制, add by tt, 20161012
 		        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
 		        if (activity.getConfirmFlag() != null && activity.getConfirmFlag().intValue() == 0 && activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
@@ -397,13 +421,7 @@ public class ActivityServiceImpl implements ActivityService {
 		                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
 							"beyond activity signup end time!");
 				}
-        
-		        Post post = forumProvider.findPostById(activity.getPostId());
-		        if (post == null) {
-		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
-		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
-		        }
+		        
 		        ActivityRoster roster = createRoster(cmd, user, activity);
 	        	//去掉报名评论 by xiongying 20160615
 	//            Post comment = new Post();
@@ -462,22 +480,10 @@ public class ActivityServiceImpl implements ActivityService {
 	            activityProvider.updateActivity(activity);
 //	            return status;
 	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-	            dto.setActivityId(activity.getId());
-	            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-	            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-	            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-	            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-	            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-	            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-	            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
-	            dto.setFamilyId(activity.getCreatorFamilyId());
-	            dto.setGroupId(activity.getGroupId());
-	            dto.setStartTime(activity.getStartTime().toString());
-	            dto.setStopTime(activity.getEndTime().toString());
-	            dto.setSignupEndTime(getSignupEndTime(activity).toString());
-	            dto.setProcessStatus(getStatus(activity).getCode());
-	            dto.setForumId(post.getForumId());
-	            dto.setPosterUrl(getActivityPosterUrl(activity));
+	            
+	            //提取成一个方法   add  by yanjun 20170525
+	            populateActivityDto(dto, activity, roster, post);
+	            
 	            fixupVideoInfo(dto);//added by janson
 	            
 	            //add by yanjun 20170512
@@ -521,6 +527,32 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
 	 }
+    
+    /**
+     * 由signup方法提取处理，填充各种信息
+     * @param dto
+     * @param activity
+     * @param roster
+     * @param post
+     */
+    private void populateActivityDto(ActivityDTO dto, Activity activity, ActivityRoster roster, Post post){
+    	dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+        dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setGroupId(activity.getGroupId());
+        dto.setStartTime(activity.getStartTime().toString());
+        dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
+        dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setForumId(post.getForumId());
+        dto.setPosterUrl(getActivityPosterUrl(activity));
+    }
     
     /**
      * 填充新订单信息，订单id、支付状态、时间等
