@@ -1167,6 +1167,9 @@ public class UserController extends ControllerBase {
 	@RequestMapping(value = "searchUsers")
 	@RestReturn(value = SearchUsersResponse.class)
 	public RestResponse searchUsers(@Valid SearchUsersCommand cmd) {
-		return new RestResponse("OK");
+		RestResponse resp = new RestResponse(userService.searchUsers(cmd));
+		resp.setErrorCode(ErrorCodes.SUCCESS);
+		resp.setErrorDescription("OK");
+		return resp;
 	}
 }

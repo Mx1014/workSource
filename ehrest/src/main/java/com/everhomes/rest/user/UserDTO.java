@@ -15,8 +15,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  *  <li>avatarUrl:用户头像url</li>
  *  <li>gender:用户性别.0代表未知，1为男性，2为女性</li>
  *  <li>birthday:用户生日</li>
- *  <li>identifier_type:</li>
- *  <li>identifier_token:电话号码</li>
+ *  <li>identifierType:</li>
+ *  <li>identifierToken:电话号码</li>
  *  </ul>
  **/
 public class UserDTO {
@@ -28,8 +28,8 @@ public class UserDTO {
     private String avatarUrl;
     private Byte gender;
     private String birthday;
-    private Byte identifier_type;
-    private String identifier_token;
+    private Byte identifierType;
+    private String identifierToken;
 
     public UserDTO() {
     }
@@ -91,20 +91,20 @@ public class UserDTO {
         this.birthday = birthday;
     }
 
-    public Byte getIdentifier_type() {
-        return identifier_type;
+    public Byte getIdentifierType() {
+        return identifierType;
     }
 
-    public void setIdentifier_type(Byte identifier_type) {
-        this.identifier_type = identifier_type;
+    public void setIdentifierType(Byte identifierType) {
+        this.identifierType = identifierType;
     }
 
-    public String getIdentifier_token() {
-        return identifier_token;
+    public String getIdentifierToken() {
+        return identifierToken;
     }
 
-    public void setIdentifier_token(String identifier_token) {
-        this.identifier_token = identifier_token;
+    public void setIdentifierToken(String identifierToken) {
+        this.identifierToken = identifierToken;
     }
 
     @Override

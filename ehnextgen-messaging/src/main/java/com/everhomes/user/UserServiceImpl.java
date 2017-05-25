@@ -3829,4 +3829,23 @@ public class UserServiceImpl implements UserService {
 	    
 	    return resp;
 	}
+
+	@Override
+	public SearchUsersResponse searchUsers(SearchUsersCommand cmd) {
+		SearchUsersResponse resp = new SearchUsersResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<User> users = this.userProvider.listUserByNamespace(cmd.getKeywords(), cmd.getNamespaceId(), locator, pageSize);
+		resp.setNextPageAnchor(locator.getAnchor());
+		resp.setDtos(new ArrayList<>());
+		for(User u : users) {
+			UserDTO dto = ConvertHelper.convert(u, UserDTO.class);
+			dto.setName(dto.getNickName());
+			resp.getDtos().add(dto);
+		}
+		return resp;
+	}
 }

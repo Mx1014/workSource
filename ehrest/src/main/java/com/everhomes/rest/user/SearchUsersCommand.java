@@ -26,6 +26,8 @@ public class SearchUsersCommand {
 
     private String keywords;
 
+    private Integer namespaceId;
+
     public SearchUsersCommand() {
     }
 
@@ -67,6 +69,14 @@ public class SearchUsersCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override
