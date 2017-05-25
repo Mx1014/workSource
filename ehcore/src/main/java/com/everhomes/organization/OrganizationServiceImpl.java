@@ -8936,6 +8936,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dto;
     }
 
+    @Override
+    public List<OrganizationDTO> listAllPmOrganizations() {
+        List<Organization> organizations = organizationProvider.listOrganizations(OrganizationType.PM.getCode(), 0L,
+                null, null);
+        return organizations.stream().map(r -> ConvertHelper.convert(r, OrganizationDTO.class)).collect(Collectors.toList());
+    }
 
     /**
      * 机构树状处理

@@ -448,4 +448,9 @@ public interface OrganizationService {
 	 * @return ListOrganizationContactCommandResponse
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
+
+	/**
+	 * 查询所有管理公司
+	 */
+	List<OrganizationDTO> listAllPmOrganizations();
 }
