@@ -101,6 +101,8 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 				obj.setFormOriginId(form.getFormOriginId());
 				obj.setFormVersion(form.getFormVersion());
 
+				obj.setSourceType(cmd.getSourceType());
+				obj.setSourceId(cmd.getSourceId());
 				obj.setFieldName(val.getFieldName());
 				obj.setFieldType(val.getFieldType());
 				obj.setFieldValue(val.getFieldValue());

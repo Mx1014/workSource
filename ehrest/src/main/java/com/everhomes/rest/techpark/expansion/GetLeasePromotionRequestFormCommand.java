@@ -4,19 +4,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id：id</li>
+ * <li>namespaceId：域空间id</li>
+ * <li>ownerType：ownerType</li>
+ * <li>ownerId：ownerId</li>
  * </ul>
  */
-public class AddLeasePromotionRequestFormCommand {
-
+public class GetLeasePromotionRequestFormCommand {
     private Integer namespaceId;
     private Long ownerId;
 
     private String ownerType;
-
-    private Long sourceId;
-
-    private String sourceType;
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -40,22 +37,6 @@ public class AddLeasePromotionRequestFormCommand {
 
     public void setOwnerType(String ownerType) {
         this.ownerType = ownerType;
-    }
-
-    public Long getSourceId() {
-        return sourceId;
-    }
-
-    public void setSourceId(Long sourceId) {
-        this.sourceId = sourceId;
-    }
-
-    public String getSourceType() {
-        return sourceType;
-    }
-
-    public void setSourceType(String sourceType) {
-        this.sourceType = sourceType;
     }
 
     @Override

@@ -47,6 +47,8 @@ public interface EnterpriseApplyEntryService {
 
 	List<AddressDTO>  listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd);
 
-	void addLeasePromotionRequestForm(@Valid AddLeasePromotionRequestFormCommand cmd);
+	void updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd);
+
+	LeaseFormRequestDTO getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd);
 	
 }

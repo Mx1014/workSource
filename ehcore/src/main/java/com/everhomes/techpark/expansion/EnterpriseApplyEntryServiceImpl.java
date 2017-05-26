@@ -19,7 +19,9 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_form.GeneralFormDTO;
 import com.everhomes.rest.general_form.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_form.GetTemplateByFormIdCommand;
 import com.everhomes.rest.general_form.addGeneralFormValuesCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
@@ -725,6 +727,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		cmd.setSourceId(dto.getId());
 		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 		dto.setFormValues(formValues);
+
+		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
+			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
+					dto.getCommunityId(), EntityType.COMMUNITY.getCode());
+			if (null != request) {
+				dto.setRequestFormId(request.getSourceId());
+			}
+		}
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -1264,10 +1274,40 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public void addLeasePromotionRequestForm(AddLeasePromotionRequestFormCommand cmd) {
+	public void updateLeasePromotionRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
 
-		LeaseFormRequest request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType());
 
-		enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		if (null == request) {
+			request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+		}else {
+			request.setSourceId(cmd.getSourceId());
+			enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
+		}
+
+	}
+
+	@Override
+	public LeaseFormRequestDTO getLeasePromotionRequestForm(GetLeasePromotionRequestFormCommand cmd) {
+
+		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+				cmd.getOwnerId(), cmd.getOwnerType());
+
+		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
+
+		if (null == dto) {
+			dto = new LeaseFormRequestDTO();
+			dto.setCustomFormFlag(LeasePromotionFlag.DISABLED.getCode());
+		}else {
+			dto.setCustomFormFlag(LeasePromotionFlag.ENABLED.getCode());
+			GetTemplateByFormIdCommand getTemplateByFormIdCommand = new GetTemplateByFormIdCommand();
+			getTemplateByFormIdCommand.setFormId(request.getSourceId());
+			GeneralFormDTO form = generalFormService.getTemplateByFormId(getTemplateByFormIdCommand);
+			dto.setForm(form);
+		}
+
+		return dto;
 	}
 }

@@ -22,6 +22,8 @@ import com.everhomes.rest.general_form.addGeneralFormValuesCommand;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
+import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -235,6 +237,8 @@ public class CommunityServiceImpl implements CommunityService {
 	private GeneralFormService generalFormService;
 	@Autowired
 	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -726,6 +730,14 @@ public class CommunityServiceImpl implements CommunityService {
 		cmd.setSourceId(building.getId());
 		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 		building.setFormValues(formValues);
+
+		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
+			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
+					building.getCommunityId(), EntityType.COMMUNITY.getCode());
+			if (null != request) {
+				building.setRequestFormId(request.getSourceId());
+			}
+		}
     }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
@@ -740,7 +752,11 @@ public class CommunityServiceImpl implements CommunityService {
             }
 			this.communityProvider.populateBuildingAttachments(building);
 	        populateBuilding(building);
-	        return ConvertHelper.convert(building, BuildingDTO.class);
+
+			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+			populateFormInfo(dto);
+
+			return dto;
 		}else {
             LOGGER.error("Building not found");
             throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
@@ -948,10 +964,28 @@ public class CommunityServiceImpl implements CommunityService {
 		processBuildingAttachments(userId, cmd.getAttachments(), building);
 		
 		populateBuilding(building);
-		
+
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+
+		populateFormInfo(dto);
 		return dto;
 		
+	}
+
+	private void populateFormInfo(BuildingDTO dto) {
+		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
+		cmdValues.setSourceType(EntityType.BUILDING.getCode());
+		cmdValues.setSourceId(dto.getId());
+		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
+		dto.setFormValues(formValues);
+
+		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
+			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
+					dto.getCommunityId(), EntityType.COMMUNITY.getCode());
+			if (null != request) {
+				dto.setRequestFormId(request.getSourceId());
+			}
+		}
 	}
 
 	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,

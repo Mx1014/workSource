@@ -123,6 +123,16 @@ public class BuildingDTO {
 	private Long generalFormId;
 	private Byte customFormFlag;
 
+	private Long requestFormId;
+
+	public Long getRequestFormId() {
+		return requestFormId;
+	}
+
+	public void setRequestFormId(Long requestFormId) {
+		this.requestFormId = requestFormId;
+	}
+
 	public Long getGeneralFormId() {
 		return generalFormId;
 	}

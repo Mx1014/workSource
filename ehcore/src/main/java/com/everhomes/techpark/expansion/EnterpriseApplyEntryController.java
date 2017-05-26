@@ -353,14 +353,14 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/addLeasePromotionRequestForm</b>
+	 * <b>URL: /techpark/entry/updateLeasePromotionRequestForm</b>
 	 * <p> 添加租赁表单 </p>
 	 */
-	@RequestMapping("addLeasePromotionRequestForm")
+	@RequestMapping("updateLeasePromotionRequestForm")
 	@RestReturn(value=String.class)
-	public RestResponse addLeasePromotionRequestForm(@Valid AddLeasePromotionRequestFormCommand cmd) {
+	public RestResponse updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd) {
 
-		enterpriseApplyEntryService.addLeasePromotionRequestForm(cmd);
+		enterpriseApplyEntryService.updateLeasePromotionRequestForm(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -368,4 +368,19 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 
+	/**
+	 * <b>URL: /techpark/entry/getLeasePromotionRequestForm</b>
+	 * <p> 获取租赁表单 </p>
+	 */
+	@RequestMapping("getLeasePromotionRequestForm")
+	@RestReturn(value=LeaseFormRequestDTO.class)
+	public RestResponse getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd) {
+
+		LeaseFormRequestDTO dto = enterpriseApplyEntryService.getLeasePromotionRequestForm(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		return response;
+	}
 }
