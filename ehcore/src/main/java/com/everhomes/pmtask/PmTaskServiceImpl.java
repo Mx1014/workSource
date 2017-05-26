@@ -1839,20 +1839,26 @@ public class PmTaskServiceImpl implements PmTaskService {
 //	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
 				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
 	    		List<FamilyDTO> families = new ArrayList<>();
-				familyList.forEach(f -> {
-					if(f.getCommunityId().equals(communityId))
-						families.add(f);
-				});
+				if(familyList != null && familyList.size() > 0) {
+					familyList.forEach(f -> {
+						if(f.getCommunityId().equals(communityId))
+							families.add(f);
+					});
+				}
+				
 	    		response.setFamilyList(families);
 	    	}else {
 				//根据查到的userid查家庭 而不是当前登录用户来查 by xiongying20170524
 //	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
 				List<FamilyDTO> familyList = familyProvider.getUserFamiliesByUserId(userId);
 	    		List<FamilyDTO> families = new ArrayList<>();
-				familyList.forEach(f -> {
-	    			if(f.getCommunityId().equals(communityId))
-	    				families.add(f);
-				});
+				if(familyList != null && familyList.size() > 0) {
+					familyList.forEach(f -> {
+						if(f.getCommunityId().equals(communityId))
+							families.add(f);
+					});
+				}
+
 				response.setFamilyList(families);
 	    		
 	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;

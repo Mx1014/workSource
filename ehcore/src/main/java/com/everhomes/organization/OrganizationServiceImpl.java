@@ -9647,7 +9647,10 @@ System.out.println();
         long userId = user.getId();
         String tag = "listUsersOfEnterprise";
         Organization org = checkEnterpriseParameter(cmd.getOrganizationId(), userId, tag);
-        
+		if(org == null){
+			LOGGER.error("No Organization is found! , {}", cmd.getOrganizationId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "No Organization is found!");
+		}
 
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -9689,6 +9692,7 @@ System.out.println();
 		response.setNextPageAnchor(locator.getAnchor());
 		response.setMembers(dtos);
 		response.setTotalCount(totalRecords);
+		response.setNamespaceId(org.getNamespaceId());
 
 		return response;
 	}

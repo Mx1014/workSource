@@ -19,7 +19,6 @@ import java.sql.Timestamp;
 public class OrganizationContactDTO {
     private Long id;
     private Long organizationId;
-    private int namespaceId;
     private String contactName;
     private Byte contactType;
     private String contactToken;
@@ -166,14 +165,6 @@ public class OrganizationContactDTO {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
-    }
-
-    public int getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(int namespaceId) {
-        this.namespaceId = namespaceId;
     }
 
     @Override
