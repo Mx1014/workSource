@@ -2619,3 +2619,38 @@ SET @id = (SELECT MAX(id) FROM  eh_service_module_scopes );
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
 	VALUES ((@id := @id + 1, '999984', '60200', '业务授权', 'EhNamespaces', '999984', NULL, '2');
 
+	
+	
+-- 清华信息港 增加创业导师item add sfyan 20170526
+SET @service_alliance_categorie_id = (SELECT max(id) FROM `eh_service_alliance_categories`);
+SET @launch_pad_item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+SET @item_service_categry_id = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999984 and `scene_type` = 'pm_admin');
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES ((@service_alliance_categorie_id := @service_alliance_categorie_id + 1), 'community', '240111044331055835', '0', '创业导师', '创业导师', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999984', '');
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331055835', '创业导师', '创业导师', @service_alliance_categorie_id , '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','创业导师','创业导师','cs://1/image/aW1hZ2UvTVRveU1USXpZV00zWm1Jd01EY3hOemt4WXpjME5EWm1PRGd5WkdaaE5EWXlPUQ','1','1','14',CONCAT('{"type":', @service_alliance_categorie_id, ',"parentId":', @service_alliance_categorie_id, ',"displayType": "list"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',@item_service_categry_id,NULL,20);
+
+SET @item_service_categry_id = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999984 and `scene_type` = 'park_tourist');
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','创业导师','创业导师','cs://1/image/aW1hZ2UvTVRveU1USXpZV00zWm1Jd01EY3hOemt4WXpjME5EWm1PRGd5WkdaaE5EWXlPUQ','1','1','14',CONCAT('{"type":', @service_alliance_categorie_id, ',"parentId":', @service_alliance_categorie_id, ',"displayType": "list"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',@item_service_categry_id,NULL,20);
+
+-- 清除报修任务数据 孙稳提供
+DELETE from eh_pm_tasks;
+DELETE from eh_pm_task_logs;
+DELETE from eh_pm_task_statistics;
+DELETE from eh_pm_task_targets;
+DELETE from eh_pm_task_target_statistics;
+
+-- 删除保修任务icon，增加保修任务icon
+delete from eh_launch_pad_items where namespace_id = 999984 and item_label = '报修任务';
+SET @launch_pad_item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','任务管理','任务管理','cs://1/image/aW1hZ2UvTVRvMU5HUTVZak15WkdJMFl6ZzFOREUwWlRCa1lUWmhOemxsTWpFM09UVmxNUQ','1','1','56','','0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',0,NULL,0);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','任务管理','任务管理','cs://1/image/aW1hZ2UvTVRvMU5HUTVZak15WkdJMFl6ZzFOREUwWlRCa1lUWmhOemxsTWpFM09UVmxNUQ','1','1','56','','0','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',0,NULL,0);
+
+-- 删除执行人员设置菜单，增加工作流设置菜单
+delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = 999984 and menu_id = 20160;
+SET @service_module_scope_id = (SELECT MAX(id) FROM  eh_service_module_scopes );
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
+	VALUES ((@service_module_scope_id := @service_module_scope_id + 1, '999984', '20158', '', NULL, '2');
