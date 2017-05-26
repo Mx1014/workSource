@@ -20,8 +20,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
 
-    private int namespace_id;
-
     private static final long serialVersionUID = 2994038655987093227L;
 
     public OrganizationMember() {
@@ -100,17 +98,10 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
         this.isCreate = isCreate;
     }
 
-    public int getNamespace_id() {
-        return namespace_id;
-    }
-
-    public void setNamespace_id(int namespace_id) {
-        this.namespace_id = namespace_id;
-    }
-
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }
