@@ -3490,6 +3490,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);*/
     }
 
+    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
     public void createOranizationMemberEducationInfo(OrganizationMemberEducations education){
 	    Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberEducations.class));
 	    education.setId(id);
@@ -3500,6 +3501,31 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	    DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberEducations.class, id);
     }
 
+    @Cacheable(value = "Education", key ="#id", unless = "#result == null")
+    public OrganizationMemberEducations findOrganizationEducationInfoById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberEducations.class));
+        EhOrganizationMemberEducationsDao dao = new EhOrganizationMemberEducationsDao(context.configuration());
+        EhOrganizationMemberEducations education = dao.findById(id);
+        if (education == null)
+            return null;
+        return ConvertHelper.convert(education, OrganizationMemberEducations.class);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
+    public void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationMemberEducations.class));
+        EhOrganizationMemberEducationsDao dao = new EhOrganizationMemberEducationsDao(context.configuration());
+        dao.delete(education);
+    }
+
+    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
+    public void updateOranizationMemberEducationInfo(OrganizationMemberEducations education){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberEducationsDao dao = new EhOrganizationMemberEducationsDao(context.configuration());
+        dao.update(education);
+    }
+
+    @Cacheable(value = "Education", unless = "#result == null")
     public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id){
 
 	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

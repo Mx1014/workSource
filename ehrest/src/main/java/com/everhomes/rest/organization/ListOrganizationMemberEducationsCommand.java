@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>id: 员工编号</li>
+ * <li>id: 员工编号(Education.detail_id),注意不是教育信息的id</li>
  * </ul>
  */
 public class ListOrganizationMemberEducationsCommand {

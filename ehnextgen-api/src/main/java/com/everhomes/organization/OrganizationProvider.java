@@ -326,6 +326,9 @@ public interface OrganizationProvider {
 	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
 
     void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
+    OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
+    void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education);
+    void updateOranizationMemberEducationInfo(OrganizationMemberEducations education);
 
 	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id);
 

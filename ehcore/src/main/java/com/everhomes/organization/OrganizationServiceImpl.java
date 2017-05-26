@@ -10104,12 +10104,34 @@ System.out.println();
 
 	@Override
 	public void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd) {
-
+		if(cmd.getId() == null)
+			return;
+		LOGGER.info("Invoke deleteOrganizationMemberEducations.education.id={}" + cmd.getId());
+		OrganizationMemberEducations education = this.organizationProvider.findOrganizationEducationInfoById(cmd.getId());
+		if(education == null){
+			LOGGER.info("Cannot find the corresponding infomation of education");
+			return;
+		}
+		this.organizationProvider.deleteOranizationMemberEducationInfo(education);
 	}
 
 	@Override
 	public void updateOrganizationMemberEducations(UpdateOrganizationMemberEducationsCommand cmd) {
+		if(cmd.getId() == null)
+			return;
+		LOGGER.info("Invoke deleteOrganizationMemberEducations.education.id={}" + cmd.getId());
+		OrganizationMemberEducations education = this.organizationProvider.findOrganizationEducationInfoById(cmd.getId());
+		if(education == null){
+			LOGGER.info("Cannot find the corresponding infomation of education");
+			return;
+		}
+		education.setSchoolName(cmd.getSchoolName());
+		education.setDegree(cmd.getDegree());
+		education.setMajor(cmd.getMajor());
+		education.setEnrollmentTime(java.sql.Date.valueOf(cmd.getEnrollmentTime()));
+		education.setGraduationTime(java.sql.Date.valueOf(cmd.getGraduationTime()));
 
+		this.organizationProvider.updateOranizationMemberEducationInfo(education);
 	}
 
 	@Override
