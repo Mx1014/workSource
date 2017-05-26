@@ -152,3 +152,6 @@ CREATE TABLE `eh_warehouse_units` (
   `delete_time` datetime DEFAULT NULL,
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+alter table eh_import_file_tasks modify column result longtext;
