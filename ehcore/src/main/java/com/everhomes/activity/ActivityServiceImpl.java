@@ -1310,7 +1310,8 @@ public class ActivityServiceImpl implements ActivityService {
 		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
 		
 		//只有需要支付并已经支付的才需要退款
-		if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() || roster.getPayFlag() == null || roster.getPayFlag().byteValue() != ActivityRosterPayFlag.PAY.getCode()){
+		if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() || 
+				roster == null || roster.getPayFlag() == null || roster.getPayFlag().byteValue() != ActivityRosterPayFlag.PAY.getCode()){
 			return;
 		}
 		
