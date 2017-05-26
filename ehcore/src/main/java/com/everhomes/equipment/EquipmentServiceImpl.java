@@ -7,6 +7,10 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,7 +122,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	final String downloadDir ="\\download\\";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentServiceImpl.class);
-	
+
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 	@Autowired
 	private EquipmentStandardSearcher equipmentStandardSearcher;
 	
@@ -2474,7 +2479,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
-
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -2485,10 +2489,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setEquipmentModel(s[3]);
 				equipment.setParameter(s[4]);
 				equipment.setManufacturer(s[5]);
-				equipment.setLocation(s[7]);
-				equipment.setQuantity(Long.valueOf(s[8]));
-				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
-					equipment.setRemarks(s[9]);
+				if(!StringUtils.isBlank(s[6])) {
+					equipment.setInstallationTime(dateStrToTimestamp(s[6]));
+				}
+				if(!StringUtils.isBlank(s[7])) {
+					equipment.setRepairTime(dateStrToTimestamp(s[7]));
+				}
+				equipment.setLocation(s[8]);
+				equipment.setQuantity(Long.valueOf(s[9]));
+				if(!StringUtils.isEmpty(s[10]) && !"null".equals(s[10])) {
+					equipment.setRemarks(s[10]);
 				}
 				equipment.setNamespaceId(namespaceId);
 				equipment.setOwnerType(cmd.getOwnerType());
@@ -2509,6 +2519,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		return errorDataLogs;
 		
+	}
+
+	private Timestamp dateStrToTimestamp(String str) {
+		LocalDate localDate = LocalDate.parse(str,dateSF);
+		Timestamp ts = Timestamp.from(Date.valueOf(localDate).toInstant());
+		return ts;
 	}
 	
 	private List<String> importEquipmentAccessoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
@@ -2592,7 +2608,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			sb.append(r.getH()).append("||");
 			sb.append(r.getI()).append("||");
 			sb.append(r.getJ()).append("||");
-				
+			sb.append(r.getK()).append("||");
+
 			
 			result.add(sb.toString());
 		}
@@ -2746,6 +2763,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (equipment != null) {
 				dto.setEquipmentLocation(equipment.getLocation());
 				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+				dto.setEquipmentName(equipment.getName());
 			}
 
 			return dto;
@@ -3864,6 +3882,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(tasks != null && tasks.size() > 0) {
 			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
 				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				if(equipment != null) {
+					dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentLocation(equipment.getLocation());
+				}
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				if(standard != null) {
+					dto.setTaskType(standard.getStandardType());
+				}
+				if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+					List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+					if(executors != null && executors.size() > 0) {
+						dto.setExecutorName(executors.get(0).getContactName());
+					}
+				}
 				return dto;
 			}).collect(Collectors.toList());
 

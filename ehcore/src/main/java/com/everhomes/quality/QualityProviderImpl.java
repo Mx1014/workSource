@@ -110,6 +110,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 
@@ -720,6 +723,7 @@ public class QualityProviderImpl implements QualityProvider {
 		return result.get(0);
 	}
 
+	@Caching(evict={@CacheEvict(value="listRecordsByOperatorId", key="#record.operatorId")})
 	@Override
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {
 
@@ -1993,6 +1997,27 @@ public class QualityProviderImpl implements QualityProvider {
 			return null;
 		});
 		
+		return result;
+	}
+
+	@Cacheable(value="listRecordsByOperatorId", key="{#operatorId}", unless="#result.size() == 0")
+	@Override
+	public List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.OPERATOR_ID.eq(operatorId));
+
+//		if(createTime != null) {
+//			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.lt(createTime));
+//		}
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
+
+		List<QualityInspectionTaskRecords> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			return null;
+		});
+
 		return result;
 	}
 

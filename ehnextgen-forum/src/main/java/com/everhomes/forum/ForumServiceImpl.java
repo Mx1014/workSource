@@ -783,7 +783,7 @@ public class ForumServiceImpl implements ForumService {
                 			//如果有退款，先退款再取消订单
                 			ActivityRoster tempRoster = activityRosters.get(i);
                 			if(tempRoster.getStatus() != null && tempRoster.getStatus().byteValue() == ActivityRosterStatus.NORMAL.getCode()){
-                				activityService.signupOrderRefund(activity, user.getId());
+                				activityService.signupOrderRefund(activity, tempRoster.getUid());
                 				
                 				tempRoster.setStatus(ActivityRosterStatus.CANCEL.getCode());
                 				tempRoster.setCancelTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

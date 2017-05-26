@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.bouncycastle.jcajce.provider.digest.MD5;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import com.everhomes.rest.express.ExpressLogisticsStatus;
 import com.everhomes.rest.express.ExpressTraceDTO;
 import com.everhomes.rest.express.GetExpressLogisticsDetailResponse;
 import com.everhomes.rest.express.TrackBillResponse;
+import com.everhomes.util.MD5Utils;
 import com.everhomes.util.RuntimeErrorException;
 
 //后面的1为表eh_express_companies中父id为0的行的id
@@ -96,7 +98,7 @@ public class EmsHandler implements ExpressHandler {
 		emsBill.setTcustProvince(expressOrder.getReceiveProvince());
 		emsBill.setTcustCity(expressOrder.getReceiveCity());
 		emsBill.setTcustCounty(expressOrder.getReceiveCounty());
-		emsBill.setInsure(String.valueOf(expressOrder.getInsuredPrice()));
+		emsBill.setInsure(expressOrder.getInsuredPrice()==null?null:String.valueOf(expressOrder.getInsuredPrice()));
 		emsBill.setCargoDesc(expressOrder.getInternal());
 		return emsBill;
 	}
@@ -225,7 +227,7 @@ public class EmsHandler implements ExpressHandler {
 		try {
 			Header[] headers = new Header[2];
 			headers[0] = new BasicHeader("version", "ems_track_cn_1.0");
-			headers[1] = new BasicHeader("authenticate", "");
+			headers[1] = new BasicHeader("authenticate", "4CCC070F8E214EBEE050030A240B4A4A");
 			result = HttpUtils.get(url, null, headers);
 		} catch (IOException e) {
 			LOGGER.error("track bill from ems error: {}", e);
@@ -256,7 +258,7 @@ public class EmsHandler implements ExpressHandler {
 				"<billNoAmount>#{billNoAmount}</billNoAmount>"+
 				"</XMLInfo>";
 		
-		return paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", sysPassword).replace("#{appKey}", APP_KEY)
+		return paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", MD5Utils.getMD5(sysPassword)).replace("#{appKey}", APP_KEY)
 				.replace("#{businessType}", String.valueOf(businessType)).replace("#{billNoAmount}", BILL_NO_AMOUNT);
 	}
 	
@@ -320,7 +322,7 @@ public class EmsHandler implements ExpressHandler {
 				"</printDatas>"+
 				"</XMLInfo>";
 		
-		paramXmlTemplate = paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", sysPassword).replace("#{appKey}", APP_KEY)
+		paramXmlTemplate = paramXmlTemplate.replace("#{sysAccount}", sysAccount).replace("#{passWord}", MD5Utils.getMD5(sysPassword)).replace("#{appKey}", APP_KEY)
 				.replace("#{printKind}", PRINT_KIND);
 		
 		Method[] methods = emsBill.getClass().getMethods();

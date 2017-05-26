@@ -7,7 +7,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 添加菜单，add by tt, 20170504
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40700, '快递管理', 40000, NULL, NULL, 1, 2, '/40000/70100', 'park', 495, 40700);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '快递员管理', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '快递员设置', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40720, '订单记录', 40700, NULL, 'react:/deliver-management/order-record/40700', 0, 2, '/40000/40700/40720', 'park', 497, 40700);
 
 -- 添加权限，add by tt, 20170504
@@ -58,20 +58,9 @@ INSERT INTO `eh_express_service_addresses` (`id`, `namespace_id`, `owner_type`, 
 
 
 -- merge from activity-3.0.0 20170522  start
-
--- 添加中文字段 add by yanjun 20170502
-SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10020','zh_CN','活动报名缴费');
-
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10021','zh_CN','活动待确认');
-
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10022','zh_CN','活动已确认');
-
-insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10023','zh_CN','活动待支付');
-
 -- 增加通知支付的消息模板 add by yanjun 20170513
 -- 增加通知支付的消息模板 add by yanjun 20170513
-SET @eh_locale_templates_id = (SELECT MAX(id) FROM eh_locale_templates); 
+SET @eh_locale_templates_id = (SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES(@eh_locale_templates_id := @eh_locale_templates_id + 1, 'activity.notification','8','zh_CN','活动待确认，通知活动创建者进行确认','“${userName}”报名了活动「${postName}」，请尽快确认。','0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES(@eh_locale_templates_id := @eh_locale_templates_id + 1, 'activity.notification','9','zh_CN','活动被管理员同意，并且不需要支付，通知活动报名者','你报名的活动「${postName}」已被确认。','0');
@@ -92,12 +81,142 @@ SET r.organization_id = (SELECT
                              AND r.uid = b.target_id
                              AND b.target_type = 'USER'
                          LIMIT 1 );
-                         
+
 -- 刷新活动tag，将null和''的刷成'其他'，方便统计  add by yanjun 20170518
 UPDATE eh_activities ac SET ac.tag = '其他' WHERE ac.tag IS NULL OR ac.tag = '';
 
 -- 添加中文字段，当取消报名时用于提示超过截止日期  add by yanjun 20170519
+-- 添加中文字段 add by yanjun 20170523
+-- 添加中文字段，当取消报名时用于提示超过截止日期  add by yanjun 20170523
 SET @eh_locale_strings_id = (SELECT MAX(id) FROM `eh_locale_strings`);
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','12','zh_CN','活动报名缴费');
+
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','13','zh_CN','活动待确认');
+
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','14','zh_CN','活动已确认');
+
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','15','zh_CN','活动待支付');
+
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10022','zh_CN','生成通用订单异常');
+
+insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10023','zh_CN','支付金额异常');
+
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values(@eh_locale_strings_id := @eh_locale_strings_id + 1,'activity','10025','zh_CN','报名已截止，不可取消报名');
 
 -- merge from activity-3.0.0 20170522  end
+
+
+
+
+
+-- merge from activity-3.0.0 20170524 start
+-- 在eh_activity_categories增加一个实际id，现在要将入口数据添加到此表。不同的namespace会用重复。刷新原有的数据。  add by yanjun 20170524
+UPDATE `eh_activity_categories` SET entry_id = id;
+
+-- 在eh_activity_categories增加一个实际id，现在要将入口数据添加到此表。不同的namespace会用重复。新增缺少的数据。  add by yanjun 20170524
+SET @eh_activity_categories_id = (SELECT MAX(id) FROM eh_activity_categories);
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'1','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999976','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999979','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999980','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999981','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999982','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999983','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999986','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999987','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999988','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999989','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999990','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999991','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999992','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999993','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999994','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999995','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999996','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999997','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999998','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'999999','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'1000000','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','0','0','论坛','/0','0','2','1',NOW(),'0',NULL,'1000001','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999975','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999976','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999977','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999978','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999979','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999980','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999981','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999982','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999983','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999984','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999985','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999986','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999987','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999988','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999989','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999990','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999991','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999992','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999993','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'999999','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1000000','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1002756','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `entry_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES(@eh_activity_categories_id := @eh_activity_categories_id + 1,'','0','1','0','活动管理','/0','0','2','1',NOW(),'0',NULL,'1004005','0','1','cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw','cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ',NULL,'0');
+
+-- merge from activity-3.0.0 20170524 end
+
+-- merge from activity-3.0.0 20170525 start
+-- 1、将更新上面脚本的数据异常将entryid为1的设置path为“-1”  add by yanjun 20170525
+-- 2、更新老数据将一级入口的parentId设置成-1。
+UPDATE eh_activity_categories SET path = '/1' WHERE entry_id = 1;
+UPDATE eh_activity_categories SET parent_id = -1 WHERE parent_id = 0;
+
+-- janson huarun error
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'aclink', '10008', 'zh_CN', '华润门禁内部错误');
+

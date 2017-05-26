@@ -234,9 +234,13 @@ public class ExpressServiceImpl implements ExpressService {
 		if (organizationCommunityList != null && !organizationCommunityList.isEmpty()) {
 			Long organizationId = organizationCommunityList.get(0).getOrganizationId();
 			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			return resolver.checkSuperAdmin(owner.getUserId(), organizationId);
+			boolean result = resolver.checkSuperAdmin(owner.getUserId(), organizationId);
+			if (result) {
+				return result;
+			}
+			throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, organizationId="+organizationId+", userId="+owner.getUserId());
 		}
-		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error");
+		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, no organization");
 	}
 	
 	private void addExpressUser(ExpressOwner owner, CreateExpressUserDTO createExpressUserDTO, AddExpressUserCommand cmd) {
@@ -280,6 +284,11 @@ public class ExpressServiceImpl implements ExpressService {
 		}
 		expressUser.setStatus(CommonStatus.INACTIVE.getCode());
 		expressUserProvider.updateExpressUser(expressUser);
+	}
+
+	@Override
+	public Object query(String query) {
+		return expressOrderProvider.query(query);
 	}
 
 	@Override
@@ -340,7 +349,7 @@ public class ExpressServiceImpl implements ExpressService {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
 			}
 		}
-		return null;
+		throw RuntimeErrorException.errorWith(ExpressServiceErrorCode.SCOPE, ExpressServiceErrorCode.PRIVILEGE_ERROR, "privilege error, no express order, id="+cmd.getId());
 	}
 
 	private ExpressOrderDTO convertToExpressOrderDTOForDetail(ExpressOrder expressOrder) {
@@ -413,7 +422,7 @@ public class ExpressServiceImpl implements ExpressService {
 			CommonOrderCommand orderCmd = new CommonOrderCommand();
 			orderCmd.setBody(expressOrder.getSendName());
 			orderCmd.setOrderNo(expressOrder.getId().toString());
-			orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+			orderCmd.setOrderType(OrderType.OrderTypeEnum.EXPRESS_ORDER.getPycode());
 			orderCmd.setSubject("快递订单简要描述");
 			orderCmd.setTotalFee(expressOrder.getPaySummary());
 			CommonOrderDTO dto = null;
@@ -429,14 +438,16 @@ public class ExpressServiceImpl implements ExpressService {
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
+		// 回调是没有UserContext的，这里需要加一个
+		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_EXPRESS_ORDER.getCode() + orderId).enter(() -> {
 			ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 			if (expressOrder == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "not exists order, orderId="+orderId);
 			}
-			if (expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error");
+			if (!expressOrder.getPaySummary().equals(new BigDecimal(cmd.getPayAmount()))) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "order money error, paySummary="+expressOrder.getPaySummary()+", payAmout="+cmd.getPayAmount());
 			}
 			expressOrder.setStatus(ExpressOrderStatus.PAID.getCode());
 			expressOrderProvider.updateExpressOrder(expressOrder);
@@ -448,6 +459,8 @@ public class ExpressServiceImpl implements ExpressService {
 
 	@Override
 	public void payFail(PayCallbackCommand cmd) {
+		// 回调是没有UserContext的，这里需要加一个
+		UserContext.current().setUser(new User(1L));
 		Long orderId = Long.valueOf(cmd.getOrderNo());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(orderId);
 		if (expressOrder == null) {
