@@ -15,14 +15,14 @@ import java.util.List;
  * <li>contactName：成员名称</li>
  * <li>contactToken：联系信息</li>
  * <li>gender：性别</li>
- * <li>employeeNo：员工编号(与memberId关联)</li>
+ * <li>employeeNo：员工编号</li>
  * <li>contactDescription：描述</li>
  * <li>departmentIds：员工部门</li>
  * <li>jobPositionIds：员工岗位</li>
  * <li>jobLevelIds: 员工职级</li>
- * <li>employeeType: 员工类型，0: 全职 1: 兼职 2: 实习 3: 劳动派遣</li>
- * <li>memberId: 员工编号</li>
+ * <li>employeeType: 员工类型，0: 全职 1: 兼职 2: 实习 3: 劳动派遣 参考{@link EmployeeType}</li>
  * <li>checkInTime: 入职日期</li>
+ * <li>employmentTime: 转正日期</li>
  * </ul>
  */
 public class AddOrganizationMemberCommand {
@@ -56,9 +56,9 @@ public class AddOrganizationMemberCommand {
 
 	private Byte employeeType;
 
-	private Long memberId;
-
 	private String checkInTime;
+
+	private String employmentTime;
 
 	public AddOrganizationMemberCommand() {
 	}
@@ -171,20 +171,20 @@ public class AddOrganizationMemberCommand {
 		this.employeeType = employeeType;
 	}
 
-	public Long getMemberId() {
-		return memberId;
-	}
-
-	public void setMemberId(Long memberId) {
-		this.memberId = memberId;
-	}
-
 	public String getCheckInTime() {
 		return checkInTime;
 	}
 
 	public void setCheckInTime(String checkInTime) {
 		this.checkInTime = checkInTime;
+	}
+
+	public String getEmploymentTime() {
+		return employmentTime;
+	}
+
+	public void setEmploymentTime(String employmentTime) {
+		this.employmentTime = employmentTime;
 	}
 
 	@Override

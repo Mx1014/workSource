@@ -313,4 +313,15 @@ public interface OrganizationProvider {
 
 	ImportFileTask findImportFileTaskById(Long id);
 
-	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);}
+	Map<Long, BigDecimal> mapOrgOrdersByBillIdAndStatus(List<Long> billIds, byte organizationOrderStatus);
+
+	/**New**/
+    List<Object[]> findContractEndTimeById(List<Long> detailIds);
+    List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
+
+	//OrganizationMember findOrganizationMemberByMemberId(Long memberId);
+	OrganizationMemberDetails findOrganizationMemberDetailsByMemberId(Long memberId);
+//	OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(OrganizationMember member, OrganizationMemberDetails memberDetails);
+
+	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
+}

@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId：政府机构id</li>
- * <li>pageAnchor: 页码</li>
+ * <li>pageAnchor: 以id来限制分页，参考锚点分页方式</li>
  * <li>pageSize: 每页大小</li>
  * <li>keywords: 搜索关键词</li>
  * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>

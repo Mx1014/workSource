@@ -4,28 +4,29 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Date;
 import java.util.List;
 
 /**
  * <ul>
  * <li>id: 表增序号</li>
- * <li>memerId: 员工编号</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>organizationId: 公司、部门编号</li>
  * <li>contactName：成员名称</li>
+ * <li>contactType：联系类型，默认为0</li>
+ * <li>contactToken：成员联系方式</li> *
+ * <li>employeeNo: 员工编号</li>
+ * <li>avatar: 成员头像</li>
  * <li>gender: 成员性别，0：保密 1：男性 2：女性 参考{@link com.everhomes.rest.user.UserGender}</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime：转正时间</li>
+ * <li>profileIntegrity: 档案完整度,0-100%</li>
+ * <li>checkInTime: 入职日期</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
+ * <li>endTime: 合同到期时间</li>
  * <li>departments：部门列表</li>
  * <li>jobPositions: 岗位</li>
  * <li>jobLevels: 职级</li>
- * <li>organizationId: 小区id</li>
- * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
- * <li>contactToken：成员标识</li>
- * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
- * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
- * <li>checkInTime: 入职日期</li>
- * <li>employmentTime：转正时间</li>
- * <li>contractEndTime: 合同时间</li>
- * <li>profileIntegrity: 档案完整度,0-100%</li>
- * <li>avatar: 成员头像</li>
- * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>groups：群组列表</li>
@@ -33,7 +34,33 @@ import java.util.List;
  */
 public class OrganizationMemberV2DTO {
 
-    @NotNull
+    private Long id;
+    private Integer namespaceId;
+    private Long organizationId;
+    private String contactName;
+    private Byte contactType;
+    private String contactToken;
+    private String employeeNo;
+    private String avatar;
+    private Byte gender;
+    private Byte employeeStatus;
+    private Date employmentTime;
+    private Integer profileIntegrity;
+    private Date checkInTime;
+    private Byte visibleFlag;
+    private Date endTime;
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> departments;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobLevels;
+
+/*    @NotNull
+//    private Byte status;
+//    private Byte employeeType;
     private Long id;
 
     @NotNull
@@ -80,6 +107,8 @@ public class OrganizationMemberV2DTO {
 
     private Byte visibleFlag;
 
+    private Byte status;*/
+
     /*
     @NotNull
     private String contactDescription;
@@ -103,6 +132,8 @@ public class OrganizationMemberV2DTO {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> groups;
 
+    private java.lang.String   nickName;
+
     public OrganizationMemberV2DTO() {
     }
 
@@ -112,14 +143,6 @@ public class OrganizationMemberV2DTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
     }
 
     public String getContactName() {
@@ -170,13 +193,6 @@ public class OrganizationMemberV2DTO {
         this.organizationId = organizationId;
     }
 
-    public String getOrganizationName() {
-        return organizationName;
-    }
-
-    public void setOrganizationName(String organizationName) {
-        this.organizationName = organizationName;
-    }
 
     public Byte getContactType() {
         return contactType;
@@ -200,22 +216,6 @@ public class OrganizationMemberV2DTO {
 
     public void setEmployeeStatus(Byte employeeStatus) {
         this.employeeStatus = employeeStatus;
-    }
-
-    public String getEmploymentTime() {
-        return employmentTime;
-    }
-
-    public void setEmploymentTime(String employmentTime) {
-        this.employmentTime = employmentTime;
-    }
-
-    public String getContractEndTime() {
-        return contractEndTime;
-    }
-
-    public void setContractEndTime(String contractEndTime) {
-        this.contractEndTime = contractEndTime;
     }
 
     public Integer getProfileIntegrity() {
@@ -266,20 +266,52 @@ public class OrganizationMemberV2DTO {
         this.groups = groups;
     }
 
-    public String getCheckInTime() {
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(Date employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public Date getCheckInTime() {
         return checkInTime;
     }
 
-    public void setCheckInTime(String checkInTime) {
+    public void setCheckInTime(Date checkInTime) {
         this.checkInTime = checkInTime;
     }
 
-    public Byte getEmployeeType() {
-        return employeeType;
+    public Date getEndTime() {
+        return endTime;
     }
 
-    public void setEmployeeType(Byte employeeType) {
-        this.employeeType = employeeType;
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override

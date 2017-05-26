@@ -10,17 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import com.everhomes.server.schema.tables.records.*;
+import javafx.scene.control.Tab;
+import jdk.nashorn.internal.scripts.JO;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -50,42 +46,11 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationJobPositionStatus;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionMapsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.User;
@@ -3381,4 +3346,167 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
 		return ConvertHelper.convert(dao.findById(id), ImportFileTask.class);
 	}
+
+    @Override
+    public List<Object[]> findContractEndTimeById(List<Long> detailIds) {
+        final List<Object[]> response = new ArrayList<>();
+
+//        Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
+
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class),
+                null, (DSLContext context, Object reducingContext) -> {
+                    Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
+                    List<Object[]> list = context.select(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID,DSL.max(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME))
+                            .from(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS)
+                            .where(condition)
+                            .groupBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID)
+                            .fetchInto(Object[].class);
+                    if(list !=null)
+                        response.addAll(list);
+                    return true;
+                });
+        return response;
+
+/*        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class),
+                null, (DSLContext context, Object reducingContext) -> {
+            Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
+            List<Object[]> list = context.select(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID,DSL.max(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME))
+                    .from(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS)
+                    .where(condition)
+                    .groupBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID)
+                    .fetchInto(Object[].class);
+            if(list !=null)
+                response.addAll(list);
+            return true;
+        });
+        return response;*/
+
+    }
+
+    @Override
+    public List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator, Integer pageSize, Organization org, List<String> groupTypes, String keywords) {
+
+        List<OrganizationMemberDetails> result = new ArrayList<>();
+        pageSize = pageSize + 1;
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes);
+
+        if (null != locator && null != locator.getAnchor())
+            condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(locator.getAnchor());
+        // 若只对应部门字段的人员
+        // condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId()));
+        // 若需要部门下的所有人员
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
+        // 添加关键字
+        if (!StringUtils.isEmpty(keywords)) {
+            condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
+        }
+        // 开始查找
+        context.select()
+                .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .join(Tables.EH_ORGANIZATION_MEMBERS, JoinType.JOIN)
+                .on(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID))
+                .where(condition)
+                .groupBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN)
+                .orderBy(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.desc())
+                .fetch().map(r -> {
+            result.add(RecordHelper.convert(r, OrganizationMemberDetails.class));
+            return null;
+        });
+
+        if (null != locator)
+            locator.setAnchor(null);
+
+        if (result.size() >= pageSize) {
+            result.remove(result.size() - 1);
+            locator.setAnchor(result.get(result.size() - 1).getId());
+        }
+
+        return result;
+/*
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+
+		if(null != queryBuilderCallback)
+			queryBuilderCallback.buildCondition(locator, query);
+		if(null != locator && null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+
+
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		if(null!= locator)
+			locator.setAnchor(null);
+
+		if(result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+ */
+    }
+
+
+	@Override
+	public OrganizationMemberDetails findOrganizationMemberDetailsByMemberId(Long memberId) {
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(memberId);
+
+        List<OrganizationMemberDetails> result  = new ArrayList<OrganizationMemberDetails>();
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.where(condition);
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, OrganizationMemberDetails.class));
+            return null;
+        });
+
+        if(null != result && 0 != result.size()){
+            return result.get(0);
+        }
+        return null;
+	}
+
+    public void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails) {
+        member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        if (null == VisibleFlag.fromCode(member.getVisibleFlag())) {
+            member.setVisibleFlag(VisibleFlag.SHOW.getCode());
+        }
+        if (member.getNamespaceId() == null) {
+            Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+            member.setNamespaceId(namespaceId);
+            memberDetails.setNamespaceId(namespaceId);
+        }
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
+        member.setId(id);
+        memberDetails.setId(id);
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+        EhOrganizationMemberDetailsDao dao2 = new EhOrganizationMemberDetailsDao(context.configuration());
+        dao.insert(member);
+        dao2.insert(memberDetails);
+        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER) {
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, member.getId());
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberDetails.class, memberDetails.getId());
+
+        }
+        /*member.setId(id);
+        memberDetails.setId(id);
+		organization.setPath(organization.getPath() + "/" + id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationsDaodao = new EhOrganizationsDao(context.configuration());
+		dao.insert(organization);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);*/
+    }
 }
