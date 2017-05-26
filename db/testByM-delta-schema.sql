@@ -50,14 +50,14 @@ CREATE TABLE `eh_organization_member_educations` (
   `id` BIGINT NOT NULL COMMENT 'id for records',
   `detail_id` BIGINT NOT NULL COMMENT 'id for members, reference for eh_organization_member_details id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `schoole_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the member''s school name',
+  `school_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the member''s school name',
   `degree` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'doctor, master, bachelor, etc',
   `major` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the major of the member',
   `enrollment_time` DATE NOT NULL COMMENT 'the time to start a new semester',
   `graduation_time` DATE NOT NULL COMMENT 'when the member graduated form the school',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  `status` TINYINT COMMENT '0: inactive, 1: active',
+  `status` TINYINT COMMENT '0: inactive, 3: active',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -77,7 +77,7 @@ CREATE TABLE `eh_organization_member_work_experiences` (
   `departure_time` DATE NOT NULL COMMENT 'timing of quit the job',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  `status` TINYINT COMMENT '0: inactive, 1: active',
+  `status` TINYINT COMMENT '0: inactive, 3: active',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -97,7 +97,7 @@ CREATE TABLE `eh_organization_member_insurances` (
   `end_time` DATE NOT NULL COMMENT '到期时间',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  `status` TINYINT COMMENT '0: inactive, 1: active',
+  `status` TINYINT COMMENT '0: inactive, 3: active',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -115,7 +115,7 @@ CREATE TABLE `eh_organization_member_contracts` (
   `end_time` DATE NOT NULL COMMENT '到期时间',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
-  `status` TINYINT COMMENT '0: inactive, 1: active',
+  `status` TINYINT COMMENT '0: inactive, 3: active',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
