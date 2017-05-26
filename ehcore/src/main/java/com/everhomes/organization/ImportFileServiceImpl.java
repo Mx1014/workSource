@@ -57,6 +57,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                     task.setStatus(ImportFileTaskStatus.EXECUTING.getCode());
                     organizationProvider.updateImportFileTask(task);
                     ImportFileResponse response = callback.importFile();
+                    LOGGER.info("complete import file response: {}", response);
                     task.setStatus(ImportFileTaskStatus.FINISH.getCode());
                     task.setResult(StringHelper.toJsonString(response));
                 }catch (Exception e){
@@ -64,6 +65,7 @@ public class ImportFileServiceImpl implements ImportFileService{
                     task.setStatus(ImportFileTaskStatus.EXCEPTION.getCode());
                     task.setResult(e.toString());
                 }finally {
+                    LOGGER.info("finally task: {}", task);
                     organizationProvider.updateImportFileTask(task);
                 }
 
