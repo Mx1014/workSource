@@ -205,3 +205,7 @@ ALTER TABLE `eh_activity_roster` ADD COLUMN `cancel_time` DATETIME NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `entry_id` BIGINT(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace' AFTER `owner_id`;
 
 -- merge from activity-3.0.0 20170524 end
+
+
+-- 修改日志表中备注长度，add by tt, 20170526
+ALTER TABLE `eh_express_order_logs`	CHANGE COLUMN `remark` `remark` TEXT;
