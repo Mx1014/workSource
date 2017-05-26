@@ -142,6 +142,7 @@ CREATE TABLE `eh_organization_member_profile_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT NOT NULL COMMENT 'id for detail records';
+ALTER TABLE `eh_organization_members` DROP detail_id;
+-- ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
 SET FOREIGN_KEY_CHECKS = 1;
