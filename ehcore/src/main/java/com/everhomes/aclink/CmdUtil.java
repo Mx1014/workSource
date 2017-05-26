@@ -18,7 +18,7 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
-    private final static int EXPIRE_TIME = (30*24*3600);
+    private final static int EXPIRE_TIME = (2*30*24*3600);//2 months
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
@@ -160,7 +160,7 @@ public class CmdUtil {
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
         int expireTime = curTime + EXPIRE_TIME;
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
-        byte[] curTimeBytes = DataUtil.intToByteArray(curTime + EXPIRE_TIME);
+        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
         System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
         System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
