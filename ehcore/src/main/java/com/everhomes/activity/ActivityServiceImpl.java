@@ -371,10 +371,17 @@ public class ActivityServiceImpl implements ActivityService {
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
     	
+    	LOGGER.debug("Before  enter.");
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+    		LOGGER.debug("Enter Success.");
+    		return null;
+    	});
+    	LOGGER.debug("Exit Enter.");
     	// 把锁放在查询语句的外面，update by tt, 20170210
-    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+    	return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
 
+	        	long signupStatStartTime = System.currentTimeMillis();
 		        User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
 		        if (activity == null) {
@@ -382,6 +389,30 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
 		        }
+        
+		        Post post = forumProvider.findPostById(activity.getPostId());
+		        if (post == null) {
+		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+		        }
+		        
+		        //如果有正常的报名，则直接返回， ActivityDTO的处理方法有下面整合   add by yanjun 20170525
+		        ActivityRoster oldRoster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId(), ActivityRosterStatus.NORMAL.getCode());
+		        if(oldRoster != null){
+		        	ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+
+		        	//提取成一个方法   add  by yanjun 20170525
+		        	populateActivityDto(dto, activity, oldRoster, post);
+
+		        	fixupVideoInfo(dto);//added by janson
+
+		        	//add by yanjun 20170512
+		        	dto.setUserRosterId(oldRoster.getId());
+
+		        	return dto;
+		        }
+		        
 		        //检查是否超过报名人数限制, add by tt, 20161012
 		        // 因为使用新规则已报名=已确认。  如果活动不需要确认在报名时限制人数，如果活动需要确认则在确认时限制。     add by yanjun 20170503
 		        if (activity.getConfirmFlag() != null && activity.getConfirmFlag().intValue() == 0 && activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
@@ -397,13 +428,8 @@ public class ActivityServiceImpl implements ActivityService {
 		                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
 							"beyond activity signup end time!");
 				}
-        
-		        Post post = forumProvider.findPostById(activity.getPostId());
-		        if (post == null) {
-		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
-		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
-		        }
+		        
+		        long rosterStatStartTime = System.currentTimeMillis();
 		        ActivityRoster roster = createRoster(cmd, user, activity);
 	        	//去掉报名评论 by xiongying 20160615
 	//            Post comment = new Post();
@@ -462,22 +488,10 @@ public class ActivityServiceImpl implements ActivityService {
 	            activityProvider.updateActivity(activity);
 //	            return status;
 	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-	            dto.setActivityId(activity.getId());
-	            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-	            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-	            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-	            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-	            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
-	            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
-	            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
-	            dto.setFamilyId(activity.getCreatorFamilyId());
-	            dto.setGroupId(activity.getGroupId());
-	            dto.setStartTime(activity.getStartTime().toString());
-	            dto.setStopTime(activity.getEndTime().toString());
-	            dto.setSignupEndTime(getSignupEndTime(activity).toString());
-	            dto.setProcessStatus(getStatus(activity).getCode());
-	            dto.setForumId(post.getForumId());
-	            dto.setPosterUrl(getActivityPosterUrl(activity));
+	            
+	            //提取成一个方法   add  by yanjun 20170525
+	            populateActivityDto(dto, activity, roster, post);
+	            
 	            fixupVideoInfo(dto);//added by janson
 	            
 	            //add by yanjun 20170512
@@ -517,10 +531,39 @@ public class ActivityServiceImpl implements ActivityService {
 		        	
 		            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR_CONFIRM, meta);
 	            }
+	            long signupStatEndTime = System.currentTimeMillis();
+	            LOGGER.debug("Signup success, totalElapse={}, rosterElapse={}, cmd={}", (signupStatEndTime - signupStatStartTime), 
+	            		(signupStatEndTime - rosterStatStartTime), cmd);
 	            return dto;
 	        });
         }).first();
 	 }
+    
+    /**
+     * 由signup方法提取处理，填充各种信息
+     * @param dto
+     * @param activity
+     * @param roster
+     * @param post
+     */
+    private void populateActivityDto(ActivityDTO dto, Activity activity, ActivityRoster roster, Post post){
+    	dto.setActivityId(activity.getId());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+        dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setGroupId(activity.getGroupId());
+        dto.setStartTime(activity.getStartTime().toString());
+        dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
+        dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setForumId(post.getForumId());
+        dto.setPosterUrl(getActivityPosterUrl(activity));
+    }
     
     /**
      * 填充新订单信息，订单id、支付状态、时间等
@@ -546,8 +589,10 @@ public class ActivityServiceImpl implements ActivityService {
      * @param activityId
      */
     private void cancelExpireRosters(Long activityId){
+    	long startTime = System.currentTimeMillis();
     	Activity activity = activityProvider.findActivityById(activityId);
     	if(activity == null || activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() != ActivityChargeFlag.CHARGE.getCode()){
+    		LOGGER.warn("No need to cancel expire rosters, activityId={}, activity={}", activityId, activity);
     		return;
     	}
     	
@@ -562,6 +607,8 @@ public class ActivityServiceImpl implements ActivityService {
     		}
     		
     	}
+    	long endTime = System.currentTimeMillis();
+    	LOGGER.debug("Cancel expire rosters, activityId={}, elapse={}", activityId, (endTime - startTime));
     }
 
 	@Override
@@ -614,7 +661,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
     	Activity outActivity = checkActivityExist(cmd.getActivityId());
-    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
+    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
 		    	User user = UserContext.current().getUser();
 		    	// 锁里面要重新查询活动
@@ -778,7 +825,7 @@ public class ActivityServiceImpl implements ActivityService {
 	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
 		// 签到的话活动表对应字段+1
 		if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.UN_CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.CHECKIN) {
-			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 				Activity activity = activityProvider.findActivityById(roster.getActivityId());
 				activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
 		                + (roster.getAdultCount() + roster.getChildCount()));
@@ -805,7 +852,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
 			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
@@ -1019,7 +1066,7 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	private void updateActivityWhenDeleteRoster(ActivityRoster roster) {
-		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			int total = roster.getAdultCount() + roster.getChildCount();
 			int result = 0;
 			Activity activity = activityProvider.findActivityById(roster.getActivityId());
@@ -1178,9 +1225,9 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
 		
-		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+		return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
-	        	
+	        	long cancelStartTime = System.currentTimeMillis();
 	        	//cmd中用户Id，该字段当前仅用于定时取消订单时无法从UserContext.current中获取用户
 	        	User user = null;
 	        	if(cmd.getUserId() != null){
@@ -1250,7 +1297,8 @@ public class ActivityServiceImpl implements ActivityService {
 	             map.put("userName", user.getNickName());
 	             map.put("postName", activity.getSubject());
 	             sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR, null);
-	             
+	             long cancelEndTime = System.currentTimeMillis();
+	             LOGGER.debug("Canel the activity signup, elapse={}, cmd={}", (cancelEndTime - cancelStartTime), cmd);
 	             return dto;
 	        	
 	        });
@@ -1258,6 +1306,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
 	public void signupOrderRefund(Activity activity, Long userId){
+		long startTime = System.currentTimeMillis();
 		ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), userId, ActivityRosterStatus.NORMAL.getCode());
 		
 		//只有需要支付并已经支付的才需要退款
@@ -1295,13 +1344,18 @@ public class ActivityServiceImpl implements ActivityService {
 			roster.setRefundAmount(roster.getPayAmount());
 			roster.setRefundTime(new Timestamp(timestamp));
 			activityProvider.updateRoster(roster);
+			LOGGER.debug("Refund from vendor successfully, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 		}
 		else{
-			LOGGER.error("bill id=["+roster.getOrderNo()+"] refound error param is "+refundCmd.toString());
+			LOGGER.error("Refund failed from vendor, orderNo={}, userId={}, activityId={}, refundCmd={}, response={}", 
+					roster.getOrderNo(), userId, activity.getId(), refundCmd, refundResponse);
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
 							"bill  refound error"); 
-		}	
+		}
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("Refund from vendor, userId={}, activityId={}, elapse={}", userId, activity.getId(), (endTime - startTime));
 	}
 	
 	/***给支付相关的参数签名*/
@@ -1761,7 +1815,7 @@ public class ActivityServiceImpl implements ActivityService {
     	}
 
     	//在锁内部更新报名和活动信息  add by yanjun 20170522
-    	return (ActivityDTO) this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+itemTemp.getActivityId()).enter(()-> {
+    	return (ActivityDTO) this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
     		
     		//在锁内部重新活动信息  add by yanjun 20170522
     		ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
@@ -1975,7 +2029,7 @@ public class ActivityServiceImpl implements ActivityService {
     	}
 
     	//在锁内部更新报名和活动信息  add by yanjun 20170522
-    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+rosterTemp.getActivityId()).enter(()-> {
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 
     		//在锁内部重新查询报名信息  add by yanjun 20170522
     		ActivityRoster roster = activityProvider.findRosterById(cmd.getRosterId());
@@ -5156,7 +5210,7 @@ public class ActivityServiceImpl implements ActivityService {
 		if(listIds != null){
 			for(int i=0; i< listIds.size(); i++){
 				Long activityId = listIds.get(i);
-				this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+activityId).enter(()-> {
+				this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 					Activity activity = activityProvider.findActivityById(activityId);
 					
 					//找不到活动不同步
