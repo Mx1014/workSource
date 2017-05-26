@@ -7,7 +7,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 添加菜单，add by tt, 20170504
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40700, '快递管理', 40000, NULL, NULL, 1, 2, '/40000/70100', 'park', 495, 40700);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '快递员管理', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40710, '快递员设置', 40700, NULL, 'react:/deliver-management/permission-setting/40700', 0, 2, '/40000/40700/40710', 'park', 496, 40700);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40720, '订单记录', 40700, NULL, 'react:/deliver-management/order-record/40700', 0, 2, '/40000/40700/40720', 'park', 497, 40700);
 
 -- 添加权限，add by tt, 20170504
