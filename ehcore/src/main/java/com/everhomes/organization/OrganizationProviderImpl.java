@@ -3372,7 +3372,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
 		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
 		importFileTask.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("update executeTask importFileTask: {}", importFileTask);
 		dao.update(importFileTask);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhImportFileTasks.class, importFileTask.getId());
 	}
 
 	@Override

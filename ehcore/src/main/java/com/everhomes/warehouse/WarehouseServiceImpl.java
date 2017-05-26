@@ -840,11 +840,9 @@ public class WarehouseServiceImpl implements WarehouseService {
                     }
 
                     List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
-                    LOGGER.error("importWarehouseMaterialCategoriesData, results = {}" , results);
                     response.setTotalCount((long)datas.size());
                     response.setFailCount((long)results.size());
                     response.setLogs(results);
-                    LOGGER.error("importWarehouseMaterialCategoriesData, response = {}" , response);
                     return response;
                 }
             }, task);
