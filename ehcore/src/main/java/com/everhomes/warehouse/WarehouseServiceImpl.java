@@ -48,6 +48,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -755,8 +757,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         row.createCell(++i).setCellValue(dto.getUnitName());
         row.createCell(++i).setCellValue(dto.getRequestUserName());
         row.createCell(++i).setCellValue(dto.getDeliveryUserName());
-
-        row.createCell(++i).setCellValue(dfDate.format(dto.getCreateTime().toInstant()));
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(dto.getCreateTime().toInstant(), ZoneId.systemDefault());
+        String format = localDateTime.format(dfDate);
+        row.createCell(++i).setCellValue(format);
 
     }
 
