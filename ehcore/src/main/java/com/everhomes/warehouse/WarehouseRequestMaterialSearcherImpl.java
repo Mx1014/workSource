@@ -25,6 +25,8 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,6 +157,10 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
 
+        if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
+            builder.addSort(SortBuilders.fieldSort("requestTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        }
+
         SearchResponse rsp = builder.execute().actionGet();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("query warehouse request material :{}", builder);
@@ -184,6 +190,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
             WarehouseRequests request = warehouseProvider.findWarehouseRequests(material.getRequestId(), material.getOwnerType(), material.getOwnerId());
             if(request != null && request.getRequestUid() != null) {
                 b.field("requestUid", request.getRequestUid());
+                b.field("requestTime", request.getCreateTime());
                 List<OrganizationMember> members = organizationProvider.listOrganizationMembers(request.getRequestUid());
                 if(members != null && members.size() > 0) {
                     b.field("requestUserName", members.get(0).getContactName());
