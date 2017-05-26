@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.organization.pmsy.OrganizationMemberRecordMapper;
 import com.everhomes.server.schema.tables.daos.*;
 import com.everhomes.server.schema.tables.pojos.*;
 
@@ -199,11 +200,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(phone));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		//added by wh 2016-10-13 把被拒绝的过滤掉
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-		query.fetch().map((r) -> {
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		List<EhOrganizationMembersRecord> records = query.fetch().map(new OrganizationMemberRecordMapper());
+		records.stream().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
@@ -259,7 +261,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
 			.fetchAny();
-		
+
+//		context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+//				.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+//				.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+//				.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+//				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
+
 		if (record != null) {
 			return record.map(r->ConvertHelper.convert(r, OrganizationMember.class));
 		}
