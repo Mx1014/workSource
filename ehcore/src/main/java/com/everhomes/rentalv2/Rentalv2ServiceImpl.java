@@ -44,6 +44,9 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
 import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
+import com.everhomes.user.*;
 import net.greghaines.jesque.Job;
 
 
@@ -130,10 +133,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -200,6 +199,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private AppProvider appProvider;
 	@Autowired
 	private OrderUtil commonOrderUtil;
+	@Autowired
+	private UserService userService;
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -730,6 +731,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if(null != timeIntervals) {
 			timeIntervals.forEach(t -> {
+				if (t.getEndTime() > t.getBeginTime()) {
+					throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_TIME_STEP, "Invalid parameter");
+				}
 				RentalTimeInterval timeInterval = ConvertHelper.convert(t, RentalTimeInterval.class);
 				timeInterval.setOwnerType(ownerType);
 				timeInterval.setOwnerId(ownerId);
@@ -3461,7 +3466,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<>());
 
-		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime());
+		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken());
 		return response;
 	}
 	
@@ -3493,7 +3498,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<>());
 
-		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime());
+		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken());
 		//按小时预订的,给客户端找到每一个时间点
 		if(rs.getRentalType().equals(RentalType.HOUR.getCode())){
 			List<RentalTimeInterval> timeIntervals = this.rentalv2Provider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
@@ -3551,14 +3556,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void processDayRuleDTOs(Calendar start ,Calendar end , List<RentalSiteDayRulesDTO> dtos,Long siteId ,
-			RentalResource rs, Long anchorTime ){
+			RentalResource rs, Long anchorTime, String sceneToken){
 
 		java.util.Date reserveTime = new java.util.Date(); 
 //		java.util.Date nowTime = new java.util.Date();
 //		response.setContactNum(rs.getContactPhonenum());
 		Timestamp beginTime = new Timestamp(reserveTime.getTime()
 				+ rs.getRentalStartTime());
-		
+
+		//解析场景信息
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != sceneToken) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
+		}
+
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			dtos.add(dayDto);
@@ -3571,6 +3583,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
 				for (RentalCell rsr : rentalSiteRules) {
 					RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
+
+					//根据场景来设置价格
+					setRentalsiteRulePrice(sceneTokenDTO, dto);
+
 					dto.setId(rsr.getId()); 
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						dto.setTimeStep(rsr.getTimeStep());
@@ -3637,6 +3653,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 	}
+
+	private void setRentalsiteRulePrice(SceneTokenDTO sceneTokenDTO, RentalSiteRulesDTO dto){
+		//目前非认证用户，不能预订，后续功能让非认证用户可以使用预订之后
+		if (null != sceneTokenDTO) {
+			String scene = sceneTokenDTO.getScene();
+
+			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+				dto.setPrice(dto.getOrgMemberPrice());
+				dto.setOriginalPrice(dto.getOrgMemberOriginalPrice());
+			}
+		}
+	}
+
+
 	@Override
 	public FindAutoAssignRentalSiteWeekStatusResponse findAutoAssignRentalSiteWeekStatus(
 			FindAutoAssignRentalSiteWeekStatusCommand cmd) {

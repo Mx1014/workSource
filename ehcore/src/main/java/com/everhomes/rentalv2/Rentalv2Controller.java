@@ -133,10 +133,10 @@ public class Rentalv2Controller extends ControllerBase {
 	/**
 	 * <b>URL: /rental/findAutoAssignRentalSiteWeekStatus</b>
 	 * <p>
-	 * 查询带场所编号的资源一周的单元格
+	 * 查询带场所编号的资源一周的单元格 (已经没有使用，可能老版本客户端会使用)
 	 * </p>
 	 */
-
+	@Deprecated
 	@RequestMapping("findAutoAssignRentalSiteWeekStatus")
 	@RestReturn(value = FindAutoAssignRentalSiteWeekStatusResponse.class)
 	public RestResponse findAutoAssignRentalSiteWeekStatus(@Valid FindAutoAssignRentalSiteWeekStatusCommand cmd) {
