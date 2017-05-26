@@ -1178,6 +1178,22 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public void createRequest(CreateRequestCommand cmd) {
+        if(WarehouseStockRequestType.STOCK_OUT.equals(WarehouseStockRequestType.fromCode(cmd.getRequestType()))) {
+            if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+                cmd.getStocks().forEach(stock -> {
+                    WarehouseStocks warehouseStocks = warehouseProvider.findWarehouseStocksByWarehouseAndMaterial(stock.getWarehouseId(), stock.getMaterialId(), cmd.getOwnerType(), cmd.getOwnerId());
+                    if (warehouseStocks == null || warehouseStocks.getAmount().compareTo(stock.getAmount()) < 0) {
+                        LOGGER.error("warehouse stock is not enough, warehouseId = " + stock.getWarehouseId()
+                                + ", materialId = " + stock.getMaterialId());
+                        throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                                localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                        String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE),
+                                        UserContext.current().getUser().getLocale(),"warehouse stock is not enough"));
+                    }
+                });
+            }
+        }
+
         Long uid = UserContext.current().getUser().getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         dbProvider.execute((TransactionStatus status) -> {
