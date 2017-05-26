@@ -6895,16 +6895,16 @@ System.out.println();
          // send notification to who is requesting to join the enterprise
         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
 
-        // QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
+        QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
 
 		// send notification to who is requesting to join the enterprise
-        List<Long> includeList = new ArrayList<Long>();
+        List<Long> includeList = new ArrayList<>();
 
         includeList.add(member.getTargetId());
         sendEnterpriseNotificationUseSystemUser(includeList, null, notifyTextForApplicant);
 
 		//同意加入公司通知客户端  by sfyan 20160526
-		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, new QuestionMetaObject());
+		sendEnterpriseNotification(includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
@@ -7043,16 +7043,12 @@ System.out.println();
         }
 	}
 
-	private void sendEnterpriseNotification(Long groupId,
-			List<Long> includeList, List<Long> excludeList, String message,
+	private void sendEnterpriseNotification(List<Long> includeList, List<Long> excludeList, String message,
 			MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
 		if (message != null && message.length() != 0) {
-			String channelType = MessageChannelType.USER.getCode();
-			String channelToken = String.valueOf(groupId);
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
-			messageDto.setChannels(new MessageChannel(channelType, channelToken));
 			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
 			messageDto.setBody(message);
 			messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
@@ -7071,10 +7067,15 @@ System.out.println();
 						StringHelper.toJsonString(metaObject));
 			}
 
-			messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
-					AppConstants.APPID_MESSAGING, channelType, channelToken,
-					messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-		}
+            if (includeList != null) {
+                for (Long targetId : includeList) {
+                    messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                }
+            }
+        }
 	}
 
 	private void sendEnterpriseNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
