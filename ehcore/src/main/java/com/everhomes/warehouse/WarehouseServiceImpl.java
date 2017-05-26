@@ -840,9 +840,11 @@ public class WarehouseServiceImpl implements WarehouseService {
                     }
 
                     List<ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO>> results = importWarehouseMaterialCategoriesData(cmd, datas, userId);
+                    LOGGER.error("importWarehouseMaterialCategoriesData, results = {}" , results);
                     response.setTotalCount((long)datas.size());
                     response.setFailCount((long)results.size());
                     response.setLogs(results);
+                    LOGGER.error("importWarehouseMaterialCategoriesData, response = {}" , response);
                     return response;
                 }
             }, task);
@@ -1111,63 +1113,6 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouseProvider.creatWarehouseMaterialCategories(category);
             warehouseMaterialCategorySearcher.feedDoc(category);
         });
-//        for (ImportWarehouseMaterialCategoryDataDTO str : list) {
-//            ImportFileResultLog<ImportWarehouseMaterialCategoryDataDTO> log = new ImportFileResultLog<>(WarehouseServiceErrorCode.SCOPE);
-//            WarehouseMaterialCategories category = new WarehouseMaterialCategories();
-//
-//            if(StringUtils.isBlank(str.getName())){
-//                LOGGER.error("warehouse material category name is null, data = {}", str);
-//                log.setData(str);
-//                log.setErrorLog("warehouse material category name is null");
-//                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL);
-//                errorDataLogs.add(log);
-//                continue;
-//            }
-//            category.setName(str.getName());
-//
-//            if(StringUtils.isBlank(str.getCategoryNumber())){
-//                LOGGER.error("warehouse material category number is null, data = {}", str);
-//                log.setData(str);
-//                log.setErrorLog("warehouse material category number is null");
-//                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_IS_NULL);
-//                errorDataLogs.add(log);
-//                continue;
-//            }
-//
-//            WarehouseMaterialCategories exist = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
-//            if(exist != null) {
-//                LOGGER.error("material categoty number already exist, data = {}, cmd = {}" , str, cmd);
-//                log.setData(str);
-//                log.setErrorLog("material categoty number already exist");
-//                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST);
-//                errorDataLogs.add(log);
-//                continue;
-//            }
-//            category.setCategoryNumber(str.getCategoryNumber());
-//            category.setPath("");
-//            if(!StringUtils.isBlank(str.getParentCategoryNumber())) {
-//                WarehouseMaterialCategories parent = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getParentCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
-//                if(parent == null) {
-//                    LOGGER.error("material categoty parent number is not exist, data = {}, cmd = {}" , str, cmd);
-//                    log.setData(str);
-//                    log.setErrorLog("material categoty parent number is not exist");
-//                    log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST);
-//                    errorDataLogs.add(log);
-//                    continue;
-//                }
-//                category.setParentId(parent.getId());
-//                category.setPath(parent.getPath());
-//            }
-//
-//
-//            category.setOwnerType(cmd.getOwnerType());
-//            category.setOwnerId(cmd.getOwnerId());
-//            category.setNamespaceId(namespaceId);
-//            category.setCreatorUid(userId);
-//            warehouseProvider.creatWarehouseMaterialCategories(category);
-//            warehouseMaterialCategorySearcher.feedDoc(category);
-//        }
-        LOGGER.error("importWarehouseMaterialCategoriesData, errorDataLogs = {}" , errorDataLogs);
         return errorDataLogs;
     }
 
