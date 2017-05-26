@@ -164,6 +164,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
         SearchResponse rsp = builder.execute().actionGet();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("query warehouse request material :{}", builder);
+            LOGGER.debug("query warehouse request material rsp :{}", rsp);
         }
 
         List<Long> ids = getIds(rsp);
