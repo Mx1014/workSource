@@ -325,5 +325,8 @@ public interface OrganizationProvider {
 
 	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
 
+    void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
+
 	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id);
+
 }

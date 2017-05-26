@@ -3490,12 +3490,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);*/
     }
 
+    public void createOranizationMemberEducationInfo(OrganizationMemberEducations education){
+	    Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberEducations.class));
+	    education.setId(id);
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+	    EhOrganizationMemberEducationsDao dao = new EhOrganizationMemberEducationsDao(context.configuration());
+	    dao.insert(education);
+	    DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberEducations.class, id);
+    }
+
     public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id){
 
 	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 	    List<OrganizationMemberEducations> result = new ArrayList<>();
 	    SelectQuery<EhOrganizationMemberEducationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS);
 	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.DETAIL_ID.eq(id));
+	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 	    query.fetch().map(r -> {
 	        result.add(ConvertHelper.convert(r,OrganizationMemberEducations.class));
 	        return null;
