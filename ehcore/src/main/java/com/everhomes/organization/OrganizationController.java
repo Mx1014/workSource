@@ -39,10 +39,10 @@ public class OrganizationController extends ControllerBase {
 
 	@Autowired
 	private OrganizationService organizationService;
-	
+
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
-	
+
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
 
@@ -92,7 +92,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /org/addOrgMemberByPhone</b>
 	 * <p>申请成为组织管理员，直接在orgMember表新增记录</p>
@@ -166,7 +166,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
      * <b>URL: /org/listOrganizationCommunitiesV2</b>
      * <p>根据机构ID列出机构所管辖的小区信息，与listOrganizationCommunities的区别是返回值是CommunityDTO</p>
@@ -222,7 +222,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("queryOrgTopicsByCategory")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
-		
+
 		/*是PM_ADMIN的场景下*/
 		if(null != cmd.getOrganizationId()){
 			/**
@@ -295,7 +295,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}*/    
+	}*/
 
 	//行政热线
 	/**
@@ -448,16 +448,16 @@ public class OrganizationController extends ControllerBase {
 	public RestResponse rejectOrganization(@Valid RejectOrganizationCommand cmd) throws Exception {
 
 		int status = organizationService.rejectOrganization(cmd);
-		
+
 		RestResponse response = new RestResponse(status);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /org/userExitOrganization</b>
-	 * @return 
+	 * @return
 	 */
 	@RequestMapping("userExitOrganization")
 	@RestReturn(String.class)
@@ -468,9 +468,9 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//move from pm to organization
-	
+
 	//1. 根据topicId获取贴详情
 	//pm 也有 ： getPmTopic
 	/**
@@ -487,7 +487,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//2. 获取贴评论列表
 	//pm listPmTopicComments
 	/**
@@ -498,13 +498,13 @@ public class OrganizationController extends ControllerBase {
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse listOrgTopicComments(@Valid ListTopicCommentCommand cmd) {
 		ListPostCommandResponse cmdResponse = organizationService.listTopicComments(cmd);
-		
+
 		RestResponse response = new RestResponse(cmdResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//3. 发表评论
 	//pm newPmComment
 	/**
@@ -521,7 +521,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	 
+
 	//4. 赞
 	//likeOrgTopic is exist in organizationController,PropertyMgrController is likePmTopic and it same to likeOrgTopic of its comments.
 	/**
@@ -557,7 +557,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//6. 拉报修贴列表
 	/**
 	 * <b>URL: /org/listTopicsByType</b>
@@ -572,8 +572,8 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
-	
+
+
 	//7. 报修贴分配人员
 	/**
 	 * <b>URL: /org/assignOrgTopic</b>
@@ -588,7 +588,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//8. 报修贴修改状态
 	/**
 	 * <b>URL: /org/setOrgTopicStatus</b>
@@ -603,7 +603,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	//9. 人员管理通过管理员
 	/**
 	 * <b>URL: /org/approveOrganizationMember</b>
@@ -633,7 +633,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>/org/deleteOrgMember</b>
 	 * <p>删除组织成员</p>
@@ -647,7 +647,7 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * <b>URL: /org/userJoinOrganization</b>
 	 * <p>用户加入组织，若组织不存在，则创建</p>
@@ -656,14 +656,14 @@ public class OrganizationController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse userJoinOrganization(@Valid UserJoinOrganizationCommand cmd){
 		this.organizationService.userJoinOrganization(cmd);
-		
+
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-		
+
 	}
-	
+
     /**
      * <b>URL: /org/updateTopicPrivacy</b>
      * <p>设置帖子是否公开</p>
@@ -672,13 +672,13 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateTopicPrivacy(UpdateTopicPrivacyCommand cmd){
         this.organizationService.updateTopicPrivacy(cmd);
-        
+
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/listUserTask</b>
      * <p>查询分配给自己的任务</p>
@@ -687,13 +687,13 @@ public class OrganizationController extends ControllerBase {
     @RestReturn(value=ListTopicsByTypeCommandResponse.class)
     public RestResponse listUserTask(ListUserTaskCommand cmd){
     	ListTopicsByTypeCommandResponse tasks = this.organizationService.listUserTask(cmd);
-        
+
         RestResponse response = new RestResponse(tasks);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/searchTopicsByType</b>
      * <p>搜索任务贴</p>
@@ -707,10 +707,10 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-    
-    
-    
-    
+
+
+
+
     /**
      * <b>URL: /org/searchEnterprise</b>
      * <p>搜索企业</p>
@@ -724,7 +724,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/searchOrganization</b>
      * <p>搜索 机构</p>
@@ -738,8 +738,8 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
+
+
     /**
      * <b>URL: /org/listEnterprises</b>
      * <p>企业列表</p>
@@ -754,7 +754,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/applyForEnterpriseContact</b>
      * <p>申请加入企业</p>
@@ -800,14 +800,14 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/verifyEnterpriseContact</b>
      * <p>通过点击邮箱认证通过认证申请</p>
      * @return {@link String}
-     * @throws IOException 
+     * @throws IOException
      */
     @RequestMapping("verifyEnterpriseContact")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
     public void verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd,HttpServletRequest request, HttpServletResponse response) throws IOException {
     	String redirectUrl = this.organizationService.verifyEnterpriseContact(cmd);
-    	response.sendRedirect(redirectUrl);  
+    	response.sendRedirect(redirectUrl);
     }
     /**
      * <b>URL: /org/leaveForEnterpriseContact</b>
@@ -816,14 +816,14 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("leaveForEnterpriseContact")
     @RestReturn(value=String.class)
     public RestResponse leaveForEnterpriseContact(@Valid LeaveEnterpriseCommand cmd) {
-    
+
         this.organizationService.leaveForEnterpriseContact(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/listCommunitiesByOrganizationId</b>
      * <p>机构官署的小区</p>
@@ -838,7 +838,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
     /**
      * <b>URL: /org/syncOwnerIndex</b>
      * <p>搜索索引同步 TODO: 求敢哥优化</p>
@@ -853,7 +853,7 @@ public class OrganizationController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
-    
+
     /**
      * <b>URL: /org/ listUserRelatedEnterprises</b>
      * <p>列出个人相关的企业</p>
@@ -865,14 +865,14 @@ public class OrganizationController extends ControllerBase {
         RestResponse res = new RestResponse(organizationService.listUserRelateEnterprises(cmd));
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
-        
+
         return res;
       }
-    
+
      /**
       * <b>URL: /org/listOrganizationTopics</b>
       * <p>机构人员的帖子查询</p>
-      * @return 
+      * @return
       */
       @RequestMapping("listOrganizationTopics")
       @RestReturn(value=ListPostCommandResponse.class)
@@ -880,10 +880,10 @@ public class OrganizationController extends ControllerBase {
          RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");
-         
+
          return res;
       }
-      
+
       /**
        * <b>URL: /org/checkOfficalPrivilegeByScene</b>
        * <p>检查是否具有官方的权限</p>
@@ -894,10 +894,10 @@ public class OrganizationController extends ControllerBase {
     	  RestResponse res = new RestResponse(organizationService.checkOfficalPrivilegeByScene(cmd));
           res.setErrorCode(ErrorCodes.SUCCESS);
           res.setErrorDescription("OK");
-          
+
           return res;
       }
-      
+
       /**
        * <b>URL: /org/checkOfficalPrivilege</b>
        * <p>检查是否具有官方的权限</p>
@@ -908,10 +908,10 @@ public class OrganizationController extends ControllerBase {
     	  RestResponse res = new RestResponse(organizationService.checkOfficalPrivilege(cmd));
           res.setErrorCode(ErrorCodes.SUCCESS);
           res.setErrorDescription("OK");
-          
+
           return res;
       }
-      
+
       /**
        * <b>URL: /org/listOrganizationPersonnelsByRoleIds</b>
        * <p>查看角色人员</p>
@@ -922,7 +922,7 @@ public class OrganizationController extends ControllerBase {
     	  RestResponse res = new RestResponse(organizationService.listOrganizationPersonnelsByRoleIds(cmd));
           res.setErrorCode(ErrorCodes.SUCCESS);
           res.setErrorDescription("OK");
-          
+
           return res;
       }
 
@@ -1169,12 +1169,12 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("getUserRelatedEnterprises")
 	@RestReturn(value=OrganizationDTO.class, collection = true)
 	public RestResponse getUserRelatedEnterprises(){
-		
+
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId(); 
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		List<OrganizationDTO> enterpriseDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.ENTERPRISE);
-		
+
 		RestResponse res = new RestResponse(enterpriseDtos);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
@@ -1285,7 +1285,7 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
-	
+
 	/**
 	 * <b>URL: /org/getOrganizationActiveCommunityId</b>
 	 * <p>获取企业所在园区id</p>
@@ -1301,7 +1301,8 @@ public class OrganizationController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /org/listUserRelatedOrganizationAddresses</b>
+	 * <b>UR
+	 * : /org/listUserRelatedOrganizationAddresses</b>
 	 * <p>获取用户机构地址</p>
 	 */
 	@RequestMapping("listUserRelatedOrganizationAddresses")
@@ -1312,4 +1313,14 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
+	@RequestMapping("syncOrganizationMembersWithDetails")
+	@RestReturn(value=String.class)
+	public RestResponse syncOrganizationMembersWithDetails() {
+        organizationService.syncOrganizationMembersWithDetails();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 }
