@@ -324,4 +324,6 @@ public interface OrganizationProvider {
 //	OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(OrganizationMember member, OrganizationMemberDetails memberDetails);
 
 	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
+
+	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id);
 }

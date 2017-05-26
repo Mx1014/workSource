@@ -3489,4 +3489,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.insert(organization);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);*/
     }
+
+    public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id){
+
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	    List<OrganizationMemberEducations> result = new ArrayList<>();
+	    SelectQuery<EhOrganizationMemberEducationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS);
+	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.DETAIL_ID.eq(id));
+	    query.fetch().map(r -> {
+	        result.add(ConvertHelper.convert(r,OrganizationMemberEducations.class));
+	        return null;
+        });
+	    return result;
+    }
+
 }

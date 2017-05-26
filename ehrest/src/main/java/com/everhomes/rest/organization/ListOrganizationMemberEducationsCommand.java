@@ -4,23 +4,23 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>id: 员工编号</li>
  * </ul>
  */
 public class ListOrganizationMemberEducationsCommand {
 
 
-    private Long memberId;
+    private Long id;
 
     public ListOrganizationMemberEducationsCommand() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

@@ -2,10 +2,12 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 /**
  * <ul>
  * <id>id: 教育信息编号</id>
- * <li>memberId: 员工编号</li>
+ * <li>detailId: 员工序号</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
  * <li>major: 专业名称</li>
@@ -18,7 +20,7 @@ public class OrganizationMemberEducationsDTO {
 
     private Long id;
 
-    private Long memberId;
+    private Long detailId;
 
     private String schoolName;
 
@@ -26,9 +28,9 @@ public class OrganizationMemberEducationsDTO {
 
     private String major;
 
-    private String enrollmentTime;
+    private Date enrollmentTime;
 
-    private String graduationTime;
+    private Date graduationTime;
 
     public OrganizationMemberEducationsDTO() {
     }
@@ -41,12 +43,12 @@ public class OrganizationMemberEducationsDTO {
         this.id = id;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getSchoolName() {
@@ -73,21 +75,22 @@ public class OrganizationMemberEducationsDTO {
         this.major = major;
     }
 
-    public String getEnrollmentTime() {
+    public Date getEnrollmentTime() {
         return enrollmentTime;
     }
 
-    public void setEnrollmentTime(String enrollmentTime) {
+    public void setEnrollmentTime(Date enrollmentTime) {
         this.enrollmentTime = enrollmentTime;
     }
 
-    public String getGraduationTime() {
+    public Date getGraduationTime() {
         return graduationTime;
     }
 
-    public void setGraduationTime(String graduationTime) {
+    public void setGraduationTime(Date graduationTime) {
         this.graduationTime = graduationTime;
     }
+
 
     @Override
     public String toString() {

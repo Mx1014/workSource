@@ -10068,7 +10068,15 @@ System.out.println();
 
 	@Override
 	public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
-		return null;
+		List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getId());
+		ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
+		if (educations != null) {
+			response.setEducations(educations.stream().map(r -> {
+				OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+		}
+		return response;
 	}
 
 	@Override
