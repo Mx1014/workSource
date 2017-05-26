@@ -60,7 +60,26 @@ public class WarehouseFlowModuleListener implements FlowModuleListener {
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("step into onFlowButtonFired, ctx: {}", ctx);
+        }
+        FlowCase flowCase = ctx.getFlowCase();
+        Long operatorId = ctx.getOperator().getId();
+        Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+        WarehouseRequests request = warehouseProvider.findWarehouseRequests(flowCase.getReferId(), flowCase.getProjectType(), flowCase.getProjectId());
+        if(FlowCaseStatus.ABSORTED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            request.setReviewResult(ReviewResult.UNQUALIFIED.getCode());
+            request.setUpdateTime(current);
+            warehouseProvider.updateWarehouseRequest(request);
+            updateWarehouseRequestMaterials(request, operatorId);
+        }
 
+        else if(FlowCaseStatus.FINISHED.equals(FlowCaseStatus.fromCode(flowCase.getStatus()))) {
+            request.setReviewResult(ReviewResult.QUALIFIED.getCode());
+            request.setUpdateTime(current);
+            warehouseProvider.updateWarehouseRequest(request);
+            updateWarehouseRequestMaterials(request, operatorId);
+        }
     }
 
     @Override
