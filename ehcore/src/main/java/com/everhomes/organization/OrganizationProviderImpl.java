@@ -3388,23 +3388,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator, Integer pageSize, Organization org, List<String> groupTypes, String keywords) {
 
-        List<OrganizationMemberDetails> result = new ArrayList<>();
-        pageSize = pageSize + 1;
-
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes);
+        pageSize = pageSize + 1;
+        List<OrganizationMemberDetails> result = new ArrayList<>();
+
+
+        // 查询正常状态的员工
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode());
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
 
         if (null != locator && null != locator.getAnchor())
             condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(locator.getAnchor());
+
         // 若只对应部门字段的人员
         // condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId()));
         // 若需要部门下的所有人员
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
+
         // 添加关键字
         if (!StringUtils.isEmpty(keywords)) {
             condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like("%" + keywords + "%")));
         }
-        // 开始查找
+
+        // 按条件查找并得到结果
         context.select()
                 .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .join(Tables.EH_ORGANIZATION_MEMBERS, JoinType.JOIN)
@@ -3426,42 +3432,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         return result;
-/*
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		pageSize = pageSize + 1;
-		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
-		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-
-		if(null != queryBuilderCallback)
-			queryBuilderCallback.buildCondition(locator, query);
-		if(null != locator && null != locator.getAnchor())
-			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
-
-
-		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-		query.addLimit(pageSize);
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, OrganizationMember.class));
-			return null;
-		});
-		if(null!= locator)
-			locator.setAnchor(null);
-
-		if(result.size() >= pageSize){
-			result.remove(result.size() - 1);
-			locator.setAnchor(result.get(result.size() - 1).getId());
-		}
-		return result;
- */
     }
 
 
 	@Override
 	public OrganizationMemberDetails findOrganizationMemberDetailsByMemberId(Long memberId) {
 
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(memberId);
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
         List<OrganizationMemberDetails> result  = new ArrayList<OrganizationMemberDetails>();
         SelectJoinStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS);

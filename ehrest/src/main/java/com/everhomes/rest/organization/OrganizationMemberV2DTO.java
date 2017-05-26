@@ -132,7 +132,7 @@ public class OrganizationMemberV2DTO {
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> groups;
 
-    private java.lang.String   nickName;
+    private String nickName;
 
     public OrganizationMemberV2DTO() {
     }

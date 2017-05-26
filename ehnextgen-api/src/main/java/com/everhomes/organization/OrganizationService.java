@@ -427,6 +427,9 @@ public interface OrganizationService {
 	void exportImportFileFailResultXls(GetImportFileResultCommand cmd, HttpServletResponse httpResponse);
 
     /****** new interface ******/
+
+    List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org);
+
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
     PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
@@ -434,6 +437,8 @@ public interface OrganizationService {
     OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd);
 
     OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd);
+
+    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
 
     void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd);
 

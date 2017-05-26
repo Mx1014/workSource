@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>memberId: 员工编号</li>
- * <li>memberBasicDTO: 员工基本信息 参考{@link com.everhomes.rest.organization.OrganizationMemberBasicDTO}</li>
+ * <li>memberBasicDTO: 员工基本信息 参考{@link OrganizationMemberBasicDTO}</li>
  * <li>memberEducationsResponse: 员工教育信息 参考{@link com.everhomes.rest.organization.OrganizationMemberEducationsDTO}</li>
  * <li>memberWorkExperiencesResponse: 员工工作经历 参考{@link com.everhomes.rest.organization.OrganizationMemberWorkExperiencesDTO}</li>
  * <li>memberInsurancesResponse: 员工保险信息 参考{@link com.everhomes.rest.organization.OrganizationMemberInsurancesDTO}</li>

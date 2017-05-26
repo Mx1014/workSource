@@ -5,11 +5,15 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Date;
 import java.util.List;
 
 /**
  * <ul>
- * <li>memberId：员工编号</li>
+ * <li>id：员工序号</li>
+ * <li>namespaceId</>
+ * <li>organizationId</li>
+ * <li>employeeNo: 员工编号(可自由设定)</li>
  * <li>contactName：成员名称</li>
  * <li>organizationId: 小区id</li>
  * <li>gender: 成员性别，0：保密 1：男性 2：女性 参考{@link com.everhomes.rest.user.UserGender}</li>
@@ -30,7 +34,7 @@ import java.util.List;
  * <li>regResidence: 户口</li>
  * <li>idNumber: 身份证号</li>
  * <li>email: 邮箱</li>
- * <li>weChat: 微信号码</li>
+ * <li>wechat: 微信号码</li>
  * <li>qq: QQ号码</li>
  * <li>emergencyName: 紧急联系人姓名</li>
  * <li>emergencyContact: 紧急联系人号码</li>
@@ -39,11 +43,21 @@ import java.util.List;
  * <li>salaryCardNumber: 工资卡号</li>
  * <li>socialSecurityNumber: 公积金卡号</li>
  * <li>providentFundNumber: 社保卡号</li>
+ * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
+ * <li>targetId：注册用户对应的userId，未注册填0</li>
+ * <li>groups：群组列表</li>
+ * <li>profileIntegrity: 档案完整性</li>
  * </ul>
  */
 public class OrganizationMemberBasicDTO {
     @NotNull
-    private Long memberId;
+    private Long id;
+
+    private Integer namespaceId;
+
+    private Long organizationId;
+
+    private String employeeNo;
 
     private String contactName;
 
@@ -62,7 +76,7 @@ public class OrganizationMemberBasicDTO {
 
     private Byte employeeStatus;
 
-    private String checkInTime;
+    private Date checkInTime;
 
     private Byte contactType;
     private String contactToken;
@@ -71,7 +85,7 @@ public class OrganizationMemberBasicDTO {
 
     private String enName;
 
-    private String birthday;
+    private Date birthday;
 
     private Byte maritalFlag;
 
@@ -85,7 +99,7 @@ public class OrganizationMemberBasicDTO {
 
     private String email;
 
-    private String weChat;
+    private String wechat;
 
     private String qq;
 
@@ -100,6 +114,18 @@ public class OrganizationMemberBasicDTO {
     private String socialSecurityNumber;
 
     private String providentFundNumber;
+
+    private Long targetId;
+
+    private String targetType;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> groups;
+
+    private String nickName;
+
+    private Integer profileIntegrity;
+
 
     /*
     @NotNull
@@ -143,12 +169,36 @@ public class OrganizationMemberBasicDTO {
     public OrganizationMemberBasicDTO() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 
     public String getContactName() {
@@ -199,11 +249,11 @@ public class OrganizationMemberBasicDTO {
         this.employeeStatus = employeeStatus;
     }
 
-    public String getCheckInTime() {
+    public Date getCheckInTime() {
         return checkInTime;
     }
 
-    public void setCheckInTime(String checkInTime) {
+    public void setCheckInTime(Date checkInTime) {
         this.checkInTime = checkInTime;
     }
 
@@ -247,11 +297,11 @@ public class OrganizationMemberBasicDTO {
         this.enName = enName;
     }
 
-    public String getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(String birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 
@@ -303,12 +353,12 @@ public class OrganizationMemberBasicDTO {
         this.email = email;
     }
 
-    public String getWeChat() {
-        return weChat;
+    public String getWechat() {
+        return wechat;
     }
 
-    public void setWeChat(String weChat) {
-        this.weChat = weChat;
+    public void setWechat(String wechat) {
+        this.wechat = wechat;
     }
 
     public String getQq() {
@@ -365,6 +415,46 @@ public class OrganizationMemberBasicDTO {
 
     public void setProvidentFundNumber(String providentFundNumber) {
         this.providentFundNumber = providentFundNumber;
+    }
+
+    public List<OrganizationDTO> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<OrganizationDTO> groups) {
+        this.groups = groups;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public Integer getProfileIntegrity() {
+        return profileIntegrity;
+    }
+
+    public void setProfileIntegrity(Integer profileIntegrity) {
+        this.profileIntegrity = profileIntegrity;
     }
 
     @Override
