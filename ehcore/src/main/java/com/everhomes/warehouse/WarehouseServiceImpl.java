@@ -342,7 +342,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         WarehouseMaterialCategoryDTO dto = ConvertHelper.convert(category, WarehouseMaterialCategoryDTO.class);
 
-        List<WarehouseMaterialCategories> children = warehouseProvider.listAllChildWarehouseMaterialCategories(category.getPath() + "/%");
+        List<WarehouseMaterialCategories> children = warehouseProvider.listAllChildWarehouseMaterialCategories(category.getPath() + "/%", cmd.getOwnerType(), cmd.getOwnerId());
         if(children != null && children.size() > 0) {
             List<WarehouseMaterialCategoryDTO> childrenDto = children.stream().map(child -> {
                 WarehouseMaterialCategoryDTO childDto = ConvertHelper.convert(child, WarehouseMaterialCategoryDTO.class);

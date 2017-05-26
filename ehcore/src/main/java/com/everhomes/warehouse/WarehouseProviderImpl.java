@@ -187,13 +187,15 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
-    public List<WarehouseMaterialCategories> listAllChildWarehouseMaterialCategories(String superiorPath) {
+    public List<WarehouseMaterialCategories> listAllChildWarehouseMaterialCategories(String superiorPath, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<WarehouseMaterialCategories> result  = new ArrayList<WarehouseMaterialCategories>();
         SelectQuery<EhWarehouseMaterialCategoriesRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES);
 
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.PATH.like(superiorPath));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.OWNER_TYPE.eq(ownerType));
         query.addConditions(Tables.EH_WAREHOUSE_MATERIAL_CATEGORIES.STATUS.eq(Status.ACTIVE.getCode()));
 
 
