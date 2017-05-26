@@ -158,7 +158,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
         builder.setQuery(qb);
 
         if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
-            builder.addSort(SortBuilders.fieldSort("requestTime").order(SortOrder.DESC).ignoreUnmapped(true));
+            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
         }
 
         SearchResponse rsp = builder.execute().actionGet();
@@ -190,7 +190,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
             WarehouseRequests request = warehouseProvider.findWarehouseRequests(material.getRequestId(), material.getOwnerType(), material.getOwnerId());
             if(request != null && request.getRequestUid() != null) {
                 b.field("requestUid", request.getRequestUid());
-                b.field("requestTime", request.getCreateTime());
+                b.field("createTime", request.getCreateTime());
                 List<OrganizationMember> members = organizationProvider.listOrganizationMembers(request.getRequestUid());
                 if(members != null && members.size() > 0) {
                     b.field("requestUserName", members.get(0).getContactName());
@@ -200,6 +200,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
             } else {
                 b.field("requestUid", "");
                 b.field("requestUserName", "");
+                b.field("createTime", "");
             }
 
             b.endObject();
