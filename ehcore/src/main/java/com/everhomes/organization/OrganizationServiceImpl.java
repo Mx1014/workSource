@@ -10091,7 +10091,7 @@ System.out.println();
 
 	@Override
 	public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
-		List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getId());
+		List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
 		ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
 		if (educations != null) {
 			response.setEducations(educations.stream().map(r -> {
