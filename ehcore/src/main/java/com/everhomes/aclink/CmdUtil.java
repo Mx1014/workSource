@@ -18,7 +18,7 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
-    private final static int EXPIRE_TIME = (30*24*3600);
+    private final static int EXPIRE_TIME = (2*30*24*3600);//2 months
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
