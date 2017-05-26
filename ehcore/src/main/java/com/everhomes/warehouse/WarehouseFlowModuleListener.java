@@ -35,7 +35,7 @@ import java.util.List;
  */
 @Component
 public class WarehouseFlowModuleListener implements FlowModuleListener {
-    private static final long MODULE_ID = 40500;
+    private static final long MODULE_ID = 21000;
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseFlowModuleListener.class);
     @Autowired
     private FlowService flowService;
