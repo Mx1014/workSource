@@ -1417,10 +1417,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  Long privilegeId){
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(privilegeId);
-		assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds);
+		assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds, null);
 	}
+
 	@Override
 	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
+		assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds, null);
+
+	}
+
+	@Override
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds, String tag){
 		User user = UserContext.current().getUser();
 		if(null != privilegeIds){
 			for (Long privilegeId: privilegeIds) {
@@ -1433,6 +1440,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setPrivilegeId(privilegeId);
 				acl.setRoleType(targetType);
 				acl.setScope(scope);
+				acl.setCommentTag1(tag);
 				acl.setNamespaceId(UserContext.getCurrentNamespaceId());
 				aclProvider.createAcl(acl);
 			}
@@ -1441,17 +1449,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, List<Long> moduleIds, ServiceModulePrivilegeType privilegeType){
+	private void assignmentModulePrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, List<Long> moduleIds, ServiceModulePrivilegeType privilegeType){
+		assignmentModulePrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType, null);
+	}
+	private void assignmentModulePrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, List<Long> moduleIds, ServiceModulePrivilegeType privilegeType, String tag){
 		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, privilegeType);
 		List<Long> privilegeIds = new ArrayList<>();
 		for (ServiceModulePrivilege serviceModulePrivilege: serviceModulePrivileges) {
 			privilegeIds.add(serviceModulePrivilege.getPrivilegeId());
 		}
 
-		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds);
+		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds, tag);
 	}
 
 	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
+		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, moduleId, privilegeType, null);
+	}
+
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType, String tag){
 		List<Long> moduleIds = new ArrayList<>();
 
 		if(0L == moduleId){
@@ -1463,7 +1478,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}else{
 			moduleIds.add(moduleId);
 		}
-		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType);
+		this.assignmentModulePrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType, tag);
 	}
 
 	@Override
@@ -1682,7 +1697,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
 //						}
 //					}else{
-						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+						this.assignmentModulePrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
 //					}
 				}
 			}
@@ -2221,6 +2236,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		this.deleteAcls(resourceType, resourceId, targetType, targetId, moduleId, null, type);
 	}
 
+
+
 	/**
      * 抛出无权限 
      */
@@ -2557,7 +2574,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				authorizationRelation.setProjects(projects.stream().map((p) ->{
 					if(EntityType.COMMUNITY == EntityType.fromCode(p.getProjectType())){
 						Community community = communityProvider.findCommunityById(p.getProjectId());
-						if(null == community){
+						if(null != community){
 							p.setProjectName(community.getName());
 						}else{
 							LOGGER.error("Unable to find the community. communityId = {}", p.getProjectId());
@@ -2565,7 +2582,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 					}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(p.getProjectType())){
 						ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(p.getProjectId());
-						if(null == resourceCategory){
+						if(null != resourceCategory){
 							p.setProjectName(resourceCategory.getName());
 						}else{
 							LOGGER.error("Unable to find the resourceCategory. resourceCategoryId = {}", p.getProjectId());
@@ -2582,7 +2599,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			authorizationRelation.setTargets(targets.stream().map((p) ->{
 				if(EntityType.USER == EntityType.fromCode(p.getTargetType())){
 					User user = userProvider.findUserById(p.getTargetId());
-					if(null == user){
+					if(null != user){
 						p.setTargetName(user.getNickName());
 					}else{
 						LOGGER.error("Unable to find the user. userId = {}", p.getTargetId());
@@ -2590,7 +2607,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 				}else if(EntityType.ORGANIZATIONS == EntityType.fromCode(p.getTargetType())){
 					Organization organization = organizationProvider.findOrganizationById(p.getTargetId());
-					if(null == organization){
+					if(null != organization){
 						p.setTargetName(organization.getName());
 					}else{
 						LOGGER.error("Unable to find the orgnaization. orgnaizationId = {}", p.getTargetId());
@@ -2738,6 +2755,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			//根据关系删除授权的记录以及关系权限
 			deleteAuthorizationsOrAclsByRelation(authorizationRelation);
 			authorizationRelation.setOperatorUid(user.getId());
+			authorizationRelation.setAllFlag(cmd.getAllFlag());
+			authorizationRelation.setAllProjectFlag(cmd.getAllProjectFlag());
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllProjectFlag())){
 				authorizationRelation.setProjectJson(StringHelper.toJsonString(cmd.getProjects()));
 			}
@@ -2745,6 +2764,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if(AllFlagType.NO == AllFlagType.fromCode(cmd.getAllFlag())){
 				authorizationRelation.setPrivilegeJson(StringHelper.toJsonString(cmd.getPrivilegeIds()));
 			}
+
 			//修改授权关系
 			authorizationProvider.updateAuthorizationRelation(authorizationRelation);
 
@@ -2783,13 +2803,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private void createAuthorizationsOrAclsByRelation(User user, AuthorizationRelation authorizationRelation, List<AssignmentTarget> targets, List<Project> projects, List<Long> privilegeIds){
 		List<Authorization> authorizations = new ArrayList<>();
-
+		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId();
 		for (AssignmentTarget target: targets) {
 			checkTarget(target.getTargetType(), target.getTargetId());
 			if (AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllProjectFlag())) {
 				for (Project project : projects) {
 					//授权
-					assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false);
+					assignmentAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false, tag);
 
 					Authorization authorization = new Authorization();
 					authorization.setOwnerType(project.getProjectType());
@@ -2803,13 +2823,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					authorization.setCreatorUid(user.getId());
 					authorization.setOperatorUid(user.getId());
 					authorization.setAuthId(authorizationRelation.getModuleId());
-					authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+					authorization.setScope(tag);
 					authorizations.add(authorization);
 
 				}
 			} else {
 				//给对象授权
-				assignmentAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false);
+				assignmentAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false, tag);
 
 				Authorization authorization = new Authorization();
 				authorization.setOwnerType(EntityType.All.getCode());
@@ -2823,7 +2843,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				authorization.setNamespaceId(authorizationRelation.getNamespaceId());
 				authorization.setCreatorUid(user.getId());
 				authorization.setOperatorUid(user.getId());
-				authorization.setScope(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+				authorization.setScope(tag);
 				authorizations.add(authorization);
 			}
 		}
@@ -2837,50 +2857,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param authorizationRelation
      */
 	private void deleteAuthorizationsOrAclsByRelation(AuthorizationRelation authorizationRelation){
-		String projectJson = authorizationRelation.getProjectJson();
-		String targetJson = authorizationRelation.getTargetJson();
-//			String privilegeJson = authorizationRelation.getPrivilegeJson();
 
-		List<Project> projects = null;
-		if(AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllFlag())){
-			Project[] projectArr = (Project[])StringHelper.fromJsonString(projectJson, Project[].class);
-			projects = Arrays.asList(projectArr);
-		}
+		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId();
 
-		AssignmentTarget[] targetArr = (AssignmentTarget[])StringHelper.fromJsonString(targetJson, AssignmentTarget[].class);
-		List<AssignmentTarget> targets = Arrays.asList(targetArr);
-
-//			List<Long> privilegeIds = null;
-//			//非全部的时候 查出所有的权限
-//			if(AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllFlag())){
-//				Long[] privilegeIdArr = (Long[])StringHelper.fromJsonString(privilegeJson, Long[].class);
-//				privilegeIds = Arrays.asList(privilegeIdArr);
-//			}
-
-		for (AssignmentTarget target: targets) {
-
-			if(AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllFlag())){
-				for (Project project: projects) {
-					//删除人员拥有的模块全部权限
-					if(AllFlagType.fromCode(authorizationRelation.getAllFlag()) == AllFlagType.YES){
-						deleteAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
-
-						//删除人员拥有的模块部分权限
-					}else{
-						deleteAcls(project.getProjectType(), project.getProjectId(), target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY);
-					}
-				}
-			}else{
-				//删除人员拥有的模块全部权限
-				if(AllFlagType.fromCode(authorizationRelation.getAllFlag()) == AllFlagType.YES){
-					deleteAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
-
-					//删除人员拥有的模块部分权限
-				}else{
-					deleteAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getModuleId(), ServiceModulePrivilegeType.ORDINARY);
-				}
-			}
-		}
+		//删除权限
+		privilegeProvider.deleteAclsByTag(tag);
 
 		//根据关系删除授权的记录
 		deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
@@ -2915,7 +2896,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 
-	private void assignmentAcls(String ownerType, Long ownerId, String targetType, Long targetId, Byte allFlag, Long moduleId, List<Long> privilegeIds ,boolean isDelete){
+	private void assignmentAcls(String ownerType, Long ownerId, String targetType, Long targetId, Byte allFlag, Long moduleId, List<Long> privilegeIds ,boolean isDelete, String tag){
 		if(isDelete){
 			//删除人员拥有的模块全部权限
 			if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
@@ -2929,9 +2910,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(AllFlagType.fromCode(allFlag) == AllFlagType.YES){
 			//给对象分配模块的全部权限
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, ServiceModulePrivilegeType.ORDINARY_ALL);
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, moduleId, ServiceModulePrivilegeType.ORDINARY_ALL, tag);
 		}else{
-			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds);
+			assignmentPrivileges(ownerType, ownerId, targetType, targetId, EntityType.SERVICE_MODULE.getCode() + moduleId, privilegeIds, tag);
 		}
 	}
 

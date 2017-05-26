@@ -12,4 +12,8 @@ public interface PrivilegeProvider{
 	List<Acl> listAclsByScope(String ownerType, Long ownerId, String targetType, Long targetId, String scope);
 
 	List<Acl> listAclsByModuleId(String ownerType, Long ownerId, String targetType, Long targetId, Long moduleId);
+
+	List<Acl> listAclsByTag(String tag);
+
+	void deleteAclsByTag(String tag);
 }

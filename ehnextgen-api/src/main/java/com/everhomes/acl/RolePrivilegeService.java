@@ -281,7 +281,7 @@ public interface RolePrivilegeService {
 	 * @param scope
      * @param privilegeIds
      */
-	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds);
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds, String tag);
 
 	/**
 	 * 分配模块权限
@@ -293,7 +293,9 @@ public interface RolePrivilegeService {
 	 * @param moduleId
      * @param privilegeType
      */
-	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType, String tag);
+
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds);
 
 	/**
 	 *

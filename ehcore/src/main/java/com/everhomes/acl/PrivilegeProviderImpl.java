@@ -77,9 +77,21 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 				}else{
 					cond = Tables.EH_ACLS.OWNER_TYPE.eq(ownerType).and(Tables.EH_ACLS.OWNER_ID.eq(ownerId));
 				}
-				cond.and(Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
-				cond.and(Tables.EH_ACLS.ROLE_ID.eq(targetId));
-				cond.and(Tables.EH_ACLS.SCOPE.eq(scope));
+				cond = cond.and(Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
+				cond = cond.and(Tables.EH_ACLS.ROLE_ID.eq(targetId));
+				cond = cond.and(Tables.EH_ACLS.SCOPE.eq(scope));
+				selectQuery.addConditions(cond);
+				return selectQuery;
+			}
+		});
+	}
+
+	@Override
+	public List<Acl> listAclsByTag(String tag){
+		return aclProvider.getAcl(new QueryBuilder() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
+				Condition cond = Tables.EH_ACLS.COMMENT_TAG1.eq(tag);
 				selectQuery.addConditions(cond);
 				return selectQuery;
 			}
@@ -91,5 +103,15 @@ public class PrivilegeProviderImpl implements PrivilegeProvider {
 		String scope = EntityType.SERVICE_MODULE.getCode() + moduleId;
 		return listAclsByScope(ownerType, ownerId, targetType, targetId, scope);
 	}
+
+	@Override
+	public void deleteAclsByTag(String tag){
+		List<Acl> acls = listAclsByTag(tag);
+		for (Acl acl: acls) {
+			aclProvider.deleteAcl(acl.getId());
+		}
+	}
+
+
 
 }
