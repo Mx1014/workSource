@@ -110,7 +110,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public WarehouseDTO updateWarehouse(UpdateWarehouseCommand cmd) {
         Warehouses warehouse = ConvertHelper.convert(cmd, Warehouses.class);
-        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode()+cmd.getWarehouseNumber()
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE.getCode()
                 +cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
             checkWarehouseNumber(warehouse.getId(), warehouse.getWarehouseNumber(), warehouse.getOwnerType(), warehouse.getOwnerId());
             if (cmd.getId() == null) {
@@ -219,7 +219,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
         WarehouseMaterialCategories category = ConvertHelper.convert(cmd, WarehouseMaterialCategories.class);
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_CATEGORY.getCode()
-                +cmd.getCategoryNumber()+cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
+                +cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
             if (cmd.getId() == null) {
                 category.setNamespaceId(UserContext.getCurrentNamespaceId());
                 category.setCreatorUid(UserContext.current().getUser().getId());
@@ -372,7 +372,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseMaterials material = ConvertHelper.convert(cmd, WarehouseMaterials.class);
 
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_WAREHOUSE_MATERIAL.getCode()
-                +cmd.getMaterialNumber()+cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
+                +cmd.getOwnerType()+cmd.getOwnerId()).enter(()-> {
             checkMaterialNumber(material.getId(), material.getMaterialNumber(), material.getOwnerType(), material.getOwnerId());
             if (cmd.getId() == null) {
                 material.setNamespaceId(UserContext.getCurrentNamespaceId());
