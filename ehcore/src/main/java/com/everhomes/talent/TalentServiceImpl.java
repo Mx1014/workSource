@@ -49,6 +49,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.sun.xml.ws.util.xml.CDATA;
 
 /**
  * 这里的所有public方法都使用TalentServiceAdvice检查是否为管理员权限
@@ -152,13 +153,17 @@ public class TalentServiceImpl implements TalentService {
 	
 	@Override
 	public void deleteTalentCategory(DeleteTalentCategoryCommand cmd) {
-		TalentCategory talentCategory = findTalentCategoryById(cmd.getId());
-		if (talentCategory == TalentCategory.other()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+		if (cmd.getIds() != null && !cmd.getIds().isEmpty()) {
+			for (Long id : cmd.getIds()) {
+				TalentCategory talentCategory = findTalentCategoryById(id);
+				if (talentCategory == TalentCategory.other()) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+							ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
+				}
+				talentCategory.setStatus(CommonStatus.INACTIVE.getCode());
+				talentCategoryProvider.updateTalentCategory(talentCategory);
+			}
 		}
-		talentCategory.setStatus(CommonStatus.INACTIVE.getCode());
-		talentCategoryProvider.updateTalentCategory(talentCategory);
 	}
 
 	@Override

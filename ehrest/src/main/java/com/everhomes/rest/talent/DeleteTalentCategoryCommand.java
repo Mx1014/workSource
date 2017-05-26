@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.talent;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -9,14 +11,13 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>organizationId: 管理公司id</li>
- * <li>id: id</li>
+ * <li>ids: ids</li>
  * </ul>
  */
 public class DeleteTalentCategoryCommand {
 	@NotNull
 	private Long organizationId;
-	@NotNull
-	private Long id;
+	private List<Long> ids;
 
 	public DeleteTalentCategoryCommand() {
 
@@ -30,12 +31,12 @@ public class DeleteTalentCategoryCommand {
 		this.organizationId = organizationId;
 	}
 
-	public Long getId() {
-		return id;
+	public List<Long> getIds() {
+		return ids;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setIds(List<Long> ids) {
+		this.ids = ids;
 	}
 
 	@Override
