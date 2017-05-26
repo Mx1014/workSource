@@ -5,8 +5,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskStatus;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.warehouse.*;
@@ -646,4 +649,19 @@ public class WarehouseController extends ControllerBase {
         res.setErrorDescription("OK");
         return res;
     }
+
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    @RequestMapping("updateImportFileTask")
+    @RestReturn(value=String.class)
+    public RestResponse updateImportFileTask() {
+        ImportFileTask task = organizationProvider.findImportFileTaskById(69L);
+        task.setStatus(ImportFileTaskStatus.EXCEPTION.getCode());
+        organizationProvider.updateImportFileTask(task);
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;}
+
 }
