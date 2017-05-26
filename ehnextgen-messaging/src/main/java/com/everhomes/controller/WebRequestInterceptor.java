@@ -357,7 +357,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             } catch (Exception e) {
                 LOGGER.error("Get user agent. Failed to find content server", e);
                 scheme = HTTP;
-                return null;
+//                return null;
             }
         }
         map.put("scheme", scheme);
