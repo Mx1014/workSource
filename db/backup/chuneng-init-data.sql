@@ -911,3 +911,4 @@ update `eh_launch_pad_items` set `icon_uri` = 'cs://1/image/aW1hZ2UvTVRwak16QmlN
 update `eh_launch_pad_items` set `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvMU5qQTFZMlZsTlRCbU9XUXhZVGRrTVRKbU1XRTJNMkUxWm1aallUbGtOZw', `item_width` = 2, default_order = 2 where `item_label` = '通讯录' and `namespace_id` = 999990;
 UPDATE eh_launch_pad_items SET display_flag = 0 WHERE namespace_id = 999990 AND item_label in ('园区活动', '服务联盟', '视频会议');
 	
+UPDATE eh_service_alliance_skip_rule SET service_alliance_category_id = 0 WHERE namespace_id = 999990;

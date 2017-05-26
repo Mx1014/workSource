@@ -2857,35 +2857,40 @@ public class QualityServiceImpl implements QualityService {
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
 		
 		Long uId = UserContext.current().getUser().getId();
-		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
+//		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
+//
 		List<Long> taskIdlist = new ArrayList<Long>();
-        for(final Long value : taskIds){
-
-        	taskIdlist.add(value);
-
-        }
-
-        Collections.sort(taskIdlist);
-		if(cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0L) {
-			if(taskIdlist.contains(cmd.getPageAnchor())) {
-				int last = taskIdlist.indexOf(cmd.getPageAnchor());
-				taskIdlist = taskIdlist.subList(0, last);
+//        for(final Long value : taskIds){
+//
+//        	taskIdlist.add(value);
+//
+//        }
+//
+//        Collections.sort(taskIdlist);
+//		if(cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0L) {
+//			if(taskIdlist.contains(cmd.getPageAnchor())) {
+//				int last = taskIdlist.indexOf(cmd.getPageAnchor());
+//				taskIdlist = taskIdlist.subList(0, last);
+//			}
+//		}
+//
+//        Collections.reverse(taskIdlist);
+		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
+		if(taskRecords != null ) {
+			Long startContainTime = System.currentTimeMillis();
+			for(QualityInspectionTaskRecords record : taskRecords) {
+				if(!taskIdlist.contains(record.getTaskId())) {
+					taskIdlist.add(record.getTaskId());
+				}
+			}
+			Long endContainTime = System.currentTimeMillis();
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIdlist size = {}, elapse = {}",
+						taskRecords.size(), taskIdlist.size(), endContainTime-startContainTime);
 			}
 		}
 
-        Collections.reverse(taskIdlist);
-//		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
-//		if(taskRecords != null ) {
-//			for(QualityInspectionTaskRecords record : taskRecords) {
-//				if(!taskIdlist.contains(record.getTaskId())) {
-//					taskIdlist.add(record.getTaskId());
-//				}
-//			}
-//		}
-
-
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         if(taskIdlist.size() > pageSize) {
 			taskIdlist = taskIdlist.subList(0,pageSize);
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
