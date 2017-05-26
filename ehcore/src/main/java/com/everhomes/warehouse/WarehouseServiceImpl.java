@@ -1065,7 +1065,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 log.setErrorLog("warehouse material category name is null");
                 log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NAME_IS_NULL);
                 errorDataLogs.add(log);
-                continue;
+                return;
             }
             category.setName(str.getName());
 
@@ -1075,7 +1075,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 log.setErrorLog("warehouse material category number is null");
                 log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_IS_NULL);
                 errorDataLogs.add(log);
-                continue;
+                return;
             }
 
             WarehouseMaterialCategories exist = warehouseProvider.findWarehouseMaterialCategoriesByNumber(str.getCategoryNumber(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -1085,7 +1085,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 log.setErrorLog("material categoty number already exist");
                 log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NUMBER_ALREADY_EXIST);
                 errorDataLogs.add(log);
-                continue;
+                return;
             }
             category.setCategoryNumber(str.getCategoryNumber());
             category.setPath("");
@@ -1097,7 +1097,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                     log.setErrorLog("material categoty parent number is not exist");
                     log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_CATEGORY_NOT_EXIST);
                     errorDataLogs.add(log);
-                    continue;
+                    return;
                 }
                 category.setParentId(parent.getId());
                 category.setPath(parent.getPath());
