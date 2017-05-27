@@ -3445,13 +3445,43 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //			organization_ids.add(r.getValue(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID));
 //			return null;
 //		});
-//
-//		for(Long oid : organization_ids){
+
+        /**不重复的记录**/
         SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
         query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID,Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+        query.addHaving(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.count().eq(1));
+        List<OrganizationMember> membersRight = query.fetch().map(r ->{
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        });
+        query.close();
+
+        /**重复的记录**/
+        query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID,Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
         query.addHaving(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.count().ge(1));
-        Result r1 = query.fetch();
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(oid));
+        List<OrganizationMember> membersRepat = query.fetch().map(r ->{
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        });
+        query.close();
+
+        /**重复记录的筛选**/
+        for(OrganizationMember m2 : membersRepat){
+            query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(m2.getOrganizationId()));
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(m2.getContactToken()));
+            List<OrganizationMember> members_temp = query.fetch().map(r -> {
+                return ConvertHelper.convert(r, OrganizationMember.class);
+            });
+            /**若果重复记录中有活跃的，加入membersRight**/
+            for(OrganizationMember m3 : members_temp){
+                if(m3.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
+                    membersRight.add(m3);
+                    break;
+                }
+            }
+        }
+        //去重
+
 
     }
 
