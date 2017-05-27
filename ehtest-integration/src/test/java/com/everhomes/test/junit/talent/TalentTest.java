@@ -4,6 +4,7 @@ package com.everhomes.test.junit.talent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jooq.Record;
@@ -126,7 +127,7 @@ public class TalentTest extends BaseLoginAuthTestCase {
 
 		DeleteTalentCategoryCommand cmd = new DeleteTalentCategoryCommand();
 		cmd.setOrganizationId(1000750L);
-		cmd.setId(1L);
+		cmd.setIds(Arrays.asList(1L));
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
