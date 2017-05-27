@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  * <li>id: 工作经历标识号</li>
- * <li>detailId: 员工编号</li>
+ * <li>detailId: 员工标识号</li>
  * <li>enterpriseName：企业名称</li>
  * <li>position: 职位</li>
  * <li>jobType: 工作类型，参考{@link EmployeeType}</li>

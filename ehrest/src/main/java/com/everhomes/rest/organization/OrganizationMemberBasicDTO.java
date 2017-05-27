@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>id：员工序号</li>
+ * <li>id：员工标识号</li>
  * <li>namespaceId</>
  * <li>organizationId</li>
  * <li>employeeNo: 员工编号(可自由设定)</li>

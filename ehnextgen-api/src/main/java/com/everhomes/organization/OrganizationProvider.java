@@ -338,6 +338,7 @@ public interface OrganizationProvider {
     List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
 
 
+	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
 
 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
 

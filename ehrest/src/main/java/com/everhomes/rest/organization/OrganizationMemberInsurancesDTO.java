@@ -7,7 +7,7 @@ import java.sql.Date;
 /**
  * <ul>
  * <li>id: 保险标识号</li>
- * <li>detailId: 员工编号</li>
+ * <li>detailId: 员工标识号</li>
  * <li>name: 保险名称</li>
  * <li>enterprise: 保险公司名称</li>
  * <li>number: 保险编号</li>

@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *<li>id: 工作经验信息编号</li>
+ *<li>id: 工作经验标识号</li>
  * <li>enterpriseName: 公司名称</li>
  * <li>position: 职位</li>
  * <li>jobType: 工作类型</li>

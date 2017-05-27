@@ -7,7 +7,7 @@ import java.sql.Date;
 /**
  * <ul>
  * <id>id: 教育信息标识号</id>
- * <li>detailId: 员工序号</li>
+ * <li>detailId: 员工标识号</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
  * <li>major: 专业名称</li>

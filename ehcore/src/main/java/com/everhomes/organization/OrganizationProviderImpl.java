@@ -3525,28 +3525,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 
-
     @Override
-	public List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId){
-        if(detailId == null)
-            return null;
-
-    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-    	List<OrganizationMemberWorkExperiences> result = new ArrayList<>();
-    	SelectQuery<EhOrganizationMemberWorkExperiencesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES);
-    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.DETAIL_ID.eq(detailId));
-    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-    	query.fetch().map(r ->{
-    		result.add(ConvertHelper.convert(r,OrganizationMemberWorkExperiences.class));
-    		return null;
-		});
-
-    	return result;
-	}
-
-
-	@Override
-	public void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience){
+    public void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience){
 
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberWorkExperiences.class));
         experience.setId(id);
@@ -3558,7 +3538,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id){
-	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberWorkExperiences.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberWorkExperiences.class));
         EhOrganizationMemberWorkExperiencesDao dao = new EhOrganizationMemberWorkExperiencesDao(context.configuration());
         EhOrganizationMemberWorkExperiences experience = dao.findById(id);
         if(experience == null)
@@ -3580,6 +3560,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(experience);
     }
 
+    @Override
+	public List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId){
+        if(detailId == null)
+            return null;
+
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	List<OrganizationMemberWorkExperiences> result = new ArrayList<>();
+    	SelectQuery<EhOrganizationMemberWorkExperiencesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES);
+    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.DETAIL_ID.eq(detailId));
+    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+    	query.fetch().map(r ->{
+    		result.add(ConvertHelper.convert(r,OrganizationMemberWorkExperiences.class));
+    		return null;
+		});
+
+    	return result;
+	}
+
+
+
+
+
+
+    public void createOranizationMemberInsurance(OrganizationMemberInsurances insurance){
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberInsurances.class));
+        insurance.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
+        dao.insert(insurance);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberInsurances.class, id);
+    }
 
     @Override
 	public 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId){

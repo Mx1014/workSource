@@ -10149,7 +10149,7 @@ System.out.println();
         experience.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         this.organizationProvider.createOranizationMemberWorkExperience(experience);
 
-		return null;
+		return ConvertHelper.convert(experience,OrganizationMemberWorkExperiencesDTO.class);
 	}
 
 	@Override
@@ -10201,7 +10201,31 @@ System.out.println();
 
 	@Override
 	public OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd) {
-		return null;
+        if(cmd.getDetailId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, detailId should not be null or empty");
+        OrganizationMemberInsurances insurance = new OrganizationMemberInsurances();
+        insurance.setDetailId(cmd.getDetailId());
+        insurance.setNamespaceId(cmd.getNamespaceId());
+        insurance.setName(cmd.getName());
+        insurance.setEnterprise(cmd.getEnterprise());
+        insurance.setNumber(cmd.getNumber());
+        insurance.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        insurance.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
+        //	获取当前时间
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        insurance.setCreateTime(now);
+        //	获取操作人员
+        if(cmd.getCreatorUid() != null)
+            insurance.setCreatorUid(cmd.getCreatorUid());
+        else
+            insurance.setCreatorUid(Long.valueOf(0));
+        //  暂且设置新增数据为有效数据
+        insurance.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+        this.organizationProvider.createOranizationMemberInsurance(insurance);
+
+        return ConvertHelper.convert(insurance,OrganizationMemberInsurancesDTO.class);
 	}
 
 	@Override

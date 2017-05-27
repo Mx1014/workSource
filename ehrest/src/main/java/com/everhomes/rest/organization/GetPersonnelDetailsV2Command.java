@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>detailId: 员工编号</li>
+ * <li>detailId: 员工标识号</li>
  * </ul>
  */
 public class GetPersonnelDetailsV2Command {
