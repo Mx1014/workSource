@@ -10125,32 +10125,6 @@ System.out.println();
 
 	@Override
 	public OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd) {
-	    /*
-	    		if(cmd.getDetailId() == null)
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameter, detailId should not be null or empty");
-		OrganizationMemberEducations education = new OrganizationMemberEducations();
-		education.setDetailId(cmd.getDetailId());
-		education.setSchoolName(cmd.getSchoolName());
-		education.setDegree(cmd.getDegree());
-		education.setMajor(cmd.getMajor());
-		education.setEnrollmentTime(java.sql.Date.valueOf(cmd.getEnrollmentTime()));
-		education.setGraduationTime(java.sql.Date.valueOf(cmd.getGraduationTime()));
-		//	获取当前时间
-		Date date = new Date();
-		Timestamp now = new Timestamp(date.getTime());
-		education.setCreateTime(now);
-		//	获取操作人员
-		if(cmd.getCreatorUid() != null)
-			education.setCreatorUid(cmd.getCreatorUid());
-		else
-			education.setCreatorUid(Long.valueOf(0));
-		//  暂且设置新增数据为有效数据
-		education.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-		this.organizationProvider.createOranizationMemberEducationInfo(education);
-
-		return ConvertHelper.convert(education,OrganizationMemberEducationsDTO.class);
-	     */
 	    if(cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
@@ -10194,12 +10168,20 @@ System.out.println();
 
 	@Override
 	public void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd) {
-
+        if(cmd.getId() == null)
+            return;
+        LOGGER.info("Invoke deleteOrganizationMemberEducations.education.id={}" + cmd.getId());
+        OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
+        if(experience == null){
+            LOGGER.info("Cannot find the corresponding infomation of education");
+            return;
+        }
+        experience.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+        this.organizationProvider.deleteOranizationMemberWorkExperience(experience);
 	}
 
 	@Override
 	public void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd) {
-
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- *<li>id: 工作经验信息编号</li>
+ *<li>id: 工作经验标识号</li>
  *</ul>
  */
 public class DeleteOrganizationMemberWorkExperiencesCommand {

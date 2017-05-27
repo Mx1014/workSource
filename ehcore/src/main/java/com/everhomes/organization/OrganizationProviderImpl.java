@@ -3556,6 +3556,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberWorkExperiences.class, id);
     }
 
+    @Override
+    public OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id){
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberWorkExperiences.class));
+        EhOrganizationMemberWorkExperiencesDao dao = new EhOrganizationMemberWorkExperiencesDao(context.configuration());
+        EhOrganizationMemberWorkExperiences experience = dao.findById(id);
+        if(experience == null)
+            return null;
+        return ConvertHelper.convert(experience,OrganizationMemberWorkExperiences.class);
+    }
+
+    @Override
+    public void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberWorkExperiencesDao dao = new EhOrganizationMemberWorkExperiencesDao(context.configuration());
+        dao.update(experience);
+    }
 
 
     @Override
