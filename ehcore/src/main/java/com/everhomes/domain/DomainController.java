@@ -27,7 +27,7 @@ import java.util.List;
 public class DomainController extends ControllerBase {
 
     @Autowired
-    private ServiceModuleService serviceModuleService;
+    private DomainService domainService;
 
     /**
      * <b>URL: /domain/getDomainInfo</b>
@@ -38,11 +38,7 @@ public class DomainController extends ControllerBase {
     @RequestMapping("getDomainInfo")
     @RestReturn(value = DomainDTO.class)
     public RestResponse getDomainInfo(@Valid GetDomainInfoCommand cmd) {
-        DomainDTO dto = new DomainDTO();
-        dto.setOwnerType(EntityType.ZUOLIN_ADMIN.getCode());
-        dto.setOwnerId(0L);
-        dto.setNamespaceId(0);
-        RestResponse response = new RestResponse(dto);
+        RestResponse response = new RestResponse(domainService.getDomainInfo(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
