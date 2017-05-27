@@ -5611,7 +5611,7 @@ public class PunchServiceImpl implements PunchService {
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		filePath = filePath + scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+dateSF.get().format(new Date(cmd.getQueryTime()))+".xlsx";
+		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+".xlsx";
 		//新建了一个文件
 		
 		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));
