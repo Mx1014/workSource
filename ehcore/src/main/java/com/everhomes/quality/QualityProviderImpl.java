@@ -1055,9 +1055,7 @@ public class QualityProviderImpl implements QualityProvider {
 					result[0] = context.select().from(Tables.EH_QUALITY_INSPECTION_TASKS)
 							.where(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(new Timestamp(startTime)))
 							.orderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_START_TIME)
-							.fetchAny().map((r) -> {
-								return ConvertHelper.convert(r, QualityInspectionTasks.class);
-							});
+							.fetchAnyInto(QualityInspectionTasks.class);
 
 					if (result[0] != null) {
 						return false;

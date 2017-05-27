@@ -69,9 +69,11 @@ public enum CoordinationLocks {
  
     UPDATE_EXPRESS_ORDER("update.express.order"),
 
+    USER_NOTIFICATION_SETTING("user.notification.setting"),
+    UPDATE_WAREHOUSE("warehouse.update"),
+    UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
+    UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update");
 
-    USER_NOTIFICATION_SETTING("user.notification.setting")
-    ;
 
 
     private String code;
