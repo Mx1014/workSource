@@ -344,6 +344,7 @@ CREATE TABLE `eh_activity_categories` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `entry_id` BIGINT(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace' ,
   `parent_id` BIGINT NOT NULL DEFAULT 0,
   `name` VARCHAR(64) NOT NULL,
   `path` VARCHAR(128),
@@ -360,7 +361,6 @@ CREATE TABLE `eh_activity_categories` (
   `selected_icon_uri` VARCHAR(1024),		
   `show_name` VARCHAR(64),		
   `all_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no, 1: yes',
-  `entry_id` BIGINT(20) NOT NULL COMMENT 'entry id, Differ from each other\n in the same namespace' AFTER `owner_id`,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
