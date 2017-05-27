@@ -983,6 +983,7 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 
 UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.male.url';
 UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.female.url';	
+UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.undisclosured.url';	
 	
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 	

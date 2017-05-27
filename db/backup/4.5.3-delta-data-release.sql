@@ -41,3 +41,6 @@ SET @rentalv2_resource_type_id = (SELECT max(id) FROM `eh_rentalv2_resource_type
 
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES((@rentalv2_resource_type_id := @rentalv2_resource_type_id + 1), '华润通会议室', 0, NULL, 0, 1);
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'1','0','4',@orgnaization_id,'/home','Bizs','华润通会议室','华润通会议室','cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ','1','1','49',CONCAT('{"resourceTypeId":', @rentalv2_resource_type_id, ',"pageType":0}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','0',NULL,NULL,'0',NULL);
+
+-- 华润 服务广场快递排序
+update `eh_launch_pad_items` set default_order = 80 where item_group = 'Bizs' and namespace_id = 999985 and item_name = '快递';
