@@ -9542,9 +9542,6 @@ System.out.println();
 	@Override
 	public List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org) {
 
-	    System.out.println(organizationMemberDetails.size());
-
-
 	    //  查找合同到期时间
         List<Long> detailIds = new ArrayList<>();
         organizationMemberDetails.forEach(r -> {
@@ -9564,7 +9561,7 @@ System.out.println();
         }
 
         //  设置部门并返回最终结果，完成转换
-        Long orgId = null;
+        Long orgId;
         if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
             orgId = org.getDirectlyEnterpriseId();
         } else
@@ -9944,7 +9941,7 @@ System.out.println();
 			OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails,OrganizationMemberBasicDTO.class);
 
             //  设置部门并返回最终结果，完成转换
-            Long orgId = null;
+            Long orgId;
             Organization org = this.checkOrganization(memberBasic.getOrganizationId());
             if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
                 orgId = org.getDirectlyEnterpriseId();
@@ -10057,6 +10054,7 @@ System.out.println();
 					"Invalid parameter, detailId should not be null or empty");
 		OrganizationMemberEducations education = new OrganizationMemberEducations();
 		education.setDetailId(cmd.getDetailId());
+		education.setNamespaceId(cmd.getNamespaceId());
 		education.setSchoolName(cmd.getSchoolName());
 		education.setDegree(cmd.getDegree());
 		education.setMajor(cmd.getMajor());
@@ -10088,6 +10086,7 @@ System.out.println();
 			LOGGER.info("Cannot find the corresponding infomation of education");
 			return;
 		}
+		education.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 		this.organizationProvider.deleteOranizationMemberEducationInfo(education);
 	}
 
@@ -10126,6 +10125,56 @@ System.out.println();
 
 	@Override
 	public OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd) {
+	    /*
+	    		if(cmd.getDetailId() == null)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter, detailId should not be null or empty");
+		OrganizationMemberEducations education = new OrganizationMemberEducations();
+		education.setDetailId(cmd.getDetailId());
+		education.setSchoolName(cmd.getSchoolName());
+		education.setDegree(cmd.getDegree());
+		education.setMajor(cmd.getMajor());
+		education.setEnrollmentTime(java.sql.Date.valueOf(cmd.getEnrollmentTime()));
+		education.setGraduationTime(java.sql.Date.valueOf(cmd.getGraduationTime()));
+		//	获取当前时间
+		Date date = new Date();
+		Timestamp now = new Timestamp(date.getTime());
+		education.setCreateTime(now);
+		//	获取操作人员
+		if(cmd.getCreatorUid() != null)
+			education.setCreatorUid(cmd.getCreatorUid());
+		else
+			education.setCreatorUid(Long.valueOf(0));
+		//  暂且设置新增数据为有效数据
+		education.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+		this.organizationProvider.createOranizationMemberEducationInfo(education);
+
+		return ConvertHelper.convert(education,OrganizationMemberEducationsDTO.class);
+	     */
+	    if(cmd.getDetailId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, detailId should not be null or empty");
+	    OrganizationMemberWorkExperiences experience = new OrganizationMemberWorkExperiences();
+	    experience.setDetailId(cmd.getDetailId());
+	    experience.setNamespaceId(cmd.getNamespaceId());
+	    experience.setEnterpriseName(cmd.getEnterpriseName());
+	    experience.setPosition(cmd.getPosition());
+	    experience.setJobType(cmd.getJobType());
+        experience.setEntryTime(java.sql.Date.valueOf(cmd.getEntryTime()));
+        experience.setDepartureTime(java.sql.Date.valueOf(cmd.getDepartureTime()));
+        //	获取当前时间
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        experience.setCreateTime(now);
+        //	获取操作人员
+        if(cmd.getCreatorUid() != null)
+            experience.setCreatorUid(cmd.getCreatorUid());
+        else
+            experience.setCreatorUid(Long.valueOf(0));
+        //  暂且设置新增数据为有效数据
+        experience.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+        this.organizationProvider.createOranizationMemberWorkExperience(experience);
+
 		return null;
 	}
 
