@@ -387,8 +387,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                         project.setProjectName(resourceCategory.getName());
                     }
                 }
+                dto.setAllProjectFlag(AllFlagType.NO.getCode());
                 dto.setProjects(projects);
-
             } else if (r.getAllProjectFlag() == AllFlagType.YES.getCode()) {
                 /**如果范围全选标识为NO，则默认不设置project**/
                 dto.setAllProjectFlag(AllFlagType.YES.getCode());
