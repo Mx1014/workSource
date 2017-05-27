@@ -1189,6 +1189,8 @@ public class WarehouseServiceImpl implements WarehouseService {
             if(null != r.getD())
                 data.setParentCategoryNumber(r.getD().trim());
 
+            if(LOGGER.isDebugEnabled())
+                LOGGER.debug("handleImportWarehouseMaterialCategoriesData data: {}", data);
             result.add(data);
         }
         return result;

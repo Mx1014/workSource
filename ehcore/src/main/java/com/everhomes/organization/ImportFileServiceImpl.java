@@ -153,18 +153,16 @@ public class ImportFileServiceImpl implements ImportFileService{
                     titleRow.setRowStyle(titleStyle);
                     ImportFileResultLog log = logs.get(0);
                     Map<String, String> data = (Map<String, String>) log.getData();
-//                    if(data.size() > 0){
-//                        for (Map.Entry<String, String> entry : data.entrySet()) {
-//                            titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
-//                        }
-//                    }else{
-//                        for (Map.Entry<String, String> entry : titleMap.entrySet()) {
-//                            titleRow.createCell(cellNum ++).setCellValue(entry.getValue());
-//                        }
-//                    }
-                    for (Map.Entry<String, String> entry : titleMap.entrySet()) {
+                    if(data.size() > 0){
+                        for (Map.Entry<String, String> entry : data.entrySet()) {
+                            titleRow.createCell(cellNum ++).setCellValue(titleMap.get(entry.getKey()));
+                        }
+                    }else{
+                        for (Map.Entry<String, String> entry : titleMap.entrySet()) {
                             titleRow.createCell(cellNum ++).setCellValue(entry.getValue());
+                        }
                     }
+
                     titleRow.createCell(cellNum ++).setCellValue("错误原因");
                 }
 
