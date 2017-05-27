@@ -3775,7 +3775,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if(cmd.getDateTime() == null) {
+			cmd.setDateTime(DateHelper.currentGMTTime().getTime());
+		}
+		cal.setTime(new Timestamp(cmd.getDateTime()));
 
 		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
