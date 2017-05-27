@@ -55,7 +55,9 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1158,5 +1160,22 @@ public class UserController extends ControllerBase {
 		user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s", cmd.getNewPassword(), user.getSalt())));
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
+	}
+	
+	/**
+	 * 用于测试nginx重新加载配置文件是否可以返回结果
+	 * @return
+	 */
+	@RequestMapping(value = "tcptest")
+	@RequireAuthentication(false)
+	@RestReturn(String.class)
+	public RestResponse tcptest() {
+	    int interval = this.configurationProvider.getIntValue(0, "test.tcptest", 10000);
+	    try {
+	        Thread.sleep(interval);
+	    } catch (Exception e) {
+            e.printStackTrace();
+        }
+	    return new RestResponse("OK at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:sss").format(new Date()));
 	}
 }
