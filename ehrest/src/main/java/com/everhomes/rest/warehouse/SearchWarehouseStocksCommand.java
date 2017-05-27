@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerType: 库存所属类型 eg：EhOrganizations</li>
  *     <li>ownerId: 库存所属类型id</li>
  *     <li>warehouseId: 仓库id</li>
+ *     <li>warehouseStatus: 仓库状态</li>
  *     <li>name: 物品名称</li>
  *     <li>materialNumber: 物品编码</li>
  *     <li>categoryId: 物品分类id</li>
@@ -22,6 +23,8 @@ public class SearchWarehouseStocksCommand {
     private Long ownerId;
 
     private Long warehouseId;
+
+    private Long warehouseStatus;
 
     private String name;
 
@@ -97,6 +100,13 @@ public class SearchWarehouseStocksCommand {
         this.warehouseId = warehouseId;
     }
 
+    public Long getWarehouseStatus() {
+        return warehouseStatus;
+    }
+
+    public void setWarehouseStatus(Long warehouseStatus) {
+        this.warehouseStatus = warehouseStatus;
+    }
 
     @Override
     public String toString() {

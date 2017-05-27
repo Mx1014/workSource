@@ -125,6 +125,10 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
         }
 
+        if(cmd.getWarehouseStatus() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseStatus", cmd.getWarehouseStatus()));
+        }
+
         if(cmd.getMaterialNumber() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("materialNumber", cmd.getMaterialNumber()));
         }
@@ -206,6 +210,14 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             b.field("warehouseId", stock.getWarehouseId());
             b.field("materialId", stock.getMaterialId());
             b.field("updateTime", stock.getUpdateTime());
+
+            Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), stock.getOwnerType(), stock.getOwnerId());
+            if(warehouse != null) {
+                b.field("warehouseStatus", warehouse.getStatus());
+            } else {
+                b.field("warehouseStatus", "");
+            }
+
 
             WarehouseMaterials material = warehouseProvider.findWarehouseMaterials(stock.getMaterialId(), stock.getOwnerType(), stock.getOwnerId());
             if(material != null) {
