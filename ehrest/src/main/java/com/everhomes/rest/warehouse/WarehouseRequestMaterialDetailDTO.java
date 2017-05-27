@@ -20,6 +20,7 @@ import java.sql.Timestamp;
  *     <li>warehouseName: 仓库名</li>
  *     <li>requestUid: 申请人id</li>
  *     <li>requestUserName: 申请人姓名</li>
+ *     <li>reviewResult： 审阅结果 参考{@link com.everhomes.rest.warehouse.WarehouseRequestReviewResult}</li>
  *     <li>deliveryTime： 出库时间</li>
  *     <li>deliveryFlag: 出库状态 参考{@link com.everhomes.rest.warehouse.WarehouseMaterialDeliveryFlag}</li>
  *     <li>brand: 品牌</li>
@@ -62,6 +63,16 @@ public class WarehouseRequestMaterialDetailDTO {
     private Timestamp deliveryTime;
 
     private Byte deliveryFlag;
+
+    private Byte reviewResult;
+
+    public Byte getReviewResult() {
+        return reviewResult;
+    }
+
+    public void setReviewResult(Byte reviewResult) {
+        this.reviewResult = reviewResult;
+    }
 
     public String getRequestUserName() {
         return requestUserName;
