@@ -10141,8 +10141,9 @@ System.out.println();
 
     @Override
     public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
-        List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
+
         ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
+        List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
         if (educations != null) {
             response.setEducations(educations.stream().map(r -> {
                 OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
@@ -10160,8 +10161,8 @@ System.out.println();
 	@Override
 	public ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd) {
 
-        List<OrganizationMemberWorkExperiences> workExperiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
         ListOrganizationMemberWorkExperiencesResponse response = new ListOrganizationMemberWorkExperiencesResponse();
+        List<OrganizationMemberWorkExperiences> workExperiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
         if(workExperiences != null) {
             response.setWorkExps(workExperiences.stream().map(r -> {
                 OrganizationMemberWorkExperiencesDTO dto = ConvertHelper.convert(r, OrganizationMemberWorkExperiencesDTO.class);
@@ -10216,7 +10217,15 @@ System.out.println();
 
 	@Override
 	public ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
-		return null;
+        ListOrganizationMemberContractsResponse response = new ListOrganizationMemberContractsResponse();
+	    List<OrganizationMemberContracts> contracts = this.organizationProvider.listOrganizationMemberContracts(cmd.getDetailId());
+	    if(contracts != null){
+	        response.setContracts(contracts.stream().map(r -> {
+	            OrganizationMemberContractsDTO dto = ConvertHelper.convert(r, OrganizationMemberContractsDTO.class);
+	            return dto;
+            }).collect(Collectors.toList()));
+        }
+		return response;
 	}
 
 	@Override

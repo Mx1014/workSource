@@ -2,9 +2,12 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>id: 合同标识号</li>
+ * <li>detailId: 员工编号</li>
  * <li>contractNumber: 合同编号</li>
  * <li>startTime: 生效时间</li>
  * <li>endTime: 到期时间</li>
@@ -12,23 +15,33 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationMemberContractsDTO {
 
-    private Long memberId;
+    private Long id;
+
+    private Long detailId;
 
     private String contractNumber;
 
-    private String startTime;
+    private Date startTime;
 
-    private String endTime;
+    private Date endTime;
 
     public OrganizationMemberContractsDTO() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getContractNumber() {
@@ -39,19 +52,19 @@ public class OrganizationMemberContractsDTO {
         this.contractNumber = contractNumber;
     }
 
-    public String getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 

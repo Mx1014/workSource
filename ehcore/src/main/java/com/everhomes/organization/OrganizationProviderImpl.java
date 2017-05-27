@@ -3527,6 +3527,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Cacheable(value = "Education", unless = "#result == null")
 	public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId){
+        if(detailId == null)
+            return null;
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<OrganizationMemberEducations> result = new ArrayList<>();
@@ -3540,7 +3542,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
+
+
+
+
 	public List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId){
+        if(detailId == null)
+            return null;
+
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
     	List<OrganizationMemberWorkExperiences> result = new ArrayList<>();
     	SelectQuery<EhOrganizationMemberWorkExperiencesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES);
@@ -3550,10 +3559,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     		result.add(ConvertHelper.convert(r,OrganizationMemberWorkExperiences.class));
     		return null;
 		});
+
     	return result;
 	}
 
+
+
+
+
 	public 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId){
+        if(detailId == null)
+            return null;
+
 	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 	    List<OrganizationMemberInsurances> result = new ArrayList<>();
 	    SelectQuery<EhOrganizationMemberInsurancesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_INSURANCES);
@@ -3563,7 +3580,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             result.add(ConvertHelper.convert(r, OrganizationMemberInsurances.class));
             return null;
         });
+
         return result;
     }
+
+
+
+
+
+    public List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId){
+	    if(detailId == null)
+	        return null;
+
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	    List<OrganizationMemberContracts> result = new ArrayList<>();
+	    SelectQuery<EhOrganizationMemberContractsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.eq(detailId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.fetch().map(r -> {
+            result.add(ConvertHelper.convert(r, OrganizationMemberContracts.class));
+            return null;
+        });
+
+        return result;
+    }
+
 
 }

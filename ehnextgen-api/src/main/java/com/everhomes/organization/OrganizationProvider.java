@@ -340,4 +340,6 @@ public interface OrganizationProvider {
 
 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
 
+	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+
 }
