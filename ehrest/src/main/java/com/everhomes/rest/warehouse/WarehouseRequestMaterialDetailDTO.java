@@ -30,6 +30,8 @@ import java.sql.Timestamp;
  */
 public class WarehouseRequestMaterialDetailDTO {
 
+    private Long id;
+
     private String ownerType;
 
     private Long ownerId;
@@ -65,6 +67,14 @@ public class WarehouseRequestMaterialDetailDTO {
     private Byte deliveryFlag;
 
     private Byte reviewResult;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Byte getReviewResult() {
         return reviewResult;
