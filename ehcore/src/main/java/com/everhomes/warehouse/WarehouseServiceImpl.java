@@ -1180,17 +1180,30 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialCategoryDataDTO data = new ImportWarehouseMaterialCategoryDataDTO();
-            if(null != r.getA())
+            if(null != r.getA()) {
                 data.setName(r.getA().trim());
-            if(null != r.getB())
-                data.setCategoryNumber(r.getB().trim());
-            if(null != r.getC())
-                data.setParentCategoryName(r.getC().trim());
-            if(null != r.getD())
-                data.setParentCategoryNumber(r.getD().trim());
+            } else {
+                data.setName("");
+            }
 
-            if(LOGGER.isDebugEnabled())
-                LOGGER.debug("handleImportWarehouseMaterialCategoriesData data: {}", data);
+            if(null != r.getB()) {
+                data.setCategoryNumber(r.getB().trim());
+            } else {
+                data.setCategoryNumber("");
+            }
+
+            if(null != r.getC()) {
+                data.setParentCategoryName(r.getC().trim());
+            } else {
+                data.setParentCategoryName("");
+            }
+
+            if(null != r.getD()) {
+                data.setParentCategoryNumber(r.getD().trim());
+            } else {
+                data.setParentCategoryNumber("");
+            }
+            
             result.add(data);
         }
         return result;
