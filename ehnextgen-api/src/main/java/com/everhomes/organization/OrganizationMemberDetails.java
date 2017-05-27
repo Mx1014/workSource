@@ -12,6 +12,7 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
     private String memberGroup;
     private Byte visibleFlag;
     private Date endTime;
+    private String nickName;
 
     public OrganizationMemberDetails() {
     }
@@ -54,6 +55,14 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override

@@ -438,7 +438,11 @@ public interface OrganizationService {
 
     OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd);
 
-    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
+    //  尝试将部门写成一个方法方便直接调用
+//    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
+    OrganizationMemberV2DTO getDepartmentFromOrganization(Organization org, OrganizationDTO orgDTO,
+                                                          Long directlyOrgId, String contactToken,
+                                                          String targetType, Long targetId, String nickName);
 
     void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd);
 

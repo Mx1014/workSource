@@ -110,6 +110,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.aspectj.weaver.ast.Or;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -9536,118 +9537,63 @@ System.out.println();
 		importFileService.exportImportFileFailResultXls(httpResponse, cmd.getTaskId());
 	}
 
+	//  New 20th.May
+
 	@Override
 	public List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org) {
 
-		Long orgId;
-
-		if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
-			orgId = org.getDirectlyEnterpriseId();
-		} else {
-			orgId = org.getId();
-		}
-
-		Long directlyOrgId = orgId;
-
-		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
-
-		List<String> groupTypes = new ArrayList<>();
-		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-
-		Organization directlyEnterprise = checkOrganization(directlyOrgId);
-
-		// 通过id查询合同信息
-		List<Long> detailIds = new ArrayList<>();
-		organizationMemberDetails.forEach(r -> {
-			detailIds.add(r.getId());
-		});
-
-		List<Object[]> listObject = this.organizationProvider.findContractEndTimeById(detailIds);
-
-		if (listObject != null) {
-			listObject.forEach(r -> {
-				organizationMemberDetails.forEach(rr -> {
-					if (r[0].equals(rr.getId()))
-						rr.setEndTime((java.sql.Date) r[1]);
-				});
-			});
-		}
-		List<OrganizationMemberV2DTO> response = organizationMemberDetails.stream().map((c) -> {
-			Long organizationId = directlyOrgId;
-
-			OrganizationMemberV2DTO dto = ConvertHelper.convert(c, OrganizationMemberV2DTO.class);
-
-			Long startTime1_1 = System.currentTimeMillis();
-			if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+	    System.out.println(organizationMemberDetails.size());
 
 
-				List<OrganizationDTO> departments = new ArrayList<>();
+	    //  查找合同到期时间
+        List<Long> detailIds = new ArrayList<>();
+        organizationMemberDetails.forEach(r -> {
+            detailIds.add(r.getId());
+        });
 
-				departments.addAll(this.getOrganizationMemberGroups(groupTypes, dto.getContactToken(), directlyEnterprise.getPath()));
-				departments = departments.stream().map(r -> {
-					String[] pathStrs = r.getPath().split("/");
-					String pathName = "";
-					for (String idStr : pathStrs) {
-						if (!"".equals(idStr)) {
-							Long id = Long.valueOf(idStr);
-							Organization o = organizationProvider.findOrganizationById(id);
-							if (id.equals(organizationId)) {
-								pathName = "start";
-							} else if ("start".equals(pathName)) {
-								pathName = null != o ? o.getName() : "未知";
-							} else if (!"".equals(pathName)) {
-								pathName += null != o ? "-" + o.getName() : "-未知";
-							}
-						}
-					}
-					if ("start".equals(pathName) && directlyEnterprise.getParentId() != 0L) {
-						r.setPathName(directlyEnterprise.getName());
-					} else {
-						r.setPathName(pathName);
-					}
+        List<Object[]> listObject = this.organizationProvider.findContractEndTimeById(detailIds);
 
-					return r;
-				}).collect(Collectors.toList());
-				dto.setDepartments(departments);
-			} else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP) {
-				List<OrganizationDTO> groups = new ArrayList<>();
-				groups.add(orgDTO);
-				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), directlyEnterprise.getPath()));
-				dto.setGroups(groups);
-			}
-			Long endTime1_1 = System.currentTimeMillis();
+        //  设置合同到期时间
+        if (listObject != null) {
+            listObject.forEach(r -> {
+                organizationMemberDetails.forEach(rr -> {
+                    if (r[0].equals(rr.getId()))
+                        rr.setEndTime((java.sql.Date) r[1]);
+                });
+            });
+        }
 
-			//岗位
-			dto.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(), directlyEnterprise.getPath()));
+        //  设置部门并返回最终结果，完成转换
+        Long orgId = null;
+        if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
+            orgId = org.getDirectlyEnterpriseId();
+        } else
+            orgId = org.getId();
 
-			//职级
-			dto.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, dto.getContactToken(), directlyEnterprise.getPath()));
+        Long directlyOrgId = orgId;
 
-			if (OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())) {
-				User user = userProvider.findUserById(dto.getTargetId());
-				if (null != user) {
-					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
-					dto.setNickName(dto.getNickName());
-				}
-			}
+        OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 
-			if (null == VisibleFlag.fromCode(c.getVisibleFlag())) {
-				dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
-			}
-
-			Long startTime2_2 = System.currentTimeMillis();
-
-			Long endTime2_2 = System.currentTimeMillis();
-
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("Track: listOrganizationPersonnels:convertDTO:map:{}: get organizatin elapse:{}, get organization elapse:{}, total elapse:{}", c.getContactToken(), endTime1_1 - startTime1_1, endTime2_2 - startTime2_2);
-			}
-			return dto;
-		}).collect(Collectors.toList());
-
-		return response;
+        List<OrganizationMemberV2DTO> response = organizationMemberDetails.stream().map((c) -> {
+            OrganizationMemberV2DTO dto = ConvertHelper.convert(c, OrganizationMemberV2DTO.class);
+            OrganizationMemberV2DTO dtoDepart = this.getDepartmentFromOrganization(org,orgDTO,directlyOrgId, dto.getContactToken(), dto.getTargetType(), dto.getTargetId(), dto.getNickName());
+            if (dtoDepart.getDepartments() != null)
+                dto.setDepartments(dtoDepart.getDepartments());
+            if(dtoDepart.getJobPositions() != null)
+                dto.setJobPositions(dtoDepart.getJobPositions());
+            if(dtoDepart.getJobLevels() != null)
+                dto.setJobLevels(dtoDepart.getJobLevels());
+            if(dtoDepart.getGroups() != null)
+                dto.setGroups(dtoDepart.getGroups());
+            if(dtoDepart.getAvatar() != null)
+                dto.setAvatar(dtoDepart.getAvatar());
+            if(dtoDepart.getNickName() != null)
+                dto.setNickName(dtoDepart.getNickName());
+            if(VisibleFlag.fromCode(c.getVisibleFlag()) == null)
+                dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
+                return dto;
+        }).collect(Collectors.toList());
+        return response;
 	}
 
 	@Override
@@ -9996,8 +9942,32 @@ System.out.println();
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (memberDetails != null) {
 			OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails,OrganizationMemberBasicDTO.class);
-			// 获取部门
-			this.getDepartmentFromOrganization(memberBasic.getOrganizationId(), memberBasic);
+
+            //  设置部门并返回最终结果，完成转换
+            Long orgId = null;
+            Organization org = this.checkOrganization(memberBasic.getOrganizationId());
+            if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
+                orgId = org.getDirectlyEnterpriseId();
+            } else
+                orgId = org.getId();
+            Long directlyOrgId = orgId;
+            OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
+
+            OrganizationMemberV2DTO dto = this.getDepartmentFromOrganization(org,orgDTO,directlyOrgId, memberBasic.getContactToken(),
+                    memberBasic.getTargetType(),memberBasic.getTargetId(),memberBasic.getNickName());
+
+            if(dto.getDepartments() != null)
+                memberBasic.setDepartments(dto.getDepartments());
+            if(dto.getJobPositions() != null)
+                memberBasic.setJobPositions(dto.getJobPositions());
+            if(dto.getJobLevels() != null)
+                memberBasic.setJobLevels(dto.getJobLevels());
+            if(dto.getGroups() != null)
+                memberBasic.setGroups(dto.getGroups());
+            if(dto.getAvatar() != null)
+                memberBasic.setAvatar(dto.getAvatar());
+            if(dto.getNickName() != null)
+                memberBasic.setNickName(dto.getNickName());
 			return memberBasic;
 
 		}else{
@@ -10007,78 +9977,73 @@ System.out.println();
 
 	// 获取部门规则函数
 	@Override
-	public void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO) {
+    public OrganizationMemberV2DTO getDepartmentFromOrganization(Organization org, OrganizationDTO orgDTO,
+                                                                 Long directlyOrgId, String contactToken,
+                                                                 String targetType, Long targetId, String nickName) {
 
-		Long orgId;
-		Organization org = this.checkOrganization(organizationId);
-		if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
-			orgId = org.getDirectlyEnterpriseId();
-		} else
-			orgId = org.getId();
-		Long directlyOrgId = orgId;
 
-		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
 
-		List<String> groupTypes = new ArrayList<>();
-		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        Organization directlyEnterprise = checkOrganization(directlyOrgId);
 
-		Organization directlyEnterprise = checkOrganization(directlyOrgId);
+        OrganizationMemberV2DTO dto = new OrganizationMemberV2DTO();
 
-		List<Long> details = new ArrayList<>();
+        if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
 
-		Long startTime1_1 = System.currentTimeMillis();
-		if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+            List<OrganizationDTO> departments = new ArrayList<>();
 
-			List<OrganizationDTO> departments = new ArrayList<>();
+            Long organizationId = directlyOrgId;
 
-			departments.addAll(this.getOrganizationMemberGroups(groupTypes, memberBasicDTO.getContactToken(), directlyEnterprise.getPath()));
-			departments = departments.stream().map(r -> {
-				String[] pathStrs = r.getPath().split("/");
-				String pathName = "";
-				for (String idStr : pathStrs) {
-					if (!"".equals(idStr)) {
-						Long id = Long.valueOf(idStr);
-						Organization o = this.organizationProvider.findOrganizationById(id);
-						if (id.equals(organizationId)) {
-							pathName = "start";
-						} else if ("start".equals(pathName)) {
-							pathName = null != o ? o.getName() : "未知";
-						} else if (!"".equals(pathName)) {
-							pathName += null != o ? "-" + o.getName() : "-未知";
-						}
-					}
-				}
-				if ("start".equals(pathName) && directlyEnterprise.getParentId() != 0L) {
-					r.setPathName(directlyEnterprise.getName());
-				} else {
-					r.setPathName(pathName);
-				}
+            departments.addAll(this.getOrganizationMemberGroups(groupTypes, contactToken, directlyEnterprise.getPath()));
+            departments = departments.stream().map(r -> {
+                String[] pathStrs = r.getPath().split("/");
+                String pathName = "";
+                for (String idStr : pathStrs) {
+                    if (!"".equals(idStr)) {
+                        Long id = Long.valueOf(idStr);
+                        Organization o = this.organizationProvider.findOrganizationById(id);
+                        if (id.equals(organizationId)) {
+                            pathName = "start";
+                        } else if ("start".equals(pathName)) {
+                            pathName = null != o ? o.getName() : "未知";
+                        } else if (!"".equals(pathName)) {
+                            pathName += null != o ? "-" + o.getName() : "-未知";
+                        }
+                    }
+                }
+                if ("start".equals(pathName) && directlyEnterprise.getParentId() != 0L) {
+                    r.setPathName(directlyEnterprise.getName());
+                } else {
+                    r.setPathName(pathName);
+                }
+                return r;
+            }).collect(Collectors.toList());
+            dto.setDepartments(departments);
+        } else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP) {
+            List<OrganizationDTO> groups = new ArrayList<>();
+            groups.add(orgDTO);
+            groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, contactToken, directlyEnterprise.getPath()));
+            dto.setGroups(groups);
+        }
+        //岗位
+        dto.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, contactToken, directlyEnterprise.getPath()));
 
-				return r;
-			}).collect(Collectors.toList());
-			memberBasicDTO.setDepartments(departments);
-		} else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP) {
-			List<OrganizationDTO> groups = new ArrayList<>();
-			groups.add(orgDTO);
-			groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, memberBasicDTO.getContactToken(), directlyEnterprise.getPath()));
-			memberBasicDTO.setGroups(groups);
-		}
-		//岗位
-		memberBasicDTO.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, memberBasicDTO.getContactToken(), directlyEnterprise.getPath()));
+        //职级
+        dto.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, contactToken, directlyEnterprise.getPath()));
 
-		//职级
-		memberBasicDTO.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, memberBasicDTO.getContactToken(), directlyEnterprise.getPath()));
+        if (OrganizationMemberTargetType.USER.getCode().equals(targetType)) {
+            User user = userProvider.findUserById(targetId);
+            if (null != user) {
+                dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+                dto.setNickName(nickName);
+            }
+        }
 
-		if (OrganizationMemberTargetType.USER.getCode().equals(memberBasicDTO.getTargetType())) {
-			User user = userProvider.findUserById(memberBasicDTO.getTargetId());
-			if (null != user) {
-				memberBasicDTO.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
-				memberBasicDTO.setNickName(memberBasicDTO.getNickName());
-			}
-		}
-	}
+        return dto;
+    }
 
 	@Override
 	public void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {

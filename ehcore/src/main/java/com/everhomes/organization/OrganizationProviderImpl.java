@@ -3347,43 +3347,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return ConvertHelper.convert(dao.findById(id), ImportFileTask.class);
 	}
 
-    @Override
-    public List<Object[]> findContractEndTimeById(List<Long> detailIds) {
-        final List<Object[]> response = new ArrayList<>();
-
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
-
-//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class),
-                null, (DSLContext context, Object reducingContext) -> {
-                    Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
-                    List<Object[]> list = context.select(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID,DSL.max(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME))
-                            .from(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS)
-                            .where(condition)
-                            .groupBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID)
-                            .fetchInto(Object[].class);
-                    if(list !=null)
-                        response.addAll(list);
-                    return true;
-                });
-        return response;
-
-/*        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class),
-                null, (DSLContext context, Object reducingContext) -> {
-            Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
-            List<Object[]> list = context.select(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID,DSL.max(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME))
-                    .from(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS)
-                    .where(condition)
-                    .groupBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID)
-                    .fetchInto(Object[].class);
-            if(list !=null)
-                response.addAll(list);
-            return true;
-        });
-        return response;*/
-
-    }
+	@Override
+	public List<Object[]> findContractEndTimeById(List<Long> detailIds) {
+		final List<Object[]> response = new ArrayList<>();
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class),
+				null, (DSLContext context, Object reducingContext) -> {
+					Condition condition = Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.in(detailIds);
+					List<Object[]> list = context.select(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID, DSL.max(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME))
+							.from(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS)
+							.where(condition)
+							.groupBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID)
+							.fetchInto(Object[].class);
+					if (list != null)
+						response.addAll(list);
+					return true;
+				});
+		return response;
+	}
 
     @Override
     public List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator, Integer pageSize, Organization org, List<String> groupTypes, String keywords) {
@@ -3401,7 +3381,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.lt(locator.getAnchor());
 
         // 若只对应部门字段的人员
-        // condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId()));
+//         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId()));
         // 若需要部门下的所有人员
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%"));
 
