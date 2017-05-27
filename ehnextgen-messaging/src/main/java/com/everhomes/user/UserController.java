@@ -1161,21 +1161,4 @@ public class UserController extends ControllerBase {
 		userProvider.updateUser(user);
 		return new RestResponse("OK");
 	}
-	
-	/**
-	 * 用于测试nginx重新加载配置文件是否可以返回结果
-	 * @return
-	 */
-	@RequestMapping(value = "tcptest")
-	@RequireAuthentication(false)
-	@RestReturn(String.class)
-	public RestResponse tcptest() {
-	    int interval = this.configurationProvider.getIntValue(0, "test.tcptest", 10000);
-	    try {
-	        Thread.sleep(interval);
-	    } catch (Exception e) {
-            e.printStackTrace();
-        }
-	    return new RestResponse("OK at " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:sss").format(new Date()));
-	}
 }
