@@ -334,7 +334,8 @@ public interface OrganizationProvider {
 	void createOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
 	OrganizationMemberWorkExperiences findOrganizationWorkExperienceById(Long id);
 	void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
-	List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
+	void updateOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience);
+    List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
 
 
 

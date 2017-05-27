@@ -10182,6 +10182,21 @@ System.out.println();
 
 	@Override
 	public void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd) {
+        if(cmd.getId() == null)
+            return;
+        LOGGER.info("Invoke deleteOrganizationMemberEducations.education.id={}" + cmd.getId());
+        OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
+        if(experience == null){
+            LOGGER.info("Cannot find the corresponding infomation of education");
+            return;
+        }
+        experience.setEnterpriseName(cmd.getEnterpriseName());
+        experience.setPosition(cmd.getPosition());
+        experience.setJobType(cmd.getJobType());
+        experience.setEntryTime(java.sql.Date.valueOf(cmd.getEntryTime()));
+        experience.setDepartureTime(java.sql.Date.valueOf(cmd.getDepartureTime()));
+
+        this.organizationProvider.updateOranizationMemberWorkExperience(experience);
 	}
 
 	@Override

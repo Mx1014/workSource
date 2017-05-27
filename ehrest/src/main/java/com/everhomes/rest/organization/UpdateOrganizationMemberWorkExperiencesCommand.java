@@ -20,7 +20,7 @@ public class UpdateOrganizationMemberWorkExperiencesCommand {
 
     private String position;
 
-    private String jobType;
+    private Byte jobType;
 
     private String entryTime;
 
@@ -53,11 +53,11 @@ public class UpdateOrganizationMemberWorkExperiencesCommand {
         this.position = position;
     }
 
-    public String getJobType() {
+    public Byte getJobType() {
         return jobType;
     }
 
-    public void setJobType(String jobType) {
+    public void setJobType(Byte jobType) {
         this.jobType = jobType;
     }
 

@@ -3494,7 +3494,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 //    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
     public void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationMemberEducations.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberEducationsDao dao = new EhOrganizationMemberEducationsDao(context.configuration());
         dao.update(education);
     }
@@ -3568,6 +3568,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
     @Override
     public void deleteOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberWorkExperiencesDao dao = new EhOrganizationMemberWorkExperiencesDao(context.configuration());
+        dao.update(experience);
+    }
+
+    @Override
+    public void updateOranizationMemberWorkExperience(OrganizationMemberWorkExperiences experience){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberWorkExperiencesDao dao = new EhOrganizationMemberWorkExperiencesDao(context.configuration());
         dao.update(experience);
