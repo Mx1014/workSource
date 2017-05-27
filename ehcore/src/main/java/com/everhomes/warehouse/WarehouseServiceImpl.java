@@ -491,11 +491,29 @@ public class WarehouseServiceImpl implements WarehouseService {
         if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
             cmd.getStocks().forEach(stock -> {
                 if(stock.getAmount() <= 0) {
-                    LOGGER.error("warehouse stock change amount should larger than 0, stock: {} " + stock);
+                    LOGGER.error("warehouse stock change amount should larger than 0, stock: {} ", stock);
                     throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
                             localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
                                     String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_REQUEST_MATERIAL_SHOULD_LARGER_THAN_ZERO),
                                     UserContext.current().getUser().getLocale(),"warehouse stock change amount should larger than 0"));
+                }
+
+                Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+                if(warehouse == null) {
+                    LOGGER.error("warehouse is not exit, warehouseid: {} ", stock.getWarehouseId());
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST),
+                                    UserContext.current().getUser().getLocale(),"warehouse is not exit"));
+
+                }
+                else if(warehouse != null && !Status.ACTIVE.equals(Status.fromCode(warehouse.getStatus()))) {
+                    LOGGER.error("warehouse is not active, warehouseid: {} ", stock.getWarehouseId());
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_NOT_ACTIVE),
+                                    UserContext.current().getUser().getLocale(),"warehouse is not active"));
+
                 }
             });
             Long uid = UserContext.current().getUser().getId();
@@ -1192,6 +1210,27 @@ public class WarehouseServiceImpl implements WarehouseService {
                     }
                 });
             }
+        }
+        if(cmd.getStocks() != null && cmd.getStocks().size() > 0) {
+            cmd.getStocks().forEach(stock -> {
+                Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), cmd.getOwnerType(), cmd.getOwnerId());
+                if(warehouse == null) {
+                    LOGGER.error("warehouse is not exit, warehouseid: {} ", stock.getWarehouseId());
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_NOT_EXIST),
+                                    UserContext.current().getUser().getLocale(),"warehouse is not exit"));
+
+                }
+                else if(warehouse != null && !Status.ACTIVE.equals(Status.fromCode(warehouse.getStatus()))) {
+                    LOGGER.error("warehouse is not active, warehouseid: {} ", stock.getWarehouseId());
+                    throw RuntimeErrorException.errorWith(WarehouseServiceErrorCode.SCOPE, WarehouseServiceErrorCode.ERROR_WAREHOUSE_STOCK_SHORTAGE,
+                            localeStringService.getLocalizedString(String.valueOf(WarehouseServiceErrorCode.SCOPE),
+                                    String.valueOf(WarehouseServiceErrorCode.ERROR_WAREHOUSE_IS_NOT_ACTIVE),
+                                    UserContext.current().getUser().getLocale(),"warehouse is not active"));
+
+                }
+            });
         }
 
         Long uid = UserContext.current().getUser().getId();
