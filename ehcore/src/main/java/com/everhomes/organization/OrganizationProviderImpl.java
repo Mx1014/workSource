@@ -3553,4 +3553,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     	return result;
 	}
 
+	public 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId){
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+	    List<OrganizationMemberInsurances> result = new ArrayList<>();
+	    SelectQuery<EhOrganizationMemberInsurancesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_INSURANCES);
+	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_INSURANCES.DETAIL_ID.eq(detailId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_INSURANCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.fetch().map(r -> {
+            result.add(ConvertHelper.convert(r, OrganizationMemberInsurances.class));
+            return null;
+        });
+        return result;
+    }
+
 }

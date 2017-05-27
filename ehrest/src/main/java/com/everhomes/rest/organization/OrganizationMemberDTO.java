@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
-
+ * <li>detailId: 关联detail表，唯一的员工序列号</li>
  * <li>organizationId: 小区id</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
 public class OrganizationMemberDTO {
 	@NotNull
     private Long   id;
+	private Long detailId;
 	@NotNull
     private Long   organizationId;
 	private String   organizationName;
@@ -93,7 +94,15 @@ public class OrganizationMemberDTO {
 	public OrganizationMemberDTO() {
     }
 
-	public Byte getExecutiveFlag() {
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
+    public Byte getExecutiveFlag() {
 		return executiveFlag;
 	}
 

@@ -332,6 +332,12 @@ public interface OrganizationProvider {
 
 	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId);
 
+
+
 	List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
+
+
+
+	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
 
 }

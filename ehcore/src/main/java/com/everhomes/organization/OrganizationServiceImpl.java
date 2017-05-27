@@ -10188,7 +10188,15 @@ System.out.println();
 
 	@Override
 	public ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd) {
-		return null;
+	    ListOrganizationMemberInsurancesResponse response = new ListOrganizationMemberInsurancesResponse();
+	    List<OrganizationMemberInsurances> insurances = this.organizationProvider.listOrganizationMemberInsurances(cmd.getDetailId());
+	    if(insurances != null){
+	        response.setInsurances(insurances.stream().map(r -> {
+	            OrganizationMemberInsurancesDTO dto = ConvertHelper.convert(r, OrganizationMemberInsurancesDTO.class);
+	            return dto;
+            }).collect(Collectors.toList()));
+        }
+		return response;
 	}
 
 	@Override

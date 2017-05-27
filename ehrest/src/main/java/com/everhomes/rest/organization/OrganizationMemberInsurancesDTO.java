@@ -2,9 +2,12 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Date;
+
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>id: 保险信息编号</li>
+ * <li>detailId: 员工编号</li>
  * <li>name: 保险名称</li>
  * <li>enterprise: 保险公司名称</li>
  * <li>number: 保险编号</li>
@@ -14,7 +17,9 @@ import com.everhomes.util.StringHelper;
  */
 public class OrganizationMemberInsurancesDTO {
 
-    private Long memberId;
+    private Long id;
+
+    private Long detailId;
 
     private String name;
 
@@ -22,19 +27,27 @@ public class OrganizationMemberInsurancesDTO {
 
     private String number;
 
-    private String startTime;
+    private Date startTime;
 
-    private String endTime;
+    private Date endTime;
 
     public OrganizationMemberInsurancesDTO() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getId() {
+        return id;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getName() {
@@ -61,19 +74,19 @@ public class OrganizationMemberInsurancesDTO {
         this.number = number;
     }
 
-    public String getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 
