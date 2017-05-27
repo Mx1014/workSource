@@ -49,7 +49,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.ValidatorUtil;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.sun.xml.ws.util.xml.CDATA;
 
 /**
  * 这里的所有public方法都使用TalentServiceAdvice检查是否为管理员权限
@@ -181,7 +180,7 @@ public class TalentServiceImpl implements TalentService {
 			addQueryHistory(cmd.getKeyword().trim());
 		}
 		
-		return new ListTalentResponse(nextPageAnchor, talents.stream().map(this::convertWithoutRemark).collect(Collectors.toList()));
+		return new ListTalentResponse(nextPageAnchor, talents.stream().map(t->convertWithoutRemark(t, cmd.getAppFlag())).collect(Collectors.toList()));
 	}
 	
 	private void addQueryHistory(String keyword) {
@@ -198,8 +197,8 @@ public class TalentServiceImpl implements TalentService {
 		talentQueryHistoryProvider.createTalentQueryHistory(talentQueryHistory);
 	}
 
-	private TalentDTO convertWithoutRemark(Talent talent) {
-		TalentDTO talentDTO = convert(talent);
+	private TalentDTO convertWithoutRemark(Talent talent, Byte appFlag) {
+		TalentDTO talentDTO = convert(talent, appFlag);
 		talentDTO.setRemark(null);
 		return talentDTO;
 	}
@@ -343,16 +342,30 @@ public class TalentServiceImpl implements TalentService {
 	@Override
 	public GetTalentDetailResponse getTalentDetail(GetTalentDetailCommand cmd) {
 		Talent talent = findTalentById(cmd.getId(), namespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
-		return new GetTalentDetailResponse(convert(talent));
+		return new GetTalentDetailResponse(convert(talent, cmd.getAppFlag()));
 	}
 
-	private TalentDTO convert(Talent talent) {
+	private TalentDTO convert(Talent talent, Byte appFlag) {
 		TalentDTO talentDTO = ConvertHelper.convert(talent, TalentDTO.class);
 		talentDTO.setCategoryName(findTalentCategoryById(talent.getCategoryId()).getName());
-		talentDTO.setAvatarUrl(contentServerService.parserUri(talent.getAvatarUri()));
+		talentDTO.setAvatarUrl(getAvatarUrl(appFlag, talent.getGender(), talent.getAvatarUri()));
 		return talentDTO;
 	}
 	
+	private String getAvatarUrl(Byte appFlag, Byte gender, String avatarUri) {
+		if (TrueOrFalseFlag.fromCode(appFlag) == TrueOrFalseFlag.TRUE) {
+			avatarUri = getDefaultAvatarUri(gender);
+		}
+		return contentServerService.parserUri(avatarUri);
+	}
+	
+	private String getDefaultAvatarUri(Byte gender) {
+		if (UserGender.fromCode(gender) == UserGender.MALE) {
+			return configurationProvider.getValue("talent.male.uri", "");
+		}
+		return configurationProvider.getValue("talent.female.uri", "");
+	}
+
 	@Override
 	public ListTalentQueryHistoryResponse listTalentQueryHistory(ListTalentQueryHistoryCommand cmd) {
 		List<TalentQueryHistory> talentQueryHistories = talentQueryHistoryProvider.listTalentQueryHistoryByUser(userId());

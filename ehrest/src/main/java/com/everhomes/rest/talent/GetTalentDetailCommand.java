@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id</li>
  * <li>organizationId: 管理公司id</li>
  * <li>id: id</li>
+ * <li>appFlag: 1是0否，是否为app端调用，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class GetTalentDetailCommand {
@@ -25,6 +26,8 @@ public class GetTalentDetailCommand {
 	private Long organizationId;
 	@NotNull
 	private Long id;
+	
+	private Byte appFlag;
 
 	public GetTalentDetailCommand() {
 
@@ -36,6 +39,14 @@ public class GetTalentDetailCommand {
 		this.ownerId = ownerId;
 		this.organizationId = organizationId;
 		this.id = id;
+	}
+
+	public Byte getAppFlag() {
+		return appFlag;
+	}
+
+	public void setAppFlag(Byte appFlag) {
+		this.appFlag = appFlag;
 	}
 
 	public String getOwnerType() {

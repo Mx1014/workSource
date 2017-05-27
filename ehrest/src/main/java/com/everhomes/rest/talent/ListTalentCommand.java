@@ -19,7 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键词</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
- * <li>historyFlag: 是否添加到历史记录</li>
+ * <li>historyFlag: 1是0否，是否添加到历史记录，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>appFlag: 1是0否，是否为app端调用，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ListTalentCommand {
@@ -46,9 +47,19 @@ public class ListTalentCommand {
 	private Integer pageSize;
 	
 	private Byte historyFlag;
+	
+	private Byte appFlag;
 
 	public ListTalentCommand() {
 
+	}
+
+	public Byte getAppFlag() {
+		return appFlag;
+	}
+
+	public void setAppFlag(Byte appFlag) {
+		this.appFlag = appFlag;
 	}
 
 	public Byte getHistoryFlag() {
