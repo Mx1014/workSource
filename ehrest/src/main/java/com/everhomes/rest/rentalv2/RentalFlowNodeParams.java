@@ -1,13 +1,16 @@
 package com.everhomes.rest.rentalv2;
 
-/***
+/**
+ * <ul>
  * AGREE("agree") 待审批
- * PAID("paid") 待支付节点 
- * COMPLETE("complete") 已完成节点 
- * */
+ * UNPAID("unpaid") 待支付节点
+ * PAID("paid") 已支付节点
+ * COMPLETE("complete") 已完成节点
+ * </ul>
+ */
 public enum RentalFlowNodeParams {
-	
-	AGREE("agree"), PAID("paid"),COMPLETE("complete") ;
+
+    AGREE("agree"), UNPAID("unpaid"), PAID("paid"), COMPLETE("complete") ;
     
     private String code;
     private RentalFlowNodeParams(String code) {

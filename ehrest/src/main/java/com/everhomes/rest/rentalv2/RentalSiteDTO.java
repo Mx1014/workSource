@@ -51,12 +51,19 @@ import com.everhomes.util.StringHelper;
  * <li>	siteNumbers：资源编号列表 {String}</li>
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.rentalv2.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
- * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
+ * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.rentalv2.admin.SiteOwnerDTO}</li>
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
  * <li>offlineCashierAddress: 线下支付收银地址</li>
  * <li>offlinePayeeUid: 线下支付收款人id</li>
  * <li>offlinePayeeName: 线下支付收款人姓名</li>
+ * <li>detailUrl: 详情Url</li>
+ * <li>rentalEndTime: 至少提前预约时间</li>
+ * <li>rentalStartTime: 最多提前预约时间</li>
+ * <li>rentalEndTimeFlag: 至少提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
+ * <li>resourceTypeId: 资源类型id</li>
+ * <li>payMode: 支付模式</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -113,11 +120,53 @@ public class RentalSiteDTO {
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
     private String offlinePayeeName;
+
+	private Byte rentalStartTimeFlag;
+	private Byte rentalEndTimeFlag;
+	private Long rentalStartTime;
+	private Long rentalEndTime;
+    private String detailUrl;
+    private String reserveRouteUrl;
+
+    private Long resourceTypeId;
+    private Byte payMode;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+
+	public Long getResourceTypeId() {
+		return resourceTypeId;
+	}
+
+	public void setResourceTypeId(Long resourceTypeId) {
+		this.resourceTypeId = resourceTypeId;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
+	}
+
+	public String getReserveRouteUrl() {
+		return reserveRouteUrl;
+	}
+
+	public void setReserveRouteUrl(String reserveRouteUrl) {
+		this.reserveRouteUrl = reserveRouteUrl;
+	}
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getBuildingName() {
 		return buildingName;
@@ -575,5 +624,35 @@ public class RentalSiteDTO {
 		this.offlinePayeeName = offlinePayeeName;
 	}
 
- 
+	public Byte getRentalStartTimeFlag() {
+		return rentalStartTimeFlag;
+	}
+
+	public void setRentalStartTimeFlag(Byte rentalStartTimeFlag) {
+		this.rentalStartTimeFlag = rentalStartTimeFlag;
+	}
+
+	public Byte getRentalEndTimeFlag() {
+		return rentalEndTimeFlag;
+	}
+
+	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
+		this.rentalEndTimeFlag = rentalEndTimeFlag;
+	}
+
+	public Long getRentalStartTime() {
+		return rentalStartTime;
+	}
+
+	public void setRentalStartTime(Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+
+	public Long getRentalEndTime() {
+		return rentalEndTime;
+	}
+
+	public void setRentalEndTime(Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
 }

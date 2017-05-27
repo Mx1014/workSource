@@ -80,7 +80,9 @@ public interface ConfigConstants {
 	public static final String CLUB_SHARE_URL = "club.share.url";
 
     String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url";
-    
+
+    String RENTAL_RESOURCE_DETAIL_URL = "rental.resource.detail.url";
+
     String KEXING_PMBILL_API_HOST = "kexing.pmbill.api.host";
     String KEXING_PMBILL_API_BILLLIST = "kexing.pmbill.api.billlist";
     String KEXING_PMBILL_API_BILLCOUNT = "kexing.pmbill.api.billcount";
