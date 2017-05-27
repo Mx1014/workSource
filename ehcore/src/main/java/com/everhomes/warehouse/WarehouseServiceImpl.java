@@ -1146,24 +1146,59 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialDataDTO data = new ImportWarehouseMaterialDataDTO();
-            if(null != r.getA())
+            if(null != r.getA()) {
                 data.setName(r.getA().trim());
-            if(null != r.getB())
+            } else {
+                data.setName("");
+            }
+
+            if(null != r.getB()) {
                 data.setMaterialNumber(r.getB().trim());
-            if(null != r.getC())
+            } else {
+                data.setMaterialNumber("");
+            }
+
+            if(null != r.getC()) {
                 data.setCategoryName(r.getC().trim());
-            if(null != r.getD())
+            } else {
+                data.setCategoryName("");
+            }
+
+            if(null != r.getD()) {
                 data.setCategoryNumber(r.getD().trim());
-            if(null != r.getE())
+            } else {
+                data.setCategoryNumber("");
+            }
+
+            if(null != r.getE()) {
                 data.setBrand(r.getE().trim());
-            if(null != r.getF())
+            } else {
+                data.setBrand("");
+            }
+
+            if(null != r.getF()) {
                 data.setItemNo(r.getF().trim());
-            if(null != r.getG())
+            } else {
+                data.setItemNo("");
+            }
+
+            if(null != r.getG()) {
                 data.setReferencePrice(r.getG().trim());
-            if(null != r.getH())
+            } else {
+                data.setReferencePrice("");
+            }
+
+            if(null != r.getH()) {
                 data.setUnitName(r.getH().trim());
-            if(null != r.getI())
+            } else {
+                data.setUnitName("");
+            }
+
+            if(null != r.getI()) {
                 data.setSpecificationInformation(r.getI().trim());
+            } else {
+                data.setSpecificationInformation("");
+            }
 
             result.add(data);
         }
