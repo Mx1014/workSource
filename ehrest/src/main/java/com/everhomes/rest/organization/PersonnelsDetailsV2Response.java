@@ -18,15 +18,15 @@ public class PersonnelsDetailsV2Response {
 
     private Long detailId;
 
-    private OrganizationMemberBasicDTO memberBasicDTO;
+    private OrganizationMemberBasicDTO basic;
 
-    private List<OrganizationMemberEducationsDTO> memberEducationsDTOList;
+    private List<OrganizationMemberEducationsDTO> education;
 
-    private ListOrganizationMemberWorkExperiencesResponse memberWorkExperiencesResponse;
+    private List<OrganizationMemberWorkExperiencesDTO> workExperience;
 
-    private ListOrganizationMemberInsurancesResponse memberInsurancesResponse;
+    private List<OrganizationMemberInsurancesDTO> insurance;
 
-    private ListOrganizationMemberContractsResponse memberContractsResponse;
+    private List<OrganizationMemberContractsDTO> contract;
 
     public PersonnelsDetailsV2Response() {
     }
@@ -39,44 +39,44 @@ public class PersonnelsDetailsV2Response {
         this.detailId = detailId;
     }
 
-    public OrganizationMemberBasicDTO getMemberBasicDTO() {
-        return memberBasicDTO;
+    public OrganizationMemberBasicDTO getBasic() {
+        return basic;
     }
 
-    public void setMemberBasicDTO(OrganizationMemberBasicDTO memberBasicDTO) {
-        this.memberBasicDTO = memberBasicDTO;
+    public void setBasic(OrganizationMemberBasicDTO basic) {
+        this.basic = basic;
     }
 
-    public List<OrganizationMemberEducationsDTO> getMemberEducationsDTOList() {
-        return memberEducationsDTOList;
+    public List<OrganizationMemberEducationsDTO> getEducation() {
+        return education;
     }
 
-    public void setMemberEducationsDTOList(List<OrganizationMemberEducationsDTO> memberEducationsDTOList) {
-        this.memberEducationsDTOList = memberEducationsDTOList;
+    public void setEducation(List<OrganizationMemberEducationsDTO> education) {
+        this.education = education;
     }
 
-    public ListOrganizationMemberWorkExperiencesResponse getMemberWorkExperiencesResponse() {
-        return memberWorkExperiencesResponse;
+    public List<OrganizationMemberWorkExperiencesDTO> getWorkExperience() {
+        return workExperience;
     }
 
-    public void setMemberWorkExperiencesResponse(ListOrganizationMemberWorkExperiencesResponse memberWorkExperiencesResponse) {
-        this.memberWorkExperiencesResponse = memberWorkExperiencesResponse;
+    public void setWorkExperience(List<OrganizationMemberWorkExperiencesDTO> workExperience) {
+        this.workExperience = workExperience;
     }
 
-    public ListOrganizationMemberInsurancesResponse getMemberInsurancesResponse() {
-        return memberInsurancesResponse;
+    public List<OrganizationMemberInsurancesDTO> getInsurance() {
+        return insurance;
     }
 
-    public void setMemberInsurancesResponse(ListOrganizationMemberInsurancesResponse memberInsurancesResponse) {
-        this.memberInsurancesResponse = memberInsurancesResponse;
+    public void setInsurance(List<OrganizationMemberInsurancesDTO> insurance) {
+        this.insurance = insurance;
     }
 
-    public ListOrganizationMemberContractsResponse getMemberContractsResponse() {
-        return memberContractsResponse;
+    public List<OrganizationMemberContractsDTO> getContract() {
+        return contract;
     }
 
-    public void setMemberContractsResponse(ListOrganizationMemberContractsResponse memberContractsResponse) {
-        this.memberContractsResponse = memberContractsResponse;
+    public void setContract(List<OrganizationMemberContractsDTO> contract) {
+        this.contract = contract;
     }
 
     @Override

@@ -3436,11 +3436,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long memberId) {
+	public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-        Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(memberId);
+        Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId);
         condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
         List<OrganizationMemberDetails> result  = new ArrayList<OrganizationMemberDetails>();
@@ -3525,7 +3525,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(education);
     }
 
-	@Cacheable(value = "Education", unless = "#result == null")
+//	@Cacheable(value = "Education", unless = "#result == null")
 	public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId){
         if(detailId == null)
             return null;

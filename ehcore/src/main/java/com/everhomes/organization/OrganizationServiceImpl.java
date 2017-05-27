@@ -9698,16 +9698,37 @@ System.out.println();
 
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
+        List<OrganizationMemberWorkExperiences> experiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
+        List<OrganizationMemberInsurances> insurances = this.organizationProvider.listOrganizationMemberInsurances(cmd.getDetailId());
+        List<OrganizationMemberContracts> contracts = this.organizationProvider.listOrganizationMemberContracts(cmd.getDetailId());
 
         if (memberDetails != null) {
             OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
             // 获取部门
             this.getDepartmentFromOrganization(memberBasic.getOrganizationId(), memberBasic);
-            response.setMemberBasicDTO(ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class));
+            response.setBasic(ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class));
         }
         if (educations != null) {
-            response.setMemberEducationsDTOList(educations.stream().map(r -> {
+            response.setEducation(educations.stream().map(r -> {
                 OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        if(experiences != null){
+            response.setWorkExperience(experiences.stream().map(r -> {
+                OrganizationMemberWorkExperiencesDTO dto = ConvertHelper.convert(r, OrganizationMemberWorkExperiencesDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        if(insurances != null){
+            response.setInsurance(insurances.stream().map(r -> {
+                OrganizationMemberInsurancesDTO dto = ConvertHelper.convert(r, OrganizationMemberInsurancesDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        if(contracts != null){
+            response.setContract(contracts.stream().map(r -> {
+                OrganizationMemberContractsDTO dto = ConvertHelper.convert(r, OrganizationMemberContractsDTO.class);
                 return dto;
             }).collect(Collectors.toList()));
         }
@@ -9982,11 +10003,12 @@ System.out.println();
         return null;*/
 	@Override
 	public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd) {
-        LOGGER.info("Invoke GetOrganizationMemberBasicInfoCommand.cmd.getMemberId={}", cmd.getId());
-        if (cmd.getId() == null) {
+
+        LOGGER.info("Invoke GetOrganizationMemberBasicInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
+        if (cmd.getDetailId() == null) {
             return null;
         }
-        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getId());
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (memberDetails != null) {
 			OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails,OrganizationMemberBasicDTO.class);
 			// 获取部门
@@ -9996,7 +10018,6 @@ System.out.println();
 		}else{
         	return null;
 		}
-
 	}
 
 	// 获取部门规则函数
