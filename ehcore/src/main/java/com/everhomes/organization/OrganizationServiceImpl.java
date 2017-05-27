@@ -9696,41 +9696,26 @@ System.out.println();
     public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
         PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
 
-        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
-        List<OrganizationMemberWorkExperiences> experiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
-        List<OrganizationMemberInsurances> insurances = this.organizationProvider.listOrganizationMemberInsurances(cmd.getDetailId());
-        List<OrganizationMemberContracts> contracts = this.organizationProvider.listOrganizationMemberContracts(cmd.getDetailId());
+        OrganizationMemberBasicDTO memberDTO = this.getOrganizationMemberBasicInfo(ConvertHelper.convert(cmd, GetOrganizationMemberBasicInfoCommand.class));
+        ListOrganizationMemberEducationsResponse educations = this.listOrganizationMemberEducations(ConvertHelper.convert(cmd, ListOrganizationMemberEducationsCommand.class));
+        ListOrganizationMemberWorkExperiencesResponse experiences = this.listOrganizationMemberWorkExperiences(ConvertHelper.convert(cmd, ListOrganizationMemberWorkExperiencesCommand.class));
+        ListOrganizationMemberInsurancesResponse insurances = this.listOrganizationMemberInsurances(ConvertHelper.convert(cmd, ListOrganizationMemberInsurancesCommand.class));
+        ListOrganizationMemberContractsResponse contracts = this.listOrganizationMemberContracts(ConvertHelper.convert(cmd, ListOrganizationMemberContractsCommand.class));
 
-        if (memberDetails != null) {
-            OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
-            // 获取部门
-            this.getDepartmentFromOrganization(memberBasic.getOrganizationId(), memberBasic);
-            response.setBasic(ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class));
+        if (memberDTO != null) {
+            response.setBasic(memberDTO);
         }
         if (educations != null) {
-            response.setEducation(educations.stream().map(r -> {
-                OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+            response.setEducation(educations);
         }
-        if(experiences != null){
-            response.setWorkExperience(experiences.stream().map(r -> {
-                OrganizationMemberWorkExperiencesDTO dto = ConvertHelper.convert(r, OrganizationMemberWorkExperiencesDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+        if (experiences != null) {
+            response.setWorkExperience(experiences);
         }
-        if(insurances != null){
-            response.setInsurance(insurances.stream().map(r -> {
-                OrganizationMemberInsurancesDTO dto = ConvertHelper.convert(r, OrganizationMemberInsurancesDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+        if (insurances != null) {
+            response.setInsurance(insurances);
         }
-        if(contracts != null){
-            response.setContract(contracts.stream().map(r -> {
-                OrganizationMemberContractsDTO dto = ConvertHelper.convert(r, OrganizationMemberContractsDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+        if (contracts != null) {
+            response.setContract(contracts);
         }
 
         return response;

@@ -7,11 +7,11 @@ import java.util.List;
 /**
  * <ul>
  * <li>detailId: 员工编号</li>
- * <li>memberBasicDTO: 员工基本信息 参考{@link OrganizationMemberBasicDTO}</li>
- * <li>memberEducationsResponse: 员工教育信息 参考{@link com.everhomes.rest.organization.OrganizationMemberEducationsDTO}</li>
- * <li>memberWorkExperiencesResponse: 员工工作经历 参考{@link com.everhomes.rest.organization.OrganizationMemberWorkExperiencesDTO}</li>
- * <li>memberInsurancesResponse: 员工保险信息 参考{@link com.everhomes.rest.organization.OrganizationMemberInsurancesDTO}</li>
- * <li>memberContractsResponse: 员工合同信息 参考{@link com.everhomes.rest.organization.OrganizationMemberContractsDTO}</li>
+ * <li>basic: 员工基本信息 参考{@link OrganizationMemberBasicDTO}</li>
+ * <li>educations: 员工教育信息 参考{@link com.everhomes.rest.organization.OrganizationMemberEducationsDTO}</li>
+ * <li>workExperiences: 员工工作经历 参考{@link com.everhomes.rest.organization.OrganizationMemberWorkExperiencesDTO}</li>
+ * <li>insurances: 员工保险信息 参考{@link com.everhomes.rest.organization.OrganizationMemberInsurancesDTO}</li>
+ * <li>contracts: 员工合同信息 参考{@link com.everhomes.rest.organization.OrganizationMemberContractsDTO}</li>
  * </ul>
  */
 public class PersonnelsDetailsV2Response {
@@ -20,13 +20,14 @@ public class PersonnelsDetailsV2Response {
 
     private OrganizationMemberBasicDTO basic;
 
-    private List<OrganizationMemberEducationsDTO> education;
+    private ListOrganizationMemberEducationsResponse educations;
 
-    private List<OrganizationMemberWorkExperiencesDTO> workExperience;
+    private ListOrganizationMemberWorkExperiencesResponse workExperiences;
 
-    private List<OrganizationMemberInsurancesDTO> insurance;
+    private ListOrganizationMemberInsurancesResponse insurances;
 
-    private List<OrganizationMemberContractsDTO> contract;
+    private ListOrganizationMemberContractsResponse contracts;
+
 
     public PersonnelsDetailsV2Response() {
     }
@@ -47,36 +48,36 @@ public class PersonnelsDetailsV2Response {
         this.basic = basic;
     }
 
-    public List<OrganizationMemberEducationsDTO> getEducation() {
-        return education;
+    public ListOrganizationMemberEducationsResponse getEducation() {
+        return educations;
     }
 
-    public void setEducation(List<OrganizationMemberEducationsDTO> education) {
-        this.education = education;
+    public void setEducation(ListOrganizationMemberEducationsResponse educations) {
+        this.educations = educations;
     }
 
-    public List<OrganizationMemberWorkExperiencesDTO> getWorkExperience() {
-        return workExperience;
+    public ListOrganizationMemberWorkExperiencesResponse getWorkExperience() {
+        return workExperiences;
     }
 
-    public void setWorkExperience(List<OrganizationMemberWorkExperiencesDTO> workExperience) {
-        this.workExperience = workExperience;
+    public void setWorkExperience(ListOrganizationMemberWorkExperiencesResponse workExperiences) {
+        this.workExperiences = workExperiences;
     }
 
-    public List<OrganizationMemberInsurancesDTO> getInsurance() {
-        return insurance;
+    public ListOrganizationMemberInsurancesResponse getInsurance() {
+        return insurances;
     }
 
-    public void setInsurance(List<OrganizationMemberInsurancesDTO> insurance) {
-        this.insurance = insurance;
+    public void setInsurance(ListOrganizationMemberInsurancesResponse insurances) {
+        this.insurances = insurances;
     }
 
-    public List<OrganizationMemberContractsDTO> getContract() {
-        return contract;
+    public ListOrganizationMemberContractsResponse getContract() {
+        return contracts;
     }
 
-    public void setContract(List<OrganizationMemberContractsDTO> contract) {
-        this.contract = contract;
+    public void setContract(ListOrganizationMemberContractsResponse contracts) {
+        this.contracts = contracts;
     }
 
     @Override
