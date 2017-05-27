@@ -2,9 +2,11 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>detailId: 员工编号</li>
  * <li>memberBasicDTO: 员工基本信息 参考{@link OrganizationMemberBasicDTO}</li>
  * <li>memberEducationsResponse: 员工教育信息 参考{@link com.everhomes.rest.organization.OrganizationMemberEducationsDTO}</li>
  * <li>memberWorkExperiencesResponse: 员工工作经历 参考{@link com.everhomes.rest.organization.OrganizationMemberWorkExperiencesDTO}</li>
@@ -14,11 +16,11 @@ import com.everhomes.util.StringHelper;
  */
 public class PersonnelsDetailsV2Response {
 
-    private Long memberId;
+    private Long detailId;
 
     private OrganizationMemberBasicDTO memberBasicDTO;
 
-    private ListOrganizationMemberEducationsResponse memberEducationsResponse;
+    private List<OrganizationMemberEducationsDTO> memberEducationsDTOList;
 
     private ListOrganizationMemberWorkExperiencesResponse memberWorkExperiencesResponse;
 
@@ -29,12 +31,12 @@ public class PersonnelsDetailsV2Response {
     public PersonnelsDetailsV2Response() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public OrganizationMemberBasicDTO getMemberBasicDTO() {
@@ -45,12 +47,12 @@ public class PersonnelsDetailsV2Response {
         this.memberBasicDTO = memberBasicDTO;
     }
 
-    public ListOrganizationMemberEducationsResponse getMemberEducationsResponse() {
-        return memberEducationsResponse;
+    public List<OrganizationMemberEducationsDTO> getMemberEducationsDTOList() {
+        return memberEducationsDTOList;
     }
 
-    public void setMemberEducationsResponse(ListOrganizationMemberEducationsResponse memberEducationsResponse) {
-        this.memberEducationsResponse = memberEducationsResponse;
+    public void setMemberEducationsDTOList(List<OrganizationMemberEducationsDTO> memberEducationsDTOList) {
+        this.memberEducationsDTOList = memberEducationsDTOList;
     }
 
     public ListOrganizationMemberWorkExperiencesResponse getMemberWorkExperiencesResponse() {

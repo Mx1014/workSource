@@ -9694,7 +9694,25 @@ System.out.println();
 
     @Override
     public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
-        return null;
+        PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
+
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
+
+        if (memberDetails != null) {
+            OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+            // 获取部门
+            this.getDepartmentFromOrganization(memberBasic.getOrganizationId(), memberBasic);
+            response.setMemberBasicDTO(ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class));
+        }
+        if (educations != null) {
+            response.setMemberEducationsDTOList(educations.stream().map(r -> {
+                OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+
+        return response;
     }
 
     @Override
@@ -9968,7 +9986,7 @@ System.out.println();
         if (cmd.getId() == null) {
             return null;
         }
-        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByMemberId(cmd.getId());
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getId());
         if (memberDetails != null) {
 			OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails,OrganizationMemberBasicDTO.class);
 			// 获取部门
@@ -10090,19 +10108,6 @@ System.out.println();
 	}
 
 	@Override
-	public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
-		List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
-		ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
-		if (educations != null) {
-			response.setEducations(educations.stream().map(r -> {
-				OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
-				return dto;
-			}).collect(Collectors.toList()));
-		}
-		return response;
-	}
-
-	@Override
 	public void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd) {
 		if(cmd.getId() == null)
 			return;
@@ -10134,6 +10139,19 @@ System.out.println();
 		this.organizationProvider.updateOranizationMemberEducationInfo(education);
 	}
 
+    @Override
+    public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
+        List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
+        ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
+        if (educations != null) {
+            response.setEducations(educations.stream().map(r -> {
+                OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        return response;
+    }
+
 	@Override
 	public OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd) {
 		return null;
@@ -10141,7 +10159,16 @@ System.out.println();
 
 	@Override
 	public ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd) {
-		return null;
+
+        List<OrganizationMemberWorkExperiences> workExperiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
+        ListOrganizationMemberWorkExperiencesResponse response = new ListOrganizationMemberWorkExperiencesResponse();
+        if(workExperiences != null) {
+            response.setWorkExps(workExperiences.stream().map(r -> {
+                OrganizationMemberWorkExperiencesDTO dto = ConvertHelper.convert(r, OrganizationMemberWorkExperiencesDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        return response;
 	}
 
 	@Override

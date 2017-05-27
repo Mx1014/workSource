@@ -1,31 +1,35 @@
 package com.everhomes.rest.organization;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 /**
  * <ul>
  * <li>id: 工作经历信息编号</li>
- * <li>memberId: 员工编号</li>
- * <li>schoolName：学校名称</li>
- * <li>degree: 学位</li>
- * <li>major: 专业名称</li>
- * <li>enrollmentTime: 入学日期</li>
- * <li>graduationTime: 毕业日期</li>
+ * <li>detailId: 员工编号</li>
+ * <li>enterpriseName：企业名称</li>
+ * <li>position: 职位</li>
+ * <li>jobType: 工作类型，参考{@link EmployeeType}</li>
+ * <li>entryTime: 入职日期</li>
+ * <li>departureTime: 离职日期</li>
  * </ul>
  */
 public class OrganizationMemberWorkExperiencesDTO {
 
     private Long id;
 
-    private Long memberId;
+    private Long detailId;
 
-    private String schoolName;
+    private String enterpriseName;
 
-    private String degree;
+    private String position;
 
-    private String major;
+    private Byte jobType;
 
-    private String enrollmentTime;
+    private Date entryTime;
 
-    private String graduationTime;
+    private Date departureTime;
+
 
     public OrganizationMemberWorkExperiencesDTO() {
     }
@@ -38,51 +42,51 @@ public class OrganizationMemberWorkExperiencesDTO {
         this.id = id;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
-    public String getSchoolName() {
-        return schoolName;
+    public String getEnterpriseName() {
+        return enterpriseName;
     }
 
-    public void setSchoolName(String schoolName) {
-        this.schoolName = schoolName;
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
     }
 
-    public String getDegree() {
-        return degree;
+    public String getPosition() {
+        return position;
     }
 
-    public void setDegree(String degree) {
-        this.degree = degree;
+    public void setPosition(String position) {
+        this.position = position;
     }
 
-    public String getMajor() {
-        return major;
+    public Byte getJobType() {
+        return jobType;
     }
 
-    public void setMajor(String major) {
-        this.major = major;
+    public void setJobType(Byte jobType) {
+        this.jobType = jobType;
     }
 
-    public String getEnrollmentTime() {
-        return enrollmentTime;
+    public Date getEntryTime() {
+        return entryTime;
     }
 
-    public void setEnrollmentTime(String enrollmentTime) {
-        this.enrollmentTime = enrollmentTime;
+    public void setEntryTime(Date entryTime) {
+        this.entryTime = entryTime;
     }
 
-    public String getGraduationTime() {
-        return graduationTime;
+    public Date getDepartureTime() {
+        return departureTime;
     }
 
-    public void setGraduationTime(String graduationTime) {
-        this.graduationTime = graduationTime;
+    public void setDepartureTime(Date departureTime) {
+        this.departureTime = departureTime;
     }
 }

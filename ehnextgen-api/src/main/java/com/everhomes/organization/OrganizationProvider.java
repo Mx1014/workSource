@@ -320,7 +320,7 @@ public interface OrganizationProvider {
     List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
 	//OrganizationMember findOrganizationMemberByMemberId(Long memberId);
-	OrganizationMemberDetails findOrganizationMemberDetailsByMemberId(Long memberId);
+	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long memberId);
 //	OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(OrganizationMember member, OrganizationMemberDetails memberDetails);
 
 	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
@@ -330,6 +330,8 @@ public interface OrganizationProvider {
     void deleteOranizationMemberEducationInfo(OrganizationMemberEducations education);
     void updateOranizationMemberEducationInfo(OrganizationMemberEducations education);
 
-	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id);
+	List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId);
+
+	List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId);
 
 }

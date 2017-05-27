@@ -3436,7 +3436,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 	@Override
-	public OrganizationMemberDetails findOrganizationMemberDetailsByMemberId(Long memberId) {
+	public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long memberId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
@@ -3525,19 +3525,32 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.update(education);
     }
 
-    @Cacheable(value = "Education", unless = "#result == null")
-    public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long id){
+	@Cacheable(value = "Education", unless = "#result == null")
+	public List<OrganizationMemberEducations> listOrganizationMemberEducations(Long detailId){
 
-	    DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-	    List<OrganizationMemberEducations> result = new ArrayList<>();
-	    SelectQuery<EhOrganizationMemberEducationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS);
-	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.DETAIL_ID.eq(id));
-	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-	    query.fetch().map(r -> {
-	        result.add(ConvertHelper.convert(r,OrganizationMemberEducations.class));
-	        return null;
-        });
-	    return result;
-    }
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMemberEducations> result = new ArrayList<>();
+		SelectQuery<EhOrganizationMemberEducationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.DETAIL_ID.eq(detailId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r,OrganizationMemberEducations.class));
+			return null;
+		});
+		return result;
+	}
+
+	public List<OrganizationMemberWorkExperiences> listOrganizationMemberWorkExperiences(Long detailId){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+    	List<OrganizationMemberWorkExperiences> result = new ArrayList<>();
+    	SelectQuery<EhOrganizationMemberWorkExperiencesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES);
+    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.DETAIL_ID.eq(detailId));
+    	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+    	query.fetch().map(r ->{
+    		result.add(ConvertHelper.convert(r,OrganizationMemberWorkExperiences.class));
+    		return null;
+		});
+    	return result;
+	}
 
 }
