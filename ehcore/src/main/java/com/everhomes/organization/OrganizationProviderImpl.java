@@ -3438,40 +3438,48 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
     @Override
-    public void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails) {
-        member.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        if (null == VisibleFlag.fromCode(member.getVisibleFlag())) {
-            member.setVisibleFlag(VisibleFlag.SHOW.getCode());
-        }
-        if (member.getNamespaceId() == null) {
-            Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-            member.setNamespaceId(namespaceId);
-            memberDetails.setNamespaceId(namespaceId);
-        }
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
-        member.setId(id);
-        memberDetails.setId(id);
-        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
-        EhOrganizationMemberDetailsDao dao2 = new EhOrganizationMemberDetailsDao(context.configuration());
-        dao.insert(member);
-        dao2.insert(memberDetails);
-        if (OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER) {
-            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, member.getId());
-            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberDetails.class, memberDetails.getId());
+    public void createOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails) {
+		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 
-        }
-        /*member.setId(id);
-        memberDetails.setId(id);
-		organization.setPath(organization.getPath() + "/" + id);
+		if(null == VisibleFlag.fromCode(organizationMember.getVisibleFlag())){
+			organizationMember.setVisibleFlag(VisibleFlag.SHOW.getCode());
+		}
+		if (organizationMember.getNamespaceId() == null) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+			organizationMember.setNamespaceId(namespaceId);
+			organizationMemberDetails.setNamespaceId(namespaceId);
+		}
+
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationsDaodao = new EhOrganizationsDao(context.configuration());
-		dao.insert(organization);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);*/
+		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
+		Long detailId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberDetails.class));
+		organizationMember.setDetailId(detailId);
+		organizationMemberDetails.setId(detailId);
+		EhOrganizationMembersDao dao1 = new EhOrganizationMembersDao(context.configuration());
+		EhOrganizationMemberDetailsDao dao2 = new EhOrganizationMemberDetailsDao(context.configuration());
+		dao1.insert(organizationMember);
+		dao2.insert(organizationMemberDetails);
+		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, organizationMember.getId());
+			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberDetails.class, organizationMemberDetails.getId());
+
+		}
     }
 
-//    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
+	public void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails){
+		assert(organizationMember.getId() == null);
+		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+
+		//	若没有赋值会将NULL加到原先有值的地方吗？
+		dao.update(organizationMember);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, organizationMember.getId());
+	}
+
+
+	//    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
     public void createOranizationMemberEducationInfo(OrganizationMemberEducations education){
 	    Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberEducations.class));
 	    education.setId(id);
@@ -3582,7 +3590,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 
-
+	@Override
     public void createOranizationMemberInsurance(OrganizationMemberInsurances insurance){
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberInsurances.class));
         insurance.setId(id);
@@ -3591,6 +3599,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.insert(insurance);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberInsurances.class, id);
     }
+
+    @Override
+    public OrganizationMemberInsurances  findOrganizationInsuranceById(Long id){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberInsurances.class));
+        EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
+        EhOrganizationMemberInsurances insurance = dao.findById(id);
+        if(insurance == null)
+            return null;
+        return ConvertHelper.convert(insurance,OrganizationMemberInsurances.class);
+    }
+
+    @Override
+    public void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
+        dao.update(insurance);
+    }
+
+    @Override
+	public void updateOrganizationMemberInsurances(OrganizationMemberInsurances insurance){
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
+		dao.update(insurance);
+	}
 
     @Override
 	public 	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId){

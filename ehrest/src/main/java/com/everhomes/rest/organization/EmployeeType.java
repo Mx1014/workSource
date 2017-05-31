@@ -10,16 +10,22 @@ package com.everhomes.rest.organization;
  * </ul>
  */
 public enum EmployeeType {
-    FULLTIME((byte)0), PARTTIME((byte)1),INTERSHIP((byte)2),LABORDISPATCH((byte)3);
+    FULLTIME((byte)0,"FULLTIME"), PARTTIME((byte)1,"PARTTIME"),INTERSHIP((byte)2,"INTERSHIP"),LABORDISPATCH((byte)3,"LABORDISPATCH");
 
     private byte code;
+    private String text;
 
-    private EmployeeType(byte code) {
+    private EmployeeType(byte code, String text) {
         this.code = code;
+        this.text = text;
     }
 
     public byte getCode() {
         return this.code;
+    }
+
+    public String getText(){
+        return this.text;
     }
 
     public static EmployeeType fromCode(Byte code) {

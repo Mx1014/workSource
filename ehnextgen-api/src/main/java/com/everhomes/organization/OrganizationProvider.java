@@ -323,7 +323,8 @@ public interface OrganizationProvider {
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long memberId);
 //	OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(OrganizationMember member, OrganizationMemberDetails memberDetails);
 
-	void createOrganizationMemberV2(OrganizationMember member, OrganizationMemberDetails memberDetails);
+	void createOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
+	void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
 
     void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
     OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
@@ -339,8 +340,13 @@ public interface OrganizationProvider {
 
 
 	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
+    OrganizationMemberInsurances  findOrganizationInsuranceById(Long id);
+    void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance);
+    void updateOrganizationMemberInsurances(OrganizationMemberInsurances insurance);
 
-	List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
+
+
+    List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
 
 	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 

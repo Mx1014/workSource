@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- *<li>id: 保险信息编号</li>
+ *<li>id: 保险信息标识号</li>
  *</ul>
  */
 public class DeleteOrganizationMemberInsurancesCommand {

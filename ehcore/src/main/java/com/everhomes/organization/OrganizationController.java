@@ -73,8 +73,7 @@ public class OrganizationController extends ControllerBase {
         ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+        response.setErrorDescription("OK");        return response;
     }
 
     /**
