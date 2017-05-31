@@ -9935,11 +9935,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
         if (memberDetails != null) {
-            OrganizationMemberBasicDTO memberBasic = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
+
+            //  计算在职天数
+            Date date = new Date();
+            java.sql.Date nowDate = new java.sql.Date(date.getTime());
+            Long workingDays = ((nowDate.getTime()-memberDetails.getCheckInTime().getTime())/(24*60*60*1000));
+            memberDTO.setWorkingDays(workingDays);
 
             //  设置部门并返回最终结果，完成转换
             Long orgId;
-            Organization org = this.checkOrganization(memberBasic.getOrganizationId());
+            Organization org = this.checkOrganization(memberDTO.getOrganizationId());
             if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
                 orgId = org.getDirectlyEnterpriseId();
             } else
@@ -9947,22 +9953,22 @@ public class OrganizationServiceImpl implements OrganizationService {
             Long directlyOrgId = orgId;
             OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 
-            OrganizationMemberV2DTO dto = this.getDepartmentFromOrganization(org, orgDTO, directlyOrgId, memberBasic.getContactToken(),
-                    memberBasic.getTargetType(), memberBasic.getTargetId(), memberBasic.getNickName());
+            OrganizationMemberV2DTO dtoTemporary = this.getDepartmentFromOrganization(org, orgDTO, directlyOrgId, memberDTO.getContactToken(),
+                    memberDTO.getTargetType(), memberDTO.getTargetId(), memberDTO.getNickName());
 
-            if (dto.getDepartments() != null)
-                memberBasic.setDepartments(dto.getDepartments());
-            if (dto.getJobPositions() != null)
-                memberBasic.setJobPositions(dto.getJobPositions());
-            if (dto.getJobLevels() != null)
-                memberBasic.setJobLevels(dto.getJobLevels());
-            if (dto.getGroups() != null)
-                memberBasic.setGroups(dto.getGroups());
-            if (dto.getAvatar() != null)
-                memberBasic.setAvatar(dto.getAvatar());
-            if (dto.getNickName() != null)
-                memberBasic.setNickName(dto.getNickName());
-            return memberBasic;
+            if (dtoTemporary.getDepartments() != null)
+                memberDTO.setDepartments(dtoTemporary.getDepartments());
+            if (dtoTemporary.getJobPositions() != null)
+                memberDTO.setJobPositions(dtoTemporary.getJobPositions());
+            if (dtoTemporary.getJobLevels() != null)
+                memberDTO.setJobLevels(dtoTemporary.getJobLevels());
+            if (dtoTemporary.getGroups() != null)
+                memberDTO.setGroups(dtoTemporary.getGroups());
+            if (dtoTemporary.getAvatar() != null)
+                memberDTO.setAvatar(dtoTemporary.getAvatar());
+            if (dtoTemporary.getNickName() != null)
+                memberDTO.setNickName(dtoTemporary.getNickName());
+            return memberDTO;
 
         } else {
             return null;

@@ -47,6 +47,7 @@ import java.util.List;
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>groups：群组列表</li>
  * <li>profileIntegrity: 档案完整性</li>
+ * <li>workingDays: 在职天数</li>
  * </ul>
  */
 public class OrganizationMemberBasicDTO {
@@ -125,6 +126,8 @@ public class OrganizationMemberBasicDTO {
     private String nickName;
 
     private Integer profileIntegrity;
+
+    private Long workingDays;
 
 
     /*
@@ -455,6 +458,14 @@ public class OrganizationMemberBasicDTO {
 
     public void setProfileIntegrity(Integer profileIntegrity) {
         this.profileIntegrity = profileIntegrity;
+    }
+
+    public Long getWorkingDays() {
+        return workingDays;
+    }
+
+    public void setWorkingDays(Long workingDays) {
+        this.workingDays = workingDays;
     }
 
     @Override
