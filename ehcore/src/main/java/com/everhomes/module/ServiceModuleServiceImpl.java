@@ -208,15 +208,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Targets of AssignmentServiceModuleCommand is not completed.");
         }
         List<AssignmentTarget> targets = cmd.getTargets();
-        List<Project> projects = new ArrayList<>();
-        List<Long> moduleIds = new ArrayList<>();
+        final List<Project> projects = new ArrayList<>();
+        final List<Long> moduleIds = new ArrayList<>();
 
         if (cmd.getAllModuleFlag() == AllFlagType.NO.getCode()){
-            moduleIds = cmd.getModuleIds();
+            moduleIds.addAll(cmd.getModuleIds());
         }
 
         if(cmd.getAllProjectFlag() == AllFlagType.NO.getCode()){
-            projects = cmd.getProjects();
+            projects.addAll(cmd.getProjects());
         }
 
         //设置标记
