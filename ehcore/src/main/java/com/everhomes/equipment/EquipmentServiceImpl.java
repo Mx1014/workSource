@@ -2523,6 +2523,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	private Timestamp dateStrToTimestamp(String str) {
 		LocalDate localDate = LocalDate.parse(str,dateSF);
+		LOGGER.info("str: {}, localdate: {}", str, localDate);
 		Timestamp ts = Timestamp.from(Date.valueOf(localDate).toInstant());
 		return ts;
 	}
