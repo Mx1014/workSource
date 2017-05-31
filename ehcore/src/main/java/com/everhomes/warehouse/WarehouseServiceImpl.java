@@ -1160,44 +1160,73 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             RowResult r = (RowResult)o;
-            ImportWarehouseMaterialDataDTO data = new ImportWarehouseMaterialDataDTO();
+            ImportWarehouseMaterialDataDTO data = null;
             if(StringUtils.isNotBlank(r.getA())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setName(r.getA().trim());
             }
 
             if(StringUtils.isNotBlank(r.getB())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setMaterialNumber(r.getB().trim());
             }
 
             if(StringUtils.isNotBlank(r.getC())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setCategoryName(r.getC().trim());
             }
 
             if(StringUtils.isNotBlank(r.getD())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setCategoryNumber(r.getD().trim());
             }
 
             if(StringUtils.isNotBlank(r.getE())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setBrand(r.getE().trim());
             }
 
             if(StringUtils.isNotBlank(r.getF())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setItemNo(r.getF().trim());
             }
 
             if(StringUtils.isNotBlank(r.getG())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setReferencePrice(r.getG().trim());
             }
 
             if(StringUtils.isNotBlank(r.getH())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setUnitName(r.getH().trim());
             }
 
             if(StringUtils.isNotBlank(r.getI())) {
+                if(data == null) {
+                    data = new ImportWarehouseMaterialDataDTO();
+                }
                 data.setSpecificationInformation(r.getI().trim());
             }
 
-            result.add(data);
+            if(data != null) {
+                result.add(data);
+            }
         }
         LOGGER.info("result size : " + result.size());
         return result;
