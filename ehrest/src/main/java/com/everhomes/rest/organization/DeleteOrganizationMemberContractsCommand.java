@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
- *<li>id: 合同信息编号</li>
+ *<li>id: 合同信息标识号</li>
  *</ul>
  */
 public class DeleteOrganizationMemberContractsCommand {

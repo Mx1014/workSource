@@ -95,7 +95,6 @@ import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
-import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -111,7 +110,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.aspectj.weaver.ast.Or;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -10176,7 +10174,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.info("Invoke deleteOrganizationMemberWorkExperiences.workExperience.id={}" + cmd.getId());
         OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
         if (experience == null) {
-            LOGGER.info("Cannot find the corresponding infomation of education");
+            LOGGER.info("Cannot find the corresponding infomation of work experience");
             return;
         }
         experience.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
@@ -10190,7 +10188,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.info("Invoke updateOrganizationMemberWorkExperiences.workExperience.id={}" + cmd.getId());
         OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
         if (experience == null) {
-            LOGGER.info("Cannot find the corresponding infomation of education");
+            LOGGER.info("Cannot find the corresponding infomation of work experience");
             return;
         }
         experience.setEnterpriseName(cmd.getEnterpriseName());
@@ -10239,11 +10237,31 @@ public class OrganizationServiceImpl implements OrganizationService {
         LOGGER.info("Invoke deleteOrganizationMemberInsurances.insurance.id={}" + cmd.getId());
         OrganizationMemberInsurances insurance = this.organizationProvider.findOrganizationInsuranceById(cmd.getId());
         if (insurance == null) {
-            LOGGER.info("Cannot find the corresponding infomation of education");
+            LOGGER.info("Cannot find the corresponding infomation of insurance");
             return;
         }
         insurance.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
         this.organizationProvider.deleteOranizationMemberInsurance(insurance);
+    }
+
+    @Override
+    public void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd) {
+        if (cmd.getId() == null)
+            return;
+        LOGGER.info("Invoke updateOrganizationMemberInsurance.insurance.id={}" + cmd.getId());
+        OrganizationMemberInsurances insurance = this.organizationProvider.findOrganizationInsuranceById(cmd.getId());
+//        OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
+        if (insurance == null) {
+            LOGGER.info("Cannot find the corresponding infomation of insurance");
+            return;
+        }
+        insurance.setName(cmd.getName());
+        insurance.setEnterprise(cmd.getEnterprise());
+        insurance.setNumber(cmd.getNumber());
+        insurance.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        insurance.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
+
+        this.organizationProvider.updateOrganizationMemberInsurance(insurance);
     }
 
     @Override
@@ -10260,29 +10278,60 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd) {
-        if (cmd.getId() == null)
-            return;
-        LOGGER.info("Invoke updateOrganizationMemberInsurances.insurance.id={}" + cmd.getId());
-        OrganizationMemberInsurances insurance = this.organizationProvider.findOrganizationInsuranceById(cmd.getId());
-//        OrganizationMemberWorkExperiences experience = this.organizationProvider.findOrganizationWorkExperienceById(cmd.getId());
-        if (insurance == null) {
-            LOGGER.info("Cannot find the corresponding infomation of education");
-            return;
-        }
-        insurance.setName(cmd.getName());
-        insurance.setEnterprise(cmd.getEnterprise());
-        insurance.setNumber(cmd.getNumber());
-        insurance.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
-        insurance.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
+    public OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
+        if (cmd.getDetailId() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameter, detailId should not be null or empty");
+        OrganizationMemberContracts contract = new OrganizationMemberContracts();
+        contract.setDetailId(cmd.getDetailId());
+        contract.setNamespaceId(cmd.getNamespaceId());
+        contract.setContractNumber(cmd.getContractNumber());
+        contract.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        contract.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
+        //	获取当前时间
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        contract.setCreateTime(now);
+        //	获取操作人员
+        if (cmd.getCreatorUid() != null)
+            contract.setCreatorUid(cmd.getCreatorUid());
+        else
+            contract.setCreatorUid(Long.valueOf(0));
+        //  暂且设置新增数据为有效数据
+        contract.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+        this.organizationProvider.createOranizationMemberContract(contract);
 
-        this.organizationProvider.updateOrganizationMemberInsurances(insurance);
+        return ConvertHelper.convert(contract, OrganizationMemberContractsDTO.class);
     }
 
+    @Override
+    public void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd) {
+        if (cmd.getId() == null)
+            return;
+        LOGGER.info("Invoke deleteOrganizationMemberContracts.contract.id={}" + cmd.getId());
+        OrganizationMemberContracts contract = this.organizationProvider.findOrganizationContractById(cmd.getId());
+        if (contract == null) {
+            LOGGER.info("Cannot find the corresponding infomation of contract");
+            return;
+        }
+        contract.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+        this.organizationProvider.deleteOranizationMemberContract(contract);
+    }
 
     @Override
-    public OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
-        return null;
+    public void updateOrganizationMemberContracts(UpdateOrganizationMemberContractsCommand cmd) {
+        if(cmd.getId() == null)
+            return;
+        OrganizationMemberContracts contract = this.organizationProvider.findOrganizationContractById(cmd.getId());
+        if (contract == null) {
+            LOGGER.info("Cannot find the corresponding infomation of contract");
+            return;
+        }
+        contract.setContractNumber(cmd.getContractNumber());
+        contract.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        contract.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
+
+        this.organizationProvider.updateOrganizationMemberContract(contract);
     }
 
     @Override
@@ -10298,15 +10347,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
-    @Override
-    public void updateOrganizationMemberContracts(UpdateOrganizationMemberContractsCommand cmd) {
 
-    }
-
-    @Override
-    public void deleteOrganizationMemberContracts(DeleteOrganizationMemberContractsCommand cmd) {
-
-    }
 
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {

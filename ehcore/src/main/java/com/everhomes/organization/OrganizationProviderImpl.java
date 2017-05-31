@@ -3618,7 +3618,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-	public void updateOrganizationMemberInsurances(OrganizationMemberInsurances insurance){
+	public void updateOrganizationMemberInsurance(OrganizationMemberInsurances insurance){
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMemberInsurancesDao dao = new EhOrganizationMemberInsurancesDao(context.configuration());
 		dao.update(insurance);
@@ -3644,7 +3644,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 
+	public void createOranizationMemberContract(OrganizationMemberContracts contract){
+		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberContracts.class));
+		contract.setId(id);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationMemberContractsDao dao = new EhOrganizationMemberContractsDao(context.configuration());
+		dao.insert(contract);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberContracts.class, id);
+	}
 
+    public OrganizationMemberContracts findOrganizationContractById(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberContracts.class));
+        EhOrganizationMemberContractsDao dao = new EhOrganizationMemberContractsDao(context.configuration());
+        EhOrganizationMemberContracts contract = dao.findById(id);
+        if(contract == null)
+            return null;
+        return ConvertHelper.convert(contract,OrganizationMemberContracts.class);
+    }
+
+    public void deleteOranizationMemberContract(OrganizationMemberContracts contract){
+	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+	    EhOrganizationMemberContractsDao dao = new EhOrganizationMemberContractsDao(context.configuration());
+	    dao.update(contract);
+    }
+
+    public void updateOrganizationMemberContract(OrganizationMemberContracts contract){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberContractsDao dao = new EhOrganizationMemberContractsDao(context.configuration());
+        dao.update(contract);
+    }
 
     public List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId){
 	    if(detailId == null)

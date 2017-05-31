@@ -342,12 +342,15 @@ public interface OrganizationProvider {
 	void createOranizationMemberInsurance(OrganizationMemberInsurances insurance);
     OrganizationMemberInsurances  findOrganizationInsuranceById(Long id);
     void deleteOranizationMemberInsurance(OrganizationMemberInsurances insurance);
-    void updateOrganizationMemberInsurances(OrganizationMemberInsurances insurance);
-
-
-
+    void updateOrganizationMemberInsurance(OrganizationMemberInsurances insurance);
     List<OrganizationMemberInsurances> listOrganizationMemberInsurances(Long detailId);
 
-	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+
+    void createOranizationMemberContract(OrganizationMemberContracts contract);
+    OrganizationMemberContracts findOrganizationContractById(Long id);
+    void deleteOranizationMemberContract(OrganizationMemberContracts contract);
+    void updateOrganizationMemberContract(OrganizationMemberContracts contract);
+
+    List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 
 }

@@ -4,15 +4,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>detailId: 员工编号</li>
+ * <li>namespaceId: 域名空间</li>
  * <li>contractNumber: 合同编号</li>
  * <li>startTime: 生效时间</li>
  * <li>endTime: 到期时间</li>
+ * <li>creatorUid: 创建人</li>
  * </ul>
  */
 public class AddOrganizationMemberContractsCommand {
 
-    private Long memberId;
+    private Long detailId;
+
+    private Integer namespaceId;
 
     private String contractNumber;
 
@@ -20,15 +24,25 @@ public class AddOrganizationMemberContractsCommand {
 
     private String endTime;
 
+    private Long creatorUid;
+
     public AddOrganizationMemberContractsCommand() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getContractNumber() {
@@ -53,6 +67,14 @@ public class AddOrganizationMemberContractsCommand {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     @Override
