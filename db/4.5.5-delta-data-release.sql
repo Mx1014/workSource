@@ -238,3 +238,5 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('war
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10024', 'zh_CN', '库存变化数量应大于零');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('warehouse', '10025', 'zh_CN', '仓库不在运行中');
 
+-- 修改menu返回
+update eh_web_menus set data_type = 'react:/repair-management/task-list' where name = '任务列表' and id = 20140;
