@@ -1044,9 +1044,15 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
             WarehouseUnits unit = warehouseProvider.findWarehouseUnitByName(str.getUnitName(), cmd.getOwnerType(), cmd.getOwnerId());
-            if(unit != null) {
-                material.setUnitId(unit.getId());
+            if(unit == null) {
+                LOGGER.error("warehouse material unit is null, data = {}", str);
+                log.setData(str);
+                log.setErrorLog("warehouse material unit is null");
+                log.setCode(WarehouseServiceErrorCode.ERROR_WAREHOUSE_MATERIAL_UNIT_IS_NULL);
+                errorDataLogs.add(log);
+                continue;
             }
+            material.setUnitId(unit.getId());
             material.setSpecificationInformation(str.getSpecificationInformation());
 
             material.setOwnerType(cmd.getOwnerType());
@@ -1146,58 +1152,40 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialDataDTO data = new ImportWarehouseMaterialDataDTO();
-            if(null != r.getA()) {
+            if(StringUtils.isNotBlank(r.getA())) {
                 data.setName(r.getA().trim());
-            } else {
-                data.setName("");
             }
 
-            if(null != r.getB()) {
+            if(StringUtils.isNotBlank(r.getB())) {
                 data.setMaterialNumber(r.getB().trim());
-            } else {
-                data.setMaterialNumber("");
             }
 
-            if(null != r.getC()) {
+            if(StringUtils.isNotBlank(r.getC())) {
                 data.setCategoryName(r.getC().trim());
-            } else {
-                data.setCategoryName("");
             }
 
-            if(null != r.getD()) {
+            if(StringUtils.isNotBlank(r.getD())) {
                 data.setCategoryNumber(r.getD().trim());
-            } else {
-                data.setCategoryNumber("");
             }
 
-            if(null != r.getE()) {
+            if(StringUtils.isNotBlank(r.getE())) {
                 data.setBrand(r.getE().trim());
-            } else {
-                data.setBrand("");
             }
 
-            if(null != r.getF()) {
+            if(StringUtils.isNotBlank(r.getF())) {
                 data.setItemNo(r.getF().trim());
-            } else {
-                data.setItemNo("");
             }
 
-            if(null != r.getG()) {
+            if(StringUtils.isNotBlank(r.getG())) {
                 data.setReferencePrice(r.getG().trim());
-            } else {
-                data.setReferencePrice("");
             }
 
-            if(null != r.getH()) {
+            if(StringUtils.isNotBlank(r.getH())) {
                 data.setUnitName(r.getH().trim());
-            } else {
-                data.setUnitName("");
             }
 
-            if(null != r.getI()) {
+            if(StringUtils.isNotBlank(r.getI())) {
                 data.setSpecificationInformation(r.getI().trim());
-            } else {
-                data.setSpecificationInformation("");
             }
 
             result.add(data);
@@ -1215,28 +1203,20 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialCategoryDataDTO data = new ImportWarehouseMaterialCategoryDataDTO();
-            if(null != r.getA()) {
+            if(StringUtils.isNotBlank(r.getA())) {
                 data.setName(r.getA().trim());
-            } else {
-                data.setName("");
             }
 
-            if(null != r.getB()) {
+            if(StringUtils.isNotBlank(r.getB())) {
                 data.setCategoryNumber(r.getB().trim());
-            } else {
-                data.setCategoryNumber("");
             }
 
-            if(null != r.getC()) {
+            if(StringUtils.isNotBlank(r.getC())) {
                 data.setParentCategoryName(r.getC().trim());
-            } else {
-                data.setParentCategoryName("");
             }
 
-            if(null != r.getD()) {
+            if(StringUtils.isNotBlank(r.getD())) {
                 data.setParentCategoryNumber(r.getD().trim());
-            } else {
-                data.setParentCategoryNumber("");
             }
             
             result.add(data);
