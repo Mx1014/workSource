@@ -1566,4 +1566,10 @@ public class ParkingServiceImpl implements ParkingService {
 		handler.lockParkingCar(cmd);
 	}
 
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
