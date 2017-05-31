@@ -203,11 +203,21 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void assignmentServiceModule(AssignmentServiceModuleCommand cmd) {
         //参数检查
-         checkAssignmentCommand(cmd);
-
+        if (cmd.getTargets() == null) {
+            LOGGER.error("Targets of AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Targets of AssignmentServiceModuleCommand is not completed.");
+        }
         List<AssignmentTarget> targets = cmd.getTargets();
-        List<Project> projects = cmd.getProjects();
-        List<Long> moduleIds = cmd.getModuleIds();
+        List<Project> projects = new ArrayList<>();
+        List<Long> moduleIds = new ArrayList<>();
+
+        if (cmd.getAllModuleFlag() == AllFlagType.NO.getCode()){
+            moduleIds = cmd.getModuleIds();
+        }
+
+        if(cmd.getAllProjectFlag() == AllFlagType.NO.getCode()){
+            projects = cmd.getProjects();
+        }
 
         //设置标记
         boolean isCreate = (cmd.getId() == null);
@@ -542,7 +552,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
      * @param cmd
      */
     private void checkAssignmentCommand(AssignmentServiceModuleCommand cmd) {
-        if (cmd.getTargets() == null) {
+        if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
             LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
         }
