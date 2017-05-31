@@ -406,7 +406,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         records.stream().map(r ->{
             result.add(ConvertHelper.convert(r, OrganizationMember.class));
             return null;
-        });
+        }).collect(Collectors.toList());
         return result;
 
 
