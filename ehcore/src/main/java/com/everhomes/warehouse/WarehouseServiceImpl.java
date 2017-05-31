@@ -1155,6 +1155,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         List<ImportWarehouseMaterialDataDTO> result = new ArrayList<>();
         int row = 1;
         for (Object o : list) {
+            LOGGER.info("row of list : " + row);
             if(row < 2){
                 row ++;
                 continue;
