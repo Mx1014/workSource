@@ -487,6 +487,24 @@ public class WarehouseProviderImpl implements WarehouseProvider {
     }
 
     @Override
+    public List<WarehouseStocks> listMaterialStocks(Long materialId, String ownerType, Long ownerId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.MATERIAL_ID.eq(materialId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_WAREHOUSE_STOCKS.STATUS.eq(Status.ACTIVE.getCode()));
+
+        List<WarehouseStocks> result = new ArrayList<WarehouseStocks>();
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, WarehouseStocks.class));
+            return null;
+        });
+
+        return result;
+    }
+
+    @Override
     public Long getWarehouseStockAmount(Long warehouseId, String ownerType, Long ownerId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhWarehouseStocksRecord> query = context.selectQuery(Tables.EH_WAREHOUSE_STOCKS);

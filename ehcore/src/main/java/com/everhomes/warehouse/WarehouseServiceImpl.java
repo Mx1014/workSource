@@ -466,7 +466,16 @@ public class WarehouseServiceImpl implements WarehouseService {
         material.setDeleteUid(UserContext.current().getUser().getId());
         material.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         warehouseProvider.updateWarehouseMaterials(material);
-        warehouseMaterialSearcher.deleteById((material.getId()));
+        warehouseMaterialSearcher.deleteById(material.getId());
+
+        List<WarehouseStocks> stocks = warehouseProvider.listMaterialStocks(material.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+        if(stocks != null && stocks.size() > 0) {
+            for (WarehouseStocks stock : stocks) {
+                stock.setStatus(Status.INACTIVE.getCode());
+                warehouseProvider.updateWarehouseStock(stock);
+                warehouseStockSearcher.feedDoc(stock);
+            }
+        }
     }
 
     @Override

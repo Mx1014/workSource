@@ -60,4 +60,6 @@ public interface WarehouseProvider {
     List<WarehouseRequestMaterials> listWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId);
     List<WarehouseRequestMaterials> listUnDeliveryWarehouseRequestMaterials(Long requestId, String ownerType, Long ownerId);
     List<WarehouseRequestMaterials> listWarehouseRequestMaterials(List<Long> ids, String ownerType, Long ownerId);
+
+    List<WarehouseStocks> listMaterialStocks(Long materialId, String ownerType, Long ownerId);
 }

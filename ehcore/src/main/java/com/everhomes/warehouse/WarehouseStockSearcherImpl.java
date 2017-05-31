@@ -4,6 +4,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.warehouse.SearchWarehouseStocksCommand;
 import com.everhomes.rest.warehouse.SearchWarehouseStocksResponse;
+import com.everhomes.rest.warehouse.Status;
 import com.everhomes.rest.warehouse.WarehouseStockDTO;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
@@ -120,6 +121,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", UserContext.getCurrentNamespaceId());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType().toLowerCase()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", Status.ACTIVE.getCode()));
 
         if(cmd.getWarehouseId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("warehouseId", cmd.getWarehouseId()));
@@ -210,6 +212,7 @@ public class WarehouseStockSearcherImpl extends AbstractElasticSearch implements
             b.field("warehouseId", stock.getWarehouseId());
             b.field("materialId", stock.getMaterialId());
             b.field("updateTime", stock.getUpdateTime());
+            b.field("status", stock.getStatus());
 
             Warehouses warehouse = warehouseProvider.findWarehouse(stock.getWarehouseId(), stock.getOwnerType(), stock.getOwnerId());
             if(warehouse != null) {
