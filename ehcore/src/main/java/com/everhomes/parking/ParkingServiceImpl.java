@@ -1568,8 +1568,14 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		
+		String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+    	GetParkingCarNumsResponse response = handler.getParkingCarNums(cmd);
+    	
+		return response;
 	}
 
 }

@@ -5,40 +5,50 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * <li>InCarNum : 在场车辆数</li>
+ * <li>carNum : 在场车辆数</li>
  * </ul>
  *
  *  @author:dengs 2017年5月31日
  */
 public class GetParkingCarNumsResponse {
-	private String ParkName;
-	private Integer CarNum;
-	private Integer SpaceNum;
-	private Integer InCarNum;
+	private String parkName;
+	private Integer allCarNum;
+	private Integer emptyCarNum;
+	private Integer carNum;
+	
+	
 	public String getParkName() {
-		return ParkName;
+		return parkName;
 	}
+
 	public void setParkName(String parkName) {
-		ParkName = parkName;
+		this.parkName = parkName;
 	}
+
+	public Integer getAllCarNum() {
+		return allCarNum;
+	}
+
+	public void setAllCarNum(Integer allCarNum) {
+		this.allCarNum = allCarNum;
+	}
+
+	public Integer getEmptyCarNum() {
+		return emptyCarNum;
+	}
+
+	public void setEmptyCarNum(Integer emptyCarNum) {
+		this.emptyCarNum = emptyCarNum;
+	}
+
 	public Integer getCarNum() {
-		return CarNum;
+		return carNum;
 	}
+
 	public void setCarNum(Integer carNum) {
-		CarNum = carNum;
+		this.carNum = carNum;
 	}
-	public Integer getSpaceNum() {
-		return SpaceNum;
-	}
-	public void setSpaceNum(Integer spaceNum) {
-		SpaceNum = spaceNum;
-	}
-	public Integer getInCarNum() {
-		return InCarNum;
-	}
-	public void setInCarNum(Integer inCarNum) {
-		InCarNum = inCarNum;
-	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
