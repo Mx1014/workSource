@@ -158,7 +158,7 @@ public class WarehouseRequestMaterialSearcherImpl extends AbstractElasticSearch 
         builder.setQuery(qb);
 
         if(cmd.getMaterialName() == null || cmd.getMaterialName().isEmpty()) {
-            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC));
+            builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
         }
 
         SearchResponse rsp = builder.execute().actionGet();
