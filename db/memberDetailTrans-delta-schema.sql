@@ -9,7 +9,6 @@ CREATE TABLE `eh_organization_member_details` (
   `employee_no` varchar(128) DEFAULT NULL,
   `avatar` varchar(128) DEFAULT NULL,
   `gender` tinyint(4) DEFAULT '0' COMMENT '0: undisclosured, 1: male, 2: female',
-  `status` tinyint(4) NOT NULL DEFAULT '0',
   `birthday` date DEFAULT NULL COMMENT 'the birthday of the member',
   `marital_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: undisclosured, 1: married, 2: unmarried',
   `political_status` varchar(128) DEFAULT NULL COMMENT '政治面貌',
