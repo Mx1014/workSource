@@ -731,7 +731,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		if(null != timeIntervals) {
 			timeIntervals.forEach(t -> {
-				if (t.getEndTime() > t.getBeginTime()) {
+				if (t.getBeginTime() > t.getEndTime()) {
 					throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 							RentalServiceErrorCode.ERROR_TIME_STEP, "Invalid parameter");
 				}
