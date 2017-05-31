@@ -203,7 +203,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public void assignmentServiceModule(AssignmentServiceModuleCommand cmd) {
         //参数检查
-        checkAssignmentCommand(cmd);
+         checkAssignmentCommand(cmd);
 
         List<AssignmentTarget> targets = cmd.getTargets();
         List<Project> projects = cmd.getProjects();
@@ -542,7 +542,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
      * @param cmd
      */
     private void checkAssignmentCommand(AssignmentServiceModuleCommand cmd) {
-        if (cmd.getTargets() == null || cmd.getProjects() == null || cmd.getModuleIds() == null) {
+        if (cmd.getTargets() == null) {
             LOGGER.error("AssignmentServiceModuleCommand is not completed. cmd = {]", cmd);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "AssignmentServiceModuleCommand is not completed.");
         }
