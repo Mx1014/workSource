@@ -402,7 +402,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        step.where(condition).orderBy(t1.field("id").desc()).limit(offset.intValue(), pageSize).fetch().map((r) -> {
+        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).limit(offset.intValue(), pageSize).fetch().map(new OrganizationMemberRecordMapper());
+        records.stream().map(r ->{
             result.add(ConvertHelper.convert(r, OrganizationMember.class));
             return null;
         });
