@@ -1154,11 +1154,18 @@ public class WarehouseServiceImpl implements WarehouseService {
     private List<ImportWarehouseMaterialDataDTO> handleImportWarehouseMaterialsData(List list){
         List<ImportWarehouseMaterialDataDTO> result = new ArrayList<>();
         int row = 1;
+        int i = 1;
         for (Object o : list) {
             if(row < 2){
                 row ++;
                 continue;
             }
+
+            if(i > 10 && result.size() <= 1) {
+                break;
+            }
+            i++;
+            
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialDataDTO data = null;
             if(StringUtils.isNotBlank(r.getA())) {
@@ -1235,11 +1242,16 @@ public class WarehouseServiceImpl implements WarehouseService {
     private List<ImportWarehouseMaterialCategoryDataDTO> handleImportWarehouseMaterialCategoriesData(List list){
         List<ImportWarehouseMaterialCategoryDataDTO> result = new ArrayList<>();
         int row = 1;
+        int i = 1;
         for (Object o : list) {
             if(row < 2){
                 row ++;
                 continue;
             }
+            if(i > 10 && result.size() <= 1) {
+                break;
+            }
+            i++;
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialCategoryDataDTO data = new ImportWarehouseMaterialCategoryDataDTO();
             if(StringUtils.isNotBlank(r.getA())) {
