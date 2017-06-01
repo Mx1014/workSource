@@ -1161,9 +1161,10 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
 
+            LOGGER.info("result size : " + result.size() + ", i: " + i);
+
             if(i > 10 && result.size() < 2) {
-                LOGGER.info("result size : " + result.size());
-                return result;
+                break;
             }
             i++;
 
