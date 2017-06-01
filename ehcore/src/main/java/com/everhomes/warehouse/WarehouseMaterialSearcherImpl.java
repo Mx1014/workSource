@@ -142,6 +142,9 @@ public class WarehouseMaterialSearcherImpl extends AbstractElasticSearch impleme
             builder.addSort(SortBuilders.fieldSort("updateTime").order(SortOrder.DESC).ignoreUnmapped(true));
         }
 
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SearchWarehouseMaterials query : {}", builder);
+        }
         SearchResponse rsp = builder.execute().actionGet();
 
         List<Long> ids = getIds(rsp);
