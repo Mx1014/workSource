@@ -646,6 +646,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 	private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
+        Long userId = UserContext.current().getUser().getId();
+
 		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
 		if(null == organization){
@@ -718,6 +720,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dto.setAccountPhone(org.getContact());
 
 		dto.setServiceUserId(org.getServiceUserId());
+
+        OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, id);
+        if(null != m ){
+            dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
+        }
+
 		return dto;
 	}
 
@@ -9181,13 +9189,16 @@ System.out.println();
 //			cmd2.setOrganizationId(organizations.get(0).getId());
 //			applyForEnterpriseContactByEmail(cmd2);
 //		}
-
 		return organizations.stream().map(r->{
 			OrganizationDTO dto = processOrganizationCommunity(ConvertHelper.convert(r, OrganizationDTO.class));
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(dto.getId());
 			if(null != detail){
 				dto.setDisplayName(detail.getDisplayName());
 			}
+            OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, r.getId());
+            if(null != m ){
+                dto.setMemberStatus(m.getStatus());
+            }
 			return dto;
 			}).collect(Collectors.toList());
 	}

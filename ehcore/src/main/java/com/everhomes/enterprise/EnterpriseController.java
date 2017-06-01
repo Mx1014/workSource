@@ -158,6 +158,9 @@ public class EnterpriseController extends ControllerBase {
         	 EnterpriseDTO eDto = ConvertHelper.convert(r, EnterpriseDTO.class);
     		 eDto.setEnterpriseAddress(r.getAddress());
     		 eDto.setId(r.getOrganizationId());
+             if(null != r.getMember()){
+                 eDto.setContactStatus(r.getMember().getStatus());
+             }
     		 if(null != r.getAttachments()){
     			 eDto.setAttachments(r.getAttachments().stream().map(n->{
     					return ConvertHelper.convert(n,EnterpriseAttachmentDTO.class); 
