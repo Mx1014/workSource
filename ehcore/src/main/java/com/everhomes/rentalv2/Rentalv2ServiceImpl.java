@@ -1066,13 +1066,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, String sceneToken) {
 
-		Calendar beginCalendar = Calendar.getInstance();
-		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
-		String beginTime = dateSF.format(beginCalendar.getTime());
+		String beginTime = null;
+		String endTime = null;
 
-		Calendar endCalendar = Calendar.getInstance();
-		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
-		String endTime = dateSF.format(endCalendar.getTime());
+		if (NormalFlag.NEED.getCode() == rentalSite.getRentalEndTimeFlag()) {
+			Calendar beginCalendar = Calendar.getInstance();
+			beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
+			beginTime = dateSF.format(beginCalendar.getTime());
+		}
+
+		if (NormalFlag.NEED.getCode() == rentalSite.getRentalStartTimeFlag()) {
+			Calendar endCalendar = Calendar.getInstance();
+			endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
+			endTime = dateSF.format(endCalendar.getTime());
+		}else {
+			Calendar endCalendar = Calendar.getInstance();
+			//暂时默认查询7天的表格价格
+			endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+7 * 24 * 60 * 60 * 1000L);
+			endTime = dateSF.format(endCalendar.getTime());
+		}
 
 		BigDecimal minPrice = null;
 		Double minTimeStep = 1.0;
