@@ -428,7 +428,7 @@ public interface OrganizationService {
 
     /****** new interface ******/
 
-    List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org);
+//    List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org);
 
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
@@ -487,5 +487,8 @@ public interface OrganizationService {
     ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
 
     ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
+
+    OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
+
 
 }

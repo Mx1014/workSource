@@ -9544,7 +9544,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     //  New 20th.May
 
-    @Override
+/*    @Override
     public List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org) {
 
         //  查找合同到期时间
@@ -9596,9 +9596,53 @@ public class OrganizationServiceImpl implements OrganizationService {
             return dto;
         }).collect(Collectors.toList());
         return response;
-    }
+    }*/
 
     @Override
+    public ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
+        ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
+        ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
+
+        //  查找合同到期时间
+        List<Long> detailIds = new ArrayList<>();
+        res.getMembers().forEach(r -> {
+            detailIds.add(r.getDetailId());
+        });
+        List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
+
+        //  获取新增字段
+        List<OrganizationMemberDetails> detailList = this.organizationProvider.findDetailListById(detailIds);
+
+
+        response.setMembers(res.getMembers().stream().map(r -> {
+            OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+
+            //  添加新增字段
+            if (detailList != null) {
+                detailList.forEach(rr -> {
+                    if (rr.getId().equals(dto.getDetailId())) {
+                        dto.setEmployeeStatus(rr.getEmployeeStatus());
+                        dto.setEmploymentTime(rr.getEmploymentTime());
+                        dto.setProfileIntegrity(rr.getProfileIntegrity());
+                        dto.setCheckInTime(rr.getCheckInTime());
+                    }
+                });
+            }
+
+            //  设置合同到期时间
+            if (endTimeList != null) {
+                endTimeList.forEach(rr -> {
+
+                    if (rr[0].equals(dto.getDetailId())) {
+                        dto.setEndTime((java.sql.Date) rr[1]);
+                    }
+                });
+            }
+            return dto;
+        }).collect(Collectors.toList()));
+        return response;
+    }
+/*    @Override
     public ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
 
         Long startTime1 = System.currentTimeMillis();
@@ -9638,7 +9682,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.debug("Track: listOrganizationPersonnels: get organization member elapse:{}, convert elapse:{}, total elapse:{}", endTime2 - startTime2, endTime - startTime3, endTime - startTime1);
         }
         return response;
-    }
+    }*/
 
     @Override
     public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
@@ -10389,7 +10433,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
-
+    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
+        OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
+        PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
+        if(response.getBasic().getJobLevels().size() <= 0)
+            result.setBackEndIntegrity(0);
+        else
+            result.setBackEndIntegrity(25);
+        result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
+        return result;
+    }
 }
 
 

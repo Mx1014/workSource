@@ -317,6 +317,7 @@ public interface OrganizationProvider {
 
 	/**New**/
     List<Object[]> findContractEndTimeById(List<Long> detailIds);
+    List<OrganizationMemberDetails> findDetailListById(List<Long> detailIds);
     List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
 	//OrganizationMember findOrganizationMemberByMemberId(Long memberId);

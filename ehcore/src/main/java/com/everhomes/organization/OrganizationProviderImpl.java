@@ -3414,8 +3414,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+    @Override
+    public List<OrganizationMemberDetails> findDetailListById(List<Long> detailIds){
+        final List<OrganizationMemberDetails> response = new ArrayList<>();
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
+                null, (DSLContext context, Object reducingContext) -> {
+                    Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.in(detailIds);
+                    List<OrganizationMemberDetails> list = context.select(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY,
+                            Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME)
+                            .from(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                            .where(condition)
+                            .fetchInto(OrganizationMemberDetails.class);
+                    if (list != null)
+                        response.addAll(list);
+                    return true;
+                });
+        return response;
+    }
 
-	@Override
+
+    @Override
 	public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

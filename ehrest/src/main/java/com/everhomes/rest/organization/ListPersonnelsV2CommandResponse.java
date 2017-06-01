@@ -11,7 +11,7 @@ import java.util.List;
  * <li>members：机构成员信息，参考{@link com.everhomes.rest.organization.OrganizationMemberV2DTO}</li>
  * </ul>
  */
-public class ListPersonnelsV2CommandResponse {
+public class ListPersonnelsV2CommandResponse{
 
     private Integer nextPageOffset;
 

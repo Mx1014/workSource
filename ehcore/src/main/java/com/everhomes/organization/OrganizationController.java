@@ -1672,6 +1672,20 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /org/getProfileIntegrity</b>
+     * <p>查看档案完整度</p>
+     */
+    @RequestMapping("getProfileIntegrity")
+    @RestReturn(value = OrganizationMemberProfileIntegrity.class)
+    public RestResponse getProfileIntegrity(@Valid GetProfileIntegrityCommand cmd) {
+        OrganizationMemberProfileIntegrity res = this.organizationService.getProfileIntegrity(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /*    @RequestMapping("updateOrganizationMemberNumbers")
     @RestReturn(value = String.class)
     public RestResponse updateOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
