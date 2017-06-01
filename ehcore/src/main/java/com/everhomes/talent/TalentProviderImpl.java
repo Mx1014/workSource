@@ -16,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.TalentDegreeConditionEnum;
 import com.everhomes.rest.talent.TalentDegreeEnum;
@@ -90,7 +91,8 @@ public class TalentProviderImpl implements TalentProvider {
 		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_TALENTS)
 			.where(Tables.EH_TALENTS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_TALENTS.OWNER_TYPE.eq(cmd.getOwnerType()))
-			.and(Tables.EH_TALENTS.OWNER_ID.eq(cmd.getOwnerId()));
+			.and(Tables.EH_TALENTS.OWNER_ID.eq(cmd.getOwnerId()))
+			.and(Tables.EH_TALENTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 			
 		if (cmd.getCategoryId() != null) {
 			step.and(Tables.EH_TALENTS.CATEGORY_ID.eq(cmd.getCategoryId()));
