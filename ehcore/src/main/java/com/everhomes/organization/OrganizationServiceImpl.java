@@ -9695,11 +9695,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
         OrganizationMemberDetails organizationMemberDetails = new OrganizationMemberDetails();
+
         OrganizationMember organizationMember = new OrganizationMember();
 
         organizationMember.setOrganizationId(cmd.getOrganizationId());
         organizationMemberDetails.setOrganizationId(cmd.getOrganizationId());
-        organizationMemberDetails.setContactName(cmd.getContactName());
+        if (cmd.getContactName() != null) {
+            organizationMemberDetails.setContactName(cmd.getContactName());
+        }
         organizationMemberDetails.setContactType(IdentifierType.MOBILE.getCode());
         organizationMemberDetails.setContactToken(cmd.getContactToken());
         organizationMemberDetails.setGender(cmd.getGender());
@@ -9708,8 +9711,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         organizationMemberDetails.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+
         //  应该是什么类型的MemberGroup?
-//        organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
         organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
         organizationMember.setCreatorUid(user.getId());
         organizationMember.setNamespaceId(namespaceId);
@@ -9718,17 +9721,38 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
-        organizationMemberDetails.setEmployeeType(cmd.getEmployeeType());
+        if (cmd.getEmployeeType() != null) {
+            organizationMemberDetails.setEmployeeType(cmd.getEmployeeType());
+        }
         organizationMemberDetails.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
-        organizationMemberDetails.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+        if (cmd.getEmploymentTime() != null) {
+            organizationMemberDetails.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+        }
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
             organizationMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
+            organizationMemberDetails.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationMember.setTargetId(userIdentifier.getOwnerUid());
+            organizationMemberDetails.setTargetId(userIdentifier.getOwnerUid());
+
         } else {
             organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+            organizationMemberDetails.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
             organizationMember.setTargetId(0L);
+            organizationMemberDetails.setTargetId(0L);
+
+        }
+
+        Long detailId;
+
+        //  利用id是否为空来判断是修改还是添加
+        if(cmd.getId() == null){
+            detailId = this.organizationProvider.createOrganizationMemberDetails(organizationMemberDetails);
+
+        }else{
+            this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails, cmd.getId());
+            detailId = cmd.getId();
         }
 
         List<String> groupTypes = new ArrayList<>();
@@ -9750,6 +9774,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationMember> leaveMembers = new ArrayList<>();
 
         dbProvider.execute((TransactionStatus status) -> {
+
 
             List<Long> departmentIds = cmd.getDepartmentIds();
 
@@ -9798,10 +9823,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null == desOrgMember) {
                     // 记录一下，成员是新加入公司的
                     joinEnterpriseMap.put(enterpriseId, true);
-                    organizationProvider.createOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                    organizationProvider.createOrganizationMemberV2(organizationMember,detailId);
                 } else {
                     organizationMember.setId(desOrgMember.getId());
-                    organizationProvider.updateOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                    organizationProvider.updateOrganizationMember(organizationMember);
                 }
             }
 
@@ -9820,7 +9845,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                         organizationMember.setOrganizationId(departmentId);
 
-                        organizationProvider.createOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                        organizationProvider.createOrganizationMemberV2(organizationMember,detailId);
 
                         departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
                     }
@@ -9838,7 +9863,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     organizationMember.setOrganizationId(groupId);
 
-                    organizationProvider.createOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                    organizationProvider.createOrganizationMemberV2(organizationMember,detailId);
 
                     groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -9856,7 +9881,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     organizationMember.setGroupType(group.getGroupType());
 
-                    organizationProvider.createOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                    organizationProvider.createOrganizationMemberV2(organizationMember, detailId);
 
                     jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -9873,7 +9898,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     organizationMember.setGroupType(group.getGroupType());
 
-                    organizationProvider.createOrganizationMemberV2(organizationMember,organizationMemberDetails);
+                    organizationProvider.createOrganizationMemberV2(organizationMember,detailId);
 
                     jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -10351,7 +10376,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
-
+        this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(),cmd.getEmployeeStatus());
     }
 
     @Override

@@ -3437,46 +3437,68 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
 	}
 
-    @Override
-    public void createOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails) {
-		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-
-		if(null == VisibleFlag.fromCode(organizationMember.getVisibleFlag())){
-			organizationMember.setVisibleFlag(VisibleFlag.SHOW.getCode());
-		}
-		if (organizationMember.getNamespaceId() == null) {
-			Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-			organizationMember.setNamespaceId(namespaceId);
-			organizationMemberDetails.setNamespaceId(namespaceId);
-		}
-
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
-		Long detailId = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberDetails.class));
-		organizationMember.setDetailId(detailId);
-		organizationMemberDetails.setId(detailId);
-		EhOrganizationMembersDao dao1 = new EhOrganizationMembersDao(context.configuration());
-		EhOrganizationMemberDetailsDao dao2 = new EhOrganizationMemberDetailsDao(context.configuration());
-		dao1.insert(organizationMember);
-		dao2.insert(organizationMemberDetails);
-		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, organizationMember.getId());
-			DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberDetails.class, organizationMemberDetails.getId());
-
-		}
+    public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
+        if (organizationMemberDetails.getNamespaceId() == null) {
+            Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+            organizationMemberDetails.setNamespaceId(namespaceId);
+        }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberDetails.class));
+        organizationMemberDetails.setId(id);
+        EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
+        dao.insert(organizationMemberDetails);
+        if(OrganizationMemberTargetType.fromCode(organizationMemberDetails.getTargetType()) == OrganizationMemberTargetType.USER){
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberDetails.class, organizationMemberDetails.getId());
+        }
+        return id;
     }
+
+    public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
+        dao.update(organizationMemberDetails);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, detailId);
+    }
+
+    @Override
+    public void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId) {
+        organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        if(null == VisibleFlag.fromCode(organizationMember.getVisibleFlag())){
+            organizationMember.setVisibleFlag(VisibleFlag.SHOW.getCode());
+        }
+        if (organizationMember.getNamespaceId() == null) {
+            Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+            organizationMember.setNamespaceId(namespaceId);
+        }
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMembers.class));
+        organizationMember.setId(id);
+        organizationMember.setDetailId(detailId);
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+        dao.insert(organizationMember);
+        if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+            DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMembers.class, organizationMember.getId());
+        }
+    }
+/*
 
 	public void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails){
 		assert(organizationMember.getId() == null);
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
 
 		//	若没有赋值会将NULL加到原先有值的地方吗？
 		dao.update(organizationMember);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, organizationMember.getId());
-	}
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+*//*		context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+				.set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS, organizationMemberDetails.)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.ID.eq(id)).execute();*//*
+	}*/
 
 
 	//    @Caching(evict = {@CacheEvict(value = "Education", allEntries=true)})
@@ -3691,5 +3713,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+
+    public boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        int count = context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS, employeeStatus)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.ID.eq(id)).execute();
+        if(count == 0)
+            return false;
+        return true;
+    }
 
 }

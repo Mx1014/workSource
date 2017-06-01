@@ -14,7 +14,7 @@ import java.util.List;
  * <li>organizationId: 公司、部门编号</li>
  * <li>contactName：成员名称</li>
  * <li>contactType：联系类型，默认为0</li>
- * <li>contactToken：成员联系方式</li> *
+ * <li>contactToken：成员联系方式</li>
  * <li>employeeNo: 员工编号</li>
  * <li>avatar: 成员头像</li>
  * <li>gender: 成员性别，0：保密 1：男性 2：女性 参考{@link com.everhomes.rest.user.UserGender}</li>

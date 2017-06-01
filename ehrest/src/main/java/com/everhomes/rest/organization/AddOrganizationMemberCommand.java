@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * <ul>
+ * <li>id: 员工标识号(修改时存在)</li>
  * <li>organizationId: 组织id</li>
  * <li>targetType：成员是否注册 参考{@link OrganizationMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
@@ -26,7 +27,9 @@ import java.util.List;
  * </ul>
  */
 public class AddOrganizationMemberCommand {
-	
+
+	private Long id;
+
     @NotNull
     private Long   organizationId;
    
@@ -63,7 +66,15 @@ public class AddOrganizationMemberCommand {
 	public AddOrganizationMemberCommand() {
 	}
 
-	public Long getOrganizationId() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getOrganizationId() {
 		return organizationId;
 	}
 

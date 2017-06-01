@@ -4,22 +4,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>detailId: 员工标识号</li>
  * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * </ul>
  */
 public class UpdateOrganizationEmployeeStatusCommand {
 
-    private Long memberId;
+    private Long detailId;
 
     private Byte employeeStatus;
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public Byte getEmployeeStatus() {

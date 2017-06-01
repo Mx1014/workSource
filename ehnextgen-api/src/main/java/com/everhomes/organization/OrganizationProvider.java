@@ -320,11 +320,13 @@ public interface OrganizationProvider {
     List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
 	//OrganizationMember findOrganizationMemberByMemberId(Long memberId);
-	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long memberId);
-//	OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(OrganizationMember member, OrganizationMemberDetails memberDetails);
+	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
+	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
+    void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
+//	void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
 
-	void createOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
-	void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
+
 
     void createOranizationMemberEducationInfo(OrganizationMemberEducations education);
     OrganizationMemberEducations findOrganizationEducationInfoById(Long id);
@@ -350,6 +352,10 @@ public interface OrganizationProvider {
     OrganizationMemberContracts findOrganizationContractById(Long id);
     void deleteOranizationMemberContract(OrganizationMemberContracts contract);
     void updateOrganizationMemberContract(OrganizationMemberContracts contract);
+
+
+    boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus);
+
 
     List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 
