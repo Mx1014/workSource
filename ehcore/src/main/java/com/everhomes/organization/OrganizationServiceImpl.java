@@ -9173,7 +9173,7 @@ System.out.println();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		//通过namespace和email domain 找企业
 		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
-		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
+		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(UserContext.getCurrentNamespaceId(), emailDomain,cmd.getCommunityId());
 		//TODO: 判断邮箱是否被使用
 		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
 		if(null != member ){

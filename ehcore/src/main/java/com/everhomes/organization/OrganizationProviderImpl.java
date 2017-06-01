@@ -2830,7 +2830,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
  
 	@Override
-	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) { 
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -2842,7 +2842,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
 
 		if(emailDomain != null)
-			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain)); 
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
 			return ConvertHelper.convert(r, Organization.class);

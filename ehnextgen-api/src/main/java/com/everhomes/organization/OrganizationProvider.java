@@ -228,7 +228,7 @@ public interface OrganizationProvider {
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
  
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
-	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+	List<Organization>  listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId);
   
   
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
