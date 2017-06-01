@@ -37,8 +37,8 @@ public class CommentDTO {
 	private String contentType;
 	private String content;
 	private Timestamp createTime;
-	@ItemType(NewsAttachmentDTO.class)
-	private List<NewsAttachmentDTO> attachments;
+	@ItemType(AttachmentDescriptor.class)
+	private List<AttachmentDescriptor> attachments;
 
 	public Long getId() {
 		return id;
@@ -128,11 +128,11 @@ public class CommentDTO {
 		this.createTime = createTime;
 	}
 
-	public List<NewsAttachmentDTO> getAttachments() {
+	public List<AttachmentDescriptor> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<NewsAttachmentDTO> attachments) {
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
 
