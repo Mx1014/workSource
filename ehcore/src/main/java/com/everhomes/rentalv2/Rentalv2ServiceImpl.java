@@ -3780,28 +3780,48 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						}
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-								.getBeginTime().getTime()
-								- rs.getRentalStartTime())))) {
+						Long time = rsr.getBeginTime().getTime();
+						if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+							time -= rs.getRentalStartTime();
+						}
+						if (reserveTime.before(new java.util.Date(time))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-								.getBeginTime().getTime()
-								- rs.getRentalEndTime())))) {
+						if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+							time -= rs.getRentalEndTime();
+						}
+						if (reserveTime.after(new java.util.Date(time))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
+//						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//								.getBeginTime().getTime()
+//								- rs.getRentalEndTime())))) {
+//							dto.setStatus(SiteRuleStatus.LATE.getCode());
+//						}
 					} else {
-						
-						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()
-								- rs.getRentalStartTime())))) {
+						Long time = rsr.getResourceRentalDate().getTime();
+						if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+							time -= rs.getRentalStartTime();
+						}
+						if (reserveTime.before(new java.util.Date(time))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()
-								- rs.getRentalEndTime()))) ){
+						if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+							time -= rs.getRentalEndTime();
+						}
+						if (reserveTime.after(new java.util.Date(time))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
+//						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
+//								.getResourceRentalDate().getTime()
+//								- rs.getRentalStartTime())))) {
+//							dto.setStatus(SiteRuleStatus.EARLY.getCode());
+//						}
+//						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//								.getResourceRentalDate().getTime()
+//								- rs.getRentalEndTime()))) ){
+//							dto.setStatus(SiteRuleStatus.LATE.getCode());
+//						}
 					}
 					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
@@ -4241,29 +4261,59 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 				}
 				
+//				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+//					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
+//							.getBeginTime().getTime()
+//							- rs.getRentalStartTime())))) {
+//						dto.setStatus(SiteRuleStatus.EARLY.getCode());
+//					}
+//					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//							.getBeginTime().getTime()
+//							- rs.getRentalEndTime())))) {
+//						dto.setStatus(SiteRuleStatus.LATE.getCode());
+//					}
+//				} else {
+//					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
+//							.getResourceRentalDate().getTime()
+//							- rs.getRentalStartTime())))) {
+//						dto.setStatus(SiteRuleStatus.EARLY.getCode());
+//					}
+//					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//							.getResourceRentalDate().getTime()
+//							- rs.getRentalEndTime()))) ){
+//						dto.setStatus(SiteRuleStatus.LATE.getCode());
+//					}
+//				}
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-							.getBeginTime().getTime()
-							- rs.getRentalStartTime())))) {
+					Long time = rsr.getBeginTime().getTime();
+					if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+						time -= rs.getRentalStartTime();
+					}
+					if (reserveTime.before(new java.util.Date(time))) {
 						dto.setStatus(SiteRuleStatus.EARLY.getCode());
 					}
-					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-							.getBeginTime().getTime()
-							- rs.getRentalEndTime())))) {
+					if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+						time -= rs.getRentalEndTime();
+					}
+					if (reserveTime.after(new java.util.Date(time))) {
 						dto.setStatus(SiteRuleStatus.LATE.getCode());
 					}
 				} else {
-					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-							.getResourceRentalDate().getTime()
-							- rs.getRentalStartTime())))) {
+					Long time = rsr.getResourceRentalDate().getTime();
+					if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+						time -= rs.getRentalStartTime();
+					}
+					if (reserveTime.before(new java.util.Date(time))) {
 						dto.setStatus(SiteRuleStatus.EARLY.getCode());
 					}
-					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-							.getResourceRentalDate().getTime()
-							- rs.getRentalEndTime()))) ){
+					if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+						time -= rs.getRentalEndTime();
+					}
+					if (reserveTime.after(new java.util.Date(time))) {
 						dto.setStatus(SiteRuleStatus.LATE.getCode());
 					}
 				}
+
 				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
