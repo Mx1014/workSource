@@ -752,7 +752,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         int i =-1 ;
         row.createCell(++i).setCellValue("所属仓库");
         row.createCell(++i).setCellValue("类型");
-        row.createCell(++i).setCellValue("物品编号");
+        row.createCell(++i).setCellValue("物品编码");
         row.createCell(++i).setCellValue("物品名称");
         row.createCell(++i).setCellValue("数量");
         row.createCell(++i).setCellValue("单位");
