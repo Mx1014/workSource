@@ -298,5 +298,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50920, '', 'EhNamespaces', 1000000, 2);
 
+UPDATE `eh_rentalv2_resource_types` SET `status`='2';
+	
 UPDATE `eh_rentalv2_resource_types` SET `status`='3' WHERE `name`='左邻会议室' and `namespace_id`='1000000';
 	
