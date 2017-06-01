@@ -1,7 +1,5 @@
 package com.everhomes.rest.comment;
 
-import com.sun.beans.editors.ByteEditor;
-
 /**
  * <ul>园区app类型
  * <li>FORUM(1)</li>
