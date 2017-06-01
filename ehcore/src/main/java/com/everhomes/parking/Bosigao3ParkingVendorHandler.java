@@ -606,6 +606,8 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			}
 		}else
 			LOGGER.info("request {}OISGetPKCarNum failed! param = {}",url,params);
+		GetParkingCarNumsResponse response = new GetParkingCarNumsResponse();
+		response.setCarNum(1);
 		return null;
 	}
 }
