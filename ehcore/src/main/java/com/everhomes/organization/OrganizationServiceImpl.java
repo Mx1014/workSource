@@ -75,6 +75,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.common.Router;
+import com.everhomes.rest.community.ImportBuildingDataDTO;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
@@ -5741,6 +5742,45 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 	@Override
+	public ImportFileTaskDTO importEnterpriseData(ImportEnterpriseDataCommand cmd, MultipartFile file, Long userId) {
+		Long communityId = cmd.getCommunityId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(communityId);
+			task.setType(ImportFileTaskType.ENGERPRISE.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportEnterpriseDataDTO> datas = handleImportEnterpriseData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportEnterpriseDataDTO>> results = importEnterprise(datas, userId, cmd);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+
+	@Override
 	public ImportFileResponse<ImportEnterpriseDataDTO> importEnterpriseData(MultipartFile mfile,
 												   Long userId, ImportEnterpriseDataCommand cmd) {
 		ImportFileResponse<ImportEnterpriseDataDTO> importDataResponse = new ImportFileResponse<>();
@@ -5814,13 +5854,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private List<ImportEnterpriseDataDTO> handleImportEnterpriseData(List list){
 		List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
-		int row = 1;
-		for (Object o : list) {
-			if(row < 3){
-				row ++;
-				continue;
-			}
-			RowResult r = (RowResult)o;
+		for(int i = 1; i < list.size(); i++) {
+			RowResult r = (RowResult)list.get(i);
 			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
 			if(null != r.getA())
 				data.setName(r.getA().trim());
