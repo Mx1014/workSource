@@ -1305,6 +1305,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					rentalBill.setEndTime(endTime);
 				 
 				if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
+
+					//解析场景信息
+					SceneTokenDTO sceneTokenDTO = null;
+					if (null != cmd.getSceneToken()) {
+						User user = UserContext.current().getUser();
+						sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+					}
+
+//					if (null != sceneTokenDTO) {
+//						String scene = sceneTokenDTO.getScene();
+//
+//						if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+//							dto.setPrice(dto.getOrgMemberPrice());
+//							dto.setOriginalPrice(dto.getOrgMemberOriginalPrice());
+//						}
+//					}
+
 					if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
 						//有半个
 						//整数部分计算
