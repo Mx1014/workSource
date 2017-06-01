@@ -440,9 +440,9 @@ public interface OrganizationService {
 
     //  尝试将部门写成一个方法方便直接调用
 //    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
-    OrganizationMemberV2DTO getDepartmentFromOrganization(Organization org, OrganizationDTO orgDTO,
+/*    OrganizationMemberV2DTO getDepartmentFromOrganization(Organization org, OrganizationDTO orgDTO,
                                                           Long directlyOrgId, String contactToken,
-                                                          String targetType, Long targetId, String nickName);
+                                                          String targetType, Long targetId, String nickName);*/
 
     void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd);
 

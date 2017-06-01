@@ -9992,8 +9992,60 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        return null;
     }
 
+    public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd) {
+        LOGGER.info("Invoke GetOrganizationMemberBasicInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
+        if (cmd.getDetailId() == null) {
+            return null;
+        }
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        if (memberDetails != null) {
+            OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
 
-    @Override
+            //  计算在职天数
+            Date date = new Date();
+            java.sql.Date nowDate = new java.sql.Date(date.getTime());
+            Long workingDays = ((nowDate.getTime() - memberDetails.getCheckInTime().getTime()) / (24 * 60 * 60 * 1000));
+            memberDTO.setWorkingDays(workingDays);
+
+            Long orgId;
+            Organization org = this.checkOrganization(memberDTO.getOrganizationId());
+            if (org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())) {
+                orgId = org.getDirectlyEnterpriseId();
+            } else {
+                orgId = org.getId();
+            }
+            Long directlyOrgId = orgId;
+
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.GROUP.getCode());
+
+            Organization directlyEnterprise = checkOrganization(directlyOrgId);
+
+            List<OrganizationDTO> departments = new ArrayList<>();
+            memberDTO.setDepartments(this.getOrganizationMemberGroups(groupTypes, memberDTO.getContactToken(), directlyEnterprise.getPath()));
+            //岗位
+            memberDTO.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, memberDTO.getContactToken(), directlyEnterprise.getPath()));
+
+            //职级
+            memberDTO.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, memberDTO.getContactToken(), directlyEnterprise.getPath()));
+
+            if (OrganizationMemberTargetType.USER.getCode().equals(memberDTO.getTargetType())) {
+                User user = userProvider.findUserById(memberDTO.getTargetId());
+                if (null != user) {
+                    memberDTO.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+                    memberDTO.setNickName(memberDTO.getNickName());
+                }
+            }
+            return memberDTO;
+        } else {
+            return null;
+        }
+    }
+
+
+/*    @Override
     public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd) {
 
         LOGGER.info("Invoke GetOrganizationMemberBasicInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
@@ -10110,7 +10162,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         return dto;
-    }
+    }*/
 
     @Override
     public void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
