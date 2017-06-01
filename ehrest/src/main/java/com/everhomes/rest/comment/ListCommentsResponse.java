@@ -10,6 +10,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 
+/**
+ * <ul>
+ *     <li>commentDtos: commentDtos {@link com.everhomes.rest.comment.CommentDTO}</li>
+ * </ul>
+ */
 public class ListCommentsResponse {
 
 	@ItemType(CommentDTO.class)
