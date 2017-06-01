@@ -15,6 +15,8 @@ public class UserContext {
     private String version;
     private String versionRealm;
     private String scheme;
+    private Long sceneId;
+    private String sceneType;
     
     public UserContext() {
     }
@@ -126,5 +128,27 @@ public class UserContext {
 
     public void setScheme(String scheme) {
         this.scheme = scheme;
+    }
+
+    public static Long getCurrentSceneId() {
+        return current().sceneId;
+    }
+    public static void setCurrentSceneId(Long sceneId) {
+        current().setSceneId(sceneId);
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
+
+    public static String getCurrentSceneType() {
+        return current().sceneType;
+    }
+    public static void setCurrentSceneType(String sceneType) {
+        current().setSceneId(sceneType);
+    }
+
+    public void setSceneId(String sceneType) {
+        this.sceneType = sceneType;
     }
 }

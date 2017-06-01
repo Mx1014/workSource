@@ -412,12 +412,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId);
 
 
-		List<Long> privilegeIds = new ArrayList<>();
-		privilegeIds.add(PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
 
 	}
 
@@ -1400,12 +1398,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setAccountPhone(cmd.getContactToken());
 		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
-		List<Long> privilegeIds = new ArrayList<>();
-		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",PrivilegeConstants.ORGANIZATION_ADMIN);
 	}
 	
 	@Override

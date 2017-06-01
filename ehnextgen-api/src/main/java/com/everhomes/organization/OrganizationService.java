@@ -453,4 +453,6 @@ public interface OrganizationService {
 	 * 查询所有管理公司
 	 */
 	List<OrganizationDTO> listAllPmOrganizations();
+
+	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
 }

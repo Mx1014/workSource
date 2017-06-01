@@ -14,10 +14,12 @@ import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
 import com.everhomes.rest.module.*;
+import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,9 +38,10 @@ public class DomainController extends ControllerBase {
      * </p>
      */
     @RequestMapping("getDomainInfo")
+    @RequireAuthentication(false)
     @RestReturn(value = DomainDTO.class)
-    public RestResponse getDomainInfo(@Valid GetDomainInfoCommand cmd) {
-        RestResponse response = new RestResponse(domainService.getDomainInfo(cmd));
+    public RestResponse getDomainInfo(@Valid GetDomainInfoCommand cmd, HttpServletRequest request) {
+        RestResponse response = new RestResponse(domainService.getDomainInfo(cmd, request));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

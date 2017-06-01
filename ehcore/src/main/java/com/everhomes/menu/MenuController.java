@@ -29,9 +29,6 @@ public class MenuController extends ControllerBase {
     private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
-    private ServiceModuleService serviceModuleService;
-    
-    @Autowired
     private WebMenuService webMenuService;
 
 

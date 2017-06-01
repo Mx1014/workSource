@@ -6439,6 +6439,29 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId){
+        List<Long> orgnaizationIds = new ArrayList<>();
+
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        List<OrganizationDTO> orgs = getOrganizationMemberGroups(groupTypes, userId, organizationId);
+        for (OrganizationDTO dto: orgs) {
+            String[] idStrs = dto.getPath().split("/");
+                for (String idStr: idStrs) {
+                    if(!StringUtils.isEmpty(idStr)){
+                        Long id = Long.valueOf(idStr);
+                        if(!orgnaizationIds.contains(id)){
+                            orgnaizationIds.add(id);
+                        }
+                    }
+            }
+        }
+        return orgnaizationIds;
+    }
+
+    @Override
     public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId) {
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
         Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -8723,6 +8746,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setJobPositions(jobPositions);
 
             dto.setJobLevels(jobLevels);
+
+
             return null;
         });
 

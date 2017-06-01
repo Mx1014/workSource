@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.entity.EntityType;
+import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +20,18 @@ import com.everhomes.util.ConvertHelper;
 @Component
 public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
-	WebMenuPrivilegeProvider webMenuProvider;
+	private WebMenuPrivilegeProvider webMenuProvider;
+
+	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
+		Long organizationId = null;
+		if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ORGANIZATIONS){
+			organizationId = UserContext.getCurrentSceneId();
+		}else if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ZUOLIN_ADMIN){
+
+		}
+
+		return null;
+	}
 	
 	@Override
 	public ListWebMenuResponse listZuolinAdminWebMenu() {
