@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- * <li>ownerType: 评论来源，如快讯、论坛等, 参考{@link com.everhomes.rest.comment.OwnerType}</li>
  * <li>ownerToken: 实体标识</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
@@ -16,18 +15,9 @@ import javax.validation.constraints.NotNull;
  */
 public class ListCommentsCommand {
 	@NotNull
-	private Byte ownerType;
 	private String ownerToken;
 	private Long pageAnchor;
 	private Integer pageSize;
-
-	public Byte getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(Byte ownerType) {
-		this.ownerType = ownerType;
-	}
 
 	public String getOwnerToken() {
 		return ownerToken;

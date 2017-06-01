@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>ownerType: 评论来源，如快讯、论坛等, 参考{@link com.everhomes.rest.comment.OwnerType}</li>
  * <li>ownerToken: 实体标识</li>
  * <li>parentCommentId: 父评论的ID</li>
  * <li>content: 帖子内容</li>
@@ -19,21 +18,12 @@ import java.util.List;
  */
 public class AddCommentCommand {
 	@NotNull
-	private Byte ownerType;
 	private String ownerToken;
 	private Long parentCommentId;
 	private String content;
 	private String contentType;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
-
-	public Byte getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(Byte ownerType) {
-		this.ownerType = ownerType;
-	}
 
 	public String getOwnerToken() {
 		return ownerToken;
