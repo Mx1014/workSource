@@ -901,7 +901,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
             task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             task.setOwnerId(cmd.getOwnerId());
-            task.setType(ImportFileTaskType.WAREHOUSE_MATERIAL_CATEGORY.getCode());
+            task.setType(ImportFileTaskType.WAREHOUSE_MATERIAL.getCode());
             task.setCreatorUid(userId);
             task = importFileService.executeTask(new ExecuteImportTaskCallback() {
                 @Override
