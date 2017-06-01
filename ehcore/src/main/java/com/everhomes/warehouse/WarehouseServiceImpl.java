@@ -1161,8 +1161,6 @@ public class WarehouseServiceImpl implements WarehouseService {
                 continue;
             }
 
-            LOGGER.info("result size : " + result.size() + ", i: " + i);
-
             if(i > 9 && result.size() < 2) {
                 break;
             }
