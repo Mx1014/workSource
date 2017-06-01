@@ -911,14 +911,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setRentalSites(new ArrayList<>());
 		
 		for (RentalResource rentalSite : rentalSites) {
-			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite);
+			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
 			 
 			response.getRentalSites().add(rSiteDTO);
 		}
 
 		return response;
 	}
-	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite){
+	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, String sceneToken){
 
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
@@ -995,6 +995,77 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		//起止时间为资源允许预定的最早和最晚时间
 		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
+//		Calendar beginCalendar = Calendar.getInstance();
+//		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
+//		String beginTime = dateSF.format(beginCalendar.getTime());
+//
+//		Calendar endCalendar = Calendar.getInstance();
+//		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
+//		String endTime = dateSF.format(endCalendar.getTime());
+//
+//		BigDecimal minPrice = null;
+//		Double minTimeStep = 1.0;
+//		BigDecimal maxPrice = null;
+//		Double maxTimeStep = 1.0;
+//
+//		try {
+//			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
+//			if(null == cells || cells.size() == 0) {
+//				rSiteDTO.setAvgPrice(new BigDecimal(0));
+//			}else {
+//				BigDecimal sum = new BigDecimal(0);
+//				for(RentalCell cell : cells){
+//					//对于按小时预约的,取平均值进行计算
+//					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
+//						//最小值超过了cell值,则cell值代替最小值
+//						if(minPrice == null || minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+//								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
+//							minPrice = cell.getPrice();
+//							minTimeStep = cell.getTimeStep();
+//						}
+//						if(maxPrice == null ||  maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+//								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
+//							maxPrice = cell.getPrice();
+//							maxTimeStep = cell.getTimeStep();
+//						}
+//					}else{
+//						if(minPrice == null || minPrice.compareTo(cell.getPrice()) == 1){
+//							minPrice = cell.getPrice();
+//						}
+//						if(maxPrice == null || maxPrice.compareTo(cell.getPrice()) == -1){
+//							maxPrice = cell.getPrice();
+//						}
+//					}
+//					sum = sum.add(cell.getPrice());
+//				}
+//				//四舍五入保留三位
+//				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
+//			}
+//		} catch (ParseException e) {
+//			 LOGGER.error("计算平均值-时间转换 异常");
+//		}
+//		if(minPrice == null)
+//			minPrice = new BigDecimal(0);
+//		if(maxPrice == null)
+//			maxPrice = new BigDecimal(0);
+//		if( minPrice.compareTo(maxPrice) == 0){
+//			rSiteDTO.setAvgPriceStr(priceToString(minPrice,rentalSite.getRentalType(),minTimeStep));
+//		}else{
+//			rSiteDTO.setAvgPriceStr( priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)+"~" +priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep));
+//		}
+//		if(rentalSite.getAvgPriceStr() == null){
+		//rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
+
+		calculatePrice(rentalSite, rSiteDTO, sceneToken);
+		//更新价格平均值
+		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
+//		rentalv2Provider.updateRentalSite(rentalSite);
+//		}
+		return rSiteDTO;
+	}
+
+	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, String sceneToken) {
+
 		Calendar beginCalendar = Calendar.getInstance();
 		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
 		String beginTime = dateSF.format(beginCalendar.getTime());
@@ -1007,61 +1078,76 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Double minTimeStep = 1.0;
 		BigDecimal maxPrice = null;
 		Double maxTimeStep = 1.0;
-		
+
+		//解析场景信息
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != sceneToken) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
+		}
+
 		try {
 			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
 			if(null == cells || cells.size() == 0) {
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
 			}else {
 				BigDecimal sum = new BigDecimal(0);
-				for(RentalCell cell : cells){	
+				for(RentalCell cell : cells){
+					//根据场景取价格
+					BigDecimal price = cell.getPrice();
+					if (null != sceneTokenDTO) {
+						String scene = sceneTokenDTO.getScene();
+						if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+							price = cell.getOrgMemberPrice();
+						}
+					}
 					//对于按小时预约的,取平均值进行计算
 					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
 						//最小值超过了cell值,则cell值代替最小值
 						if(minPrice == null || minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
-							minPrice = cell.getPrice();
+								price.divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
+							minPrice = price;
 							minTimeStep = cell.getTimeStep();
 						}
 						if(maxPrice == null ||  maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
-							maxPrice = cell.getPrice();
+								price.divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
+							maxPrice = price;
 							maxTimeStep = cell.getTimeStep();
 						}
 					}else{
-						if(minPrice == null || minPrice.compareTo(cell.getPrice()) == 1){
-							minPrice = cell.getPrice(); 
+						if(minPrice == null || minPrice.compareTo(price) == 1){
+							minPrice = price;
 						}
-						if(maxPrice == null || maxPrice.compareTo(cell.getPrice()) == -1){
-							maxPrice = cell.getPrice(); 
+						if(maxPrice == null || maxPrice.compareTo(price) == -1){
+							maxPrice = price;
 						}
 					}
-					sum = sum.add(cell.getPrice());
+					sum = sum.add(price);
 				}
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
 			}
 		} catch (ParseException e) {
-			 LOGGER.error("计算平均值-时间转换 异常");
+			LOGGER.error("计算平均值-时间转换 异常");
 		}
 		if(minPrice == null)
 			minPrice = new BigDecimal(0);
 		if(maxPrice == null)
 			maxPrice = new BigDecimal(0);
 		if( minPrice.compareTo(maxPrice) == 0){
-			rSiteDTO.setAvgPriceStr(priceToString(minPrice,rentalSite.getRentalType(),minTimeStep));
+			String priceStr = priceToString(minPrice,rentalSite.getRentalType(),minTimeStep);
+			rSiteDTO.setAvgPriceStr(priceStr);
+
+			return priceStr;
 		}else{
-			rSiteDTO.setAvgPriceStr( priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)+"~" +priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep));
+			String priceStr =priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)
+					+ "~" + priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep);
+			rSiteDTO.setAvgPriceStr(priceStr);
+			return priceStr;
 		}
-//		if(rentalSite.getAvgPriceStr() == null){
-		//rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
-		//更新价格平均值
-		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
-		rentalv2Provider.updateRentalSite(rentalSite);	
-//		}
-		return rSiteDTO;
+
 	}
-	
+
 	private boolean isInteger(BigDecimal b){
 		if(new BigDecimal(b.intValue()).compareTo(b)==0){
 			return true;
@@ -1312,28 +1398,26 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						User user = UserContext.current().getUser();
 						sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 					}
-
-//					if (null != sceneTokenDTO) {
-//						String scene = sceneTokenDTO.getScene();
-//
-//						if (SceneType.PM_ADMIN.getCode().equals(scene)) {
-//							dto.setPrice(dto.getOrgMemberPrice());
-//							dto.setOriginalPrice(dto.getOrgMemberOriginalPrice());
-//						}
-//					}
+					BigDecimal amount = null == rentalSiteRule.getPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getPrice();
+					BigDecimal halfPrice = null == rentalSiteRule.getHalfresourcePrice()?new java.math.BigDecimal(0):rentalSiteRule.getHalfresourcePrice();
+					if (null != sceneTokenDTO) {
+						String scene = sceneTokenDTO.getScene();
+						if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+							amount = null == rentalSiteRule.getOrgMemberPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getOrgMemberPrice();
+							halfPrice = null == rentalSiteRule.getHalfOrgMemberPrice()?new java.math.BigDecimal(0):rentalSiteRule.getHalfOrgMemberPrice();
+						}
+					}
 
 					if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
 						//有半个
 						//整数部分计算
 						if(siteRule.getRentalCount().intValue()>0)
-							siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
-									new   java.math.BigDecimal(siteRule.getRentalCount().intValue() )));
+							siteTotalMoney = siteTotalMoney.add(amount.multiply(new BigDecimal(siteRule.getRentalCount().intValue())));
 						//小数部分计算
-						siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getHalfresourcePrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()));
+						siteTotalMoney = siteTotalMoney.add(halfPrice);
 					}
 					else{
-						siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
-								new   java.math.BigDecimal(siteRule.getRentalCount() )));
+						siteTotalMoney = siteTotalMoney.add(amount.multiply(new BigDecimal(siteRule.getRentalCount())));
 			 
 					}
 				}
@@ -2620,6 +2704,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							}
 							if(rsr.getUnit()<1){
 								rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+								rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+								rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
 							}
 							rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
 							rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
@@ -2649,7 +2735,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
 						if(rsr.getUnit()<1){
-							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) ); 
+							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+
 						}
 						createRSR(rsr, cmd);
 						rsr.setAmorpm(AmorpmFlag.PM.getCode());
@@ -2666,7 +2755,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
 						if(rsr.getUnit()<1){
-							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) ); 
+							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+
 						}
 						createRSR(rsr, cmd);
 						rsr.setAmorpm(AmorpmFlag.PM.getCode());
@@ -4490,7 +4582,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			nextPageAnchor = rentalSites.get(rentalSites.size() -1).getDefaultOrder();
 		}
 		response.setNextPageAnchor(nextPageAnchor);
-		response.setRentalSites(rentalSites.stream().map(this::convertRentalSite2DTO)
+		response.setRentalSites(rentalSites.stream().map(r -> convertRentalSite2DTO(r, null))
 			.collect(Collectors.toList()));
 
 		return response;
@@ -4505,7 +4597,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResource rentalSite = rentalv2Provider.getRentalSiteById(cmd.getId());
 
-		return convertRentalSite2DTO(rentalSite);
+		return convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
 	}
 
 	@Override
