@@ -1165,7 +1165,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 break;
             }
             i++;
-            
+
             RowResult r = (RowResult)o;
             ImportWarehouseMaterialDataDTO data = null;
             if(StringUtils.isNotBlank(r.getA())) {
