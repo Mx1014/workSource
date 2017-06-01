@@ -6814,9 +6814,8 @@ System.out.println();
 
 	private String getNotifyText(Organization org, OrganizationMember member, User user, int code){
 		Map<String, String> map = new HashMap<String, String>();
-
         map.put("enterpriseName", org.getName());
-        map.put("userName", member.getContactName());
+        map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : member.getContactName());
         if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getApplyDescription()));
         } else {
@@ -9217,10 +9216,10 @@ System.out.println();
 		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
-
+        String nickName = UserContext.current().getUser().getNickName();
 		String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
 		String locale = "zh_CN";
-		map.put("nickName", UserContext.current().getUser().getNickName());
+		map.put("nickName", null == nickName ? useridentifier.getIdentifierToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : nickName);
 		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
 		String appName = "左邻";
 		if(null != namespace && namespace.getName() != null)
