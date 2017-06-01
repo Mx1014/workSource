@@ -3,18 +3,14 @@
 package com.everhomes.rest.comment;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
-
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
  * <ul>
- * <li>sceneToken: 场景标识</li>
- * <li>sourceType: 评论来源，如快讯、论坛等, 参考{@link com.everhomes.rest.comment.SourceType}</li>
- * <li>entityToken: 实体标识</li>
- * <li>entityId: 实体ID</li>
+ * <li>ownerType: 评论来源，如快讯、论坛等, 参考{@link com.everhomes.rest.comment.OwnerType}</li>
+ * <li>ownerToken: 实体标识</li>
  * <li>parentCommentId: 父评论的ID</li>
  * <li>content: 帖子内容</li>
  * <li>contentType: 评论类型，参考{@link com.everhomes.rest.comment.ContentType}</li>
@@ -22,48 +18,29 @@ import java.util.List;
  * </ul>
  */
 public class AddCommentCommand {
-	private String sceneToken;
 	@NotNull
-	private Byte sourceType;
-	private String entityToken;
-	private Long entityId;
+	private Byte ownerType;
+	private String ownerToken;
 	private Long parentCommentId;
 	private String content;
 	private String contentType;
-	private Long embeddedAppId;
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 
-	public String getSceneToken() {
-		return sceneToken;
+	public Byte getOwnerType() {
+		return ownerType;
 	}
 
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
+	public void setOwnerType(Byte ownerType) {
+		this.ownerType = ownerType;
 	}
 
-	public Byte getSourceType() {
-		return sourceType;
+	public String getOwnerToken() {
+		return ownerToken;
 	}
 
-	public void setSourceType(Byte sourceType) {
-		this.sourceType = sourceType;
-	}
-
-	public String getEntityToken() {
-		return entityToken;
-	}
-
-	public void setEntityToken(String entityToken) {
-		this.entityToken = entityToken;
-	}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
+	public void setOwnerToken(String ownerToken) {
+		this.ownerToken = ownerToken;
 	}
 
 	public Long getParentCommentId() {
@@ -88,14 +65,6 @@ public class AddCommentCommand {
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
-	}
-
-	public Long getEmbeddedAppId() {
-		return embeddedAppId;
-	}
-
-	public void setEmbeddedAppId(Long embeddedAppId) {
-		this.embeddedAppId = embeddedAppId;
 	}
 
 	public List<AttachmentDescriptor> getAttachments() {

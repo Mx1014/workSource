@@ -3,16 +3,13 @@
 package com.everhomes.rest.comment;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
-
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 
 /**
  * <ul>
- *     <li>commentDtos: commentDtos {@link com.everhomes.rest.comment.CommentDTO}</li>
+ *     <li>commentDtos: 评论列表，参考 {@link com.everhomes.rest.comment.CommentDTO}</li>
  * </ul>
  */
 public class ListCommentsResponse {

@@ -3,7 +3,6 @@
 package com.everhomes.rest.comment;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.news.NewsAttachmentDTO;
 import com.everhomes.util.StringHelper;
 
 import java.sql.Timestamp;
@@ -12,8 +11,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>id: 评论id</li>
- * <li>entityToken: 实体标识</li>
- * <li>entityId: 实体ID</li>
+ * <li>ownerToken: 实体标识</li>
  * <li>parentCommentId: 父评论的ID</li>
  * <li>creatorUid: 创建者id</li>
  * <li>creatorNickName: 创建者昵称</li>
@@ -22,13 +20,12 @@ import java.util.List;
  * <li>contentType: 评论类型，参考{@link com.everhomes.rest.comment.ContentType}</li>
  * <li>content: 评论内容</li>
  * <li>createTime: 创建时间</li>
- * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.rest.comment.AttachmentDescriptor}</li>
+ * <li>attachments: 图片、语音、视频等附件信息，参考{@link com.everhomes.rest.comment.AttachmentDTO}</li>
  * </ul>
  */
 public class CommentDTO {
 	private Long id;
-	private String entityToken;
-	private Long entityId;
+	private String ownerToken;
 	private Long parentCommentId;
 	private Long creatorUid;
 	private String creatorNickName;
@@ -37,8 +34,8 @@ public class CommentDTO {
 	private String contentType;
 	private String content;
 	private Timestamp createTime;
-	@ItemType(AttachmentDescriptor.class)
-	private List<AttachmentDescriptor> attachments;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> attachments;
 
 	public Long getId() {
 		return id;
@@ -48,20 +45,12 @@ public class CommentDTO {
 		this.id = id;
 	}
 
-	public String getEntityToken() {
-		return entityToken;
+	public String getOwnerToken() {
+		return ownerToken;
 	}
 
-	public void setEntityToken(String entityToken) {
-		this.entityToken = entityToken;
-	}
-
-	public Long getEntityId() {
-		return entityId;
-	}
-
-	public void setEntityId(Long entityId) {
-		this.entityId = entityId;
+	public void setOwnerToken(String ownerToken) {
+		this.ownerToken = ownerToken;
 	}
 
 	public Long getParentCommentId() {
@@ -128,11 +117,11 @@ public class CommentDTO {
 		this.createTime = createTime;
 	}
 
-	public List<AttachmentDescriptor> getAttachments() {
+	public List<AttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDescriptor> attachments) {
+	public void setAttachments(List<AttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
