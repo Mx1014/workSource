@@ -12,6 +12,7 @@ import java.util.List;
 
 public class ListCommentsResponse {
 
+	@ItemType(CommentDTO.class)
 	List<CommentDTO> commentDtos;
 
 	public List<CommentDTO> getCommentDtos() {
