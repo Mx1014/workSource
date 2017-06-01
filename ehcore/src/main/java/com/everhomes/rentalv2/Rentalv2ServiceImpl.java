@@ -2669,9 +2669,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid paramter site counts or site numbers");
 		}
+		List<Long> closeDates = cmd.getCloseDates();
+
 		while (start.before(end)) {
 			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
-			if (cmd.getOpenWeekday().contains(weekday)) {
+			Integer day = start.get(Calendar.DAY_OF_MONTH);
+			if (cmd.getOpenWeekday().contains(weekday) &&
+					(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
+
 				RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
 				rsr.setRentalResourceId(cmd.getRentalSiteId());
 				rsr.setAutoAssign(cmd.getAutoAssign()); 
