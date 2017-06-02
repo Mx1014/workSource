@@ -437,7 +437,6 @@ public interface OrganizationService {
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 
-	void syncOrganizationMembersWithDetails();
     /****** new interface ******/
 
 //    List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org);

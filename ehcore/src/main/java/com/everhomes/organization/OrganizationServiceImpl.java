@@ -9701,10 +9701,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
-    @Override
-    public void syncOrganizationMembersWithDetails() {
-        organizationProvider.syncOrganizationMembersWithDetails();
-    }
     //  New 20th.May
     @Override
     public ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd) {
