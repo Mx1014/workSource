@@ -50,5 +50,7 @@ public interface EnterpriseApplyEntryService {
 	void updateLeasePromotionRequestForm(@Valid UpdateLeasePromotionRequestFormCommand cmd);
 
 	LeaseFormRequestDTO getLeasePromotionRequestForm(@Valid GetLeasePromotionRequestFormCommand cmd);
+
+	void updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd);
 	
 }

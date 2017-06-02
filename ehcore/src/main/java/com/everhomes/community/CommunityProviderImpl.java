@@ -785,6 +785,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildings.class));
         
 		building.setId(id);
+        building.setDefaultOrder(id);
 		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		building.setCreatorUid(creatorId);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, id));

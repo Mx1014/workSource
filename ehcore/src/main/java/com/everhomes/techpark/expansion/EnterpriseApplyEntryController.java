@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.community.UpdateBuildingOrderCommand;
 import com.everhomes.rest.general_form.GeneralFormDTO;
 import com.everhomes.rest.general_form.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
@@ -383,4 +384,22 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 
 		return response;
 	}
+
+	/**
+	 *
+	 * <b>URL: /techpark/entry/updateLeasePromotionOrder<b>
+	 * <p>
+	 * 更新招租顺序
+	 * </p>
+	 */
+	@RequestMapping("updateLeasePromotionOrder")
+	@RestReturn(String.class)
+	public RestResponse updateLeasePromotionOrder(@Valid UpdateLeasePromotionOrderCommand cmd){
+		enterpriseApplyEntryService.updateLeasePromotionOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

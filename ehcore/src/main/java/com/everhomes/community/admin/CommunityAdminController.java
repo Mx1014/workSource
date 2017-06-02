@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.community.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -614,8 +608,23 @@ public class CommunityAdminController extends ControllerBase {
 		communityService.communityImportOrganizationConfig(cmd);
 		return new RestResponse();
 	}
-	
-	
+
+    /**
+     *
+     * <b>URL: /admin/community/updateBuildingOrder<b>
+     * <p>
+     * 更新楼栋顺序
+     * </p>
+     */
+    @RequestMapping("updateBuildingOrder")
+    @RestReturn(String.class)
+    public RestResponse updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd){
+        communityService.updateBuildingOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 	
 	
 }

@@ -173,7 +173,9 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 				.getSequenceDomainFromTablePojo(EhLeasePromotions.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeasePromotions.class));
 		leasePromotion.setId(id);
-		leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		Long now = DateHelper.currentGMTTime().getTime();
+		leasePromotion.setCreateTime(new Timestamp(now));
+		leasePromotion.setDefaultOrder(now);
 		leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		dao.insert(leasePromotion);

@@ -46,6 +46,7 @@ import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 
 public interface CommunityService {
@@ -154,4 +155,6 @@ public interface CommunityService {
 	void deleteChildProject(DeleteChildProjectCommand cmd);
 
 	List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd);
+
+	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
 }

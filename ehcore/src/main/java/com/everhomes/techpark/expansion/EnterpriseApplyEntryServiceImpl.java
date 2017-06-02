@@ -1310,4 +1310,44 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		return dto;
 	}
+
+	@Override
+	public void updateLeasePromotionOrder(UpdateLeasePromotionOrderCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		if (null == cmd.getExchangeId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid exchangeId parameter in the command");
+		}
+		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+		LeasePromotion exchangeLeasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getExchangeId());
+
+		if (null == leasePromotion) {
+			LOGGER.error("LeasePromotion not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LeasePromotion not found");
+		}
+		if (null == exchangeLeasePromotion) {
+			LOGGER.error("LeasePromotion not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"LeasePromotion not found");
+		}
+
+		Long order = leasePromotion.getDefaultOrder();
+		Long exchangeOrder = exchangeLeasePromotion.getDefaultOrder();
+
+		dbProvider.execute((TransactionStatus status) -> {
+			leasePromotion.setDefaultOrder(exchangeOrder);
+			exchangeLeasePromotion.setDefaultOrder(order);
+			enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
+			enterpriseApplyEntryProvider.updateLeasePromotion(exchangeLeasePromotion);
+			return null;
+		});
+	}
 }

@@ -3141,4 +3141,44 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return rolePrivilegeService.getTreeProjectCategories(namespaceId, projects);
 	}
+
+	@Override
+	public void updateBuildingOrder(UpdateBuildingOrderCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		if (null == cmd.getExchangeId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid exchangeId parameter in the command");
+		}
+		Building building = communityProvider.findBuildingById(cmd.getId());
+		Building exchangeBuilding = communityProvider.findBuildingById(cmd.getExchangeId());
+
+		if (null == building) {
+			LOGGER.error("Building not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Building not found");
+		}
+		if (null == exchangeBuilding) {
+			LOGGER.error("Building not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Building not found");
+		}
+
+		Long order = building.getDefaultOrder();
+		Long exchangeOrder = exchangeBuilding.getDefaultOrder();
+
+		dbProvider.execute((TransactionStatus status) -> {
+			building.setDefaultOrder(exchangeOrder);
+			exchangeBuilding.setDefaultOrder(order);
+			communityProvider.updateBuilding(building);
+			communityProvider.updateBuilding(exchangeBuilding);
+			return null;
+		});
+	}
 }
