@@ -165,7 +165,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = (t1.field("organization_id").eq(id)).and(t2.field("contact_token").eq(phone))
                 .and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         records.stream().map((r) -> {
             result.add(ConvertHelper.convert(r, OrganizationMember.class));
             return null;
@@ -255,8 +255,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
 
         if (record != null) {
-            EhOrganizationMembersRecord membersRecord = record.map(new OrganizationMemberRecordMapper());
-            return membersRecord.map(r -> ConvertHelper.convert(r, OrganizationMember.class));
+            OrganizationMember membersRecord = record.map(new OrganizationMemberRecordMapper());
+            return membersRecord;
         }
         return null;
     }
@@ -378,8 +378,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("id").eq(id);
-        EhOrganizationMembersRecord membersRecord = step.where(condition).fetchOne().map(new OrganizationMemberRecordMapper());
-        return membersRecord.map(r -> ConvertHelper.convert(r, OrganizationMember.class));
+        OrganizationMember membersRecord = step.where(condition).fetchOne().map(new OrganizationMemberRecordMapper());
+        return membersRecord;
     }
 
     /**
@@ -450,7 +450,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -492,7 +492,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (memberUids != null) {
             condition = condition.and(t1.field("target_id").in(memberUids));
         }
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -531,7 +531,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t2.field("contact_token").eq(phone));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -572,7 +572,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -1277,7 +1277,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        EhOrganizationMembersRecord record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
+        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
         if (record != null)
             return ConvertHelper.convert(record, OrganizationMember.class);
         return null;
@@ -1307,7 +1307,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        EhOrganizationMembersRecord record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
+        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
         if (record != null)
             return ConvertHelper.convert(record, OrganizationMember.class);
         return null;
@@ -1334,7 +1334,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()));
-        EhOrganizationMembersRecord record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny().map(new OrganizationMemberRecordMapper());
+        OrganizationMember record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny().map(new OrganizationMemberRecordMapper());
         if (record != null)
             return ConvertHelper.convert(record, OrganizationMember.class);
         return null;
@@ -1363,7 +1363,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -1401,7 +1401,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
 
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -1775,7 +1775,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (null != locator.getAnchor())
             condition = condition.and(t1.field("id").lt(locator.getAnchor()));
 
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         records.stream().map(r -> {
             result.add(ConvertHelper.convert(r, OrganizationMember.class));
             return null;
@@ -1852,7 +1852,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (!StringUtils.isEmpty(userName))
             condition = condition.and(t2.field("contact_name").like("%" + userName + "%"));
 
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -1892,6 +1892,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 //        return null;
     }
 
+    /**
+     * modify cause member_detail by lei lv
+     **/
     @Override
     public List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1918,6 +1921,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             result.remove(result.size() - 1);
             locator.setAnchor(result.get(result.size() - 1).getId());
         }
+        convertMemberListAsDetailList(result);
         return result;
     }
 
@@ -1957,7 +1961,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (null != locator && null != locator.getAnchor())
             condition.and(t1.field("id").lt(locator.getAnchor()));
 
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2035,7 +2039,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             cond = cond.and(t1.field("target_type").eq(targetType.getCode()));
         }
         condition = condition.and(cond);
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2096,7 +2100,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(cond);
         if (null != locator.getAnchor())
             condition = condition.and(t1.field("id").lt(locator.getAnchor()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).limit(pageSize).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2170,7 +2174,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(t2.field("contact_token").eq(contactPhone));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        EhOrganizationMembersRecord record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
+        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
         if (record != null) {
             return ConvertHelper.convert(record, OrganizationMember.class);
         }
@@ -2201,7 +2205,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(t1.field("organization_id").in(organizationIds))
                 .and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
 
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").asc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").asc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2894,7 +2898,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t1.field("organization_id").eq(orgId))
                 .and(t1.field("member_group").eq(memberGroup))
                 .and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2924,7 +2928,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         SelectJoinStep step = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).leftOuterJoin(Tables.EH_ORGANIZATION_MEMBER_DETAILS).on(Tables.EH_ORGANIZATION_MEMBERS.DETAIL_ID.eq(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID));
         Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids).and(cond);
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -2971,7 +2975,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("target_id").eq(uId).and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3022,7 +3026,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode())
                 .and(t1.field("target_id").ne(0L))
                 .and(t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3204,7 +3208,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (null != cond) {
             condition = condition.and(cond);
         }
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("create_time").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("create_time").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3257,7 +3261,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t2.field("contact_token").in(contactTokens)
                 .and(t1.field("organization_id").eq(organizationId))
                 .and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3435,7 +3439,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t2.field("contact_token").eq(email);
         condition = condition.and(t1.field("namespace_id").eq(currentNamespaceId));
         condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("organization_id").asc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("organization_id").asc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3811,7 +3815,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -3867,7 +3871,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             condition = condition.and(t1.field("id").lt(locator.getAnchor()));
         }
         condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        List<EhOrganizationMembersRecord> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
+        List<OrganizationMember> records = step.where(condition).groupBy(t2.field("contact_token")).orderBy(t1.field("id").desc()).limit(pageSize + 1).fetch().map(new OrganizationMemberRecordMapper());
         if (records != null) {
             records.stream().map(r -> {
                 result.add(ConvertHelper.convert(r, OrganizationMember.class));
@@ -4111,8 +4115,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         for (OrganizationMember member : old_list) {
-            //循环调detail方法返回一个detail对象
-            EhOrganizationMemberDetailsRecord detail = new EhOrganizationMemberDetailsRecord();
+            OrganizationMemberDetails detail = findOrganizationMemberDetailsByDetailId(member.getDetailId());
             member.setContactToken(detail.getContactToken());
             member.setContactName(detail.getContactName());
             member.setContactType(detail.getContactType());

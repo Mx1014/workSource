@@ -9715,14 +9715,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
         //  获取新增字段
-        List<OrganizationMemberDetails> detailList = this.organizationProvider.findDetailInfoListByIdIn(detailIds);
+//        List<OrganizationMemberDetails> detailList = this.organizationProvider.findDetailInfoListByIdIn(detailIds);
 
 
         response.setMembers(res.getMembers().stream().map(r -> {
             OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
 
             //  添加新增字段
-            if (detailList != null) {
+/*            if (detailList != null) {
                 detailList.forEach(rr -> {
                     if (rr.getId().equals(dto.getDetailId())) {
                         dto.setEmployeeStatus(rr.getEmployeeStatus());
@@ -9731,7 +9731,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                         dto.setCheckInTime(rr.getCheckInTime());
                     }
                 });
-            }
+            }*/
 
             //  设置合同到期时间
             if (endTimeList != null) {

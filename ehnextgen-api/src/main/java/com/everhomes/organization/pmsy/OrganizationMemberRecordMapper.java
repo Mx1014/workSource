@@ -1,5 +1,6 @@
 package com.everhomes.organization.pmsy;
 
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhOrganizationMemberDetails;
 import com.everhomes.server.schema.tables.EhOrganizationMembers;
@@ -13,14 +14,14 @@ import org.jooq.RecordMapper;
  * <li>t2: t2</li>
  * </ul>
  */
-public class OrganizationMemberRecordMapper implements RecordMapper<Record, EhOrganizationMembersRecord> {
+public class OrganizationMemberRecordMapper implements RecordMapper<Record, OrganizationMember> {
     private static final EhOrganizationMembers t1 = Tables.EH_ORGANIZATION_MEMBERS;
     private static final EhOrganizationMemberDetails t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS;
 
     @SuppressWarnings("unchecked")
     @Override
-    public EhOrganizationMembersRecord map(Record r) {
-        EhOrganizationMembersRecord member = new EhOrganizationMembersRecord();
+    public OrganizationMember map(Record r) {
+        OrganizationMember member = new OrganizationMember();
         //以下信息来自于members表
         member.setId(r.getValue(t1.ID));
         member.setOrganizationId(r.getValue(t1.ORGANIZATION_ID));
@@ -55,6 +56,10 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, EhOr
         member.setEmployeeNo(r.getValue(t2.EMPLOYEE_NO));
         member.setAvatar(r.getValue(t2.AVATAR));
         member.setGender(r.getValue(t2.GENDER));
+        member.setEmployeeStatus(r.getValue(t2.EMPLOYEE_STATUS));
+        member.setEmploymentTime(r.getValue(t2.EMPLOYMENT_TIME));
+        member.setProfileIntegrity(r.getValue(t2.PROFILE_INTEGRITY));
+        member.setCheckInTime(r.getValue(t2.CHECK_IN_TIME));
         return member;
     }
 }
