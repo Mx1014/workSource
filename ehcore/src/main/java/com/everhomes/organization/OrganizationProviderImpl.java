@@ -3415,7 +3415,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
     @Override
-    public List<OrganizationMemberDetails> findDetailListById(List<Long> detailIds){
+    public List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds){
         final List<OrganizationMemberDetails> response = new ArrayList<>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class),
                 null, (DSLContext context, Object reducingContext) -> {
@@ -3436,28 +3436,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
-    @Override
-	public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId) {
-
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-        Condition condition = Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId);
-        condition = condition.and(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-
-        List<OrganizationMemberDetails> result  = new ArrayList<OrganizationMemberDetails>();
-        SelectJoinStep<Record> query = context.select().from(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
-        query.where(condition);
-        query.fetch().map((r) -> {
-            result.add(ConvertHelper.convert(r, OrganizationMemberDetails.class));
-            return null;
-        });
-
-        if(null != result && 0 != result.size()){
-            return result.get(0);
-        }
-        return null;
-	}
-
     public Long createOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         if (organizationMemberDetails.getNamespaceId() == null) {
             Integer namespaceId = UserContext.getCurrentNamespaceId(null);
@@ -3474,11 +3452,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return id;
     }
 
+    @Override
+    public OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class));
+        EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
+        EhOrganizationMemberDetails memberDetails = dao.findById(detailId);
+        if(memberDetails == null)
+            return null;
+        return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);
+    }
+
     public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.update(organizationMemberDetails);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, detailId);
+    }
+
+    public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
+        dao.delete(organizationMemberDetails);
     }
 
     @Override
