@@ -4,29 +4,39 @@ package com.everhomes.organization;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.util.StringHelper;
 
+import java.util.Date;
+
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
-	
+
 	private java.lang.String   nickName;
 	// private java.lang.String   avatar;
-	
+
 	private String initial;
-	
+
     private String fullPinyin;
     private String fullInitial;
-	
+
 	private java.lang.Long creatorUid;
-	
+
 	private boolean isCreate;
 
 	private String applyDescription;// 申请加入公司时填写的描述信息   add by xq.tian  2017/05/02
-	
+
+    private Byte employeeStatus;
+
+    private Date employmentTime;
+
+    private Integer profileIntegrity;
+
+    private Date CheckInTime;
+
 	private static final long serialVersionUID = 2994038655987093227L;
 
 	public OrganizationMember() {
     }
-    
-	
-	
+
+
+
     public java.lang.String getNickName() {
 		return nickName;
 	}
@@ -68,7 +78,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 		this.initial = initial;
 	}
 
-	
+
 	public String getFullPinyin() {
 		return fullPinyin;
 	}
@@ -96,8 +106,8 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	public int compareTo(OrganizationMember organizationMember) {
 	    return this.initial.compareTo(organizationMember.getInitial());
 	}
-	
-	
+
+
 
 	public boolean isCreate() {
 		return isCreate;
@@ -110,10 +120,41 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	}
 
 
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(Date employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public Integer getProfileIntegrity() {
+        return profileIntegrity;
+    }
+
+    public void setProfileIntegrity(Integer profileIntegrity) {
+        this.profileIntegrity = profileIntegrity;
+    }
+
+    public Date getCheckInTime() {
+        return CheckInTime;
+    }
+
+    public void setCheckInTime(Date checkInTime) {
+        CheckInTime = checkInTime;
+    }
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
+
 }
