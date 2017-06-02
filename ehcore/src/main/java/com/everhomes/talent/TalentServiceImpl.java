@@ -284,22 +284,29 @@ public class TalentServiceImpl implements TalentService {
 				command.setOwnerType(cmd.getOwnerType());
 				command.setOwnerId(cmd.getOwnerId());
 				command.setOrganizationId(cmd.getOrganizationId());
-				command.setName(r.getA().trim());
-				command.setGender(getGender(r.getB().trim()));
-				command.setPosition(r.getC().trim());
-				command.setCategoryId(getCategoryId(namespaceId, r.getD().trim()));
-				command.setExperience(Integer.parseInt(r.getE().trim().replace("年", "")));
-				command.setGraduateSchool(r.getF());
-				command.setDegree(getDegree(r.getG()));
-				command.setPhone(r.getH());
-				command.setRemark(r.getI());
+				command.setName(trim(r.getA()));
+				command.setGender(getGender(trim(r.getB())));
+				command.setPosition(trim(r.getC()));
+				command.setCategoryId(getCategoryId(namespaceId, trim(r.getD())));
+				command.setExperience(Integer.parseInt(trim(r.getE())));
+				command.setGraduateSchool(trim(r.getF()));
+				command.setDegree(getDegree(trim(r.getG())));
+				command.setPhone(trim(r.getH()));
+				command.setRemark(trim(r.getI()));
 				ValidatorUtil.validate(command);
 				createTalent(command);
 			}
 			return null;
 		});
 	}
-	
+
+	private String trim(String string) {
+		if (string == null) {
+			return null;
+		}
+		return string.trim();
+	}
+
 	private Byte getDegree(String degree) {
 		TalentDegreeEnum talentDegreeEnum = TalentDegreeEnum.fromName(degree);
 		if (talentDegreeEnum == null) {
