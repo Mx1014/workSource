@@ -419,7 +419,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //					this.rentalv2Provider.createTimeInterval(timeInterval);
 //				}
 			// set half day time intervals
-			if(cmd.getRentalType().equals(RentalType.HALFDAY.getCode())&& null!=cmd.getHalfDayTimeIntervals()) {
+			if(cmd.getRentalType() == RentalType.HALFDAY.getCode() || cmd.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
 			}
 //				for(TimeIntervalDTO intervalDTO : cmd.getTimeIntervals()){
@@ -1023,69 +1023,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		rSiteDTO.setAttachments(convertAttachments(attachments));
 
-		//起止时间为资源允许预定的最早和最晚时间
-		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
-//		Calendar beginCalendar = Calendar.getInstance();
-//		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
-//		String beginTime = dateSF.format(beginCalendar.getTime());
-//
-//		Calendar endCalendar = Calendar.getInstance();
-//		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
-//		String endTime = dateSF.format(endCalendar.getTime());
-//
-//		BigDecimal minPrice = null;
-//		Double minTimeStep = 1.0;
-//		BigDecimal maxPrice = null;
-//		Double maxTimeStep = 1.0;
-//
-//		try {
-//			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
-//			if(null == cells || cells.size() == 0) {
-//				rSiteDTO.setAvgPrice(new BigDecimal(0));
-//			}else {
-//				BigDecimal sum = new BigDecimal(0);
-//				for(RentalCell cell : cells){
-//					//对于按小时预约的,取平均值进行计算
-//					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
-//						//最小值超过了cell值,则cell值代替最小值
-//						if(minPrice == null || minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-//								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
-//							minPrice = cell.getPrice();
-//							minTimeStep = cell.getTimeStep();
-//						}
-//						if(maxPrice == null ||  maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-//								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
-//							maxPrice = cell.getPrice();
-//							maxTimeStep = cell.getTimeStep();
-//						}
-//					}else{
-//						if(minPrice == null || minPrice.compareTo(cell.getPrice()) == 1){
-//							minPrice = cell.getPrice();
-//						}
-//						if(maxPrice == null || maxPrice.compareTo(cell.getPrice()) == -1){
-//							maxPrice = cell.getPrice();
-//						}
-//					}
-//					sum = sum.add(cell.getPrice());
-//				}
-//				//四舍五入保留三位
-//				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
-//			}
-//		} catch (ParseException e) {
-//			 LOGGER.error("计算平均值-时间转换 异常");
-//		}
-//		if(minPrice == null)
-//			minPrice = new BigDecimal(0);
-//		if(maxPrice == null)
-//			maxPrice = new BigDecimal(0);
-//		if( minPrice.compareTo(maxPrice) == 0){
-//			rSiteDTO.setAvgPriceStr(priceToString(minPrice,rentalSite.getRentalType(),minTimeStep));
-//		}else{
-//			rSiteDTO.setAvgPriceStr( priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)+"~" +priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep));
-//		}
-//		if(rentalSite.getAvgPriceStr() == null){
-		//rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
-
+		//计算显示价格
 		calculatePrice(rentalSite, rSiteDTO, sceneToken);
 		//更新价格平均值
 		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
@@ -1099,6 +1037,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String beginTime = null;
 		String endTime = null;
 
+		//起止时间为资源允许预定的最早和最晚时间
+		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
 		if (NormalFlag.NEED.getCode() == rentalSite.getRentalEndTimeFlag()) {
 			Calendar beginCalendar = Calendar.getInstance();
 			beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
@@ -1275,8 +1215,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
-				} else if (dto.getRentalType().equals(
-						RentalType.HALFDAY.getCode())) {
+				} else if (dto.getRentalType() == RentalType.HALFDAY.getCode() ||
+						dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 					dto.setAmorpm(rsr.getAmorpm());
 				}
 				dto.setUnit(rsr.getUnit());
@@ -2182,8 +2122,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) { 
 				ruleDto.setBeginTime(rsb.getBeginTime().getTime());
 				ruleDto.setEndTime(rsb.getEndTime().getTime());
-			} else if (ruleDto.getRentalType().equals(
-					RentalType.HALFDAY.getCode())) {
+			} else if (ruleDto.getRentalType() == RentalType.HALFDAY.getCode() ||
+					ruleDto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 				ruleDto.setAmorpm(rsb.getAmorpm());
 			} 
 			ruleDto.setPrice(rsb.getPrice());
@@ -2450,7 +2390,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 				}
 			}else {
-				if (RentalType.HALFDAY.getCode() == cmd.getRentalType()) {
+				if (RentalType.HALFDAY.getCode() == cmd.getRentalType() || RentalType.THREETIMEADAY.getCode() == cmd.getRentalType()) {
+					rentalv2Provider.deleteTimeIntervalsByOwnerId(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId());
 					setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rs.getId(), cmd.getHalfDayTimeIntervals());
 				}
 				AddRentalSiteSingleSimpleRule singleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class);
@@ -3764,8 +3705,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							}
 							
 						}
-					} else if (dto.getRentalType().equals(
-							RentalType.HALFDAY.getCode())) {
+					} else if (dto.getRentalType() == RentalType.HALFDAY.getCode() ||
+							dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 						dto.setAmorpm(rsr.getAmorpm());
 					} 
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
@@ -3779,47 +3720,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									- rsb.getRentalCount());
 						}
 					}
-					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						Long time = rsr.getBeginTime().getTime();
-						if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-							time -= rs.getRentalStartTime();
-							if (reserveTime.before(new java.util.Date(time))) {
-								dto.setStatus(SiteRuleStatus.EARLY.getCode());
-							}
-						}
+					//根据时间判断来设置status
+					setRentalCellStatus(reserveTime, dto, rsr, rs);
 
-						if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
-							time -= rs.getRentalEndTime();
-						}
-						if (reserveTime.after(new java.util.Date(time))) {
-							dto.setStatus(SiteRuleStatus.LATE.getCode());
-						}
-					} else {
-						Long time = rsr.getResourceRentalDate().getTime();
-						if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-							time -= rs.getRentalStartTime();
-							if (reserveTime.before(new java.util.Date(time))) {
-								dto.setStatus(SiteRuleStatus.EARLY.getCode());
-							}
-						}
-
-						if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
-							time -= rs.getRentalEndTime();
-						}
-						if (reserveTime.after(new java.util.Date(time))) {
-							dto.setStatus(SiteRuleStatus.LATE.getCode());
-						}
-//						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-//								.getResourceRentalDate().getTime()
-//								- rs.getRentalStartTime())))) {
-//							dto.setStatus(SiteRuleStatus.EARLY.getCode());
-//						}
-//						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-//								.getResourceRentalDate().getTime()
-//								- rs.getRentalEndTime()))) ){
-//							dto.setStatus(SiteRuleStatus.LATE.getCode());
-//						}
-					}
 					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
@@ -3924,8 +3827,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							
 							
 						}
-					} else if (dto.getRentalType().equals(
-							RentalType.HALFDAY.getCode())) {
+					} else if (dto.getRentalType() == RentalType.HALFDAY.getCode()
+							|| dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 						dto.setAmorpm(rsr.getAmorpm());
 					} 
 					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
@@ -4052,94 +3955,96 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
 					RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 			// 查sitebills
-			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
-				for (RentalCell rsr : rentalSiteRules) {
-					RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
-					dto.setSiteNumber(String.valueOf(rsr.getResourceNumber()));
-					dto.setId(rsr.getId()); 
-					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						dto.setTimeStep(rsr.getTimeStep());
-						dto.setBeginTime(rsr.getBeginTime().getTime());
-						dto.setEndTime(rsr.getEndTime().getTime());
-						if(response.getAnchorTime().equals(0L)){
-							response.setAnchorTime(dto.getBeginTime());
-						}else{
-							try {
-								if(timeSF.parse(timeSF.format(new java.util.Date(response.getAnchorTime()))).after(
-										timeSF.parse(timeSF.format(new java.util.Date(dto.getBeginTime()))))){
-									response.setAnchorTime(dto.getBeginTime());
+				if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
+					for (RentalCell rsr : rentalSiteRules) {
+						RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
+						dto.setSiteNumber(String.valueOf(rsr.getResourceNumber()));
+						dto.setId(rsr.getId());
+						if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+							dto.setTimeStep(rsr.getTimeStep());
+							dto.setBeginTime(rsr.getBeginTime().getTime());
+							dto.setEndTime(rsr.getEndTime().getTime());
+							if(response.getAnchorTime().equals(0L)){
+								response.setAnchorTime(dto.getBeginTime());
+							}else{
+								try {
+									if(timeSF.parse(timeSF.format(new java.util.Date(response.getAnchorTime()))).after(
+											timeSF.parse(timeSF.format(new java.util.Date(dto.getBeginTime()))))){
+										response.setAnchorTime(dto.getBeginTime());
+									}
+								} catch (Exception e) {
+									LOGGER.error("anchorTime error  dto = "+ dto );
 								}
-							} catch (Exception e) {
-								LOGGER.error("anchorTime error  dto = "+ dto );
 							}
-							
-							
+						} else if (dto.getRentalType() == RentalType.HALFDAY.getCode()
+								|| dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
+							dto.setAmorpm(rsr.getAmorpm());
 						}
-					} else if (dto.getRentalType().equals(
-							RentalType.HALFDAY.getCode())) {
-						dto.setAmorpm(rsr.getAmorpm());
-					} 
-					dto.setRuleDate(rsr.getResourceRentalDate().getTime());
-					List<RentalResourceOrder> rsbs = rentalv2Provider
-							.findRentalSiteBillBySiteRuleId(rsr.getId());
-					dto.setStatus(SiteRuleStatus.OPEN.getCode());
-					dto.setCounts((double) rsr.getCounts());
-					if (null != rsbs && rsbs.size() > 0) {
-						for (RentalResourceOrder rsb : rsbs) {
-							dto.setCounts(dto.getCounts()
-									- rsb.getRentalCount());
-						}
-					}
-					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-								.getBeginTime().getTime()
-								- rs.getRentalStartTime())))) {
-							dto.setStatus(SiteRuleStatus.EARLY.getCode());
-						}
-						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-								.getBeginTime().getTime()
-								- rs.getRentalEndTime())))) {
-							dto.setStatus(SiteRuleStatus.LATE.getCode());
-						}
-					}  else{
-						Long dayBeginTime = 0l; 
-						if(rsr.getAmorpm() != null){
-							if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode())){
-								dayBeginTime = 10*60*60*1000L; 
-							}else if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode())){
-								dayBeginTime = 15*60*60*1000L; 
-							}else if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())){
-								dayBeginTime = 20*60*60*1000L; 
+						dto.setRuleDate(rsr.getResourceRentalDate().getTime());
+						List<RentalResourceOrder> rsbs = rentalv2Provider
+								.findRentalSiteBillBySiteRuleId(rsr.getId());
+						dto.setStatus(SiteRuleStatus.OPEN.getCode());
+						dto.setCounts((double) rsr.getCounts());
+						if (null != rsbs && rsbs.size() > 0) {
+							for (RentalResourceOrder rsb : rsbs) {
+								dto.setCounts(dto.getCounts()
+										- rsb.getRentalCount());
 							}
 						}
-						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()+dayBeginTime
-								- rs.getRentalStartTime())))) {
-							dto.setStatus(SiteRuleStatus.EARLY.getCode());
-						}
-						if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()+dayBeginTime
-								- rs.getRentalEndTime()))) ){
-							dto.setStatus(SiteRuleStatus.LATE.getCode());
-						}
-					}
+//						if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+//							if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
+//									.getBeginTime().getTime()
+//									- rs.getRentalStartTime())))) {
+//								dto.setStatus(SiteRuleStatus.EARLY.getCode());
+//							}
+//							if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//									.getBeginTime().getTime()
+//									- rs.getRentalEndTime())))) {
+//								dto.setStatus(SiteRuleStatus.LATE.getCode());
+//							}
+//						}  else{
+//							Long dayBeginTime = 0l;
+//							if(rsr.getAmorpm() != null){
+//								if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode())){
+//									dayBeginTime = 10*60*60*1000L;
+//								}else if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode())){
+//									dayBeginTime = 15*60*60*1000L;
+//								}else if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())){
+//									dayBeginTime = 20*60*60*1000L;
+//								}
+//							}
+//							if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
+//									.getResourceRentalDate().getTime()+dayBeginTime
+//									- rs.getRentalStartTime())))) {
+//								dto.setStatus(SiteRuleStatus.EARLY.getCode());
+//							}
+//							if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
+//									.getResourceRentalDate().getTime()+dayBeginTime
+//									- rs.getRentalEndTime()))) ){
+//								dto.setStatus(SiteRuleStatus.LATE.getCode());
+//							}
+//						}
 
-					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
-						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+						//根据时间判断来设置status
+						setRentalCellStatus(reserveTime, dto, rsr, rs);
+
+						if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
+							dto.setStatus(SiteRuleStatus.CLOSE.getCode());
+						}
+						if(siteNumberMap.get(dto.getSiteNumber())==null)
+							siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
+						siteNumberMap.get(dto.getSiteNumber()).add(dto);
 					}
-					if(siteNumberMap.get(dto.getSiteNumber())==null)
-						siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
-					siteNumberMap.get(dto.getSiteNumber()).add(dto);
 				}
-			}
-			
-			//
-			for(String siteNumber : response.getSiteNames()){
-				RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
-				siteNumberRuleDTO.setSiteNumber(siteNumber);
-				siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
-				dayDto.getSiteNumbers().add(siteNumberRuleDTO);
-			}
+
+				//
+				for(String siteNumber : response.getSiteNames()){
+					RentalSiteNumberRuleDTO siteNumberRuleDTO = new RentalSiteNumberRuleDTO();
+					siteNumberRuleDTO.setSiteNumber(siteNumber);
+					siteNumberRuleDTO.setSiteRules(siteNumberMap.get(siteNumber));
+					dayDto.getSiteNumbers().add(siteNumberRuleDTO);
+				}
+
 		}
 //		//即使单元格为空也会有days不用担心空指针
 //		response.setSiteCounts(response.getSiteDays().get(0).getSiteNumbers().size());
@@ -4164,7 +4069,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		response.setAnchorTime(0L);
 		//当前时间+预定开始时间 即为可预订开始时间
 		java.util.Date nowTime = new java.util.Date();
-//		response.setContactNum(rs.getContactPhonenum());
 		Timestamp beginTime = new Timestamp(nowTime.getTime()
 				+ rs.getRentalStartTime());
 		response.setSiteCounts(rs.getResourceCounts());
@@ -4186,34 +4090,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//按小时预订的,给客户端找到每一个时间点
 		List<RentalTimeInterval> timeIntervals = this.rentalv2Provider.queryRentalTimeIntervalByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		List<Long> dayTimes = calculateOrdinateList(timeIntervals);
-
-//		if(null!=timeIntervals){
-//			for(RentalTimeInterval timeInterval : timeIntervals){
-//
-//				Long dayTimeBegin = Timestamp.valueOf(dateSF.format(new java.util.Date())
-//						+ " "
-//						+ String.valueOf((int) timeInterval.getBeginTime().doubleValue() / 1)
-//						+ ":"
-//						+ String.valueOf((int) (( timeInterval.getBeginTime() % 1) * 60))
-//						+ ":00").getTime();
-//				if(!dayTimes.contains(dayTimeBegin))
-//					dayTimes.add(dayTimeBegin);
-//
-//				for (double i = timeInterval.getBeginTime(); i < timeInterval.getEndTime();) {
-//
-//					i = i + timeInterval.getTimeStep();
-//					Long dayTimeEnd = Timestamp.valueOf(dateSF.format(new java.util.Date())
-//							+ " "
-//							+ String.valueOf((int) i / 1)
-//							+ ":"
-//							+ String.valueOf((int) (( i % 1) * 60))
-//							+ ":00").getTime();
-//					if(!dayTimes.contains(dayTimeEnd))
-//						dayTimes.add(dayTimeEnd);
-//
-//				}
-//			}
-//		}
 		
 		List<RentalCell> rentalSiteRules =  findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(cmd.getRuleDate() )),
 						beginTime, rs.getRentalType()==null?RentalType.DAY.getCode():rs.getRentalType(), DateLength.DAY.getCode(),
@@ -4242,8 +4118,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						
 						
 					}
-				} else if (dto.getRentalType().equals(
-						RentalType.HALFDAY.getCode())) {
+				} else if (dto.getRentalType() == RentalType.HALFDAY.getCode()
+						|| dto.getRentalType() == RentalType.THREETIMEADAY.getCode()) {
 					dto.setAmorpm(rsr.getAmorpm());
 				} 
 				dto.setRuleDate(rsr.getResourceRentalDate().getTime());
@@ -4257,59 +4133,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rsb.getRentalCount());
 					}
 				}
-				
-//				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-//					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-//							.getBeginTime().getTime()
-//							- rs.getRentalStartTime())))) {
-//						dto.setStatus(SiteRuleStatus.EARLY.getCode());
-//					}
-//					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-//							.getBeginTime().getTime()
-//							- rs.getRentalEndTime())))) {
-//						dto.setStatus(SiteRuleStatus.LATE.getCode());
-//					}
-//				} else {
-//					if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
-//							.getResourceRentalDate().getTime()
-//							- rs.getRentalStartTime())))) {
-//						dto.setStatus(SiteRuleStatus.EARLY.getCode());
-//					}
-//					if ((NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag())&&(reserveTime.after(new java.util.Date(rsr
-//							.getResourceRentalDate().getTime()
-//							- rs.getRentalEndTime()))) ){
-//						dto.setStatus(SiteRuleStatus.LATE.getCode());
-//					}
-//				}
-				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-					Long time = rsr.getBeginTime().getTime();
-					if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-						time -= rs.getRentalStartTime();
-					}
-					if (reserveTime.before(new java.util.Date(time))) {
-						dto.setStatus(SiteRuleStatus.EARLY.getCode());
-					}
-					if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
-						time -= rs.getRentalEndTime();
-					}
-					if (reserveTime.after(new java.util.Date(time))) {
-						dto.setStatus(SiteRuleStatus.LATE.getCode());
-					}
-				} else {
-					Long time = rsr.getResourceRentalDate().getTime();
-					if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
-						time -= rs.getRentalStartTime();
-					}
-					if (reserveTime.before(new java.util.Date(time))) {
-						dto.setStatus(SiteRuleStatus.EARLY.getCode());
-					}
-					if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
-						time -= rs.getRentalEndTime();
-					}
-					if (reserveTime.after(new java.util.Date(time))) {
-						dto.setStatus(SiteRuleStatus.LATE.getCode());
-					}
-				}
+				//根据时间判断来设置status
+				setRentalCellStatus(reserveTime, dto, rsr, rs);
 
 				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
@@ -4333,6 +4158,64 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		response.setSiteCounts(response.getSiteNumbers().size());
 		return response;
 	}
+
+	private void setRentalCellStatus(java.util.Date reserveTime, RentalSiteRulesDTO dto, RentalCell rsr, RentalResource rs) {
+		if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+			Long time = rsr.getBeginTime().getTime();
+			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+				time -= rs.getRentalStartTime();
+				if (reserveTime.before(new java.util.Date(time))) {
+					dto.setStatus(SiteRuleStatus.EARLY.getCode());
+				}
+			}
+
+			if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+				time -= rs.getRentalEndTime();
+			}
+			if (reserveTime.after(new java.util.Date(time))) {
+				dto.setStatus(SiteRuleStatus.LATE.getCode());
+			}
+		} else {
+
+			Long dayBeginTime = 0l;
+			if(rsr.getAmorpm() != null){
+				String halfOwnerType = RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode();
+
+				List<RentalTimeInterval> halfTimeIntervals = rentalv2Provider.queryRentalTimeIntervalByOwner(halfOwnerType, rs.getId());
+				//当有晚上时，如果查询出来的条数不是3，就有数据错误的问题，默认按顺序存和取
+				int size = halfTimeIntervals.size();
+				if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode())){
+					if (size >= 1) {
+						dayBeginTime = (long)(halfTimeIntervals.get(0).getBeginTime() * 60 * 60 * 1000);
+					}
+				}else if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode())){
+					if (size >= 2) {
+						dayBeginTime = (long)(halfTimeIntervals.get(1).getBeginTime() * 60 * 60 * 1000);
+					}
+				}else if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())){
+					if (size >= 3) {
+						dayBeginTime = (long) (halfTimeIntervals.get(2).getBeginTime() * 60 * 60 * 1000);
+					}
+				}
+			}
+
+			Long time = rsr.getResourceRentalDate().getTime() + dayBeginTime;
+			if (NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag()) {
+				time -= rs.getRentalStartTime();
+				if (reserveTime.before(new java.util.Date(time))) {
+					dto.setStatus(SiteRuleStatus.EARLY.getCode());
+				}
+			}
+
+			if (NormalFlag.NEED.getCode() == rs.getRentalEndTimeFlag()) {
+				time -= rs.getRentalEndTime();
+			}
+			if (reserveTime.after(new java.util.Date(time))) {
+				dto.setStatus(SiteRuleStatus.LATE.getCode());
+			}
+		}
+	}
+
 	@Override
 	public RentalBillDTO confirmBill(ConfirmBillCommand cmd) {
 		RentalOrder bill = this.rentalv2Provider.findRentalBillById(cmd.getRentalBillId());
@@ -4646,19 +4529,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
-//		if(cmd.getPageAnchor() == null)
-//			cmd.setPageAnchor(Long.MAX_VALUE);
+
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-//		if(null==cmd.getStatus() || cmd.getStatus().size() == 0){
-//			cmd.setStatus(new ArrayList<Byte>());
-//			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
-//		}
-		//查全部
-		
-//		List<Byte> status = new ArrayList<Byte>();
-//		status.add(RentalSiteStatus.NORMAL.getCode());
+
 		List<Long> siteIds = null;
 		if(null != cmd.getOwnerType()){
 			siteIds = new ArrayList<>();

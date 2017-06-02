@@ -1457,7 +1457,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalTimeInterval> result = step
-				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalTimeInterval.class);
 				});
 		if (null != result && result.size() > 0)
