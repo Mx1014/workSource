@@ -74,8 +74,8 @@ CREATE TABLE `eh_service_module_assignment_relations` (
 CREATE TABLE `eh_domains` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `owner_type` varchar(32) NOT NULL COMMENT 'eh_organizations, eh_communities',
-  `owner_id` bigint(20) NOT NULL,
+  `portal_type` varchar(32) NOT NULL COMMENT 'zuolin, pm, enterprise, user',
+  `portal_id` bigint(20) NOT NULL,
   `domain` varchar(32) NOT NULL COMMENT 'domain',
   `create_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
