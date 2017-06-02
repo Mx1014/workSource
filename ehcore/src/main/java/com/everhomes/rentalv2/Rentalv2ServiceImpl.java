@@ -587,7 +587,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						rca.setRecommendUsers(recommendUsers.stream().map(u -> {
 							RentalRecommendUser user = ConvertHelper.convert(u, RentalRecommendUser.class);
 							user.setIconUrl(contentServerService.parserUri(u.getIconUri(),
-									EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+									EntityType.USER.getCode(), User.ROOT_UID));
 							return user;
 						}).collect(Collectors.toList()));
 					}
