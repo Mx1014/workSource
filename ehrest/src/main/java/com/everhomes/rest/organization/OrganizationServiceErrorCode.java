@@ -56,4 +56,9 @@ public interface OrganizationServiceErrorCode {
     int ERROR_CONTACTNAME_ISNULL = 700000;
 
     int ERROR_CONTACTTOKEN_ISNULL = 700001;
+    
+    
+    int ERROR_ENTERPRISE_NAME_EMPTY = 80001;
+    int ERROR_BUILDING_NAME_EMPTY = 80002;
+    int ERROR_APARTMENT_NAME_EMPTY = 80003;
 }

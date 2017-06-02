@@ -5953,6 +5953,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				LOGGER.error("enterprise name is null, data = {}", data);
 				log.setData(data);
 				log.setErrorLog("enterprise name is null");
+				log.setCode(OrganizationServiceErrorCode.ERROR_ENTERPRISE_NAME_EMPTY);
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5961,6 +5962,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				LOGGER.error("building name is null, data = {}", data);
 				log.setData(data);
 				log.setErrorLog("building name is null");
+				log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -5969,6 +5971,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				LOGGER.error("address name is null, data = {}", data);
 				log.setData(data);
 				log.setErrorLog("address name is null");
+				log.setCode(OrganizationServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY);
 				errorDataLogs.add(log);
 				continue;
 			}

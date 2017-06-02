@@ -417,7 +417,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					m.setOrganizationId(organizationId);
 					m.setCommunityId(community.getId());
 					m.setOrganizationAddress(address.getAddress());
-					m.setLivingStatus(PmAddressMappingStatus.DEFAULT.getCode());
+					m.setLivingStatus(AddressMappingStatus.DEFAULT.getCode());
 					propertyMgrProvider.createPropAddressMapping(m);
 				}
 			}
@@ -897,7 +897,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			dto.setLivingStatus(mapping.getLivingStatus());
 		}
 		else{
-			dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+			dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
 		}
 		return dto;
 	}
@@ -2108,7 +2108,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setLivingStatus(mapping.getLivingStatus());
 			}
 			else{
-				dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+				dto.setLivingStatus(AddressMappingStatus.LIVING.getCode());
 			}
 		}
 	}
