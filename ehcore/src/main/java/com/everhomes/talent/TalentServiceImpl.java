@@ -292,7 +292,7 @@ public class TalentServiceImpl implements TalentService {
 				command.setGender(getGender(trim(r.getB())));
 				command.setPosition(trim(r.getC()));
 				command.setCategoryId(getCategoryId(namespaceId, trim(r.getD())));
-				command.setExperience(Integer.parseInt(trim(r.getE())));
+				command.setExperience(Integer.parseInt(trim(r.getE()).replace("年", "")));
 				command.setGraduateSchool(trim(r.getF()));
 				command.setDegree(getDegree(trim(r.getG())));
 				command.setPhone(trim(r.getH()));
@@ -306,7 +306,7 @@ public class TalentServiceImpl implements TalentService {
 
 	private String trim(String string) {
 		if (string == null) {
-			return null;
+			return "";
 		}
 		return string.trim();
 	}
