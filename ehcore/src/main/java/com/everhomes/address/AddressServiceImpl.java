@@ -1741,17 +1741,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             address.setAreaSize(areaSize);
             address.setAddress(building.getName() + "-" + data.getApartmentName());
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            address.setLivingStatus(AddressMappingStatus.fromDesc(data.getStatus()).getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
 		}else {
 			address.setAreaSize(areaSize);
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
-            address.setLivingStatus(AddressMappingStatus.fromDesc(data.getStatus()).getCode());
             addressProvider.updateAddress(address);
 		}
 
-        insertOrganizationAddressMapping(organizationId, community, address);
+        Byte livingStatus = AddressMappingStatus.fromDesc(data.getStatus()).getCode();
+        insertOrganizationAddressMapping(organizationId, community, address, livingStatus);
 	}
 
 	private List<ImportApartmentDataDTO> handleImportApartmentData(List resultList) {
@@ -1885,15 +1884,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
             if (null != addr) {
                 LOGGER.error("Data already exists. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
-                insertOrganizationAddressMapping(organizationId, community, addr);
+                insertOrganizationAddressMapping(organizationId, community, addr, AddressMappingStatus.DEFAULT.getCode());
                 continue;
             }
             addressProvider.createAddress(address);
-            insertOrganizationAddressMapping(organizationId, community, address);
+            insertOrganizationAddressMapping(organizationId, community, address, AddressMappingStatus.DEFAULT.getCode());
         }
     }
 
-    private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address) {
+    private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
         if (organizationId != null && community != null && address != null) {
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
             if (communityAddressMapping == null) {
@@ -1902,7 +1901,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 addressMapping.setCommunityId(community.getId());
                 addressMapping.setAddressId(address.getId());
                 addressMapping.setOrganizationAddress(address.getAddress());
-                addressMapping.setLivingStatus(address.getLivingStatus());
+                addressMapping.setLivingStatus(livingStatus);
                 addressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                 addressMapping.setUpdateTime(addressMapping.getCreateTime());
                 organizationProvider.createOrganizationAddressMapping(addressMapping);

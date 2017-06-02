@@ -9,5 +9,7 @@ public interface AddressServiceErrorCode {
     int ERROR_BUILDING_NAME_EMPTY = 20001;
     int ERROR_APARTMENT_NAME_EMPTY = 20002;
     int ERROR_AREA_SIZE_NOT_NUMBER = 20003;
+    int ERROR_EXISTS_APARTMENT_NAME = 20004;
+    
     
 }
