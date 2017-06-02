@@ -4123,6 +4123,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
         return old_list;
     }
+
+    //  02 June
 	@Override
 	public List<Object[]> findContractEndTimeById(List<Long> detailIds) {
 		final List<Object[]> response = new ArrayList<>();
