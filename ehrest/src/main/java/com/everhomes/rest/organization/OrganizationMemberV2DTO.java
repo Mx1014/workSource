@@ -26,42 +26,22 @@ import java.sql.Date;
  * <li>position：职位</li>
  * <li>idNumber：身份证号码</li>
  * <li>namespaceId: 域空间</li>
+ * <li>endTime: 合同到期时间</li>
  * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
  * <li>employmentTime：转正时间</li>
  * <li>profileIntegrity: 档案完整度,0-100%</li>
  * <li>checkInTime: 入职日期</li>
  * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
- * <li>endTime: 合同到期时间</li>
  * </ul>
  */
 public class OrganizationMemberV2DTO extends OrganizationMemberDTO {
 
     private Integer namespaceId;
-    private Byte employeeStatus;
-    private Date employmentTime;
-    private Integer profileIntegrity;
-    private Date checkInTime;
+
     private Date endTime;
 
     public OrganizationMemberV2DTO() {
     }
-
-    public Byte getEmployeeStatus() {
-        return employeeStatus;
-    }
-
-    public void setEmployeeStatus(Byte employeeStatus) {
-        this.employeeStatus = employeeStatus;
-    }
-
-    public Integer getProfileIntegrity() {
-        return profileIntegrity;
-    }
-
-    public void setProfileIntegrity(Integer profileIntegrity) {
-        this.profileIntegrity = profileIntegrity;
-    }
-
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -69,23 +49,6 @@ public class OrganizationMemberV2DTO extends OrganizationMemberDTO {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
-    }
-
-
-    public Date getEmploymentTime() {
-        return employmentTime;
-    }
-
-    public void setEmploymentTime(Date employmentTime) {
-        this.employmentTime = employmentTime;
-    }
-
-    public Date getCheckInTime() {
-        return checkInTime;
-    }
-
-    public void setCheckInTime(Date checkInTime) {
-        this.checkInTime = checkInTime;
     }
 
     public Date getEndTime() {

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.sql.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -30,6 +31,11 @@ import com.everhomes.util.StringHelper;
  * <li>executiveFlag：是否高管 1-是 0-否</li>
  * <li>position：职位</li>
  * <li>idNumber：身份证号码</li>
+ * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime：转正时间</li>
+ * <li>profileIntegrity: 档案完整度,0-100%</li>
+ * <li>checkInTime: 入职日期</li>
+ * <li>visibleFlag: 成员隐藏性, 0: 显示 1: 隐藏 参考{@link com.everhomes.rest.organization.VisibleFlag}</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -90,6 +96,11 @@ public class OrganizationMemberDTO {
     private String groupType;
 
     private String groupPath;
+
+    private Byte employeeStatus;
+    private Date employmentTime;
+    private Integer profileIntegrity;
+    private Date checkInTime;
 	 
 	public OrganizationMemberDTO() {
     }
@@ -376,5 +387,37 @@ public class OrganizationMemberDTO {
 
     public void setGroupPath(String groupPath) {
         this.groupPath = groupPath;
+    }
+
+    public Byte getEmployeeStatus() {
+        return employeeStatus;
+    }
+
+    public void setEmployeeStatus(Byte employeeStatus) {
+        this.employeeStatus = employeeStatus;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(java.sql.Date employmentTime) {
+        this.employmentTime = employmentTime;
+    }
+
+    public Integer getProfileIntegrity() {
+        return profileIntegrity;
+    }
+
+    public void setProfileIntegrity(Integer profileIntegrity) {
+        this.profileIntegrity = profileIntegrity;
+    }
+
+    public Date getCheckInTime() {
+        return checkInTime;
+    }
+
+    public void setCheckInTime(java.sql.Date checkInTime) {
+        this.checkInTime = checkInTime;
     }
 }

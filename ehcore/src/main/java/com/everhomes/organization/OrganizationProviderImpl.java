@@ -4123,6 +4123,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             member.setEmployeeNo(detail.getEmployeeNo());
             member.setAvatar(detail.getAvatar());
             member.setGender(detail.getGender());
+            member.setEmployeeStatus(detail.getEmployeeStatus());
+            member.setEmploymentTime(detail.getEmploymentTime());
+            member.setProfileIntegrity(detail.getProfileIntegrity());
+            member.setCheckInTime(detail.getCheckInTime());
         }
         return old_list;
     }

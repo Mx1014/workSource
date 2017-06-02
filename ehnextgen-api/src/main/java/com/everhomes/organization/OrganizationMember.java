@@ -4,7 +4,7 @@ package com.everhomes.organization;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.util.StringHelper;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
