@@ -516,7 +516,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
 
-		}else if (SmsTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE == templateId) {
+		}else if (SmsTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE == templateId) {
+
+			Map<String, String> map = new HashMap<>();
+			map.put("userName", userName);
+			map.put("userPhone", userPhone);
+			map.put("useTime", order.getUseDetail());
+			map.put("resourceName", order.getResourceName());
+			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+					RentalNotificationTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE);
+
+			//支付成功
+			smsProvider.addToTupleList(variables, "userName", userName);
+			smsProvider.addToTupleList(variables, "userPhone", userPhone);
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+		} else if (SmsTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE == templateId) {
 
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());
