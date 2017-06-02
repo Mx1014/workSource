@@ -11,6 +11,8 @@ import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 public interface WebMenuPrivilegeProvider {
 	
 	List<WebMenu> listWebMenuByType(String type);
+
+	List<WebMenu> listWebMenuByType(String type, List<String> categories, String path, List<Long> moduleIds);
 	
 	List<WebMenuPrivilege> listWebMenuByPrivilegeIds(List<Long> privilegeIds,WebMenuPrivilegeShowFlag showFlag);
 	

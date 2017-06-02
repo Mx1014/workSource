@@ -37,10 +37,10 @@ public class MenuController extends ControllerBase {
      * <p>获取用户菜单</p>
      */
     @RequestMapping("listUserRelatedWebMenus")
-    @RestReturn(value=ListWebMenuResponse.class)
+    @RestReturn(value=WebMenuDTO.class, collection = true)
     public RestResponse listUserRelatedWebMenus(@Valid ListUserRelatedWebMenusCommand cmd) {
         RestResponse response =  new RestResponse();
-        response.setResponseObject(webMenuService.listZuolinAdminWebMenu());
+        response.setResponseObject(webMenuService.listUserRelatedWebMenus(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

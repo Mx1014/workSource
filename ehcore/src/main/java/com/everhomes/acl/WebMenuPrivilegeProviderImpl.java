@@ -8,6 +8,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuStatus;
+import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWebMenusDao;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,17 +47,37 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	@Override
 	//@Caching(evict={@CacheEvict(value="listWebMenuByType", key="'webMenu'")})
 	public List<WebMenu> listWebMenuByType(String type) {
+		return listWebMenuByType(type, null, null, null);
+	}
+
+	@Override
+	//@Caching(evict={@CacheEvict(value="listWebMenuByType", key="'webMenu'")})
+	public List<WebMenu> listWebMenuByType(String type, List<String> categories, String path, List<Long> moduleIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
 		Condition cond = Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode());
-		cond = cond.and(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		if(null != WebMenuType.fromCode(type)){
+			cond = cond.and(Tables.EH_WEB_MENUS.TYPE.eq(type));
+		}
+
+		if(null != categories && categories.size() > 0){
+			cond = cond.and(Tables.EH_WEB_MENUS.CATEGORY.in(categories));
+		}
+
+		if(!StringUtils.isEmpty(path)){
+			cond = cond.and(Tables.EH_WEB_MENUS.PATH.like(path));
+		}
+
+		if(moduleIds != null && moduleIds.size() > 0){
+			cond = cond.and(Tables.EH_WEB_MENUS.MODULE_ID.in(moduleIds));
+		}
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM);
 		return query.fetch().map((r) -> {
 			return ConvertHelper.convert(r, WebMenu.class);
 		});
 	}
-	
+
 	@Override
 	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
 	public List<WebMenuPrivilege> listWebMenuByPrivilegeIds(

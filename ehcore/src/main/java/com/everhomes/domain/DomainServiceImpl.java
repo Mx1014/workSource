@@ -32,12 +32,6 @@ public class DomainServiceImpl implements DomainService {
         }
         Domain domainInfo = domainProvider.findDomainByDomain(domain);
 
-        //设置当前机构
-        if(EntityType.ORGANIZATIONS == EntityType.fromCode(domainInfo.getOwnerType())){
-            UserContext.setCurrentSceneId(domainInfo.getOwnerId());
-            UserContext.setCurrentSceneType(domainInfo.getOwnerType());
-        }
-
         return ConvertHelper.convert(domainInfo, DomainDTO.class);
     }
 

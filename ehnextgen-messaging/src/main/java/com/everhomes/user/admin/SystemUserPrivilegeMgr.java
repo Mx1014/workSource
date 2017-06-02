@@ -283,8 +283,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId){
         Long organizationId = null;
-        if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ORGANIZATIONS){
-            organizationId = UserContext.getCurrentSceneId();
+        UserContext userContext = UserContext.current();
+        if(EntityType.fromCode(userContext.getCurrentSceneType()) == EntityType.ORGANIZATIONS){
+            organizationId = userContext.getCurrentSceneId();
         }
         if(checkUserPrivilege(UserContext.current().getUser().getId(), ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("authority success...");
