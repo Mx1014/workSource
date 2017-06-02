@@ -1,14 +1,12 @@
 // @formatter:off
 package com.everhomes.comment;
 
-import com.everhomes.rest.comment.AddCommentCommand;
-import com.everhomes.rest.comment.CommentDTO;
-import com.everhomes.rest.comment.DeleteCommentCommand;
-import com.everhomes.rest.comment.ListCommentsCommand;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.comment.*;
+import com.everhomes.util.WebTokenGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
 
 @Component
@@ -17,16 +15,66 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public CommentDTO addComment(AddCommentCommand cmd) {
-		return null;
+		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
+
+		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());
+
+		CommentDTO commentDto = null;
+		if(handler != null){
+			commentDto = handler.addComment(cmd);
+		}
+
+		return commentDto;
 	}
 
 	@Override
 	public List<CommentDTO> listComments(ListCommentsCommand cmd) {
-		return null;
+		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
+
+		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());
+
+		List<CommentDTO> commentDtos = new ArrayList<CommentDTO>();
+		if(handler != null){
+			commentDtos = handler.listComments(cmd);
+		}
+
+		return commentDtos;
 	}
 
 	@Override
-	public void deleteComment(DeleteCommentCommand cmd) {
+	public void deleteComment(DeleteCommonCommentCommand cmd) {
+		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
 
+		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());
+		if(handler != null){
+			handler.deleteComment(cmd);
+		}
+	}
+
+	/**
+	 * 老的类型中ownerToken是Long类型的id，如快讯；新的类型封装的OwnerTokenDTO，包括type和id，如论坛。 add by yanjun 20170601
+	 * @param ownerToken
+	 * @return
+	 */
+	private OwnerTokenDTO getOwnerTokenDTO(String ownerToken){
+		OwnerTokenDTO ownerTokenDto = null;
+		try{
+			ownerTokenDto =  WebTokenGenerator.getInstance().fromWebToken(ownerToken, OwnerTokenDTO.class);
+		}catch (Exception e){
+			Long ownerTokenId =  WebTokenGenerator.getInstance().fromWebToken(ownerToken, Long.class);
+			ownerTokenDto.setType(OwnerType.NEWS.getCode());
+			ownerTokenDto.setId(ownerTokenId);
+		}
+		return ownerTokenDto;
+	}
+
+	private CommentHandler getCommentHandler(Byte ownerTypeCode) {
+		CommentHandler handler = null;
+
+		if(ownerTypeCode != null) {
+			String handlerPrefix = CommentHandler.COMMENT_OBJ_RESOLVER_PREFIX;
+			handler = PlatformContext.getComponent(handlerPrefix + ownerTypeCode);
+		}
+		return handler;
 	}
 }

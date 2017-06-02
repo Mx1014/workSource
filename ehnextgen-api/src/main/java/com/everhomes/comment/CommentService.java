@@ -11,5 +11,5 @@ public interface CommentService {
 
 	List<CommentDTO> listComments(ListCommentsCommand cmd);
 
-	void deleteComment(DeleteCommentCommand cmd);
+	void deleteComment(DeleteCommonCommentCommand cmd);
 }

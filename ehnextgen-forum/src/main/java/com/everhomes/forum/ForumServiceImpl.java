@@ -694,11 +694,13 @@ public class ForumServiceImpl implements ForumService {
     public void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-        
-        checkForumParameter(userId, forumId, "getTopic");
-        
-        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
 
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+        if(forumId == null && post!= null){
+            forumId = post.getForumId();
+        }
+        checkForumParameter(userId, forumId, "getTopic");
 
         Post pPost = null;
         if(post.getParentPostId() != null && post.getParentPostId() != 0) {

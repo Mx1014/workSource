@@ -64,7 +64,7 @@ public class CommentController extends ControllerBase {
      */
     @RequestMapping("deleteComment")
     @RestReturn(value=String.class)
-    public RestResponse deleteComment(DeleteCommentCommand cmd) {
+    public RestResponse deleteComment(DeleteCommonCommentCommand cmd) {
         CommentService.deleteComment(cmd);
         
         RestResponse response = new RestResponse();

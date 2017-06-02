@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
  * <li>id: 评论id</li>
  * </ul>
  */
-public class DeleteCommentCommand {
+public class DeleteCommonCommentCommand {
 	@NotNull
 	private String ownerToken;
 	private Long id;
