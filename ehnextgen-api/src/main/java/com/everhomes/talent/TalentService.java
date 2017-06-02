@@ -19,6 +19,7 @@ import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
+import com.everhomes.rest.talent.TalentDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
 
 public interface TalentService {
@@ -36,7 +37,7 @@ public interface TalentService {
 	public ListTalentResponse listTalent(ListTalentCommand cmd);
 
 
-	public void createOrUpdateTalent(CreateOrUpdateTalentCommand cmd);
+	public TalentDTO createOrUpdateTalent(CreateOrUpdateTalentCommand cmd);
 
 
 	public void enableTalent(EnableTalentCommand cmd);

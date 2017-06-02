@@ -204,24 +204,27 @@ public class TalentServiceImpl implements TalentService {
 	}
 
 	@Override
-	public void createOrUpdateTalent(CreateOrUpdateTalentCommand cmd) {
+	public TalentDTO createOrUpdateTalent(CreateOrUpdateTalentCommand cmd) {
+		Talent talent = null;
 		if (cmd.getId() == null) {
-			createTalent(cmd);
+			talent = createTalent(cmd);
 		}else {
-			updateTalent(cmd);
+			talent = updateTalent(cmd);
 		}
+		return convert(talent, TrueOrFalseFlag.FALSE.getCode());
 	}
 
-	private void createTalent(CreateOrUpdateTalentCommand cmd) {
+	private Talent createTalent(CreateOrUpdateTalentCommand cmd) {
 		Talent talent = ConvertHelper.convert(cmd, Talent.class);
 		talent.setNamespaceId(namespaceId());
 		talent.setEnabled(TrueOrFalseFlag.TRUE.getCode());
 		talent.setDefaultOrder(0L);
 		talent.setStatus(CommonStatus.ACTIVE.getCode());
 		talentProvider.createTalent(talent);
+		return talent;
 	}
 
-	private void updateTalent(CreateOrUpdateTalentCommand cmd) {
+	private Talent updateTalent(CreateOrUpdateTalentCommand cmd) {
 		Talent talent = findTalentById(cmd.getId(), namespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		talent.setName(cmd.getName());
 		talent.setAvatarUri(cmd.getAvatarUri());
@@ -234,6 +237,7 @@ public class TalentServiceImpl implements TalentService {
 		talent.setPhone(cmd.getPhone());
 		talent.setRemark(cmd.getRemark());
 		talentProvider.updateTalent(talent);
+		return talent;
 	}
 	
 	@Override
