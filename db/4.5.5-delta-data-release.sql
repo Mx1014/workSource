@@ -266,8 +266,6 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 	VALUES ('50916', '预订详情', '50910', NULL, 'rental_info/organization', '0', '2', '/50000/50910/50916', 'park', '446', '40400');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('50918', '退款处理', '50910', NULL, 'refund_management/organization', '0', '2', '/50000/50910/50918', 'park', '448', '40400');
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 	VALUES ('50920', '工作流设置', '50910', NULL, 'react:/working-flow/flow-list/resource-reservation/40400/organization', '0', '2', '/50000/50910/50920', 'park', '475', '40400');
 	
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
@@ -279,8 +277,6 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50914, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50916, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50918, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50920, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
 		
@@ -301,4 +297,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 UPDATE `eh_rentalv2_resource_types` SET `status`='2';
 	
 UPDATE `eh_rentalv2_resource_types` SET `status`='3' WHERE `name`='左邻会议室' and `namespace_id`='1000000';
-	
+
+DELETE from eh_web_menus where id = 50918;
+DELETE from eh_web_menu_privileges where menu_id = 50918 and privilege_id = 10023;
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('rental.resource.detail.url', '/resource-reservation/build/index.html?namespaceId=%s&id=%s', NULL, '0', NULL);
