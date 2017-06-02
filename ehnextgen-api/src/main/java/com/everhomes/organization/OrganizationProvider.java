@@ -331,5 +331,6 @@ public interface OrganizationProvider {
 	
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 
-	void syncOrganizationMembersWithDetails();
-} 
+	List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list);
+
+}

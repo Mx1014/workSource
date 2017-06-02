@@ -481,7 +481,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public List<OrganizationMember> listOrganizationMembers(Long orgId, List<Long> memberUids) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
         /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
         TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
@@ -4105,9 +4104,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return totalRecords;
     }
 
+    /**
+     * modify by lei lv,增加了detail表，部分信息挪到detail表里去取
+     **/
     @Override
-    public void syncOrganizationMembersWithDetails() {
-
+    public List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        for (OrganizationMember member : old_list) {
+            //循环调detail方法返回一个detail对象
+            EhOrganizationMemberDetailsRecord detail = new EhOrganizationMemberDetailsRecord();
+            member.setContactToken(detail.getContactToken());
+            member.setContactName(detail.getContactName());
+            member.setContactType(detail.getContactType());
+            member.setContactDescription(detail.getContactDescription());
+            member.setEmployeeNo(detail.getEmployeeNo());
+            member.setAvatar(detail.getAvatar());
+            member.setGender(detail.getGender());
+        }
+        return old_list;
     }
 
 }
