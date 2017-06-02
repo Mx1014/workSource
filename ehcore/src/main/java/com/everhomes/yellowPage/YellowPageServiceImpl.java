@@ -20,6 +20,8 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
 import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
@@ -117,6 +119,9 @@ public class YellowPageServiceImpl implements YellowPageService {
     private Configuration templateConfig;
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -590,9 +595,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 		this.processDetailUrl(dto);
 //		response.setDisplayName(serviceAlliance.getNickName());
-		Community community = communityProvider.findCommunityById(dto.getOwnerId());
-		if(community != null) {
-			dto.setNamespaceId(community.getNamespaceId());
+		ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(dto.getOwnerType());
+		if(belongType == ServiceAllianceBelongType.COMMUNITY){
+			Community community = communityProvider.findCommunityById(dto.getOwnerId());
+			if(community != null) {
+				dto.setNamespaceId(community.getNamespaceId());
+			}
+		}else{
+			Organization organization = organizationProvider.findOrganizationById(dto.getOwnerId());
+			if(organization!=null){
+				dto.setNamespaceId(organization.getNamespaceId());
+			}
 		}
 //		dto.setNamespaceId(UserContext.getCurrentNamespaceId());
 
@@ -683,8 +696,32 @@ public class YellowPageServiceImpl implements YellowPageService {
         locator.setAnchor(cmd.getNextPageAnchor());
 //        List<YellowPage> yellowPages = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
 //        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
-        List<ServiceAlliances> sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
-        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+        
+        //add by dengs .20170428 如果是客户端来，将community所在organaization 的服务联盟也查询出来。
+        List<ServiceAlliances> sas = null;
+        ServiceAllianceSourceRequestType sourceRequestType = ServiceAllianceSourceRequestType.fromCode(cmd.getSourceRequestType());
+        //如果为CLIENT，或者空值，认为是客户端
+        if(ServiceAllianceSourceRequestType.CLIENT == sourceRequestType || sourceRequestType == null){
+        	 List<Organization> organizationList= this.organizationProvider.findOrganizationByCommunityId(cmd.getOwnerId());
+        	 if(organizationList!=null &&organizationList.size()>0){
+        		 //目前只考虑一个物业管理公司的情况。
+        		 Organization pm = organizationList.get(0);
+        		 sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
+        	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords(),pm.getId(),ServiceAllianceBelongType.ORGANAIZATION.getCode());
+        		 for (ServiceAlliances serviceAlliance : sas) {
+        			ServiceAllianceBelongType belongType = ServiceAllianceBelongType.fromCode(serviceAlliance.getOwnerType());
+					if(belongType == ServiceAllianceBelongType.ORGANAIZATION){
+						//传给客户端的ownertype,ownerid 都改成小区，兼容老版本
+						serviceAlliance.setOwnerType(ServiceAllianceBelongType.COMMUNITY.getCode());
+						serviceAlliance.setOwnerId(cmd.getOwnerId());
+					}
+				}
+        	 }
+        	
+        }else{
+        	sas = this.yellowPageProvider.queryServiceAlliance(locator, pageSize + 1,cmd.getOwnerType(), 
+ 	        		cmd.getOwnerId(), cmd.getParentId(), cmd.getCategoryId(), cmd.getKeywords());
+        }
 
 		long time5 = System.currentTimeMillis();
 		LOGGER.info("getServiceAllianceEnterpriseList time: {}", time5 - time4);

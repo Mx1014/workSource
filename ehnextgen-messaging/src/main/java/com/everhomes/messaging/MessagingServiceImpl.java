@@ -1,19 +1,6 @@
 // @formatter:off
 package com.everhomes.messaging;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
@@ -31,8 +18,17 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Name;
-import com.everhomes.util.StringHelper;
-import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 /**
@@ -61,7 +57,7 @@ public class MessagingServiceImpl implements MessagingService {
     @PostConstruct
     public void setup() {
         if(handlers != null) {
-            handlers.stream().forEach((handler) -> {
+            handlers.forEach((handler) -> {
                 Name name = handler.getClass().getAnnotation(Name.class);
                 if(name != null && name.value() != null) {
                     registerRoutingHandler(name.value(), handler);
@@ -193,15 +189,15 @@ public class MessagingServiceImpl implements MessagingService {
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.INCLUDE)))) {
                         newCtx.setIncludeUsers(jsonToLongList(inStr));
                         inStr = null;
-                        }
+                    }
                     if(null != message.getMeta() && (null != (inStr = message.getMeta().get(MessageMetaConstant.EXCLUDE)))) {
                         newCtx.setExcludeUsers(jsonToLongList(inStr));
-                        }
+                    }
                     
                     handler.routeMessage(newCtx, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);
                 } else {
                     handler.routeMessage(context, senderLogin, appId, dstChannelType, dstChannelToken, message, deliveryOption);    
-                    }
+                }
                 
             } else {
                 if(LOGGER.isDebugEnabled())

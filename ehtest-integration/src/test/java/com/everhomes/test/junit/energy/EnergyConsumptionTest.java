@@ -2,6 +2,7 @@ package com.everhomes.test.junit.energy;
 
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.energy.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
@@ -105,7 +106,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     private CreateEnergyMeterRestResponse getMeter() {
         CreateEnergyMeterCommand cmd = new CreateEnergyMeterCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         cmd.setCommunityId(1L);
         cmd.setName("电表1");
         cmd.setMeterNumber("123456");
@@ -416,7 +418,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterFormula() {
         logon();
         CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         String name = "新建的公式1";
         cmd.setName(name);
         cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])");
@@ -438,7 +441,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterFormula1() {
         logon();
         CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         String name = "新建的公式1";
         cmd.setName(name);
         cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])1");// 公式结构错误,无法计算
@@ -459,7 +463,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterCategory() {
         logon();
         CreateEnergyMeterCategoryCommand cmd = new CreateEnergyMeterCategoryCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         String name = "自用部分";
         cmd.setName(name);
         cmd.setCategoryType(EnergyCategoryType.BILL.getCode());
@@ -527,7 +532,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         try {
             logon();
             ImportEnergyMeterCommand cmd = new ImportEnergyMeterCommand();
-            cmd.setOrganizationId(1000001L);
+            cmd.setOwnerId(1000001L);
+            cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
             cmd.setCommunityId(1L);
             String filePath;
             filePath = new File("").getCanonicalPath()+"\\src\\test\\data\\excel\\energy_meter_template.xlsx";
@@ -548,7 +554,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterCategories() {
         logon();
         ListEnergyMeterCategoriesCommand cmd = new ListEnergyMeterCategoriesCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         cmd.setCategoryType(EnergyCategoryType.BILL.getCode());
 
         ListEnergyMeterCategoriesRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_CATEGORIES_URL, cmd, ListEnergyMeterCategoriesRestResponse.class);
@@ -562,7 +569,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterCategories1() {
         logon();
         ListEnergyMeterCategoriesCommand cmd = new ListEnergyMeterCategoriesCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         cmd.setCategoryType(EnergyCategoryType.SERVICE.getCode());
 
         ListEnergyMeterCategoriesRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_CATEGORIES_URL, cmd, ListEnergyMeterCategoriesRestResponse.class);
@@ -603,7 +611,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterFormulas() {
         logon();
         ListEnergyMeterFormulasCommand cmd = new ListEnergyMeterFormulasCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         cmd.setFormulaType(EnergyFormulaType.AMOUNT.getCode());
 
         ListEnergyMeterFormulasRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_FORMULAS_URL, cmd, ListEnergyMeterFormulasRestResponse.class);
@@ -617,7 +626,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyDefaultSettings() {
         logon();
         ListEnergyDefaultSettingsCommand cmd = new ListEnergyDefaultSettingsCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         cmd.setMeterType(EnergyMeterType.WATER.getCode());
 
         ListEnergyDefaultSettingsRestResponse response = httpClientService.restPost(GET_ENERGY_DEFAULT_SETTINGS_URL, cmd, ListEnergyDefaultSettingsRestResponse.class);
@@ -632,7 +642,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyDefaultSettings1() {
         logon();
         ListEnergyDefaultSettingsCommand cmd = new ListEnergyDefaultSettingsCommand();
-        cmd.setOrganizationId(1000001L);
+        cmd.setOwnerId(1000001L);
+        cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
         // cmd.setMeterType((byte)1);
 
         ListEnergyDefaultSettingsRestResponse response = httpClientService.restPost(GET_ENERGY_DEFAULT_SETTINGS_URL, cmd, ListEnergyDefaultSettingsRestResponse.class);

@@ -94,6 +94,8 @@ import javax.annotation.PostConstruct;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.launchpad.ApplyPolicy;
+import com.everhomes.rest.quality.*;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.util.CronDateUtils;
 import org.jooq.Condition;
@@ -135,16 +137,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.quality.ExecuteGroupAndPosition;
-import com.everhomes.rest.quality.QualityGroupType;
-import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
-import com.everhomes.rest.quality.QualityInspectionTaskResult;
-import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
-import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
-import com.everhomes.rest.quality.QualityInspectionTaskStatus;
-import com.everhomes.rest.quality.QualityStandardStatus;
-import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
@@ -1744,6 +1736,34 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		return result;
 		
+	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listAddAndModifyChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, List<Long> scopeIds, Long parentId, Byte inspectionType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.APPLY_POLICY.eq(SpecificationApplyPolicy.ADD.getCode())
+				.or(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.APPLY_POLICY.eq(SpecificationApplyPolicy.MODIFY.getCode())));
+		if(scopeCode != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
+		if(scopeIds != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.in(scopeIds));
+		if(inspectionType != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	@Override

@@ -326,6 +326,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		param.put("REQUESTS",array);
 
+		LOGGER.info("param={}", param);
+
 		return param;
 	}
 
@@ -408,10 +410,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("start_date", validStart);
 	    param.put("buy_num", String.valueOf(order.getMonthCount().intValue()));
 
-		String json = post(createRequestParam(RECHARGE, param));
+		JSONObject requestParam = createRequestParam(RECHARGE, param);
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = post(requestParam);
+
+		LOGGER.info("Result={}, param={}", json, requestParam);
 
 		String entityJson = parseJson(json);
 

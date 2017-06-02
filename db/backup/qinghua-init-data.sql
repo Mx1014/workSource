@@ -2598,3 +2598,24 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 update eh_launch_pad_items set more_order = 10 where namespace_id = 999984 and item_label in('知识产权','财税咨询','法律服务','人力资源','科技金融','云服务','供应链','产品测试','福利管家');
 
 update eh_launch_pad_items set display_flag = 0 where item_label = '供求信息' and namespace_id = 999984;
+
+-- 修改服务市场“供求信息”item的位置及规则，add by tt, 20170510（已执行）
+SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999984', '0');
+update eh_launch_pad_items set service_categry_id = 5 where namespace_id = 999984 and item_name = '供求信息' and scene_type= 'pm_admin';
+update eh_launch_pad_items set service_categry_id = 10 where namespace_id = 999984 and item_name = '供求信息' and scene_type= 'park_tourist';
+
+-- 车辆放行导出excel无数据提示，add by tt, 20170510
+select max(id) into @id from `eh_locale_strings`; 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'parking.clearance', '10011', 'zh_CN', '没有数据');
+
+-- 更改服务联盟是否支持审批, add by tt, 20170510
+select max(id) into @id from `eh_service_alliance_jump_module`;
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) VALUES (@id+1, 999984, '审批', 'zl://approval/create?approvalId={}&sourceId={}', 0);
+
+
+-- 添加业务授权模块范围
+SET @id = (SELECT MAX(id) FROM  eh_service_module_scopes );
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
+	VALUES ((@id := @id + 1, '999984', '60200', '业务授权', 'EhNamespaces', '999984', NULL, '2');
+

@@ -3,6 +3,7 @@
 /atomikos
 /logs
 /statistics
+ehborder/target/
 ehnextgen-api/target/
 ehnextgen-forum/target/
 ehnextgen-messaging/target/

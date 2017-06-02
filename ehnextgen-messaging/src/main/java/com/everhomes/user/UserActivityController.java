@@ -41,6 +41,8 @@ import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListBusinessTreasureResponse;
 import com.everhomes.rest.user.ListContactRespose;
 import com.everhomes.rest.user.ListContactsCommand;
+import com.everhomes.rest.user.ListFeedbacksCommand;
+import com.everhomes.rest.user.ListFeedbacksResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -56,6 +58,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.user.UpdateFeedbackCommand;
 import com.everhomes.rest.user.UpdateShakeOpenDoorCommand;
 import com.everhomes.rest.user.UserInvitationsDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
@@ -207,16 +210,44 @@ public class UserActivityController extends ControllerBase {
     /**
      * 用户反馈 <b>url:/user/feedback</b>
      * 
-     * @param cmd {@link FeedbackCommand}
+     * @param cmd {@link com.everhomes.rest.user.FeedbackCommand}
      */
     @RequestMapping("feedback")
     @RequireAuthentication(false)
     @RestReturn(String.class)
     public RestResponse feedback(@Valid FeedbackCommand cmd) {
-        userActivityService.updateFeedback(cmd);
+        userActivityService.addFeedback(cmd);
         return new RestResponse("OK");
     }
 
+    /**
+     * 获取用户反馈 <b>url:/user/listFeedbacks</b>
+     * 
+     * @param cmd {@link ListFeedbacksCommand}
+     */
+    @RequestMapping("listFeedbacks")
+    @RestReturn(ListFeedbacksResponse.class)
+    public RestResponse listFeedbacks(@Valid ListFeedbacksCommand cmd) {
+    	ListFeedbacksResponse result = userActivityService.ListFeedbacks(cmd);
+
+    	RestResponse response = new RestResponse(result);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+     * 更新用户反馈 <b>url:/user/updateFeedback</b>
+     * 
+     * @param cmd {@link UpdateFeedbackCommand}
+     */
+    @RequestMapping("updateFeedback")
+    @RestReturn(String.class)
+    public RestResponse updateFeedback(@Valid UpdateFeedbackCommand cmd) {
+        userActivityService.updateFeedback(cmd);
+        return new RestResponse("OK");
+    }
+    
     /**
      * 查询版本信息 <b>url:/user/appversion</b>
      * 

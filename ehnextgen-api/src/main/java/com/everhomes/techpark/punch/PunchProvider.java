@@ -2,7 +2,6 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.util.Calendar;
 import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -101,6 +100,9 @@ public interface PunchProvider {
 	public List<PunchDayLog> listPunchDayExceptionLogs(Long userId,
 			Long companyId, String startDay, String endDay);
 
+	List<PunchDayLog> listPunchDayLogsExcludeEndDay(Long userId,
+													Long companyId, String startDay, String endDay);
+
 	public List<PunchExceptionRequest> listExceptionNotViewRequests(
 			Long userId, Long companyId, String startDay, String endDay);
 
@@ -111,7 +113,7 @@ public interface PunchProvider {
  
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay);
 
-	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId, String name);
+	List<PunchTimeRule> queryPunchTimeRules(String ownerType, Long ownerId,String targetType , Long targetId, String name);
 
 	PunchTimeRule getPunchTimeRuleById(Long id);
 
@@ -256,7 +258,7 @@ public interface PunchProvider {
 	public List<PunchStatistic> queryPunchStatistics(String ownerType, Long ownerId, String month, Byte exceptionStatus,
 			List<Long> userIds, CrossShardListingLocator locator, int i);
   
-	public void deletePunchStatisticByUser(String ownerType, Long ownerId, String punchMonth, Long userId);
+	public void deletePunchStatisticByUser(String ownerType, List<Long> ownerId, String punchMonth, Long userId);
 
 	public PunchRuleOwnerMap getPunchRuleOwnerMapById(Long id);
 
@@ -282,6 +284,14 @@ public interface PunchProvider {
 			java.sql.Date beginDate , java.sql.Date endDate);
 
 	PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType, Long targetId);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(String ownerType, Long ownerId, String targetType,
+			Long targetId, CrossShardListingLocator locator, int pageSize);
+
+	List<PunchTimeRule> queryPunchTimeRuleList(Long startTimeLong, Long endTimeLong);
+
+	void deletePunchTimeRulesByOwnerAndTarget(String ownerType, Long ownerId,
+			String targetType, Long targetId);
  
  
  

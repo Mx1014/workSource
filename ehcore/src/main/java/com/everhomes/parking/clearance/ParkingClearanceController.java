@@ -7,6 +7,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.parking.clearance.*;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +72,17 @@ public class ParkingClearanceController extends ControllerBase {
     @RestReturn(SearchClearanceLogsResponse.class)
     public RestResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
         return response(parkingClearanceService.searchClearanceLog(cmd));
+    }
+    
+    /**
+     * <p>导出车辆放行log</p>
+     * <b>URL: /clearance/exportClearanceLog</b>
+     */
+    @RequestMapping("exportClearanceLog")
+    @RestReturn(String.class)
+    public RestResponse exportClearanceLog(SearchClearanceLogCommand cmd, HttpServletResponse response) {
+    	parkingClearanceService.exportClearanceLog(cmd, response);
+    	return new RestResponse();
     }
 
     /**

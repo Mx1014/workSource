@@ -890,7 +890,7 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/listOrganizationTopics</b>
      * <p>机构人员的帖子查询</p>
      *
-     * @return
+      * @return 
      */
     @RequestMapping("listOrganizationTopics")
     @RestReturn(value = ListPostCommandResponse.class)
