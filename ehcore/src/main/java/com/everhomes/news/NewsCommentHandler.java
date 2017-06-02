@@ -6,6 +6,9 @@ import com.everhomes.rest.comment.AttachmentDTO;
 import com.everhomes.rest.comment.DeleteCommonCommentCommand;
 import com.everhomes.rest.news.*;
 import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
+import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +27,10 @@ public class NewsCommentHandler implements CommentHandler {
 
 	@Override
 	public CommentDTO addComment(AddCommentCommand cmd) {
-		AddNewsCommentCommand newsCmd = toAddNewsCommentCommand(cmd);
+		AddNewsCommentBySceneCommand newsCmd = toAddNewsCommentBySceneCommand(cmd);
 
-		AddNewsCommentResponse newsCommentDTO = newsService.addNewsComment(newsCmd);
+		AddNewsCommentBySceneResponse newsCommentDTO = newsService.addNewsCommentByScene(newsCmd);
+		//AddNewsCommentResponse newsCommentDTO = newsService.addNewsComment(newsCmd);
 
 		CommentDTO commentDto = toCommentDTO(newsCommentDTO);
 		commentDto.setOwnerToken(cmd.getOwnerToken());
@@ -35,33 +39,39 @@ public class NewsCommentHandler implements CommentHandler {
 	}
 
 	@Override
-	public List<CommentDTO> listComments(ListCommentsCommand cmd) {
+	public ListCommentsResponse listComments(ListCommentsCommand cmd) {
 		ListNewsCommentCommand newsCmd =  ConvertHelper.convert(cmd, ListNewsCommentCommand.class);
 		newsCmd.setNewsToken(cmd.getOwnerToken());
 		ListNewsCommentResponse listNewsCommentResponse = newsService.listNewsComment(newsCmd);
 
-		List<CommentDTO> response = new ArrayList<CommentDTO>();
+		List<CommentDTO> responseCommentDto = new ArrayList<CommentDTO>();
 		if(listNewsCommentResponse != null && listNewsCommentResponse.getCommentList() != null&&listNewsCommentResponse.getCommentList().size()>0){
 			listNewsCommentResponse.getCommentList().forEach(c -> {
 				CommentDTO commentDto = toCommentDTO(c);
 				commentDto.setOwnerToken(cmd.getOwnerToken());
-				response.add(commentDto);
+				responseCommentDto.add(commentDto);
 			});
 		}
+
+
+		ListCommentsResponse response = new ListCommentsResponse();
+		response.setCommentCount(listNewsCommentResponse.getCommentCount());
+		response.setNextPageAnchor(listNewsCommentResponse.getNextPageAnchor());
+		response.setCommentDtos(responseCommentDto);
 
 		return response;
 	}
 
 	@Override
 	public void deleteComment(DeleteCommonCommentCommand cmd) {
-		DeleteNewsCommentCommand newsCmd = ConvertHelper.convert(cmd, DeleteNewsCommentCommand.class);
+		DeleteNewsCommentBySceneCommand newsCmd = ConvertHelper.convert(cmd, DeleteNewsCommentBySceneCommand.class);
 		newsCmd.setNewsToken(cmd.getOwnerToken());
-		newsService.deleteNewsComment(newsCmd);
+		newsService.deleteNewsCommentByScene(newsCmd);
 	}
 
-	private AddNewsCommentCommand toAddNewsCommentCommand(AddCommentCommand cmd){
+	private AddNewsCommentBySceneCommand toAddNewsCommentBySceneCommand(AddCommentCommand cmd){
 
-		AddNewsCommentCommand newsCmd = ConvertHelper.convert(cmd, AddNewsCommentCommand.class);
+		AddNewsCommentBySceneCommand newsCmd = ConvertHelper.convert(cmd, AddNewsCommentBySceneCommand.class);
 		newsCmd.setNewsToken(cmd.getOwnerToken());
 
 		if(cmd != null && cmd.getAttachments() != null){
@@ -76,7 +86,7 @@ public class NewsCommentHandler implements CommentHandler {
 		return newsCmd;
 	}
 
-	private CommentDTO toCommentDTO(AddNewsCommentResponse newsComment){
+	private CommentDTO toCommentDTO(AddNewsCommentBySceneResponse newsComment){
 		CommentDTO commentDto = ConvertHelper.convert(newsComment, CommentDTO.class);
 		commentDto.setOwnerToken(newsComment.getNewsToken());
 		if(newsComment.getAttachments() != null && newsComment.getAttachments().size() > 0){

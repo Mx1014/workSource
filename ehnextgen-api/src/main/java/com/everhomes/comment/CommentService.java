@@ -9,7 +9,7 @@ import java.util.List;
 public interface CommentService {
 	CommentDTO addComment(AddCommentCommand cmd);
 
-	List<CommentDTO> listComments(ListCommentsCommand cmd);
+	ListCommentsResponse listComments(ListCommentsCommand cmd);
 
 	void deleteComment(DeleteCommonCommentCommand cmd);
 }

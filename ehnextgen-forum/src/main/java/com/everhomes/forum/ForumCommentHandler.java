@@ -48,22 +48,28 @@ public class ForumCommentHandler implements CommentHandler {
 	}
 
 	@Override
-	public List<CommentDTO> listComments(ListCommentsCommand cmd) {
+	public ListCommentsResponse listComments(ListCommentsCommand cmd) {
 		OwnerTokenDTO ownerTokenDto =  WebTokenGenerator.getInstance().fromWebToken(cmd.getOwnerToken(), OwnerTokenDTO.class);
 		ListTopicCommentCommand topicCmd = ConvertHelper.convert(cmd, ListTopicCommentCommand.class);
 		topicCmd.setTopicId(ownerTokenDto.getId());
 
+
 		ListPostCommandResponse cmdResponse = this.forumService.listTopicComments(topicCmd);
 
-		List<CommentDTO> response = new ArrayList<CommentDTO>();
+		List<CommentDTO> responseCommentDto = new ArrayList<CommentDTO>();
 		if(cmdResponse != null && cmdResponse.getPosts() != null){
 			cmdResponse.getPosts().forEach(p -> {
 
 				CommentDTO commentDto = toCommentDTO(p);
 				commentDto.setOwnerToken(cmd.getOwnerToken());
-				response.add(commentDto);
+				responseCommentDto.add(commentDto);
 			});
 		}
+
+		ListCommentsResponse response = new ListCommentsResponse();
+		response.setCommentCount(cmdResponse.getCommentCount());
+		response.setNextPageAnchor(cmdResponse.getNextPageAnchor());
+		response.setCommentDtos(responseCommentDto);
 
 		return response;
 	}

@@ -48,9 +48,9 @@ public class CommentController extends ControllerBase {
     @RestReturn(value=ListCommentsResponse.class)
     @RequireAuthentication(false)
     public RestResponse listComments(@Valid ListCommentsCommand cmd) {
-        List<CommentDTO> list = CommentService.listComments(cmd);
+        ListCommentsResponse listCommentsResponse = CommentService.listComments(cmd);
         
-        RestResponse response = new RestResponse(list);
+        RestResponse response = new RestResponse(listCommentsResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

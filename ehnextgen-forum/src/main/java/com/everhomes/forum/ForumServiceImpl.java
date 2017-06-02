@@ -1748,12 +1748,16 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         String tag = "listTopicComments";
-        
+
+        //为了兼容新的统一评论接口，先检查post再检查forum，因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Long topicId = cmd.getTopicId();
+        Post post = checkPostParameter(operatorId, null, topicId, tag);
+        if(post != null && cmd.getForumId() == null){
+            cmd.setForumId(post.getForumId());
+        }
         Long forumId = cmd.getForumId();
         Forum forum = checkForumParameter(operatorId, forumId, tag);
-        
-        Long topicId = cmd.getTopicId();
-        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
+
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1823,7 +1827,11 @@ public class ForumServiceImpl implements ForumService {
         
         User user = UserContext.current().getUser();
         Long userId = user.getId();
-                
+
+        //为了兼容新的统一评论接口，先检查活动, 因为新的统一接口没有传来forumId  add by yanjun 20170601
+        Post ownerPost = checkPostParameter(userId, null, cmd.getTopicId(), "createComment");
+        cmd.setForumId(ownerPost.getForumId());
+
         Post post = processCommentCommand(userId, cmd);
 
         //黑名单权限校验 by sfyan20161213

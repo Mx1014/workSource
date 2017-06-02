@@ -28,17 +28,17 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
-	public List<CommentDTO> listComments(ListCommentsCommand cmd) {
+	public ListCommentsResponse listComments(ListCommentsCommand cmd) {
 		OwnerTokenDTO ownerTokenDto =getOwnerTokenDTO(cmd.getOwnerToken());
 
 		CommentHandler handler =  getCommentHandler(ownerTokenDto.getType());
 
-		List<CommentDTO> commentDtos = new ArrayList<CommentDTO>();
+		ListCommentsResponse listCommentsResponse = new ListCommentsResponse();
 		if(handler != null){
-			commentDtos = handler.listComments(cmd);
+			listCommentsResponse = handler.listComments(cmd);
 		}
 
-		return commentDtos;
+		return listCommentsResponse;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
 	 * @return
 	 */
 	private OwnerTokenDTO getOwnerTokenDTO(String ownerToken){
-		OwnerTokenDTO ownerTokenDto = null;
+		OwnerTokenDTO ownerTokenDto = new OwnerTokenDTO();
 		try{
 			ownerTokenDto =  WebTokenGenerator.getInstance().fromWebToken(ownerToken, OwnerTokenDTO.class);
 		}catch (Exception e){
