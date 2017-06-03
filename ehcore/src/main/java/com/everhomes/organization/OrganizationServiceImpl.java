@@ -10159,6 +10159,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
         OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
         PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
+        if(response.getBasic().getContactName() == null)
         if(response.getBasic().getJobLevels().size() <= 0)
             result.setBackEndIntegrity(0);
         else
