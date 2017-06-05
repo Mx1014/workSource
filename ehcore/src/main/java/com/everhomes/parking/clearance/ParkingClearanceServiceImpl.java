@@ -28,6 +28,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import com.everhomes.rest.common.PortalType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -468,7 +469,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
-                            null, null, privilegeId);
+                            PortalType.PM.getCode(), cmd.getOrganizationId(), privilegeId);
 
                     // 上面的权限检查会放过超级管理员, 但是需求是不放过
                     checkUserNotInOperatorList(parkingLot.getId(), operatorType);
