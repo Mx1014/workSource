@@ -354,7 +354,9 @@ public class TalentServiceImpl implements TalentService {
 
 	private TalentDTO convert(Talent talent, Byte appFlag) {
 		TalentDTO talentDTO = ConvertHelper.convert(talent, TalentDTO.class);
-		talentDTO.setCategoryName(findTalentCategoryById(talent.getCategoryId()).getName());
+		TalentCategory talentCategory = findTalentCategoryById(talent.getCategoryId());
+		talentDTO.setCategoryName(talentCategory.getName());
+		talentDTO.setCategoryId(talentCategory.getId());
 		talentDTO.setAvatarUrl(getAvatarUrl(appFlag, talent.getGender(), talent.getAvatarUri()));
 		return talentDTO;
 	}
