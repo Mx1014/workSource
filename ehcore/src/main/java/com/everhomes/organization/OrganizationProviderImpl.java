@@ -4514,13 +4514,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
 
 
-    public boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus){
+    public boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         int count = context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS, employeeStatus)
-                .where(Tables.EH_ORGANIZATION_MEMBERS.ID.eq(id)).execute();
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
         if(count == 0)
             return false;
         return true;
+    }
+
+    public void updateProfileIntegrity(Long detailId, Integer integrity){
+        DSLContext context = this.dbProvider.getDslContext((AccessSpec.readWrite()));
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY, integrity)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
     }
 }

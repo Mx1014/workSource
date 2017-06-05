@@ -10159,17 +10159,84 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
         OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
         PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
-        if(response.getBasic().getContactName() == null)
-        if(response.getBasic().getJobLevels().size() <= 0)
+
+        //  基本信息完整度判断
+        if (response.getBasic().getContactName() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getGender() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getAvatar() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getDepartments().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getJobPositions().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getJobLevels().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getEmployeeType() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getCheckInTime() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getContactToken() == null)
+            result.setBasicIntegrity(0);
+        else
+            result.setBasicIntegrity(25);
+
+        //  背景信息完整度判断
+        if(response.getBasic().getEnName() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getBirthday() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getMaritalFlag() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getPoliticalStatus() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getNativePlace() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getRegResidence() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getIdNumber() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmail() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getWechat() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getQq() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmergencyName() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmergencyContact() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getAddress() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getEducation().getEducations().size() <= 0)
             result.setBackEndIntegrity(0);
         else
-            result.setBackEndIntegrity(25);
+            result.setBackEndIntegrity(45);
+
+        //  社保信息完整度判断
+        if(response.getBasic().getSalaryCardNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getBasic().getSocialSecurityNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getBasic().getProvidentFundNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getInsurance().getInsurances().size() <= 0)
+            result.setSocialSecurityIntegrity(0);
+        else
+            result.setSocialSecurityIntegrity(15);
+
+        //  合同信息完整度判断
+        if(response.getContract().getContracts().size() <= 0)
+            result.setContractIntegrity(0);
+        else
+            result.setContractIntegrity(15);
+
+        //  返回结果至数据库
         result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
+        this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
     }
-
-
-
 }
 
 

@@ -372,7 +372,8 @@ public interface OrganizationProvider {
     void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
 
-    boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus);
+    boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
+    void updateProfileIntegrity(Long detailId, Integer integrity);
 
 
     List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
