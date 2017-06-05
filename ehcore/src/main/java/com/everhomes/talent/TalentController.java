@@ -26,6 +26,7 @@ import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryCommand;
 import com.everhomes.rest.talent.ListTalentQueryHistoryResponse;
 import com.everhomes.rest.talent.ListTalentResponse;
+import com.everhomes.rest.talent.TalentDTO;
 import com.everhomes.rest.talent.TopTalentCommand;
 
 @RestController
@@ -82,10 +83,9 @@ public class TalentController extends ControllerBase {
 	 * <b>URL: /talent/createOrUpdateTalent</b>
 	 */
 	@RequestMapping("createOrUpdateTalent")
-	@RestReturn(String.class)
+	@RestReturn(TalentDTO.class)
 	public RestResponse createOrUpdateTalent(CreateOrUpdateTalentCommand cmd){
-		talentService.createOrUpdateTalent(cmd);
-		return new RestResponse();
+		return new RestResponse(talentService.createOrUpdateTalent(cmd));
 	}
 
 	/**
