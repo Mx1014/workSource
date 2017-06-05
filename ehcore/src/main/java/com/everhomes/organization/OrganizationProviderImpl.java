@@ -378,8 +378,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("id").eq(id);
-        OrganizationMember membersRecord = step.where(condition).fetchOne().map(new OrganizationMemberRecordMapper());
-        return membersRecord;
+        Record record = step.where(condition).fetchAny();
+        if (record != null) {
+            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        }
+        return null;
     }
 
     /**
@@ -1277,9 +1281,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
-        if (record != null)
-            return ConvertHelper.convert(record, OrganizationMember.class);
+        Record record = step.where(condition).fetchAny();
+        if (record != null) {
+            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+            return ConvertHelper.convert(member, OrganizationMember.class);
+        }
         return null;
 //        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
 //        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
@@ -1307,9 +1313,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
-        if (record != null)
-            return ConvertHelper.convert(record, OrganizationMember.class);
+        Record record = step.where(condition).fetchAny();
+        if (record != null) {
+            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+            return ConvertHelper.convert(member, OrganizationMember.class);
+        }
         return null;
 
 //        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
@@ -1334,9 +1342,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         Condition condition = t1.field("id").gt(0L);
         condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()));
-        OrganizationMember record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny().map(new OrganizationMemberRecordMapper());
-        if (record != null)
-            return ConvertHelper.convert(record, OrganizationMember.class);
+        Record record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny();
+        if (record != null) {
+            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+            return ConvertHelper.convert(member, OrganizationMember.class);
+        }
         return null;
 //
 //        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
@@ -2174,9 +2184,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 .and(t2.field("contact_token").eq(contactPhone));
         condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
                 .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        OrganizationMember record = step.where(condition).fetchAny().map(new OrganizationMemberRecordMapper());
+        Record record = step.where(condition).fetchAny();
         if (record != null) {
-            return ConvertHelper.convert(record, OrganizationMember.class);
+            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
+            return ConvertHelper.convert(r, OrganizationMember.class);
         }
         return null;
 
@@ -4252,7 +4263,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.update(organizationMemberDetails);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
-
     }
 
     public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
@@ -4534,17 +4544,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(contactToken));
-        OrganizationMemberDetails detail = query.fetchAny().map(r -> {
-            return ConvertHelper.convert(r, OrganizationMemberDetails.class);
-        });
-        return detail;
+        Record record = query.fetchAny();
+        if(record != null){
+            return ConvertHelper.convert(record, OrganizationMemberDetails.class);
+        }
+        return null;
     }
 
-    public boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus){
+    public boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         int count = context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS, employeeStatus)
-                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(id)).execute();
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
         if(count == 0)
             return false;
         return true;
