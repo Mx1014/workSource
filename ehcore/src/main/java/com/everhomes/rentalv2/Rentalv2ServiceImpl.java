@@ -1651,7 +1651,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							map.put("useTime", order.getUseDetail());
 							map.put("resourceName", order.getResourceName());
 							sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
-									RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+									RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 
 							String templateScope = SmsTemplateCode.SCOPE;
 							int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE;

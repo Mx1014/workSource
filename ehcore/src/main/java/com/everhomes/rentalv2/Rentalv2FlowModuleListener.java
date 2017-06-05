@@ -471,6 +471,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		if (SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE == templateId) {
 			//线下模式审批通过 短信
+			LOGGER.info("Rental message -----------------------------, templateId={}", templateId);
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
 
