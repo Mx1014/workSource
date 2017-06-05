@@ -282,7 +282,7 @@ public class TalentServiceImpl implements TalentService {
 		Integer namespaceId = namespaceId();
 		ArrayList<RowResult> resultList = processorExcel(attachment[0]);
 		dbProvider.execute(s->{
-			for (int i = 2; i < resultList.size(); i++) {
+			for (int i = resultList.size() -1 ; i >= 2; i--) {
 				RowResult r = resultList.get(i);
 				CreateOrUpdateTalentCommand command = new CreateOrUpdateTalentCommand();
 				command.setOwnerType(cmd.getOwnerType());
