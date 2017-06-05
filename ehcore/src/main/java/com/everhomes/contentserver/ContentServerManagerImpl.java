@@ -185,16 +185,12 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             return avatarUri;
         }*/
 
-        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
-        if (resource == null) { 
-            /*LOGGER.error("Resource not found, orginResourceId=" + orginResourceId
-=======
-            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId
->>>>>>> 808c8c1c5ca8924b3cc85cac7373fa072ba6cba4
-                + ", decodeResourceId=" + resourceId + ", loginToken=" + login);
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId); 
+        if (resource == null) {
+            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId +
+                    ", decodeResourceId=" + resourceId + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Resource file not found");*/
-            return "MTpmZWE1OGIzMjZmMzQyMzE2M2M5OTVkMTZhNDE5YjA4ZQ";
+                    "Resource file not found");
         }
         return resource.getResourceMd5();
     }
