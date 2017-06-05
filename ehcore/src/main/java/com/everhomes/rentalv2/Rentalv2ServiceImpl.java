@@ -2616,7 +2616,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
 					// 按日预定
 					//TODO:产品说按天预定没有场所编号，所以默认只为noneed，以后可能会改就注释掉下面这一句
-					cmd.setAutoAssign(NormalFlag.NONEED.getCode());
+//					cmd.setAutoAssign(NormalFlag.NONEED.getCode());
 					rsr.setRentalResourceId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getSiteCounts());

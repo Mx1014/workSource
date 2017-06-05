@@ -345,18 +345,20 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		Map<String,String> customObject = new HashMap<String,String>();
 
-    	Map<String, String> map = new HashMap<String, String>(); 
+    	Map<String, String> map = new HashMap<String, String>();
 
+		String contentString = "";
 		if(null != order.getOfflinePayeeUid()){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
 			if(null!=member){
 				map.put("offlinePayeeName", member.getContactName());
 				map.put("offlinePayeeContact", member.getContactToken());
+				map.put("offlineCashierAddress", order.getOfflineCashierAddress());
+				contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE,
+						RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
+
 			}
 		}
-        map.put("offlineCashierAddress", order.getOfflineCashierAddress()); 
-		String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
-				RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
 		customObject.put("offlinePayInfo",contentString);
 		customObject.put("orderId", String.valueOf(order.getId()));
 		flowCase.setCustomObject(JSON.toJSONString(customObject));
