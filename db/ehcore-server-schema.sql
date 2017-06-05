@@ -8198,7 +8198,7 @@ CREATE TABLE `eh_rentalv2_resources` (
   `org_member_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '企业内部节假日价格',
   `approving_user_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户工作日价格',
   `approving_user_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户节假日价格',
-  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order';
+  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
