@@ -7,17 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>memberId：员工编号</li>
- * <li>contactName：成员名称</li>
- * <li>organizationId: 小区id</li>
- * <li>gender: 成员性别，0：保密 1：男性 2：女性 参考{@link com.everhomes.rest.user.UserGender}</li>
- * <li>departmentsId：部门</li>
- * <li>jobPositionsId: 岗位</li>
- * <li>jobLevelsId: 职级</li>
- * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
- * <li>checkInTime：入职时间</li>
- * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
- * <li>contactToken：联系号码</li>
+ * <li>detailId：员工编号</li>
  * <li>enName：英文名</li>
  * <li>birthday: 出生日期</li>
  * <li>maritalFlag: 婚姻状况：0，保密 1，已婚 2，未婚 参考{@link com.everhomes.rest.organization.MaritalFlag}</li>
@@ -26,43 +16,20 @@ import java.util.List;
  * <li>regResidence: 户口</li>
  * <li>idNumber: 身份证号</li>
  * <li>email: 邮箱</li>
- * <li>weChat: 微信号码</li>
+ * <li>wechat: 微信号码</li>
  * <li>qq: QQ号码</li>
  * <li>emergencyName: 紧急联系人姓名</li>
  * <li>emergencyContact: 紧急联系人号码</li>
  * <li>address: 住址</li>
- * <li>memberId: 员工编号</li>
  * <li>salaryCardNumber: 工资卡号</li>
  * <li>socialSecurityNumber: 公积金卡号</li>
  * <li>providentFundNumber: 社保卡号</li>
  * </ul>
  */
 
-public class UpdateOrganizationMemberBasicInfoCommand {
+public class UpdateOrganizationMemberBackGroundCommand {
 
-    private Long memberId;
-
-    private String contactName;
-
-    private Byte gender;
-
-    @ItemType(Long.class)
-    private List<Long> departmentsId;
-
-    @ItemType(Long.class)
-    private List<Long> jobPositionsId;
-
-    @ItemType(Long.class)
-    private List<Long> jobLevelsId;
-
-    private Byte employeeType;
-
-    private String checkInTime;
-
-    private Byte contactType;
-    private String contactToken;
-
-    private String avatar;
+    private Long detailId;
 
     private String enName;
 
@@ -80,7 +47,7 @@ public class UpdateOrganizationMemberBasicInfoCommand {
 
     private String email;
 
-    private String weChat;
+    private String wechat;
 
     private String qq;
 
@@ -96,95 +63,15 @@ public class UpdateOrganizationMemberBasicInfoCommand {
 
     private String providentFundNumber;
 
-    public UpdateOrganizationMemberBasicInfoCommand() {
+    public UpdateOrganizationMemberBackGroundCommand() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
-
-    public String getContactName() {
-        return contactName;
-    }
-
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
-    }
-
-    public Byte getGender() {
-        return gender;
-    }
-
-    public void setGender(Byte gender) {
-        this.gender = gender;
-    }
-
-    public List<Long> getDepartmentsId() {
-        return departmentsId;
-    }
-
-    public void setDepartmentsId(List<Long> departmentsId) {
-        this.departmentsId = departmentsId;
-    }
-
-    public List<Long> getJobPositionsId() {
-        return jobPositionsId;
-    }
-
-    public void setJobPositionsId(List<Long> jobPositionsId) {
-        this.jobPositionsId = jobPositionsId;
-    }
-
-    public List<Long> getJobLevelsId() {
-        return jobLevelsId;
-    }
-
-    public void setJobLevelsId(List<Long> jobLevelsId) {
-        this.jobLevelsId = jobLevelsId;
-    }
-
-    public Byte getEmployeeType() {
-        return employeeType;
-    }
-
-    public void setEmployeeType(Byte employeeType) {
-        this.employeeType = employeeType;
-    }
-
-    public String getCheckInTime() {
-        return checkInTime;
-    }
-
-    public void setCheckInTime(String checkInTime) {
-        this.checkInTime = checkInTime;
-    }
-
-    public Byte getContactType() {
-        return contactType;
-    }
-
-    public void setContactType(Byte contactType) {
-        this.contactType = contactType;
-    }
-
-    public String getContactToken() {
-        return contactToken;
-    }
-
-    public void setContactToken(String contactToken) {
-        this.contactToken = contactToken;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getEnName() {
@@ -251,12 +138,12 @@ public class UpdateOrganizationMemberBasicInfoCommand {
         this.email = email;
     }
 
-    public String getWeChat() {
-        return weChat;
+    public String getWechat() {
+        return wechat;
     }
 
-    public void setWeChat(String weChat) {
-        this.weChat = weChat;
+    public void setWechat(String wechat) {
+        this.wechat = wechat;
     }
 
     public String getQq() {

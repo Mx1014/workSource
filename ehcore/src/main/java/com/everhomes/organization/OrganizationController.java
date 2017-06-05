@@ -1390,14 +1390,14 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updateOrganizationMemberBasicInfo</b>
-     * <p>修改员工基本信息息</p>
+     * <b>URL: /org/updateOrganizationMemberBackGround</b>
+     * <p>修改员工背景信息</p>
      */
-    @RequestMapping("updateOrganizationMemberBasicInfo")
+    @RequestMapping("updateOrganizationMemberBackGround")
     @RestReturn(value = String.class)
     //@Valid
-    public RestResponse updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
-        this.organizationService.updateOrganizationMemberBasicInfo(cmd);
+    public RestResponse updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
+        this.organizationService.updateOrganizationMemberBackGround(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

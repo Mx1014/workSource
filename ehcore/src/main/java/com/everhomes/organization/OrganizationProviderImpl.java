@@ -4247,11 +4247,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);
     }
 
-    public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId){
+    public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.update(organizationMemberDetails);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, detailId);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
+
     }
 
     public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
@@ -4529,5 +4530,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY, integrity)
                 .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
+    }
+
+
+
+    public void profileLogsUpdate(OrganizationMemberProfileLogs log){
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberProfileLogs.class));
+        log.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberProfileLogsDao dao = new EhOrganizationMemberProfileLogsDao(context.configuration());
+        dao.insert(log);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberContracts.class, id);
     }
 }

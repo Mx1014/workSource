@@ -374,7 +374,8 @@ public interface OrganizationProvider {
 
     boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
     void updateProfileIntegrity(Long detailId, Integer integrity);
+//	void updateOrganizationMemberBackGround(OrganizationMemberDetails organizationMemberDetails);
+    void profileLogsUpdate(OrganizationMemberProfileLogs log);
 
-
-    List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 }

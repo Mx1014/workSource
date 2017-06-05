@@ -9836,7 +9836,94 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
+    public void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
+        OrganizationMemberDetails organizationMemberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
+//        log.setOriginalContent(StringHelper.toJsonString(organizationMemberDetails));
+
+        Map<String,String> mapLogs = new HashMap<>();
+        if(cmd.getEnName() != null){
+            organizationMemberDetails.setEnName(cmd.getEnName());
+            mapLogs.put("enName: ", cmd.getEnName());
+        }
+        if(cmd.getBirthday() != null){
+            organizationMemberDetails.setBirthday(java.sql.Date.valueOf(cmd.getBirthday()));
+            mapLogs.put("birthday: ", cmd.getBirthday());
+        }
+        if(cmd.getMaritalFlag() != null){
+            organizationMemberDetails.setMaritalFlag(cmd.getMaritalFlag());
+            mapLogs.put("maritalFlag: ", String.valueOf(cmd.getMaritalFlag()));
+        }
+        if(cmd.getPoliticalStatus() != null){
+            organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus());
+            mapLogs.put("politicalStatus: ", cmd.getPoliticalStatus());
+        }
+        if(cmd.getNativePlace() != null){
+            organizationMemberDetails.setNativePlace(cmd.getNativePlace());
+            mapLogs.put("nativePlace: ", cmd.getNativePlace());
+        }
+        if(cmd.getRegResidence() != null){
+            organizationMemberDetails.setRegResidence(cmd.getRegResidence());
+            mapLogs.put("regResidence: ", cmd.getRegResidence());
+        }
+        if(cmd.getIdNumber() != null){
+            organizationMemberDetails.setIdNumber(cmd.getIdNumber());
+            mapLogs.put("idNumber: ", cmd.getIdNumber());
+        }
+        if(cmd.getEmail() != null){
+            organizationMemberDetails.setEmail(cmd.getEmail());
+            mapLogs.put("eamil: ", cmd.getEmail());
+        }
+        if(cmd.getWechat() != null){
+            organizationMemberDetails.setWechat(cmd.getWechat());
+            mapLogs.put("wechat: ", cmd.getWechat());
+        }
+        if(cmd.getEnName() != null){
+            organizationMemberDetails.setEnName(cmd.getEnName());
+            mapLogs.put("EnName: ", cmd.getEnName());
+        }
+        if(cmd.getQq() != null){
+            organizationMemberDetails.setQq(cmd.getQq());
+            mapLogs.put("qq: ", cmd.getQq());
+        }
+        if(cmd.getEmergencyName() != null){
+            organizationMemberDetails.setEmergencyName(cmd.getEmergencyName());
+            mapLogs.put("emergencyName: ", cmd.getEmergencyName());
+        }
+        if(cmd.getEmergencyContact() != null){
+            organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact());
+            mapLogs.put("emergencyContact: ", cmd.getEmergencyContact());
+        }
+        if(cmd.getAddress() != null){
+            organizationMemberDetails.setAddress(cmd.getAddress());
+            mapLogs.put("address: ", cmd.getAddress());
+        }
+        if(cmd.getSalaryCardNumber() != null){
+            organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber());
+            mapLogs.put("salaryCardNumber: ", cmd.getSalaryCardNumber());
+        }
+        if(cmd.getSocialSecurityNumber() != null){
+            organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
+            mapLogs.put("socialSecurityNumber: ", cmd.getSocialSecurityNumber());
+        }
+        if(cmd.getProvidentFundNumber() != null){
+            organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber());
+            mapLogs.put("providentFundNumber: ", cmd.getProvidentFundNumber());
+        }
+
+        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
+        System.out.println(StringHelper.toJsonString(mapLogs));
+
+        log.setDetailId(organizationMemberDetails.getId());
+        log.setNamespaceId(organizationMemberDetails.getNamespaceId());
+        log.setOperationType("update");
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        log.setOperationTime(now);
+        //  操作人未设置
+        log.setResourceType("eh_organization_member_details");
+        log.setAuditContent(StringHelper.toJsonString(mapLogs));
+        this.organizationProvider.profileLogsUpdate(log);
 
     }
 
