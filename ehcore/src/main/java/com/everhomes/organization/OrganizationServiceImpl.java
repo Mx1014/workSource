@@ -850,11 +850,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private OrganizationExportDetailDTO convertToExportDetail(OrganizationDetailDTO organizationDetailDTO) {
 		OrganizationExportDetailDTO exportDetailDTO = ConvertHelper.convert(organizationDetailDTO, OrganizationExportDetailDTO.class);
-		String apartments = String.join("\n", exportDetailDTO.getAddresses().stream().map(AddressDTO::getAddress).collect(Collectors.toList()));
-		exportDetailDTO.setApartments(apartments);
-		String admins = String.join("\n", exportDetailDTO.getAdminMembers().stream().map(this::toAdminString).collect(Collectors.toList()));
-		exportDetailDTO.setAdmins(admins);
-		exportDetailDTO.setCheckinDateString(DateUtil.dateToStr(new Date(exportDetailDTO.getCheckinDate()), DateUtil.YMR_SLASH));
+		if(exportDetailDTO.getAddresses() != null) {
+			String apartments = String.join("\n", exportDetailDTO.getAddresses().stream().map(AddressDTO::getAddress).collect(Collectors.toList()));
+			exportDetailDTO.setApartments(apartments);
+		}
+		if (exportDetailDTO.getAdminMembers() != null) {
+			String admins = String.join("\n", exportDetailDTO.getAdminMembers().stream().map(this::toAdminString).collect(Collectors.toList()));
+			exportDetailDTO.setAdmins(admins);
+		}
+		if (exportDetailDTO.getCheckinDate() != null) {
+			exportDetailDTO.setCheckinDateString(DateUtil.dateToStr(new Date(exportDetailDTO.getCheckinDate()), DateUtil.YMR_SLASH));
+		}
 		return exportDetailDTO;
 	}
 	
