@@ -8,14 +8,12 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>ownerId: 例行检查所属owner id</li>
  *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>name: 检查名称</li>
- *     <li>startTime: 开始时间</li>
- *     <li>endTime: 结束时间</li>
  *     <li>communityId: 小区id</li>
+ *     <li>routineId: 例行检查id</li>
  * </ul>
- * Created by ying.xiong on 2017/6/1.
+ * Created by ying.xiong on 2017/6/2.
  */
-public class ListRoutineQualityInspectionCommand {
+public class ListRoutineQualityInspectionTasksCommand {
 
     @NotNull
     private Long ownerId;
@@ -25,11 +23,7 @@ public class ListRoutineQualityInspectionCommand {
 
     private Long communityId;
 
-    private Long startTime;
-
-    private Long endTime;
-
-    private String name;
+    private Long routineId;
 
     public Long getCommunityId() {
         return communityId;
@@ -37,22 +31,6 @@ public class ListRoutineQualityInspectionCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
-    }
-
-    public Long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Long endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Long getOwnerId() {
@@ -71,12 +49,12 @@ public class ListRoutineQualityInspectionCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getStartTime() {
-        return startTime;
+    public Long getRoutineId() {
+        return routineId;
     }
 
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
+    public void setRoutineId(Long routineId) {
+        this.routineId = routineId;
     }
 
     @Override

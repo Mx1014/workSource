@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -30,9 +31,9 @@ public class RoutineQualityInspectionDTO {
 
     private String name;
 
-    private Long startTime;
+    private Timestamp startTime;
 
-    private Long endTime;
+    private Timestamp endTime;
 
     private String creatorName;
 
@@ -66,12 +67,16 @@ public class RoutineQualityInspectionDTO {
         this.communityIds = communityIds;
     }
 
-    public Long getEndTime() {
+    public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Long endTime) {
+    public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
+    }
+
+    public void setStartTime(Timestamp startTime) {
+        this.startTime = startTime;
     }
 
     public List<ExecuteGroupAndPosition> getExecuteGroupAndPositionList() {
@@ -106,12 +111,8 @@ public class RoutineQualityInspectionDTO {
         this.ownerType = ownerType;
     }
 
-    public Long getStartTime() {
+    public Timestamp getStartTime() {
         return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
     }
 
     @Override

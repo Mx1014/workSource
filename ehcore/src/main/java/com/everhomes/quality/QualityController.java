@@ -615,6 +615,83 @@ public class QualityController extends ControllerBase {
 		return response;
 	}
 
-	//app端要拼接例行检查
-	
+	/**
+	 * <b>URL: /quality/listRoutineQualityInspection</b>
+	 * <p>查看品质核查例行检查生成的任务-web</p>
+	 */
+	@RequestMapping("listRoutineQualityInspection")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listRoutineQualityInspectionTasks(ListRoutineQualityInspectionTasksCommand cmd) {
+
+//		ListQualityInspectionTasksResponse routineQualityInspections = qualityService.listRoutineQualityInspectionTasks(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countRoutineTaskScores</b>
+	 * <p>检查分数统计</p>
+	 */
+	@RequestMapping("countRoutineTaskScores")
+	@RestReturn(value = CountRoutineTaskScoresResponse.class)
+	public RestResponse countRoutineTaskScores(CountRoutineTaskScoresCommand cmd) {
+
+//		CountRoutineTaskScoresResponse scores = qualityService.countRoutineTaskScores(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countRoutineTasks</b>
+	 * <p>检查生成的任务统计</p>
+	 */
+	@RequestMapping("countRoutineTasks")
+	@RestReturn(value = CountRoutineTasksResponse.class)
+	public RestResponse countRoutineTasks(CountRoutineTasksCommand cmd) {
+
+//		CountRoutineTasksResponse tasks = qualityService.countRoutineTasks(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countRoutineTaskCommunityScores</b>
+	 * <p>检查关联的各项目分数统计</p>
+	 */
+	@RequestMapping("countRoutineTaskCommunityScores")
+	@RestReturn(value = CountScoresResponse.class)
+	public RestResponse countRoutineTaskCommunityScores(CountRoutineTaskCommunityScoresCommand cmd) {
+
+//		CountScoresResponse scores = qualityService.countRoutineTaskCommunityScores(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/countRoutineTaskSpecificationItemScores</b>
+	 * <p>检查关联各扣分项占比</p>
+	 */
+	@RequestMapping("countRoutineTaskSpecificationItemScores")
+	@RestReturn(value = CountRoutineTaskSpecificationItemScoresResponse.class)
+	public RestResponse countRoutineTaskSpecificationItemScores(CountRoutineTaskSpecificationItemScoresCommand cmd) {
+
+//		CountScoresResponse scores = qualityService.countRoutineTaskSpecificationItemScores(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

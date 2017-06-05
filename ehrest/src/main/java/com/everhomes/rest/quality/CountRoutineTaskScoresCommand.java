@@ -11,11 +11,10 @@ import javax.validation.constraints.NotNull;
  *     <li>name: 检查名称</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
- *     <li>communityId: 小区id</li>
  * </ul>
- * Created by ying.xiong on 2017/6/1.
+ * Created by ying.xiong on 2017/6/2.
  */
-public class ListRoutineQualityInspectionCommand {
+public class CountRoutineTaskScoresCommand {
 
     @NotNull
     private Long ownerId;
@@ -23,21 +22,11 @@ public class ListRoutineQualityInspectionCommand {
     @NotNull
     private String ownerType;
 
-    private Long communityId;
-
     private Long startTime;
 
     private Long endTime;
 
     private String name;
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
 
     public Long getEndTime() {
         return endTime;
