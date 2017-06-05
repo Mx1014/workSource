@@ -204,8 +204,8 @@ public class FlowServiceImpl implements FlowService {
         obj.setStatus(FlowStatusType.CONFIG.getCode());
         obj.setOrganizationId(cmd.getOrgId());
         obj.setNamespaceId(cmd.getNamespaceId());
-        obj.setProjectId(cmd.getProjectId());
-        obj.setProjectType(cmd.getProjectType());
+        obj.setProjectType(cmd.getProjectType() != null ? cmd.getProjectType() : EntityType.COMMUNITY.getCode());
+        obj.setProjectId(cmd.getProjectId() != null ? cmd.getProjectId() : 0L);
         obj.setStringTag1(cmd.getStringTag1());
         flowListenerManager.onFlowCreating(obj);
 
@@ -1850,7 +1850,7 @@ public class FlowServiceImpl implements FlowService {
         }
 
         FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
-        flowCase.setCurrentNodeId(0l);
+        flowCase.setCurrentNodeId(0L);
         if (flowCase.getApplyUserId() == null) {
             flowCase.setApplyUserId(UserContext.current().getUser().getId());
         }
