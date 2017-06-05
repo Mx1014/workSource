@@ -9726,24 +9726,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         });
         List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
-        //  获取新增字段
-//        List<OrganizationMemberDetails> detailList = this.organizationProvider.findDetailInfoListByIdIn(detailIds);
-
-
         response.setMembers(res.getMembers().stream().map(r -> {
             OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
-
-            //  添加新增字段
-/*            if (detailList != null) {
-                detailList.forEach(rr -> {
-                    if (rr.getId().equals(dto.getDetailId())) {
-                        dto.setEmployeeStatus(rr.getEmployeeStatus());
-                        dto.setEmploymentTime(rr.getEmploymentTime());
-                        dto.setProfileIntegrity(rr.getProfileIntegrity());
-                        dto.setCheckInTime(rr.getCheckInTime());
-                    }
-                });
-            }*/
 
             //  设置合同到期时间
             if (endTimeList != null) {
@@ -9850,7 +9834,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
         OrganizationMemberDetails organizationMemberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-        OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
 //        log.setOriginalContent(StringHelper.toJsonString(organizationMemberDetails));
 
         Map<String,String> mapLogs = new HashMap<>();
@@ -9926,17 +9909,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
         System.out.println(StringHelper.toJsonString(mapLogs));
 
-        log.setDetailId(organizationMemberDetails.getId());
-        log.setNamespaceId(organizationMemberDetails.getNamespaceId());
-        log.setOperationType("update");
-        Date date = new Date();
-        Timestamp now = new Timestamp(date.getTime());
-        log.setOperationTime(now);
-        //  操作人未设置
-        log.setResourceType("eh_organization_member_details");
-        log.setAuditContent(StringHelper.toJsonString(mapLogs));
-        this.organizationProvider.profileLogsUpdate(log);
-
+        //  存入日志
+        this.addProfileLogs(organizationMemberDetails.getId(),organizationMemberDetails.getNamespaceId(),
+                OperatingType.UPDATE.getCode(),"eh_organization_member_details",
+                StringHelper.toJsonString(mapLogs));
     }
 
     @Override
@@ -9945,9 +9921,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
         OrganizationMemberEducations education = new OrganizationMemberEducations();
+        Map<String, String> mapLog = new HashMap<>();
         education.setDetailId(cmd.getDetailId());
         education.setNamespaceId(cmd.getNamespaceId());
         education.setSchoolName(cmd.getSchoolName());
+//        maplog.put("学校名字：")
         education.setDegree(cmd.getDegree());
         education.setMajor(cmd.getMajor());
         education.setEnrollmentTime(java.sql.Date.valueOf(cmd.getEnrollmentTime()));
@@ -9965,6 +9943,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         education.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
         this.organizationProvider.createOranizationMemberEducationInfo(education);
 
+//        this.addProfileLogs(education.getDetailId(),);
         return ConvertHelper.convert(education, OrganizationMemberEducationsDTO.class);
     }
 
@@ -10252,7 +10231,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd) {
-        return null;
+        ListMemberProfileRecordsCommandResponse response = new ListMemberProfileRecordsCommandResponse();
+        List<OrganizationMemberProfileLogs> records = this.organizationProvider.listMemberRecordChanges(cmd.getDetailId());
+        if(records != null){
+            response.setMemberProfileRecords(records.stream().map(r -> {
+                MemberRecordChangesByProfileDTO dto = ConvertHelper.convert(r,MemberRecordChangesByProfileDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+        }
+        return response;
     }
 
     public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
@@ -10336,12 +10323,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
     }
+
     private void updateDetailAndBindDetailIdAtMember(OrganizationMember organizationMember){
         //更新或创建detail记录
         Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
         //绑定member表的detail_id
         organizationMember.setDetailId(new_detail_id);
         organizationProvider.updateOrganizationMember(organizationMember);
+    }
+
+    private void addProfileLogs(Long detailId, Integer namespaceId, String operationType, String tableName, String auditContent){
+        OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
+        log.setDetailId(detailId);
+        log.setNamespaceId(namespaceId);
+        log.setOperationType(operationType);
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        log.setOperationTime(now);
+        //  操作人未设置
+        log.setResourceType(tableName);
+        log.setAuditContent(auditContent);
+        this.organizationProvider.createProfileLogs(log);
     }
 
 }

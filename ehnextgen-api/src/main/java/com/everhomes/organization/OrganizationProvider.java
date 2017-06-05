@@ -375,11 +375,14 @@ public interface OrganizationProvider {
     boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
     void updateProfileIntegrity(Long detailId, Integer integrity);
 //	void updateOrganizationMemberBackGround(OrganizationMemberDetails organizationMemberDetails);
-    void profileLogsUpdate(OrganizationMemberProfileLogs log);
+    void createProfileLogs(OrganizationMemberProfileLogs log);
 
 	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 
 	public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
+
+    List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
+
 }
