@@ -1,14 +1,9 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowEntitySel;
-import com.everhomes.rest.flow.FlowEventType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 
 public class FlowGraphStartEvent implements FlowGraphEvent {
 	private Long firedUserId;
@@ -38,17 +33,17 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 		ctx.setNextNode(next);
 		ctx.setStepType(FlowStepType.APPROVE_STEP);
 		ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
-		ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount()+1l);
+		ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1L);
 	}
 
 	@Override
 	public Long getFiredButtonId() {
-		return 0l;
+		return 0L;
 	}
 
 	@Override
 	public List<FlowEntitySel> getEntitySel() {
-		return new ArrayList<FlowEntitySel>();
+		return new ArrayList<>();
 	}
 
 	@Override
