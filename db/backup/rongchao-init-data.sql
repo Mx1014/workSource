@@ -1310,6 +1310,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET @namespace_id=999975;
 SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量 
 SET @organization_id = (SELECT MAX(id) FROM `eh_organizations`) + 5; 	-- 需要取eh_organizations的ID最大值并加一定余量，如果修改此值则其path也要改
+SET @eh_organization_communities_id = (SELECT MAX(id) FROM `eh_organization_communities`) + 5; 	--  
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量
 SET @org_group_id = (SELECT MAX(id) FROM `eh_groups`) + 5;  -- 需要取eh_groups的ID的最大值再加一定余量
@@ -1325,8 +1326,8 @@ INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `
 	VALUES(@community_id, UUID(), @shi_id, '深圳市',  @qu_id, '福田区', '荣超大厦', '荣超大厦', '深圳市福田区金田路4036', NULL, '',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 492, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES((@community_geopoint_id := @community_geopoint_id + 1), @community_id, '', 114.06359, 22.54839, 'ws1078f9fk91');
-INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(@organization_id, @community_id);
+INSERT INTO `eh_organization_communities`(id,organization_id, community_id) 
+	VALUES((@eh_organization_communities_id := @eh_organization_communities_id + 1),@organization_id, @community_id);
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
 
