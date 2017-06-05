@@ -12,6 +12,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.blacklist.BlacklistErrorCode;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
@@ -111,7 +112,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             return checkModuleAdmin(ownerType, ownerId, userId, serviceModules.get(0).getModuleId());
         }
         //校验是否拥有全部模块的管理权限
-        return checkAccess(userId, ownerType, ownerId, null, PrivilegeConstants.ALL_SERVICE_MODULE);
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        return aclProvider.checkAccessEx(ownerType, ownerId, PrivilegeConstants.ALL_SERVICE_MODULE, descriptors);
     }
 
     public boolean checkModuleAdmin(String ownerType, Long ownerId, Long userId, Long moduleId){
@@ -119,7 +122,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
-    public boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long privilegeId){
+    public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId){
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
             checkModuleAccess(ownerType, ownerId, userId, serviceModules.get(0).getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
@@ -128,7 +131,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
-    public boolean checkModuleAccess(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId){
+    public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId){
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
             checkModuleAccess(ownerType, ownerId, descriptors, serviceModules.get(0).getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
@@ -208,7 +211,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             }
 
             //校验具体范围下是否拥有模块的全部权限
-            if(checkModuleAccess(ownerType, ownerId, descriptors, privilegeId)){
+            if(checkModuleAllPrivileges(ownerType, ownerId, descriptors, privilegeId)){
                 return true;
             }
 
@@ -220,17 +223,22 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
 
         //校验全部范围下是否拥有模块的全部权限
-        return checkModuleAccess(EntityType.All.getCode(), 0L, descriptors, privilegeId);
+        return checkModuleAllPrivileges(EntityType.All.getCode(), 0L, descriptors, privilegeId);
     }
 
 
 
     @Override
-    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, String portalType, Long portalId, Long privilegeId){
 
-        if(EntityType.ORGANIZATIONS == EntityType.fromCode(ownerType)){
+        if(PortalType.PM == PortalType.fromCode(portalType) || PortalType.ENTERPRISE == PortalType.fromCode(portalType)){
+            Long organizationId = portalId;
             if(null != organizationId){
                 Organization organization = organizationProvider.findOrganizationById(organizationId);
+                //子公司的时候 需要获取root 总公司的id
+                if(0L != organization.getParentId()){
+                    organizationId = Long.valueOf(organization.getPath().split("/")[1]);
+                }
                 if(null != organization){
                     if(OrganizationType.PM == OrganizationType.fromCode(organization.getOrganizationType())){
                         if(checkSuperAdmin(userId, organizationId)){
@@ -257,43 +265,41 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
                     LOGGER.error("Unable to find the organization.organizationId = {}",  organizationId);
                 }
             }
-
-        }else if(EntityType.ZUOLIN_ADMIN == EntityType.fromCode(ownerType)){
+        }else if(PortalType.ZUOLIN == PortalType.fromCode(portalType)){
             if(checkRoleAccess(userId, ownerType, ownerId, null, privilegeId)){
-                LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
+                LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, portalType = {}, portalId = {}, privilegeId={}" , userId, ownerType, ownerId, portalType, portalId, privilegeId);
                 return true;
             }
         }
 
-        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
+        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, portalType = {}, portalId = {}, privilegeId={}" , userId, ownerType, ownerId, portalType, portalId, privilegeId);
         return false;
     }
 
     @Override
-    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        if(checkUserPrivilege(userId, ownerType, ownerId, organizationId, privilegeId)){
+    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, String portalType, Long portalId, Long privilegeId){
+
+        if(null == PortalType.fromCode(portalType)){
+            portalType = UserContext.getCurrentPortalType();
+            portalId = UserContext.getCurrentPortalId();
+        }
+
+        if(null == userId){
+            userId = UserContext.current().getUser().getId();
+        }
+
+        if(checkUserPrivilege(userId, ownerType, ownerId, portalType, portalId, privilegeId)){
             LOGGER.debug("authority success...");
             return;
         }
-        LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
+        LOGGER.error("Insufficient privilege, privilegeId={}, portalType = {}, portalId = {}", privilegeId, portalType, portalId);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
     }
 
     @Override
     public void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId){
-        Long organizationId = null;
-        UserContext userContext = UserContext.current();
-        if(EntityType.fromCode(userContext.getCurrentSceneType()) == EntityType.ORGANIZATIONS){
-            organizationId = userContext.getCurrentSceneId();
-        }
-        if(checkUserPrivilege(UserContext.current().getUser().getId(), ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("authority success...");
-            return;
-        }
-        LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
-        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-                "Insufficient privilege");
+        checkUserAuthority(null, ownerType, ownerId, null, null, privilegeId);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.everhomes.acl;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.menu.Target;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ public interface AuthorizationProvider {
     List<Authorization> deleteAuthorization(String ownerType, Long ownerId, String targetType, Long targetId, String authType, Long authId, String identityType);
 
     void deleteAuthorizationById(Long id);
+
+    List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets);
 
     List<Authorization> listTargetAuthorizations(String ownerType, Long ownerId, String authType, Long authId, String identityType);
 

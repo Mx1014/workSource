@@ -14,21 +14,23 @@ public interface UserPrivilegeMgr {
      * 新权限校验
      * @param ownerType
      * @param ownerId
-     * @param organizationId
+     * @param systemType
+     * @param systemId
      * @param privilegeId
      * @return
      */
-    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, String systemType, Long systemId, Long privilegeId);
 
 
     /**
      * 新权限校验
      * @param ownerType
      * @param ownerId
-     * @param organizationId
+     * @param portalType
+     * @param portalId
      * @param privilegeId
      */
-    void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+    void checkUserAuthority(Long userId, String ownerType, Long ownerId, String portalType, Long portalId, Long privilegeId);
 
     /**
      * 校验公司管理员
@@ -89,7 +91,7 @@ public interface UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long privilegeId);
+    boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId);
 
     /**
      * 校验模块权限
@@ -121,7 +123,7 @@ public interface UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    boolean checkModuleAccess(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId);
+    boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId);
 
     /**
      * 校验当前用户的权限

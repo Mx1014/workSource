@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.WebMenuCategory;
 import com.everhomes.rest.organization.OrganizationType;
@@ -33,6 +35,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
+	@Autowired
+	private OrganizationService organizationService;
+
+	@Autowired
+	private AuthorizationProvider authorizationProvider;
+
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
 		UserContext userContext = UserContext.current();
@@ -52,7 +60,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(null != organization){
 				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
+					listPmWebMenu(user.getId(), menu, categories, organizationId);
 				}else{
+					listEnterpriseWebMenu(user.getId(), menu, categories, organizationId);
 				}
 			}
 
@@ -70,12 +80,45 @@ public class WebMenuServiceImpl implements WebMenuService {
 		if(null != menu){
 			path = menu.getPath() + "/%";
 		}
-		if(resolver.checkSuperAdmin(userId, organizationId)){
-			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, menu.getPath() + "/%", null);
+		List<Target> targets = new ArrayList<>();
+		targets.add(new Target(EntityType.USER.getCode(), userId));
+		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
+			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
 		}else{
-
+			List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
+			for (Long orgId: orgIds) {
+				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
+			}
+			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
+			if(null != moduleIds && moduleIds.size() > 0)
+				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
 		}
-		return null;
+
+		if(null == menus || menus.size() == 0){
+			return new ArrayList<>();
+		}
+
+		return processWebMenus(menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
+	}
+
+	private List<WebMenuDTO> listEnterpriseWebMenu(Long userId, WebMenu menu, List<String> categories, Long organizationId){
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		List<WebMenu> menus = null;
+		String path = null;
+		if(null != menu){
+			path = menu.getPath() + "/%";
+		}
+		if(resolver.checkOrganizationAdmin(userId, organizationId)){
+			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
+		}
+		if(null == menus || menus.size() == 0){
+			return new ArrayList<>();
+		}
+		return processWebMenus(menus.stream().map(r->{
+			return ConvertHelper.convert(r, WebMenuDTO.class);
+		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 	}
 
 	private List<WebMenuDTO> listZuolinAdminWebMenu(Long userId, WebMenu menu, List<String> categories) {
@@ -84,6 +127,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 			path = menu.getPath() + "/%";
 		}
 		List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.ZUOLIN.getCode(), categories, path, null);
+		if(null == menus || menus.size() == 0){
+			return new ArrayList<>();
+		}
 		return processWebMenus(menus.stream().map(r->{
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();

@@ -6,8 +6,8 @@ package com.everhomes.rest.domain;
  * </p>
  * <ul>
  * <li>namespaceId: 域空间</li>
- * <li>ownerType: 配置类型，左邻域类型：EhZuolinAdmins，机构类型（包括物业公司和企业）：EhOrganizations</li>
- * <li>ownerId: 配置类型，左邻域类型填0，机构类型（包括物业公司和企业）填具体id</li>
+ * <li>portalType: 门户类型，左邻域类型：zuolin，物业公司:pm 和企业：enterprise</li>
+ * <li>portalId: 配置类型，左邻域类型填0，物业公司和企业填具体id</li>
  * <li>domain: 域名</li>
  * <ul>
  */
@@ -16,9 +16,9 @@ public class DomainDTO {
 
 	private Integer namespaceId;
 
-	private String ownerType;
+	private String portalType;
 
-	private Long ownerId;
+	private Long portalId;
 
 	private String domain;
 
@@ -30,20 +30,20 @@ public class DomainDTO {
 		this.namespaceId = namespaceId;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
+	public String getPortalType() {
+		return portalType;
 	}
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
+	public void setPortalType(String portalType) {
+		this.portalType = portalType;
 	}
 
-	public Long getOwnerId() {
-		return ownerId;
+	public Long getPortalId() {
+		return portalId;
 	}
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	public void setPortalId(Long portalId) {
+		this.portalId = portalId;
 	}
 
 	public String getDomain() {

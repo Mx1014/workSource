@@ -15,8 +15,8 @@ public class UserContext {
     private String version;
     private String versionRealm;
     private String scheme;
-    private Long sceneId;
-    private String sceneType;
+    private Long portalId;
+    private String portalType;
     
     public UserContext() {
     }
@@ -130,25 +130,35 @@ public class UserContext {
         this.scheme = scheme;
     }
 
-    public static Long getCurrentSceneId() {
-        return current().sceneId;
-    }
-    public static void setCurrentSceneId(Long sceneId) {
-        current().setSceneId(sceneId);
+    public static Long getCurrentPortalId() {
+        return current().portalId;
     }
 
-    public void setSceneId(Long sceneId) {
-        this.sceneId = sceneId;
+    public static void setCurrentPortalId(Long portalId) {
+        current().setPortalId(portalId);
     }
 
-    public static String getCurrentSceneType() {
-        return current().sceneType;
+
+    public static String getCurrentPortalType() {
+        return current().portalType;
     }
-    public static void setCurrentSceneType(String sceneType) {
-        current().setSceneId(sceneType);
+    public static void setCurrentPortalType(String portalType) {
+        current().setPortalType(portalType);
     }
 
-    public void setSceneId(String sceneType) {
-        this.sceneType = sceneType;
+    public Long getPortalId() {
+        return portalId;
+    }
+
+    public void setPortalId(Long portalId) {
+        this.portalId = portalId;
+    }
+
+    public String getPortalType() {
+        return portalType;
+    }
+
+    public void setPortalType(String portalType) {
+        this.portalType = portalType;
     }
 }

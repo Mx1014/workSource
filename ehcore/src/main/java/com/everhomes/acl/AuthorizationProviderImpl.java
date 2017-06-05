@@ -5,9 +5,11 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.menu.Target;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.IdentityType;
 import com.everhomes.sequence.SequenceProvider;
@@ -20,6 +22,7 @@ import com.everhomes.server.schema.tables.records.EhAuthorizationRelationsRecord
 import com.everhomes.server.schema.tables.records.EhAuthorizationsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -76,6 +79,24 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
+	public List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Long> result  = new ArrayList<>();
+		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE.getCode());
+		for (Target target:targets) {
+			cond = cond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+		}
+		query.addConditions(cond);
+		query.addGroupBy(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID);
+		query.fetch().map((r) -> {
+			result.add(r.getAuthId());
+			return null;
+		});
+		return result;
+	}
+
+	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		if(null != pageSize)
@@ -104,6 +125,8 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		return result;
 	}
+
+
 
 	@Override
 	public List<AuthorizationRelation> listAuthorizationRelations(CrossShardListingLocator locator, Integer pageSize, String ownerType, Long ownerId, Long moduleId){

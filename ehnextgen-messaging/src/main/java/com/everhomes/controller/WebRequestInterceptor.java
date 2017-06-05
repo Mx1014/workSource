@@ -10,6 +10,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
@@ -133,6 +134,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             setupNamespaceIdContext(userAgents);
             setupVersionContext(userAgents);
             setupScheme(userAgents);
+            setupPortal(request);
             if (isProtected(handler)) {
                 LoginToken token = userService.getLoginToken(request);
                 // isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -221,6 +223,18 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //
 //		return this.userService.isValidLoginToken(token);
 //	}
+
+    private void setupPortal(HttpServletRequest request){
+        String portalType = request.getParameter("portalType");
+        if(null != PortalType.fromCode(portalType)){
+            UserContext.setCurrentPortalType(portalType);
+            String portalIdStr = request.getParameter("portalId");
+            if(!org.springframework.util.StringUtils.isEmpty(portalIdStr)){
+                UserContext.setCurrentPortalId(Long.valueOf(portalIdStr));
+            }
+        }
+
+    }
 
     private void setupScheme(Map<String, String> userAgents) {
         UserContext context = UserContext.current();
