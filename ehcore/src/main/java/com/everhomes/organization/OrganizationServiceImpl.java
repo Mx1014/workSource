@@ -7707,16 +7707,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
-        if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)) {
+        if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskAllListPosts)) {
 
-        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)) {
+        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskGuaranteeListPosts)) {
             if (StringUtils.isEmpty(cmd.getTaskType())) {
                 cmd.setTargetId(user.getId());
             } else if (!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS) {
                 returnNoPrivileged(null, user);
             }
             cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)) {
+        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskSeekHelpListPosts)) {
             if (StringUtils.isEmpty(cmd.getTaskType())) {
                 cmd.setTargetId(user.getId());
             } else if (!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP) {
@@ -7739,13 +7739,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			/* 根据用户不同 查询不同的任务类型贴*/
 
         cmd.setTargetId(user.getId());
-        if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)) {
-        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)) {
+        if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskAllListPosts)) {
+        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskGuaranteeListPosts)) {
             if (!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS) {
                 returnNoPrivileged(null, user);
             }
             cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)) {
+        } else if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.TaskSeekHelpListPosts)) {
             if (!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP) {
                 returnNoPrivileged(null, user);
             }
@@ -8275,7 +8275,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             Organization organization = organizationProvider.findOrganizationById(organizationId);
             if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
                 try {
-                    if (resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), organizationId, organizationId, PrivilegeConstants.OfficialActivity)) {
+                    if (resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), organizationId, null, null, PrivilegeConstants.OfficialActivity)) {
                         response.setOfficialFlag((byte) 1);
                     }
                 } catch (Exception e) {

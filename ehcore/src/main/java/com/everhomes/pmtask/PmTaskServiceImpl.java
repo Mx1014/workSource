@@ -233,17 +233,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		
 		List<String> result = new ArrayList<>();
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.LISTALLTASK))
 				result.add(PmTaskPrivilege.LISTALLTASK.getCode());
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.LISTUSERTASK))
 				result.add(PmTaskPrivilege.LISTUSERTASK.getCode());
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.ASSIGNTASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.ASSIGNTASK))
 				result.add(PmTaskPrivilege.ASSIGNTASK.getCode());
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.COMPLETETASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.COMPLETETASK))
 				result.add(PmTaskPrivilege.COMPLETETASK.getCode());
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.CLOSETASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.CLOSETASK))
 				result.add(PmTaskPrivilege.CLOSETASK.getCode());
-			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.REVISITTASK))
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), null, null, PrivilegeConstants.REVISITTASK))
 				result.add(PmTaskPrivilege.REVISITTASK.getCode());
 		dto.setPrivileges(result);
 		return dto;
@@ -251,7 +251,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	private void checkPrivilege(Long organizationId, String ownerType, Long ownerId, Long userId, Long privilegeId) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-		if(!resolver.checkUserPrivilege(userId, ownerType, ownerId, organizationId, privilegeId)){
+		if(!resolver.checkUserPrivilege(userId, ownerType, ownerId, null, null, privilegeId)){
     		returnNoPrivileged(Collections.singletonList(privilegeId), userId);
 		}
 	}
@@ -1583,7 +1583,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 					//检查 （超级管理员，模块管理员都不添加物业报修子权限，会覆盖物业报修模块权限） 如果没有物业报修模块权限，才添加物业报修的权限  add by sw 20170120
 					if (!resolver.checkUserPrivilege(t, EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
-							cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+							null, null, PrivilegeConstants.PM_TASK_MODULE)) {
 
 						rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(),
 								EntityType.USER.getCode(), t, "pmtask", privilegeIds);
@@ -1818,7 +1818,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			User user = UserContext.current().getUser();
 			List<CommunityDTO> result = new ArrayList<>();
 			dtos.forEach(r -> {
-				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), null, null, PrivilegeConstants.REPLACE_CREATE_TASK)) {
 					result.add(r);
 				}
 			});

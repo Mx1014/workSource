@@ -196,13 +196,13 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(CreateClearanceLogCommand cmd) {
-        userPrivilegeMgr.checkUserAuthority(
-                currUserId(),
-                EntityType.PARKING_LOT.getCode(),
-                cmd.getParkingLotId(),
-                cmd.getOrganizationId(),
-                APPLY_PRIVILEGE_ID
-        );
+//        userPrivilegeMgr.checkUserAuthority(
+//                currUserId(),
+//                EntityType.PARKING_LOT.getCode(),
+//                cmd.getParkingLotId(),
+//                cmd.getOrganizationId(),
+//                APPLY_PRIVILEGE_ID
+//        );
         // 上面的权限检查会放过超级管理员, 但是需求是不放过
         checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
     }
@@ -468,7 +468,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
-                            cmd.getOrganizationId(), privilegeId);
+                            null, null, privilegeId);
 
                     // 上面的权限检查会放过超级管理员, 但是需求是不放过
                     checkUserNotInOperatorList(parkingLot.getId(), operatorType);

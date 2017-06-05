@@ -2502,7 +2502,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             User user = UserContext.current().getUser();
             List<CommunityDTO> result = new ArrayList<>();
             dtos.forEach(r -> {
-                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), null, null, PrivilegeConstants.REPLACE_CREATE_TASK)) {
                     result.add(r);
                 }
             });

@@ -55,8 +55,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
 
-		if(EntityType.fromCode(userContext.getCurrentSceneType()) == EntityType.ORGANIZATIONS){
-			Long organizationId = UserContext.getCurrentSceneId();
+		if(EntityType.fromCode(UserContext.getCurrentPortalType()) == EntityType.ORGANIZATIONS){
+			Long organizationId = UserContext.getCurrentPortalId();
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(null != organization){
 				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
