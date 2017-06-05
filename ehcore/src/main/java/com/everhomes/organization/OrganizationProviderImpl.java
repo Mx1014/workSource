@@ -4408,10 +4408,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     	return result;
 	}
 
-
-
-
-
 	@Override
     public void createOranizationMemberInsurance(OrganizationMemberInsurances insurance){
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberInsurances.class));
@@ -4513,6 +4509,35 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+    /**
+     * 根据公司organization_id和电话contact_id判断是否创建或更新member_detail表
+     **/
+    @Override
+    public Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails) {
+        Long organization_id = organizationMemberDetails.getOrganizationId();
+        String contactToken = organizationMemberDetails.getContactToken();
+        OrganizationMemberDetails detail = findOrganizationMemberDetailsByOrganizationIdAndContactToken(organization_id, contactToken);
+        Long new_detail_id = 0L;
+        if (detail == null) {
+            new_detail_id = createOrganizationMemberDetails(organizationMemberDetails);
+        } else {
+            new_detail_id = detail.getId();
+            updateOrganizationMemberDetails(organizationMemberDetails, new_detail_id);
+        }
+        return new_detail_id;
+    }
+
+    @Override
+    public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizationMemberDetails.class));
+        SelectQuery<EhOrganizationMemberDetailsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(contactToken));
+        OrganizationMemberDetails detail = query.fetchAny().map(r -> {
+            return ConvertHelper.convert(r, OrganizationMemberDetails.class);
+        });
+        return detail;
+    }
 
     public boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -4523,4 +4548,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return false;
         return true;
     }
+
+
 }

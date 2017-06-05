@@ -8636,9 +8636,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                     // 记录一下，成员是新加入公司的
                     joinEnterpriseMap.put(enterpriseId, true);
                     organizationProvider.createOrganizationMember(organizationMember);
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    updateDetailAndBindDetailIdAtMember(organizationMember);
                 } else {
                     organizationMember.setId(desOrgMember.getId());
                     organizationProvider.updateOrganizationMember(organizationMember);
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    updateDetailAndBindDetailIdAtMember(organizationMember);
                 }
             }
 
@@ -8658,6 +8662,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                         organizationMember.setOrganizationId(departmentId);
 
                         organizationProvider.createOrganizationMember(organizationMember);
+                        /**Modify BY lei.lv cause MemberDetail**/
+                        updateDetailAndBindDetailIdAtMember(organizationMember);
 
                         departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
                     }
@@ -8676,6 +8682,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setOrganizationId(groupId);
 
                     organizationProvider.createOrganizationMember(organizationMember);
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    updateDetailAndBindDetailIdAtMember(organizationMember);
 
                     groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -8694,6 +8702,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setGroupType(group.getGroupType());
 
                     organizationProvider.createOrganizationMember(organizationMember);
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    updateDetailAndBindDetailIdAtMember(organizationMember);
 
                     jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -8711,6 +8721,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setGroupType(group.getGroupType());
 
                     organizationProvider.createOrganizationMember(organizationMember);
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    updateDetailAndBindDetailIdAtMember(organizationMember);
 
                     jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
                 }
@@ -10166,6 +10178,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             result.setBackEndIntegrity(25);
         result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
         return result;
+    }
+
+    private void updateDetailAndBindDetailIdAtMember(OrganizationMember organizationMember){
+        //更新或创建detail记录
+        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+        //绑定member表的detail_id
+        organizationMember.setDetailId(new_detail_id);
+        organizationProvider.updateOrganizationMember(organizationMember);
     }
 
 

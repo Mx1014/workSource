@@ -376,4 +376,8 @@ public interface OrganizationProvider {
 
 
     List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+
+	public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
+
+	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
 }
