@@ -4247,11 +4247,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(memberDetails,OrganizationMemberDetails.class);
     }
 
-    public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId){
+    public void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long id){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());
         dao.update(organizationMemberDetails);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, detailId);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
+
     }
 
     public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
@@ -4543,11 +4544,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         int count = context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
                 .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_STATUS, employeeStatus)
-                .where(Tables.EH_ORGANIZATION_MEMBERS.ID.eq(id)).execute();
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
         if(count == 0)
             return false;
         return true;
     }
 
+    public void updateProfileIntegrity(Long detailId, Integer integrity){
+        DSLContext context = this.dbProvider.getDslContext((AccessSpec.readWrite()));
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.PROFILE_INTEGRITY, integrity)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
+    }
 
+
+
+    public void profileLogsUpdate(OrganizationMemberProfileLogs log){
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberProfileLogs.class));
+        log.setId(id);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationMemberProfileLogsDao dao = new EhOrganizationMemberProfileLogsDao(context.configuration());
+        dao.insert(log);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberContracts.class, id);
+    }
 }

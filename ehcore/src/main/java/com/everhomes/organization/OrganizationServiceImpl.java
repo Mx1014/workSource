@@ -9848,7 +9848,94 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd) {
+    public void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
+        OrganizationMemberDetails organizationMemberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
+        OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
+//        log.setOriginalContent(StringHelper.toJsonString(organizationMemberDetails));
+
+        Map<String,String> mapLogs = new HashMap<>();
+        if(cmd.getEnName() != null){
+            organizationMemberDetails.setEnName(cmd.getEnName());
+            mapLogs.put("enName: ", cmd.getEnName());
+        }
+        if(cmd.getBirthday() != null){
+            organizationMemberDetails.setBirthday(java.sql.Date.valueOf(cmd.getBirthday()));
+            mapLogs.put("birthday: ", cmd.getBirthday());
+        }
+        if(cmd.getMaritalFlag() != null){
+            organizationMemberDetails.setMaritalFlag(cmd.getMaritalFlag());
+            mapLogs.put("maritalFlag: ", String.valueOf(cmd.getMaritalFlag()));
+        }
+        if(cmd.getPoliticalStatus() != null){
+            organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus());
+            mapLogs.put("politicalStatus: ", cmd.getPoliticalStatus());
+        }
+        if(cmd.getNativePlace() != null){
+            organizationMemberDetails.setNativePlace(cmd.getNativePlace());
+            mapLogs.put("nativePlace: ", cmd.getNativePlace());
+        }
+        if(cmd.getRegResidence() != null){
+            organizationMemberDetails.setRegResidence(cmd.getRegResidence());
+            mapLogs.put("regResidence: ", cmd.getRegResidence());
+        }
+        if(cmd.getIdNumber() != null){
+            organizationMemberDetails.setIdNumber(cmd.getIdNumber());
+            mapLogs.put("idNumber: ", cmd.getIdNumber());
+        }
+        if(cmd.getEmail() != null){
+            organizationMemberDetails.setEmail(cmd.getEmail());
+            mapLogs.put("eamil: ", cmd.getEmail());
+        }
+        if(cmd.getWechat() != null){
+            organizationMemberDetails.setWechat(cmd.getWechat());
+            mapLogs.put("wechat: ", cmd.getWechat());
+        }
+        if(cmd.getEnName() != null){
+            organizationMemberDetails.setEnName(cmd.getEnName());
+            mapLogs.put("EnName: ", cmd.getEnName());
+        }
+        if(cmd.getQq() != null){
+            organizationMemberDetails.setQq(cmd.getQq());
+            mapLogs.put("qq: ", cmd.getQq());
+        }
+        if(cmd.getEmergencyName() != null){
+            organizationMemberDetails.setEmergencyName(cmd.getEmergencyName());
+            mapLogs.put("emergencyName: ", cmd.getEmergencyName());
+        }
+        if(cmd.getEmergencyContact() != null){
+            organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact());
+            mapLogs.put("emergencyContact: ", cmd.getEmergencyContact());
+        }
+        if(cmd.getAddress() != null){
+            organizationMemberDetails.setAddress(cmd.getAddress());
+            mapLogs.put("address: ", cmd.getAddress());
+        }
+        if(cmd.getSalaryCardNumber() != null){
+            organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber());
+            mapLogs.put("salaryCardNumber: ", cmd.getSalaryCardNumber());
+        }
+        if(cmd.getSocialSecurityNumber() != null){
+            organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
+            mapLogs.put("socialSecurityNumber: ", cmd.getSocialSecurityNumber());
+        }
+        if(cmd.getProvidentFundNumber() != null){
+            organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber());
+            mapLogs.put("providentFundNumber: ", cmd.getProvidentFundNumber());
+        }
+
+        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
+        System.out.println(StringHelper.toJsonString(mapLogs));
+
+        log.setDetailId(organizationMemberDetails.getId());
+        log.setNamespaceId(organizationMemberDetails.getNamespaceId());
+        log.setOperationType("update");
+        Date date = new Date();
+        Timestamp now = new Timestamp(date.getTime());
+        log.setOperationTime(now);
+        //  操作人未设置
+        log.setResourceType("eh_organization_member_details");
+        log.setAuditContent(StringHelper.toJsonString(mapLogs));
+        this.organizationProvider.profileLogsUpdate(log);
 
     }
 
@@ -10171,15 +10258,84 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
         OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
         PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
-        if(response.getBasic().getContactName() == null)
-        if(response.getBasic().getJobLevels().size() <= 0)
+
+        //  基本信息完整度判断
+        if (response.getBasic().getContactName() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getGender() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getAvatar() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getDepartments().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getJobPositions().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getJobLevels().size() <= 0)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getEmployeeType() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getCheckInTime() == null)
+            result.setBasicIntegrity(0);
+        else if (response.getBasic().getContactToken() == null)
+            result.setBasicIntegrity(0);
+        else
+            result.setBasicIntegrity(25);
+
+        //  背景信息完整度判断
+        if(response.getBasic().getEnName() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getBirthday() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getMaritalFlag() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getPoliticalStatus() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getNativePlace() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getRegResidence() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getIdNumber() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmail() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getWechat() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getQq() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmergencyName() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getEmergencyContact() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getBasic().getAddress() == null)
+            result.setBackEndIntegrity(0);
+        else if(response.getEducation().getEducations().size() <= 0)
             result.setBackEndIntegrity(0);
         else
-            result.setBackEndIntegrity(25);
+            result.setBackEndIntegrity(45);
+
+        //  社保信息完整度判断
+        if(response.getBasic().getSalaryCardNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getBasic().getSocialSecurityNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getBasic().getProvidentFundNumber() == null)
+            result.setSocialSecurityIntegrity(0);
+        else if(response.getInsurance().getInsurances().size() <= 0)
+            result.setSocialSecurityIntegrity(0);
+        else
+            result.setSocialSecurityIntegrity(15);
+
+        //  合同信息完整度判断
+        if(response.getContract().getContracts().size() <= 0)
+            result.setContractIntegrity(0);
+        else
+            result.setContractIntegrity(15);
+
+        //  返回结果至数据库
         result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
+        this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
     }
-
     private void updateDetailAndBindDetailIdAtMember(OrganizationMember organizationMember){
         //更新或创建detail记录
         Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
@@ -10187,8 +10343,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setDetailId(new_detail_id);
         organizationProvider.updateOrganizationMember(organizationMember);
     }
-
-
 
 }
 

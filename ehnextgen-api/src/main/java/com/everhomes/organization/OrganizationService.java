@@ -455,7 +455,7 @@ public interface OrganizationService {
                                                           Long directlyOrgId, String contactToken,
                                                           String targetType, Long targetId, String nickName);*/
 
-    void updateOrganizationMemberBasicInfo(UpdateOrganizationMemberBasicInfoCommand cmd);
+    void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd);
 
     //	OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd);
 //	void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd);

@@ -372,10 +372,12 @@ public interface OrganizationProvider {
     void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
 
-    boolean updateOrganizationEmployeeStatus(Long id,Byte employeeStatus);
+    boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
+    void updateProfileIntegrity(Long detailId, Integer integrity);
+//	void updateOrganizationMemberBackGround(OrganizationMemberDetails organizationMemberDetails);
+    void profileLogsUpdate(OrganizationMemberProfileLogs log);
 
-
-    List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
+	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 
 	public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
