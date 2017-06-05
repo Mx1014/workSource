@@ -645,6 +645,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 	private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
+        Long userId = UserContext.current().getUser().getId();
+
 		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
 		if(null == organization){
@@ -658,11 +660,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		}
 
+		OrganizationDTO organizationDTO = processOrganizationCommunity(ConvertHelper.convert(organization, OrganizationDTO.class));
+
 		if(null == org){
 			org = new OrganizationDetail();
+			org.setOrganizationId(organization.getId());
 		}
-		org.setOrganizationId(organization.getId());
-		org.setDisplayName(organization.getName());
 
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
 		//modify by dengs,20170512,将经纬度转换成 OrganizationDetailDTO 里面的类型，不改动dto，暂时不影响客户端。后面考虑将dto的经纬度改成Double
@@ -673,6 +676,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//end
 		dto.setEmailDomain(org.getEmailDomain());
 		dto.setName(organization.getName());
+		dto.setCommunityId(organizationDTO.getCommunityId());
+		dto.setCommunityName(organizationDTO.getCommunityName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
 			dto.setCheckinDate(org.getCheckinDate().getTime());
@@ -714,6 +719,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dto.setAccountPhone(org.getContact());
 
 		dto.setServiceUserId(org.getServiceUserId());
+
+        OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, id);
+        if(null != m ){
+            dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
+        }
+
 		return dto;
 	}
 
@@ -6810,9 +6821,8 @@ System.out.println();
 
 	private String getNotifyText(Organization org, OrganizationMember member, User user, int code){
 		Map<String, String> map = new HashMap<String, String>();
-
         map.put("enterpriseName", org.getName());
-        map.put("userName", member.getContactName());
+        map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : member.getContactName());
         if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getApplyDescription()));
         } else {
@@ -9162,7 +9172,7 @@ System.out.println();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		//通过namespace和email domain 找企业
 		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
-		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
+		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(UserContext.getCurrentNamespaceId(), emailDomain,cmd.getCommunityId());
 		//TODO: 判断邮箱是否被使用
 		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
 		if(null != member ){
@@ -9178,9 +9188,17 @@ System.out.println();
 //			cmd2.setOrganizationId(organizations.get(0).getId());
 //			applyForEnterpriseContactByEmail(cmd2);
 //		}
-
 		return organizations.stream().map(r->{
-			return ConvertHelper.convert(r, OrganizationDTO.class);
+			OrganizationDTO dto = processOrganizationCommunity(ConvertHelper.convert(r, OrganizationDTO.class));
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(dto.getId());
+			if(null != detail){
+				dto.setDisplayName(detail.getDisplayName());
+			}
+            OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, r.getId());
+            if(null != m ){
+                dto.setMemberStatus(m.getStatus());
+            }
+			return dto;
 			}).collect(Collectors.toList());
 	}
 
@@ -9208,10 +9226,10 @@ System.out.println();
 		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
-
+        String nickName = UserContext.current().getUser().getNickName();
 		String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
 		String locale = "zh_CN";
-		map.put("nickName", UserContext.current().getUser().getNickName());
+		map.put("nickName", null == nickName ? useridentifier.getIdentifierToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : nickName);
 		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
 		String appName = "左邻";
 		if(null != namespace && namespace.getName() != null)

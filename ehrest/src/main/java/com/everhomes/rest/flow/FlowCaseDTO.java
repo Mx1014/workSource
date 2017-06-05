@@ -2,10 +2,7 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
-import java.util.List;
 import java.sql.Timestamp;
-
-import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
@@ -17,9 +14,9 @@ import com.everhomes.discover.ItemType;
  * <li>moduleLink: 路由信息，比如 zl://停车月卡申请/[申请ID] </li>
  * <li>content: 业务处理的内容 </li>
  * <li>createTime: 创建时间 </li>
- * <li>status: @{link com.everhomes.rest.flow.FlowCaseStatus} </li>
- * <li>isEvaluate: 0: 不需要评价， 1:待评价，2: 已评价</li>
- * <li>evaluate_score: 评价分数</li>
+ * <li>status: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus}</li>
+ * <li>needEvaluate: 0: 不需要评价， 1:待评价，2: 已评价</li>
+ * <li>evaluateScore: 评价分数</li>
  * <li>allowApplierUpdate: 是否可以编辑</li>
  * <li>flowNodeName: 当前节点名字</li>
  * <li>processorUserName: 当前处理人</li>
