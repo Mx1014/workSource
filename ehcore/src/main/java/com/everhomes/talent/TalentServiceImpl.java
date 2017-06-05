@@ -113,6 +113,10 @@ public class TalentServiceImpl implements TalentService {
 		}
 		Integer namespaceId = namespaceId();
 		talentCategoryDTOs.forEach(t->{
+			if (TalentCategory.otherName().equals(t.getName()) && (t.getId() == null || t.getId().longValue() != TalentCategory.otherId())) {
+				throw RuntimeErrorException.errorWith(TalentServiceErrorCode.SCOPE,
+						TalentServiceErrorCode.DUPLICATED_NAME, "duplicated name");
+			}
 			TalentCategory talentCategory = talentCategoryProvider.findTalentCategoryByName(namespaceId, t.getName());
 			if (talentCategory != null && (t.getId() == null || t.getId().longValue() != talentCategory.getId().longValue())) {
 				throw RuntimeErrorException.errorWith(TalentServiceErrorCode.SCOPE,
@@ -161,6 +165,7 @@ public class TalentServiceImpl implements TalentService {
 				}
 				talentCategory.setStatus(CommonStatus.INACTIVE.getCode());
 				talentCategoryProvider.updateTalentCategory(talentCategory);
+				talentProvider.updateToOther(talentCategory.getId());
 			}
 		}
 	}

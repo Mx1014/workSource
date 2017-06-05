@@ -19,4 +19,6 @@ public interface TalentProvider {
 
 	List<Talent> listTalent(Integer namespaceId, ListTalentCommand cmd);
 
+	void updateToOther(Long categoryId);
+
 }

@@ -60,6 +60,19 @@ public class TalentProviderImpl implements TalentProvider {
 	}
 
 	@Override
+	public void updateToOther(Long categoryId) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		Long userId = UserContext.current().getUser().getId();
+		
+		getReadWriteContext().update(Tables.EH_TALENTS)
+			.set(Tables.EH_TALENTS.CATEGORY_ID, -1L)
+			.set(Tables.EH_TALENTS.UPDATE_TIME, now)
+			.set(Tables.EH_TALENTS.OPERATOR_UID, userId)
+			.where(Tables.EH_TALENTS.CATEGORY_ID.eq(categoryId))
+			.execute();
+	}
+
+	@Override
 	public void updateTalentId(Talent talent) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTalents.class));
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
