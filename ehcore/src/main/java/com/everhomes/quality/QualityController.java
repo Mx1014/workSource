@@ -616,22 +616,6 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/listRoutineQualityInspection</b>
-	 * <p>查看品质核查例行检查生成的任务-web</p>
-	 */
-	@RequestMapping("listRoutineQualityInspection")
-	@RestReturn(value = ListQualityInspectionTasksResponse.class)
-	public RestResponse listRoutineQualityInspectionTasks(ListRoutineQualityInspectionTasksCommand cmd) {
-
-//		ListQualityInspectionTasksResponse routineQualityInspections = qualityService.listRoutineQualityInspectionTasks(cmd);
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
 	 * <b>URL: /quality/countRoutineTaskScores</b>
 	 * <p>检查分数统计</p>
 	 */
