@@ -1,10 +1,12 @@
 package com.everhomes.organization;
 
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberDetails;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
@@ -23,17 +25,22 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
 
     public OrganizationMemberDetails(OrganizationMember member) {
+        java.util.Date nDate = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDate = sdf.format(nDate);
+        java.sql.Date now = java.sql.Date.valueOf(sDate);
+
         //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
         Long directOrgId = 0L;
-        if(member.getGroupType().equals("ENTERPRISE")){
+        if (member.getGroupType().equals("ENTERPRISE")) {
             directOrgId = member.getOrganizationId();
-        }else {
+        } else {
             Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
             directOrgId = org.getDirectlyEnterpriseId();
         }
 
-        this.setId(member.getDetailId());
-        this.setNamespaceId(member.getNamespaceId());
+        this.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
+        this.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
         this.setOrganizationId(directOrgId);
         this.setContactName(member.getContactName());
         this.setContactToken(member.getContactToken());
@@ -41,10 +48,10 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
         this.setEmployeeNo(member.getEmployeeNo());
         this.setAvatar(member.getAvatar());
         this.setGender(member.getGender());
-        this.setEmployeeStatus(member.getEmployeeStatus());
+        this.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
         this.setEmploymentTime(member.getEmploymentTime());
         this.setProfileIntegrity(member.getProfileIntegrity());
-        this.setCheckInTime(member.getCheckInTime());
+        this.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
     }
 
     public String getTargetType() {
