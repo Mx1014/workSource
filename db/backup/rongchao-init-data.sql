@@ -1320,6 +1320,7 @@ SET @building_id = (SELECT MAX(id) FROM `eh_buildings`) + 5;   -- 取eh_building
 SET @sheng_id = 18160;  -- 广东
 SET @shi_id = 18161;  -- 深圳
 SET @qu_id = 18162;    -- 福田
+SET @namespace_resource_id = (SELECT MAX(id) FROM `eh_namespace_resources`);
 
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
