@@ -1739,6 +1739,7 @@ public class FlowServiceImpl implements FlowService {
             dto.setRemindCount(dto.getRemindCount() - 1);
             // dto.setTimeoutAtTick(dto.getRemindTick());
             ft.setId(null);
+            ft.setStatus(FlowStatusType.VALID.getCode());
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
@@ -2118,6 +2119,7 @@ public class FlowServiceImpl implements FlowService {
         List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
         if (evas != null && evas.size() > 0) {
             dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
+            // dto.setNeedEvaluate((byte) 2);
         } else {
             if (1 == type && !snapshotFlow.getNeedEvaluate().equals((byte) 0)
                     && flowNode.getNodeLevel() >= snapshotFlow.getEvaluateStart()
@@ -3465,9 +3467,16 @@ public class FlowServiceImpl implements FlowService {
                     "flowId not exists");
         }
 
-        if (cmd.getItems() != null && cmd.getItems().size() > 5) {
-            throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR,
-                    "items size error!");
+        TrueOrFalseFlag needEvaluate = TrueOrFalseFlag.fromCode(cmd.getNeedEvaluate());
+        // 开启评论的时候，评论项至少1个，至多5个
+        if (needEvaluate == TrueOrFalseFlag.TRUE) {
+            if (cmd.getItems() == null || cmd.getItems().size() < 1 || cmd.getItems().size() > 5) {
+                LOGGER.error("items size error");
+                throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_EVALUATE_ITEM_SIZE_ERROR,
+                        "items size error!");
+            }
+        } else {
+            cmd.setItems(null);
         }
 
         // FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
@@ -3588,6 +3597,7 @@ public class FlowServiceImpl implements FlowService {
             FlowEvaluateResultDTO rltDTO = new FlowEvaluateResultDTO();
             rltDTO.setEvaluateItemId(item.getId());
             rltDTO.setName(item.getName());
+            rltDTO.setInputFlag(item.getInputFlag());
 
             if (evaMap.containsKey(item.getId())) {
                 FlowEvaluate eva = evaMap.get(item.getId());

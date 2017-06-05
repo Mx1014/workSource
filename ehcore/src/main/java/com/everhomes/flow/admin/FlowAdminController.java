@@ -119,13 +119,13 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/disableFlow</b>
-     * <p> 启用某一个业务模块下的工作流 </p>
+     * <p> 禁用某一个业务模块下的工作流 </p>
      * @return
      */
     @RequestMapping("disableFlow")
     @RestReturn(value=String.class)
     public RestResponse disableFlow(@Valid FlowIdCommand cmd) {
-    		flowService.disableFlow(cmd.getFlowId());
+        flowService.disableFlow(cmd.getFlowId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -460,7 +460,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listScripts")
     @RestReturn(value=ListScriptsResponse.class)
-    public RestResponse getFlowEvaluate(@Valid ListScriptsCommand cmd) {
+    public RestResponse listScripts(@Valid ListScriptsCommand cmd) {
         RestResponse response = new RestResponse(flowService.listScripts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
