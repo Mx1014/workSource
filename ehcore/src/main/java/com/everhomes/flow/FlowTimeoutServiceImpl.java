@@ -3,13 +3,17 @@ package com.everhomes.flow;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.FlowTimeoutType;
-import net.greghaines.jesque.Job;
+import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationListener<ContextRefreshedEvent> {
@@ -26,6 +30,9 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
 	
 	@Autowired
 	FlowService flowService;
+
+    @Autowired
+    private ScheduleProvider scheduleProvider;
     
     private String queueDelay = "flowdelays";
     private String queueNoDelay = "flownodelays";
@@ -40,8 +47,8 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
 		setup();
 	}
     
-    @Override
-    public void pushTimeout(FlowTimeout ft) {
+    /*@Override
+    public void pushTimeoutByJesque(FlowTimeout ft) {
     	//FlowTimeoutAction
     	flowTimeoutProvider.createFlowTimeout(ft);
     	
@@ -57,8 +64,46 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
     	} else {
     		LOGGER.error("create flowTimeout error! ft=" + ft.toString());
     	}
+    }*/
+
+    @Override
+    public void pushTimeout(FlowTimeout ft) {
+    	//FlowTimeoutAction
+    	flowTimeoutProvider.createFlowTimeout(ft);
+
+    	if (ft.getId() > 0) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("flowTimeoutId", ft.getId());
+
+            if (ft.getTimeoutTick().getTime() > (System.currentTimeMillis() + 10L)) {
+                scheduleProvider.scheduleSimpleJob(
+                        queueDelay + ft.getId(),
+                        queueDelay + ft.getId(),
+                        new Date(ft.getTimeoutTick().getTime()),
+                        FlowTimeoutJob.class,
+                        map
+                );
+
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("pushTimeout delayedEnqueue ft = {}", ft);
+                }
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("pushTimeout enqueue ft = {}", ft);
+                }
+                scheduleProvider.scheduleSimpleJob(
+                        queueNoDelay + ft.getId(),
+                        queueNoDelay + ft.getId(),
+                        new Date(System.currentTimeMillis() + 1000),
+                        FlowTimeoutJob.class,
+                        map
+                );
+            }
+    	} else {
+    		LOGGER.error("create flowTimeout error! ft=" + ft.toString());
+    	}
     }
-    
+
     @Override
     public void processTimeout(FlowTimeout ft) {
     	FlowTimeoutType timeoutType = FlowTimeoutType.fromCode(ft.getTimeoutType());

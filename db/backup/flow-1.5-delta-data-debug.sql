@@ -13,12 +13,15 @@ INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `te
 
 UPDATE `eh_locale_templates` SET `text` = '任务已被${processorName}驳回' WHERE `scope` = 'flow' AND `code` = 10002;
 
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('flow', '10011', 'zh_CN', '评价项数量需在1-5个之间');
+
+
 -- 把任务管理菜单放到内部管理下
 DELETE FROM `eh_web_menus` WHERE `id` IN (70000, 70100, 70200);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
   VALUES (70000, '任务管理', 50000, 'fa fa-group', NULL, 1, 2, '/50000/70000', 'park', 600, 70000);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
-  VALUES (70100, '任务列表', 70000, NULL, 'react:/task-management/task-list/70100', 0, 2, '/50000/70000/70100', 'park', 610, 70000);
+  VALUES (70100, '任务汇总', 70000, NULL, 'react:/task-management/task-list/70100', 0, 2, '/50000/70000/70100', 'park', 610, 70000);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
   VALUES (70200, '业务授权视图', 70000, NULL, 'flow_view', 0, 2, '/50000/70000/70200', 'park', 620, 70000);
 

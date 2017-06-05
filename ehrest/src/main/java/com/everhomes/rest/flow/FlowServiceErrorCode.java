@@ -20,4 +20,5 @@ public interface FlowServiceErrorCode {
     static final int ERROR_FLOW_STEP_ERROR = 10008;
     static final int ERROR_FLOW_PARAM_ERROR = 10009;
     static final int ERROR_FLOW_REMIND_ERROR = 10010;
+    static final int ERROR_FLOW_EVALUATE_ITEM_SIZE_ERROR = 10011;
 }
