@@ -15,7 +15,6 @@ UPDATE `eh_locale_templates` SET `text` = '任务已被${processorName}驳回' W
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('flow', '10011', 'zh_CN', '评价项数量需在1-5个之间');
 
-
 -- 把任务管理菜单放到内部管理下
 DELETE FROM `eh_web_menus` WHERE `id` IN (70000, 70100, 70200);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
