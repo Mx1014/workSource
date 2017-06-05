@@ -187,8 +187,8 @@ public class ContentServerManagerImpl implements ContentServerMananger {
 
         ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
         if (resource == null) {
-            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId 
-                + ", decodeResourceId=" + resourceId + ", loginToken=" + login);
+            LOGGER.error("Resource not found, orginResourceId=" + orginResourceId +
+                    ", decodeResourceId=" + resourceId + ", loginToken=" + login);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Resource file not found");
         }

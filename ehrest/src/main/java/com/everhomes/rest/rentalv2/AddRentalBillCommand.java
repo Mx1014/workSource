@@ -21,10 +21,10 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;   
 	private Long rentalDate;
-	@NotNull
-	private Long startTime;
-	@NotNull
-	private Long endTime;
+//	@NotNull
+//	private Long startTime;
+//	@NotNull
+//	private Long endTime;
 	@NotNull
 	@ItemType(RentalBillRuleDTO.class)
 	private List<RentalBillRuleDTO> rules; 
@@ -52,21 +52,21 @@ public class AddRentalBillCommand {
 		this.rentalDate = rentalDate;
 	}
 
-	public Long getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(Long startTime) {
-		this.startTime = startTime;
-	}
-
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
+//	public Long getStartTime() {
+//		return startTime;
+//	}
+//
+//	public void setStartTime(Long startTime) {
+//		this.startTime = startTime;
+//	}
+//
+//	public Long getEndTime() {
+//		return endTime;
+//	}
+//
+//	public void setEndTime(Long endTime) {
+//		this.endTime = endTime;
+//	}
 
 	public List<RentalBillRuleDTO> getRules() {
 		return rules;

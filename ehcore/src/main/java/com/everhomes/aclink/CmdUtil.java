@@ -18,7 +18,7 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
-    private final static int EXPIRE_TIME = (30*24*3600);
+    private final static int EXPIRE_TIME = (2*30*24*3600);//2 months
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
@@ -100,6 +100,8 @@ public class CmdUtil {
             byte[] encryptData = RSAUtil.encryptByRawPublicKey(resultArray, pubKey);
             byte[] headArr = {cmd, ver};
             resultArray = DataUtil.mergeArray(headArr, encryptData);
+            
+            LOGGER.info(StringHelper.toHexString(resultArray));
 
             return resultArray;
         } catch (Exception e) {
@@ -173,6 +175,7 @@ public class CmdUtil {
             resultArr[1] = ver;
             System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
             return resultArr;
+//            return aeskeyEncryptResult;
         } catch (Exception e) {
         }
         return null;

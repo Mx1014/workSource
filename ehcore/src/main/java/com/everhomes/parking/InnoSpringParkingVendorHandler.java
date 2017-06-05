@@ -19,6 +19,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -54,12 +55,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_TEMP_FEE = "70111005";
 	private static final String PAY_TEMP_FEE = "70111004";
 
-	private CloseableHttpClient httpclient;
-//	private String version;
-//	private String licensekey;
-//	private String parkName;
-//	private String serverUrl;
-
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -70,12 +65,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     private BigCollectionProvider bigCollectionProvider;
 	@Autowired
     private DbProvider dbProvider;
-
-	@PostConstruct
-	public void init() {
-		httpclient = HttpClients.createDefault();
-
-	}
 
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -179,8 +168,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
 			if(payStatus.toLowerCase().equals("fail")) {
 				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
+			}else {
 				if(recharge(order)){
 					dbProvider.execute((TransactionStatus transactionStatus) -> {
 						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
@@ -289,11 +277,9 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	private List<InnoSpringCardRate> getCardRule() {
 		List<InnoSpringCardRate> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		Integer namespaceId = 999986;
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
+		String version = configProvider.getValue("parking.innospring.version", "");
+		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
+		String parkName = configProvider.getValue("parking.innospring.parkName", "");
 		param.put("version", version);
 		param.put("licensekey", licensekey);
 		param.put("park_name", parkName);
@@ -326,6 +312,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		param.put("REQUESTS",array);
 
+		LOGGER.info("param={}", param);
+
 		return param;
 	}
 
@@ -333,11 +321,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		InnoSpringCardInfo card = null;
 
 		JSONObject param = new JSONObject();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
+		String version = configProvider.getValue("parking.innospring.version", "");
+		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
 		param.put("version", version);
 		param.put("licensekey", licensekey);
 		param.put("car_id", plateNumber);
@@ -396,11 +381,10 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		String oldValidEnd = card.getEnd_time();
 		Long time = strToLong(oldValidEnd + "235959");
 		String validStart = sdf1.format(addSecond(time, 1));
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
+
+		String version = configProvider.getValue("parking.innospring.version", "");
+		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
+		String parkName = configProvider.getValue("parking.innospring.parkName", "");
 		param.put("version", version);
 		param.put("licensekey", licensekey);
 		param.put("car_id", order.getPlateNumber());
@@ -408,10 +392,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("start_date", validStart);
 	    param.put("buy_num", String.valueOf(order.getMonthCount().intValue()));
 
-		String json = post(createRequestParam(RECHARGE, param));
+		JSONObject requestParam = createRequestParam(RECHARGE, param);
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = post(requestParam);
+
+		LOGGER.info("Result={}, param={}", json, requestParam);
 
 		String entityJson = parseJson(json);
 
@@ -436,11 +421,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	}
 
 	private boolean payTempCardFee(ParkingRechargeOrder order){
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
+		String version = configProvider.getValue("parking.innospring.version", "");
+		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
 		JSONObject param = new JSONObject();
 		param.put("version", version);
 		param.put("licensekey", licensekey);
@@ -472,41 +454,48 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	public String post(JSONObject param) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
-		HttpPost httpPost = new HttpPost(serverUrl);
+//		CloseableHttpClient httpclient = HttpClients.createDefault();
 
-		CloseableHttpResponse response = null;
-		String json = null;
-		try {
-			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
-			httpPost.setEntity(stringEntity);
-			response = httpclient.execute(httpPost);
-
-			int status = response.getStatusLine().getStatusCode();
-
-			if (status == HttpStatus.SC_OK) {
-				HttpEntity entity = response.getEntity();
-				if (null != entity) {
-					json = EntityUtils.toString(entity, "utf8");
-				}
-			}
-		} catch (IOException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Parking request error.");
-		}finally {
-			try {
-				if (null != response)
-					response.close();
-			} catch (IOException e) {
-			}
-		}
-		LOGGER.info("Result={}, param={}", json, param);
-
-		return json;
+		String serverUrl = configProvider.getValue("parking.innospring.serverUrl", "");
+		return HttpUtils.post(serverUrl, param);
+//		HttpPost httpPost = new HttpPost(serverUrl);
+//
+//		CloseableHttpResponse response = null;
+//		String json = null;
+//		try {
+//			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
+//			httpPost.setEntity(stringEntity);
+//			response = httpclient.execute(httpPost);
+//			StatusLine statusLine = response.getStatusLine();
+//			LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+//			int status = statusLine.getStatusCode();
+//
+//			if (status == HttpStatus.SC_OK) {
+//				HttpEntity entity = response.getEntity();
+//				if (null != entity) {
+//					json = EntityUtils.toString(entity, "utf8");
+//				}
+//			}
+//		} catch (IOException e) {
+//			LOGGER.error("Parking request error, param={}", param, e);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//					"Parking request error.");
+//		}finally {
+//			try {
+//				if (null != response) {
+//					response.close();
+//				}
+//				if (null != httpclient) {
+//					httpclient.close();
+//				}
+//			} catch (IOException e) {
+//				LOGGER.error("close httpclient error", e);
+//			}
+//
+//		}
+//		LOGGER.info("Result={}, param={}", json, param);
+//
+//		return json;
 	}
 
 	@Override
@@ -518,11 +507,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 	private InnoSpringTempFee getTempFee(String plateNumber) {
 		InnoSpringTempFee tempFee = null;
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		String version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
-		String licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
-		String parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
-		String serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
+		String version = configProvider.getValue("parking.innospring.version", "");
+		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
 		JSONObject param = new JSONObject();
 		param.put("version", version);
 		param.put("licensekey", licensekey);
@@ -559,17 +545,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		dto.setPrice(new BigDecimal(tempFee.getPayable()));
 		dto.setOrderToken(tempFee.getOrder_no());
 		return dto;
-	}
-
-	@PreDestroy
-	public void destroy() {
-		if (null != httpclient) {
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				LOGGER.error("Close httpclient error.");
-			}
-		}
 	}
 
 	@Override

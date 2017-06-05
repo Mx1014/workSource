@@ -91,7 +91,7 @@ public interface Rentalv2Provider {
 	RentalOrderPayorderMap findRentalBillPaybillMapByOrderNo(String orderNo);
 
 	List<RentalOrder> listRentalBills(Long userId, Long resourceTypeId, ListingLocator locator,
-			int count, List<Byte> status);
+			int count, List<Byte> status, Byte payMode);
 
 	int countRentalSites(Long  resourceTypeId,String keyword,List<Byte>  status,List<Long>  siteIds);
 
@@ -150,7 +150,7 @@ public interface Rentalv2Provider {
 
 	List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(String ownerType, Long ownerId);
 
- 
+	List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids);
 
 	void createRentalSiteOwner(RentalSiteRange siteOwner);
 
@@ -236,7 +236,7 @@ public interface Rentalv2Provider {
 	void updateRentalResourceType(RentalResourceType resourceType);
 
 
-	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator);
+	List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator);
 
 
 	List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId,

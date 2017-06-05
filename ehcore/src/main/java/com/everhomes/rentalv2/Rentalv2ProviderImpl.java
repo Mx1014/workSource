@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder.Case;
 
+import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -113,6 +114,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalv2Resources.class));
 		rentalsite.setId(id);
+		rentalsite.setDefaultOrder(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2ResourcesRecord record = ConvertHelper.convert(rentalsite,
 				EhRentalv2ResourcesRecord.class);
@@ -420,9 +422,18 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.REFUNDING.getCode())); 
+				.ne(SiteBillStatus.REFUNDING.getCode()));
+		/*---start modify by sw----*/
+		//修改以前线下订单只有一个状态
+		//线下订单重新定义状态，产品定义在已支付节点之前，该资源状态是未预约，但是支付之后该资源就表示已预约
+		//判断 待审批和待支付状态
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.OFFLINE_PAY.getCode())); 
+				.ne(SiteBillStatus.APPROVING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.PAYINGFINAL.getCode()));
+		/*---end----*/
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.INACTIVE.getCode()));
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -508,9 +519,11 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 	@Override
 	public List<RentalOrder> listRentalBills(Long userId,Long resourceTypeId,
-			ListingLocator locator, int count, List<Byte> status) {
+			ListingLocator locator, int count, List<Byte> status, Byte payMode) {
 		final List<RentalOrder> result = new ArrayList<RentalOrder>();
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.lt(locator.getAnchor());
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+
 		//TODO:
 		if(null!=resourceTypeId)
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE_ID
@@ -520,6 +533,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //		if (StringUtils.isNotEmpty(siteType))
 //			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RESOURCE_TYPE
 //					.eq(siteType));
+		if (null != payMode) {
+			condition = condition.and(Tables.EH_RENTALV2_ORDERS.PAY_MODE.eq(payMode));
+		}
 		if (null != userId) {
 			condition = condition.and(Tables.EH_RENTALV2_ORDERS.RENTAL_UID
 					.eq(userId));
@@ -822,8 +838,20 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode()));
+
+		/*---start modify by sw----*/
+		//修改以前线下订单只有一个状态
+		//线下订单重新定义状态，产品定义在已支付节点之前，该资源状态是未预约，但是支付之后该资源就表示已预约
+		//判断 待审批和待支付状态
+		//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+//				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
+				.ne(SiteBillStatus.APPROVING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.PAYINGFINAL.getCode()));
+		/*---end----*/
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.INACTIVE.getCode()));
 
 		return step.where(condition).fetchOneInto(Double.class);
 	}
@@ -875,6 +903,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		//TODO
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ORGANIZATION_ID
 				.equal( organizationId);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
 //		condition = condition.and(Tables.EH_RENTALV2_ORDERS.OWNER_TYPE
 //				.equal(ownerType));
 		if (StringUtils.isNotEmpty(vendorType))
@@ -946,7 +975,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 
         if(locator.getAnchor() != null)
-        	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.ID.lt(locator.getAnchor()));
+        	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.ID.gt(locator.getAnchor()));
 
         if(communityId  != null)
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
@@ -954,10 +983,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
 		else
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
-		step.where(condition);
 
-		List<RentalResource> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCES.ID.desc()).limit(pageSize).fetch().map((r) -> {
+		List<RentalResource> result = step.where(condition)
+				.orderBy(Tables.EH_RENTALV2_RESOURCES.DEFAULT_ORDER.asc()).limit(pageSize).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalResource.class);
 				});
 		if(result.size()==0)
@@ -1472,9 +1500,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
-		if (null != result && result.size() > 0)
-			return result;
-		return null;
+
+		return result;
+	}
+
+	@Override
+	public List<RentalConfigAttachment> queryRentalConfigAttachmentByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_CONFIG_ATTACHMENTS);
+		Condition condition = Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID
+				.in(ids);
+
+		step.where(condition);
+		List<RentalConfigAttachment> result = step
+				.orderBy(Tables.EH_RENTALV2_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalConfigAttachment.class);
+				});
+
+		return result;
 	}
 
 	@Override
@@ -1852,15 +1896,18 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	
 
 	@Override
-	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, ListingLocator locator) {
+	public List<RentalResourceType> findRentalResourceTypes(Integer namespaceId, Byte status, ListingLocator locator) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTALV2_RESOURCE_TYPES);
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_TYPES.STATUS
+				.equal(status);
 		if(null!=namespaceId){
-			Condition condition = Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID
-					.equal(namespaceId);
-			step.where(condition);
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCE_TYPES.NAMESPACE_ID
+					.equal(namespaceId));
 		}
+		step.where(condition);
+
 		List<RentalResourceType> result = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_TYPES.ID.desc()).fetch()
 				.map((r) -> {
