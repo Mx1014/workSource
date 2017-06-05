@@ -4388,7 +4388,7 @@ CREATE TABLE `eh_import_file_tasks` (
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `type` VARCHAR(64) NOT NULL DEFAULT '',
   `status` TINYINT NOT NULL,
-  `result` TEXT,
+  `result` LONGTEXT,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
@@ -7776,6 +7776,10 @@ CREATE TABLE `eh_rentalv2_cells` (
   `halfresource_original_price` DECIMAL(10,2) COMMENT '半场原价（如果不为null则price为打折价）',
   `number_group` INTEGER COMMENT '同一个groupid的两个编号资源被认为是一组资源',
   `group_lock_flag` TINYINT COMMENT '一个资源被预约是否锁整个group,0-否,1-是',
+  `org_member_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '原价-如果打折则有(企业内部价)';
+  `org_member_price` DECIMAL(10,2) DEFAULT NULL COMMENT '实际价格-打折则为折后价(企业内部价)';
+  `approving_user_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '原价-如果打折则有（外部客户价）';
+  `approving_user_price` DECIMAL(10,2) DEFAULT NULL COMMENT '实际价格-打折则为折后价（外部客户价）';
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -7805,6 +7809,11 @@ CREATE TABLE `eh_rentalv2_config_attachments` (
   `attachment_type` TINYINT,
   `content` TEXT COMMENT '根据type，这里可能是文本或者附件url',
   `must_options` TINYINT COMMENT '0 非必须 1 必选',
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -7849,7 +7858,13 @@ CREATE TABLE `eh_rentalv2_default_rules` (
   `end_date` DATE COMMENT '结束日期',
   `open_weekday` VARCHAR(7) COMMENT '7位二进制，0000000每一位表示星期7123456',
   `time_step` DOUBLE COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
-
+  `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制';
+  `rental_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制';
+  `org_member_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '企业内部工作日价格';
+  `org_member_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '企业内部节假日价格';
+  `approving_user_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户工作日价格';
+  `approving_user_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户节假日价格';
+ 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -7989,6 +8004,7 @@ CREATE TABLE `eh_rentalv2_orders` (
   `pay_mode` TINYINT DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline',
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
+  `flow_case_id` BIGINT DEFAULT NULL COMMENT 'id of the flow_case';
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -8176,6 +8192,13 @@ CREATE TABLE `eh_rentalv2_resources` (
   `confirmation_prompt` VARCHAR(200),
   `offline_cashier_address` VARCHAR(200),
   `offline_payee_uid` BIGINT,
+  `rental_start_time_flag` TINYINT DEFAULT 0 COMMENT '至少提前预约时间标志: 1-限制, 0-不限制';
+  `rental_end_time_flag` TINYINT DEFAULT 0 COMMENT '最多提前预约时间标志: 1-限制, 0-不限制';
+  `org_member_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '企业内部工作日价格';
+  `org_member_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '企业内部节假日价格';
+  `approving_user_workday_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户工作日价格';
+  `approving_user_weekend_price` DECIMAL(10,2) DEFAULT NULL COMMENT '外部客户节假日价格';
+  `default_order` BIGINT NOT NULL DEFAULT 0 COMMENT 'order';
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -10091,6 +10114,160 @@ CREATE TABLE `eh_versioned_content` (
   CONSTRAINT `eh_versioned_content_ibfk_1` FOREIGN KEY (`realm_id`) REFERENCES `eh_version_realm` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_warehouses`;
+CREATE TABLE `eh_warehouses` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(128) NOT NULL DEFAULT '',
+  `warehouse_number` VARCHAR(32) DEFAULT '',
+  `volume` DOUBLE NOT NULL DEFAULT 0,
+  `location` VARCHAR(512) NOT NULL DEFAULT '',
+  `manager` VARCHAR(64),
+  `contact` VARCHAR(64),
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: disable, 2: enable',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_materials`;
+CREATE TABLE `eh_warehouse_materials` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(128) NOT NULL DEFAULT '',
+  `material_number` VARCHAR(32) NOT NULL DEFAULT '',
+  `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_warehouse_material_categories',
+  `category_path` VARCHAR(128) COMMENT 'path of eh_warehouse_material_categories',
+  `brand` VARCHAR(128),
+  `item_no` VARCHAR(64),
+  `reference_price` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
+  `unit_id` BIGINT COMMENT 'id of eh_warehouse_units',
+  `specification_information` VARCHAR(1024),
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_material_categories`;
+CREATE TABLE `eh_warehouse_material_categories` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `name` VARCHAR(128) NOT NULL DEFAULT '',
+  `category_number` VARCHAR(32) DEFAULT '',
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `path` VARCHAR(128),
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_stocks`;
+CREATE TABLE `eh_warehouse_stocks` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `warehouse_id` BIGINT NOT NULL COMMENT 'id of eh_warehouses',
+  `material_id` BIGINT NOT NULL COMMENT 'eh_warehouse_materials',
+  `amount` BIGINT NOT NULL DEFAULT 0,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `delete_uid` BIGINT,
+  `delete_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_stock_logs`;
+CREATE TABLE `eh_warehouse_stock_logs` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `request_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_warehouse_requests',
+  `request_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: stock in, 1: stock out',
+  `request_source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: request, 1: manual input',
+  `warehouse_id` BIGINT NOT NULL COMMENT 'id of eh_warehouses',
+  `material_id` BIGINT NOT NULL COMMENT 'eh_warehouse_materials',
+  `delivery_amount` BIGINT NOT NULL DEFAULT 0,
+  `stock_amount` BIGINT NOT NULL DEFAULT 0 COMMENT 'rest amount after delivery',
+  `request_uid` BIGINT,
+  `delivery_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_requests`;
+CREATE TABLE `eh_warehouse_requests` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `request_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: stock in, 1: stock out',
+  `request_uid` BIGINT,
+  `request_organization_id` BIGINT,
+  `remark` VARCHAR(512),
+  `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified',
+  `delivery_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0:no, 1: yes',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+DROP TABLE IF EXISTS `eh_warehouse_request_materials`;
+CREATE TABLE `eh_warehouse_request_materials` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `request_id` BIGINT NOT NULL COMMENT 'id of eh_warehouse_requests',
+  `request_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: stock in, 1: stock out',
+  `request_source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: request, 1: manual input',
+  `warehouse_id` BIGINT NOT NULL COMMENT 'id of eh_warehouses',
+  `material_id` BIGINT NOT NULL COMMENT 'eh_warehouse_materials',
+  `amount` BIGINT NOT NULL DEFAULT 0,
+  `review_result` TINYINT NOT NULL DEFAULT 0 COMMENT '0:none, 1: qualified, 2: unqualified',
+  `review_uid` BIGINT,
+  `review_time` DATETIME,
+  `delivery_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0:no, 1: yes',
+  `delivery_uid` BIGINT,
+  `delivery_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_warehouse_units`;
+CREATE TABLE `eh_warehouse_units` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT '0',
+  `name` VARCHAR(64) NOT NULL,
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+  `create_time` DATETIME DEFAULT NULL,
+  `deletor_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
+  `delete_time` DATETIME DEFAULT NULL,
+PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_warning_contacts`;
 CREATE TABLE `eh_warning_contacts` (
