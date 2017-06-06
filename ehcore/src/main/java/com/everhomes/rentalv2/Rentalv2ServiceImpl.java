@@ -863,8 +863,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		long time1 = System.currentTimeMillis();
 		LOGGER.info("Get list time={}", time1 - start);
 
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+
 		for (RentalResource rentalSite : rentalSites) {
-			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
+			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, sceneTokenDTO);
 			 
 			response.getRentalSites().add(rSiteDTO);
 		}
@@ -874,7 +880,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		return response;
 	}
-	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, String sceneToken){
+	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, SceneTokenDTO sceneTokenDTO){
 
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
@@ -958,7 +964,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		long time3 = System.currentTimeMillis();
 		LOGGER.info("populate time={}", time3 - time2);
 		//计算显示价格
-		calculatePrice(rentalSite, rSiteDTO, sceneToken);
+		calculatePrice(rentalSite, rSiteDTO, sceneTokenDTO);
 
 		long time4 = System.currentTimeMillis();
 		LOGGER.info("calculatePrice time={}", time4 - time3);
@@ -969,7 +975,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return rSiteDTO;
 	}
 
-	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, String sceneToken) {
+	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, SceneTokenDTO sceneTokenDTO) {
 
 		String beginTime = null;
 		String endTime = null;
@@ -997,13 +1003,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Double minTimeStep = 1.0;
 		BigDecimal maxPrice = null;
 		Double maxTimeStep = 1.0;
-
-		//解析场景信息
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != sceneToken) {
-			User user = UserContext.current().getUser();
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
-		}
 
 		try {
 			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
@@ -4414,8 +4413,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid organizationId parameter in the command");
 
 		RentalResource rentalSite = rentalv2Provider.getRentalSiteById(cmd.getId());
-
-		return convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+		return convertRentalSite2DTO(rentalSite, sceneTokenDTO);
 	}
 
 	@Override
