@@ -8560,6 +8560,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
         List<OrganizationDTO> jobLevels = new ArrayList<OrganizationDTO>();
         List<Long> enterpriseIds = new ArrayList<>();
+        List<Long> memberDetailIds = new ArrayList<>();
 
         Map<Long, Boolean> joinEnterpriseMap = new HashMap<>();
 
@@ -8588,21 +8589,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			}
             /**modify by lei.lv*/
             enterpriseIds.add(org.getId());
-//
-//            if (null != departmentIds) {
-//                for (Long departmentId : departmentIds) {
-//                    Organization o = checkOrganization(departmentId);
-//                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
-//                        if (!enterpriseIds.contains(o.getId())) {
-//                            enterpriseIds.add(o.getId());
-//                        }
-//                    } else {
-//                        if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
-//                            enterpriseIds.add(o.getDirectlyEnterpriseId());
-//                        }
-//                    }
-//                }
-//            }
+
+            if (null != departmentIds) {
+                for (Long departmentId : departmentIds) {
+                    Organization o = checkOrganization(departmentId);
+                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
+                        if (!enterpriseIds.contains(o.getId())) {
+                            enterpriseIds.add(o.getId());
+                        }
+                    } else {
+                        if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
+                            enterpriseIds.add(o.getDirectlyEnterpriseId());
+                        }
+                    }
+                }
+            }
 
             // 先把把成员从公司所有部门都删除掉
 //			for (Organization organization : childOrganizations) {
@@ -8613,137 +8614,76 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			}
 
             // 先把把成员从公司所有机构都删除掉
-            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
-            for (OrganizationMember member : members) {
-                if (!enterpriseIds.contains(member.getOrganizationId())) {
-                    //记录 退出的公司
-                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
+//            List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(org.getPath(), groupTypes, cmd.getContactToken());
+//            for (OrganizationMember member : members) {
+//                if (!enterpriseIds.contains(member.getOrganizationId())) {
+//                    //记录 退出的公司
+//                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(member.getGroupType())) {
+//                        leaveMembers.add(member);
+//                    }
+//                    organizationProvider.deleteOrganizationMemberById(member.getId());
+//                }
+//            }
+            /**删除公司级别以下的记录**/
+            for (Long enterpriseId : enterpriseIds){
+                Organization enterprise = checkOrganization(enterpriseId);
+                List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, cmd.getContactToken());
+                for (OrganizationMember member : members) {
+                    if(!enterpriseIds.contains(member.getOrganizationId())){//删除退出公司的记录
+                        organizationProvider.deleteOrganizationMemberById(member.getId());
                         leaveMembers.add(member);
                     }
-                    organizationProvider.deleteOrganizationMemberById(member.getId());
+                    if(!member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//删除所有公司下级的记录
+                        organizationProvider.deleteOrganizationMemberById(member.getId());
+                    }
                 }
             }
 
-            //加入到公司
+                //加入到公司
             for (Long enterpriseId : enterpriseIds) {
                 OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), enterpriseId);
                 Organization enterprise = checkOrganization(enterpriseId);
                 organizationMember.setOrganizationId(enterpriseId);
                 organizationMember.setGroupType(enterprise.getGroupType());
                 organizationMember.setGroupPath(enterprise.getPath());
+                OrganizationMemberDetails organizationMemberDetail  = getDetailFromOrganizationMember(organizationMember);
+                organizationMemberDetail.setOrganizationId(enterpriseId);
+
+                //更新或创建detail记录
+                OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(enterpriseId, cmd.getContactToken());
+                Long new_detail_id = 0L;
+                if (old_detail == null) { /**如果档案表中无记录**/
+                    new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
+                } else { /**如果档案表中有记录**/
+                    organizationMemberDetail.setId(old_detail.getId());
+                    organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+                    new_detail_id = organizationMemberDetail.getId();
+                }
+
                 if (null == desOrgMember) {
                     // 记录一下，成员是新加入公司的
                     joinEnterpriseMap.put(enterpriseId, true);
                     /**Modify BY lei.lv cause MemberDetail**/
-                    //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
+                    memberDetailIds.add(new_detail_id);
                 } else {
                     organizationMember.setId(desOrgMember.getId());
                     //organizationProvider.updateOrganizationMember(organizationMember);
                     /**Modify BY lei.lv cause MemberDetail**/
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.updateOrganizationMember(organizationMember);
+                    memberDetailIds.add(new_detail_id);
                 }
             }
 
             //添加除公司之外的机构成员
-            if (null != departmentIds) {
-                removeRepeat(departmentIds);
-                // 重新把成员添加到公司多个部门
-                for (Long departmentId : departmentIds) {
-                    //排除掉上面已添加的公司机构成员
-                    if (!enterpriseIds.contains(departmentId)) {
-                        Organization group = checkOrganization(departmentId);
-
-                        organizationMember.setGroupPath(group.getPath());
-
-                        organizationMember.setGroupType(group.getGroupType());
-
-                        organizationMember.setOrganizationId(departmentId);
-
-                        /**Modify BY lei.lv cause MemberDetail**/
-                        //更新或创建detail记录
-                        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
-                        //绑定member表的detail_id
-                        organizationMember.setDetailId(new_detail_id);
-                        organizationProvider.createOrganizationMember(organizationMember);
-
-                        departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
-                    }
-                }
-            }
-
-
-            if (null != groupIds) {
-                removeRepeat(groupIds);
-                // 重新把成员添加到公司多个群组
-                for (Long groupId : groupIds) {
-                    Organization group = checkOrganization(groupId);
-
-                    organizationMember.setGroupPath(group.getPath());
-
-                    organizationMember.setOrganizationId(groupId);
-
-                    /**Modify BY lei.lv cause MemberDetail**/
-                    //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
-                    //绑定member表的detail_id
-                    organizationMember.setDetailId(new_detail_id);
-                    organizationProvider.createOrganizationMember(organizationMember);
-
-                    groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-                }
-            }
-
-            if (null != jobPositionIds) {
-                removeRepeat(jobPositionIds);
-                // 重新把成员添加到公司多个群组
-                for (Long jobPositionId : jobPositionIds) {
-                    Organization group = checkOrganization(jobPositionId);
-
-                    organizationMember.setGroupPath(group.getPath());
-
-                    organizationMember.setOrganizationId(jobPositionId);
-
-                    organizationMember.setGroupType(group.getGroupType());
-
-                    /**Modify BY lei.lv cause MemberDetail**/
-                    //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
-                    //绑定member表的detail_id
-                    organizationMember.setDetailId(new_detail_id);
-                    organizationProvider.createOrganizationMember(organizationMember);
-
-                    jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
-                }
-            }
-            //重新把成员添加到公司多个职级
-            if (null != jobLevelIds) {
-                removeRepeat(jobLevelIds);
-                for (Long jobLevelId : jobLevelIds) {
-                    Organization group = checkOrganization(jobLevelId);
-
-                    organizationMember.setGroupPath(group.getPath());
-
-                    organizationMember.setOrganizationId(jobLevelId);
-
-                    organizationMember.setGroupType(group.getGroupType());
-
-                    /**Modify BY lei.lv cause MemberDetail**/
-                    //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
-                    //绑定member表的detail_id
-                    organizationMember.setDetailId(new_detail_id);
-                    organizationProvider.createOrganizationMember(organizationMember);
-
-                    jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
-                }
-            }
+            departments.addAll(repeatCreateOrganizationmembers(departmentIds,cmd.getContactToken(),enterpriseIds,organizationMember));
+            groups.addAll(repeatCreateOrganizationmembers(groupIds,cmd.getContactToken(),enterpriseIds,organizationMember));
+            jobPositions.addAll(repeatCreateOrganizationmembers(jobPositionIds,cmd.getContactToken(),enterpriseIds,organizationMember));
+            jobLevels.addAll(repeatCreateOrganizationmembers(jobLevelIds,cmd.getContactToken(),enterpriseIds,organizationMember));
 
             dto.setGroups(groups);
 
@@ -8752,6 +8692,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setJobPositions(jobPositions);
 
             dto.setJobLevels(jobLevels);
+
+            dto.setMemberDetailIds(memberDetailIds);
+
             return null;
         });
 
@@ -10350,18 +10293,18 @@ public class OrganizationServiceImpl implements OrganizationService {
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
 
-        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
-        Long directOrgId = 0L;
-        if (member.getGroupType().equals("ENTERPRISE")) {
-            directOrgId = member.getOrganizationId();
-        } else {
-            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-            directOrgId = org.getDirectlyEnterpriseId();
-        }
+//        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
+//        Long directOrgId = 0L;
+//        if (member.getGroupType().equals("ENTERPRISE")) {
+//            directOrgId = member.getOrganizationId();
+//        } else {
+//            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+//            directOrgId = org.getDirectlyEnterpriseId();
+//        }
 
         detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
         detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
-        detail.setOrganizationId(directOrgId);
+//        detail.setOrganizationId(directOrgId);
         detail.setContactName(member.getContactName());
         detail.setContactToken(member.getContactToken());
         detail.setContactDescription(member.getContactDescription());
@@ -10372,6 +10315,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         detail.setEmploymentTime(member.getEmploymentTime());
         detail.setProfileIntegrity(member.getProfileIntegrity());
         detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
+        detail.setEmployeeNo(member.getEmployeeNo());
+        detail.setEmployeeType(member.getEmployeeType());
 
         return detail;
     }
@@ -10389,6 +10334,36 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setResourceType(tableName);
         log.setAuditContent(auditContent);
         this.organizationProvider.createProfileLogs(log);
+    }
+
+    private List<OrganizationDTO> repeatCreateOrganizationmembers(List<Long> organizationIds, String contact_token, List<Long> enterpriseIds, OrganizationMember organizationMember){
+        List<OrganizationDTO> results = new ArrayList<>();
+        if (null != organizationIds) {
+            removeRepeat(organizationIds);
+            // 重新把成员添加到公司多个部门
+            for (Long oId : organizationIds) {
+                //排除掉上面已添加的公司机构成员
+                if (!enterpriseIds.contains(oId)) {
+                    Organization group = checkOrganization(oId);
+
+                    organizationMember.setGroupPath(group.getPath());
+
+                    organizationMember.setGroupType(group.getGroupType());
+
+                    organizationMember.setOrganizationId(oId);
+
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    if (OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(group.getGroupType())) {
+                        //找到部门对应的资料表记录
+                        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(group.getDirectlyEnterpriseId(), contact_token);
+                        organizationMember.setDetailId(old_detail.getId());
+                        organizationProvider.createOrganizationMember(organizationMember);
+                        results.add(ConvertHelper.convert(group, OrganizationDTO.class));
+                    }
+                }
+            }
+        }
+        return results;
     }
 }
 

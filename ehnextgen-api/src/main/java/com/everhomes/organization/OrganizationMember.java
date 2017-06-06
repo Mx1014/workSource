@@ -30,6 +30,10 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
     private Date CheckInTime;
 
+	private String employeeNo;
+
+	private Byte employeeType;
+
 	private static final long serialVersionUID = 2994038655987093227L;
 
 	public OrganizationMember() {
@@ -108,11 +112,9 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	}
 
 
-
 	public boolean isCreate() {
 		return isCreate;
 	}
-
 
 
 	public void setCreate(boolean isCreate) {
@@ -151,6 +153,22 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     public void setCheckInTime(Date checkInTime) {
         CheckInTime = checkInTime;
     }
+
+	public String getEmployeeNo() {
+		return employeeNo;
+	}
+
+	public void setEmployeeNo(String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public Byte getEmployeeType() {
+		return employeeType;
+	}
+
+	public void setEmployeeType(Byte employeeType) {
+		this.employeeType = employeeType;
+	}
 
 	@Override
     public String toString() {

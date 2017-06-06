@@ -373,19 +373,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public OrganizationMember findOrganizationMemberById(Long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
-//        return ConvertHelper.convert(dao.findById(id), OrganizationMember.class);
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").eq(id);
-        Record record = step.where(condition).fetchAny();
-        if (record != null) {
-            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
-            return ConvertHelper.convert(r, OrganizationMember.class);
-        }
-        return null;
+        EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), OrganizationMember.class);
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").eq(id);
+//        Record record = step.where(condition).fetchAny();
+//        if (record != null) {
+//            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
+//            return ConvertHelper.convert(r, OrganizationMember.class);
+//        }
+//        return null;
     }
 
     /**
@@ -1275,29 +1275,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                                                                   Long organizationId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
-        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        Record record = step.where(condition).fetchAny();
-        if (record != null) {
-            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
-            return ConvertHelper.convert(member, OrganizationMember.class);
-        }
-        return null;
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        //added by wh 2016-10-13 把被拒绝的过滤掉
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-//        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
-//
-//        if (r != null)
-//            return ConvertHelper.convert(r, OrganizationMember.class);
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").gt(0L);
+//        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
+//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+//        Record record = step.where(condition).fetchAny();
+//        if (record != null) {
+//            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+//            return ConvertHelper.convert(member, OrganizationMember.class);
+//        }
 //        return null;
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        //added by wh 2016-10-13 把被拒绝的过滤掉
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+
+        if (r != null)
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        return null;
     }
 
     /**
@@ -1337,27 +1337,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public OrganizationMember findOrganizationMemberByOrgIdAndUIdWithoutStatus(Long organizationId, Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
-        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()));
-        Record record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny();
-        if (record != null) {
-            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
-            return ConvertHelper.convert(member, OrganizationMember.class);
-        }
-        return null;
-//
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        Result<Record> r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc()).limit(1).fetch();
-//
-//        if (r != null && r.size() > 0)
-//            return ConvertHelper.convert(r.get(0), OrganizationMember.class);
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").gt(0L);
+//        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
+//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()));
+//        Record record = step.where(condition).orderBy(t1.field("id").desc()).limit(1).fetchAny();
+//        if (record != null) {
+//            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+//            return ConvertHelper.convert(member, OrganizationMember.class);
+//        }
 //        return null;
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        Result<Record> r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).orderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc()).limit(1).fetch();
+
+        if (r != null && r.size() > 0)
+            return ConvertHelper.convert(r.get(0), OrganizationMember.class);
+        return null;
     }
 
     /**
@@ -1365,36 +1365,38 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      **/
     @Override
     public List<OrganizationMember> findOrganizationMembersByOrgIdAndUId(Long userId, Long organizationId) {
-        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
-        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, OrganizationMember.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        return result;
 
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        //added by wh 2016-10-13 把被拒绝的过滤掉
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-//        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetch();
-//
-//        if (records != null && !records.isEmpty()) {
-//            for (Record r : records)
-//                list.add(ConvertHelper.convert(r, OrganizationMember.class));
+        List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+//        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").gt(0L);
+//        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
+//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+//        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, OrganizationMember.class));
+//                return null;
+//            }).collect(Collectors.toList());
 //        }
-//        return list;
+//        return result;
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        //added by wh 2016-10-13 把被拒绝的过滤掉
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetch();
+
+        if (records != null && !records.isEmpty()) {
+            for (Record r : records)
+                list.add(ConvertHelper.convert(r, OrganizationMember.class));
+        }
+        return list;
     }
 
     /**
@@ -2177,30 +2179,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public OrganizationMember findOrganizationMemberByOrgIdAndToken(
             String contactPhone, Long organizationId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("organization_id").eq(organizationId))
-                .and(t2.field("contact_token").eq(contactPhone));
-        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        Record record = step.where(condition).fetchAny();
-        if (record != null) {
-            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
-            return ConvertHelper.convert(r, OrganizationMember.class);
-        }
-        return null;
-
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone));
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        //added by wh 2016-10-13 把被拒绝的过滤掉
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-//        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
-//        if (r != null)
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").gt(0L);
+//        condition = condition.and(t1.field("organization_id").eq(organizationId))
+//                .and(t2.field("contact_token").eq(contactPhone));
+//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+//        Record record = step.where(condition).fetchAny();
+//        if (record != null) {
+//            OrganizationMember r = record.map(new OrganizationMemberRecordMapper());
 //            return ConvertHelper.convert(r, OrganizationMember.class);
+//        }
 //        return null;
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        //added by wh 2016-10-13 把被拒绝的过滤掉
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+        if (r != null)
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        return null;
     }
 
     /**
@@ -3814,47 +3816,47 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         }
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("group_path").like(path + "%");
-        if (null != groupTypes && groupTypes.size() > 0)
-            condition = condition.and(t1.field("group_type").in(groupTypes));
-
-        if (!StringUtils.isEmpty(contactToken)) {
-            condition = condition.and(t1.field("contact_token").eq(contactToken));
-        }
-
-        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
-        if (records != null) {
-            records.stream().map(r -> {
-                result.add(ConvertHelper.convert(r, OrganizationMember.class));
-                return null;
-            }).collect(Collectors.toList());
-        }
-        return result;
-//
-//        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("group_path").like(path + "%");
 //        if (null != groupTypes && groupTypes.size() > 0)
-//            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+//            condition = condition.and(t1.field("group_type").in(groupTypes));
 //
 //        if (!StringUtils.isEmpty(contactToken)) {
-//            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+//            condition = condition.and(t1.field("contact_token").eq(contactToken));
 //        }
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-////		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
-//        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-//        query.fetch().map((r) -> {
-//            result.add(ConvertHelper.convert(r, OrganizationMember.class));
-//            return null;
-//        });
 //
+//        condition = condition.and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+//        List<OrganizationMember> records = step.where(condition).orderBy(t1.field("id").desc()).fetch().map(new OrganizationMemberRecordMapper());
+//        if (records != null) {
+//            records.stream().map(r -> {
+//                result.add(ConvertHelper.convert(r, OrganizationMember.class));
+//                return null;
+//            }).collect(Collectors.toList());
+//        }
 //        return result;
+
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+        if (null != groupTypes && groupTypes.size() > 0)
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+
+        if (!StringUtils.isEmpty(contactToken)) {
+            query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactToken));
+        }
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+//		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, OrganizationMember.class));
+            return null;
+        });
+
+        return result;
     }
 
     /**
@@ -4541,13 +4543,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (detail == null) {
             new_detail_id = createOrganizationMemberDetails(organizationMemberDetails);
         } else {
-            if (organizationMemberDetails.getId() != 0L && organizationMemberDetails.getId() != detail.getId()) {
+            if (organizationMemberDetails.getId() != 0L && !organizationMemberDetails.getId().equals(detail.getId())) {
                 LOGGER.error("organizationMemberDetails is not matched, detailId={}, organization_id={}, contact_token={}", detail.getId(), organizationMemberDetails.getOrganizationId(), organizationMemberDetails.getContactToken());
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                         "organizationMemberDetails is not matched");
             }
             if (needUpdate == Boolean.TRUE) {
+                organizationMemberDetails.setId(detail.getId());
                 updateOrganizationMemberDetails(organizationMemberDetails, organizationMemberDetails.getId());
+                new_detail_id = detail.getId();
             }
         }
         return new_detail_id;

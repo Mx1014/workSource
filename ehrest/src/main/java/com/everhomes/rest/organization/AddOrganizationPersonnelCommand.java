@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -36,8 +37,16 @@ public class AddOrganizationPersonnelCommand {
 	private String contactToken;
 	
 	private Byte gender;
-	
+
 	private String employeeNo;
+
+	private Byte employeeType;
+
+	private Byte employeeStatus;
+
+	private Date employmentTime;
+
+	private Date checkInTime;
 	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
@@ -50,7 +59,9 @@ public class AddOrganizationPersonnelCommand {
 	
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
-	
+
+	public AddOrganizationPersonnelCommand() {
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -152,9 +163,41 @@ public class AddOrganizationPersonnelCommand {
 		this.jobLevelIds = jobLevelIds;
 	}
 
+	public Byte getEmployeeType() {
+		return employeeType;
+	}
+
+	public void setEmployeeType(Byte employeeType) {
+		this.employeeType = employeeType;
+	}
+
+	public Byte getEmployeeStatus() {
+		return employeeStatus;
+	}
+
+	public void setEmployeeStatus(Byte employeeStatus) {
+		this.employeeStatus = employeeStatus;
+	}
+
+	public Date getEmploymentTime() {
+		return employmentTime;
+	}
+
+	public void setEmploymentTime(Date employmentTime) {
+		this.employmentTime = employmentTime;
+	}
+
+	public Date getCheckInTime() {
+		return checkInTime;
+	}
+
+	public void setCheckInTime(Date checkInTime) {
+		this.checkInTime = checkInTime;
+	}
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

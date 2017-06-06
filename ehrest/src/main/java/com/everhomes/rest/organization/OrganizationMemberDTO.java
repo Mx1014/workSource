@@ -75,6 +75,9 @@ public class OrganizationMemberDTO {
 	private Byte   gender;
 
     private Byte visibleFlag;
+
+    @ItemType(Long.class)
+    private List<Long> memberDetailIds;
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> groups;
@@ -419,5 +422,13 @@ public class OrganizationMemberDTO {
 
     public void setCheckInTime(java.sql.Date checkInTime) {
         this.checkInTime = checkInTime;
+    }
+
+    public List<Long> getMemberDetailIds() {
+        return memberDetailIds;
+    }
+
+    public void setMemberDetailIds(List<Long> memberDetailIds) {
+        this.memberDetailIds = memberDetailIds;
     }
 }
