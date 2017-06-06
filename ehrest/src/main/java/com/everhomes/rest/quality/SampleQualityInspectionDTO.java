@@ -21,7 +21,7 @@ import java.util.List;
  * </ul>
  * Created by ying.xiong on 2017/6/1.
  */
-public class RoutineQualityInspectionDTO {
+public class SampleQualityInspectionDTO {
     private Long id;
     @NotNull
     private Long ownerId;

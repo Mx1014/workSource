@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
-public class CountRoutineTasksResponse {
+public class CountSampleTasksResponse {
 
     private Long id;
 

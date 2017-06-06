@@ -15,7 +15,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.address.CommunityDTO;
@@ -584,14 +583,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/createRoutineQualityInspection</b>
+	 * <b>URL: /quality/createSampleQualityInspection</b>
 	 * <p>创建品质核查例行检查</p>
 	 */
-	@RequestMapping("createRoutineQualityInspection")
-	@RestReturn(value = RoutineQualityInspectionDTO.class)
-	public RestResponse createRoutineQualityInspection(CreateRoutineQualityInspectionCommand cmd) {
+	@RequestMapping("createSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
 
-//		RoutineQualityInspectionDTO routineQualityInspection = qualityService.createRoutineQualityInspection(cmd);
+//		SampleQualityInspectionDTO routineQualityInspection = qualityService.createSampleQualityInspection(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -600,14 +599,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/listRoutineQualityInspection</b>
+	 * <b>URL: /quality/listSampleQualityInspection</b>
 	 * <p>查看品质核查例行检查-web</p>
 	 */
-	@RequestMapping("listRoutineQualityInspection")
-	@RestReturn(value = ListRoutineQualityInspectionResponse.class)
-	public RestResponse listRoutineQualityInspection(ListRoutineQualityInspectionCommand cmd) {
+	@RequestMapping("listSampleQualityInspection")
+	@RestReturn(value = ListSampleQualityInspectionResponse.class)
+	public RestResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
 
-//		ListRoutineQualityInspectionResponse routineQualityInspections = qualityService.listRoutineQualityInspection(cmd);
+//		ListSampleQualityInspectionResponse routineQualityInspections = qualityService.listSampleQualityInspection(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -616,14 +615,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/countRoutineTaskScores</b>
+	 * <b>URL: /quality/countSampleTaskScores</b>
 	 * <p>检查分数统计</p>
 	 */
-	@RequestMapping("countRoutineTaskScores")
-	@RestReturn(value = CountRoutineTaskScoresResponse.class)
-	public RestResponse countRoutineTaskScores(CountRoutineTaskScoresCommand cmd) {
+	@RequestMapping("countSampleTaskScores")
+	@RestReturn(value = CountSampleTaskScoresResponse.class)
+	public RestResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
 
-//		CountRoutineTaskScoresResponse scores = qualityService.countRoutineTaskScores(cmd);
+//		CountSampleTaskScoresResponse scores = qualityService.countSampleTaskScores(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -632,14 +631,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/countRoutineTasks</b>
+	 * <b>URL: /quality/countSampleTasks</b>
 	 * <p>检查生成的任务统计</p>
 	 */
-	@RequestMapping("countRoutineTasks")
-	@RestReturn(value = CountRoutineTasksResponse.class)
-	public RestResponse countRoutineTasks(CountRoutineTasksCommand cmd) {
+	@RequestMapping("countSampleTasks")
+	@RestReturn(value = CountSampleTasksResponse.class)
+	public RestResponse countSampleTasks(CountSampleTasksCommand cmd) {
 
-//		CountRoutineTasksResponse tasks = qualityService.countRoutineTasks(cmd);
+//		CountSampleTasksResponse tasks = qualityService.countSampleTasks(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -648,14 +647,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/countRoutineTaskCommunityScores</b>
+	 * <b>URL: /quality/countSampleTaskCommunityScores</b>
 	 * <p>检查关联的各项目分数统计</p>
 	 */
-	@RequestMapping("countRoutineTaskCommunityScores")
+	@RequestMapping("countSampleTaskCommunityScores")
 	@RestReturn(value = CountScoresResponse.class)
-	public RestResponse countRoutineTaskCommunityScores(CountRoutineTaskCommunityScoresCommand cmd) {
+	public RestResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd) {
 
-//		CountScoresResponse scores = qualityService.countRoutineTaskCommunityScores(cmd);
+//		CountScoresResponse scores = qualityService.countSampleTaskCommunityScores(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -664,14 +663,14 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/countRoutineTaskSpecificationItemScores</b>
+	 * <b>URL: /quality/countSampleTaskSpecificationItemScores</b>
 	 * <p>检查关联各扣分项占比</p>
 	 */
-	@RequestMapping("countRoutineTaskSpecificationItemScores")
-	@RestReturn(value = CountRoutineTaskSpecificationItemScoresResponse.class)
-	public RestResponse countRoutineTaskSpecificationItemScores(CountRoutineTaskSpecificationItemScoresCommand cmd) {
+	@RequestMapping("countSampleTaskSpecificationItemScores")
+	@RestReturn(value = CountSampleTaskSpecificationItemScoresResponse.class)
+	public RestResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 
-//		CountScoresResponse scores = qualityService.countRoutineTaskSpecificationItemScores(cmd);
+//		CountScoresResponse scores = qualityService.countSampleTaskSpecificationItemScores(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -10,7 +10,7 @@ import java.util.List;
  * </ul>
  * Created by ying.xiong on 2017/6/3.
  */
-public class CountRoutineTaskSpecificationItemScoresResponse {
+public class CountSampleTaskSpecificationItemScoresResponse {
     @ItemType(SpecificationItemScores.class)
     private List<SpecificationItemScores> itemScores;
 

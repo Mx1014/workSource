@@ -8,30 +8,18 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>ownerId: 例行检查所属owner id</li>
  *     <li>ownerType: 例行检查所属owner类型例如PM</li>
- *     <li>communityId: 小区id</li>
- *     <li>routineId: 例行检查id</li>
+ *     <li>sampleId: 检查id</li>
  * </ul>
- * Created by ying.xiong on 2017/6/2.
+ * Created by ying.xiong on 2017/6/3.
  */
-public class ListRoutineQualityInspectionTasksCommand {
-
+public class CountSampleTaskSpecificationItemScoresCommand {
     @NotNull
     private Long ownerId;
 
     @NotNull
     private String ownerType;
 
-    private Long communityId;
-
-    private Long routineId;
-
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
+    private Long sampleId;
 
     public Long getOwnerId() {
         return ownerId;
@@ -49,12 +37,12 @@ public class ListRoutineQualityInspectionTasksCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getRoutineId() {
-        return routineId;
+    public Long getSampleId() {
+        return sampleId;
     }
 
-    public void setRoutineId(Long routineId) {
-        this.routineId = routineId;
+    public void setSampleId(Long sampleId) {
+        this.sampleId = sampleId;
     }
 
     @Override

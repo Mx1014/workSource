@@ -158,8 +158,8 @@
 		eh_express_orders | eh_express_query_histories | eh_express_order_logs |
 		eh_roster_order_settings |
         eh_energy_meter_price_config |
-        eh_user_notification_settings | eh_group_member_logs |
-
+        eh_user_notification_settings | eh_group_member_logs | 
+        eh_quality_inspection_samples | eh_quality_inspection_sample_group_map | eh_quality_inspection_sample_community_map | eh_quality_inspection_sample_score_stat | eh_quality_inspection_sample_community_specification_stat |
         </includes>
 
             <!-- All elements that are excluded from your schema

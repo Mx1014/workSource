@@ -20,7 +20,7 @@ import java.sql.Timestamp;
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
-public class RoutineTaskScoreDTO {
+public class SampleTaskScoreDTO {
 
     private Long id;
 

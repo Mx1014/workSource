@@ -1,8 +1,10 @@
 package com.everhomes.rest.quality;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -11,11 +13,12 @@ import javax.validation.constraints.NotNull;
  *     <li>name: 检查名称</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
- *     <li>communityId: 小区id</li>
+ *     <li>communityIds: 关联小区id列表</li>
+ *     <li>executeGroupAndPositionList:执行组部门岗位id列表 参考{@link com.everhomes.rest.quality.ExecuteGroupAndPosition}</li>
  * </ul>
  * Created by ying.xiong on 2017/6/1.
  */
-public class ListRoutineQualityInspectionCommand {
+public class CreateSampleQualityInspectionCommand {
 
     @NotNull
     private Long ownerId;
@@ -23,20 +26,24 @@ public class ListRoutineQualityInspectionCommand {
     @NotNull
     private String ownerType;
 
-    private Long communityId;
+    private String name;
 
     private Long startTime;
 
     private Long endTime;
 
-    private String name;
+    @ItemType(Long.class)
+    private List<Long> communityIds;
 
-    public Long getCommunityId() {
-        return communityId;
+    @ItemType(ExecuteGroupAndPosition.class)
+    private List<ExecuteGroupAndPosition> executeGroupAndPositionList;
+
+    public List<Long> getCommunityIds() {
+        return communityIds;
     }
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
+    public void setCommunityIds(List<Long> communityIds) {
+        this.communityIds = communityIds;
     }
 
     public Long getEndTime() {
@@ -45,6 +52,14 @@ public class ListRoutineQualityInspectionCommand {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public List<ExecuteGroupAndPosition> getExecuteGroupAndPositionList() {
+        return executeGroupAndPositionList;
+    }
+
+    public void setExecuteGroupAndPositionList(List<ExecuteGroupAndPosition> executeGroupAndPositionList) {
+        this.executeGroupAndPositionList = executeGroupAndPositionList;
     }
 
     public String getName() {

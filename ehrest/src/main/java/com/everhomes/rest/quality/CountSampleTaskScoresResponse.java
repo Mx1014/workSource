@@ -7,15 +7,15 @@ import java.util.List;
 
 /**
  * <ul>
- *  <li>routineTasks: 参考{@link com.everhomes.rest.quality.RoutineTaskScoreDTO}</li>
+ *  <li>sampleTasks: 参考{@link com.everhomes.rest.quality.SampleTaskScoreDTO}</li>
  *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
-public class CountRoutineTaskScoresResponse {
+public class CountSampleTaskScoresResponse {
 
-    @ItemType(RoutineTaskScoreDTO.class)
-    private List<RoutineTaskScoreDTO> routineTasks;
+    @ItemType(SampleTaskScoreDTO.class)
+    private List<SampleTaskScoreDTO> sampleTasks;
 
     private Long nextPageAnchor;
 
@@ -27,12 +27,12 @@ public class CountRoutineTaskScoresResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-    public List<RoutineTaskScoreDTO> getRoutineTasks() {
-        return routineTasks;
+    public List<SampleTaskScoreDTO> getSampleTasks() {
+        return sampleTasks;
     }
 
-    public void setRoutineTasks(List<RoutineTaskScoreDTO> routineTasks) {
-        this.routineTasks = routineTasks;
+    public void setSampleTasks(List<SampleTaskScoreDTO> sampleTasks) {
+        this.sampleTasks = sampleTasks;
     }
 
     @Override

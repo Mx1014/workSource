@@ -19,7 +19,7 @@ import java.util.List;
  * </ul>
  * Created by ying.xiong on 2017/6/3.
  */
-public class CountRoutineTaskCommunityScoresCommand {
+public class CountSampleTaskCommunityScoresCommand {
 
     @NotNull
     private Long ownerId;
@@ -27,7 +27,7 @@ public class CountRoutineTaskCommunityScoresCommand {
     @NotNull
     private String ownerType;
 
-    private Long routineId;
+    private Long sampleId;
 
     @ItemType(Long.class)
     private List<Long> targetIds;
@@ -72,12 +72,12 @@ public class CountRoutineTaskCommunityScoresCommand {
         this.pageSize = pageSize;
     }
 
-    public Long getRoutineId() {
-        return routineId;
+    public Long getSampleId() {
+        return sampleId;
     }
 
-    public void setRoutineId(Long routineId) {
-        this.routineId = routineId;
+    public void setSampleId(Long sampleId) {
+        this.sampleId = sampleId;
     }
 
     public Long getSpecificationId() {
