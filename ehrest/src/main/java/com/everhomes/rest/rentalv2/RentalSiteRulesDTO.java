@@ -61,14 +61,47 @@ public class RentalSiteRulesDTO {
 
 	private BigDecimal approvingUserOriginalPrice;
 	private BigDecimal approvingUserPrice;
-
+	private BigDecimal halfOrgMemberOriginalPrice;
+	private BigDecimal halfOrgMemberPrice;
+	private BigDecimal halfApprovingUserOriginalPrice;
+	private BigDecimal halfApprovingUserPrice;
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
+	public BigDecimal getHalfOrgMemberOriginalPrice() {
+		return halfOrgMemberOriginalPrice;
+	}
 
+	public void setHalfOrgMemberOriginalPrice(BigDecimal halfOrgMemberOriginalPrice) {
+		this.halfOrgMemberOriginalPrice = halfOrgMemberOriginalPrice;
+	}
+
+	public BigDecimal getHalfOrgMemberPrice() {
+		return halfOrgMemberPrice;
+	}
+
+	public void setHalfOrgMemberPrice(BigDecimal halfOrgMemberPrice) {
+		this.halfOrgMemberPrice = halfOrgMemberPrice;
+	}
+
+	public BigDecimal getHalfApprovingUserOriginalPrice() {
+		return halfApprovingUserOriginalPrice;
+	}
+
+	public void setHalfApprovingUserOriginalPrice(BigDecimal halfApprovingUserOriginalPrice) {
+		this.halfApprovingUserOriginalPrice = halfApprovingUserOriginalPrice;
+	}
+
+	public BigDecimal getHalfApprovingUserPrice() {
+		return halfApprovingUserPrice;
+	}
+
+	public void setHalfApprovingUserPrice(BigDecimal halfApprovingUserPrice) {
+		this.halfApprovingUserPrice = halfApprovingUserPrice;
+	}
 
 	public Long getRentalSiteId() {
 		return rentalSiteId;

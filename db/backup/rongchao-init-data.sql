@@ -1308,8 +1308,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- add 【荣超股份】上线新项目 荣超大厦 by wh 2017-6-5 http://devops.lab.everhomes.com/issues/10522
 SET FOREIGN_KEY_CHECKS = 0;
 SET @namespace_id=999975;
-SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; -- 需要取现网eh_communities的ID的最大值再加一定余量 
-SET @organization_id = (SELECT MAX(id) FROM `eh_organizations`) + 5; 	-- 需要取eh_organizations的ID最大值并加一定余量，如果修改此值则其path也要改
+SET @community_id = 240111044332059740; -- 需要取现网eh_communities的ID的最大值再加一定余量 
+SET @organization_id = (SELECT id FROM eh_organizations WHERE NAME = '深圳市荣超物业管理股份有限公司' AND namespace_id =999975) ; 	-- 需要取eh_organizations的ID最大值并加一定余量，如果修改此值则其path也要改
 SET @eh_organization_communities_id = (SELECT MAX(id) FROM `eh_organization_communities`) + 5; 	--  
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   -- 取eh_forums的ID最大值再加一定余量

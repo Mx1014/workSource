@@ -464,7 +464,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.in(orderIds);
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode())); 
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+
 		step.where(condition);
 //		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 //				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -1457,7 +1459,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalTimeInterval> result = step
-				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalTimeInterval.class);
 				});
 		if (null != result && result.size() > 0)
