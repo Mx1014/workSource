@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
@@ -1005,7 +1006,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Double maxTimeStep = 1.0;
 
 		try {
+			long time3 = System.currentTimeMillis();
 			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
+			long time4 = System.currentTimeMillis();
+			LOGGER.info("calculatePrice get cell time={}", time4 - time3);
+
 			if(null == cells || cells.size() == 0) {
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
 			}else {
@@ -1045,6 +1050,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
 			}
+
+			long time5 = System.currentTimeMillis();
+			LOGGER.info("calculatePrice foreach time={}", time5 - time4);
 		} catch (ParseException e) {
 			LOGGER.error("计算平均值-时间转换 异常");
 		}
@@ -1064,6 +1072,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return priceStr;
 		}
 
+	}
+
+	private InnoSpringCardInfo bubble(List<InnoSpringCardInfo> list) {
+		list.toArray();
+		int size = list.size();
+		if (size == 0)
+			return null;
+		for (int i = size - 1; i > 0 ; i--) {
+			for (int j = 0; j < i; j++) {
+				if (Long.valueOf(list.get(j).getEnd_time()) > Long.valueOf(list.get(j+1).getEnd_time())) {
+					InnoSpringCardInfo temp = list.get(j);
+					list.set(j, list.get(j+1));
+					list.set(j+1, temp);
+				}
+			}
+		}
+		return list.get(size - 1);
 	}
 
 	private boolean isInteger(BigDecimal b){
