@@ -8629,10 +8629,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Organization enterprise = checkOrganization(enterpriseId);
                 List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, cmd.getContactToken());
                 for (OrganizationMember member : members) {
-                    if(!enterpriseIds.contains(member.getOrganizationId())){//删除退出公司的记录
-                        organizationProvider.deleteOrganizationMemberById(member.getId());
-                        leaveMembers.add(member);
-                    }
+//                    if(!enterpriseIds.contains(member.getOrganizationId())){//删除退出公司的记录
+//                        organizationProvider.deleteOrganizationMemberById(member.getId());
+//                        leaveMembers.add(member);
+//                    }
                     if(!member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//删除所有公司下级的记录
                         organizationProvider.deleteOrganizationMemberById(member.getId());
                     }
