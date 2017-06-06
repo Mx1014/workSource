@@ -99,6 +99,7 @@ import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.GetBizConfHolder;
+import com.everhomes.rest.videoconf.GetVideoConfHelpUrlResponse;
 import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.TrialFlag;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
@@ -3024,6 +3025,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(null != userIdentifier)
 			return userIdentifier.getIdentifierToken();
 		return null;
+	}
+
+	@Override
+	public GetVideoConfHelpUrlResponse getVideoConfHelpUrl() { 
+		String url = configurationProvider.getValue("video.help", "");
+		GetVideoConfHelpUrlResponse response = new GetVideoConfHelpUrlResponse();
+		response.setHelpUrl(url);
+		return response;
 	}
 	
 	

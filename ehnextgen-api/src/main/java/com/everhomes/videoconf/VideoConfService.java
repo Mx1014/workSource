@@ -21,6 +21,7 @@ import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.GetVideoConfHelpUrlResponse;
 import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
@@ -162,4 +163,5 @@ public interface VideoConfService {
 			CheckVideoConfTrialAccountCommand cmd);
 	void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd);
 	void testSendPhoneMsg(String phoneNum, int templateId, int namespaceId);
+	GetVideoConfHelpUrlResponse getVideoConfHelpUrl();
 }

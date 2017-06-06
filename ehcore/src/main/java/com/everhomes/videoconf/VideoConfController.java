@@ -40,6 +40,7 @@ import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
 import com.everhomes.rest.videoconf.GetNamespaceListResponse;
+import com.everhomes.rest.videoconf.GetVideoConfHelpUrlResponse;
 import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
@@ -1445,6 +1446,20 @@ public class VideoConfController  extends ControllerBase{
 	}
 
 	/**
+	 * <b>URL: /conf/getVideoConfHelpUrl</b>
+	 * 获取如何使用的URL
+	 */
+	@RequestMapping("getVideoConfHelpUrl")
+	@RestReturn(GetVideoConfHelpUrlResponse.class)
+	public RestResponse getVideoConfHelpUrl(){		
+		GetVideoConfHelpUrlResponse rsp = videoConfService.getVideoConfHelpUrl();
+		RestResponse response = new RestResponse(rsp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /conf/getVideoConfTrialAccount</b>
 	 * 获取一个测试账号
 	 */
@@ -1457,7 +1472,6 @@ public class VideoConfController  extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 
 	/**
 	 * <b>URL: /conf/testSendPhoneMsg</b>
