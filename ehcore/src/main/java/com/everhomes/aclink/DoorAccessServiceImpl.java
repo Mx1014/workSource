@@ -3477,7 +3477,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 	private void newUserAutoAuth(Long identifierId) {
 		UserIdentifier identifier = userProvider.findIdentifierById(identifierId);
-		if(identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode())) {
+		if(identifier != null &&
+				( identifier.getClaimStatus().equals(IdentifierClaimStatus.VERIFYING.getCode()) ||
+				identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode()))
+				) {
 			String mac = this.configProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
 			if(mac == null || mac.isEmpty()) {
 				if(LOGGER.isInfoEnabled()) {
