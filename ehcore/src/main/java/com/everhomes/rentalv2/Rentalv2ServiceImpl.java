@@ -830,6 +830,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter ResourceTypeId OwnerId OwnerType cant be null");
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 
+		long start = System.currentTimeMillis();
 //		if(cmd.getAnchor() == null)
 //			cmd.setAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -858,12 +859,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setRentalSites(new ArrayList<>());
-		
+
+		long time1 = System.currentTimeMillis();
+		LOGGER.info("Get list time={}", time1 - start);
+
 		for (RentalResource rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
 			 
 			response.getRentalSites().add(rSiteDTO);
 		}
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("Get list time={}", time2 - time1);
 
 		return response;
 	}
@@ -871,7 +878,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
+		long time1 = System.currentTimeMillis();
+
 		proccessCells(rentalSite);
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("proccessCells time={}", time2 - time1);
+
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
@@ -942,8 +955,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		rSiteDTO.setAttachments(convertAttachments(attachments));
 
+		long time3 = System.currentTimeMillis();
+		LOGGER.info("populate time={}", time3 - time2);
 		//计算显示价格
 		calculatePrice(rentalSite, rSiteDTO, sceneToken);
+
+		long time4 = System.currentTimeMillis();
+		LOGGER.info("calculatePrice time={}", time4 - time3);
 		//更新价格平均值
 		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
 //		rentalv2Provider.updateRentalSite(rentalSite);
