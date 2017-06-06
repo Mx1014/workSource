@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
@@ -32,6 +33,7 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchDayLog;
@@ -107,7 +109,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 	 
 
 	@Override
-	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+	public String postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 		super.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
 		//添加工作流
@@ -120,7 +122,9 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),"")); 
 		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
 				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
-		createflowCase(approvalRequest, contentString);
+		FlowCase flowCase = createflowCase(approvalRequest, contentString);
+		String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+		return url;
 	}
 	
 	@Override

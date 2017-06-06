@@ -138,10 +138,17 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 
 	public static final String REFER_TYPE= FlowReferType.PUNCH_APPROVAL.getCode();
 	@Override
-	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+	public String postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
+		return null;
 	}
+	
 
+    public String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId  ;
+		  
+		
+	}
 
 	public FlowCase createflowCase(ApprovalRequest approvalRequest,String contentString ){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();

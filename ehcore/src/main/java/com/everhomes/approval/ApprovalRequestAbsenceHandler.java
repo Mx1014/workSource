@@ -11,9 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors; 
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component; 
+
+
+
 
 
 
@@ -55,9 +59,16 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
 import ch.qos.logback.classic.Logger;
  
+
+
+
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
@@ -74,6 +85,7 @@ import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.techpark.punch.PunchConstants;
 import com.everhomes.techpark.punch.PunchRule;
@@ -890,7 +902,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	}
 
 	@Override
-	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+	public String postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 		//添加请假时间
 		createTimeRange(userId, approvalRequest.getId(), cmd.getTimeRangeList());
@@ -912,7 +924,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
         map.put("endTime", sdFormat.format(new Date(range.getEndTime())) ); 
 		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
 				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
-		createflowCase(approvalRequest, contentString);
+		FlowCase flowCase = createflowCase(approvalRequest, contentString);
+		String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+		return url;
 	}
 
 	@Override

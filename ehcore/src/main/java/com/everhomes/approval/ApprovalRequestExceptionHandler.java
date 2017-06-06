@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
@@ -40,6 +41,7 @@ import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -133,7 +135,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	}
 	
 	@Override
-	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
+	public String postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
 		//处理考勤
@@ -155,7 +157,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
         map.put("punchDetail", content.getPunchDetail() ); 
 		String contentString = localeTemplateService.getLocaleTemplateString(PunchConstants.PUNCH_FLOW_CONTEXT_SCOPE ,
 				 approvalRequest.getApprovalType().intValue() , "zh_CN", map, "");
-		createflowCase(approvalRequest, contentString);
+		FlowCase flowCase = createflowCase(approvalRequest, contentString);
+		String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+		return url;
 	}
 
 	@Override
