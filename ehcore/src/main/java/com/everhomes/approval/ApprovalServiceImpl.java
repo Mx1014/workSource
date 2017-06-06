@@ -1436,7 +1436,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
-
+		CreateApprovalRequestBySceneResponse response = new CreateApprovalRequestBySceneResponse();
 		ApprovalRequest result = dbProvider.execute(s -> {
 			// 1. 申请表增加一条记录
 			// 前置处理器，处理一些特定审批类型的数据检查等操作
@@ -1456,7 +1456,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 				createApprovalOpRequest(userId, approvalRequest, cmd.getReason());
 
 				// 4. 后置处理器，处理时间，回调考勤接口更新打卡相关接口
-				handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+				String flowCaseUrl = handler.postProcessCreateApprovalRequest(userId, ownerInfo, approvalRequest, cmd);
+				response.setFlowCaseUrl(flowCaseUrl);
 
 				// 5. 发消息给第一级审批者
 				List<ApprovalFlowLevel> nextLevelUser = approvalFlowLevelProvider.listApprovalFlowLevel(approvalRequest.getFlowId(),
@@ -1465,8 +1466,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 				return approvalRequest;
 			});
-
-		return new CreateApprovalRequestBySceneResponse(handler.processBriefApprovalRequest(result));
+		response.setApprovalRequest(handler.processBriefApprovalRequest(result)); 
+		return response;
 	}
 	private void createApprovalOpRequest(Long userId, ApprovalRequest approvalRequest, String processMessage) {
 		ApprovalOpRequest approvalOpRequest = new ApprovalOpRequest();

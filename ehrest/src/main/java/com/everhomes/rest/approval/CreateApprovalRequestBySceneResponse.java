@@ -13,6 +13,9 @@ public class CreateApprovalRequestBySceneResponse {
 	private BriefApprovalRequestDTO approvalRequest;
 	private String flowCaseUrl;
 
+	public CreateApprovalRequestBySceneResponse(){
+		
+	}
 	public CreateApprovalRequestBySceneResponse(BriefApprovalRequestDTO approvalRequest) {
 		super();
 		this.approvalRequest = approvalRequest;
