@@ -10341,6 +10341,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return result;
     }
 
+<<<<<<< HEAD
     @Override
     public OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
         OrganizationMemberDetails detail = new OrganizationMemberDetails();
@@ -10374,8 +10375,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
 
         return detail;
+=======
+    private void updateDetailAndBindDetailIdAtMember(OrganizationMember organizationMember){
+        //更新或创建detail记录
+        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+        //绑定member表的detail_id
+        organizationMember.setDetailId(new_detail_id);
+        organizationProvider.updateOrganizationMember(organizationMember);
     }
-
 
     private void addProfileLogs(Long detailId, Integer namespaceId, String operationType, String tableName, String auditContent){
         OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
@@ -10389,7 +10396,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setResourceType(tableName);
         log.setAuditContent(auditContent);
         this.organizationProvider.createProfileLogs(log);
+>>>>>>> 6ad7d121c06297e6fe349d4f6009f9a00c17f98f
     }
+
 }
 
 

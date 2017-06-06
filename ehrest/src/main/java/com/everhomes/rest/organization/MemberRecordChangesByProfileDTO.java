@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
+ * <li>detailId: 员工编号</li>
  * <li>operationTime: 修改时间</li>
  * <li>operationType: 新增、修改、删除</li>
  * <li>operatorUid: 操作人员编号</li>
@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class MemberRecordChangesByProfileDTO {
 
-    private Long memberId;
+    private Long detailId;
 
     private String operationTime;
 
@@ -26,12 +26,12 @@ public class MemberRecordChangesByProfileDTO {
     public MemberRecordChangesByProfileDTO() {
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Long getDetailId() {
+        return detailId;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     public String getOperationTime() {

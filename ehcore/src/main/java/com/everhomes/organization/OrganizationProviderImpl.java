@@ -4570,12 +4570,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 
 
-    public void profileLogsUpdate(OrganizationMemberProfileLogs log){
+    public void createProfileLogs(OrganizationMemberProfileLogs log){
         Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberProfileLogs.class));
         log.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberProfileLogsDao dao = new EhOrganizationMemberProfileLogsDao(context.configuration());
         dao.insert(log);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberContracts.class, id);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberProfileLogs.class, id);
     }
+
+
+    public List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId){
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        List<OrganizationMemberProfileLogs> result = new ArrayList<>();
+        SelectQuery<EhOrganizationMemberProfileLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_PROFILE_LOGS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_PROFILE_LOGS.DETAIL_ID.eq(detailId));
+        query.fetch().map(r -> {
+            result.add(ConvertHelper.convert(r,OrganizationMemberProfileLogs.class));
+            return null;
+        });
+        return result;
+    }
+
 }
