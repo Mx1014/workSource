@@ -4533,7 +4533,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             new_detail_id = createOrganizationMemberDetails(organizationMemberDetails);
         } else {
             new_detail_id = detail.getId();
-            updateOrganizationMemberDetails(organizationMemberDetails, new_detail_id);
+//            updateOrganizationMemberDetails(organizationMemberDetails, new_detail_id);
         }
         return new_detail_id;
     }

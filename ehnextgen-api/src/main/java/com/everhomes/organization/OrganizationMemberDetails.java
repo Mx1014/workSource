@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
     @Autowired
-    OrganizationProvider organizationProvider;
+    private OrganizationProvider organizationProvider;
 
     private String targetType;
     private Long targetId;

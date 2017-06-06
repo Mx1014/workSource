@@ -131,7 +131,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -8637,7 +8636,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     joinEnterpriseMap.put(enterpriseId, true);
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8645,7 +8644,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setId(desOrgMember.getId());
                     //organizationProvider.updateOrganizationMember(organizationMember);
                     /**Modify BY lei.lv cause MemberDetail**/
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.updateOrganizationMember(organizationMember);
@@ -8669,7 +8668,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                         /**Modify BY lei.lv cause MemberDetail**/
                         //更新或创建detail记录
-                        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                         //绑定member表的detail_id
                         organizationMember.setDetailId(new_detail_id);
                         organizationProvider.createOrganizationMember(organizationMember);
@@ -8692,7 +8691,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8715,7 +8714,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8737,7 +8736,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(new OrganizationMemberDetails(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -10353,6 +10352,41 @@ public class OrganizationServiceImpl implements OrganizationService {
         result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
+    }
+
+    @Override
+    public OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
+        OrganizationMemberDetails detail = new OrganizationMemberDetails();
+
+        java.util.Date nDate = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDate = sdf.format(nDate);
+        java.sql.Date now = java.sql.Date.valueOf(sDate);
+
+        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
+        Long directOrgId = 0L;
+        if (member.getGroupType().equals("ENTERPRISE")) {
+            directOrgId = member.getOrganizationId();
+        } else {
+            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+            directOrgId = org.getDirectlyEnterpriseId();
+        }
+
+        detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
+        detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
+        detail.setOrganizationId(directOrgId);
+        detail.setContactName(member.getContactName());
+        detail.setContactToken(member.getContactToken());
+        detail.setContactDescription(member.getContactDescription());
+        detail.setEmployeeNo(member.getEmployeeNo());
+        detail.setAvatar(member.getAvatar());
+        detail.setGender(member.getGender());
+        detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
+        detail.setEmploymentTime(member.getEmploymentTime());
+        detail.setProfileIntegrity(member.getProfileIntegrity());
+        detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
+
+        return detail;
     }
 
 }

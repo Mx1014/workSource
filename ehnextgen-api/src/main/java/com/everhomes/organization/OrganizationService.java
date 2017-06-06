@@ -501,4 +501,5 @@ public interface OrganizationService {
 
     OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
 
+	OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member);
 }
