@@ -114,8 +114,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             types.add(ServiceModuleType.PARK.getCode());
             types.add(ServiceModuleType.MANAGER.getCode());
         }
+        List<ServiceModule> serviceModules = new ArrayList<>();
+        if(null != cmd.getModuleId()){
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+            if(null != module)
+                serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
+        }else{
+            serviceModules =  serviceModuleProvider.listServiceModule(startLevel, types);
+        }
 
-        List<ServiceModule> serviceModules = serviceModuleProvider.listServiceModule(startLevel, types);
 
         List<ServiceModuleDTO> dtos = serviceModules.stream().map(r -> {
             ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);

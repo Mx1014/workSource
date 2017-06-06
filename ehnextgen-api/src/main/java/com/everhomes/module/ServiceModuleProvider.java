@@ -58,4 +58,6 @@ public interface ServiceModuleProvider {
 
     void updateServiceModuleAssignmentRelation(ServiceModuleAssignmentRelation relation);
 
+    List<ServiceModule> listServiceModule(String path);
+
 }
