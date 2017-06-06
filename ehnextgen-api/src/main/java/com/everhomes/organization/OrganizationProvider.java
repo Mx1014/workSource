@@ -11,6 +11,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -379,9 +380,11 @@ public interface OrganizationProvider {
 
 	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
 
-	public OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
+	OrganizationMemberDetails findOrganizationMemberDetailsByOrganizationIdAndContactToken(Long organizationId, String contactToken);
 
 	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails);
+
+	Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate);
 
     List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
 

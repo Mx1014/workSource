@@ -8586,23 +8586,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				organizationProvider.createOrganizationMember(organizationMember);
 //				return null;
 //			}
-
+            /**modify by lei.lv*/
             enterpriseIds.add(org.getId());
-
-            if (null != departmentIds) {
-                for (Long departmentId : departmentIds) {
-                    Organization o = checkOrganization(departmentId);
-                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
-                        if (!enterpriseIds.contains(o.getId())) {
-                            enterpriseIds.add(o.getId());
-                        }
-                    } else {
-                        if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
-                            enterpriseIds.add(o.getDirectlyEnterpriseId());
-                        }
-                    }
-                }
-            }
+//
+//            if (null != departmentIds) {
+//                for (Long departmentId : departmentIds) {
+//                    Organization o = checkOrganization(departmentId);
+//                    if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
+//                        if (!enterpriseIds.contains(o.getId())) {
+//                            enterpriseIds.add(o.getId());
+//                        }
+//                    } else {
+//                        if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
+//                            enterpriseIds.add(o.getDirectlyEnterpriseId());
+//                        }
+//                    }
+//                }
+//            }
 
             // 先把把成员从公司所有部门都删除掉
 //			for (Organization organization : childOrganizations) {
@@ -8636,7 +8636,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     joinEnterpriseMap.put(enterpriseId, true);
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8644,7 +8644,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setId(desOrgMember.getId());
                     //organizationProvider.updateOrganizationMember(organizationMember);
                     /**Modify BY lei.lv cause MemberDetail**/
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.updateOrganizationMember(organizationMember);
@@ -8668,7 +8668,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                         /**Modify BY lei.lv cause MemberDetail**/
                         //更新或创建detail记录
-                        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                        Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                         //绑定member表的detail_id
                         organizationMember.setDetailId(new_detail_id);
                         organizationProvider.createOrganizationMember(organizationMember);
@@ -8691,7 +8691,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8714,7 +8714,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -8736,7 +8736,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     //更新或创建detail记录
-                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember));
+                    Long new_detail_id = organizationProvider.createOrUpdateOrganizationMemberDetail(getDetailFromOrganizationMember(organizationMember), true);
                     //绑定member表的detail_id
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
@@ -9927,8 +9927,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         System.out.println(StringHelper.toJsonString(mapLogs));
 
         //  存入日志
-        this.addProfileLogs(organizationMemberDetails.getId(),organizationMemberDetails.getNamespaceId(),
-                OperatingType.UPDATE.getCode(),"eh_organization_member_details",
+        this.addProfileLogs(organizationMemberDetails.getId(), organizationMemberDetails.getNamespaceId(),
+                OperatingType.UPDATE.getCode(), "eh_organization_member_details",
                 StringHelper.toJsonString(mapLogs));
     }
 

@@ -2,6 +2,7 @@
 package com.everhomes.organization;
 
 import com.everhomes.community.Community;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -35,6 +36,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
+import com.everhomes.util.RuntimeErrorException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -4524,7 +4526,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
      * 根据公司organization_id和电话contact_id判断是否创建或更新member_detail表
      **/
     @Override
-    public Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails) {
+    public Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails){
+        return createOrUpdateOrganizationMemberDetail(organizationMemberDetails,Boolean.FALSE);
+    }
+
+    /**
+     * 根据公司organization_id和电话contact_id判断是否创建或更新member_detail表
+     **/
+    public Long createOrUpdateOrganizationMemberDetail(OrganizationMemberDetails organizationMemberDetails, Boolean needUpdate) {
         Long organization_id = organizationMemberDetails.getOrganizationId();
         String contactToken = organizationMemberDetails.getContactToken();
         OrganizationMemberDetails detail = findOrganizationMemberDetailsByOrganizationIdAndContactToken(organization_id, contactToken);
@@ -4532,8 +4541,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         if (detail == null) {
             new_detail_id = createOrganizationMemberDetails(organizationMemberDetails);
         } else {
-            new_detail_id = detail.getId();
-//            updateOrganizationMemberDetails(organizationMemberDetails, new_detail_id);
+            if (organizationMemberDetails.getId() != 0L && organizationMemberDetails.getId() != detail.getId()) {
+                LOGGER.error("organizationMemberDetails is not matched, detailId={}, organization_id={}, contact_token={}", detail.getId(), organizationMemberDetails.getOrganizationId(), organizationMemberDetails.getContactToken());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+                        "organizationMemberDetails is not matched");
+            }
+            if (needUpdate == Boolean.TRUE) {
+                updateOrganizationMemberDetails(organizationMemberDetails, organizationMemberDetails.getId());
+            }
         }
         return new_detail_id;
     }
@@ -4545,7 +4560,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ORGANIZATION_ID.eq(organizationId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(contactToken));
         Record record = query.fetchAny();
-        if(record != null){
+        if (record != null) {
             return ConvertHelper.convert(record, OrganizationMemberDetails.class);
         }
         return null;
