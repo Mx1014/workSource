@@ -2987,6 +2987,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid PunchTimesPerDay parameter in the command");
 		}
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		List<PunchTimeRule> punchTimeRules = punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(), cmd.getName()) ; 
 		if(null!=punchTimeRules ){
 			LOGGER.error("Invalid name parameter in the command");
@@ -3040,6 +3041,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		}
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getPunchTimesPerDay() ) {
 			LOGGER.error("Invalid PunchTimesPerDay parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -3099,6 +3101,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public listPunchTimeRuleListResponse listPunchTimeRuleList(ListPunchRulesCommonCommand cmd) {
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		listPunchTimeRuleListResponse response =new listPunchTimeRuleListResponse();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
@@ -5017,6 +5020,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid owner type or  Id parameter in the command");
 		} 
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		if (null == cmd.getId() ) {
 			LOGGER.error("Invalid   Id parameter in the command");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -5359,6 +5363,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public void addPunchPoint(AddPunchPointCommand cmd) { 
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchLocationRule plr = null;
@@ -5390,6 +5395,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd) { 
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		ListPunchPointsResponse response = new ListPunchPointsResponse();
 		PunchRuleOwnerMap map =  punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		if(null == map)
@@ -5427,6 +5433,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public void addPunchWiFi(AddPunchWiFiCommand cmd) { 
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
 		PunchWifiRule pwr = null;
@@ -5457,7 +5464,7 @@ public class PunchServiceImpl implements PunchService {
 
 	@Override
 	public ListPunchWiFisResponse listPunchWiFis(ListPunchRulesCommonCommand cmd) {
-		// TODO Auto-generated method stub
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId())); 
 		ListPunchWiFisResponse response = new ListPunchWiFisResponse();
 		PunchRuleOwnerMap map =  punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		if(null == map)
@@ -5510,6 +5517,7 @@ public class PunchServiceImpl implements PunchService {
 	} 
 	@Override
 	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd) {
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		PunchRuleOwnerMap map = getUsefulRuleMap(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
 		Calendar startCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
@@ -5588,6 +5596,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
 			HttpServletResponse response) {
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
 		if(null == targetTimeRules.get())
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -5763,6 +5772,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void importPunchScheduling(ListPunchRulesCommonCommand cmd ,MultipartFile[] files) {
 		// TODO Auto-generated method stub
+		cmd.setOwnerId(getTopEnterpriseId(cmd.getOwnerId()));
 		targetTimeRules.set(punchProvider.queryPunchTimeRules(cmd.getOwnerType(), cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId(),  null));
 		ArrayList resultList = new ArrayList();
 		String rootPath = System.getProperty("user.dir");
