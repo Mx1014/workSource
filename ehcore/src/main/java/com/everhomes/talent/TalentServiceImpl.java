@@ -286,7 +286,8 @@ public class TalentServiceImpl implements TalentService {
 	public void importTalent(ImportTalentCommand cmd, MultipartFile[] attachment) {
 		Integer namespaceId = namespaceId();
 		ArrayList<RowResult> resultList = processorExcel(attachment[0]);
-		dbProvider.execute(s->{
+		List<CreateOrUpdateTalentCommand> commands = new ArrayList<>();
+		try {
 			for (int i = resultList.size() -1 ; i >= 2; i--) {
 				RowResult r = resultList.get(i);
 				CreateOrUpdateTalentCommand command = new CreateOrUpdateTalentCommand();
@@ -303,6 +304,20 @@ public class TalentServiceImpl implements TalentService {
 				command.setPhone(trim(r.getH()));
 				command.setRemark(trim(r.getI()));
 				ValidatorUtil.validate(command);
+				commands.add(command);
+			}
+		} catch (Exception e) {
+			if (e instanceof RuntimeErrorException) {
+				throw RuntimeErrorException.errorWith(TalentServiceErrorCode.SCOPE,
+						TalentServiceErrorCode.ERROR_EXCEL, ((RuntimeErrorException)e).getMessage());
+			}
+			throw RuntimeErrorException.errorWith(TalentServiceErrorCode.SCOPE,
+					TalentServiceErrorCode.ERROR_EXCEL, "error excel");
+		}
+		
+
+		dbProvider.execute(s->{
+			for (CreateOrUpdateTalentCommand command : commands) {
 				createTalent(command);
 			}
 			return null;
@@ -319,12 +334,16 @@ public class TalentServiceImpl implements TalentService {
 	private Byte getDegree(String degree) {
 		TalentDegreeEnum talentDegreeEnum = TalentDegreeEnum.fromName(degree);
 		if (talentDegreeEnum == null) {
-			talentDegreeEnum = TalentDegreeEnum.UNKNOWN;
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters");
 		}
 		return talentDegreeEnum.getCode();
 	}
 
 	private Long getCategoryId(Integer namespaceId, String categoryName) {
+		if (TalentCategory.otherName().equals(categoryName)) {
+			return TalentCategory.otherId();
+		}
 		TalentCategory talentCategory = talentCategoryProvider.findTalentCategoryByName(namespaceId, categoryName);
 		if (talentCategory == null) {
 			TalentCategoryDTO talentCategoryDTO = new TalentCategoryDTO();

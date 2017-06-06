@@ -17,6 +17,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.talent.ListTalentCommand;
 import com.everhomes.rest.talent.TalentDegreeConditionEnum;
 import com.everhomes.rest.talent.TalentDegreeEnum;
@@ -115,6 +116,10 @@ public class TalentProviderImpl implements TalentProvider {
 			step.and(Tables.EH_TALENTS.GENDER.eq(cmd.getGender()));
 		}
 		
+		if (TrueOrFalseFlag.fromCode(cmd.getAppFlag()) == TrueOrFalseFlag.TRUE) {
+			step.and(Tables.EH_TALENTS.ENABLED.eq(TrueOrFalseFlag.TRUE.getCode()));
+		}
+		
 		// 经验
 		if (cmd.getExperience() != null) {
 			if (cmd.getExperience().byteValue() == TalentExperienceConditionEnum.UNDER_ONE_YEAR.getCode()) {
@@ -136,7 +141,7 @@ public class TalentProviderImpl implements TalentProvider {
 		// 学历
 		if (cmd.getDegree() != null) {
 			if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.UNDER_SECONDARY.getCode()) {
-				step.and(Tables.EH_TALENTS.DEGREE.le(TalentDegreeEnum.SECONDARY.getCode()));
+				step.and(Tables.EH_TALENTS.DEGREE.lt(TalentDegreeEnum.SECONDARY.getCode()));
 			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_SECONDARY.getCode()) {
 				step.and(Tables.EH_TALENTS.DEGREE.ge(TalentDegreeEnum.SECONDARY.getCode()));
 			}else if (cmd.getDegree().byteValue() == TalentDegreeConditionEnum.OVER_COLLEGE.getCode()) {
