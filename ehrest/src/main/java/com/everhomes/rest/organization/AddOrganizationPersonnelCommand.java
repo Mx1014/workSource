@@ -19,6 +19,11 @@ import com.everhomes.util.StringHelper;
  * <li>gender：性别</li>
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
+ * <li>employeeNo: 工号</li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
+ * <li>employeeStatus: 员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime: 转正时间</li>
+ * <li>checkInTime: 入职时间</li>
  * <li>departmentIds：添加到多部门</li>
  * <li>jobPositionIds：添加到多群组</li>
  * </ul>
