@@ -117,6 +117,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         List<ServiceModule> serviceModules = new ArrayList<>();
         if(null != cmd.getModuleId()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(cmd.getModuleId());
+            startLevel = module.getLevel() + 1;
             if(null != module)
                 serviceModules = serviceModuleProvider.listServiceModule(module.getPath() + "/%");
         }else{
