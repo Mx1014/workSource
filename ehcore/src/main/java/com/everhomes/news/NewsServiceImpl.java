@@ -145,6 +145,9 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private UserActivityProvider userActivityProvider;
 
+	@Autowired
+	private ConfigurationProvider configProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
@@ -946,7 +949,38 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
+
+		//填充创建者信息   add by yanjun 20170606
+		populatePostUserInfo(userId, commentDTO);
 		return commentDTO;
+	}
+
+	/**
+	 * 填充创建者信息
+	 * @param userId
+	 * @param commentDTO
+	 */
+	private void populatePostUserInfo(Long userId, AddNewsCommentBySceneResponse commentDTO){
+		if(userId == null || commentDTO == null){
+			return;
+		}
+		User creator = userProvider.findUserById(userId);
+		if(creator != null) {
+			commentDTO.setCreatorNickName(creator.getNickName());
+
+			String creatorAvatar = creator.getAvatar();
+			commentDTO.setCreatorAvatar(creatorAvatar);
+
+			if(StringUtils.isEmpty(creatorAvatar)) {
+				creatorAvatar = configProvider.getValue(creator.getNamespaceId(), "user.avatar.default.url", "");
+			}
+
+			if(creatorAvatar != null && creatorAvatar.length() > 0){
+				String avatarUrl = getResourceUrlByUir(userId, creatorAvatar,
+						EntityType.USER.getCode(), userId);
+				commentDTO.setCreatorAvatarUrl(avatarUrl);
+			}
+		}
 	}
 
 	private Comment processComment(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
