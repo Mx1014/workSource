@@ -1190,7 +1190,7 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
 	VALUES(2, 240111044331056800, '光大We谷A4栋', 'A4栋', 0, '0769-22992838', '东莞市松山湖总部二路2号', NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999979);
     
-SET @address_id = 1;
+SET @address_id = 239825274387256100;
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id + 1),UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'A1-101','光大We谷A1栋','101','2','0',UTC_TIMESTAMP(), 999979);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id + 1),UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'A1-108','光大We谷A1栋','108','2','0',UTC_TIMESTAMP(), 999979);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id + 1),UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'A1-102','光大We谷A1栋','102','2','0',UTC_TIMESTAMP(), 999979);
@@ -1369,7 +1369,7 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id + 1),UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'A4-411','光大We谷A4栋','411','2','0',UTC_TIMESTAMP(), 999979);
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id + 1),UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'A4-412','光大We谷A4栋','412','2','0',UTC_TIMESTAMP(), 999979);
  
-SET @address_id = 1; 
+SET @address_id = 239825274387256100; 
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (1, 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A1-101', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (2, 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A1-108', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES (3, 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A1-102', '0');
