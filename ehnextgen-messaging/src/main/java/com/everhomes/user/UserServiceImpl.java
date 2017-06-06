@@ -2779,7 +2779,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
 		sceneDto.setName(organizationDto.getName());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
-		String aliasName = organizationDto.getName();
+		String aliasName = organizationDto.getDisplayName();
 		//if(sceneType.getCode().contains("park") && organizationDto.getCommunityName() != null) {
 		//    aliasName = organizationDto.getCommunityName();
 		//}
