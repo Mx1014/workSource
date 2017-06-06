@@ -4,6 +4,8 @@ package com.everhomes.talent;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -28,6 +30,17 @@ public class TalentServiceAdvice {
     @Autowired
     private CommunityProvider communityProvider;
     
+    private static final List<String> enterpriseAdminAPIList = new ArrayList<>();
+    
+    static {
+    	enterpriseAdminAPIList.add("listTalentCategory");
+    	enterpriseAdminAPIList.add("listTalent");
+    	enterpriseAdminAPIList.add("listTalentQueryHistory");
+    	enterpriseAdminAPIList.add("deleteTalentQueryHistory");
+    	enterpriseAdminAPIList.add("clearTalentQueryHistory");
+    	enterpriseAdminAPIList.add("getTalentDetail");
+    }
+    
 	@Before("execution(* com.everhomes.talent.TalentServiceImpl.*(..))")
 	public void check(JoinPoint joinPoint) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		// 检查通用参数，通过参数上的注解检查
@@ -37,8 +50,10 @@ public class TalentServiceAdvice {
 		// 检查owner
 		checkOwner(cmd);
 		
+		String methodName = joinPoint.getSignature().getName();
+		
 		// 检查是否为管理员
-		checkAdmin(cmd);
+		checkAdmin(methodName, cmd);
 	}
 
 	private void checkOwner(Object cmd) throws IllegalArgumentException, IllegalAccessException{
@@ -69,16 +84,22 @@ public class TalentServiceAdvice {
 		}
 	}
 
-	private void checkAdmin(Object cmd) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private boolean checkAdmin(String methodName, Object cmd) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Long userId = UserContext.current().getUser().getId();
 		Field field = cmd.getClass().getDeclaredField("organizationId");
 		field.setAccessible(true);
 		Long organizationId = (Long) field.get(cmd);
 		
-		checkAdmin(userId, organizationId);
+		for (String api : enterpriseAdminAPIList) {
+			if (api.equals(methodName)) {
+				return checkEnterpriseAdmin(userId, organizationId) || checkSuperAdmin(userId, organizationId);
+			}
+		}
+		
+		return checkSuperAdmin(userId, organizationId);
 	}
 
-	private boolean checkAdmin(Long userId, Long organizationId) {
+	private boolean checkSuperAdmin(Long userId, Long organizationId) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		boolean result = resolver.checkSuperAdmin(userId, organizationId);
 		if (!result) {
@@ -86,6 +107,11 @@ public class TalentServiceAdvice {
 					TalentServiceErrorCode.NOT_ADMIN, "not admin");
 		}
 		return result;
+	}
+	
+	private boolean checkEnterpriseAdmin(Long userId, Long organizationId) {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		return resolver.checkOrganizationAdmin(userId, organizationId);
 	}
 	
     
