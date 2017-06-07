@@ -50,6 +50,7 @@ import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
 import com.everhomes.approval.ApprovalRangeStatistic;
 import com.everhomes.approval.ApprovalRangeStatisticProvider;
+import com.everhomes.approval.ApprovalRequestDefaultHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
@@ -60,6 +61,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -73,6 +76,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -195,8 +199,8 @@ public class PunchServiceImpl implements PunchService {
 	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
- 
-
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
     private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
     	protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
@@ -702,15 +706,24 @@ public class PunchServiceImpl implements PunchService {
 				//是否有请求的flag
 				if(exceptionRequest.getApprovalStatus() != null ){
 					pdl.setRequestFlag(NormalFlag.YES.getCode());
-					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+//					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getMorningApprovalStatus() != null ){
 					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
-					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setMorningRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+//					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
 					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
-					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setAfternoonRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+//					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 				
