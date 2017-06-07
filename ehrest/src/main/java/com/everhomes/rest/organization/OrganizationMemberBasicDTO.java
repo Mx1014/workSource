@@ -26,23 +26,6 @@ import java.util.List;
  * <li>contactType：成员类型：{@link com.everhomes.use.IdentifierType}</li>
  * <li>contactToken：联系号码</li>
  * <li>avatar: 成员头像</li>
- * <li>enName：英文名</li>
- * <li>birthday: 出生日期</li>
- * <li>maritalFlag: 婚姻状况：0，保密 1，已婚 2，未婚 参考{@link com.everhomes.rest.organization.MaritalFlag}</li>
- * <li>politicalStatus: 政治面貌</li>
- * <li>nativePlace: 籍贯</li>
- * <li>regResidence: 户口</li>
- * <li>idNumber: 身份证号</li>
- * <li>email: 邮箱</li>
- * <li>wechat: 微信号码</li>
- * <li>qq: QQ号码</li>
- * <li>emergencyName: 紧急联系人姓名</li>
- * <li>emergencyContact: 紧急联系人号码</li>
- * <li>address: 住址</li>
- * <li>memberId: 员工编号</li>
- * <li>salaryCardNumber: 工资卡号</li>
- * <li>socialSecurityNumber: 公积金卡号</li>
- * <li>providentFundNumber: 社保卡号</li>
  * <li>targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
  * <li>targetId：注册用户对应的userId，未注册填0</li>
  * <li>groups：群组列表</li>
@@ -84,38 +67,6 @@ public class OrganizationMemberBasicDTO {
 
     private String avatar;
 
-    private String enName;
-
-    private Date birthday;
-
-    private Byte maritalFlag;
-
-    private String politicalStatus;
-
-    private String nativePlace;
-
-    private String regResidence;
-
-    private String idNumber;
-
-    private String email;
-
-    private String wechat;
-
-    private String qq;
-
-    private String emergencyName;
-
-    private String emergencyContact;
-
-    private String address;
-
-    private String salaryCardNumber;
-
-    private String socialSecurityNumber;
-
-    private String providentFundNumber;
-
     private Long targetId;
 
     private String targetType;
@@ -129,46 +80,6 @@ public class OrganizationMemberBasicDTO {
 
     private Long workingDays;
 
-
-    /*
-    @NotNull
-    private Long   organizationId;
-    private String   organizationName;
-    private String targetType;
-    @NotNull
-    private Long   targetId;
-    private String memberGroup;
-    private String contactDescription;
-    private Byte   status;private String initial;
-    private String fullPinyin;
-    private String fullInitial;
-    @ItemType(RoleDTO.class)
-    private List<RoleDTO> roles;
-    private Long groupId;
-    private String groupName;
-    private String   nickName;
-    private Long creatorUid;
-    @ItemType(OrganizationDTO.class)
-	private List<OrganizationDTO> groups;
-	private Integer proccesingTaskCount;
-    private String groupType;
-    private String groupPath;
-    private String position;
-    private String idNumber;
-    targetType：成员是否注册 参考{@link com.everhomes.rest.organization.pm.PmMemberTargetType}</li>
-    targetId：注册用户对应的userId，未注册填0</li>
-    memberGroup：组织角色类型 参考{@link com.everhomes.rest.organization.pm.PmMemberGroup}</li>
-    contactDescription：描述</li>
-    status：状态</li>
-    roles：角色列表</li>
-    groups：群组列表</li>
-    employeeNo：工号</li>
-    initial：首字母</li>
-    proccesingTaskCount：执行任务数量</li>
-    executiveFlag：是否高管 1-是 0-否</li>
-    position：职位</li>
-    idNumber：身份证号码</li>
-    */
     public OrganizationMemberBasicDTO() {
     }
 
@@ -291,135 +202,6 @@ public class OrganizationMemberBasicDTO {
     public void setEmployeeType(Byte employeeType) {
         this.employeeType = employeeType;
     }
-
-    public String getEnName() {
-        return enName;
-    }
-
-    public void setEnName(String enName) {
-        this.enName = enName;
-    }
-
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
-
-    public Byte getMaritalFlag() {
-        return maritalFlag;
-    }
-
-    public void setMaritalFlag(Byte maritalFlag) {
-        this.maritalFlag = maritalFlag;
-    }
-
-    public String getPoliticalStatus() {
-        return politicalStatus;
-    }
-
-    public void setPoliticalStatus(String politicalStatus) {
-        this.politicalStatus = politicalStatus;
-    }
-
-    public String getNativePlace() {
-        return nativePlace;
-    }
-
-    public void setNativePlace(String nativePlace) {
-        this.nativePlace = nativePlace;
-    }
-
-    public String getRegResidence() {
-        return regResidence;
-    }
-
-    public void setRegResidence(String regResidence) {
-        this.regResidence = regResidence;
-    }
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getWechat() {
-        return wechat;
-    }
-
-    public void setWechat(String wechat) {
-        this.wechat = wechat;
-    }
-
-    public String getQq() {
-        return qq;
-    }
-
-    public void setQq(String qq) {
-        this.qq = qq;
-    }
-
-    public String getEmergencyName() {
-        return emergencyName;
-    }
-
-    public void setEmergencyName(String emergencyName) {
-        this.emergencyName = emergencyName;
-    }
-
-    public String getEmergencyContact() {
-        return emergencyContact;
-    }
-
-    public void setEmergencyContact(String emergencyContact) {
-        this.emergencyContact = emergencyContact;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getSalaryCardNumber() {
-        return salaryCardNumber;
-    }
-
-    public void setSalaryCardNumber(String salaryCardNumber) {
-        this.salaryCardNumber = salaryCardNumber;
-    }
-
-    public String getSocialSecurityNumber() {
-        return socialSecurityNumber;
-    }
-
-    public void setSocialSecurityNumber(String socialSecurityNumber) {
-        this.socialSecurityNumber = socialSecurityNumber;
-    }
-
-    public String getProvidentFundNumber() {
-        return providentFundNumber;
-    }
-
-    public void setProvidentFundNumber(String providentFundNumber) {
-        this.providentFundNumber = providentFundNumber;
-    }
-
     public List<OrganizationDTO> getGroups() {
         return groups;
     }

@@ -8,11 +8,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.RolePrivilegeService;
@@ -31,6 +34,7 @@ import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
 import com.everhomes.util.RequireAuthentication;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/org")
@@ -1379,15 +1383,15 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/getOrganizationMemberBasicInfo</b>
      * <p>获取员工基本信息</p>
      */
-    @RequestMapping("getOrganizationMemberBasicInfo")
+/*    @RequestMapping("getOrganizationMemberBasicInfo")
     @RestReturn(value = OrganizationMemberBasicDTO.class)
-    public RestResponse getOrganizationMemberBasicInfo(@Valid GetOrganizationMemberBasicInfoCommand cmd) {
+    public RestResponse getOrganizationMemberBasicInfo(@Valid GetOrganizationMemberInfoCommand cmd) {
         OrganizationMemberBasicDTO res = this.organizationService.getOrganizationMemberBasicInfo(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /org/updateOrganizationMemberBackGround</b>
@@ -1451,9 +1455,9 @@ public class OrganizationController extends ControllerBase {
      * <p>列出员工教育信息</p>
      */
     @RequestMapping("listOrganizationMemberEducations")
-    @RestReturn(value = ListOrganizationMemberEducationsResponse.class)
+    @RestReturn(value = OrganizationMemberEducationsDTO.class, collection = true)
     public RestResponse listOrganizationMemberEducations(@Valid ListOrganizationMemberEducationsCommand cmd) {
-        ListOrganizationMemberEducationsResponse res = this.organizationService.listOrganizationMemberEducations(cmd);
+        List<OrganizationMemberEducationsDTO> res = this.organizationService.listOrganizationMemberEducations(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1507,9 +1511,9 @@ public class OrganizationController extends ControllerBase {
      * <p>列出员工工作经历</p>
      */
     @RequestMapping("listOrganizationMemberWorkExperiences")
-    @RestReturn(value = ListOrganizationMemberWorkExperiencesResponse.class)
+    @RestReturn(value = OrganizationMemberWorkExperiencesDTO.class, collection = true)
     public RestResponse listOrganizationMemberWorkExperiences(@Valid ListOrganizationMemberWorkExperiencesCommand cmd) {
-        ListOrganizationMemberWorkExperiencesResponse res = this.organizationService.listOrganizationMemberWorkExperiences(cmd);
+        List<OrganizationMemberWorkExperiencesDTO> res = this.organizationService.listOrganizationMemberWorkExperiences(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1563,9 +1567,9 @@ public class OrganizationController extends ControllerBase {
      * <p>列举员工保险信息</p>
      */
     @RequestMapping("listOrganizationMemberInsurances")
-    @RestReturn(value = ListOrganizationMemberInsurancesResponse.class)
+    @RestReturn(value = OrganizationMemberInsurancesDTO.class, collection = true)
     public RestResponse listOrganizationMemberInsurances(@Valid ListOrganizationMemberInsurancesCommand cmd) {
-        ListOrganizationMemberInsurancesResponse res = this.organizationService.listOrganizationMemberInsurances(cmd);
+        List<OrganizationMemberInsurancesDTO> res = this.organizationService.listOrganizationMemberInsurances(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1620,9 +1624,9 @@ public class OrganizationController extends ControllerBase {
      * <p>列举员工合同信息</p>
      */
     @RequestMapping("listOrganizationMemberContracts")
-    @RestReturn(value = ListOrganizationMemberContractsResponse.class)
+    @RestReturn(value = OrganizationMemberContractsDTO.class, collection = true)
     public RestResponse listOrganizationMemberContracts(@Valid ListOrganizationMemberContractsCommand cmd) {
-        ListOrganizationMemberContractsResponse res = this.organizationService.listOrganizationMemberContracts(cmd);
+        List<OrganizationMemberContractsDTO> res = this.organizationService.listOrganizationMemberContracts(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1686,52 +1690,23 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /*    @RequestMapping("updateOrganizationMemberNumbers")
-    @RestReturn(value = String.class)
-    public RestResponse updateOrganizationMemberNumbers(@Valid UpdateOrganizationMemberNumbersCommand cmd) {
-        this.organizationService.updateOrganizationMemberNumbers(cmd);
-        RestResponse response = new RestResponse();
+    /**
+     * <b>URL: /org/importOrganizationPersonelFiles</b>
+     * <p>通讯录成员导入</p>
+     */
+    @RequestMapping("importOrganizationPersonelFiles")
+    @RestReturn(value = ImportFileTaskDTO.class)
+    public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+
+        User manaUser = UserContext.current().getUser();
+        Long userId = manaUser.getId();
+        if (null == files || null == files[0]) {
+            LOGGER.error("files is null, userId=" + userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }
+        RestResponse response = new RestResponse(organizationService.importOrganizationPersonelFiles(files[0], userId, cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
-
-
-    @RequestMapping("getOrganizationMemberNumbers")
-    @RestReturn(value = OrganizationMemberNumbersDTO.class)
-    public RestResponse getOrganizationMemberNumbers(@Valid GetOrganizationMemberNumbersCommand cmd) {
-         res = this.organizationService.getOrganizationMemberNumbers(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
-    /*    @RequestMapping("getOrganizationMemberPersonal")
-    @RestReturn(value = OrganizationMemberPersonalDTO.class)
-    public RestResponse getOrganizationMemberPersonal(@Valid GetOrganizationMemberPersonalCommand cmd) {
-         res = this.organizationService.getOrganizationMemberPersonal(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;    }
-
-    @RequestMapping("updateOrganizationMemberContacts")
-    @RestReturn(value = String.class)
-    public RestResponse updateOrganizationMemberContacts(@Valid UpdateOrganizationMemberContactsCommand cmd) {
-        this.organizationService.updateOrganizationMemberContacts(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    @RequestMapping("getOrganizationMemberContacts")
-    @RestReturn(value = OrganizationMemberContactsDTO.class)
-    public RestResponse getOrganizationMemberContacts(@Valid GetOrganizationMemberContactsCommand cmd) {
-         res = this.organizationService.getOrganizationMemberContacts(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }*/
-}
+    }}

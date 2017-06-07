@@ -32,6 +32,9 @@ public class RowResult {
 	private String X;
 	private String Y;
 	private String Z;
+	private String AA;
+	private String AB;
+	private String AC;
 	public String getA() {
 		return A;
 	}
@@ -212,6 +215,24 @@ public class RowResult {
 	}
 	public void setZ(String z) {
 		Z = z;
+	}
+	public String getAA() {
+		return AA;
+	}
+	public void setAA(String AA) {
+		this.AA = AA;
+	}
+	public String getAB() {
+		return AB;
+	}
+	public void setAB(String AB) {
+		this.AB = AB;
+	}
+	public String getAC() {
+		return AC;
+	}
+	public void setAC(String AC) {
+		this.AC = AC;
 	}
 	@Override
 	public String toString() {

@@ -9763,29 +9763,30 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
         PersonnelsDetailsV2Response response = new PersonnelsDetailsV2Response();
+        OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
 
-        OrganizationMemberBasicDTO memberDTO = this.getOrganizationMemberBasicInfo(ConvertHelper.convert(cmd, GetOrganizationMemberBasicInfoCommand.class));
-        ListOrganizationMemberEducationsResponse educations = this.listOrganizationMemberEducations(ConvertHelper.convert(cmd, ListOrganizationMemberEducationsCommand.class));
-        ListOrganizationMemberWorkExperiencesResponse experiences = this.listOrganizationMemberWorkExperiences(ConvertHelper.convert(cmd, ListOrganizationMemberWorkExperiencesCommand.class));
-        ListOrganizationMemberInsurancesResponse insurances = this.listOrganizationMemberInsurances(ConvertHelper.convert(cmd, ListOrganizationMemberInsurancesCommand.class));
-        ListOrganizationMemberContractsResponse contracts = this.listOrganizationMemberContracts(ConvertHelper.convert(cmd, ListOrganizationMemberContractsCommand.class));
 
-        if (memberDTO != null) {
-            response.setBasic(memberDTO);
-        }
-        if (educations != null) {
-            response.setEducation(educations);
-        }
-        if (experiences != null) {
-            response.setWorkExperience(experiences);
-        }
-        if (insurances != null) {
-            response.setInsurance(insurances);
-        }
-        if (contracts != null) {
-            response.setContract(contracts);
-        }
+        OrganizationMemberBasicDTO basic = this.getOrganizationMemberBasicInfo(ConvertHelper.convert(cmd,GetOrganizationMemberInfoCommand.class));
+        OrganizationMemberBackGroundDTO backGround = ConvertHelper.convert(memberDetails,OrganizationMemberBackGroundDTO.class);
+        OrganizationMemberSocialSecurityDTO socialSecurity = ConvertHelper.convert(memberDetails,OrganizationMemberSocialSecurityDTO.class);
 
+        List<OrganizationMemberContractsDTO> contracts = this.listOrganizationMemberContracts(ConvertHelper.convert(cmd, ListOrganizationMemberContractsCommand.class));
+
+        if (basic != null) {
+            response.setBasic(basic);
+        }
+        if(backGround != null){
+            backGround.setEducations(this.listOrganizationMemberEducations(ConvertHelper.convert(cmd, ListOrganizationMemberEducationsCommand.class)));
+            backGround.setWorkExperiences(this.listOrganizationMemberWorkExperiences(ConvertHelper.convert(cmd, ListOrganizationMemberWorkExperiencesCommand.class)));
+            response.setBackGround(backGround);
+        }
+        if(socialSecurity != null){
+            socialSecurity.setInsurances(this.listOrganizationMemberInsurances(ConvertHelper.convert(cmd, ListOrganizationMemberInsurancesCommand.class)));
+            response.setSocialSecurity(socialSecurity);
+        }
+        if(contracts != null ){
+            response.setContracts(contracts);
+        }
         return response;
     }
 
@@ -9796,8 +9797,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
-    public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd) {
-        LOGGER.info("Invoke GetOrganizationMemberBasicInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
+    public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd) {
+        LOGGER.info("Invoke GetOrganizationMemberInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
         if (cmd.getDetailId() == null) {
             return null;
         }
@@ -9998,15 +9999,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
+    public List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd) {
 
-        ListOrganizationMemberEducationsResponse response = new ListOrganizationMemberEducationsResponse();
+        List<OrganizationMemberEducationsDTO> response = new ArrayList<>();
         List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(cmd.getDetailId());
         if (educations != null) {
-            response.setEducations(educations.stream().map(r -> {
+            educations.forEach(r-> {
                 OrganizationMemberEducationsDTO dto = ConvertHelper.convert(r, OrganizationMemberEducationsDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+                response.add(dto);
+            });
         }
         return response;
     }
@@ -10041,15 +10042,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd) {
+    public List<OrganizationMemberWorkExperiencesDTO> listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd) {
 
-        ListOrganizationMemberWorkExperiencesResponse response = new ListOrganizationMemberWorkExperiencesResponse();
+        List<OrganizationMemberWorkExperiencesDTO> response = new ArrayList<>();
         List<OrganizationMemberWorkExperiences> workExperiences = this.organizationProvider.listOrganizationMemberWorkExperiences(cmd.getDetailId());
         if (workExperiences != null) {
-            response.setWorkExps(workExperiences.stream().map(r -> {
+            workExperiences.forEach(r -> {
                 OrganizationMemberWorkExperiencesDTO dto = ConvertHelper.convert(r, OrganizationMemberWorkExperiencesDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+                response.add(dto);
+            });
         }
         return response;
     }
@@ -10152,14 +10153,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd) {
-        ListOrganizationMemberInsurancesResponse response = new ListOrganizationMemberInsurancesResponse();
+    public List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd) {
+        List<OrganizationMemberInsurancesDTO> response = new ArrayList<>();
         List<OrganizationMemberInsurances> insurances = this.organizationProvider.listOrganizationMemberInsurances(cmd.getDetailId());
         if (insurances != null) {
-            response.setInsurances(insurances.stream().map(r -> {
+            insurances.forEach(r -> {
                 OrganizationMemberInsurancesDTO dto = ConvertHelper.convert(r, OrganizationMemberInsurancesDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+                response.add(dto);
+            });
         }
         return response;
     }
@@ -10222,14 +10223,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
-        ListOrganizationMemberContractsResponse response = new ListOrganizationMemberContractsResponse();
+    public List<OrganizationMemberContractsDTO> listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd) {
+        List<OrganizationMemberContractsDTO> response = new ArrayList<>();
         List<OrganizationMemberContracts> contracts = this.organizationProvider.listOrganizationMemberContracts(cmd.getDetailId());
         if (contracts != null) {
-            response.setContracts(contracts.stream().map(r -> {
+            contracts.forEach(r ->{
                 OrganizationMemberContractsDTO dto = ConvertHelper.convert(r, OrganizationMemberContractsDTO.class);
-                return dto;
-            }).collect(Collectors.toList()));
+                response.add(dto);
+            });
         }
         return response;
     }
@@ -10286,51 +10287,51 @@ public class OrganizationServiceImpl implements OrganizationService {
             result.setBasicIntegrity(25);
 
         //  背景信息完整度判断
-        if(response.getBasic().getEnName() == null)
+        if(response.getBackGround().getEnName() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getBirthday() == null)
+        else if(response.getBackGround().getBirthday() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getMaritalFlag() == null)
+        else if(response.getBackGround().getMaritalFlag() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getPoliticalStatus() == null)
+        else if(response.getBackGround().getPoliticalStatus() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getNativePlace() == null)
+        else if(response.getBackGround().getNativePlace() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getRegResidence() == null)
+        else if(response.getBackGround().getRegResidence() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getIdNumber() == null)
+        else if(response.getBackGround().getIdNumber() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getEmail() == null)
+        else if(response.getBackGround().getEmail() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getWechat() == null)
+        else if(response.getBackGround().getWechat() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getQq() == null)
+        else if(response.getBackGround().getQq() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getEmergencyName() == null)
+        else if(response.getBackGround().getEmergencyName() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getEmergencyContact() == null)
+        else if(response.getBackGround().getEmergencyContact() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getBasic().getAddress() == null)
+        else if(response.getBackGround().getAddress() == null)
             result.setBackEndIntegrity(0);
-        else if(response.getEducation().getEducations().size() <= 0)
+        else if(response.getBackGround().getEducations() == null || response.getBackGround().getEducations().isEmpty())
             result.setBackEndIntegrity(0);
         else
             result.setBackEndIntegrity(45);
 
         //  社保信息完整度判断
-        if(response.getBasic().getSalaryCardNumber() == null)
+        if(response.getSocialSecurity().getSalaryCardNumber() == null)
             result.setSocialSecurityIntegrity(0);
-        else if(response.getBasic().getSocialSecurityNumber() == null)
+        else if(response.getSocialSecurity().getSocialSecurityNumber() == null)
             result.setSocialSecurityIntegrity(0);
-        else if(response.getBasic().getProvidentFundNumber() == null)
+        else if(response.getSocialSecurity().getProvidentFundNumber() == null)
             result.setSocialSecurityIntegrity(0);
-        else if(response.getInsurance().getInsurances().size() <= 0)
+        else if(response.getSocialSecurity().getInsurances() == null || response.getSocialSecurity().getInsurances().isEmpty())
             result.setSocialSecurityIntegrity(0);
         else
             result.setSocialSecurityIntegrity(15);
 
         //  合同信息完整度判断
-        if(response.getContract().getContracts().size() <= 0)
+        if(response.getContracts() == null || response.getContracts().isEmpty())
             result.setContractIntegrity(0);
         else
             result.setContractIntegrity(15);
@@ -10389,6 +10390,115 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setResourceType(tableName);
         log.setAuditContent(auditContent);
         this.organizationProvider.createProfileLogs(log);
+    }
+
+    public ImportFileTaskDTO importOrganizationPersonelFiles(MultipartFile mfile,
+                                                             Long userId, ImportOrganizationPersonnelDataCommand cmd){
+        ImportFileTask task = new ImportFileTask();
+        try{
+            //  解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+            if (null == resultList || resultList.isEmpty()) {
+                LOGGER.error("File content is empty。userId=" + userId);
+                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");
+            }
+            task.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+            task.setOwnerId(cmd.getOrganizationId());
+            task.setType(ImportFileTaskType.PERSONNEL_FILE.getCode());
+            task.setCreatorUid(userId);
+            task = importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<ImportOrganizationPersonnelFilesDTO> datas = handleImportOrganizationPersonnelFiles(resultList);
+                    if (datas.size() > 0) {
+                        //设置导出报错的结果excel的标题
+                        response.setTitle(datas.get(0));
+                        datas.remove(0);
+                    }
+                    List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> results = importOrganizationPersonnelFiles(datas, userId, cmd);
+                    response.setTotalCount((long) datas.size());
+                    response.setFailCount((long) results.size());
+                    response.setLogs(results);
+                    return response;
+                }
+            }, task);
+        }catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+    }
+
+    private List<ImportOrganizationPersonnelFilesDTO> handleImportOrganizationPersonnelFiles(List list){
+        List<ImportOrganizationPersonnelFilesDTO> datas = new ArrayList<>();
+        int row = 1;
+        for (Object o : list) {
+            if (row < 2) {
+                row++;
+                continue;
+            }
+            RowResult r = (RowResult) o;
+            ImportOrganizationPersonnelFilesDTO data = new ImportOrganizationPersonnelFilesDTO();
+            if (null != r.getA())
+                data.setContactName(r.getA().trim());
+            if (null != r.getB())
+                data.setGender(r.getB().trim());
+            if (null != r.getC())
+                data.setContactToken(r.getC().trim());
+            if (null != r.getD())
+                data.setOrgnaizationPath(r.getD().trim());
+            if (null != r.getE())
+                data.setJobPosition(r.getE().trim());
+            if (null != r.getF())
+                data.setCheckInTime(r.getF().trim());
+            if (null != r.getG())
+                data.setEmployeeStatus(r.getG().trim());
+            if (null != r.getH())
+                data.setEmployeeTime(r.getH().trim());
+            if (null != r.getI())
+                data.setJobLevel(r.getI().trim());
+            if (null != r.getK())
+                data.setEmployeeNo(r.getK().trim());
+            if (null != r.getL())
+                data.setEnName(r.getL().trim());
+            if (null != r.getM())
+                data.setBirthday(r.getM().trim());
+            if (null != r.getN())
+                data.setMaritalFlag(r.getF().trim());
+            if (null != r.getO())
+                data.setPoliticalStatus(r.getO().trim());
+            if (null != r.getP())
+                data.setNativePlace(r.getP().trim());
+            if (null != r.getQ())
+                data.setRegResidence(r.getQ().trim());
+            if (null != r.getR())
+                data.setIdNumber(r.getR().trim());
+            if (null != r.getS())
+                data.setEmail(r.getS().trim());
+            if (null != r.getT())
+                data.setWechat(r.getT().trim());
+            if (null != r.getU())
+                data.setQq(r.getU().trim());
+            if (null != r.getV())
+                data.setEmergencyName(r.getV().trim());
+            if (null != r.getW())
+                data.setEmergencyContact(r.getW().trim());
+            if (null != r.getX())
+                data.setAddress(r.getX().trim());
+            if (null != r.getY())
+                data.setSchoolName(r.getY().trim());
+            if (null != r.getZ())
+                data.setDegree(r.getZ().trim());
+            if (null != r.getAA())
+                data.setMajor(r.getAA().trim());
+            datas.add(data);
+        }
+        return datas;
+    }
+    private List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> importOrganizationPersonnelFiles(List<ImportOrganizationPersonnelFilesDTO> list, Long userId, ImportOrganizationPersonnelDataCommand cmd){
+        return null;
     }
 }
 

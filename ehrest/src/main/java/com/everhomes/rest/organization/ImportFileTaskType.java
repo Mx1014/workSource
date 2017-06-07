@@ -5,11 +5,12 @@ package com.everhomes.rest.organization;
  * <ul>
  * <li>ORGANIZATION_CONTACT("organization_contact"): 机构通讯录导入</li>
  * <li>ENGERPRISE("enterprise"): 企业信息导入</li>
+ * <li>PERSONNEL_FILE("personnel_file"): 人事档案导入</li>
  * </ul>
  */
 public enum ImportFileTaskType {
 
-    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise");
+    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), PERSONNEL_FILE("personnel_file");
 
 	private String code;
 

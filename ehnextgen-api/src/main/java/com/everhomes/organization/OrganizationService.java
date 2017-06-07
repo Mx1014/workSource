@@ -447,7 +447,7 @@ public interface OrganizationService {
 
     OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd);
 
-    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberBasicInfoCommand cmd);
+    OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd);
 
     //  尝试将部门写成一个方法方便直接调用
 //    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
@@ -462,7 +462,7 @@ public interface OrganizationService {
 //	OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd);
     OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
 
-    ListOrganizationMemberEducationsResponse listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
+    List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
 
     void deleteOrganizationMemberEducations(DeleteOrganizationMemberEducationsCommand cmd);
 
@@ -470,7 +470,7 @@ public interface OrganizationService {
 
     OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd);
 
-    ListOrganizationMemberWorkExperiencesResponse listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
+    List<OrganizationMemberWorkExperiencesDTO> listOrganizationMemberWorkExperiences(ListOrganizationMemberWorkExperiencesCommand cmd);
 
     void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
 
@@ -479,7 +479,7 @@ public interface OrganizationService {
 //	OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd);
     OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
 
-    ListOrganizationMemberInsurancesResponse listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
+    List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);
 
     void updateOrganizationMemberInsurances(UpdateOrganizationMemberInsurancesCommand cmd);
 
@@ -487,7 +487,7 @@ public interface OrganizationService {
 
     OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd);
 
-    ListOrganizationMemberContractsResponse listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
+    List<OrganizationMemberContractsDTO> listOrganizationMemberContracts(ListOrganizationMemberContractsCommand cmd);
 
     void updateOrganizationMemberContracts (UpdateOrganizationMemberContractsCommand cmd);
 
@@ -502,4 +502,7 @@ public interface OrganizationService {
     OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
 
 	OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member);
+
+	ImportFileTaskDTO importOrganizationPersonelFiles(MultipartFile mfile,
+													  Long userId, ImportOrganizationPersonnelDataCommand cmd);
 }

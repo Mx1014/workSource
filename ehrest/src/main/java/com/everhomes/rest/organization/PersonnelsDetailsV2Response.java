@@ -1,5 +1,6 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -20,14 +21,12 @@ public class PersonnelsDetailsV2Response {
 
     private OrganizationMemberBasicDTO basic;
 
-    private ListOrganizationMemberEducationsResponse educations;
+    private OrganizationMemberBackGroundDTO backGround;
 
-    private ListOrganizationMemberWorkExperiencesResponse workExperiences;
+    private OrganizationMemberSocialSecurityDTO socialSecurity;
 
-    private ListOrganizationMemberInsurancesResponse insurances;
-
-    private ListOrganizationMemberContractsResponse contracts;
-
+    @ItemType(OrganizationMemberContractsDTO.class)
+    private List<OrganizationMemberContractsDTO> contracts;
 
     public PersonnelsDetailsV2Response() {
     }
@@ -48,35 +47,27 @@ public class PersonnelsDetailsV2Response {
         this.basic = basic;
     }
 
-    public ListOrganizationMemberEducationsResponse getEducation() {
-        return educations;
+    public OrganizationMemberBackGroundDTO getBackGround() {
+        return backGround;
     }
 
-    public void setEducation(ListOrganizationMemberEducationsResponse educations) {
-        this.educations = educations;
+    public void setBackGround(OrganizationMemberBackGroundDTO backGround) {
+        this.backGround = backGround;
     }
 
-    public ListOrganizationMemberWorkExperiencesResponse getWorkExperience() {
-        return workExperiences;
+    public OrganizationMemberSocialSecurityDTO getSocialSecurity() {
+        return socialSecurity;
     }
 
-    public void setWorkExperience(ListOrganizationMemberWorkExperiencesResponse workExperiences) {
-        this.workExperiences = workExperiences;
+    public void setSocialSecurity(OrganizationMemberSocialSecurityDTO socialSecurity) {
+        this.socialSecurity = socialSecurity;
     }
 
-    public ListOrganizationMemberInsurancesResponse getInsurance() {
-        return insurances;
-    }
-
-    public void setInsurance(ListOrganizationMemberInsurancesResponse insurances) {
-        this.insurances = insurances;
-    }
-
-    public ListOrganizationMemberContractsResponse getContract() {
+    public List<OrganizationMemberContractsDTO> getContracts() {
         return contracts;
     }
 
-    public void setContract(ListOrganizationMemberContractsResponse contracts) {
+    public void setContracts(List<OrganizationMemberContractsDTO> contracts) {
         this.contracts = contracts;
     }
 
