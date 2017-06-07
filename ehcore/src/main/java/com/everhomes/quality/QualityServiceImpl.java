@@ -3011,19 +3011,45 @@ public class QualityServiceImpl implements QualityService {
 		}
 
 		if(cmd.getExecuteGroupAndPositionList() != null && cmd.getExecuteGroupAndPositionList().size() > 0) {
-
+			cmd.getExecuteGroupAndPositionList().forEach(execute -> {
+				QualityInspectionSampleGroupMap map = new QualityInspectionSampleGroupMap();
+				map.setNamespaceId(namespaceId);
+				map.setSampleId(sample.getId());
+				map.setOrganizationId(execute.getGroupId());
+				map.setPositionId(execute.getPositionId());
+				qualityProvider.createQualityInspectionSampleGroupMap(map);
+			});
 		}
-		return null;
+
+		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
+		return dto;
 	}
 
 	@Override
 	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
+		if(tasks != null && tasks.size() > 0) {
+			检查已产生关联任务 不可删除
+		}
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
+			已删除或不存在
+		}
+		sample.setStatus(Status.INACTIVE.getCode());
+		sample.setDeleteUid(UserContext.current().getUser().getId());
+		sample.setDeleteTime(new Timestamp(System.currentTimeMillis()));
+		qualityProvider.updateQualityInspectionSample(sample);
 
 	}
 
 	@Override
 	public SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
-		return null;
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
+			已删除或不存在
+		}
+		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
+		return dto;
 	}
 
 	@Override
@@ -3033,6 +3059,17 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
+			已删除或不存在
+		}
+
+		Timestamp now = new Timestamp(System.currentTimeMillis());
+		if(now.after(sample.getStartTime())) {
+			已经进入开始时间的检查，不可进行编辑
+		}
+
+		
 		return null;
 	}
 

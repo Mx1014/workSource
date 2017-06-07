@@ -112,7 +112,8 @@ public interface QualityProvider {
 	List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime);
 
 	List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds);
-	
+	List<QualityInspectionTasks> listTaskByParentId(Long parentId);
+
 	void createQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
 	void updateQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
 	void deleteQualityInspectionTaskTemplates(Long templateId);
@@ -126,7 +127,7 @@ public interface QualityProvider {
 
 	void createQualityInspectionSample(QualityInspectionSamples sample);
 	void createQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map);
+	void createQualityInspectionSampleGroupMap(QualityInspectionSampleGroupMap map);
 	void updateQualityInspectionSample(QualityInspectionSamples sample);
-	QualityInspectionSamples findQualityInspectionSample(QualityInspectionSamples sample);
-	void deleteQualityInspectionSample(QualityInspectionSamples sample);
+	QualityInspectionSamples findQualityInspectionSample(Long id, String ownerType, Long ownerId);
 }
