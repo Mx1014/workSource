@@ -887,7 +887,8 @@ public class PunchServiceImpl implements PunchService {
 					(punchTimeRule.getNoonLeaveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getNoonLeaveTime()):punchTimeRule.getNoonLeaveTimeLong())));
 			 
 			long realWorkTime = 0L;
-			if(leaveCalendar.after(AfternoonArriveCalendar)&&AfternoonArriveCalendar.before(NoonLeaveTimeCalendar)){
+			//到达时间<中午离开时间 并且 离开时间>下午上班时间
+			if(leaveCalendar.after(AfternoonArriveCalendar)&&arriveCalendar.before(NoonLeaveTimeCalendar)){
 				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
 					-punchTimeRule.getAfternoonArriveTime().getTime() +punchTimeRule.getNoonLeaveTime().getTime();
 			}else {
