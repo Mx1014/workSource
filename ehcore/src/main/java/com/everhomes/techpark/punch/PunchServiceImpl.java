@@ -706,7 +706,7 @@ public class PunchServiceImpl implements PunchService {
 				//是否有请求的flag
 				if(exceptionRequest.getApprovalStatus() != null ){
 					pdl.setRequestFlag(NormalFlag.YES.getCode());
-					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
 					else
@@ -714,7 +714,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 				if(exceptionRequest.getMorningApprovalStatus() != null ){
 					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
-					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setMorningRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
 					else
@@ -722,7 +722,7 @@ public class PunchServiceImpl implements PunchService {
 				}
 				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
 					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
-					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setAfternoonRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
 					else
