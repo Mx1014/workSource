@@ -709,21 +709,24 @@ public class PunchServiceImpl implements PunchService {
 					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-//					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					else
+						pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getMorningApprovalStatus() != null ){
 					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
 					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setMorningRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-//					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					else
+						pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
 					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
 					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
 					if(null != flowCase)
 						pdl.setAfternoonRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
-//					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					else
+						pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 				
