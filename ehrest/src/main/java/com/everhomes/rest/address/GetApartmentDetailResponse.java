@@ -3,6 +3,7 @@ package com.everhomes.rest.address;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.util.StringHelper;
 
@@ -24,6 +25,7 @@ public class GetApartmentDetailResponse {
 	private Byte status;
 	private Double areaSize;
 	private String enterpriseName;
+	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
 
