@@ -599,8 +599,56 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /quality/updateSampleQualityInspection</b>
+	 * <p>修改品质核查例行检查</p>
+	 */
+	@RequestMapping("updateSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+
+//		SampleQualityInspectionDTO routineQualityInspection = qualityService.updateSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/findSampleQualityInspection</b>
+	 * <p>查看品质核查例行检查</p>
+	 */
+	@RequestMapping("findSampleQualityInspection")
+	@RestReturn(value = SampleQualityInspectionDTO.class)
+	public RestResponse findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+//		SampleQualityInspectionDTO routineQualityInspection = qualityService.findSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/deleteSampleQualityInspection</b>
+	 * <p>删除品质核查例行检查</p>
+	 */
+	@RequestMapping("deleteSampleQualityInspection")
+	@RestReturn(value = String.class)
+	public RestResponse deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+//		qualityService.deleteSampleQualityInspection(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /quality/listSampleQualityInspection</b>
-	 * <p>查看品质核查例行检查-web</p>
+	 * <p>列出品质核查例行检查-web</p>
 	 */
 	@RequestMapping("listSampleQualityInspection")
 	@RestReturn(value = ListSampleQualityInspectionResponse.class)
