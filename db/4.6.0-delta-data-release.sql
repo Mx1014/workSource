@@ -38,3 +38,13 @@ VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), 1000000, 0, 0, 0, '/ho
 
 -- 仓库管理menu更换datatype add by xiongying 20170607
 update eh_web_menus set data_type = "react:/working-flow/flow-list/store-management/21000" where name = '工作流设置' and parent_id = 21050;
+
+-- 修正邮箱服务器的地址和value值
+UPDATE eh_configurations set `value` = 'webmail.zuolin.com' WHERE `name` = 'mail.smtp.address' and `namespace_id` = 1000000;
+
+UPDATE eh_configurations set `value` = '465' WHERE `name` = 'mail.smtp.port' and `namespace_id` = 1000000;
+
+UPDATE eh_configurations set `value` = 'webmail.zuolin.com' WHERE `name` = 'mail.smtp.address' and `namespace_id` = 0;
+
+UPDATE eh_configurations set `value` = '465' WHERE `name` = 'mail.smtp.port' and `namespace_id` = 0;
+>>>>>>> cfa1ff8d31e5fb44fb0ae1edb23d7e0b5dbf5ea8

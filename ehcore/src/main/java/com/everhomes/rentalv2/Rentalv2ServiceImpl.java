@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
  
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
@@ -830,6 +831,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter ResourceTypeId OwnerId OwnerType cant be null");
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 
+		long start = System.currentTimeMillis();
 //		if(cmd.getAnchor() == null)
 //			cmd.setAnchor(Long.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -858,20 +860,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setRentalSites(new ArrayList<>());
-		
+
+		long time1 = System.currentTimeMillis();
+		LOGGER.info("Get list time={}", time1 - start);
+
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+
 		for (RentalResource rentalSite : rentalSites) {
-			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
+			RentalSiteDTO rSiteDTO = convertRentalSite2DTO(rentalSite, sceneTokenDTO);
 			 
 			response.getRentalSites().add(rSiteDTO);
 		}
 
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("Get list time={}", time2 - time1);
+
 		return response;
 	}
-	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, String sceneToken){
+	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, SceneTokenDTO sceneTokenDTO){
 
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
+		long time1 = System.currentTimeMillis();
+
 		proccessCells(rentalSite);
+
+		long time2 = System.currentTimeMillis();
+		LOGGER.info("proccessCells time={}", time2 - time1);
+
 		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
@@ -942,8 +962,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		rSiteDTO.setAttachments(convertAttachments(attachments));
 
+		long time3 = System.currentTimeMillis();
+		LOGGER.info("populate time={}", time3 - time2);
 		//计算显示价格
-		calculatePrice(rentalSite, rSiteDTO, sceneToken);
+		calculatePrice(rentalSite, rSiteDTO, sceneTokenDTO);
+
+		long time4 = System.currentTimeMillis();
+		LOGGER.info("calculatePrice time={}", time4 - time3);
 		//更新价格平均值
 		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
 //		rentalv2Provider.updateRentalSite(rentalSite);
@@ -951,7 +976,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return rSiteDTO;
 	}
 
-	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, String sceneToken) {
+	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, SceneTokenDTO sceneTokenDTO) {
 
 		String beginTime = null;
 		String endTime = null;
@@ -980,15 +1005,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		BigDecimal maxPrice = null;
 		Double maxTimeStep = 1.0;
 
-		//解析场景信息
-		SceneTokenDTO sceneTokenDTO = null;
-		if (null != sceneToken) {
-			User user = UserContext.current().getUser();
-			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
-		}
-
 		try {
+			long time3 = System.currentTimeMillis();
 			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), beginTime, endTime);
+			long time4 = System.currentTimeMillis();
+			LOGGER.info("calculatePrice get cell time={}", time4 - time3);
+
 			if(null == cells || cells.size() == 0) {
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
 			}else {
@@ -1028,6 +1050,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
 			}
+
+			long time5 = System.currentTimeMillis();
+			LOGGER.info("calculatePrice foreach time={}", time5 - time4);
 		} catch (ParseException e) {
 			LOGGER.error("计算平均值-时间转换 异常");
 		}
@@ -1047,6 +1072,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return priceStr;
 		}
 
+	}
+
+	private InnoSpringCardInfo bubble(List<InnoSpringCardInfo> list) {
+		list.toArray();
+		int size = list.size();
+		if (size == 0)
+			return null;
+		for (int i = size - 1; i > 0 ; i--) {
+			for (int j = 0; j < i; j++) {
+				if (Long.valueOf(list.get(j).getEnd_time()) > Long.valueOf(list.get(j+1).getEnd_time())) {
+					InnoSpringCardInfo temp = list.get(j);
+					list.set(j, list.get(j+1));
+					list.set(j+1, temp);
+				}
+			}
+		}
+		return list.get(size - 1);
 	}
 
 	private boolean isInteger(BigDecimal b){
@@ -4396,8 +4438,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid organizationId parameter in the command");
 
 		RentalResource rentalSite = rentalv2Provider.getRentalSiteById(cmd.getId());
-
-		return convertRentalSite2DTO(rentalSite, cmd.getSceneToken());
+		SceneTokenDTO sceneTokenDTO = null;
+		if (null != cmd.getSceneToken()) {
+			User user = UserContext.current().getUser();
+			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		}
+		return convertRentalSite2DTO(rentalSite, sceneTokenDTO);
 	}
 
 	@Override

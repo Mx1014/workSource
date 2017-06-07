@@ -2784,10 +2784,11 @@ public class UserServiceImpl implements UserService {
 		//    aliasName = organizationDto.getCommunityName();
 		//}
 		// 在园区通用版与左邻小区版合并后，只要不是物业公司，则优先显示小区/园区名称 by lqs 20160517
-		String orgType = organizationDto.getOrganizationType();
-		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
-			aliasName = organizationDto.getCommunityName();
-		}
+		// 不管什么公司都要显示本公司的简称 by sfyan 20170606
+//		String orgType = organizationDto.getOrganizationType();
+//		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+//			aliasName = organizationDto.getCommunityName();
+//		}
 		sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
