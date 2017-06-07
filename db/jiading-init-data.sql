@@ -40,6 +40,10 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 	VALUES(@organization_id, 0, 'PM', '上海创源新城科技有限公司', '', CONCAT('/', @organization_id), 1, 2, 'ENTERPRISE', @namespace_id, @org_group_id);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES((@org_cmnty_request_id := @org_cmnty_request_id + 1), @community_id, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP()); 
+    
+SET @detail_id = (SELECT MAX(id) FROM `eh_organization_details`);	
+INSERT INTO `eh_organization_details` (`id`, `organization_id`, `description`, `contact`, `address`, `create_time`, `longitude`, `latitude`, `geohash`, `display_name`, `contactor`, `member_count`, `checkin_date`, `avatar`, `post_uri`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `service_user_id`, `namespace_organization_type`, `namespace_organization_token`) 
+    VALUES ((@detail_id := @detail_id + 1), @organization_id, NULL, NULL, NULL, UTC_TIMESTAMP(), NULL, NULL, NULL, '创源', NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
 SET @user_id = 243081;
@@ -63,6 +67,11 @@ SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   
 SET @feedback_forum_id = @community_forum_id+1;  
 SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@community_forum_id, UUID(), @namespace_id, 2, 'EhGroups', 0,'TEEC论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(@feedback_forum_id, UUID(), @namespace_id, 2, 'EhGroups', 0,'TEEC意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(@community_id, UUID(), @shi_id, '上海市',  @qu_id, '嘉定区', 'TEEC上海中心', 'TEEC上海中心', '云谷路599弄TEEC上海中心大厦', NULL, 'TEEC上海中心大厦位于上海市嘉定区云谷路599弄，是嘉定新城和TEEC（清华企业家协会）合作的新典范，园区将打造嘉定传统产业转型升级的新引擎（新能源智能网联汽车、物联网集成电路、先进制造和智慧医疗），并充分融入清华企业家元素的创新资源，由teec会员上海创源科技发展有限公司和嘉定区国有全资上海嘉定新城发展有限公司合资成立的上海创源新城科技有限公司进行运营管理。',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 13, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
@@ -120,8 +129,6 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 
 
-
-
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10000,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),10100,'', 'EhNamespaces', 999974,2);
@@ -135,9 +142,6 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),12200,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20000,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20100,'', 'EhNamespaces', 999974,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20110,'', 'EhNamespaces', 999974,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20120,'', 'EhNamespaces', 999974,2);
-INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20130,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20140,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20150,'', 'EhNamespaces', 999974,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20155,'', 'EhNamespaces', 999974,2);
@@ -317,3 +321,18 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 SET @url_id = (SELECT MAX(id) FROM `eh_app_urls`); 
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@url_id := @url_id + 1), '999974', '嘉定新城', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) VALUES ((@url_id := @url_id + 1), '999974', '嘉定新城', '1', '', '', '移动平台聚合服务，助力园区效能提升');
+
+
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwaVpXTTFZbUl5T1dVeE1qTXpaR1k1WVdNNU5ESXpPR1prTkdKbU4yWTFZUQ' where namespace_id = 999974;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM05qUm1NMlJoTkRsall6Z3laak0xTURWbE1EY3dOMk0zTURka00yTm1OZw' where namespace_id = 999974 and item_label = '一键上网';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9XWXpNekl6Wm1VNVpEQXhPV1F6WVRNeU9UVXpPV1V3T0RCbU5UUXlZUQ' where namespace_id = 999974 and item_label = '企业通讯录';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbU0yUXdaalZoTUdRNU9XTXpZakkwWlRBME9UQTJNMlF6WVRrME9XWXlNUQ' where namespace_id = 999974 and item_label = '会议室预定';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMllqQXdaR05tTWpjeU5HTTNNekUzTmpJME5URTNOek0wTUdZek1UVXlaZw' where namespace_id = 999974 and item_label = '园区入驻';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd1l6ZzJaVGMwTURZeVlXWXlPRFZpWldRME5qWXdNbVJoTm1JellUVTROQQ' where namespace_id = 999974 and item_label = '园区活动';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvd1l6UTBZbVl5WldRellqQXlOamhrWmpjNE1tVmpZemt4TmpsbVpESm1PQQ' where namespace_id = 999974 and item_label = '园区热线';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU5ETTBNRE15WkRRNFpXRXlaamxoTUdOaE5XTmlNRFl6TTJOaU5UQmtPQQ' where namespace_id = 999974 and item_label = '智能门禁';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwallXTmtZelV5TkRSa09XRmlNR1E0WVRFek1HVTBPR1F3TmpabU9URm1OQQ' where namespace_id = 999974 and item_label = '更多.';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvME1EVmxNMlF6TVdSbU9URXhaREJoTVdKbVpXUmtNVGs1WTJKaE9UaG1NUQ' where namespace_id = 999974 and item_label = '服务联盟';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVl6bGlZVEE1TTJJNFlUSmhZV1JtT0RNeE9XRmxPV0ZoWldVeVpqTXlaQQ' where namespace_id = 999974 and item_label = '物业服务';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9XRXlNemt4WldVNE1HUmtNR1V5TURFM1l6VmtaR0V3TURNMk4yTXhZdw' where namespace_id = 999974 and item_label = '移动考勤';
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwbE16QXlZbVZsTURKbVpXWTJaV1JqWVRFNU1Ua3lOMll6TVRaak1qUmxOdw' where namespace_id = 999974 and item_label = '视频会议';
