@@ -17,7 +17,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     private String fullPinyin;
     private String fullInitial;
 
-	private java.lang.Long creatorUid;
+//	private java.lang.Long creatorUid;
 
 	private boolean isCreate;
 
@@ -35,13 +35,9 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
 	private Byte employeeType;
 
-
-
 	public OrganizationMember() {
     }
-
-
-
+    
     public java.lang.String getNickName() {
 		return nickName;
 	}
@@ -51,19 +47,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	public void setNickName(java.lang.String nickName) {
 		this.nickName = nickName;
 	}
-
-
-
-	public java.lang.Long getCreatorUid() {
-		return creatorUid;
-	}
-
-
-
-	public void setCreatorUid(java.lang.Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
 
 
 	public String getInitial() {
