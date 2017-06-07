@@ -155,8 +155,8 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		Long ownerId = approvalRequest.getOwnerId();
 		
 		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
-    	Flow flow = flowService.getEnabledFlow(approvalRequest.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
-    	LOGGER.debug("parames : " +approvalRequest.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+    	Flow flow = flowService.getEnabledFlow(approvalRequest.getNamespaceId(),PunchConstants.PUNCH_MODULE_ID, moduleType, ownerId, ownerType);
+    	LOGGER.debug("parames : " +approvalRequest.getNamespaceId()+"*"+ PunchConstants.PUNCH_MODULE_ID+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
     	LOGGER.debug("\n flow is "+flow);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
