@@ -97,6 +97,9 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.quality.*;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.CronDateUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -144,46 +147,6 @@ import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionLogsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationItemResultsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardSpecificationMapDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskTemplatesDao;
-import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecificationItemResults;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecifications;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardSpecificationMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskTemplates;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionLogsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationItemResultsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardSpecificationMapRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskTemplatesRecord;
-import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -2123,5 +2086,90 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return result.get(0);
 	}
-	
+
+	@Override
+	public void createQualityInspectionSample(QualityInspectionSamples sample) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSamples.class));
+
+		sample.setId(id);
+		sample.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("createQualityInspectionSample: " + sample);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSamples.class, id));
+		EhQualityInspectionSamplesDao dao = new EhQualityInspectionSamplesDao(context.configuration());
+		dao.insert(sample);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSamples.class, null);
+	}
+
+	@Override
+	public void createQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSampleCommunityMap.class));
+
+		map.setId(id);
+		LOGGER.info("createQualityInspectionSampleCommunityMap: " + map);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleCommunityMap.class, id));
+		EhQualityInspectionSampleCommunityMapDao dao = new EhQualityInspectionSampleCommunityMapDao(context.configuration());
+		dao.insert(map);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSampleCommunityMap.class, null);
+	}
+
+	@Override
+	public void createQualityInspectionSampleGroupMap(QualityInspectionSampleGroupMap map) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSampleGroupMap.class));
+
+		map.setId(id);
+		LOGGER.info("createQualityInspectionSampleGroupMap: " + map);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleGroupMap.class, id));
+		EhQualityInspectionSampleGroupMapDao dao = new EhQualityInspectionSampleGroupMapDao(context.configuration());
+		dao.insert(map);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSampleGroupMap.class, null);
+	}
+
+	@Override
+	public QualityInspectionSamples findQualityInspectionSample(Long id, String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSamplesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLES);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.eq(id));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.OWNER_ID.eq(ownerId));
+
+		List<QualityInspectionSamples> result = new ArrayList<QualityInspectionSamples>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSamples.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listTaskByParentId(Long parentId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.PARENT_ID.eq(parentId));
+
+		List<QualityInspectionTasks> result = new ArrayList<QualityInspectionTasks>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTasks.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public void updateQualityInspectionSample(QualityInspectionSamples sample) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSamples.class, sample.getId()));
+		EhQualityInspectionSamplesDao dao = new EhQualityInspectionSamplesDao(context.configuration());
+		dao.update(sample);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSamples.class, sample.getId());
+	}
 }

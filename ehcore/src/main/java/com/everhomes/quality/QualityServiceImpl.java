@@ -3029,11 +3029,30 @@ public class QualityServiceImpl implements QualityService {
 	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
 		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByParentId(cmd.getId());
 		if(tasks != null && tasks.size() > 0) {
-			检查已产生关联任务 不可删除
+			LOGGER.error("the sample which id="+cmd.getId()+" has generate tasks!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_HAS_TASK,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_HAS_TASK),
+									UserContext.current().getUser().getLocale(),
+									"the sample has generate tasks!"));
+
 		}
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
-			已删除或不存在
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
 		}
 		sample.setStatus(Status.INACTIVE.getCode());
 		sample.setDeleteUid(UserContext.current().getUser().getId());
@@ -3046,7 +3065,16 @@ public class QualityServiceImpl implements QualityService {
 	public SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
-			已删除或不存在
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
 		}
 		SampleQualityInspectionDTO dto = convertQualityInspectionSampleToDTO(sample);
 		return dto;
@@ -3061,16 +3089,39 @@ public class QualityServiceImpl implements QualityService {
 	public SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample == null || Status.INACTIVE.equals(Status.fromStatus(sample.getStatus()))) {
-			已删除或不存在
+			LOGGER.error("the sample which id="+cmd.getId()+" is not exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the sample is not exist!"));
 		}
 
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		if(now.after(sample.getStartTime())) {
-			已经进入开始时间的检查，不可进行编辑
+			LOGGER.error("the sample which id="+cmd.getId()+" has start!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_SAMPLE_START,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_START),
+									UserContext.current().getUser().getLocale(),
+									"the sample has start!"));
 		}
 
 		
 		return null;
+	}
+
+	private SampleQualityInspectionDTO convertQualityInspectionSampleToDTO(QualityInspectionSamples sample) {
+		SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+		return dto;
 	}
 
 	@Override
