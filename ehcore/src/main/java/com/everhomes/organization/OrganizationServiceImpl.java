@@ -4693,6 +4693,33 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setTargetId(identifier.getOwnerUid());
             member.setGroupType(organization.getGroupType());
             member.setGroupPath(organization.getPath());
+            member.setGender(cmd.getGender());
+            member.setEmployeeNo(cmd.getEmployeeNo());
+
+            /**modify by lei.lv 申请创建member同时创建detail表**/
+            OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(member);
+            Long enterpriseId = 0L;
+            /**获取档案表中应存放的organization_id（企业ID）**/
+            Organization o = checkOrganization(member.getOrganizationId());
+            if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
+                enterpriseId = o.getId();
+            } else {
+                enterpriseId = o.getDirectlyEnterpriseId();
+            }
+            organizationMemberDetail.setOrganizationId(enterpriseId);
+            /**更新或创建detail记录**/
+            OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(enterpriseId, cmd.getContactToken());
+            Long new_detail_id = 0L;
+            if (old_detail == null) { /**如果档案表中无记录**/
+                new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
+            } else { /**如果档案表中有记录**/
+                organizationMemberDetail.setId(old_detail.getId());
+                organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+                new_detail_id = organizationMemberDetail.getId();
+            }
+            /**绑定member表的detail_id**/
+            member.setDetailId(new_detail_id);
+
             organizationProvider.createOrganizationMember(member);
 
             member.setCreatorUid(user.getId());
