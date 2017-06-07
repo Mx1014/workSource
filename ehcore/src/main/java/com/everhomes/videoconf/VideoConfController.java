@@ -1439,6 +1439,8 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(CheckVideoConfTrialAccountResponse.class)
 	public RestResponse checkVideoConfTrialAccount(CheckVideoConfTrialAccountCommand cmd){
 		CheckVideoConfTrialAccountResponse resp = videoConfService.checkVideoConfTrialAccount(cmd);
+		//TODO : 给王蓉蓉测试用,记得删
+		resp.setTrialFlag((byte) 2);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
