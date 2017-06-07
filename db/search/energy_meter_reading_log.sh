@@ -7,7 +7,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeterReadingLog" -d '
     "energyMeterReadingLog": {
         "properties": {
             "meterName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
-            "meterNumber":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+            "meterNumber":{"type":"string", "index":"not_analyzed"},
             "operatorName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
             "communityId":{"type":"long"},
             "billCategoryId":{"type":"long"},

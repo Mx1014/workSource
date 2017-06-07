@@ -7103,36 +7103,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-    private void sendEnterpriseNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
-        if (message != null && message.length() != 0) {
-            MessageDTO messageDto = new MessageDTO();
-            messageDto.setAppId(AppConstants.APPID_MESSAGING);
-            messageDto.setSenderUid(User.SYSTEM_UID);
-            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-            messageDto.setBody(message);
-            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
-            if (includeList != null && includeList.size() > 0) {
-                messageDto.getMeta().put(MessageMetaConstant.INCLUDE,
-                        StringHelper.toJsonString(includeList));
-            }
-            if (excludeList != null && excludeList.size() > 0) {
-                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
-                        StringHelper.toJsonString(excludeList));
-            }
-            if (includeList != null && includeList.size() > 0) {
-                if (excludeList != null && excludeList.size() > 0) {
-                    includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
-                }
-                includeList.stream().distinct().forEach(targetId -> {
-                    messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
-                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
-                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
-                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-                });
-            }
-        }
-    }
-
     /**
      * 处理层级菜单
      *
@@ -8729,10 +8699,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
                     organizationMember.setGroupPath(group.getPath());
 
-                    organizationMember.setOrganizationId(jobLevelId);
-
-                    organizationMember.setGroupType(group.getGroupType());
-
                     organizationProvider.createOrganizationMember(organizationMember);
 
                     jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
@@ -8754,7 +8720,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // 如果有加入的公司 需要发送加入公司的消息等系列操作
         for (Long enterpriseId : enterpriseIds) {
-
             organizationMember.setOrganizationId(enterpriseId);
             userSearcher.feedDoc(organizationMember);
             //是往公司添加新成员就需要发消息
@@ -8781,6 +8746,71 @@ public class OrganizationServiceImpl implements OrganizationService {
             leaveOrganizationAfterOperation(user.getId(), leaveMembers);
         }
         return dto;
+	}
+
+	private void sendEnterpriseNotification(List<Long> includeList, List<Long> excludeList, String message,
+			MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+		if (message != null && message.length() != 0) {
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+			messageDto.setBody(message);
+			messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+			if (includeList != null && includeList.size() > 0) {
+				messageDto.getMeta().put(MessageMetaConstant.INCLUDE,
+						StringHelper.toJsonString(includeList));
+			}
+			if (excludeList != null && excludeList.size() > 0) {
+				messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
+						StringHelper.toJsonString(excludeList));
+			}
+			if (metaObjectType != null && metaObject != null) {
+				messageDto.getMeta().put(MessageMetaConstant.META_OBJECT_TYPE,
+						metaObjectType.getCode());
+				messageDto.getMeta().put(MessageMetaConstant.META_OBJECT,
+						StringHelper.toJsonString(metaObject));
+			}
+
+            if (includeList != null) {
+                for (Long targetId : includeList) {
+                    messageDto.setChannels(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId)));
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                }
+            }
+        }
+	}
+
+	private void sendEnterpriseNotificationUseSystemUser(List<Long> includeList, List<Long> excludeList, String message) {
+        if (message != null && message.length() != 0) {
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(User.SYSTEM_UID);
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(message);
+            messageDto.setMetaAppId(AppConstants.APPID_ENTERPRISE);
+            if (includeList != null && includeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.INCLUDE,
+                        StringHelper.toJsonString(includeList));
+            }
+            if (excludeList != null && excludeList.size() > 0) {
+                messageDto.getMeta().put(MessageMetaConstant.EXCLUDE,
+                        StringHelper.toJsonString(excludeList));
+            }
+            if (includeList != null && includeList.size() > 0) {
+                if (excludeList != null && excludeList.size() > 0) {
+                    includeList = includeList.stream().filter(r -> !excludeList.contains(r)).collect(Collectors.toList());
+                }
+                includeList.stream().distinct().forEach(targetId -> {
+                    messageDto.setChannels(Collections.singletonList(new MessageChannel(ChannelType.USER.getCode(), String.valueOf(targetId))));
+                    messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
+                            AppConstants.APPID_MESSAGING, ChannelType.USER.getCode(), String.valueOf(targetId),
+                            messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+                });
+            }
+        }
     }
 
 
@@ -9693,7 +9723,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         long userId = user.getId();
         String tag = "listUsersOfEnterprise";
         Organization org = checkEnterpriseParameter(cmd.getOrganizationId(), userId, tag);
-
+        if(org == null){
+            LOGGER.error("No Organization is found! , {}", cmd.getOrganizationId());
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "No Organization is found!");
+        }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -9708,7 +9741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 //控制用户type为user
                 query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.equal(OrganizationMemberTargetType.USER.getCode()));
                 //查找组织ID等于输入参数的记录
-                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId()));
+                query.addConditions(Tables.EH_ORGANIZATION_MEMBERS. ORGANIZATION_ID.eq(org.getId()));
                 //控制只查找手机用户contactType=0
                 //query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TYPE.eq(value));
                 return query;
@@ -9716,30 +9749,30 @@ public class OrganizationServiceImpl implements OrganizationService {
         };
 
         List<OrganizationMember> organizationMembers = organizationProvider.listUsersOfEnterprise(locator, pageSize, callback);
-        List<OrganizationContactDTO> dtos = organizationMembers.stream().map(r -> {
+        List<OrganizationContactDTO> dtos = organizationMembers.stream().map(r->{
 
             User userInfo = this.userProvider.findUserById(r.getTargetId());
-            if (userInfo == null) {
-                LOGGER.error("Nick name is not found =" + cmd.getOrganizationId());
+            if(userInfo == null){
+                LOGGER.error("Nick name is not found ="+cmd.getOrganizationId());
                 r.setNickName("");
-            } else {
+            }else{
                 r.setNickName(userInfo.getNickName());
             }
             return ConvertHelper.convert(r, OrganizationContactDTO.class);
 
         }).collect(Collectors.toList());
 
-        Integer totalRecords = organizationProvider.countUsersOfEnterprise(locator, callback);
+        Integer totalRecords =  organizationProvider.countUsersOfEnterprise(locator, callback);
 
         ListOrganizationContactCommandResponse response = new ListOrganizationContactCommandResponse();
         response.setNextPageAnchor(locator.getAnchor());
         response.setMembers(dtos);
         response.setTotalCount(totalRecords);
+        response.setNamespaceId(org.getNamespaceId());
 
         return response;
-    }
 
-
+	}
 }
 
 

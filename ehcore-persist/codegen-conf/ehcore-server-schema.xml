@@ -151,13 +151,18 @@
         eh_oauth2_client_tokens | eh_oauth2_servers |
         eh_sms_logs |
 		eh_previews |
-
         eh_energy_meter_price_config | eh_asset_vendor |
 		eh_import_file_tasks |
         eh_pm_task_history_addresses |
 		eh_authorizations | eh_service_module_assignment_relations | eh_authorization_relations |
         eh_energy_meter_price_config |
         eh_user_notification_settings | eh_group_member_logs | eh_domains
+		eh_express_service_addresses | eh_express_companies | eh_express_users | eh_express_addresses | 
+		eh_express_orders | eh_express_query_histories | eh_express_order_logs |
+		eh_roster_order_settings |
+        eh_energy_meter_price_config |
+        eh_user_notification_settings | eh_group_member_logs |
+        eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
 
         </includes>
 

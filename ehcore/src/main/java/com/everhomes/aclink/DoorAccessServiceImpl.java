@@ -2040,7 +2040,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         }
         AclinkGetSimpleQRCodeResp resp = aclinkHuarunService.getSimpleQRCode(getCode);
         if(resp == null) {
-        	qr.setQrCodeKey("error");
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_HUARUN_ERROR, "huarun service error");
         } else {
         	qr.setQrCodeKey(resp.getQrcode());
         }
@@ -2524,7 +2524,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(resp != null) {
         	auth.setQrKey(resp.getQrcode());	
         } else {
-        	auth.setQrKey("error");
+        	throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_HUARUN_ERROR, "huarun service error");
         }
         
         doorAuthProvider.createDoorAuth(auth);
@@ -3450,10 +3450,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 					LOGGER.info("start run.....");
 					 Long id = (Long)arg2;
 			         if(null == id) {
-			              LOGGER.error("None of promotion");
+			              LOGGER.error("None of UserIdentifier");
 			         } else {
 			        	 if(LOGGER.isDebugEnabled()) {
-			        		 LOGGER.debug("new promotion id= " + id); 
+			        		 LOGGER.debug("newUserAutoAuth id= " + id); 
 			        	 }
 			              
 		              try {
@@ -3480,11 +3480,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 		if(identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode())) {
 			String mac = this.configProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
 			if(mac == null || mac.isEmpty()) {
+				if(LOGGER.isInfoEnabled()) {
+					LOGGER.info("identifier not found, mac=" + mac + " claimed=" + identifier);	
+				}	
 				return;
 			}
 			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
 			if(doorAccess == null) {
-				LOGGER.warn("aclink auto auth failed mac=" + mac);
+				LOGGER.warn("aclink auto auth failed mac=" + mac + " claimed=" + identifier);
 				return;
 			}
 			
@@ -3500,8 +3503,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			cmd.setRightRemote((byte)1);
 			cmd.setUserId(identifier.getOwnerUid());
 			createDoorAuth(cmd);
+		} else {
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("identifier not found, identifierId=" + identifierId + " claimed=" + identifier);	
+			}
 		}
-		
-		identifier.getNamespaceId();
 	}
 }

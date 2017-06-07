@@ -25,6 +25,15 @@ public class BosigaoCardInfo {
 	private Integer State;
 	private Integer isAdd;
 	private String oldCardTypeName;
+	private String UserName;
+
+	public String getUserName() {
+		return UserName;
+	}
+
+	public void setUserName(String userName) {
+		UserName = userName;
+	}
 
 	public String getOldCardTypeName() {
 		return oldCardTypeName;

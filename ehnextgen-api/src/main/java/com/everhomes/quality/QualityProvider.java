@@ -109,7 +109,8 @@ public interface QualityProvider {
 	void createSpecificationItemResults(QualityInspectionSpecificationItemResults result);
 
 	Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Long maxTaskId);
-	
+	List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime);
+
 	List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds);
 	
 	void createQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);

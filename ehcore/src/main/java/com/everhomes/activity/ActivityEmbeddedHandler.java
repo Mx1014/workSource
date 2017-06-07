@@ -315,6 +315,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         cmd.setVisibleRegionType(post.getVisibleRegionType());
         cmd.setVisibleRegionId(post.getVisibleRegionId());
         
+        if(cmd.getChargeFlag() == null){
+        	cmd.setChargeFlag((byte)0);
+        }
+        
         
         //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
         try {

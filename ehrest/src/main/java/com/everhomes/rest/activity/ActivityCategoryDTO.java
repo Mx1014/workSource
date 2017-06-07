@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>ownerType: 所属者类型</li>
  * <li>ownerId: 所属者id</li>
+ * <li>entryId: 实际入口id</li>
  * <li>parentId: 父id</li>
  * <li>name: 名称</li>
  * <li>path: 路径</li>
@@ -33,6 +34,7 @@ public class ActivityCategoryDTO {
 	private Long id;
 	private String ownerType;
 	private Long ownerId;
+	private Long entryId;
 	private Long parentId;
 	private String name;
 	private String path;
@@ -120,6 +122,14 @@ public class ActivityCategoryDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getEntryId() {
+		return entryId;
+	}
+
+	public void setEntryId(Long entryId) {
+		this.entryId = entryId;
 	}
 
 	public Long getParentId() {

@@ -53,11 +53,12 @@ public enum EntityType {
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles"),
     SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
     AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
-    All("EhAll");
+    All("EhAll"),
+    WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
+    ORGANIZATION_FILE("EhOrganizationFiles");
 
     private String code;
     

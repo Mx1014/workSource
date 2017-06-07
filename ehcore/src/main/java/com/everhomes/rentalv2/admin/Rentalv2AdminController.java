@@ -3,6 +3,7 @@ package com.everhomes.rentalv2.admin;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.rentalv2.admin.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,35 +27,6 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
-import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
-import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
-import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
-import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
-import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
 
 /**
  * <ul>
@@ -210,7 +182,7 @@ public class Rentalv2AdminController extends ControllerBase {
 
 	
 	/**
-	 * 
+	 *
 	 * <b>URL: /rental/admin/queryDefaultRule<b>
 	 * <p>
 	 * 查询默认规则
@@ -336,6 +308,23 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse updateResource(@Valid UpdateResourceAdminCommand cmd){
 		this.rentalService.updateResource(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 *
+	 * <b>URL: /rental/admin/updateResourceOrder<b>
+	 * <p>
+	 * 更新资源顺序
+	 * </p>
+	 */
+	@RequestMapping("updateResourceOrder")
+	@RestReturn(String.class)
+	public RestResponse updateResourceOrder(@Valid UpdateResourceOrderAdminCommand cmd){
+		this.rentalService.updateResourceOrder(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -694,4 +683,5 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 }

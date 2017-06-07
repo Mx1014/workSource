@@ -41,9 +41,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
-import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -77,6 +77,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -3750,7 +3751,13 @@ public class UserServiceImpl implements UserService {
             case GROUP:
                 Group group = groupProvider.findGroupById(cmd.getTargetId());
                 if (group != null) {
-                    dto.setName(group.getName());
+                    String name = group.getName();
+                    // 如果是公司的话，就显示公司的名称，@see com.everhomes.group.GroupServiceImpl#getGroupMemberSnapshot
+                    if (GroupDiscriminator.ENTERPRISE == GroupDiscriminator.fromCode(group.getDiscriminator())) {
+                        Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
+                        name = organization.getName();
+                    }
+                    dto.setName(name);
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);
