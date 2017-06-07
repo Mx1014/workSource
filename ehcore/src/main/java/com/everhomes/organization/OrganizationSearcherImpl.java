@@ -200,6 +200,10 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //	                    .field("addresses", 5.0f);
 			}
         } else {
+        	// es中超过10个字无法搜索出来结果，这里把关键词截断处理
+        	if (cmd.getKeyword().length() > 10) {
+				cmd.setKeyword(cmd.getKeyword().substring(cmd.getKeyword().length() - 10));
+			}
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
 //        		qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
 //                        .field("name", 5.0f)
