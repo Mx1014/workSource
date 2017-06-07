@@ -144,12 +144,12 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale(),"")); 
 		entities.add(e); 
 		
-		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
-		e = new FlowCaseEntity();  
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"punchDetail", PunchConstants.locale, ""));
-		e.setValue(content.getPunchDetail()); 
-		entities.add(e); 
+//		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+//		e = new FlowCaseEntity();  
+//		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+//		e.setKey(this.localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_SCOPE,"punchDetail", PunchConstants.locale, ""));
+//		e.setValue(content.getPunchDetail()); 
+//		entities.add(e); 
 		
 		entities.addAll(getPostFlowEntities(approvalRequest));
 		return entities;
