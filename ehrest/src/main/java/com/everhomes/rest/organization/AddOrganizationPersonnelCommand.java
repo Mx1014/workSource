@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,11 @@ import com.everhomes.util.StringHelper;
  * <li>gender：性别</li>
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
+ * <li>employeeNo: 工号</li>
+ * <li>employeeType: 员工类型：0，全职 1，兼职 2，实习 3，劳动派遣 参考{@link com.everhomes.rest.organization.EmployeeType}</li>
+ * <li>employeeStatus: 员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employmentTime: 转正时间</li>
+ * <li>checkInTime: 入职时间</li>
  * <li>departmentIds：添加到多部门</li>
  * <li>jobPositionIds：添加到多群组</li>
  * </ul>
@@ -36,8 +42,16 @@ public class AddOrganizationPersonnelCommand {
 	private String contactToken;
 	
 	private Byte gender;
-	
+
 	private String employeeNo;
+
+	private Byte employeeType;
+
+	private Byte employeeStatus;
+
+	private Date employmentTime;
+
+	private Date checkInTime;
 	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
@@ -50,7 +64,9 @@ public class AddOrganizationPersonnelCommand {
 	
 	@ItemType(Long.class)
 	private List<Long> jobLevelIds;
-	
+
+	public AddOrganizationPersonnelCommand() {
+	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -152,9 +168,41 @@ public class AddOrganizationPersonnelCommand {
 		this.jobLevelIds = jobLevelIds;
 	}
 
+	public Byte getEmployeeType() {
+		return employeeType;
+	}
+
+	public void setEmployeeType(Byte employeeType) {
+		this.employeeType = employeeType;
+	}
+
+	public Byte getEmployeeStatus() {
+		return employeeStatus;
+	}
+
+	public void setEmployeeStatus(Byte employeeStatus) {
+		this.employeeStatus = employeeStatus;
+	}
+
+	public Date getEmploymentTime() {
+		return employmentTime;
+	}
+
+	public void setEmploymentTime(Date employmentTime) {
+		this.employmentTime = employmentTime;
+	}
+
+	public Date getCheckInTime() {
+		return checkInTime;
+	}
+
+	public void setCheckInTime(Date checkInTime) {
+		this.checkInTime = checkInTime;
+	}
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }
