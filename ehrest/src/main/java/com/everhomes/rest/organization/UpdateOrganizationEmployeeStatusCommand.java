@@ -5,7 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>detailId: 员工标识号</li>
- * <li>employeeStatus：员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>employeeStatus：新增员工状态, 0: 试用 1: 在职 2: 离职 参考{@link com.everhomes.rest.organization.EmployeeStatus}</li>
+ * <li>remarks: 备注或延长日期</li>
  * </ul>
  */
 public class UpdateOrganizationEmployeeStatusCommand {
@@ -13,6 +14,8 @@ public class UpdateOrganizationEmployeeStatusCommand {
     private Long detailId;
 
     private Byte employeeStatus;
+
+    private String remarks;
 
     public Long getDetailId() {
         return detailId;
@@ -28,6 +31,14 @@ public class UpdateOrganizationEmployeeStatusCommand {
 
     public void setEmployeeStatus(Byte employeeStatus) {
         this.employeeStatus = employeeStatus;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     public UpdateOrganizationEmployeeStatusCommand() {

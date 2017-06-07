@@ -10208,7 +10208,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
-        this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(),cmd.getEmployeeStatus());
+        if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION)) {
+            this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB)) {
+            this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB)) {
+            this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
+        }
     }
 
     @Override
