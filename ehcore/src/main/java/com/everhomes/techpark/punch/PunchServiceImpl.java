@@ -4968,9 +4968,10 @@ public class PunchServiceImpl implements PunchService {
 					}
 				});
 				List<Long> userIdList = new ArrayList<Long>();
-				for(PunchRuleOwnerMap ownerMap : ownerMaps){
-					userIdList.add(ownerMap.getTargetId());
-				}
+				if(null != ownerMaps)
+					for(PunchRuleOwnerMap ownerMap : ownerMaps){
+						userIdList.add(ownerMap.getTargetId());
+					}
 				Long orgId = punchScheduling.getTargetId();
 				//拿到
 				List<String> groupTypeList = new ArrayList<String>();

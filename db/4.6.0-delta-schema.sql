@@ -10,3 +10,6 @@ ALTER TABLE `eh_flow_buttons` ADD COLUMN `subject_required_flag` TINYINT NOT NUL
 
 -- 给flowCase增加公司字段，以便在普通公司下按照公司进行搜索  add by xq.tian  2017/05/12
 ALTER TABLE `eh_flow_cases` ADD COLUMN `organization_id` BIGINT DEFAULT NULL COMMENT 'the same as eh_flows organization_id';
+
+-- eh_configurations表value字段加长
+ALTER TABLE `eh_configurations` MODIFY COLUMN `value` VARCHAR(512) NOT NULL;

@@ -17,17 +17,13 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
@@ -53,22 +49,16 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.sequence.SequenceService;
 import com.everhomes.user.User;
@@ -602,7 +592,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ft.setTimeoutTick(new Timestamp(timeoutTick));
     	ft.setTimeoutType(FlowTimeoutType.MESSAGE_TIMEOUT.getCode());
     	ft.setStatus(FlowStatusType.VALID.getCode());
-    	flowTimeoutService.pushTimeout(ft);
+    	flowTimeoutService.pushTimeout(ft, ctx);
     	
     	try {
 			Thread.currentThread().sleep(100000l);

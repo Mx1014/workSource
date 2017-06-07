@@ -793,9 +793,12 @@ public class FlowServiceImpl implements FlowService {
             if (actionInfo.getTrackerProcessor() != null) {
                 action.setTrackerProcessor(actionInfo.getTrackerProcessor());
             }
-            action.setTemplateId(actionInfo.getTemplateId());
-
-            action.setRenderText(actionInfo.getRenderText());
+            if (actionInfo.getTemplateId() != null) {
+                action.setTemplateId(actionInfo.getTemplateId());
+            }
+            if (actionInfo.getRenderText() != null) {
+                action.setRenderText(actionInfo.getRenderText());
+            }
             flowActionProvider.updateFlowAction(action);
 
             flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -1743,7 +1746,7 @@ public class FlowServiceImpl implements FlowService {
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
-            flowTimeoutService.pushTimeout(ft);
+            flowTimeoutService.pushTimeout(ft, ctx);
         } else {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
@@ -1823,10 +1826,17 @@ public class FlowServiceImpl implements FlowService {
             Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
             clearSnapshotGraph(snapshotFlow);
 
-            flow.setStatus(FlowStatusType.STOP.getCode());
-            Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-            flow.setUpdateTime(now);
-            flowProvider.updateFlow(flow);
+            dbProvider.execute(status -> {
+                flow.setStatus(FlowStatusType.CONFIG.getCode());
+                Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+                flow.setUpdateTime(now);
+                flowProvider.updateFlow(flow);
+
+                snapshotFlow.setStatus(FlowStatusType.STOP.getCode());
+                snapshotFlow.setUpdateTime(now);
+                flowProvider.updateFlow(snapshotFlow);
+                return true;
+            });
         }
     }
 
@@ -3004,13 +3014,12 @@ public class FlowServiceImpl implements FlowService {
             } else {
                 throw new FlowStepBusyException("already step by others");
             }
-
             return true;
         });
 
         //flush timeouts
         for (FlowTimeout ft : ctx.getTimeouts()) {
-            flowTimeoutService.pushTimeout(ft);
+            flowTimeoutService.pushTimeout(ft, ctx);
         }
     }
 

@@ -26,4 +26,11 @@ ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `org_member_price` DECIMAL(10,2) DEF
 ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `approving_user_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '原价-如果打折则有（外部客户价）';
 ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `approving_user_price` DECIMAL(10,2) DEFAULT NULL COMMENT '实际价格-打折则为折后价（外部客户价）';
 
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_org_member_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-原价-如果打折则有(企业内部价)';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_org_member_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-实际价格-打折则为折后价(企业内部价)';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_approving_user_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-原价-如果打折则有（外部客户价）';
+ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_approving_user_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-实际价格-打折则为折后价（外部客户价）';
+
+
+
 ALTER TABLE `eh_rentalv2_orders`  ADD COLUMN `flow_case_id` BIGINT DEFAULT NULL COMMENT 'id of the flow_case';

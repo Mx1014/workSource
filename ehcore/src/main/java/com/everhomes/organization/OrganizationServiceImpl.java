@@ -9525,7 +9525,7 @@ System.out.println();
 		List<OrganizationMember> members = null;
 		if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 			members = listOrganizationContactByJobPositionId(organization.getId(), cmd.getJobPositionId());
-		}else{
+		} else {
 			List<Long> organizationIds = new ArrayList<>();
 			organizationIds.add(organization.getId());
 			members = listOrganizationContactByJobPositionId(organizationIds, cmd.getJobPositionId());
@@ -9562,7 +9562,8 @@ System.out.println();
 		return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
 	}
 
-	private List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId){
+	@Override
+	public List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId){
 		return listOrganizationContactByJobPositionId(null, organizationIds, jobPositionId);
 	}
 

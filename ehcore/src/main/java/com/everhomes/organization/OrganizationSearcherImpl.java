@@ -215,7 +215,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom(pageNum * pageSize).setSize(pageSize);
+        builder.setFrom(pageNum * pageSize).setSize(pageSize + 1);
         
         builder.setQuery(qb);
         
@@ -233,7 +233,11 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //         } else {
 //            result.setPageAnchor(null);
 //            }
-        
+
+        if(ids.size() > pageSize){
+            result.setPageAnchor(Long.valueOf(pageNum + 1));
+            ids.remove(ids.size() - 1);
+        }
         result.setIds(ids);
         
         return result;
