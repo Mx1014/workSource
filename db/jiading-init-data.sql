@@ -76,7 +76,8 @@ SET @building_id = (SELECT MAX(id) FROM `eh_buildings`);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
 	VALUES ((@building_id := @building_id + 1), @community_id, '创源新城TEEC上海中心大厦', 'TEEC上海中心大厦', 0, '021-61250766', '上海市嘉定区云谷路599弄6号楼21F', NULL, 121.2534427643, 31.3323967337, 'wtw4ppyh6n04', 'TEEC上海中心大厦位于上海市嘉定区云谷路599弄，是嘉定新城和TEEC（清华企业家协会）合作的新典范，园区将打造嘉定传统产业转型升级的新引擎（新能源智能网联汽车、物联网集成电路、先进制造和智慧医疗），并充分融入清华企业家元素的创新资源，由teec会员上海创源科技发展有限公司和嘉定区国有全资上海嘉定新城发展有限公司合资成立的上海创源新城科技有限公司进行运营管理。', '', '2', '1', UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
 
-SET @address_id = (SELECT MAX(id) FROM `eh_addresses`) + 5;    
+SET @address_id = (SELECT MAX(id) FROM `eh_addresses`) + 5;  
+SET @organization_address_mapping_id = (SELECT max(id) FROM `eh_organization_address_mappings`);  
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`, `apartment_floor`)
 	VALUES((@address_id := @address_id +1), UUID(), @community_id, @shi_id, '上海市', @qu_id, '嘉定区' ,'6号楼-601','创源新城TEEC上海中心大厦','601','2','0',UTC_TIMESTAMP(), @namespace_id, 6);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@address_mapping_id := @address_mapping_id + 1), @organization_id, @community_id, @address_id, '6号楼-601', '0');
