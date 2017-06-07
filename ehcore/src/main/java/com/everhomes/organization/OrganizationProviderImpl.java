@@ -4570,6 +4570,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return null;
     }
 
+    public void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employmentTime){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYMENT_TIME, employmentTime)
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
+    }
+
     public boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         int count = context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)

@@ -372,7 +372,7 @@ public interface OrganizationProvider {
     void deleteOranizationMemberContract(OrganizationMemberContracts contract);
     void updateOrganizationMemberContract(OrganizationMemberContracts contract);
 
-
+    void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employeeTime);
     boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
     void updateProfileIntegrity(Long detailId, Integer integrity);
 //	void updateOrganizationMemberBackGround(OrganizationMemberDetails organizationMemberDetails);
