@@ -1,21 +1,16 @@
 package com.everhomes.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.organization.ListOrganizationByModuleIdCommand;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.ListOrganizationManagersCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationManagerDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.user.UserInfo;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
@@ -34,21 +29,19 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 			Long jobPositionId, Long departmentId) {
 		// DepartmentId is also organizationId
 		
-		ListOrganizationContactByJobPositionIdCommand cmd = new ListOrganizationContactByJobPositionIdCommand();
+		/*ListOrganizationContactByJobPositionIdCommand cmd = new ListOrganizationContactByJobPositionIdCommand();
 		cmd.setJobPositionId(jobPositionId);
-		cmd.setOrganizationId(departmentId);
-		
-		List<OrganizationContactDTO> dtos = organizationService.listOrganizationContactByJobPositionId(cmd);
-		List<Long> users = new ArrayList<>();
-		if(dtos != null) {
-			for(OrganizationContactDTO dto : dtos) {
-				if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())) {
-					users.add(dto.getTargetId());	
-				}
-			}
-		}
-		
-		return users;
+		cmd.setOrganizationId(departmentId);*/
+
+        List<Long> organizationIds = Collections.singletonList(departmentId);
+        List<OrganizationMember> members = organizationService.listOrganizationContactByJobPositionId(organizationIds, jobPositionId);
+
+		if(members != null) {
+            return members.stream().filter(r ->
+                    OrganizationMemberTargetType.fromCode(r.getTargetType()) == OrganizationMemberTargetType.USER)
+                    .map(OrganizationMember::getTargetId).collect(Collectors.toList());
+        }
+		return new ArrayList<>();
 	}
 
 	@Override
