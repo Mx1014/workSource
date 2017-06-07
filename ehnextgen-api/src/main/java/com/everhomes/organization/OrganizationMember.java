@@ -8,7 +8,8 @@ import java.sql.Date;
 
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
-	private java.lang.String   nickName;
+    private static final long serialVersionUID = -4420904659870582839L;
+    private java.lang.String   nickName;
 	// private java.lang.String   avatar;
 
 	private String initial;
@@ -34,7 +35,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
 	private Byte employeeType;
 
-	private static final long serialVersionUID = 2994038655987093227L;
+
 
 	public OrganizationMember() {
     }

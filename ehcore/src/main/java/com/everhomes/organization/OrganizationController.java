@@ -1493,7 +1493,7 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/updateOrganizationMemberWorkExperiences</b>
+     * <b>URL: /org/updateOrganiz ationMemberWorkExperiences</b>
      * <p>修改员工工作经历</p>
      */
     @RequestMapping("updateOrganizationMemberWorkExperiences")
