@@ -29,7 +29,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 @Component
 public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	
@@ -123,6 +126,22 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		return query.fetch().map((r) -> {
 			return ConvertHelper.convert(r, WebMenuScope.class);
 		});
+	}
+
+	@Override
+	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
+	public Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId) {
+		Map<Long, WebMenuScope> map = new HashMap<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhWebMenuScopesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_SCOPES);
+		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
+		cond = cond.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			map.put(r.getMenuId(), ConvertHelper.convert(r, WebMenuScope.class));
+			return null;
+		});
+		return map;
 	}
 
 	@Override

@@ -2,6 +2,7 @@
 package com.everhomes.acl;
 
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -47,5 +48,7 @@ public interface WebMenuPrivilegeProvider {
 	Long nextId();
 
 	void createWebMenus(List<WebMenu> objs);
+
+	Map<Long, WebMenuScope> getWebMenuScopeMapByOwnerId(String ownerType, Long ownerId);
 	
 }

@@ -84,13 +84,19 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		List<Long> result  = new ArrayList<>();
 		SelectQuery<EhAuthorizationsRecord> query = context.selectQuery(Tables.EH_AUTHORIZATIONS);
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(EntityType.SERVICE_MODULE.getCode());
+		Condition targetCond = null;
 		for (Target target:targets) {
-			cond = cond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
 		}
+		cond = cond.and(targetCond);
 		query.addConditions(cond);
-		query.addGroupBy(Tables.EH_AUTHORIZATION_RELATIONS.MODULE_ID);
 		query.fetch().map((r) -> {
-			result.add(r.getAuthId());
+			if(!result.contains(r.getAuthId()))
+				result.add(r.getAuthId());
 			return null;
 		});
 		return result;

@@ -1,15 +1,20 @@
 package com.everhomes.menu;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.WebMenuCategory;
 import com.everhomes.rest.organization.OrganizationType;
@@ -43,8 +48,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
-		UserContext userContext = UserContext.current();
-		User user = userContext.getUser();
+		Long userId = cmd.getUserId();
+		if(null == userId)
+			userId = UserContext.current().getUser().getId();
+
 		List<String> categories = new ArrayList<>();
 		WebMenu menu = null;
 		if(null == cmd.getMenuId()){
@@ -55,20 +62,20 @@ public class WebMenuServiceImpl implements WebMenuService {
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
 
-		if(EntityType.fromCode(UserContext.getCurrentPortalType()) == EntityType.ORGANIZATIONS){
+		if(PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.PM || PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.ENTERPRISE){
 			Long organizationId = UserContext.getCurrentPortalId();
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if(null != organization){
 				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
-					listPmWebMenu(user.getId(), menu, categories, organizationId);
+					return listPmWebMenu(userId, menu, categories, organizationId);
 				}else{
-					listEnterpriseWebMenu(user.getId(), menu, categories, organizationId);
+					return listEnterpriseWebMenu(userId, menu, categories, organizationId);
 				}
 			}
 
 
 		}else /*if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ZUOLIN_ADMIN) */{
-			 return listZuolinAdminWebMenu(user.getId(), menu, categories);
+			 return listZuolinAdminWebMenu(userId, menu, categories);
 		}
 		return null;
 	}
@@ -82,8 +89,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 		List<Target> targets = new ArrayList<>();
 		targets.add(new Target(EntityType.USER.getCode(), userId));
+
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
+			if(null != menu && menus.size() > 0){
+				menus.add(menu);
+			}
 		}else{
 			List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
 			for (Long orgId: orgIds) {
@@ -95,9 +106,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 
 		if(null == menus || menus.size() == 0){
-			return new ArrayList<>();
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
 		}
-
+		menus = filterMenus(menus, organizationId);
 		return processWebMenus(menus.stream().map(r->{
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
@@ -114,8 +128,12 @@ public class WebMenuServiceImpl implements WebMenuService {
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.ORGANIZATION.getCode(), categories, path, null);
 		}
 		if(null == menus || menus.size() == 0){
-			return new ArrayList<>();
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
 		}
+		menus = filterMenus(menus, organizationId);
 		return processWebMenus(menus.stream().map(r->{
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
@@ -128,7 +146,10 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 		List<WebMenu> menus = webMenuProvider.listWebMenuByType(WebMenuType.ZUOLIN.getCode(), categories, path, null);
 		if(null == menus || menus.size() == 0){
-			return new ArrayList<>();
+			if(null != menu)
+				menus.add(menu);
+			else
+				return new ArrayList<>();
 		}
 		return processWebMenus(menus.stream().map(r->{
 			return ConvertHelper.convert(r, WebMenuDTO.class);
@@ -148,6 +169,45 @@ public class WebMenuServiceImpl implements WebMenuService {
 		res.setMenus(this.processWebMenus(menuDtos, null).getDtos());
 		
 		return res;
+	}
+
+	/**
+	 * 过滤菜单
+	 * @param menus
+	 * @param filterMap
+     * @return
+     */
+	private List<WebMenu> filterMenus(List<WebMenu> menus, Map<Long, WebMenuScope> filterMap){
+		List<WebMenu> filterMenus = new ArrayList<>();
+		for (WebMenu menu: menus) {
+			WebMenuScope scope = filterMap.get(menu.getId());
+			if(null != scope){
+				if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+					//override menu
+					menu.setName(scope.getMenuName());
+					filterMenus.add(menu);
+				}else if(WebMenuScopeApplyPolicy.fromCode(scope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+					filterMenus.add(menu);
+				}
+
+			}
+		}
+		filterMenus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
+		return filterMenus;
+	}
+
+	/**
+	 * 根据对应的机构过滤菜单
+	 * @param menus
+	 * @param organizationId
+     * @return
+     */
+	private List<WebMenu> filterMenus(List<WebMenu> menus, Long organizationId){
+		Map<Long, WebMenuScope> filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(filterMap.size() == 0 ){
+			filterMap = webMenuProvider.getWebMenuScopeMapByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(UserContext.getCurrentNamespaceId()));
+		}
+		return filterMenus(menus, filterMap);
 	}
 	
     /**
