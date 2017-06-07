@@ -590,9 +590,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = SampleQualityInspectionDTO.class)
 	public RestResponse createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
 
-//		SampleQualityInspectionDTO routineQualityInspection = qualityService.createSampleQualityInspection(cmd);
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.createSampleQualityInspection(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(routineQualityInspection);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -606,9 +606,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = SampleQualityInspectionDTO.class)
 	public RestResponse updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
 
-//		SampleQualityInspectionDTO routineQualityInspection = qualityService.updateSampleQualityInspection(cmd);
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.updateSampleQualityInspection(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(routineQualityInspection);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -622,9 +622,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = SampleQualityInspectionDTO.class)
 	public RestResponse findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
 
-//		SampleQualityInspectionDTO routineQualityInspection = qualityService.findSampleQualityInspection(cmd);
+		SampleQualityInspectionDTO routineQualityInspection = qualityService.findSampleQualityInspection(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(routineQualityInspection);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -638,7 +638,7 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = String.class)
 	public RestResponse deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
 
-//		qualityService.deleteSampleQualityInspection(cmd);
+		qualityService.deleteSampleQualityInspection(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -654,9 +654,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = ListSampleQualityInspectionResponse.class)
 	public RestResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
 
-//		ListSampleQualityInspectionResponse routineQualityInspections = qualityService.listSampleQualityInspection(cmd);
+		ListSampleQualityInspectionResponse routineQualityInspections = qualityService.listSampleQualityInspection(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(routineQualityInspections);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

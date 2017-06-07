@@ -2986,8 +2986,30 @@ public class QualityServiceImpl implements QualityService {
 							UserContext.current().getUser().getLocale(),
 							"the template don't exist!"));
 		}
-		
-		
 	}
 
+	@Override
+	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+
+	}
+
+	@Override
+	public SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+		return null;
+	}
 }
