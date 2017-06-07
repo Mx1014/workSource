@@ -34,7 +34,8 @@ INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visibl
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(@org_forum_id, UUID(), @namespace_id, 2, 'EhGroups', @org_group_id,'上海创源新城科技有限公司论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());       
 
-	
+SET @org_cmnty_request_id = (SELECT max(id) FROM `eh_organization_community_requests`);
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5;	
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
 	VALUES(@organization_id, 0, 'PM', '上海创源新城科技有限公司', '', CONCAT('/', @organization_id), 1, 2, 'ENTERPRISE', @namespace_id, @org_group_id);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
@@ -43,6 +44,9 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 
 SET @user_id = 243081;
 SET @account_name = 19091791975;
+SET @user_identifier_id = (SELECT max(id) FROM `eh_user_identifiers`);
+SET @org_member_id = (SELECT MAX(id) FROM `eh_organization_members`); 
+SET @role_assignment_id = (SELECT MAX(id) FROM `eh_acl_role_assignments`); 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (@user_id, UUID(), @account_name, '许俊杰', '', 1, 45, '1', '2',  'zh_CN',  '5c2d56ce23e2f8ea6f525c580a051a89', 'b05efa7b64d7e5ddfbfd64ff74c5f3fda9ed66e593abad5a4b49b28d36aa7426', UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
@@ -54,11 +58,11 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 
  
 
-SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5;
-SET @organization_id = (SELECT MAX(id) FROM `eh_organizations`) + 5; 
+
 SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 5;  
 SET @community_forum_id = (SELECT MAX(id) FROM `eh_forums`) + 5;   
 SET @feedback_forum_id = @community_forum_id+1;  
+SET @namespace_resource_id = (SELECT max(id) FROM `eh_namespace_resources`);
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
 	VALUES(@community_id, UUID(), @shi_id, '上海市',  @qu_id, '嘉定区', 'TEEC上海中心', 'TEEC上海中心', '云谷路599弄TEEC上海中心大厦', NULL, 'TEEC上海中心大厦位于上海市嘉定区云谷路599弄，是嘉定新城和TEEC（清华企业家协会）合作的新典范，园区将打造嘉定传统产业转型升级的新引擎（新能源智能网联汽车、物联网集成电路、先进制造和智慧医疗），并充分融入清华企业家元素的创新资源，由teec会员上海创源科技发展有限公司和嘉定区国有全资上海嘉定新城发展有限公司合资成立的上海创源新城科技有限公司进行运营管理。',NULL, NULL, NULL, NULL, NULL, NULL,NULL, 13, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,1, @community_forum_id, @feedback_forum_id, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
@@ -68,6 +72,7 @@ INSERT INTO `eh_organization_communities`(organization_id, community_id)
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES((@namespace_resource_id := @namespace_resource_id + 1), @namespace_id, 'COMMUNITY', @community_id, UTC_TIMESTAMP());	
 
+SET @building_id = (SELECT MAX(id) FROM `eh_buildings`); 
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
 	VALUES ((@building_id := @building_id + 1), @community_id, '创源新城TEEC上海中心大厦', 'TEEC上海中心大厦', 0, '021-61250766', '上海市嘉定区云谷路599弄6号楼21F', NULL, 121.2534427643, 31.3323967337, 'wtw4ppyh6n04', 'TEEC上海中心大厦位于上海市嘉定区云谷路599弄，是嘉定新城和TEEC（清华企业家协会）合作的新典范，园区将打造嘉定传统产业转型升级的新引擎（新能源智能网联汽车、物联网集成电路、先进制造和智慧医疗），并充分融入清华企业家元素的创新资源，由teec会员上海创源科技发展有限公司和嘉定区国有全资上海嘉定新城发展有限公司合资成立的上海创源新城科技有限公司进行运营管理。', '', '2', '1', UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, @namespace_id);
 
