@@ -99,7 +99,23 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseStateChanged(FlowCaseState ctx) {
+        String params = ctx.getCurrentNode().getFlowNode().getParams();
+        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
 
+        if (map != null) {
+            String nodeConfigStatus = String.valueOf(map.get("status"));
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(nodeConfigStatus);
+
+            Long logId = ctx.getFlowCase().getReferId();
+            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != status) {
+                    log.setStatus(status.getCode());
+                    clearanceLogProvider.updateClearanceLog(log);
+                }
+                return null;
+            });
+        }
     }
 
     @Override
@@ -107,7 +123,7 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
         Long logId = ctx.getFlowCase().getReferId();
         coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
             ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PROCESSING) {
+            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
                 log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
                 clearanceLogProvider.updateClearanceLog(log);
             }
@@ -129,16 +145,17 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     public void onFlowButtonFired(FlowCaseState ctx) {
         String params = ctx.getCurrentNode().getFlowNode().getParams();
         Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
-        ParkingClearanceLogStatus status = null;
-        if (map != null) {
-            status = ParkingClearanceLogStatus.valueOf(((String) map.get("node")));
-        }
-        if (status == ParkingClearanceLogStatus.PENDING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+
+        if (map != null && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+            String nodeConfigStatus = String.valueOf(map.get("status"));
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(nodeConfigStatus);
+
             Long logId = ctx.getFlowCase().getReferId();
             coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
                 ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
+                ParkingClearanceLogStatus logStatus = ParkingClearanceLogStatus.fromCode(log.getStatus());
+                if (logStatus != status) {
+                    log.setStatus(status.getCode());
                     clearanceLogProvider.updateClearanceLog(log);
                 }
                 return null;

@@ -28,22 +28,32 @@ public class FlowTimeoutJob extends QuartzJobBean {
     private
     FlowTimeoutService flowTimeoutService;
 
+    // private static class FlowVersionVO {Integer flowVersion;}// vo class
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
 
             Long ftId = (Long)jobMap.get("flowTimeoutId");
+            // FlowCaseState ctx = (FlowCaseState)jobMap.get("ctx");
 
             if (flowTimeoutProvider.deleteIfValid(ftId)) {
                 FlowTimeout ft = flowTimeoutProvider.getFlowTimeoutById(ftId);
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("FlowTimeoutAction.run success ft = {}", ft);
-                }
+                // FlowVersionVO flowVersionVO = (FlowVersionVO) StringHelper.fromJsonString(ft.getJson(), FlowVersionVO.class);
+                // Integer ftFlowVersion = flowVersionVO.flowVersion;
+                // Integer currFlowVersion = ctx.getFlowCase().getFlowVersion();
 
-                //delete ok, means we take it's owner
-                flowTimeoutService.processTimeout(ft);
+                // 当前的flowVersion和ft的flowVersion一致时才执行
+                // if (currFlowVersion.equals(ftFlowVersion)) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("FlowTimeoutAction.run success ft = {}", ft);
+                    }
+
+                    //delete ok, means we take it's owner
+                    flowTimeoutService.processTimeout(ft);
+                // }
             } else {
                 LOGGER.warn("FlowTimeoutAction.run failure timeoutId = {}", ftId);
             }
