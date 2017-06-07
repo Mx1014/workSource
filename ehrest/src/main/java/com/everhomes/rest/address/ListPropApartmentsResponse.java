@@ -3,6 +3,7 @@ package com.everhomes.rest.address;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.util.StringHelper;
 
@@ -31,6 +32,7 @@ public class ListPropApartmentsResponse {
 	private Integer defaultCount;
 	private Integer hasOwnerCount;
 	private Integer noOwnerCount;
+	@ItemType(PropFamilyDTO.class)
 	private List<PropFamilyDTO> resultList;
 
 	public Integer getAptCount() {
