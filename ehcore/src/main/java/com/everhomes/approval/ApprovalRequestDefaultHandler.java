@@ -144,7 +144,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	}
 	
 	
-    public String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 
+    public static String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 
 		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId  ;
 	}
 
