@@ -42,6 +42,21 @@ CREATE TABLE `eh_lease_configs2` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_general_form_mappings` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`namespace_id` INT NOT NULL DEFAULT '0',
+	`owner_id` BIGINT NOT NULL,
+	`owner_type` VARCHAR (64) NOT NULL,
+
+    `source_id` BIGINT NOT NULL,
+	`source_type` VARCHAR (64) NOT NULL,
+	`form_origin_id` BIGINT DEFAULT NULL,
+	`form_version` BIGINT DEFAULT NULL,
+	`create_time` datetime DEFAULT NULL COMMENT 'record create time',
+
+	PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
 CREATE TABLE `eh_general_form_vals` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`namespace_id` INT NOT NULL DEFAULT '0',
