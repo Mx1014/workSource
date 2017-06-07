@@ -173,11 +173,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         }).collect(Collectors.toList());
 
-        OrganizationMember target = new OrganizationMember();
         if (null != result && 0 != result.size()) {
-            target = result.get(0);
+            return result.get(0);
         }
-        return target;
+        return null;
 //        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS).;
 //        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
 //        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(phone));
