@@ -10053,11 +10053,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.info("Cannot find the corresponding infomation of work experience");
             return;
         }
-        experience.setEnterpriseName(cmd.getEnterpriseName());
-        experience.setPosition(cmd.getPosition());
-        experience.setJobType(cmd.getJobType());
-        experience.setEntryTime(java.sql.Date.valueOf(cmd.getEntryTime()));
-        experience.setDepartureTime(java.sql.Date.valueOf(cmd.getDepartureTime()));
+        if (cmd.getEnterpriseName() != null)
+            experience.setEnterpriseName(cmd.getEnterpriseName());
+        if (cmd.getPosition() != null)
+            experience.setPosition(cmd.getPosition());
+        if (cmd.getJobType() != null)
+            experience.setJobType(cmd.getJobType());
+        if (cmd.getEntryTime() != null)
+            experience.setEntryTime(java.sql.Date.valueOf(cmd.getEntryTime()));
+        if (cmd.getDepartureTime() != null)
+            experience.setDepartureTime(java.sql.Date.valueOf(cmd.getDepartureTime()));
 
         this.organizationProvider.updateOranizationMemberWorkExperience(experience);
     }
@@ -10117,10 +10122,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.info("Cannot find the corresponding infomation of insurance");
             return;
         }
+        if(cmd.getName() != null)
         insurance.setName(cmd.getName());
+        if(cmd.getEnterprise() != null)
         insurance.setEnterprise(cmd.getEnterprise());
+        if(cmd.getNumber() != null)
         insurance.setNumber(cmd.getNumber());
+        if(cmd.getStartTime() != null)
         insurance.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        if(cmd.getEndTime() != null)
         insurance.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
 
         this.organizationProvider.updateOrganizationMemberInsurance(insurance);
@@ -10189,8 +10199,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.info("Cannot find the corresponding infomation of contract");
             return;
         }
+        if(cmd.getContractNumber() != null)
         contract.setContractNumber(cmd.getContractNumber());
+        if(cmd.getContractNumber() != null)
         contract.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
+        if(cmd.getContractNumber() != null)
         contract.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
 
         this.organizationProvider.updateOrganizationMemberContract(contract);
