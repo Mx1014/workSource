@@ -1,9 +1,9 @@
 SET @namespace_id = 999974;
 SET @configuration_id = (SELECT max(id) FROM `eh_configurations`);
+SET @core_server_url = "core.zuolin.com";
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ((@configuration_id := @configuration_id + 1), 'app.agreements.url', CONCAT('https://', @core_server_url, '/mobile/static/app_agreements/agreements.html?ns=999974'), 'the relative path for jiadingxincheng TEEC app agreements', @namespace_id, NULL);	   
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ((@configuration_id := @configuration_id + 1), 'business.url', , 'biz access url for jiadingxincheng TEEC', @namespace_id, NULL);	   
+
 
 INSERT INTO `eh_version_realm` VALUES (121, 'Android_TEEC', null, UTC_TIMESTAMP(), @namespace_id);
 INSERT INTO `eh_version_realm` VALUES (122, 'iOS_TEEC', null, UTC_TIMESTAMP(), @namespace_id);
