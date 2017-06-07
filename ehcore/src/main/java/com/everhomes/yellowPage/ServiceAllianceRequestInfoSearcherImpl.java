@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
-import com.everhomes.rest.general_form.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;

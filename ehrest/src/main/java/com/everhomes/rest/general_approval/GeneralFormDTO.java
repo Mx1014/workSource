@@ -1,4 +1,4 @@
-package com.everhomes.rest.general_form;
+package com.everhomes.rest.general_approval;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
@@ -37,7 +37,7 @@ public class GeneralFormDTO {
     private String     templateType;
     private String     templateText;
     private Timestamp     createTime;
-    
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
 

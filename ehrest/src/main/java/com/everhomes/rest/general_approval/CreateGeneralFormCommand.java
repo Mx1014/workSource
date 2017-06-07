@@ -1,9 +1,9 @@
-package com.everhomes.rest.general_form;
-
-import java.util.List;
+package com.everhomes.rest.general_approval;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul> 
@@ -25,10 +25,10 @@ public class CreateGeneralFormCommand {
     private String     moduleType;
     private Long     organizationId;
     private String     formName;
-    
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
- 
+
 	public Long getOwnerId() {
 		return ownerId;
 	}

@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.address.AddressDTO;
-import com.everhomes.rest.community.UpdateBuildingOrderCommand;
-import com.everhomes.rest.general_form.GeneralFormDTO;
-import com.everhomes.rest.general_form.GetTemplateByFormIdCommand;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GetTemplateByFormIdCommand;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,6 @@
-package com.everhomes.rest.general_form;
+package com.everhomes.rest.general_approval;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;

@@ -1,7 +1,6 @@
 package com.everhomes.general_form;
 
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.general_form.*;
 
 import java.util.List;
 
@@ -22,4 +21,8 @@ public interface GeneralFormService {
 	List<PostApprovalFormItem> getGeneralFormValues(GetGeneralFormValuesCommand cmd);
 
 	void addGeneralFormValues(addGeneralFormValuesCommand cmd);
+
+	GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
+
+	void postGeneralForm(PostGeneralFormCommand cmd);
 }

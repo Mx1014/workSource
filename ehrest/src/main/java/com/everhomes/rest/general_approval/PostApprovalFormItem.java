@@ -1,6 +1,5 @@
 package com.everhomes.rest.general_approval;
 
-import com.everhomes.rest.general_form.GeneralFormFieldType;
 import com.everhomes.util.StringHelper;
 
 /**

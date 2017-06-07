@@ -1,8 +1,7 @@
-package com.everhomes.rest.general_form;
-
-import org.apache.commons.lang.StringUtils;
+package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>

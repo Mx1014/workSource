@@ -1,6 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
-import com.everhomes.rest.general_form.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.util.StringHelper;
 
 /**

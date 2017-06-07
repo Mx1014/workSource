@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.general_form.GeneralFormFieldDTO;
 import com.everhomes.util.StringHelper;
 
 /**

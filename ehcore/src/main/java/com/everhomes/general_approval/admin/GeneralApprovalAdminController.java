@@ -3,6 +3,7 @@ package com.everhomes.general_approval.admin;
 import javax.validation.Valid;
 
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,18 +14,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.general_approval.GeneralApprovalService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.general_form.GeneralFormIdCommand;
-import com.everhomes.rest.general_form.CreateGeneralFormCommand;
-import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.GeneralApprovalDTO;
-import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
-import com.everhomes.rest.general_form.GeneralFormDTO;
-import com.everhomes.rest.general_form.ListGeneralFormsCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
-import com.everhomes.rest.general_form.ListGeneralFormResponse;
-import com.everhomes.rest.general_form.UpdateGeneralFormCommand;
-import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
 @RestDoc(value="General approval admin controller", site="core")
 @RestController

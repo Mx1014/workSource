@@ -5,8 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>id: 资源id</li>
- * <li>exchangeId: 交换顺序id
- * </li>
+ * <li>exchangeId: 交换顺序id</li>
  * </ul>
  */
 public class UpdateLeasePromotionOrderCommand {

@@ -2,6 +2,7 @@ package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -9,7 +10,6 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.*;
-import com.everhomes.rest.general_form.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
@@ -75,6 +75,24 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 		dto.setFormFields(fieldDTOs);
 		return dto;
+	}
+
+	@Override
+	public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
+		GeneralFormModuleHandler handler = getOrderHandler(cmd.getOwnerType());
+
+		return handler.getTemplateBySourceId(cmd);
+	}
+
+	@Override
+	public void postGeneralForm(PostGeneralFormCommand cmd) {
+		GeneralFormModuleHandler handler = getOrderHandler(cmd.getOwnerType());
+		handler.postGeneralForm(cmd);
+	}
+
+	private GeneralFormModuleHandler getOrderHandler(String type) {
+		String handler = GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + type;
+		return PlatformContext.getComponent(handler);
 	}
 
 	@Override

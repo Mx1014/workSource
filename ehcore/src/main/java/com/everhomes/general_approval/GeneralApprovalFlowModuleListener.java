@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.general_approval.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +26,6 @@ import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_form.GeneralFormDataSourceType;
-import com.everhomes.rest.general_form.GeneralFormFieldDTO;
-import com.everhomes.rest.general_form.GeneralFormFieldType;
-import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
-import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
