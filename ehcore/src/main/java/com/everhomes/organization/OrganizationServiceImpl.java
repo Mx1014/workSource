@@ -9958,10 +9958,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.info("Cannot find the corresponding infomation of education");
             return;
         }
+        if(cmd.getSchoolName() != null)
         education.setSchoolName(cmd.getSchoolName());
+        if(cmd.getDegree() != null)
         education.setDegree(cmd.getDegree());
+        if(cmd.getMajor() != null)
         education.setMajor(cmd.getMajor());
+        if(cmd.getEnrollmentTime() != null)
         education.setEnrollmentTime(java.sql.Date.valueOf(cmd.getEnrollmentTime()));
+        if(cmd.getGraduationTime() != null)
         education.setGraduationTime(java.sql.Date.valueOf(cmd.getGraduationTime()));
 
         this.organizationProvider.updateOranizationMemberEducationInfo(education);
@@ -10208,11 +10213,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd) {
-        if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION)) {
+        if (cmd.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
             this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
-        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB)) {
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB)) {
+        } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
         }
     }
