@@ -9,7 +9,10 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerId: 例行检查所属owner id</li>
  *     <li>ownerType: 例行检查所属owner类型例如PM</li>
  *     <li>communityId: 小区id</li>
- *     <li>routineId: 例行检查id</li>
+ *     <li>sampleId: 例行检查id</li>
+ *     <li>communityName: 项目名称</li>
+ *     <li>executorName: 执行人姓名</li>
+ *     <li>status: 执行状态</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -23,7 +26,13 @@ public class ListSampleQualityInspectionTasksCommand {
 
     private Long communityId;
 
-    private Long routineId;
+    private Long sampleId;
+
+    private String communityName;
+
+    private String executorName;
+
+    private Byte status;
 
     public Long getCommunityId() {
         return communityId;
@@ -49,12 +58,36 @@ public class ListSampleQualityInspectionTasksCommand {
         this.ownerType = ownerType;
     }
 
-    public Long getRoutineId() {
-        return routineId;
+    public Long getSampleId() {
+        return sampleId;
     }
 
-    public void setRoutineId(Long routineId) {
-        this.routineId = routineId;
+    public void setSampleId(Long sampleId) {
+        this.sampleId = sampleId;
+    }
+
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    public String getExecutorName() {
+        return executorName;
+    }
+
+    public void setExecutorName(String executorName) {
+        this.executorName = executorName;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

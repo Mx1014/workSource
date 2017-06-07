@@ -123,4 +123,10 @@ public interface QualityProvider {
 
 	QualityInspectionTasks findLastestQualityInspectionTask(Long startTime);
 	QualityInspectionStandardSpecificationMap getMapByStandardId(Long standardId);
+
+	void createQualityInspectionSample(QualityInspectionSamples sample);
+	void createQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map);
+	void updateQualityInspectionSample(QualityInspectionSamples sample);
+	QualityInspectionSamples findQualityInspectionSample(QualityInspectionSamples sample);
+	void deleteQualityInspectionSample(QualityInspectionSamples sample);
 }

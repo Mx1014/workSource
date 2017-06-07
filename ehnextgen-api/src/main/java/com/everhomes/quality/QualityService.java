@@ -63,4 +63,5 @@ public interface QualityService {
 	SampleQualityInspectionDTO findSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
 	void deleteSampleQualityInspection(FindSampleQualityInspectionCommand cmd);
 	ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd);
+	ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd);
 }

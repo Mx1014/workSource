@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.*;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -2990,6 +2991,28 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public SampleQualityInspectionDTO createSampleQualityInspection(CreateSampleQualityInspectionCommand cmd) {
+		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
+		Long uid = UserContext.current().getUser().getId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		sample.setCreatorUid(uid);
+		sample.setNamespaceId(namespaceId);
+		sample.setStatus(Status.ACTIVE.getCode());
+		qualityProvider.createQualityInspectionSample(sample);
+		feeddoc
+
+		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+			cmd.getCommunityIds().forEach(communityId -> {
+				QualityInspectionSampleCommunityMap map = new QualityInspectionSampleCommunityMap();
+				map.setNamespaceId(namespaceId);
+				map.setSampleId(sample.getId());
+				map.setCommunityId(communityId);
+				qualityProvider.createQualityInspectionSampleCommunityMap(map);
+			});
+		}
+
+		if(cmd.getExecuteGroupAndPositionList() != null && cmd.getExecuteGroupAndPositionList().size() > 0) {
+
+		}
 		return null;
 	}
 
@@ -3010,6 +3033,11 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public SampleQualityInspectionDTO updateSampleQualityInspection(UpdateSampleQualityInspectionCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
 		return null;
 	}
 }
