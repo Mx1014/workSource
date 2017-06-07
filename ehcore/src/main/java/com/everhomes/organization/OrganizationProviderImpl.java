@@ -173,11 +173,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             return null;
         }).collect(Collectors.toList());
 
-        OrganizationMember target = new OrganizationMember();
         if (null != result && 0 != result.size()) {
-            target = result.get(0);
+            return result.get(0);
         }
-        return target;
+        return null;
 //        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS).;
 //        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
 //        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(phone));
@@ -232,29 +231,29 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId,
                                                                               String groupType) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode())
-                .and(t1.field("target_id").eq(userId))
-                .and(t1.field("namespace_id").eq(namespaceId))
-                .and(t1.field("group_type").eq(groupType));
-        Record record = step.where(condition).fetchOne();
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("target_type").eq(OrganizationMemberTargetType.USER.getCode())
+//                .and(t1.field("target_id").eq(userId))
+//                .and(t1.field("namespace_id").eq(namespaceId))
+//                .and(t1.field("group_type").eq(groupType));
+//        Record record = step.where(condition).fetchOne();
 
-//        Record record = context.select()
-//                .from(Tables.EH_ORGANIZATION_MEMBERS)
-//                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-//                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-//                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
-//                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
-//                .fetchAny();
+        Record record = context.select()
+                .from(Tables.EH_ORGANIZATION_MEMBERS)
+                .where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
+                .fetchAny();
 
-//		context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
-//				.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-//				.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
-//				.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
-//				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
+		context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType));
 
         if (record != null) {
             OrganizationMember membersRecord = record.map(new OrganizationMemberRecordMapper());
@@ -1308,27 +1307,27 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                                                                         Long organizationId) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
-        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
-        Record record = step.where(condition).fetchAny();
-        if (record != null) {
-            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
-            return ConvertHelper.convert(member, OrganizationMember.class);
-        }
-        return null;
-
-//        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
-//        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
-//        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
-//
-//        if (r != null)
-//            return ConvertHelper.convert(r, OrganizationMember.class);
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = t1.field("id").gt(0L);
+//        condition = condition.and(t1.field("organization_id").eq(organizationId)).and(t1.field("target_id").eq(userId));
+//        condition = condition.and(t1.field("status").eq(OrganizationMemberStatus.ACTIVE.getCode()));
+//        Record record = step.where(condition).fetchAny();
+//        if (record != null) {
+//            OrganizationMember member = record.map(new OrganizationMemberRecordMapper());
+//            return ConvertHelper.convert(member, OrganizationMember.class);
+//        }
 //        return null;
+
+        Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId));
+        condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+
+        if (r != null)
+            return ConvertHelper.convert(r, OrganizationMember.class);
+        return null;
     }
 
     /**

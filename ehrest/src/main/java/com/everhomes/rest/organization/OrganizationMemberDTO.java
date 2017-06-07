@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>status：状态</li>
  * <li>roles：角色列表</li>
  * <li>departments：部门列表</li>
+ * <li>memberDetailIds: 添加人员返回的detail表ID</>
  * <li>groups：群组列表</li>
  * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>

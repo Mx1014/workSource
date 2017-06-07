@@ -8588,6 +8588,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationDTO> jobLevels = new ArrayList<OrganizationDTO>();
         List<Long> enterpriseIds = new ArrayList<>();
         List<Long> memberDetailIds = new ArrayList<>();
+        List<Long> current_detailId = new ArrayList<>();
 
         Map<Long, Boolean> joinEnterpriseMap = new HashMap<>();
 
@@ -8694,6 +8695,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
                     memberDetailIds.add(new_detail_id);
+                    //保存当前企业关联的detailId,用于多个返回值时进行比对
+                    if(enterpriseId.equals(org.getId())){
+                        current_detailId.add(new_detail_id);
+                    }
                 } else {
                     organizationMember.setId(desOrgMember.getId());
                     //organizationProvider.updateOrganizationMember(organizationMember);
@@ -8702,6 +8707,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.updateOrganizationMember(organizationMember);
                     memberDetailIds.add(new_detail_id);
+                    //保存当前企业关联的detailId,用于多个返回值时进行比对
+                    if(enterpriseId.equals(org.getId())){
+                        current_detailId.add(new_detail_id);
+                    }
                 }
             }
 
@@ -8720,6 +8729,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             dto.setJobLevels(jobLevels);
 
             dto.setMemberDetailIds(memberDetailIds);
+
+            dto.setDetailId(current_detailId.get(0));
 
             return null;
         });
