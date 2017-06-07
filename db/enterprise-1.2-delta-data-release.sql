@@ -1,6 +1,6 @@
 -- 导出无数据提示，add by tt, 20170522
 select max(id) into @id from `eh_locale_strings`;
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'organization', '800001', 'zh_CN', '无数据！');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'organization', '800000', 'zh_CN', '无数据！');
 
 -- 初始化organization表中是否设置了企业管理员标记，add by tt, 20170522
 update eh_organizations t1

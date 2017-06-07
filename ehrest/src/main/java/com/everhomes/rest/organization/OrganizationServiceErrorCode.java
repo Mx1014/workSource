@@ -61,5 +61,5 @@ public interface OrganizationServiceErrorCode {
     int ERROR_ENTERPRISE_NAME_EMPTY = 80001;
     int ERROR_BUILDING_NAME_EMPTY = 80002;
     int ERROR_APARTMENT_NAME_EMPTY = 80003;
-    int ERROR_NO_DATA = 800001;
+    int ERROR_NO_DATA = 800000;
 }
