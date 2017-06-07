@@ -1119,7 +1119,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
  
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
 		List<RentalCell>  result = new ArrayList<>();
-		for(RentalCell cell : cellList.get()){
+		List<RentalCell> cells = cellList.get();
+		List<Long> ids = cells.stream().map(r -> r.getId()).collect(Collectors.toList());
+
+		List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+
+		for(RentalCell cell : cells){
 			//如果预定时间在开始时间之前,跳过
 			if (null != beginTime && 
 					cell.getResourceRentalDate().before((new Date(dateSF.parse(beginTime).getTime())))) {
@@ -1131,9 +1136,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				 continue;
 			}  
 			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
-			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
-			if(null != dbCell )
-				cell = dbCell;
+//			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
+			for (RentalCell c: dbCells) {
+				if (c.getId().equals(cell.getId())) {
+					cell = c;
+				}
+			}
+
+//			if(null != dbCell )
+//			cell = dbCell;
+
 			result.add(cell);
 			
 		}
