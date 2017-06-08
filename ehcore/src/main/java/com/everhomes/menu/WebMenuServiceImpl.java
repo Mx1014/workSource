@@ -61,8 +61,8 @@ public class WebMenuServiceImpl implements WebMenuService {
 			menu = webMenuProvider.getWebMenuById(cmd.getMenuId());
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
-		UserContext.setCurrentPortalId(1000750L);
-		UserContext.setCurrentPortalType(PortalType.PM.getCode());
+//		UserContext.setCurrentPortalId(1000750L);
+//		UserContext.setCurrentPortalType(PortalType.PM.getCode());
 		if(PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.PM || PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.ENTERPRISE){
 			Long organizationId = UserContext.getCurrentPortalId();
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
