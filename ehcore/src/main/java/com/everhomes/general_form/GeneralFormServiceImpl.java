@@ -79,14 +79,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 	@Override
 	public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-		GeneralFormModuleHandler handler = getOrderHandler(cmd.getOwnerType());
+		GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
 
 		return handler.getTemplateBySourceId(cmd);
 	}
 
 	@Override
 	public void postGeneralForm(PostGeneralFormCommand cmd) {
-		GeneralFormModuleHandler handler = getOrderHandler(cmd.getOwnerType());
+		GeneralFormModuleHandler handler = getOrderHandler(cmd.getSourceType());
 		GeneralForm form = handler.postGeneralForm(cmd);
 
 
