@@ -592,6 +592,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ft.setTimeoutTick(new Timestamp(timeoutTick));
     	ft.setTimeoutType(FlowTimeoutType.MESSAGE_TIMEOUT.getCode());
     	ft.setStatus(FlowStatusType.VALID.getCode());
+        FlowCaseState ctx = new FlowCaseState();
     	flowTimeoutService.pushTimeout(ft, ctx);
     	
     	try {
