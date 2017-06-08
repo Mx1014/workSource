@@ -28,24 +28,28 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
 
         for (PostApprovalFormItem item: cmd.getValues()) {
-            switch (GeneralFormDataSourceType.fromCode(item.getFieldName())) {
-                case USER_NAME:
-                    cmd2.setApplyUserName(item.getFieldValue());
-                    break;
-                case USER_PHONE:
-                    cmd2.setContactPhone(item.getFieldValue());
-                    break;
-                case USER_COMPANY:
-                    //工作流images怎么传
-                    cmd2.setEnterpriseName(item.getFieldValue());
-                    break;
-                case ORGANIZATION_ID:
+            GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
+            if (null != dataSourceType) {
+                switch (dataSourceType) {
+                    case USER_NAME:
+                        cmd2.setApplyUserName(item.getFieldValue());
+                        break;
+                    case USER_PHONE:
+                        cmd2.setContactPhone(item.getFieldValue());
+                        break;
+                    case USER_COMPANY:
+                        //工作流images怎么传
+                        cmd2.setEnterpriseName(item.getFieldValue());
+                        break;
+                    case ORGANIZATION_ID:
 
-                    break;
-                case USER_ADDRESS:
-                    break;
+                        break;
+                    case USER_ADDRESS:
+                        break;
 
+                }
             }
+
         }
 
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
