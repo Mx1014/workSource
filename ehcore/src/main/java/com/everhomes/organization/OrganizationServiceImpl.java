@@ -1272,6 +1272,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
+    @Deprecated
     @Override
     public void createOrganizationMember(CreateOrganizationMemberCommand cmd) {
         //先判断，后台管理员才能创建。状态直接设为正常
@@ -5457,6 +5458,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    @Deprecated
     @Override
     public ListOrganizationMemberCommandResponse listPersonnelNotJoinGroups(
             ListPersonnelNotJoinGroupCommand cmd) {

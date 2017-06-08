@@ -49,7 +49,7 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
         this.setAvatar(member.getAvatar());
         this.setGender(member.getGender());
         this.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
-        this.setEmploymentTime(member.getEmploymentTime());
+        this.setEmploymentTime(member.getEmploymentTime()!= null ? member.getCheckInTime() : now);
         this.setProfileIntegrity(member.getProfileIntegrity());
         this.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
     }
