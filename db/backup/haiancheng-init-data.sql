@@ -2632,3 +2632,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 SELECT MAX(id) FROM `eh_locale_templates` INTO @max_id;
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@max_id := @max_id + 1, 'sms.default.yzx', 8, 'zh_CN', '门禁-海岸', '42958', 999993);
+
+-- fix 10971 add by xiongying20170608
+SET @lease_config_id = (SELECT max(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_config_id := @lease_config_id + 1), '999993', '1', '1', '1', '1', '1', '0');
+
