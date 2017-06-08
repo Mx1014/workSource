@@ -72,7 +72,7 @@ public class OrganizationMemberDTO {
 	
 	private Long creatorUid;
 	
-	private Long   employeeNo;
+	private String  employeeNo;
 	private Byte   gender;
 
     private Byte visibleFlag;
@@ -278,14 +278,6 @@ public class OrganizationMemberDTO {
         this.creatorUid = creatorUid;
     }
 
-    public Long getEmployeeNo() {
-        return employeeNo;
-    }
-
-    public void setEmployeeNo(Long employeeNo) {
-        this.employeeNo = employeeNo;
-    }
-
     public Byte getGender() {
         return gender;
     }
@@ -431,5 +423,13 @@ public class OrganizationMemberDTO {
 
     public void setMemberDetailIds(List<Long> memberDetailIds) {
         this.memberDetailIds = memberDetailIds;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 }
