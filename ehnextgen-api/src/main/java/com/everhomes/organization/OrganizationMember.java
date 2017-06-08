@@ -37,7 +37,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
 	public OrganizationMember() {
     }
-    
+
     public java.lang.String getNickName() {
 		return nickName;
 	}
