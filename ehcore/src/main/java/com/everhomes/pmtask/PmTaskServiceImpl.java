@@ -767,7 +767,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			for(int i=0;i<size;i++){
 				Row tempRow = sheet.createRow(i + 4);
 				PmTaskDTO task = list.get(i);
-				Category category = checkCategory(task.getTaskCategoryId());
+				Category category = null;
+				if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
+						cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					category = createEbeiCategory();
+				} else {
+					category = checkCategory(task.getTaskCategoryId());
+				}
+
 				Cell cell1 = tempRow.createCell(1);
 				cell1.setCellStyle(style);
 				cell1.setCellValue(i + 1);
@@ -1226,6 +1233,14 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Category not found.");
         }
+		return category;
+	}
+
+	private Category createEbeiCategory() {
+		Category category = new Category();
+		category.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
+		category.setName("物业报修");
+		category.setParentId(0L);
 		return category;
 	}
 	
