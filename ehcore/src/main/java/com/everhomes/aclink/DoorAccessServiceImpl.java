@@ -53,7 +53,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import com.atomikos.util.DateHelper;
 import com.atomikos.util.FastDateFormat;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
@@ -1641,6 +1640,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(locator, cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        long now = DateHelper.currentGMTTime().getTime();
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
@@ -1657,6 +1657,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                     dto.setApproveUserName(u.getAccountName());
                 }
             }
+            
+            if(auth.getValidEndMs() < now) {
+            	auth.setStatus(DoorAuthStatus.INVALID.getCode());
+            }
+            
             dtos.add(dto);
         }
         
@@ -3430,7 +3435,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             Date ct = new Date(1476317477917l);
             
             ct = new Date(1476327557913l + KEY_TICK_7_DAY);
-            LOGGER.info("date=" + DateHelper.format(dt) + " create=" + DateHelper.format(ct) + " expire=" + DateHelper.format(et));
+//            LOGGER.info("date=" + DateHelper.format(dt) + " create=" + DateHelper.format(ct) + " expire=" + DateHelper.format(et));
             LOGGER.info(StringHelper.toHexString(rlt));
             
         } catch(Exception ex) {
@@ -3477,10 +3482,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 	
 	private void newUserAutoAuth(Long identifierId) {
 		UserIdentifier identifier = userProvider.findIdentifierById(identifierId);
-		if(identifier != null &&
-				( identifier.getClaimStatus().equals(IdentifierClaimStatus.VERIFYING.getCode()) ||
-				identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode()))
-				) {
+		if(identifier.getClaimStatus().equals(IdentifierClaimStatus.CLAIMED.getCode())) {
 			String mac = this.configProvider.getValue(identifier.getNamespaceId(), AclinkConstant.ACLINK_NEW_USER_AUTO_AUTH, "");
 			if(mac == null || mac.isEmpty()) {
 				if(LOGGER.isInfoEnabled()) {
