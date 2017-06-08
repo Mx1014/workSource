@@ -1,8 +1,10 @@
 package com.everhomes.techpark.expansion;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,10 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
     @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;
+    @Autowired
+    private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+    @Autowired
+    private GeneralFormService generalFormService;
     @Override
     public GeneralForm postGeneralForm(PostGeneralFormCommand cmd) {
 
@@ -47,6 +53,14 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
     @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
-        return null;
+
+        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+                cmd.getOwnerId(), EntityType.BUILDING.getCode());
+
+        GetTemplateByFormIdCommand cmd2 = new GetTemplateByFormIdCommand();
+        cmd2.setFormId(request.getSourceId());
+
+        GeneralFormDTO dto = generalFormService.getTemplateByFormId(cmd2);
+        return dto;
     }
 }
