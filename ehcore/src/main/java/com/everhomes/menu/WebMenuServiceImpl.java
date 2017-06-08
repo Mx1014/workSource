@@ -19,9 +19,13 @@ import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.menu.ListUserRelatedWebMenusCommand;
 import com.everhomes.rest.menu.WebMenuCategory;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +38,8 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class WebMenuServiceImpl implements WebMenuService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebMenuServiceImpl.class);
 
 	@Autowired
 	private WebMenuPrivilegeProvider webMenuProvider;
@@ -64,6 +70,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 		}
 		Domain domain = UserContext.current().getDomain();
 		Long currentOrgId = cmd.getCurrentOrgId();
+		if(null == domain){
+			LOGGER.error("domain not configured, userId = {}", userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.DOMAIN_NOT_CONFIGURED,
+					"domain not configured");
+		}
 		if(null == cmd.getCurrentOrgId()){
 			currentOrgId = domain.getPortalId();
 		}
