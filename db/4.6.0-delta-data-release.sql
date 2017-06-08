@@ -47,3 +47,32 @@ UPDATE eh_configurations set `value` = '465' WHERE `name` = 'mail.smtp.port' and
 UPDATE eh_configurations set `value` = 'webmail.zuolin.com' WHERE `name` = 'mail.smtp.address' and `namespace_id` = 0;
 
 UPDATE eh_configurations set `value` = '465' WHERE `name` = 'mail.smtp.port' and `namespace_id` = 0;
+
+
+-- 资源预约 add by sw 20170608
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('rental.notification', '9', 'zh_CN', '支付成功发给处理人', '客户${userName}（${userPhone}）完成支付，成功预约${useTime}的${resourceName}，请提前做好相关准备工作。', '0');
+
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('sms.default.yzx', '50', 'zh_CN', '正中会-预成功', '47318', '999983');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ('rental.notification', '9', 'zh_CN', '支付成功发给处理人', '客户${userName}（${userPhone}）完成支付，成功预约${useTime}的${resourceName}，请提前做好相关准备工作。', '0');
+
+UPDATE `eh_locale_templates` SET `text`='您申请预约的${useTime}的${resourceName}已通过审批，为确保您成功预约，请尽快到APP完成在线支付，感谢您的使用。'
+	WHERE `scope`='rental.notification' and `code`='6' and `locale`='zh_CN' and `namespace_id`='0';
+
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 28, 'zh_CN', '线下支付模式,审批通过短信', '38570');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 29, 'zh_CN', '审批驳回短信', '38572');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 30, 'zh_CN', '支付成功短信', '38573');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 31, 'zh_CN', '审批线上支付模式,审批通过短信', '38574');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 32, 'zh_CN', '取消短信', '38575');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999983, 'flow:40400', 33, 'zh_CN', '催办短信', '38832');
+INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+	VALUES ('sms.default.yzx', '50', 'zh_CN', '正中会-预成功', '47318', '999983');
+	
