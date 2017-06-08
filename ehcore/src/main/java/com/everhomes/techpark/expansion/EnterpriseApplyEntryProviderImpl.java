@@ -421,7 +421,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 
 	@Override
-	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType) {
+	public LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
 
@@ -429,6 +429,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_LEASE_FORM_REQUESTS.SOURCE_TYPE.eq(sourceType));
 
 		return ConvertHelper.convert(query.fetchAny(), LeaseFormRequest.class);
 

@@ -733,7 +733,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
 			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
-					building.getCommunityId(), EntityType.COMMUNITY.getCode());
+					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
 			if (null != request) {
 				building.setRequestFormId(request.getSourceId());
 			}
@@ -981,7 +981,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
 			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
-					dto.getCommunityId(), EntityType.COMMUNITY.getCode());
+					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
 			if (null != request) {
 				dto.setRequestFormId(request.getSourceId());
 			}

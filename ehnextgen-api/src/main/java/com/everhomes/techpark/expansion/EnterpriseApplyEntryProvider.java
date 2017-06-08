@@ -62,5 +62,5 @@ public interface EnterpriseApplyEntryProvider {
 
 	LeaseFormRequest findLeaseRequestFormById(Long id);
 
-	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType);
+	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);
 }

@@ -725,7 +725,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
 			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
-					dto.getCommunityId(), EntityType.COMMUNITY.getCode());
+					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.COMMUNITY.getCode());
 			if (null != request) {
 				dto.setRequestFormId(request.getSourceId());
 			}
@@ -1265,7 +1265,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public void updateLeasePromotionRequestForm(UpdateLeasePromotionRequestFormCommand cmd) {
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
 
 		if (null == request) {
 			request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
@@ -1281,7 +1281,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public LeaseFormRequestDTO getLeasePromotionRequestForm(GetLeasePromotionRequestFormCommand cmd) {
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType());
+				cmd.getOwnerId(), cmd.getOwnerType(), EntityType.COMMUNITY.getCode());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
