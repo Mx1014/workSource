@@ -20,7 +20,8 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         String json = cmd.getCustomObject();
 
         PostApprovalFormCommand cmd2 = JSONObject.parseObject(json, PostApprovalFormCommand.class);
-
+        cmd2.setApprovalId(cmd.getSourceId());
+        cmd2.setValues(cmd.getValues());
 //        for (PostApprovalFormItem item: cmd.getValues()) {
 //            switch (GeneralFormDataSourceType.fromCode(item.getFieldName())) {
 //                case USER_NAME:

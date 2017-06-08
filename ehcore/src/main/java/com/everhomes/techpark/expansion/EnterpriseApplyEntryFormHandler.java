@@ -23,7 +23,9 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         String json = cmd.getCustomObject();
 
         EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
-
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        cmd2.setCommunityId(cmd.getOwnerId());
+        cmd2.setFormValues(cmd.getValues());
         for (PostApprovalFormItem item: cmd.getValues()) {
             switch (GeneralFormDataSourceType.fromCode(item.getFieldName())) {
                 case USER_NAME:
