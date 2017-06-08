@@ -376,6 +376,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
+            	
                 if(status != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
                 }
@@ -387,6 +388,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 if(keyword != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));                    
                 }
+                
+//                Long now = DateHelper.currentGMTTime().getTime();
+//                query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now));
                 
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
 
