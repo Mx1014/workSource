@@ -8562,6 +8562,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
+        organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+        organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
@@ -10359,7 +10361,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 //        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
 //        Long directOrgId = 0L;
-//        if (member.getGroupType().equals("ENTERPRISE")) {
+//        if (member.getGroupType().equals("ENTERPRISE")) {a
 //            directOrgId = member.getOrganizationId();
 //        } else {
 //            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -10376,7 +10378,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         detail.setAvatar(member.getAvatar());
         detail.setGender(member.getGender());
         detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
-        detail.setEmploymentTime(member.getEmploymentTime());
+        detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
         detail.setProfileIntegrity(member.getProfileIntegrity());
         detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
         detail.setEmployeeNo(member.getEmployeeNo());

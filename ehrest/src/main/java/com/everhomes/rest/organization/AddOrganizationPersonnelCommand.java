@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -49,9 +48,9 @@ public class AddOrganizationPersonnelCommand {
 
 	private Byte employeeStatus;
 
-	private Date employmentTime;
+	private String employmentTime;
 
-	private Date checkInTime;
+	private String checkInTime;
 	
 	@ItemType(Long.class)
 	private List<Long> departmentIds;
@@ -184,19 +183,19 @@ public class AddOrganizationPersonnelCommand {
 		this.employeeStatus = employeeStatus;
 	}
 
-	public Date getEmploymentTime() {
+	public String getEmploymentTime() {
 		return employmentTime;
 	}
 
-	public void setEmploymentTime(Date employmentTime) {
+	public void setEmploymentTime(String employmentTime) {
 		this.employmentTime = employmentTime;
 	}
 
-	public Date getCheckInTime() {
+	public String getCheckInTime() {
 		return checkInTime;
 	}
 
-	public void setCheckInTime(Date checkInTime) {
+	public void setCheckInTime(String checkInTime) {
 		this.checkInTime = checkInTime;
 	}
 
@@ -204,5 +203,6 @@ public class AddOrganizationPersonnelCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 
 }
