@@ -11,7 +11,7 @@ public interface GeneralFormModuleHandler {
 
     String GENERAL_FORM_MODULE_HANDLER_PREFIX = "GeneralFormModuleHandler-";
 
-    void postGeneralForm(PostGeneralFormCommand cmd);
+    GeneralForm postGeneralForm(PostGeneralFormCommand cmd);
 
     GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 }

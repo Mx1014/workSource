@@ -87,7 +87,9 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	@Override
 	public void postGeneralForm(PostGeneralFormCommand cmd) {
 		GeneralFormModuleHandler handler = getOrderHandler(cmd.getOwnerType());
-		handler.postGeneralForm(cmd);
+		GeneralForm form = handler.postGeneralForm(cmd);
+
+
 	}
 
 	private GeneralFormModuleHandler getOrderHandler(String type) {

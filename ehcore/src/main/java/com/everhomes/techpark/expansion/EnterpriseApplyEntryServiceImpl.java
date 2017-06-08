@@ -294,7 +294,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				for(EnterpriseOpRequestBuilding opBuilding : opBuildings){
 					Building building = communityProvider.findBuildingById(opBuilding.getBuildingId());
 					if (null != building) {
-						dto.getBuildings().add(proessBuildingDTO(building));
+						dto.getBuildings().add(processBuildingDTO(building));
 					}
 				}
 			}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
@@ -302,7 +302,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				Building building = communityProvider.findBuildingById(dto.getSourceId());
 				if(null != building){
 					dto.setSourceName(building.getName());
-					dto.getBuildings().add(proessBuildingDTO(building));
+					dto.getBuildings().add(processBuildingDTO(building));
 				}
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
@@ -312,7 +312,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					dto.setSourceName(leasePromotion.getSubject());
 					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
 					if (null != building) {
-						dto.getBuildings().add(proessBuildingDTO(building));
+						dto.getBuildings().add(processBuildingDTO(building));
 					}				}
 			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
 				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
@@ -322,7 +322,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					if(yellowPage.getBuildingId()!=null){
 						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
 						if (null != building) {
-							dto.getBuildings().add(proessBuildingDTO(building));
+							dto.getBuildings().add(processBuildingDTO(building));
 						}					}
 				}
 			}
@@ -330,7 +330,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		res.setEntrys(dtos);
 		return res;
 	}
-	private BuildingDTO proessBuildingDTO(Building building){
+	private BuildingDTO processBuildingDTO(Building building){
 		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class);
 		buildingDTO.setBuildingName(buildingDTO.getName());
 		buildingDTO.setName(StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
@@ -389,8 +389,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     				}
     			}
-    			
-    		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
     			
     		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
@@ -666,9 +664,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
 			if (LeaseIssuerType.NORMAL_USER.getCode().equals(dto.getIssuerType())) {
-				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag() &&
-						userId == c.getCreateUid())
+				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag()
+						&& userId == c.getCreateUid()) {
 					dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
+				}
 			}
 
             return dto;
@@ -772,14 +771,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			/**
 			 * 重新添加
 			 */
-			if (null != attachmentDTOs) {
-				for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-					LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-					attachment.setLeaseId(leasePromotion.getId());
-					attachment.setCreatorUid(leasePromotion.getCreateUid());
-					enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
-				}
-			}
+			addAttachments(attachmentDTOs, leasePromotion);
 
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
@@ -823,22 +815,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					leasePromotion.getId(), cmd.getCustomFormFlag());
 			List<BuildingForRentAttachmentDTO> attachmentDTOs = cmd.getAttachments();
 
-			/**
-			 * 先删除全部图片
-			 */
+			//先删除全部图片
 			enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
 
-			/**
-			 * 重新添加
-			 */
-			if (null != attachmentDTOs) {
-				for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
-					LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
-					attachment.setLeaseId(leasePromotion.getId());
-					attachment.setCreatorUid(leasePromotion.getCreateUid());
-					enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
-				}
-			}
+			//重新添加
+			addAttachments(attachmentDTOs, leasePromotion);
 
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
@@ -846,6 +827,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			return dto;
 		});
+	}
+
+	private void addAttachments(List<BuildingForRentAttachmentDTO> attachmentDTOs, LeasePromotion leasePromotion) {
+		if (null != attachmentDTOs) {
+			for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+				LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+				attachment.setLeaseId(leasePromotion.getId());
+				attachment.setCreatorUid(leasePromotion.getCreateUid());
+				enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+			}
+		}
 	}
 
 	private List<LeasePromotionAttachment> getAttachmentsByLeaseId(Long leaseId) {
