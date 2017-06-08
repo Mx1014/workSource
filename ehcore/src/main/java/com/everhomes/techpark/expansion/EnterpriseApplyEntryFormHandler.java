@@ -66,5 +66,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         cmd2.setFormId(request.getSourceId());
 
         GeneralFormDTO dto = generalFormService.getTemplateByFormId(cmd2);
+
+        return dto;
     }
 }
