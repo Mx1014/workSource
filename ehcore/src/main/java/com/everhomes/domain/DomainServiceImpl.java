@@ -1,10 +1,8 @@
 package com.everhomes.domain;
 
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.rest.domain.DomainDTO;
 import com.everhomes.rest.domain.GetDomainInfoCommand;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +24,11 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public DomainDTO getDomainInfo(GetDomainInfoCommand cmd, HttpServletRequest request) {
-        String domain = cmd.getDomain();
-        if(StringUtils.isEmpty(domain)){
+        String domain = "";
+        if(null == cmd || StringUtils.isEmpty(cmd.getDomain())){
             domain = request.getHeader("host");
+        }else{
+            domain = cmd.getDomain();
         }
         Domain domainInfo = domainProvider.findDomainByDomain(domain);
 

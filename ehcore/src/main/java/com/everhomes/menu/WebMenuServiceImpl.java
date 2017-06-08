@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.domain.Domain;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
@@ -61,19 +62,20 @@ public class WebMenuServiceImpl implements WebMenuService {
 			menu = webMenuProvider.getWebMenuById(cmd.getMenuId());
 			categories.add(WebMenuCategory.PAGE.getCode());
 		}
-//		UserContext.setCurrentPortalId(1000750L);
-//		UserContext.setCurrentPortalType(PortalType.PM.getCode());
-		if(PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.PM || PortalType.fromCode(UserContext.getCurrentPortalType()) == PortalType.ENTERPRISE){
-			Long organizationId = UserContext.getCurrentPortalId();
-			Organization organization = organizationProvider.findOrganizationById(organizationId);
+		Domain domain = UserContext.current().getDomain();
+		Long currentOrgId = cmd.getCurrentOrgId();
+		if(null == cmd.getCurrentOrgId()){
+			currentOrgId = domain.getPortalId();
+		}
+		if(PortalType.fromCode(domain.getPortalType()) == PortalType.PM || PortalType.fromCode(domain.getPortalType()) == PortalType.ENTERPRISE){
+			Organization organization = organizationProvider.findOrganizationById(currentOrgId);
 			if(null != organization){
 				if(OrganizationType.fromCode(organization.getOrganizationType()) == OrganizationType.PM){
-					return listPmWebMenu(userId, menu, categories, organizationId);
+					return listPmWebMenu(userId, menu, categories, currentOrgId);
 				}else{
-					return listEnterpriseWebMenu(userId, menu, categories, organizationId);
+					return listEnterpriseWebMenu(userId, menu, categories, currentOrgId);
 				}
 			}
-
 
 		}else /*if(EntityType.fromCode(UserContext.getCurrentSceneType()) == EntityType.ZUOLIN_ADMIN) */{
 			 return listZuolinAdminWebMenu(userId, menu, categories);

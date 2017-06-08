@@ -13,6 +13,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class DomainProviderImpl implements DomainProvider {
     private SequenceProvider sequenceProvider;
 
 
+    @Cacheable(value = "DomainInfo-domain", key="#domain", unless="#result == null")
     @Override
     public Domain findDomainByDomain(String domain) {
         List<Domain> results = new ArrayList<>();

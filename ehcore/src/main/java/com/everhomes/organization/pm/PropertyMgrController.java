@@ -1973,7 +1973,7 @@ public class PropertyMgrController extends ControllerBase {
     private void checkPrivilege(String ownerType, Long ownerId, Long organizationId, Long privilegeId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         Long userId = UserContext.current().getUser().getId();
-        resolver.checkUserAuthority(userId, ownerType, ownerId, PortalType.PM.getCode(),organizationId, privilegeId);
+        resolver.checkUserAuthority(userId, ownerType, ownerId,organizationId, privilegeId);
     }
 
 	/**

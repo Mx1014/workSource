@@ -14,30 +14,28 @@ public interface UserPrivilegeMgr {
      * 新权限校验
      * @param ownerType
      * @param ownerId
-     * @param systemType
-     * @param systemId
+     * @param currentOrgId
      * @param privilegeId
      * @return
      */
-    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, String systemType, Long systemId, Long privilegeId);
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
 
     /**
      * 新权限校验
      * @param ownerType
      * @param ownerId
-     * @param portalType
-     * @param portalId
+     * @param currentOrgId
      * @param privilegeId
      */
-    void checkUserAuthority(Long userId, String ownerType, Long ownerId, String portalType, Long portalId, Long privilegeId);
+    void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
     /**
      * 校验公司管理员
-     * @param organizationId
+     * @param currentOrgId
      * @return
      */
-    boolean checkOrganizationAdmin(Long userId, Long organizationId);
+    boolean checkOrganizationAdmin(Long userId, Long currentOrgId);
 
     /**
      * 校验模块管理员权限
@@ -61,18 +59,18 @@ public interface UserPrivilegeMgr {
 
     /**
      * 校验超级管理员
-     * @param organizationId
+     * @param currentOrgId
      * @return
      */
-    boolean checkSuperAdmin(Long userId, Long organizationId);
+    boolean checkSuperAdmin(Long userId, Long currentOrgId);
 
     /**
      * 校验角色权限
-     * @param organizationId
+     * @param currentOrgId
      * @param privilegeId
      * @return
      */
-    boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+    boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 
     /**
      * 校验权限是否被禁止
@@ -132,4 +130,6 @@ public interface UserPrivilegeMgr {
      * @param privilegeId
      */
     void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId);
+
+    void checkCurrentUserAuthority(String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
 }

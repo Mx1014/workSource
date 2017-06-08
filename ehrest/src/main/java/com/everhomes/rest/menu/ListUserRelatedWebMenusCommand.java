@@ -18,6 +18,8 @@ public class ListUserRelatedWebMenusCommand extends PortalCommand{
 
 	private Long userId;
 
+	private Long currentOrgId;
+
 	public Long getMenuId() {
 		return menuId;
 	}
@@ -40,6 +42,14 @@ public class ListUserRelatedWebMenusCommand extends PortalCommand{
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public Long getCurrentOrgId() {
+		return currentOrgId;
+	}
+
+	public void setCurrentOrgId(Long currentOrgId) {
+		this.currentOrgId = currentOrgId;
 	}
 
 	@Override

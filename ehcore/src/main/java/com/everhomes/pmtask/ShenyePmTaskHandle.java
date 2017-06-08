@@ -341,13 +341,13 @@ class ShenyePmTaskHandle implements PmTaskHandle {
 	    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 	    	
 	    	if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), null, null, PrivilegeConstants.LISTALLTASK)
+	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK)
 	    			){
 	    		
 	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
 			}else if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), null, null, PrivilegeConstants.LISTUSERTASK)
+	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK)
 	    			){
 				
 				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
