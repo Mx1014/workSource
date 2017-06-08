@@ -378,7 +378,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     SelectQuery<? extends Record> query) {
             	
                 if(status != null) {
-                    query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
+                	Long now = DateHelper.currentGMTTime().getTime();
+                    if(status.equals(DoorAuthStatus.INVALID.getCode())) {
+                      query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));   	
+                    } else {
+                    	query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
+                    }
                 }
                 
                 if(doorId != null) {
@@ -388,9 +393,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 if(keyword != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));                    
                 }
-                
-//                Long now = DateHelper.currentGMTTime().getTime();
-//                query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now));
                 
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
 
