@@ -8065,8 +8065,9 @@ System.out.println();
 	    ListOrganizationsByNameResponse resp = new ListOrganizationsByNameResponse();
 	    ListingLocator locator = new ListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 	    int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-	    List<Organization> orgs = organizationProvider.listOrganizationByName(locator, pageSize, cmd.getNamespaceId(), cmd.getName());
+	    List<Organization> orgs = organizationProvider.listOrganizationByName(locator, pageSize, namespaceId, cmd.getName());
 	    List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
 	    if(orgs != null) {
 	        for(Organization org : orgs) {
