@@ -86,7 +86,6 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-
         organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -717,6 +716,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <b>URL: /admin/org/listPersonnelNotJoinGroups</b>
      * <p>查询未加入组的人员</p>
      */
+    @Deprecated
     @RequestMapping("listPersonnelNotJoinGroups")
     @RestReturn(value = ListOrganizationMemberCommandResponse.class)
     public RestResponse listPersonnelNotJoinGroups(@Valid ListPersonnelNotJoinGroupCommand cmd) {
