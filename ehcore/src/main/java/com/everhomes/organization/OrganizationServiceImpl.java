@@ -127,10 +127,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -8562,8 +8563,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
-        organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
-        organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+        /**Modify by lei.lv**/
+        java.util.Date nDate = new java.util.Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDate = sdf.format(nDate);
+        java.sql.Date now = java.sql.Date.valueOf(sDate);
+
+        java.sql.Date checkInTime = cmd.getCheckInTime() != null ? java.sql.Date.valueOf(cmd.getCheckInTime()):now;
+        java.sql.Date employmentTime = cmd.getEmploymentTime() != null ? java.sql.Date.valueOf(cmd.getEmploymentTime()):now;
+
+        organizationMember.setCheckInTime(checkInTime);
+        organizationMember.setEmploymentTime(employmentTime);
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
