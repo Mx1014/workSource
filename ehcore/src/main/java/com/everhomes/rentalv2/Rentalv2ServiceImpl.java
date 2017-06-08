@@ -1074,23 +1074,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	}
 
-	private InnoSpringCardInfo bubble(List<InnoSpringCardInfo> list) {
-		list.toArray();
-		int size = list.size();
-		if (size == 0)
-			return null;
-		for (int i = size - 1; i > 0 ; i--) {
-			for (int j = 0; j < i; j++) {
-				if (Long.valueOf(list.get(j).getEnd_time()) > Long.valueOf(list.get(j+1).getEnd_time())) {
-					InnoSpringCardInfo temp = list.get(j);
-					list.set(j, list.get(j+1));
-					list.set(j+1, temp);
-				}
-			}
-		}
-		return list.get(size - 1);
-	}
-
 	private boolean isInteger(BigDecimal b){
 		if(new BigDecimal(b.intValue()).compareTo(b)==0){
 			return true;
@@ -1120,7 +1103,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
 		List<RentalCell>  result = new ArrayList<>();
 		List<RentalCell> cells = cellList.get();
-		List<Long> ids = cells.stream().map(r -> r.getId()).collect(Collectors.toList());
+		List<Long> ids = cells.stream().map(RentalCell::getId).collect(Collectors.toList());
 
 		List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
 
@@ -1135,16 +1118,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					cell.getResourceRentalDate().after((new Date(dateSF.parse(endTime).getTime())))) {
 				 continue;
 			}  
-			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
+			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的,改成一次性查出来
 //			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
 			for (RentalCell c: dbCells) {
 				if (c.getId().equals(cell.getId())) {
 					cell = c;
 				}
 			}
-
-//			if(null != dbCell )
-//			cell = dbCell;
 
 			result.add(cell);
 			
@@ -2378,7 +2358,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			String siteNumber, Timestamp beginTime, Timestamp endTime,
 			List<Byte> ampmList, String rentalDate){
 		List<RentalCell>  result = new ArrayList<>();
-		for(RentalCell cell : cellList.get()){
+
+		List<RentalCell> cells = cellList.get();
+		List<Long> ids = cells.stream().map(RentalCell::getId).collect(Collectors.toList());
+
+		List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+
+		for(RentalCell cell : cells){
 			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
 				continue;
 			if (null != siteNumber && !siteNumber.equals(cell.getResourceNumber()))
@@ -2394,9 +2380,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (null != rentalDate && !rentalDate.equals(dateSF.format(cell.getResourceRentalDate())))
 				continue; 
 			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
-			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
-			if(null != dbCell )
-				cell = dbCell;
+//			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
+//			if(null != dbCell )
+//				cell = dbCell;
+			for (RentalCell c: dbCells) {
+				if (c.getId().equals(cell.getId())) {
+					cell = c;
+				}
+			}
+
 			result.add(cell);
 			
 		}
@@ -2408,8 +2400,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * */
 	private List<RentalCell> findRentalSiteRules(Long rentalSiteId,
 			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength,Byte status, Byte rentalStartTimeFlag) {
-		List<RentalCell>  result = new ArrayList<>();
-		for(RentalCell cell : cellList.get()){
+		List<RentalCell> result = new ArrayList<>();
+
+		List<RentalCell> cells = cellList.get();
+		List<Long> ids = cells.stream().map(RentalCell::getId).collect(Collectors.toList());
+		List<RentalCell> dbCells = this.rentalv2Provider.getRentalCellsByIds(ids);
+
+		for(RentalCell cell : cells){
 			if (null != rentalSiteId && !rentalSiteId.equals(cell.getRentalResourceId()))
 				continue;
 			if (null != status && !status.equals(cell.getStatus()))
@@ -2465,9 +2462,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 			}
 			//对于单独设置过价格和开放状态的单元格,使用数据库里记录的
-			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
-			if(null != dbCell )
-				cell = dbCell;
+//			RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
+//			if(null != dbCell )
+//				cell = dbCell;
+			for (RentalCell c: dbCells) {
+				if (c.getId().equals(cell.getId())) {
+					cell = c;
+				}
+			}
 			result.add(cell);
 		}
 		return result;
@@ -4914,6 +4916,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private RentalCell findRentalSiteRuleById(Long ruleId) {
+
 		for( RentalCell cell : cellList.get()){
 			if (cell.getId().equals(ruleId)){
 				RentalCell dbCell = this.rentalv2Provider.getRentalCellById(cell.getId());
