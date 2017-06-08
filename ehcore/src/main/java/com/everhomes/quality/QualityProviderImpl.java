@@ -2172,4 +2172,93 @@ public class QualityProviderImpl implements QualityProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSamples.class, sample.getId());
 	}
+
+	@Override
+	public void deleteQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map) {
+		assert(map.getId() != null);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleCommunityMap.class, map.getId()));
+		EhQualityInspectionSampleCommunityMapDao dao = new EhQualityInspectionSampleCommunityMapDao(context.configuration());
+		dao.delete(map);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSampleCommunityMap.class, map.getId());
+	}
+
+	@Override
+	public void deleteQualityInspectionSampleGroupMap(QualityInspectionSampleGroupMap map) {
+		assert(map.getId() != null);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleGroupMap.class, map.getId()));
+		EhQualityInspectionSampleGroupMapDao dao = new EhQualityInspectionSampleGroupMapDao(context.configuration());
+		dao.delete(map);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSampleGroupMap.class, map.getId());
+	}
+
+	@Override
+	public List<QualityInspectionSampleCommunityMap> findQualityInspectionSampleCommunityMapBySample(Long sampleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunityMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(sampleId));
+
+		List<QualityInspectionSampleCommunityMap> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleCommunityMap.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public QualityInspectionSampleCommunityMap findQualityInspectionSampleCommunityMapBySampleAndCommunity(Long sampleId, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunityMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(sampleId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+
+		List<QualityInspectionSampleCommunityMap> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleCommunityMap.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
+	}
+
+	@Override
+	public List<QualityInspectionSampleGroupMap> findQualityInspectionSampleGroupMapBySample(Long sampleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.SAMPLE_ID.eq(sampleId));
+
+		List<QualityInspectionSampleGroupMap> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleGroupMap.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public QualityInspectionSampleGroupMap findQualityInspectionSampleGroupMapBySampleAndOrg(Long sampleId, Long organizationId, Long positionId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.SAMPLE_ID.eq(sampleId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.POSITION_ID.eq(positionId));
+
+		List<QualityInspectionSampleGroupMap> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleGroupMap.class));
+			return null;
+		});
+
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
+	}
 }

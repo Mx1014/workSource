@@ -3208,6 +3208,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
+
+
 		return null;
 	}
 }
