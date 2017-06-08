@@ -6,6 +6,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralFormService generalFormService;
     @Override
-    public GeneralForm postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
         String json = cmd.getCustomObject();
 
@@ -47,8 +48,10 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
             }
         }
 
-        enterpriseApplyEntryService.applyEntry(cmd2);
-        return null;
+        ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
+        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        dto.setCustomObject(JSONObject.toJSONString(response));
+        return dto;
     }
 
     @Override

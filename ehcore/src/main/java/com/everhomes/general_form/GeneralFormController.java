@@ -58,10 +58,10 @@ public class GeneralFormController extends ControllerBase {
      * <p> 提交数据，并获取表单的信息 </p>
      */
     @RequestMapping("postGeneralForm")
-    @RestReturn(value=String.class)
+    @RestReturn(value=PostGeneralFormDTO.class)
     public RestResponse postGeneralForm(PostGeneralFormCommand cmd) {
-    	generalFormService.postGeneralForm(cmd);
-    	RestResponse response = new RestResponse();
+		PostGeneralFormDTO dto = generalFormService.postGeneralForm(cmd);
+    	RestResponse response = new RestResponse(dto);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	

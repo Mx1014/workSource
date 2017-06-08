@@ -7,6 +7,7 @@ import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -24,7 +25,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     private GeneralFormService generalFormService;
 
     @Override
-    public GeneralForm postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
         String json = cmd.getCustomObject();
 
@@ -53,8 +54,10 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             }
         }
 
-        enterpriseApplyEntryService.applyEntry(cmd2);
-        return null;
+        ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
+        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        dto.setCustomObject(JSONObject.toJSONString(response));
+        return dto;
     }
 
     @Override

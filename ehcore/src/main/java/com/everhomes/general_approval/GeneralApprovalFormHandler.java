@@ -27,7 +27,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     @Autowired
     private GeneralApprovalProvider generalApprovalProvider;
     @Override
-    public GeneralForm postGeneralForm(PostGeneralFormCommand cmd) {
+    public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
         String json = cmd.getCustomObject();
 
@@ -55,8 +55,10 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 //            }
 //        }
 
-        generalApprovalService.postApprovalForm(cmd2);
-        return null;
+        GetTemplateByApprovalIdResponse response = generalApprovalService.postApprovalForm(cmd2);
+        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        dto.setCustomObject(JSONObject.toJSONString(response));
+        return dto;
     }
 
     @Override

@@ -24,5 +24,5 @@ public interface GeneralFormService {
 
 	GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 
-	void postGeneralForm(PostGeneralFormCommand cmd);
+	PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd);
 }
