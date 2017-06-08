@@ -38,7 +38,7 @@ public class GeneralFormController extends ControllerBase {
 //    }
 
 	/**
-	 * <b>URL: /general_form/getTemplateByFormId</b>
+	 * <b>URL: /general_form/getTemplateBySourceId</b>
 	 * <p> 根据业务获取表单 </p>
 	 */
 	@RequestMapping("getTemplateBySourceId")
