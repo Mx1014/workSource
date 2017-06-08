@@ -1,19 +1,15 @@
 package com.everhomes.techpark.expansion;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhLeasePromotions")
-public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler {
+@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhBuildings")
+public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
     @Autowired
     private EnterpriseApplyEntryService enterpriseApplyEntryService;

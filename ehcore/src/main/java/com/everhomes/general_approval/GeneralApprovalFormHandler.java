@@ -9,7 +9,7 @@ import com.everhomes.techpark.expansion.EnterpriseApplyEntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "LEASE_PROMOTION")
+@Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "GENERAL_APPROVE")
 public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 
     @Autowired
