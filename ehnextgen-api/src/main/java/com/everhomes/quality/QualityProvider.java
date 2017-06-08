@@ -127,7 +127,13 @@ public interface QualityProvider {
 
 	void createQualityInspectionSample(QualityInspectionSamples sample);
 	void createQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map);
+	void deleteQualityInspectionSampleCommunityMap(QualityInspectionSampleCommunityMap map);
+	void deleteQualityInspectionSampleGroupMap(QualityInspectionSampleGroupMap map);
 	void createQualityInspectionSampleGroupMap(QualityInspectionSampleGroupMap map);
 	void updateQualityInspectionSample(QualityInspectionSamples sample);
 	QualityInspectionSamples findQualityInspectionSample(Long id, String ownerType, Long ownerId);
+	List<QualityInspectionSampleCommunityMap> findQualityInspectionSampleCommunityMapBySample(Long sampleId);
+	List<QualityInspectionSampleGroupMap> findQualityInspectionSampleGroupMapBySample(Long sampleId);
+	QualityInspectionSampleCommunityMap findQualityInspectionSampleCommunityMapBySampleAndCommunity(Long sampleId, Long communityId);
+	QualityInspectionSampleGroupMap findQualityInspectionSampleGroupMapBySampleAndOrg(Long sampleId, Long organizationId, Long positionId);
 }

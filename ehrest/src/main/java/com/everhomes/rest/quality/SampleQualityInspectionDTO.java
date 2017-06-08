@@ -16,7 +16,7 @@ import java.util.List;
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
  *     <li>creatorName: 创建人姓名</li>
- *     <li>communityIds: 关联小区id列表</li>
+ *     <li>sampleCommunities: 关联小区列表 参考{@link com.everhomes.rest.quality.SampleCommunity}</li>
  *     <li>executeGroupAndPositionList:执行组部门岗位id列表 参考{@link com.everhomes.rest.quality.ExecuteGroupAndPosition}</li>
  * </ul>
  * Created by ying.xiong on 2017/6/1.
@@ -38,7 +38,7 @@ public class SampleQualityInspectionDTO {
     private String creatorName;
 
     @ItemType(Long.class)
-    private List<Long> communityIds;
+    private List<SampleCommunity> sampleCommunities;
 
     @ItemType(ExecuteGroupAndPosition.class)
     private List<ExecuteGroupAndPosition> executeGroupAndPositionList;
@@ -59,12 +59,12 @@ public class SampleQualityInspectionDTO {
         this.creatorName = creatorName;
     }
 
-    public List<Long> getCommunityIds() {
-        return communityIds;
+    public List<SampleCommunity> getSampleCommunities() {
+        return sampleCommunities;
     }
 
-    public void setCommunityIds(List<Long> communityIds) {
-        this.communityIds = communityIds;
+    public void setSampleCommunities(List<SampleCommunity> sampleCommunities) {
+        this.sampleCommunities = sampleCommunities;
     }
 
     public Timestamp getEndTime() {
