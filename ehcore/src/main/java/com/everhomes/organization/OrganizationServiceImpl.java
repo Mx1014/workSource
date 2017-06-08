@@ -9751,6 +9751,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return dto;
         }).collect(Collectors.toList()));
+
+        response.setNextPageOffset(res.getNextPageOffset());
+        response.setNextPageAnchor(res.getNextPageAnchor());
         return response;
     }
 
