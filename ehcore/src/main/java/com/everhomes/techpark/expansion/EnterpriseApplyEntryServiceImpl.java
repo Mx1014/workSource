@@ -1288,7 +1288,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public LeaseFormRequestDTO getLeasePromotionRequestForm(GetLeasePromotionRequestFormCommand cmd) {
 
 		LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
-				cmd.getOwnerId(), cmd.getOwnerType(), EntityType.LEASEPROMOTION.getCode());
+				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
 
 		LeaseFormRequestDTO dto = ConvertHelper.convert(request, LeaseFormRequestDTO.class);
 
