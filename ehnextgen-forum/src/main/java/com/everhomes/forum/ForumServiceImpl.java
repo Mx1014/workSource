@@ -271,14 +271,17 @@ public class ForumServiceImpl implements ForumService {
         }
         populatePost(creatorUid, post, communityId, false);
 
-        try {
-            postSearcher.feedDoc(post);
+        //暂存的帖子不添加到搜索引擎，不计算积分    add by yanjun 20170609
+        if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
+            try {
+                postSearcher.feedDoc(post);
 
-            AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
-                userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
-            userPointService.addPoint(pointCmd);
-        } catch(Exception e) {
-            LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+                AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
+                        userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
+                userPointService.addPoint(pointCmd);
+            } catch (Exception e) {
+                LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
+            }
         }
 
         /**
