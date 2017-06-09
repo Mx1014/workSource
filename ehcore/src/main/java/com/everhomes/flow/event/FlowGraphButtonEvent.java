@@ -280,19 +280,28 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		}
 		
 		//button actions
-		if(null != btn.getMessage()) {
-			btn.getMessage().fireAction(ctx, ctx.getCurrentEvent());
-		}
-		if(null != btn.getSms()) {
-			btn.getSms().fireAction(ctx, ctx.getCurrentEvent());
-		}
-		if(null != btn.getScripts()) {
-			for(FlowGraphAction action : btn.getScripts()) {
-				action.fireAction(ctx, ctx.getCurrentEvent());
-			}
-		}
-		
-		if(tracker != null && subject != null) {
+        if (null != btn.getMessage()) {
+            FlowActionStatus status = FlowActionStatus.fromCode(btn.getMessage().getFlowAction().getStatus());
+            if (status == FlowActionStatus.ENABLED) {
+                btn.getMessage().fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
+        if (null != btn.getSms()) {
+            FlowActionStatus status = FlowActionStatus.fromCode(btn.getSms().getFlowAction().getStatus());
+            if (status == FlowActionStatus.ENABLED) {
+                btn.getSms().fireAction(ctx, ctx.getCurrentEvent());
+            }
+        }
+        if (null != btn.getScripts()) {
+            for (FlowGraphAction action : btn.getScripts()) {
+                FlowActionStatus status = FlowActionStatus.fromCode(action.getFlowAction().getStatus());
+                if (status == FlowActionStatus.ENABLED) {
+                    action.fireAction(ctx, ctx.getCurrentEvent());
+                }
+            }
+        }
+
+        if(tracker != null && subject != null) {
 			tracker.setId(flowEventLogProvider.getNextId());
 			tracker.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 			tracker.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());

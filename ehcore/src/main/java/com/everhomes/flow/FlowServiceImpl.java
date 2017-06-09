@@ -454,6 +454,9 @@ public class FlowServiceImpl implements FlowService {
         button.setFlowUserType(userType.getCode());
         button.setButtonName(buttonDefName(flow.getNamespaceId(), stepType));
         button.setSubjectRequiredFlag(TrueOrFalseFlag.FALSE.getCode());
+        if (stepType == FlowStepType.REMINDER_STEP) {
+            button.setRemindCount(1);
+        }
         if (stepType == FlowStepType.TRANSFER_STEP) {
             button.setNeedProcessor((byte) 1);
         }
