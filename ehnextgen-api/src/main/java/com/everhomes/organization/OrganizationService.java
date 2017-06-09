@@ -505,5 +505,5 @@ public interface OrganizationService {
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-	Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
+    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
 }
