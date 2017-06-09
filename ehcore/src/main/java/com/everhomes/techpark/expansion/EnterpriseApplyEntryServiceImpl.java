@@ -658,7 +658,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
-			dto.setLeasePromotionFormId(c.getGeneralFormId());
+			dto.setLeasePromotionFormId(c.getGeneralFormId  ());
 
 			populateRentDTO(dto);
 
@@ -750,8 +750,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public BuildingForRentDTO createLeasePromotion(CreateLeasePromotionCommand cmd){
 
 		return dbProvider.execute((TransactionStatus status) -> {
-			if (null == cmd.getIssuerType())
+			if (null == cmd.getIssuerType()) {
 				cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+			}
+			if (null == cmd.getCustomFormFlag()) {
+				cmd.setCustomFormFlag(LeasePromotionFlag.DISABLED.getCode());
+			}
+
 			LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
 
 			if (null != cmd.getEnterTime())
