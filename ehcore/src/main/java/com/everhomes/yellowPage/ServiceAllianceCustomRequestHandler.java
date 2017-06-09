@@ -230,7 +230,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
 				String fieldName = field.getFieldName()==null?"":field.getFieldName();
-				sb.append(fieldName.trim() + ":" + fieldValue + "\n");
+				sb.append(" "+fieldName.trim() + "：" + fieldValue + "\n");
 			}
 			
 			return sb.toString();
