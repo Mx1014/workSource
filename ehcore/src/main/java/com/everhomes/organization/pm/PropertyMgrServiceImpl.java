@@ -2122,7 +2122,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		response.setBuildingName(address.getBuildingName());
 		response.setApartmentName(address.getApartmentName());
 		response.setAreaSize(address.getAreaSize());
-		response.setStatus(communityAddressMapping.getLivingStatus());
+		if (communityAddressMapping != null) {
+			response.setStatus(communityAddressMapping.getLivingStatus());
+		}else {
+			response.setStatus(address.getLivingStatus());
+		}
 		
 		if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
 			OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
