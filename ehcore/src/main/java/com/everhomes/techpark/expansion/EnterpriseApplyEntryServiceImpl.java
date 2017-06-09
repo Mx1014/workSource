@@ -1119,6 +1119,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeasePromotionConfigDTO dto = ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
 			dto.setDisplayNames(Arrays.stream(names).collect(Collectors.toList()));
 			dto.setDisplayOrders(Arrays.stream(orders).map(Integer::valueOf).collect(Collectors.toList()));
+
+			dto.setConsultFlag((byte)1);
 			return dto;
 		}
 
