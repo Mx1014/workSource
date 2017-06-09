@@ -2637,3 +2637,6 @@ VALUES (@max_id := @max_id + 1, 'sms.default.yzx', 8, 'zh_CN', '门禁-海岸', 
 SET @lease_config_id = (SELECT max(id) FROM `eh_lease_configs`);
 INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_config_id := @lease_config_id + 1), '999993', '1', '1', '1', '1', '1', '0');
 
+-- fix 10972 add by xiongying20170608
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40130,'', 'EhNamespaces', 999993,2);
