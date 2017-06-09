@@ -9741,31 +9741,35 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
         ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
 
-        //  查找合同到期时间
-        List<Long> detailIds = new ArrayList<>();
-        res.getMembers().forEach(r -> {
-            detailIds.add(r.getDetailId());
-        });
-        List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
+        if(res.getMembers() == null || res.getMembers().isEmpty()){
+            return response;
+        }else{
+            //  查找合同到期时间
+            List<Long> detailIds = new ArrayList<>();
+            res.getMembers().forEach(r -> {
+                detailIds.add(r.getDetailId());
+            });
+            List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
-        response.setMembers(res.getMembers().stream().map(r -> {
-            OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+            response.setMembers(res.getMembers().stream().map(r -> {
+                OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
 
-            //  设置合同到期时间
-            if (endTimeList != null) {
-                endTimeList.forEach(rr -> {
+                //  设置合同到期时间
+                if (endTimeList != null) {
+                    endTimeList.forEach(rr -> {
 
-                    if (rr[0].equals(dto.getDetailId())) {
-                        dto.setEndTime((java.sql.Date) rr[1]);
-                    }
-                });
-            }
-            return dto;
-        }).collect(Collectors.toList()));
+                        if (rr[0].equals(dto.getDetailId())) {
+                            dto.setEndTime((java.sql.Date) rr[1]);
+                        }
+                    });
+                }
+                return dto;
+            }).collect(Collectors.toList()));
 
-        response.setNextPageOffset(res.getNextPageOffset());
-        response.setNextPageAnchor(res.getNextPageAnchor());
-        return response;
+            response.setNextPageOffset(res.getNextPageOffset());
+            response.setNextPageAnchor(res.getNextPageAnchor());
+            return response;
+        }
     }
 
     @Override
