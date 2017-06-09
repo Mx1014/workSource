@@ -84,6 +84,17 @@ UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/resource-rese
 DELETE from eh_web_menus where id = 50918;
 DELETE from eh_web_menu_scopes where menu_id = 50918;	
 
+DELETE from eh_rentalv2_time_interval where owner_type = 'resource_half_day';
+SET @id = (SELECT MAX(id) FROM `eh_rentalv2_time_interval`);
+
+INSERT INTO `eh_rentalv2_time_interval` (`id`, `owner_id`, `owner_type`, `begin_time`, `end_time`, `time_step`) 
+	select (@id := @id + 1), id, 'resource_half_day', '8', '12', '0.25' from eh_rentalv2_resources where rental_type = 1;
+INSERT INTO `eh_rentalv2_time_interval` (`id`, `owner_id`, `owner_type`, `begin_time`, `end_time`, `time_step`) 
+	select (@id := @id + 1), id, 'resource_half_day', '14', '18', '0.25' from eh_rentalv2_resources where rental_type = 1;
+
+UPDATE eh_rentalv2_resources set org_member_weekend_price = weekend_price, org_member_workday_price = workday_price;
+UPDATE eh_rentalv2_cells set org_member_original_price = original_price, org_member_price = price;
+
 	
 -- 删除重复的菜单配置 add by sfyan 20170609
 delete from eh_web_menu_scopes where id in (select a.id from (select id from eh_web_menu_scopes group by owner_type, owner_id, menu_id having count(*) > 1) a);
