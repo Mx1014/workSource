@@ -1885,6 +1885,7 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setCaseType(FlowCaseType.INNER.getCode());
         flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
         flowCase.setOrganizationId(snapshotFlow.getOrganizationId());
+        flowCase.setApplierOrganizationId(flowCaseCmd.getCurrentOrganizationId());
 
         if (flowCase.getModuleType() == null) {
             flowCase.setModuleType(FlowModuleType.NO_MODULE.getCode());
@@ -2887,8 +2888,7 @@ public class FlowServiceImpl implements FlowService {
                 }
             }
         }
-
-        return users;
+        return users.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
