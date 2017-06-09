@@ -690,7 +690,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_BUILDINGS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
         }
         
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
@@ -710,7 +710,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         });
         
         if(buildings.size() > 0) {
-            locator.setAnchor(buildings.get(buildings.size() -1).getId());
+            locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
         }
         
         

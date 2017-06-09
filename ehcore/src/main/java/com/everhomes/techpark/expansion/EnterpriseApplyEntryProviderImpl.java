@@ -133,7 +133,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		}
 
 		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.lt(locator.getAnchor()));
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
@@ -147,7 +147,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 						});
 		
 		if(leasePromotions.size() >= pageSize) {
-			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getCreateTime().getTime());
+			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getDefaultOrder());
 		}else {
 			locator.setAnchor(null);
 		}
