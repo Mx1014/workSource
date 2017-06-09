@@ -76,3 +76,6 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('sms.default.yzx', '50', 'zh_CN', '正中会-预成功', '47318', '999983');
 	
+-- 删除重复的菜单配置 add by sfyan 20170609
+delete from eh_web_menu_scopes where id in (select a.id from (select id from eh_web_menu_scopes group by owner_type, owner_id, menu_id having count(*) > 1) a);
+	

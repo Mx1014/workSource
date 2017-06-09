@@ -13,3 +13,6 @@ ALTER TABLE `eh_flow_cases` ADD COLUMN `organization_id` BIGINT DEFAULT NULL COM
 
 -- eh_configurations表value字段加长
 ALTER TABLE `eh_configurations` MODIFY COLUMN `value` VARCHAR(512) NOT NULL;
+
+-- 增加菜单配置的唯一约束 add by sfyan 20170609
+ALTER TABLE eh_web_menu_scopes ADD UNIQUE KEY u_menu_scope_owner(menu_id, owner_type, owner_id);
