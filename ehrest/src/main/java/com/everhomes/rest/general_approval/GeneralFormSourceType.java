@@ -1,6 +1,5 @@
-package com.everhomes.general_form;
+package com.everhomes.rest.general_approval;
 
-import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 
