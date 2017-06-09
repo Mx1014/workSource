@@ -1054,7 +1054,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			long time5 = System.currentTimeMillis();
 			LOGGER.info("calculatePrice foreach time={}", time5 - time4);
 		} catch (ParseException e) {
-			LOGGER.error("计算平均值-时间转换 异常");
+			LOGGER.error("calculatePrice error", e);
 		}
 		if(minPrice == null)
 			minPrice = new BigDecimal(0);
