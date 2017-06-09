@@ -356,10 +356,10 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         // 根据owenerType和owenerId查询出多条relatios表记录
         List<ServiceModuleAssignmentRelation> relations = this.serviceModuleProvider.listServiceModuleAssignmentRelations(cmd.getOwnerType(), cmd.getOwnerId());
-        if (relations == null || relations.size() == 0) {
-            LOGGER.error("ServiceModuleAssignmentRelations is not found. cmd = {}", cmd);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelations is not found.");
-        }
+//        if (relations == null || relations.size() == 0) {
+//            LOGGER.error("ServiceModuleAssignmentRelations is not found. cmd = {}", cmd);
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "ServiceModuleAssignmentRelations is not found.");
+//        }
         List<ServiceModuleAssignmentRelationDTO> results = relations.stream().map(r -> {
             ServiceModuleAssignmentRelationDTO dto = new ServiceModuleAssignmentRelationDTO();
             dto.setId(r.getId());
@@ -545,7 +545,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         Iterator<ServiceModuleDTO> iter = tempList.iterator();
         while (iter.hasNext()) {
             ServiceModuleDTO current = iter.next();
-            if (current.getParentId().equals(parentId) && iter.next().getLevel() < 3) {
+            if (current.getParentId().equals(parentId) && current.getLevel() < 3) {
                 List<ServiceModuleDTO> c_node = getServiceModuleAsLevelTree(tempList, current.getId());
                 current.setServiceModules(c_node);
                 results.add(current);
