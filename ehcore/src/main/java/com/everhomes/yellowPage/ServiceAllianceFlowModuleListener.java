@@ -237,8 +237,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			e.setValue(yellowPage.getName());
 		entities.add(e);
 		
-		//后面跟自定义模块--通用父类方法
-		entities.addAll(super.onFlowCaseDetailRender(flowCase, flowUserType));
+		//后面跟自定义模块-- 
+		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
 		return entities;
 	}
 

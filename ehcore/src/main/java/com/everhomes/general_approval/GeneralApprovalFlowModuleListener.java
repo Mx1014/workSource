@@ -134,6 +134,48 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	 * */
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
+		List<FlowCaseEntity> entities = new ArrayList<>(); 
+		//姓名
+		FlowCaseEntity e = new FlowCaseEntity();
+		GeneralApprovalVal val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_NAME.getCode()); 
+		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
+				val.getFormOriginId(), val.getFormVersion());
+		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+		e.setKey(dto.getFieldDisplayName());
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+		entities.add(e);
+		
+		//电话
+		e = new FlowCaseEntity();
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_PHONE.getCode()); 
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+			entities.add(e);
+		}
+		
+		//企业
+		e = new FlowCaseEntity();
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.USER_COMPANY.getCode()); 
+		if(val != null){
+			dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+			e.setKey(dto.getFieldDisplayName());
+			e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+			e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+			entities.add(e);
+		}
+		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
+		return entities;
+	}
+
+	public List<FlowCaseEntity> onFlowCaseCustomDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) { 
 			List<GeneralApprovalVal> vals = this.generalApprovalValProvider
@@ -148,7 +190,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 		}
 		return entities;
 	}
-
+	
 	private void processEntities(
 			List<FlowCaseEntity> entities,List<GeneralApprovalVal> vals ,List<GeneralFormFieldDTO> fieldDTOs ){
 		
