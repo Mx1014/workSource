@@ -1590,10 +1590,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 									if (ListUtils.isEmpty(nextLevelUser)) {
 										// 如果不存在下一级别的审批人，说明此单审批结束
 										// 1. 修改审批状态为同意
-										approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
-										approvalRequest.setNextLevel(null);
-										approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
-										updateApprovalRequest(userId, approvalRequest);
+//										approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+//										approvalRequest.setNextLevel(null);
+//										approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+//										updateApprovalRequest(userId, approvalRequest);
 										// 2. 发消息给申请单创建者
 										sendMessageToCreator(approvalRequest, null);
 										// 3. 最终同意回调业务方法
@@ -1626,6 +1626,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		});
 	}
 	public void finishApproveApprovalRequest(ApprovalRequest approvalRequest){
+		// 1. 修改审批状态为同意
+		approvalRequest.setCurrentLevel(approvalRequest.getNextLevel());
+		approvalRequest.setNextLevel(null);
+		approvalRequest.setApprovalStatus(ApprovalStatus.AGREEMENT.getCode());
+		updateApprovalRequest(getUserId(), approvalRequest);
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
 		// 3. 最终同意回调业务方法
 		handler.processFinalApprove(approvalRequest);
