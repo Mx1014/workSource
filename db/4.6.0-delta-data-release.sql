@@ -75,4 +75,11 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 	VALUES (999983, 'flow:40400', 33, 'zh_CN', '催办短信', '38832');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 	VALUES ('sms.default.yzx', '50', 'zh_CN', '正中会-预成功', '47318', '999983');
-	
+
+UPDATE eh_web_menus set data_type = 'resource--defaultParameter/status/3' WHERE id = 50912;
+UPDATE eh_web_menus set data_type = 'resource_publish/status/3' WHERE id = 50914;
+UPDATE eh_web_menus set data_type = 'rental_info/status/3' WHERE id = 50916;
+UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/resource-reservation/40400?status=3' WHERE id = 50920;
+
+DELETE from eh_web_menus where id = 50918;
+DELETE from eh_web_menu_scopes where menu_id = 50918;	
