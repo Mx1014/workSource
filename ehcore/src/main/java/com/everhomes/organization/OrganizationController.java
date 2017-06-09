@@ -1691,10 +1691,10 @@ public class OrganizationController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /org/importOrganizationPersonelFiles</b>
+     * <b>URL: /org/importOrganizationPersonnelFiles</b>
      * <p>通讯录成员导入</p>
      */
-    @RequestMapping("importOrganizationPersonelFiles")
+    @RequestMapping("importOrganizationPersonnelFiles")
     @RestReturn(value = ImportFileTaskDTO.class)
     public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
 
@@ -1705,7 +1705,7 @@ public class OrganizationController extends ControllerBase {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }
-        RestResponse response = new RestResponse(organizationService.importOrganizationPersonelFiles(files[0], userId, cmd));
+        RestResponse response = new RestResponse(organizationService.importOrganizationPersonnelFiles(files[0], userId, cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

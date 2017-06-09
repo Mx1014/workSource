@@ -9750,6 +9750,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             return dto;
         }).collect(Collectors.toList()));
+
+        response.setNextPageOffset(res.getNextPageOffset());
+        response.setNextPageAnchor(res.getNextPageAnchor());
         return response;
     }
 
@@ -10445,8 +10448,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return results;
     }
-    public ImportFileTaskDTO importOrganizationPersonelFiles(MultipartFile mfile,
-                                                             Long userId, ImportOrganizationPersonnelDataCommand cmd){
+    public ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
+                                                              Long userId, ImportOrganizationPersonnelDataCommand cmd){
         ImportFileTask task = new ImportFileTask();
         try{
             //  解析excel

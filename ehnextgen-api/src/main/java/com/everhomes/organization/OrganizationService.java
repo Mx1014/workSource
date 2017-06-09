@@ -503,6 +503,6 @@ public interface OrganizationService {
 
 	OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member);
 
-	ImportFileTaskDTO importOrganizationPersonelFiles(MultipartFile mfile,
-													  Long userId, ImportOrganizationPersonnelDataCommand cmd);
+	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
+													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
 }
