@@ -4129,7 +4129,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public List<OrganizationMember> convertMemberListAsDetailList(List<OrganizationMember> old_list) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         for (OrganizationMember member : old_list) {
+            if(member.getDetailId() == null){
+                continue;
+            }
             OrganizationMemberDetails detail = findOrganizationMemberDetailsByDetailId(member.getDetailId());
+            if(detail == null){
+                continue;
+            }
             member.setContactToken(detail.getContactToken());
             member.setContactName(detail.getContactName());
             member.setContactType(detail.getContactType());
