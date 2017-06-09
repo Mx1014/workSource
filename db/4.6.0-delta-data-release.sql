@@ -83,3 +83,20 @@ UPDATE eh_web_menus set data_type = 'react:/working-flow/flow-list/resource-rese
 
 DELETE from eh_web_menus where id = 50918;
 DELETE from eh_web_menu_scopes where menu_id = 50918;	
+
+	
+-- 删除重复的菜单配置 add by sfyan 20170609
+delete from eh_web_menu_scopes where id in (select a.id from (select id from eh_web_menu_scopes group by owner_type, owner_id, menu_id having count(*) > 1) a);
+
+-- 服务联盟bug 10974 by dengs,20170608
+update eh_locale_templates SET text='您收到一条${categoryName}:${serviceAllianceName}的申请 
+ 提交者信息：
+ 预订人：${creatorName} 
+ 手机号：${creatorMobile} 
+ 公司名称：${creatorOrganization} 
+ 
+ 提交的信息：
+ ${notemessage} 
+ 您可以登录管理后台查看详情' WHERE scope='serviceAlliance.request.notification' AND `code`=1;
+
+	
