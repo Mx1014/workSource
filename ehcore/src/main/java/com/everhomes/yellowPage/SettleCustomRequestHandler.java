@@ -145,6 +145,8 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		//modify by dengs,20170425  更换模板，发送html邮件
 //		notifyMap.put("note", getNote(request));
 		notifyMap.put("note", changeRequestToHtml(request));
+		notifyMap.put("serviceAllianceName", "");
+		notifyMap.put("notemessage", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
         String creatorOrganization = "";
 		if(org != null) {
@@ -156,6 +158,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
 			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			notifyMap.put("serviceAllianceName", serviceOrg.getName());
 			title = serviceOrg.getName() + title;
 		}
 		notifyMap.put("title", title);
