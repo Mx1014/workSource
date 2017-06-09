@@ -271,7 +271,7 @@ public class ForumServiceImpl implements ForumService {
         }
         populatePost(creatorUid, post, communityId, false);
 
-        //暂存的帖子不添加到搜索引擎，不计算积分    add by yanjun 20170609
+        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
         if(PostStatus.fromCode(post.getStatus()) == PostStatus.ACTIVE) {
             try {
                 postSearcher.feedDoc(post);
@@ -5704,6 +5704,18 @@ public class ForumServiceImpl implements ForumService {
 			throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
 	        		ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "post not found"); 
 		}
+
+
+        //暂存的帖子不添加到搜索引擎，到发布的时候添加到搜索引擎，不计算积分    add by yanjun 20170609
+        try {
+            postSearcher.feedDoc(post);
+
+            AddUserPointCommand pointCmd = new AddUserPointCommand(post.getCreatorUid(), PointType.CREATE_TOPIC.name(),
+                    userPointService.getItemPoint(PointType.CREATE_TOPIC), post.getCreatorUid());
+            userPointService.addPoint(pointCmd);
+        } catch (Exception e) {
+            LOGGER.error("Failed to add post to search engine, userId=" + post.getCreatorUid() + ", postId=" + post.getId(), e);
+        }
 		
 		this.dbProvider.execute((status) -> {
 			activity.setStatus(PostStatus.ACTIVE.getCode());
