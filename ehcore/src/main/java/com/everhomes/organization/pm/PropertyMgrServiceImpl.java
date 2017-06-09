@@ -2126,8 +2126,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		if (CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
 			OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
-			Organization organization = organizationProvider.findOrganizationById(organizationAddress.getOrganizationId());
-			response.setEnterpriseName(organization.getName());
+			if (organizationAddress != null) {
+				Organization organization = organizationProvider.findOrganizationById(organizationAddress.getOrganizationId());
+				if (organization != null) {
+					response.setEnterpriseName(organization.getName());
+				}
+			}
 		}else {
 			List<OrganizationOwnerAddress> organizationOwnerAddresses = propertyMgrProvider.listOrganizationOwnerAddressByAddressId(address.getNamespaceId(), address.getId());
 			if (organizationOwnerAddresses != null) {
