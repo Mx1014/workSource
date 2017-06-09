@@ -10587,15 +10587,40 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> importOrganizationPersonnelFiles(List<ImportOrganizationPersonnelFilesDTO> list, Long userId, ImportOrganizationPersonnelDataCommand cmd) {
         List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> errorDataLogs = new ArrayList<>();
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-/*        for(ImportOrganizationPersonnelFilesDTO data : list){
-            this.checkImportOrganizationMembers(data);
-            this.checkImportOrganizationMemberDetails(data);
-            this.checkImportOrganizationMemberEducations(data);
-            this.checkImportOrganizationMemberWorkExperiences(data);
-            this.checkImportOrganizationMemberInsurances(data);
-            this.checkImportOrganizationMemberContracts(data);
-        }*/
-return null;
+        for (ImportOrganizationPersonnelFilesDTO data : list) {
+            membersRecord = this.checkImportOrganizationMembers(data);
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+            membersRecord = this.checkImportOrganizationMemberDetails(data);
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+            membersRecord = this.checkImportOrganizationMemberEducations(data);
+
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+            membersRecord = this.checkImportOrganizationMemberWorkExperiences(data);
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+            membersRecord = this.checkImportOrganizationMemberInsurances(data);
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+            membersRecord = this.checkImportOrganizationMemberContracts(data);
+            if (membersRecord != null) {
+                errorDataLogs.add(membersRecord);
+                continue;
+            }
+        }
+        return null;
     }
 }
 
