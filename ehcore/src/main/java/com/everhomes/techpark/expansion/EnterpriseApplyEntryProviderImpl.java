@@ -137,7 +137,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
-						.orderBy(Tables.EH_LEASE_PROMOTIONS.CREATE_TIME.desc())
+						.orderBy(Tables.EH_LEASE_PROMOTIONS.DEFAULT_ORDER.desc())
 						.limit(pageSize)
 						.fetch().map((r) -> {
 							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
