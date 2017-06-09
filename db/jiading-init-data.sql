@@ -235,6 +235,7 @@ SET @resource_type_id = (SELECT MAX(id) FROM `eh_rentalv2_resource_types`);
 SET @resource_type_id = @resource_type_id + 1;
 INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES (@resource_type_id, '会议室预订', 0, NULL, 0, 999974);    
 
+
 SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`); 
 -- 园区管理员  
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
@@ -354,3 +355,4 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 
 delete from eh_launch_pad_items where namespace_id = 999974 and item_label = '一键上网';
 update eh_launch_pad_items set display_flag = 0 where namespace_id = 999974 and item_label in('服务联盟', '智能门禁', '视频会议', '企业通讯录');
+update eh_rentalv2_resource_types set status = 2 where namespace_id = 999974;

@@ -2640,3 +2640,12 @@ INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issui
 -- fix 10972 add by xiongying20170608
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40130,'', 'EhNamespaces', 999993,2);
+
+-- fix 10968 add by xiongying20170609
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20158,'', 'EhNamespaces', 999993,2);
+delete from eh_web_menu_scopes where owner_id = 999993 and menu_id = 20160;
+
+-- fix 10969 add by xiongying20170609
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'pmtask.handler-999983', 'flow', '', '0', NULL);
+

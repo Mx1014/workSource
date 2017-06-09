@@ -1019,6 +1019,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- fix 10690 纲哥要求拿下物业缴费和物业服务
 delete from eh_launch_pad_items where namespace_id = 1 and item_label in('物业服务','物业缴费');
 	
-	
+-- fix 11023 by xiongying20170609	
+update eh_launch_pad_items set action_type = 50  where namespace_id = 1 and item_label = '最新活动';
 	
 	
