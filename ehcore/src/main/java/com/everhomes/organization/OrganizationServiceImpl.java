@@ -127,11 +127,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.sql.*;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -10450,6 +10449,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if (OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(group.getGroupType())) {
                         //找到部门对应的资料表记录
                         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(group.getDirectlyEnterpriseId(), contact_token);
+                        if (old_detail == null) {
+                            LOGGER.error("Cannot find DirectlyEnterpriseId for this org。orgId={}", oId);
+                            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE,
+                                    "Cannot find DirectlyEnterpriseId for this org");
+                        }
                         organizationMember.setDetailId(old_detail.getId());
                         organizationProvider.createOrganizationMember(organizationMember);
                         results.add(ConvertHelper.convert(group, OrganizationDTO.class));
