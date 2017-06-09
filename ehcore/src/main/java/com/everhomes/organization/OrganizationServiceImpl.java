@@ -6515,6 +6515,18 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
+    public Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId){
+        OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(contactToken,organizationId);
+        Byte visibleFlag;
+        if (null == VisibleFlag.fromCode(member.getVisibleFlag())) {
+            visibleFlag = VisibleFlag.SHOW.getCode();
+        } else {
+            visibleFlag = member.getVisibleFlag();
+        }
+        return visibleFlag;
+    }
+
+    @Override
     public CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd) {
         CommunityOrganizationTreeResponse response = new CommunityOrganizationTreeResponse();
 
@@ -9839,7 +9851,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     memberDTO.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
                     memberDTO.setNickName(memberDTO.getNickName());
                 }
+
             }
+
+            memberDTO.setVisibleFlag(this.getOrganizationMemberVisibleFlag(memberDTO.getContactToken(),memberDTO.getOrganizationId()));
             return memberDTO;
         } else {
             return null;

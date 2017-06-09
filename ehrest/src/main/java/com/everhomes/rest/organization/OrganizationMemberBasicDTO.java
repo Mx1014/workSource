@@ -31,6 +31,7 @@ import java.util.List;
  * <li>groups：群组列表</li>
  * <li>profileIntegrity: 档案完整性</li>
  * <li>workingDays: 在职天数</li>
+ * <li>visibleFlag: 隐藏性 参考{@link VisibleFlag}</li>
  * </ul>
  */
 public class OrganizationMemberBasicDTO {
@@ -79,6 +80,8 @@ public class OrganizationMemberBasicDTO {
     private Integer profileIntegrity;
 
     private Long workingDays;
+
+    private Byte visibleFlag;
 
     public OrganizationMemberBasicDTO() {
     }
@@ -248,6 +251,14 @@ public class OrganizationMemberBasicDTO {
 
     public void setWorkingDays(Long workingDays) {
         this.workingDays = workingDays;
+    }
+
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
     }
 
     @Override
