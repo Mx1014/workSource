@@ -35,6 +35,7 @@ import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.util.ConvertHelper;
+import org.springframework.util.StringUtils;
 
 @Component
 public class WebMenuServiceImpl implements WebMenuService {
@@ -104,19 +105,26 @@ public class WebMenuServiceImpl implements WebMenuService {
 		List<Target> targets = new ArrayList<>();
 		targets.add(new Target(EntityType.USER.getCode(), userId));
 
+		//物业超级管理员拿所有菜单
 		if(resolver.checkSuperAdmin(userId, organizationId) || null != path){
 			menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, path, null);
 			if(null != menu && menus.size() > 0){
 				menus.add(menu);
 			}
 		}else{
+			//获取人员的所有相关机构
 			List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
 			for (Long orgId: orgIds) {
 				targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
 			}
+			//获取人员和人员所有机构所赋予的权限模块
 			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
 			if(null != moduleIds && moduleIds.size() > 0)
 				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
+
+			//拼上菜单的所有父级菜单
+			menus = appendParentMenus(menus);
+
 		}
 
 		if(null == menus || menus.size() == 0){
@@ -169,6 +177,23 @@ public class WebMenuServiceImpl implements WebMenuService {
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList()), ConvertHelper.convert(menu, WebMenuDTO.class)).getDtos();
 	}
+
+	private List<WebMenu> appendParentMenus(List<WebMenu> menus){
+		List<Long> menuIds = new ArrayList<>();
+		for (WebMenu menu: menus) {
+			String[] menuIdStrs = menu.getPath().split("/");
+			for (String menuIdStr: menuIdStrs) {
+				if(!StringUtils.isEmpty(menuIdStr)){
+					Long menuId = Long.valueOf(menuIdStr);
+					if(!menuIds.contains(menuId)){
+						menuIds.add(menuId);
+					}
+				}
+			}
+		}
+		return webMenuProvider.listWebMenuByMenuIds(menuIds);
+	}
+
 
 
 	@Override
