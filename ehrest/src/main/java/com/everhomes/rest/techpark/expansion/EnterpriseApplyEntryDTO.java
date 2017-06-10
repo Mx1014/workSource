@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -71,6 +72,17 @@ public class EnterpriseApplyEntryDTO {
 	private Long addressId;
 	private String apartmentName;
 	private Long flowcaseId;
+
+	@ItemType(PostApprovalFormItem.class)
+	private List<PostApprovalFormItem> formValues;
+
+	public List<PostApprovalFormItem> getFormValues() {
+		return formValues;
+	}
+
+	public void setFormValues(List<PostApprovalFormItem> formValues) {
+		this.formValues = formValues;
+	}
 
 	public String getBuildingName() {
 		return buildingName;

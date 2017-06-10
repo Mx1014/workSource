@@ -304,6 +304,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					dto.setSourceName(building.getName());
 					dto.getBuildings().add(processBuildingDTO(building));
 				}
+
+				GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
+				cmd2.setSourceType(EntityType.LEASEPROMOTION.getCode());
+				cmd2.setSourceId(dto.getId());
+				List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd2);
+				dto.setFormValues(formValues);
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
 				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
@@ -313,7 +319,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
 					if (null != building) {
 						dto.getBuildings().add(processBuildingDTO(building));
-					}				}
+					}
+				}
+
+				GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
+				cmd2.setSourceType(EntityType.LEASEPROMOTION.getCode());
+				cmd2.setSourceId(dto.getId());
+				List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd2);
+				dto.setFormValues(formValues);
 			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
 				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
@@ -555,8 +568,31 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
         String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
-        map.put("enterpriseName", defaultIfNull(request.getEnterpriseName(),""));
-        map.put("contactPhone", defaultIfNull(request.getApplyContact(),""));
+
+		Building building = communityProvider.findBuildingById(request.getBuildingId());
+
+        map.put("buildingName", defaultIfNull(building.getName(),""));
+
+		GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
+		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		LeasePromotionConfigDTO config = getLeasePromotionConfig(cmd);
+
+		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
+		String sourceTypeName = sourceType.getDescription();
+
+		byte i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
+		if (ApplyEntrySourceType.BUILDING == sourceType) {
+			i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
+		}
+		if (null != config.getDisplayNames() ) {
+			for (Integer k: config.getDisplayOrders()) {
+				if (k.byteValue() ==i) {
+					sourceTypeName =config.getDisplayNames().get(k);
+				}
+			}
+		}
+
+        map.put("sourceType", defaultIfNull(sourceTypeName,""));
 
         return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
                 ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");

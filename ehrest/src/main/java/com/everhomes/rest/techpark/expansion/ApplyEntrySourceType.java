@@ -8,13 +8,20 @@ package com.everhomes.rest.techpark.expansion;
  */
 public enum ApplyEntrySourceType {
 	
-	BUILDING("building"), MARKET_ZONE("market_zone"), FOR_RENT("for_rent"),OFFICE_CUBICLE("office_cubicle");
+	BUILDING("building", "园区介绍"), MARKET_ZONE("market_zone", "创客入驻"), FOR_RENT("for_rent", "虚位以待"),
+    OFFICE_CUBICLE("office_cubicle", "工位预定");
     
     private String code;
-    private ApplyEntrySourceType(String code) {
+    private String description;
+    private ApplyEntrySourceType(String code, String description) {
         this.code = code;
+        this.description = description;
     }
-    
+
+    public String getDescription() {
+        return description;
+    }
+
     public String getCode() {
         return this.code;
     }

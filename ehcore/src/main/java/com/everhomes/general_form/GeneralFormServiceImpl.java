@@ -64,14 +64,14 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 //		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
 //		fieldDTOs.add(sourceIdField);
 		
-		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
-		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-		fieldDTOs.add(organizationIdField);
+//		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
+//		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+//		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+//		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+//		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+//		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+//		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+//		fieldDTOs.add(organizationIdField);
 
 		dto.setFormFields(fieldDTOs);
 		return dto;
