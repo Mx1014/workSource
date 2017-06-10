@@ -15,7 +15,6 @@ import com.everhomes.util.StringHelper;
  * <li>id：要修改的招租信息id</li>
  * <li>buildingId：楼栋ID</li>
  * <li>rentPosition：招租位置</li>
- * <li>rentType：招租类型：1：出租 </li>
  * <li>posterUri：封面uri，标题图 </li>
  * <li>attachments：banner图，列表 {@link com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO} </li>
  * <li>rentAreas：招租面积</li>
@@ -43,9 +42,8 @@ public class UpdateLeasePromotionCommand {
 	@NotNull
 	private Long     buildingId;
 	private String   rentPosition;
-	private String   rentType;
 	private String   posterUri;
-	private String   subject;
+//	private String   subject;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -62,11 +60,20 @@ public class UpdateLeasePromotionCommand {
 
 	private Double longitude;
 	private Double latitude;
+	private String address;
 	private Long generalFormId;
 	private Byte customFormFlag;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
 
 	public Double getLongitude() {
 		return longitude;
@@ -158,23 +165,11 @@ public class UpdateLeasePromotionCommand {
 	public void setRentPosition(String rentPosition) {
 		this.rentPosition = rentPosition;
 	}
-	public String getRentType() {
-		return rentType;
-	}
-	public void setRentType(String rentType) {
-		this.rentType = rentType;
-	}
 	public String getPosterUri() {
 		return posterUri;
 	}
 	public void setPosterUri(String posterUri) {
 		this.posterUri = posterUri;
-	}
-	public String getSubject() {
-		return subject;
-	}
-	public void setSubject(String subject) {
-		this.subject = subject;
 	}
 	public String getContacts() {
 		return contacts;

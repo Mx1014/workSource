@@ -658,7 +658,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
-			dto.setLeasePromotionFormId(c.getGeneralFormId  ());
+			dto.setLeasePromotionFormId(c.getGeneralFormId());
 
 			populateRentDTO(dto);
 
@@ -691,9 +691,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		Building building = communityProvider.findBuildingById(dto.getBuildingId());
 		if(null != building){
 			dto.setBuildingName(building.getName());
-			dto.setAddress(building.getAddress());
-			dto.setLatitude(building.getLatitude());
-			dto.setLongitude(building.getLongitude());
 		}
 
 		long userId = UserContext.current().getUser().getId();
@@ -803,27 +800,45 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		return dbProvider.execute((TransactionStatus status) -> {
 
-			LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-			LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
 
-			if (null != cmd.getEnterTime())
+			leasePromotion.setBuildingId(cmd.getBuildingId());
+			leasePromotion.setRentPosition(cmd.getRentPosition());
+			leasePromotion.setPosterUri(cmd.getPosterUri());
+			leasePromotion.setRentAreas(cmd.getRentAreas());
+			leasePromotion.setContacts(cmd.getContacts());
+			leasePromotion.setContactPhone(cmd.getContactPhone());
+			leasePromotion.setDescription(cmd.getDescription());
+
+			leasePromotion.setEnterTimeFlag(cmd.getEnterTimeFlag());
+			if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getEnterTimeFlag()) {
 				leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+			}
+			leasePromotion.setAddressId(cmd.getAddressId());
+			leasePromotion.setOrientation(cmd.getOrientation());
+			leasePromotion.setRentAmount(cmd.getRentAmount());
+			leasePromotion.setLatitude(cmd.getLatitude());
+			leasePromotion.setLongitude(cmd.getLongitude());
+			leasePromotion.setAddress(cmd.getAddress());
 
-			leasePromotion.setIssuerType(lease.getIssuerType());
-			leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
-			leasePromotion.setCreateTime(lease.getCreateTime());
-			leasePromotion.setCreateUid(lease.getCreateUid());
+			leasePromotion.setCustomFormFlag(cmd.getCustomFormFlag());
+			leasePromotion.setGeneralFormId(cmd.getGeneralFormId());
+			if (null == cmd.getCustomFormFlag()) {
+				leasePromotion.setCustomFormFlag(LeasePromotionFlag.DISABLED.getCode());
+			}
+
 			enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
 
-			generalFormValProvider.deleteGeneralFormVals(EntityType.LEASEPROMOTION.getCode(), leasePromotion.getId());
-			addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
-					leasePromotion.getId(), cmd.getCustomFormFlag());
+			//表单
+			if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getCustomFormFlag()) {
+				generalFormValProvider.deleteGeneralFormVals(EntityType.LEASEPROMOTION.getCode(), leasePromotion.getId());
+				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+						leasePromotion.getId(), cmd.getCustomFormFlag());
+			}
+
+			//先删除全部图片//重新添加
 			List<BuildingForRentAttachmentDTO> attachmentDTOs = cmd.getAttachments();
-
-			//先删除全部图片
 			enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
-
-			//重新添加
 			addAttachments(attachmentDTOs, leasePromotion);
 
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);

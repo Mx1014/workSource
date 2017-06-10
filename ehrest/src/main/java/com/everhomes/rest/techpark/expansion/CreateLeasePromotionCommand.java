@@ -66,11 +66,20 @@ public class CreateLeasePromotionCommand {
 
 	private Double longitude;
 	private Double latitude;
+	private String address;
 	private Long generalFormId;
 	private Byte customFormFlag;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> formValues;
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
 
 	public List<PostApprovalFormItem> getFormValues() {
 		return formValues;

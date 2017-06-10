@@ -53,7 +53,7 @@ public class BuildingForRentDTO {
 	private String   rentType;
 	private String   posterUri;
 	private String   posterUrl;
-	private String   subject;
+//	private String   subject;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -273,13 +273,13 @@ public class BuildingForRentDTO {
 		this.posterUrl = posterUrl;
 	}
 
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
+//	public String getSubject() {
+//		return subject;
+//	}
+//
+//	public void setSubject(String subject) {
+//		this.subject = subject;
+//	}
 
 	public String getRentAreas() {
 		return rentAreas;

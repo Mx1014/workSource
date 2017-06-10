@@ -55,7 +55,9 @@ public class BuildingDTO {
 	private String aliasName;
 	
 	private Long managerUid;
-	
+
+	private String managerName;
+
 	private String managerNickName;
     
 	private String managerContact;
@@ -490,5 +492,13 @@ public class BuildingDTO {
 
 	public void setFloorCount(String floorCount) {
 		this.floorCount = floorCount;
+	}
+
+	public String getManagerName() {
+		return managerName;
+	}
+
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
 	}
 }
