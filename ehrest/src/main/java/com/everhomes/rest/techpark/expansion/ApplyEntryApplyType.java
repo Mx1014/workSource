@@ -4,11 +4,10 @@ package com.everhomes.rest.techpark.expansion;
  * APPLY(1):申请
  * EXPANSION(2): 扩租
  * RENEW(3):续租
- *  MAKER_ZONE((byte)4):创客空间
  * */
 public enum ApplyEntryApplyType {
 	
-	APPLY((byte)1), EXPANSION((byte)2), RENEW((byte)3), MAKER_ZONE((byte)4);
+	APPLY((byte)1), EXPANSION((byte)2), RENEW((byte)3);
 	
 	private byte code;
 	

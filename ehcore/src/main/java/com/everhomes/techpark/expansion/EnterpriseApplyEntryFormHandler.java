@@ -38,14 +38,14 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             if (null != dataSourceType) {
                 switch (dataSourceType) {
                     case USER_NAME:
-                        cmd2.setApplyUserName(item.getFieldValue());
+                        cmd2.setApplyUserName(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
                         break;
                     case USER_PHONE:
-                        cmd2.setContactPhone(item.getFieldValue());
+                        cmd2.setContactPhone(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
                         break;
                     case USER_COMPANY:
                         //工作流images怎么传
-                        cmd2.setEnterpriseName(item.getFieldValue());
+                        cmd2.setEnterpriseName(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
                         break;
                     case ORGANIZATION_ID:
 

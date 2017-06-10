@@ -60,6 +60,8 @@ public interface EnterpriseApplyEntryProvider {
 
 	void updateLeaseRequestForm(LeaseFormRequest leaseFormRequest);
 
+	void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest);
+
 	LeaseFormRequest findLeaseRequestFormById(Long id);
 
 	LeaseFormRequest findLeaseRequestForm(Integer namespaceId, Long ownerId, String ownerType, String sourceType);

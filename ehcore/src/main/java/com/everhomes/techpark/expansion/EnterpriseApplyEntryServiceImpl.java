@@ -714,13 +714,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		//暂时用枚举，如果拓展单位类型，则须在表中添加字段
 		dto.setUnit(LeasePromotionUnit.MONTH_UNIT.getDescription());
 
-		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
-		cmd.setSourceType(EntityType.LEASEPROMOTION.getCode());
-		cmd.setSourceId(dto.getId());
-		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
-		dto.setFormValues(formValues);
-
 		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
+
+			GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+			cmd.setSourceType(EntityType.LEASEPROMOTION.getCode());
+			cmd.setSourceId(dto.getId());
+			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
+			dto.setFormValues(formValues);
+
 			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
 					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
 			if (null != request) {
@@ -1290,11 +1291,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSourceType());
 
 		if (null == request) {
-			request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
-			enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+			if (null != cmd.getSourceId()) {
+				request = ConvertHelper.convert(cmd, LeaseFormRequest.class);
+				enterpriseApplyEntryProvider.createLeaseRequestForm(request);
+			}
+
 		}else {
-			request.setSourceId(cmd.getSourceId());
-			enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
+			if (null != cmd.getSourceId()) {
+				request.setSourceId(cmd.getSourceId());
+				enterpriseApplyEntryProvider.updateLeaseRequestForm(request);
+			}else {
+				enterpriseApplyEntryProvider.deleteLeaseRequestForm(request);
+			}
 		}
 
 	}

@@ -410,6 +410,16 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 	}
 
 	@Override
+	public void deleteLeaseRequestForm(LeaseFormRequest leaseFormRequest) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
+
+		EhLeaseFormRequestsDao dap = new EhLeaseFormRequestsDao(context.configuration());
+		dap.delete(leaseFormRequest);
+
+	}
+
+	@Override
 	public LeaseFormRequest findLeaseRequestFormById(Long id) {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseFormRequests.class));
