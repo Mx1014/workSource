@@ -40,8 +40,8 @@ public class SampleQualityInspectionDTO {
     @ItemType(Long.class)
     private List<SampleCommunity> sampleCommunities;
 
-    @ItemType(ExecuteGroupAndPosition.class)
-    private List<ExecuteGroupAndPosition> executeGroupAndPositionList;
+    @ItemType(SampleGroupDTO.class)
+    private List<SampleGroupDTO> sampleGroupDTOs;
 
     public Long getId() {
         return id;
@@ -79,12 +79,12 @@ public class SampleQualityInspectionDTO {
         this.startTime = startTime;
     }
 
-    public List<ExecuteGroupAndPosition> getExecuteGroupAndPositionList() {
-        return executeGroupAndPositionList;
+    public List<SampleGroupDTO> getSampleGroupDTOs() {
+        return sampleGroupDTOs;
     }
 
-    public void setExecuteGroupAndPositionList(List<ExecuteGroupAndPosition> executeGroupAndPositionList) {
-        this.executeGroupAndPositionList = executeGroupAndPositionList;
+    public void setSampleGroupDTOs(List<SampleGroupDTO> sampleGroupDTOs) {
+        this.sampleGroupDTOs = sampleGroupDTOs;
     }
 
     public String getName() {

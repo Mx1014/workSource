@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
  *     <li>sampleId: 例行检查id</li>
  *     <li>communityName: 项目名称</li>
  *     <li>executorName: 执行人姓名</li>
- *     <li>status: 执行状态</li>
+ *     <li>executeStatus: 执行状态</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -32,7 +32,7 @@ public class ListSampleQualityInspectionTasksCommand {
 
     private String executorName;
 
-    private Byte status;
+    private Byte executeStatus;
 
     public Long getCommunityId() {
         return communityId;
@@ -82,12 +82,12 @@ public class ListSampleQualityInspectionTasksCommand {
         this.executorName = executorName;
     }
 
-    public Byte getStatus() {
-        return status;
+    public Byte getExecuteStatus() {
+        return executeStatus;
     }
 
-    public void setStatus(Byte status) {
-        this.status = status;
+    public void setExecuteStatus(Byte executeStatus) {
+        this.executeStatus = executeStatus;
     }
 
     @Override

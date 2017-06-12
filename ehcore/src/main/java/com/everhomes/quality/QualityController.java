@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.quality.*;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,9 @@ public class QualityController extends ControllerBase {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private QualityInspectionSampleSearcher sampleSearcher;
 	
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
@@ -652,6 +657,22 @@ public class QualityController extends ControllerBase {
 	 */
 	@RequestMapping("listSampleQualityInspection")
 	@RestReturn(value = ListSampleQualityInspectionResponse.class)
+	public RestResponse searchSampleQualityInspection(SearchSampleQualityInspectionCommand cmd) {
+
+		ListSampleQualityInspectionResponse routineQualityInspections = sampleSearcher.query(cmd);
+
+		RestResponse response = new RestResponse(routineQualityInspections);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <p>列出品质核查例行检查-app</p>
+	 */
+	@RequestMapping("listSampleQualityInspection")
+	@RestReturn(value = ListSampleQualityInspectionResponse.class)
 	public RestResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
 
 		ListSampleQualityInspectionResponse routineQualityInspections = qualityService.listSampleQualityInspection(cmd);
@@ -686,9 +707,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = CountSampleTaskScoresResponse.class)
 	public RestResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
 
-//		CountSampleTaskScoresResponse scores = qualityService.countSampleTaskScores(cmd);
+		CountSampleTaskScoresResponse scores = qualityService.countSampleTaskScores(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(scores);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -702,9 +723,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = CountSampleTasksResponse.class)
 	public RestResponse countSampleTasks(CountSampleTasksCommand cmd) {
 
-//		CountSampleTasksResponse tasks = qualityService.countSampleTasks(cmd);
+		CountSampleTasksResponse tasks = qualityService.countSampleTasks(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -718,9 +739,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = CountScoresResponse.class)
 	public RestResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd) {
 
-//		CountScoresResponse scores = qualityService.countSampleTaskCommunityScores(cmd);
+		CountScoresResponse scores = qualityService.countSampleTaskCommunityScores(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(scores);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -734,9 +755,9 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = CountSampleTaskSpecificationItemScoresResponse.class)
 	public RestResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 
-//		CountScoresResponse scores = qualityService.countSampleTaskSpecificationItemScores(cmd);
+		CountSampleTaskSpecificationItemScoresResponse scores = qualityService.countSampleTaskSpecificationItemScores(cmd);
 
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(scores);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

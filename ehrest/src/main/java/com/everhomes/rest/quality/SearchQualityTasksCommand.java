@@ -48,9 +48,9 @@ public class SearchQualityTasksCommand {
 
     private Long executorId;
 
-    private Long executorName;
+    private String executorName;
 
-    private Byte reviewStatus;
+    private Byte reviewResult;
 
     private Byte manualFlag;
 
@@ -114,12 +114,12 @@ public class SearchQualityTasksCommand {
         this.pageSize = pageSize;
     }
 
-    public Byte getReviewStatus() {
-        return reviewStatus;
+    public Byte getReviewResult() {
+        return reviewResult;
     }
 
-    public void setReviewStatus(Byte reviewStatus) {
-        this.reviewStatus = reviewStatus;
+    public void setReviewResult(Byte reviewResult) {
+        this.reviewResult = reviewResult;
     }
 
     public Long getSampleId() {
@@ -170,11 +170,11 @@ public class SearchQualityTasksCommand {
         this.executorId = executorId;
     }
 
-    public Long getExecutorName() {
+    public String getExecutorName() {
         return executorName;
     }
 
-    public void setExecutorName(Long executorName) {
+    public void setExecutorName(String executorName) {
         this.executorName = executorName;
     }
 

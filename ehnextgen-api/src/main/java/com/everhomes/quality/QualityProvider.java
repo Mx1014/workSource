@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ScoreDTO;
@@ -136,4 +137,16 @@ public interface QualityProvider {
 	List<QualityInspectionSampleGroupMap> findQualityInspectionSampleGroupMapBySample(Long sampleId);
 	QualityInspectionSampleCommunityMap findQualityInspectionSampleCommunityMapBySampleAndCommunity(Long sampleId, Long communityId);
 	QualityInspectionSampleGroupMap findQualityInspectionSampleGroupMapBySampleAndOrg(Long sampleId, Long organizationId, Long positionId);
+	List<QualityInspectionSampleGroupMap> listQualityInspectionSampleGroupMapByOrgAndPosition(List<ExecuteGroupAndPosition> groupIds);
+
+	List<QualityInspectionSamples> listQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId);
+
+	List<QualityInspectionSamples> listQualityInspectionSamples(CrossShardListingLocator locator, Integer pageSize);
+	List<QualityInspectionTasks> listQualityInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
+
+	Integer getSampleCommunities(Long sampleId);
+
+	void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample);
+	void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample);
+	QualityInspectionSampleScoreStat findQualityInspectionSampleScoreStat(Long sampleId);
 }

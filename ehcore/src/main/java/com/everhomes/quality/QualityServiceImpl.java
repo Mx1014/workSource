@@ -29,6 +29,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.*;
+import com.everhomes.search.QualityInspectionSampleSearcher;
+import com.everhomes.search.QualityTaskSearcher;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -58,8 +62,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -144,6 +146,12 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private AclProvider aclProvider;
+
+	@Autowired
+	private QualityInspectionSampleSearcher sampleSearcher;
+
+	@Autowired
+	private QualityTaskSearcher taskSearcher;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -2998,7 +3006,7 @@ public class QualityServiceImpl implements QualityService {
 		sample.setNamespaceId(namespaceId);
 		sample.setStatus(Status.ACTIVE.getCode());
 		qualityProvider.createQualityInspectionSample(sample);
-		feeddoc
+		sampleSearcher.feedDoc(sample);
 
 		if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
 			cmd.getCommunityIds().forEach(communityId -> {
@@ -3058,6 +3066,7 @@ public class QualityServiceImpl implements QualityService {
 		sample.setDeleteUid(UserContext.current().getUser().getId());
 		sample.setDeleteTime(new Timestamp(System.currentTimeMillis()));
 		qualityProvider.updateQualityInspectionSample(sample);
+		sampleSearcher.feedDoc(sample);
 
 	}
 
@@ -3082,7 +3091,59 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListSampleQualityInspectionResponse listSampleQualityInspection(ListSampleQualityInspectionCommand cmd) {
-		return null;
+
+		User user = UserContext.current().getUser();
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		Long communityId = cmd.getCommunityId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+
+		//是否是管理员
+		boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					break;
+				}
+			}
+		}
+		List<QualityInspectionSamples> samples = new ArrayList<>();
+
+		if(isAdmin) {
+			//管理员查询所有检查
+			samples = qualityProvider.listQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, null, communityId);
+		} else {
+			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
+			List<QualityInspectionSampleGroupMap> maps = qualityProvider.listQualityInspectionSampleGroupMapByOrgAndPosition(groupDtos);
+			if(maps != null && maps.size() > 0) {
+				List<Long> sampleIds = maps.stream().map(QualityInspectionSampleGroupMap::getSampleId).collect(Collectors.toList());
+
+				samples = qualityProvider.listQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, sampleIds, communityId);
+			}
+		}
+
+		Long nextPageAnchor = null;
+		if(samples.size() > pageSize) {
+			samples.remove(samples.size() - 1);
+			nextPageAnchor = samples.get(samples.size() - 1).getId();
+		}
+		List<SampleQualityInspectionDTO> sampleQualityInspectionDTOList = samples.stream().map(sample -> {
+			SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+
+		ListSampleQualityInspectionResponse response = new ListSampleQualityInspectionResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setSampleQualityInspectionDTOList(sampleQualityInspectionDTOList);
+
+		return response;
 	}
 
 	@Override
@@ -3119,7 +3180,7 @@ public class QualityServiceImpl implements QualityService {
 		sample.setCreateTime(exist.getCreateTime());
 		sample.setCreatorUid(exist.getCreatorUid());
 		qualityProvider.updateQualityInspectionSample(sample);
-		feeddoc
+		sampleSearcher.feedDoc(sample);
 
 		List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
 		List<Long> communityIds = new ArrayList<>();
@@ -3198,8 +3259,40 @@ public class QualityServiceImpl implements QualityService {
 		}
 		List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
 		if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
+			List<SampleCommunity> sampleCommunities = new ArrayList<>();
+			List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
+			Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
 			sampleCommunityMaps.forEach(map -> {
 				SampleCommunity sc = new SampleCommunity();
+				sc.setSampleId(sample.getId());
+				sc.setCommunityId(map.getCommunityId());
+				Community community = communityMap.get(map.getCommunityId());
+				sc.setCommunityName(community.getName());
+				sampleCommunities.add(sc);
+			});
+
+			dto.setSampleCommunities(sampleCommunities);
+		}
+		List<QualityInspectionSampleGroupMap> sampleGroupMaps = qualityProvider.findQualityInspectionSampleGroupMapBySample(sample.getId());
+		if(sampleGroupMaps != null && sampleGroupMaps.size() > 0) {
+			List<SampleGroupDTO> sampleGroupDTOs = new ArrayList<>();
+			sampleGroupMaps.forEach(map -> {
+				SampleGroupDTO sampleGroupDTO = new SampleGroupDTO();
+				Organization group = organizationProvider.findOrganizationById(map.getOrganizationId());
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(map.getPositionId());
+				if(group != null) {
+					sampleGroupDTO.setOrganizationName(group.getName());
+				}
+
+				if(position != null) {
+					if(sampleGroupDTO.getOrganizationName() != null) {
+						sampleGroupDTO.setOrganizationName(sampleGroupDTO.getOrganizationName() + "-" + position.getName());
+					} else {
+						sampleGroupDTO.setOrganizationName(position.getName());
+
+					}
+				}
+				sampleGroupDTOs.add(sampleGroupDTO);
 			});
 		}
 
@@ -3208,8 +3301,52 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
+		SearchQualityTasksCommand command = ConvertHelper.convert(cmd, SearchQualityTasksCommand.class);
+		command.setTargetId(cmd.getCommunityId());
+		command.setTargetName(cmd.getCommunityName());
+		ListQualityInspectionTasksResponse tasks = taskSearcher.query(command);
 
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample != null) {
+			tasks.setSampleName(sample.getName());
+			tasks.setStartTime(sample.getStartTime());
+			tasks.setEndTime(sample.getEndTime());
+		}
 
+		Integer communityCount = qualityProvider.getSampleCommunities(cmd.getSampleId());
+		tasks.setCommunityCount(communityCount);
+		return tasks;
+	}
+
+	@Override
+	public CountScoresResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd) {
+//		communityCount: 关联小区数量
+//		averageScore: 平均得分
+//		taskCount: 任务数
+//		correctionRate: 整改率
+//
+		CountSampleTasksResponse response = new CountSampleTasksResponse();
+
+		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+		if(sample != null) {
+			response.setName(sample.getName());
+		}
+
+		return response;
+	}
+
+	@Override
+	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 		return null;
 	}
 }

@@ -1,5 +1,6 @@
 package com.everhomes.rest.quality;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -15,6 +16,14 @@ public class ListQualityInspectionTasksResponse {
 	
 	@ItemType(QualityInspectionTaskDTO.class)
 	private List<QualityInspectionTaskDTO> tasks;
+
+	private String sampleName;
+
+	private Integer communityCount;
+
+	private Timestamp startTime;
+
+	private Timestamp endTime;
 	
 	private Long nextPageAnchor;
 
@@ -41,6 +50,38 @@ public class ListQualityInspectionTasksResponse {
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
+	}
+
+	public Integer getCommunityCount() {
+		return communityCount;
+	}
+
+	public void setCommunityCount(Integer communityCount) {
+		this.communityCount = communityCount;
+	}
+
+	public Timestamp getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Timestamp endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getSampleName() {
+		return sampleName;
+	}
+
+	public void setSampleName(String sampleName) {
+		this.sampleName = sampleName;
+	}
+
+	public Timestamp getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Timestamp startTime) {
+		this.startTime = startTime;
 	}
 
 	@Override
