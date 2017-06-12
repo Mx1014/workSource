@@ -24,12 +24,23 @@ public class GetApartmentDetailResponse {
 	private String apartmentName;
 	private Byte status;
 	private Double areaSize;
+	private Byte communityType;
 	private String enterpriseName;
 	@ItemType(OrganizationOwnerDTO.class)
 	private List<OrganizationOwnerDTO> owerList;
 	private Long nextPageAnchor;
 
 	
+	public Byte getCommunityType() {
+		return communityType;
+	}
+
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
+
+
 	public String getBuildingName() {
 		return buildingName;
 	}

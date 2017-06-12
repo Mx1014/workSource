@@ -2143,15 +2143,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				response.setOwerList(owerList);
 			}
 		}
-		
+		response.setCommunityType(community.getCommunityType());
 		return response;
 	}
 	
 	private OrganizationOwnerDTO convert(OrganizationOwnerAddress organizationOwnerAddress) {
 		OrganizationOwnerDTO organizationOwnerDTO = new OrganizationOwnerDTO();
 		OrganizationOwner organizationOwner = propertyMgrProvider.findOrganizationOwnerById(organizationOwnerAddress.getOrganizationOwnerId());
-		organizationOwnerDTO.setContactName(organizationOwner.getContactName());
-		organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
+		if (organizationOwner != null) {
+			organizationOwnerDTO.setContactName(organizationOwner.getContactName());
+			organizationOwnerDTO.setContactToken(organizationOwner.getContactToken());
+		}
 		return organizationOwnerDTO;
 	}
 
