@@ -49,6 +49,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
@@ -117,6 +118,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organization.setPath(organization.getPath() + "/" + id);
+		organization.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
@@ -291,6 +293,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	
 	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {
+		return listEnterpriseByNamespaceIds(namespaceId, organizationType, null, locator, pageSize);
+	}
+
+	@Override
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
+			Byte setAdminFlag, CrossShardListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
@@ -303,6 +311,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 		if(!StringUtils.isEmpty(organizationType)){
 			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+		}
+		if (setAdminFlag != null) {
+			query.addConditions(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG.eq(setAdminFlag));
 		}
 		
 		if(null != locator.getAnchor()){
@@ -2414,6 +2425,68 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
+	public List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator) {
+		List<Long> organizationIds = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, (DSLContext context, Object reducingContext)->{
+			int size = pageSize + 1;
+			organizationIds.addAll(context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG.eq(setAdminFlag))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+				.andExists(
+						context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
+							.where(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID))
+							.and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId))
+							.and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.ne(OrganizationAddressStatus.INACTIVE.getCode()))
+				).orderBy(Tables.EH_ORGANIZATIONS.ID.desc())
+				.limit(size)
+				.fetch().map(r->r.getValue(Tables.EH_ORGANIZATIONS.ID))
+			);
+			return true;
+		});
+		
+		locator.setAnchor(null);
+		if(organizationIds.size() >= pageSize){
+			organizationIds.remove(organizationIds.size() - 1);
+			locator.setAnchor(organizationIds.get(organizationIds.size() - 1));
+		}
+        return organizationIds;
+	}
+
+	@Override
+	public List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize,
+			CrossShardListingLocator locator) {
+		List<Long> organizationIds = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, (DSLContext context, Object reducingContext)->{
+			int size = pageSize + 1;
+			organizationIds.addAll(context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG.eq(setAdminFlag))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
+				.and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+				.andExists(
+						context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+							.where(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID))
+							.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()))
+							.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+							.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId))
+				).orderBy(Tables.EH_ORGANIZATIONS.ID.desc())
+				.limit(size)
+				.fetch().map(r->r.getValue(Tables.EH_ORGANIZATIONS.ID))
+			);
+			return true;
+		});
+		
+		locator.setAnchor(null);
+		if(organizationIds.size() >= pageSize){
+			organizationIds.remove(organizationIds.size() - 1);
+			locator.setAnchor(organizationIds.get(organizationIds.size() - 1));
+		}
+        return organizationIds;
+	}
+
+	@Override
 	public List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName) {
 		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
@@ -3153,6 +3226,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationAddress> listOrganizationAddressByOrganizationId(Long organizationId) {
 		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESSES)
 	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+	       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()))
 	       		 .fetch()
 	       		 .map(r->ConvertHelper.convert(r, OrganizationAddress.class));	       		 
 	}

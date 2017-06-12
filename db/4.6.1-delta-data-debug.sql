@@ -52,5 +52,22 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) VALUES (@id:=@id+1, 999990, 0, 0, 0, '/home', 'Bizs', '企业人才', '企业人才', 'cs://1/image/aW1hZ2UvTVRvNE56STNNamxsWW1GalpUUTJOamhpTVRKbFpqTTBOVEJoTkRrelpUZzJaUQ', 1, 1, 14, '{"url":"http://core.zuolin.com/enterprise-talent/build/index.html?hideNavigationBar=1#/home_page#sign_suffix"}', 2, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL, NULL, 0, NULL);
 
 
+-- 导出无数据提示，add by tt, 20170522
+select max(id) into @id from `eh_locale_strings`;
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id+1, 'organization', '800000', 'zh_CN', '无数据！');
 
+-- 初始化organization表中是否设置了企业管理员标记，add by tt, 20170522
+update eh_organizations t1
+set t1.set_admin_flag = 1
+where t1.`status` = 2
+and t1.parent_id = 0
+and t1.group_type = 'ENTERPRISE'
+and exists (
+	select 1 
+	from eh_acl_role_assignments t2
+	where t2.owner_type = 'EhOrganizations'
+	and t2.owner_id = t1.id
+	and t2.target_type = 'EhUsers'
+	and t2.role_id = 1005
+);
 
