@@ -1,23 +1,26 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
-
-import java.util.List;
+package com.everhomes.rest.comment;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+import java.util.List;
+
 
 /**
  * <ul>
- * 返回值
- * <li>nextPageAnchor: 分页的锚点，下一页开始取数据的位置</li>
- * <li>commentList: 评论列表，参考{@link com.everhomes.rest.news.NewsCommentDTO}</li>
+ *     <li>nextPageAnchor: nextPageAnchor</li>
+ *     <li>commentDtos: 评论列表，参考 {@link com.everhomes.rest.comment.CommentDTO}</li>
+ *     <li>commentCount: 评论总数</li>
  * </ul>
  */
-public class ListNewsCommentResponse {
+public class ListCommentsResponse {
+
 	private Long nextPageAnchor;
-	@ItemType(NewsCommentDTO.class)
-	private List<NewsCommentDTO> commentList;
+
+	@ItemType(CommentDTO.class)
+	List<CommentDTO> commentDtos;
+
 	private Long commentCount;
 
 	public Long getNextPageAnchor() {
@@ -28,12 +31,12 @@ public class ListNewsCommentResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<NewsCommentDTO> getCommentList() {
-		return commentList;
+	public List<CommentDTO> getCommentDtos() {
+		return commentDtos;
 	}
 
-	public void setCommentList(List<NewsCommentDTO> commentList) {
-		this.commentList = commentList;
+	public void setCommentDtos(List<CommentDTO> commentDtos) {
+		this.commentDtos = commentDtos;
 	}
 
 	public Long getCommentCount() {
