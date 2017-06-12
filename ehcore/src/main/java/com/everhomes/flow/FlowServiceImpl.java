@@ -11,6 +11,10 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.action.FlowGraphMessageAction;
+import com.everhomes.flow.action.FlowGraphSMSAction;
+import com.everhomes.flow.action.FlowGraphScriptAction;
+import com.everhomes.flow.action.FlowGraphTrackerAction;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -450,6 +454,9 @@ public class FlowServiceImpl implements FlowService {
         button.setFlowUserType(userType.getCode());
         button.setButtonName(buttonDefName(flow.getNamespaceId(), stepType));
         button.setSubjectRequiredFlag(TrueOrFalseFlag.FALSE.getCode());
+        if (stepType == FlowStepType.REMINDER_STEP) {
+            button.setRemindCount(1);
+        }
         if (stepType == FlowStepType.TRANSFER_STEP) {
             button.setNeedProcessor((byte) 1);
         }
@@ -1881,6 +1888,7 @@ public class FlowServiceImpl implements FlowService {
         flowCase.setCaseType(FlowCaseType.INNER.getCode());
         flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
         flowCase.setOrganizationId(snapshotFlow.getOrganizationId());
+        flowCase.setApplierOrganizationId(flowCaseCmd.getCurrentOrganizationId());
 
         if (flowCase.getModuleType() == null) {
             flowCase.setModuleType(FlowModuleType.NO_MODULE.getCode());
@@ -2883,8 +2891,7 @@ public class FlowServiceImpl implements FlowService {
                 }
             }
         }
-
-        return users;
+        return users.stream().distinct().collect(Collectors.toList());
     }
 
     @Override

@@ -70,4 +70,7 @@ ALTER TABLE `eh_organization_community_requests` ADD INDEX `community_id` (`comm
 ALTER TABLE `eh_service_alliances` ADD COLUMN `display_flag` TINYINT NOT NULL DEFAULT '1' COMMENT '0:hide,1:display';
 ALTER TABLE `eh_service_alliances` CHANGE COLUMN `default_order` `default_order` BIGINT COMMENT 'default value is id';
 
+-- 给flowCase增加申请人在当前场景下的公司id字段   add by xq.tian  2017/06/08
+ALTER TABLE `eh_flow_cases` ADD COLUMN `applier_organization_id` BIGINT COMMENT 'applier current organization_id';
+
   
