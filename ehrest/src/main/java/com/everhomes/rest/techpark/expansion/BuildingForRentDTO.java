@@ -54,6 +54,7 @@ public class BuildingForRentDTO {
 	private String   posterUri;
 	private String   posterUrl;
 //	private String   subject;
+	private Long createUid;
 	private String   rentAreas;
 	private String   contacts;
 	private String   contactPhone;
@@ -87,6 +88,14 @@ public class BuildingForRentDTO {
 	private List<PostApprovalFormItem> formValues;
 
 	private Long requestFormId;
+
+	public Long getCreateUid() {
+		return createUid;
+	}
+
+	public void setCreateUid(Long createUid) {
+		this.createUid = createUid;
+	}
 
 	public Long getRequestFormId() {
 		return requestFormId;

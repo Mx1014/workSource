@@ -723,7 +723,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			dto.setDeleteFlag(LeasePromotionDeleteFlag.NOTSUPPROT.getCode());
 			if (LeaseIssuerType.NORMAL_USER.getCode().equals(dto.getIssuerType())) {
 				if (LeasePromotionFlag.ENABLED.getCode() == flag.getFlag()
-						&& userId == c.getCreateUid()) {
+						&& userId == dto.getCreateUid()) {
 					dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
 				}
 			}
@@ -786,6 +786,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				dto.setRequestFormId(request.getSourceId());
 			}
 		}
+
 	}
 
     private void processDetailUrl(BuildingForRentDTO dto) {
@@ -904,6 +905,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 
 			populateRentDTO(dto);
+
+			//当前用户可以更新
+			dto.setDeleteFlag(LeasePromotionDeleteFlag.SUPPROT.getCode());
 
 			return dto;
 		});
