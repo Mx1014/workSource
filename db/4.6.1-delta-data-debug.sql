@@ -171,5 +171,11 @@ SET @id =(SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'approval.flow.context','1','zh_CN','请假申请的内容','请假类型：${absentCategory}\n请假时间${beginTime}至${endTime}',0); 
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'approval.flow.context','2','zh_CN','异常申请的内容','异常日期：${exceptionDate}\n打卡详情：${punchDetail}',0); 
 INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'approval.flow.context','3','zh_CN','加班申请的内容','加班日期：${overTimeDate}\n加班时长：${timeLength}',0); 
-INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'approval.flow','1','zh_CN','请假申请的时间','${beginTime}至${endTime}',0); 
+INSERT INTO `eh_locale_templates` (`id`,`scope`,`code`,`locale`,`description`,`text`,`namespace_id`)VALUES ((@id:=@id+1),'approval.flow','1','zh_CN','请假申请的时间','${beginTime}至${endTime}',0);
 
+-- 工作流新增两个变量 add by xq.tian  2017/06/09
+SET @flow_var_max_id = (SELECT MAX(id) FROM `eh_flow_variables`);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_organization_manager', '发起人的企业管理员', 'node_user_processor', 'bean_id', 'flow-variable-applier-organization-manager', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_department_manager', '发起人的部门经理', 'node_user_processor', 'bean_id', 'flow-variable-applier-department-manager', 1);
