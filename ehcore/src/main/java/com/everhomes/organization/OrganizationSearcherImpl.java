@@ -201,7 +201,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 
        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
-        QueryBuilder qb;
+        QueryBuilder qb = null;
         
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	if (StringUtils.isEmpty(cmd.getBuildingName())) {
