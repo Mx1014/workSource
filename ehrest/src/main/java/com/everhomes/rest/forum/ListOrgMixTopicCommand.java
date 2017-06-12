@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId: 机构ID</li>
  * <li>communityId: {@link com.everhomes.rest.forum.OrganizationTopicMixType}</li>
  * <li>excludeCategories: 不查询的内容类型 {@link com.everhomes.rest.category.CategoryConstants}</li>
+ * <li>categoryId: 选择类型的Id，1-话题、1010-活动、1011-投票{@link com.everhomes.rest.category.CategoryConstants}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -22,7 +23,9 @@ public class ListOrgMixTopicCommand {
     private Integer pageSize;
     
     @ItemType(Long.class)
-    private List<Long> excludeCategories; 
+    private List<Long> excludeCategories;
+
+    private Long categoryId;
     
     public ListOrgMixTopicCommand() {
     }
@@ -68,7 +71,15 @@ public class ListOrgMixTopicCommand {
 		this.excludeCategories = excludeCategories;
 	}
 
-	@Override
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -95,7 +95,7 @@ public class ForumController extends ControllerBase {
     
     /**
      * <b>URL: /forum/listTopics</b>
-     * <p>查询指定论坛的帖子列表（不区分类型查询）</p>
+     * <p>查询指定论坛的帖子列表</p>
      */
     @RequestMapping("listTopics")
     @RestReturn(value=ListPostCommandResponse.class)

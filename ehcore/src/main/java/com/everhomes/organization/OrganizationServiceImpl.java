@@ -1724,12 +1724,18 @@ public class OrganizationServiceImpl implements OrganizationService {
     	    forumCmd.setPageAnchor(cmd.getPageAnchor());
     	    forumCmd.setPageSize(cmd.getPageSize());
     	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
+    	    forumCmd.setCategoryId(cmd.getCategoryId());
     	    response = forumService.listTopicsByForums(forumCmd);
 	        break;
 	    case COMMUNITY_ALL:
 	    	QueryOrganizationTopicCommand command = ConvertHelper.convert(cmd, QueryOrganizationTopicCommand.class);
 	    	command.setOrganizationId(organizationId);
 	    	command.setPrivateFlag(PostPrivacy.PRIVATE.getCode());
+
+	    	// 因为此处EmbeddedAppId为空，在listOrgTopics方法中不会走到活动的查询中，因此此处加上论坛的CategoryId不会和活动的CategoryId混淆。
+			// add by yanjn  20170612
+	    	command.setCategoryId(cmd.getCategoryId());
+
 	    	response = forumService.listOrgTopics(command);
 	        break;
 	    }
