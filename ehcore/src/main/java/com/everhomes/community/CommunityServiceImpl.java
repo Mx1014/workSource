@@ -1208,7 +1208,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}else {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
-				building.setContact(data.getContactor());
+				building.setContact(data.getPhone());
 				building.setAreaSize(Double.valueOf(data.getAreaSize()));
 				String contactToken = data.getPhone();
 				if(ct.get(contactToken) != null) {

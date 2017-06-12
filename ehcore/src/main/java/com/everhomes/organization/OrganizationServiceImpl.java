@@ -6081,6 +6081,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				LOGGER.error("building Non-existent, buildingName = {}", data.getBuildingName());
 				log.setData(data);
 				log.setErrorLog("building Non-existent");
+				log.setCode(OrganizationServiceErrorCode.ERROR_BUILDING_NOT_EXIST);
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -6091,6 +6092,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				LOGGER.error("address Non-existent, address = {}", data.getAddress());
 				log.setData(data);
 				log.setErrorLog("address Non-existent");
+				log.setCode(OrganizationServiceErrorCode.ERROR_APARTMENT_NOT_EXIST);
 				errorDataLogs.add(log);
 				continue;
 			}
@@ -6098,10 +6100,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
 
 			if(null != orgAddress){
-				LOGGER.error("address has been checked in, address = {}", data.getAddress());
-				log.setData(data);
-				log.setErrorLog("address has been checked in");
-				errorDataLogs.add(log);
+//				LOGGER.error("address has been checked in, address = {}", data.getAddress());
+//				log.setData(data);
+//				log.setErrorLog("address has been checked in");
+//				errorDataLogs.add(log);
 				continue;
 			}
 
