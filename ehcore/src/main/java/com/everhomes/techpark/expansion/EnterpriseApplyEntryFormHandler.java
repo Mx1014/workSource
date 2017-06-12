@@ -35,9 +35,13 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
+        LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
+                cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
+
         String json = cmd.getCustomObject();
 
         EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
+        cmd2.setRequestFormId(request.getSourceId());
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());
         cmd2.setFormValues(cmd.getValues());
