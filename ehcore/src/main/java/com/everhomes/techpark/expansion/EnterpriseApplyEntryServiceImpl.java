@@ -354,9 +354,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
 
-        if (null == cmd.getIssuerType())
-            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
-
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		if(null != cmd.getContactPhone())
@@ -364,10 +361,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-		
+
+
         FlowCase flowCase = dbProvider.execute(status -> {
 
-        	//added by Janson
+			String issuerType = LeaseIssuerType.ORGANIZATION.getCode();
+			//added by Janson
         	String projectType = EntityType.COMMUNITY.getCode();
         	
             enterpriseApplyEntryProvider.createApplyEntry(request);
@@ -427,6 +426,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
     			//4. 虚位以待的楼栋地址
     			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+
+				issuerType = leasePromotion.getIssuerType();
+
     			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
     			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
@@ -441,7 +443,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 
 			buildingIds.add(opRequestBuilding.getBuildingId());
-    		if (null == cmd.getIssuerType() || LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
+    		if (LeaseIssuerType.ORGANIZATION.getCode().equals(issuerType)) {
                 FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
                 request.setFlowcaseId(flowCase1.getId());
                 enterpriseApplyEntryProvider.updateApplyEntry(request);

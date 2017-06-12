@@ -59,8 +59,6 @@ public class EnterpriseApplyEntryCommand {
 
 	private Long contractId;
 
-	private String issuerType;
-
 	private Long addressId;
 	private Long buildingId;
 
@@ -99,14 +97,6 @@ public class EnterpriseApplyEntryCommand {
 
 	public void setBuildingId(Long buildingId) {
 		this.buildingId = buildingId;
-	}
-
-	public String getIssuerType() {
-		return issuerType;
-	}
-
-	public void setIssuerType(String issuerType) {
-		this.issuerType = issuerType;
 	}
 
 	public String getSourceType() {
