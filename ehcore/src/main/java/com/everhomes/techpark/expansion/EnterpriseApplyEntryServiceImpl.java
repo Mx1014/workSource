@@ -412,15 +412,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
-				buildingIds.add(opRequestBuilding.getId());
-
 			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
     			//3. 园区介绍直接就是楼栋的地址
     			opRequestBuilding.setBuildingId(cmd.getSourceId());
     			resourceCategory = communityProvider.findResourceCategoryAssignment(cmd.getSourceId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-				buildingIds.add(opRequestBuilding.getId());
 
 			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
@@ -433,7 +430,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-				buildingIds.add(opRequestBuilding.getId());
 
 			}
     		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId()) {
