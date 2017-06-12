@@ -5644,6 +5644,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		Integer namespaceId = exNamespaceId;
 
+		Organization org = checkOrganization(cmd.getOrganizationId());
+
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 
 		return this.dbProvider.execute((TransactionStatus status) -> {
@@ -5657,10 +5659,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
 				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
 			}else{
-				if(OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE){
-					m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					m.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-					organizationProvider.updateOrganizationMember(m);
+				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
+				for (OrganizationMember organizationMember: members) {
+					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					organizationMember.setContactName(cmd.getAccountName());
+					organizationProvider.updateOrganizationMember(organizationMember);
 				}
 			}
 			UserIdentifier userIdentifier = null;
