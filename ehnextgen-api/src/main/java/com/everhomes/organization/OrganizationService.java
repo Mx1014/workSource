@@ -495,7 +495,7 @@ public interface OrganizationService {
 
     void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
 
-    ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
+    List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
 
     ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
 
@@ -505,5 +505,5 @@ public interface OrganizationService {
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
-	Byte getOrganizationMemberVisibleFlag(String contactToken, Long organizationId);
+    List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
 }

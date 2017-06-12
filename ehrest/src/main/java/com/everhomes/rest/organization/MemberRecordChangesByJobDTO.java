@@ -2,17 +2,17 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
- * <li>memberId: 员工编号</li>
  * <li>operationTime: 修改时间</li>
- * <li>personChangeType: 人员变动类型，只记录入职、转正、离职、变更部门、岗位、职级</li>
+ * <li>personChangeType: 人员变动类型，参考{@link PersonChangeType}</li>
  * <li>reason: 操作备注</li>
  * </ul>
  */
 public class MemberRecordChangesByJobDTO {
 
-    private Long memberId;
 
     private String operationTime;
 
@@ -21,14 +21,6 @@ public class MemberRecordChangesByJobDTO {
     private String reason;
 
     public MemberRecordChangesByJobDTO() {
-    }
-
-    public Long getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
     }
 
     public String getOperationTime() {

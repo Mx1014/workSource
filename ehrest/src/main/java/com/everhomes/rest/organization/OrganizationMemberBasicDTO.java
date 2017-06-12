@@ -11,6 +11,7 @@ import java.util.List;
 /**
  * <ul>
  * <li>id：员工标识号</li>
+ * <li>membersId: 原始id(members表中的id)</li>
  * <li>namespaceId</>
  * <li>organizationId</li>
  * <li>employeeNo: 员工编号(可自由设定)</li>
@@ -37,6 +38,8 @@ import java.util.List;
 public class OrganizationMemberBasicDTO {
     @NotNull
     private Long id;
+
+    private Long membersId;
 
     private Integer namespaceId;
 
@@ -92,6 +95,14 @@ public class OrganizationMemberBasicDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getMembersId() {
+        return membersId;
+    }
+
+    public void setMembersId(Long membersId) {
+        this.membersId = membersId;
     }
 
     public Integer getNamespaceId() {

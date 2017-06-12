@@ -56,4 +56,12 @@ public interface OrganizationServiceErrorCode {
     int ERROR_CONTACTNAME_ISNULL = 700000;
 
     int ERROR_CONTACTTOKEN_ISNULL = 700001;
+
+    int ERROR_GENDER_ISNULL = 700002;   // 性别未填写
+    int ERROR_DEPARTMENT_ISNULL = 700003;   // 部门未填写
+    int ERROR_JOBPOSITION_ISNULL = 700004;  //  岗位未填写
+    int ERROR_CHECKINTIME_ISNULL = 700005;  //  入职日期未填写
+    int ERROR_EMPLOYEESTATUS_ISNULL = 700006;   //  试用期未填写
+    int ERROR_EMPLOYEETIME_ISNULL = 700007; //  转正日期未填写
+
 }

@@ -1365,10 +1365,10 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
+/*    *//**
      * <b>URL: /org/addOrganizationMember</b>
      * <p>新增员工</p>
-     */
+     *//*
     @RequestMapping("addOrganizationMember")
     @RestReturn(value = OrganizationMemberV2DTO.class)
     public RestResponse addOrganizationMember(@Valid AddOrganizationMemberCommand cmd) {
@@ -1377,7 +1377,7 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }
+    }*/
 
     /**
      * <b>URL: /org/getOrganizationMemberBasicInfo</b>
@@ -1653,9 +1653,9 @@ public class OrganizationController extends ControllerBase {
      * <p>查看在职变动记录</p>
      */
     @RequestMapping("listMemberRecordChangesByJob")
-    @RestReturn(value = ListMemberRecordChangesByJobCommandResponse.class)
+    @RestReturn(value = MemberRecordChangesByJobDTO.class, collection = true)
     public RestResponse listMemberJobRecords(@Valid ListMemberRecordChangesByJobCommand cmd) {
-        ListMemberRecordChangesByJobCommandResponse res = this.organizationService.listMemberRecordChangesByJob(cmd);
+        List<MemberRecordChangesByJobDTO> res = this.organizationService.listMemberRecordChangesByJob(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
