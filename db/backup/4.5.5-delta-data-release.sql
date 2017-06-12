@@ -260,13 +260,13 @@ UPDATE `eh_locale_templates` SET `text`='您申请预约的${useTime}的${resour
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 	VALUES ('50910', '内部会议室', '50000', NULL, NULL, '1', '2', '/50000/50910', 'park', '440', '40400');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('50912', '默认参数', '50910', NULL, 'resource--defaultParameter/organization', '0', '2', '/50000/50910/50912', 'park', '441', '40400');
+	VALUES ('50912', '默认参数', '50910', NULL, 'resource--defaultParameter/status/3', '0', '2', '/50000/50910/50912', 'park', '441', '40400');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('50914', '资源发布', '50910', NULL, 'resource_publish/organization', '0', '2', '/50000/50910/50914', 'park', '444', '40400');
+	VALUES ('50914', '资源发布', '50910', NULL, 'resource_publish/status/3', '0', '2', '/50000/50910/50914', 'park', '444', '40400');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('50916', '预订详情', '50910', NULL, 'rental_info/organization', '0', '2', '/50000/50910/50916', 'park', '446', '40400');
+	VALUES ('50916', '预订详情', '50910', NULL, 'rental_info/status/3', '0', '2', '/50000/50910/50916', 'park', '446', '40400');
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('50920', '工作流设置', '50910', NULL, 'react:/working-flow/flow-list/resource-reservation/40400/organization', '0', '2', '/50000/50910/50920', 'park', '475', '40400');
+	VALUES ('50920', '工作流设置', '50910', NULL, 'react:/working-flow/flow-list/resource-reservation/40400?status=3', '0', '2', '/50000/50910/50920', 'park', '475', '40400');
 	
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
@@ -289,8 +289,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50914, '', 'EhNamespaces', 1000000, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50916, '', 'EhNamespaces', 1000000, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50918, '', 'EhNamespaces', 1000000, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50920, '', 'EhNamespaces', 1000000, 2);
 
