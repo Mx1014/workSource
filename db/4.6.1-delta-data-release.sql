@@ -78,6 +78,7 @@ UPDATE `eh_service_alliances` SET `default_order` = `id`;
 -- 将服务联盟下的菜单机构管理改为服务管理 by dengs,20170524
 UPDATE `eh_web_menus` SET `name`='服务管理' WHERE `id` = 40520;
 
+-- added by wh  增加审批管理菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES('51000','审批管理','50000',NULL,'react:/approval-management/approval-list/51000','0','2','/50000/51000','park','591','51000'); 
 -- 给科兴加
