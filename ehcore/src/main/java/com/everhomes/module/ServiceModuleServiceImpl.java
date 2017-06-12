@@ -2,7 +2,6 @@ package com.everhomes.module;
 
 import com.everhomes.acl.AuthorizationProvider;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.acl.WebMenuPrivilege;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -19,8 +18,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -31,7 +28,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +161,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
         return results;
     }
+
 
     private List<ServiceModule> filterList(List<ServiceModule> modules, List<ServiceModuleScope> scopes) {
         List<ServiceModule> result = new ArrayList<ServiceModule>();
@@ -528,6 +525,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
         return dtos;
     }
 
+    @Override
+    public Byte checkModuleManage(CheckModuleManageCommand cmd){
+        Long userId = cmd.getUserId();
+        User user = UserContext.current().getUser();
+        if(null == userId){
+            userId = user.getId();
+        }
+        if(checkModuleManage(userId, cmd.getOrganizationId(), cmd.getModuleId())){
+            return 1;
+        }
+        return 0;
+    }
+
+    private boolean checkModuleManage(Long userId, Long organizationId, Long moduleId) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if (resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 获取模块下授权的用户项目
      * @param userId
@@ -537,10 +555,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
      */
     private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId){
         boolean allProjectFlag = false;
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         List<ProjectDTO> dtos = new ArrayList<>();
         //物业超级管理员拿所有项目
-        if(resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)){
+        if(checkModuleManage(userId, organizationId, moduleId)){
             allProjectFlag = true;
         }else{
             List<Target> targets = new ArrayList<>();

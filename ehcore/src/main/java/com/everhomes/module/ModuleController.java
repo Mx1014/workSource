@@ -162,4 +162,19 @@ public class ModuleController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /module/checkModuleManage</b>
+     * <p>
+     * 校验有没有模块管理权限
+     * </p>
+     */
+    @RequestMapping("checkModuleManage")
+    @RestReturn(value = Byte.class)
+    public RestResponse checkModuleManage(@Valid CheckModuleManageCommand cmd) {
+        RestResponse response = new RestResponse(serviceModuleService.checkModuleManage(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

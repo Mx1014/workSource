@@ -28,4 +28,6 @@ public interface ServiceModuleService {
 	List<ProjectDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd);
 
 	List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd);
+
+	Byte checkModuleManage(CheckModuleManageCommand cmd);
 }
