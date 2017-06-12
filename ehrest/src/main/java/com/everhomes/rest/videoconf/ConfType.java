@@ -6,11 +6,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>CONF_TYPE_VIDEO_ONLY: 仅视频 0</li>
  * <li>CONF_TYPE_PHONE_SUPPORT: 支持电话 1</li>
+ * <li>CONF_TYPE_TRIAL: 支持电话 1</li>
  * </ul>
  */
 public enum ConfType {
 
-	CONF_TYPE_VIDEO_ONLY("仅视频", (byte)0), CONF_TYPE_PHONE_SUPPORT("支持电话", (byte)1);
+	CONF_TYPE_VIDEO_ONLY("仅视频", (byte)0), CONF_TYPE_PHONE_SUPPORT("支持电话", (byte)1),CONF_TYPE_TRIAL("试用账号", (byte)4);
     
     private String code;
     private byte status;

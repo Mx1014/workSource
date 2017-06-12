@@ -2258,10 +2258,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 					account.setExpiredDate(order.getExpiredDate());
 				} else {
 					account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
-				}
+				} 
 				
 				account.setAccountCategoryId(order.getAccountCategoryId());
 				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+					account.setOwnerId(UserContext.current().getUser().getId());
 					account.setAccountType((byte) 1);
 				} else {
 					account.setAccountType((byte) 2);
