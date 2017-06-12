@@ -73,6 +73,11 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
     }
 
     @Override
+    public PostGeneralFormDTO updateGeneralFormPost(PostGeneralFormCommand cmd) {
+        return null;
+    }
+
+    @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());

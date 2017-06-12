@@ -62,6 +62,11 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     }
 
     @Override
+    public PostGeneralFormDTO updateGeneralFormPost(PostGeneralFormCommand cmd) {
+        return null;
+    }
+
+    @Override
     public GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd) {
         //
         GeneralApproval ga = generalApprovalProvider.getGeneralApprovalById(cmd
