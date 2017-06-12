@@ -1,38 +1,6 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
-import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.APPLY_PRIVILEGE_ID;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.PROCESS_PRIVILEGE_ID;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.Size;
-import javax.validation.metadata.ConstraintDescriptor;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -51,7 +19,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
@@ -62,33 +29,36 @@ import com.everhomes.rest.parking.ParkingCommonStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
-import com.everhomes.rest.parking.clearance.CheckAuthorityCommand;
-import com.everhomes.rest.parking.clearance.CheckAuthorityResponse;
-import com.everhomes.rest.parking.clearance.CheckAuthorityStatus;
-import com.everhomes.rest.parking.clearance.CreateClearanceLogCommand;
-import com.everhomes.rest.parking.clearance.CreateClearanceOperatorCommand;
-import com.everhomes.rest.parking.clearance.DeleteClearanceOperatorCommand;
-import com.everhomes.rest.parking.clearance.ListClearanceOperatorCommand;
-import com.everhomes.rest.parking.clearance.ListClearanceOperatorResponse;
-import com.everhomes.rest.parking.clearance.ParkingClearanceLogDTO;
-import com.everhomes.rest.parking.clearance.ParkingClearanceLogStatus;
-import com.everhomes.rest.parking.clearance.ParkingClearanceOperatorDTO;
-import com.everhomes.rest.parking.clearance.ParkingClearanceOperatorType;
-import com.everhomes.rest.parking.clearance.SearchClearanceLogCommand;
-import com.everhomes.rest.parking.clearance.SearchClearanceLogsResponse;
+import com.everhomes.rest.parking.clearance.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserPrivilegeMgr;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * Parking clearance service
@@ -344,7 +314,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         boolean success = dbProvider.execute(status -> {
             long logId = clearanceLogProvider.createClearanceLog(log);
             log.setId(logId);
-            this.createFlowCase(log);
+            this.createFlowCase(log, cmd.getOrganizationId());
             return true;
         });
         if (!success) {
@@ -354,7 +324,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         return toClearanceLogDTO(log);
     }
 
-    private Long createFlowCase(ParkingClearanceLog log) {
+    private Long createFlowCase(ParkingClearanceLog log, Long organizationId) {
         Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, log.getParkingLotId(), FlowOwnerType.PARKING.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
@@ -363,6 +333,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
             flowCaseCmd.setReferId(log.getId());
             flowCaseCmd.setReferType(EntityType.PARKING_CLEARANCE_LOG.getCode());
+            flowCaseCmd.setCurrentOrganizationId(organizationId);
             // flowCase摘要内容
             flowCaseCmd.setContent(this.getBriefContent(log));
 

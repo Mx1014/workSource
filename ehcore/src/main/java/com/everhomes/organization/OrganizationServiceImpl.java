@@ -6859,7 +6859,8 @@ System.out.println();
 	 * @param organizationIds
 	 * @return
      */
-	private List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds){
+	@Override
+	public List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds){
 		List<OrganizationManagerDTO>  dtos = new ArrayList<>();
 		//机构经理
 		List<String> types = new ArrayList<>();
