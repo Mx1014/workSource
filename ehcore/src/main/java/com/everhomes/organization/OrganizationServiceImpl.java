@@ -10471,10 +10471,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         return results;
     }
-    public ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
-                                                              Long userId, ImportOrganizationPersonnelDataCommand cmd){
+
+    public ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile, Long userId, ImportOrganizationPersonnelDataCommand cmd) {
         ImportFileTask task = new ImportFileTask();
-        try{
+        try {
             //  解析excel
             List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
             if (null == resultList || resultList.isEmpty()) {
@@ -10491,11 +10491,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 public ImportFileResponse importFile() {
                     ImportFileResponse response = new ImportFileResponse();
                     List<ImportOrganizationPersonnelFilesDTO> datas = handleImportOrganizationPersonnelFiles(resultList);
-/*                    List<ImportOrganizationPersonnelFilesDTO> dataMembers = handleImportOrganizationPersonnelMembers(resultList);
-                    List<ImportOrganizationPersonnelFilesDTO> dataMemberdetails = handleImportOrganizationPersonnelMemberDetails(resultList);
-                    List<ImportOrganizationPersonnelFilesDTO> dataEducations = handleImportOrganizationEducations(resultList);
-                    List<ImportOrganizationPersonnelFilesDTO> dataInsurances = handleImportOrganizationInsurances(resultList);
-                    List<ImportOrganizationPersonnelFilesDTO> dataContracts = handleImportOrganizationContracts(resultList);*/
                     if (datas.size() > 0) {
                         //设置导出报错的结果excel的标题
                         response.setTitle(datas.get(0));
@@ -10509,7 +10504,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     return response;
                 }
             }, task);
-        }catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.error("File can not be resolved...");
             e.printStackTrace();
         }
@@ -10587,41 +10582,341 @@ public class OrganizationServiceImpl implements OrganizationService {
     private List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> importOrganizationPersonnelFiles(List<ImportOrganizationPersonnelFilesDTO> list, Long userId, ImportOrganizationPersonnelDataCommand cmd) {
         List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> errorDataLogs = new ArrayList<>();
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        for (ImportOrganizationPersonnelFilesDTO data : list) {
-            membersRecord = this.checkImportOrganizationMembers(data);
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
-                continue;
-            }
-            membersRecord = this.checkImportOrganizationMemberDetails(data);
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
-                continue;
-            }
-            membersRecord = this.checkImportOrganizationMemberEducations(data);
 
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
+        // 部门校验规则
+        Organization org = checkOrganization(cmd.getOrganizationId());
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%", groupTypes);
+        List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%",
+                Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()));
+        List<Organization> jobLevels = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "%",
+                Collections.singletonList(OrganizationGroupType.JOB_LEVEL.getCode()));
+
+        Map<String, Organization> jobPositionMap = this.convertOrgListToStrMap(jobPositions);
+        Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
+        Map<String, Organization> jobLevelMap = this.convertOrgListToStrMap(jobLevels);
+
+        // 开始校验
+        for (ImportOrganizationPersonnelFilesDTO data : list) {
+            log = this.checkImportOrganizationMembers(data,cmd.getOrganizationId(),deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
+            if (log != null) {
+                errorDataLogs.add(log);
                 continue;
             }
-            membersRecord = this.checkImportOrganizationMemberWorkExperiences(data);
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
+            log = this.checkImportOrganizationMemberDetails(data);
+            if (log != null) {
+                errorDataLogs.add(log);
                 continue;
             }
-            membersRecord = this.checkImportOrganizationMemberInsurances(data);
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
+            log = this.checkImportOrganizationMemberEducations(data);
+
+            if (log != null) {
+                errorDataLogs.add(log);
                 continue;
             }
-            membersRecord = this.checkImportOrganizationMemberContracts(data);
-            if (membersRecord != null) {
-                errorDataLogs.add(membersRecord);
+            log = this.checkImportOrganizationMemberWorkExperiences(data);
+            if (log != null) {
+                errorDataLogs.add(log);
                 continue;
             }
+            log = this.checkImportOrganizationMemberInsurances(data);
+            if (log != null) {
+                errorDataLogs.add(log);
+                continue;
+            }
+            log = this.checkImportOrganizationMemberContracts(data);
+            if (log != null) {
+                errorDataLogs.add(log);
+                continue;
+            }
+
+            Long detailId = this.saveOrganizationMembers(data,cmd.getOrganizationId(),deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
+            this.saveOrganizationMemberDetails(data,detailId);
+            this.saveOrganizationMemberEducations(data,detailId);
+            this.saveOrganizationMemberWorkExperiences(data,detailId);
+            this.saveOrganizationMemberInsurances(data,detailId);
+            this.saveOrganizationMemberContracts(data,detailId);
         }
         return null;
     }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMembers(
+            ImportOrganizationPersonnelFilesDTO data, Long organizationId,
+            Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
+            Map<String, Organization> jobLevelMap, Organization org,
+            int namespaceId) {
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if (StringUtils.isEmpty(data.getContactName())) {
+            LOGGER.warn("Organization member contactName is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member contactName is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTNAME_ISNULL);
+            return log;
+        }
+
+        if (StringUtils.isEmpty(data.getGender())) {
+            LOGGER.warn("Organization member gender is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member gender is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_GENDER_ISNULL);
+            return log;
+        }
+
+        if (StringUtils.isEmpty(data.getContactToken())) {
+            LOGGER.warn("Organization member contactToken is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member contactToken is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
+            return log;
+        }
+
+        if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
+            String[] deptStrArr = data.getOrgnaizationPath().split(",");
+            for (String deptName : deptStrArr) {
+                Organization dept = deptMap.get(deptName.trim());
+                if (null == dept) {
+                    LOGGER.debug("Organization member department Non-existent. departmentName = {}", deptName);
+                    log.setData(data);
+                    log.setErrorLog("Organization member department Non-existent.");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    return log;
+                }
+            }
+        } else {
+            LOGGER.warn("Organization member department is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member department is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_DEPARTMENT_ISNULL);
+            return log;
+        }
+
+        if (!StringUtils.isEmpty(data.getJobPosition())) {
+            String[] jobPositionStrArr = data.getJobPosition().split(",");
+            for (String jobPositionName : jobPositionStrArr) {
+                Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
+                if (null == jobPosition) {
+                    LOGGER.debug("Organization member jobPosition Non-existent. jobPositionName = {}", jobPositionName);
+                    log.setData(data);
+                    log.setErrorLog("Organization member jobPosition Non-existent.");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    return log;
+                }
+            }
+        } else {
+            LOGGER.warn("Organization member jobPosition is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member jobPosition is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_JOBPOSITION_ISNULL);
+            return log;
+        }
+
+        if (!StringUtils.isEmpty(data.getCheckInTime())) {
+            if (StringUtils.isEmpty(data.getEmployeeTime())) {
+                LOGGER.warn("Organization member employeeTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member employeeTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEETIME_ISNULL);
+                return log;
+            }
+        } else {
+            LOGGER.warn("Organization member checkInTime is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member checkInTime is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_CHECKINTIME_ISNULL);
+            return log;
+        }
+
+        if (StringUtils.isEmpty(data.getEmployeeStatus())) {
+            LOGGER.warn("Organization member employeeStatus is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member employeeStatus is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEESTATUS_ISNULL);
+            return log;
+        }
+
+        if (!StringUtils.isEmpty(data.getJobLevel())) {
+            String[] jobLevelStrArr = data.getJobLevel().split(",");
+            for (String jobLevelName : jobLevelStrArr) {
+                Organization jobLevel = jobLevelMap.get(jobLevelName);
+                if (null == jobLevel) {
+                    LOGGER.debug("Organization member jobLevel Non-existent. jobLevelName = {}", jobLevelName);
+                    log.setData(data);
+                    log.setErrorLog("Organization member jobLevel Non-existent.");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    return log;
+                }
+            }
+        }
+
+        VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
+        verifyCommand.setEnterpriseId(org.getId());
+        verifyCommand.setNamespaceId(namespaceId);
+        verifyCommand.setPhone(data.getContactToken());
+        try {
+            this.verifyPersonnelByPhone(verifyCommand);
+        } catch (RuntimeErrorException e) {
+            LOGGER.debug(e.getMessage());
+            log.setData(data);
+            log.setErrorLog(e.getMessage());
+            log.setCode(e.getErrorCode());
+            log.setScope(e.getErrorScope());
+            return log;
+        }
+
+        return log;
+    }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data) {
+        return null;
+
+    }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data) {
+        return null;
+
+    }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data) {
+        return null;
+
+    }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data) {
+        return null;
+
+    }
+
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data) {
+        return null;
+
+    }
+
+    private Long saveOrganizationMembers(
+            ImportOrganizationPersonnelFilesDTO data, Long organizationId,
+            Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
+            Map<String, Organization> jobLevelMap, Organization org,
+            int namespaceId) {
+        AddOrganizationPersonnelCommand memberCommand = new AddOrganizationPersonnelCommand();
+
+        //  公司
+        memberCommand.setOrganizationId(organizationId);
+
+        //  联系号码
+        memberCommand.setContactToken(data.getContactToken());
+
+        //  姓名
+        memberCommand.setContactName(data.getContactName());
+
+        //  性别
+        Byte gender;
+        if (data.getGender().trim().equals("男")) {
+            gender = 1;
+        } else{
+            gender = 2;
+        }
+        memberCommand.setGender(gender);
+
+        //  获取部门
+        String[] deptStrArr = data.getOrgnaizationPath().split(",");
+        List<Long> departmentIds = new ArrayList<>();
+        for (String deptName : deptStrArr) {
+            Organization dept = deptMap.get(deptName.trim());
+            departmentIds.add(dept.getId());
+        }
+        memberCommand.setDepartmentIds(departmentIds);
+
+        //  获取岗位
+        String[] jobPositionStrArr = data.getJobPosition().split(",");
+        List<Long> jobPositionIds = new ArrayList<>();
+        for (String jobPositionName : jobPositionStrArr) {
+            Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
+            jobPositionIds.add(jobPosition.getId());
+        }
+        memberCommand.setJobPositionIds(jobPositionIds);
+
+        //  入职日期
+        memberCommand.setCheckInTime(data.getCheckInTime());
+
+        //  试用期
+        Byte employeeStatus;
+        if(data.getEmployeeStatus().equals("是")){
+            employeeStatus = 0;
+        }else{
+            employeeStatus = 1;
+        }
+        memberCommand.setEmployeeStatus(employeeStatus);
+
+        //  转正日期
+        if(StringUtils.isEmpty(data.getEmployeeTime()))
+            memberCommand.setEmploymentTime(data.getEmployeeTime());
+
+        //  职级
+        if (!StringUtils.isEmpty(data.getJobLevel())) {
+            String[] jobLevelStrArr = data.getJobLevel().split(",");
+            List<Long> jobLevelIds = new ArrayList<>();
+            for (String jobLevelName : jobLevelStrArr) {
+                Organization jobLevel = jobLevelMap.get(jobLevelName);
+                jobLevelIds.add(jobLevel.getId());
+            }
+            memberCommand.setJobLevelIds(jobLevelIds);
+        }
+
+        //  员工类型
+        Byte employeeType;
+        if(!StringUtils.isEmpty(data.getEmployeeType())){
+            if(data.getEmployeeType().equals("全职")){
+                employeeType = 0;
+            }else if(data.getEmployeeType().equals("兼职")){
+                employeeType = 1;
+            }else if(data.getEmployeeType().equals("实习")){
+                employeeType = 2;
+            }else{
+                employeeType = 3;
+            }
+            memberCommand.setEmployeeType(employeeType);
+        }
+        if(!StringUtils.isEmpty(data.getEmployeeNo()))
+            memberCommand.setEmployeeNo(data.getEmployeeNo());
+
+        //  查找手机号
+        VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
+        verifyCommand.setEnterpriseId(org.getId());
+        verifyCommand.setNamespaceId(namespaceId);
+        verifyCommand.setPhone(memberCommand.getContactToken());
+        VerifyPersonnelByPhoneCommandResponse verifyRes = this.verifyPersonnelByPhone(verifyCommand);
+
+        //  设置目标
+        if (null != verifyRes && null != verifyRes.getDto()) {
+            memberCommand.setTargetId(verifyRes.getDto().getTargetId());
+            memberCommand.setTargetType(verifyRes.getDto().getTargetType());
+        }
+
+        //  新增人员并返回detailId
+        OrganizationMemberDTO member = this.addOrganizationPersonnel(memberCommand);
+        return member.getDetailId();
+    }
+
+    private void saveOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data, Long detailId){
+
+    }
+    private void saveOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data, Long detailId){
+
+    }
+    private void saveOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data, Long detailId){
+
+    }
+    private void saveOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data, Long detailId){
+
+    }
+    private void saveOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data, Long detailId){
+
+    }
+
 }
 
 
