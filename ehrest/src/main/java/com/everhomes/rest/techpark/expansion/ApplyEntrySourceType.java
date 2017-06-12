@@ -27,16 +27,9 @@ public enum ApplyEntrySourceType {
     }
     
     public static ApplyEntrySourceType fromType(String code) {
-    	if(code == null) {
-    		return null;
-    	}
-        
-        if(code.equalsIgnoreCase(BUILDING.getCode())) {
-        	return BUILDING;
-        }
-
-        if(code.equalsIgnoreCase(MARKET_ZONE.getCode())) {
-        	return MARKET_ZONE;
+        for(ApplyEntrySourceType v : ApplyEntrySourceType.values()) {
+            if(v.getCode().equals(code))
+                return v;
         }
         return null;
     }

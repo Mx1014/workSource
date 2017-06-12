@@ -378,6 +378,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						request.getId(), LeasePromotionFlag.ENABLED.getCode());
 			}
 
+			Set<Long> buildingIds = new HashSet<>();
             Long projectId = cmd.getCommunityId();
             EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
             opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 
@@ -396,6 +397,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			for(BuildingApartmentDTO buildingApartmentDTO: buildings){
     				com.everhomes.building.Building building = buildingProvider.findBuildingByName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), buildingApartmentDTO.getBuildingName());
     				if(building !=null){
+						buildingIds.add(building.getId());
     					opRequestBuilding.setBuildingId(building.getId());
     					resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(), 
     							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
@@ -410,13 +412,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			resourceCategory = communityProvider.findResourceCategoryAssignment(yellowPage.getBuildingId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
+
+				buildingIds.add(opRequestBuilding.getId());
+
+			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
     			//3. 园区介绍直接就是楼栋的地址
     			opRequestBuilding.setBuildingId(cmd.getSourceId());
     			resourceCategory = communityProvider.findResourceCategoryAssignment(cmd.getSourceId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-    		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
+				buildingIds.add(opRequestBuilding.getId());
+
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
     			//4. 虚位以待的楼栋地址
     			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
@@ -424,14 +431,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
-    		}
+				buildingIds.add(opRequestBuilding.getId());
+
+			}
     		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId()) {
     			projectId = resourceCategory.getResourceCategryId();
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
+
+			buildingIds.add(opRequestBuilding.getBuildingId());
     		if (null == cmd.getIssuerType() || LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
-                FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType);
+                FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
                 request.setFlowcaseId(flowCase1.getId());
                 enterpriseApplyEntryProvider.updateApplyEntry(request);
                 return flowCase1;
@@ -523,7 +534,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		  
 		
 	}
-    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType) {
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, Set<Long> buildingIds) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 
 		if(null == flow) {
@@ -536,7 +547,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         flowCaseCmd.setApplyUserId(request.getApplyUserId());
         flowCaseCmd.setReferId(request.getId());
         // flowCase摘要内容
-        flowCaseCmd.setContent(this.getBriefContent(request));
+        flowCaseCmd.setContent(this.getBriefContent(request, buildingIds));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         flowCaseCmd.setProjectId(projectId);
         
@@ -564,14 +575,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 //        }
     }
 
-    private String getBriefContent(EnterpriseOpRequest request) {
+    private String getBriefContent(EnterpriseOpRequest request, Set<Long> buildingIds) {
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
         String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
 
-		Building building = communityProvider.findBuildingById(request.getBuildingId());
+        StringBuilder sb = new StringBuilder();
+        int n = 1;
+        for (Long id: buildingIds) {
 
-        map.put("buildingName", defaultIfNull(building.getName(),""));
+			Building building = communityProvider.findBuildingById(id);
+			if (n == buildingIds.size()) {
+				sb.append(building.getName());
+			}else {
+				sb.append(building.getName()).append(",");
+			}
+			n++;
+		}
+
+        map.put("buildingName", defaultIfNull(sb.toString(),""));
 
 		GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
 		cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
@@ -587,7 +609,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null != config.getDisplayNames() ) {
 			for (Integer k: config.getDisplayOrders()) {
 				if (k.byteValue() ==i) {
-					sourceTypeName =config.getDisplayNames().get(k);
+					sourceTypeName =config.getDisplayNames().get(k - 1);
 				}
 			}
 		}
@@ -848,6 +870,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			leasePromotion.setDescription(cmd.getDescription());
 
 			leasePromotion.setEnterTimeFlag(cmd.getEnterTimeFlag());
+			leasePromotion.setEnterTime(null);
 			if (LeasePromotionFlag.ENABLED.getCode() == leasePromotion.getEnterTimeFlag()) {
 				leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 			}

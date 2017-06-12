@@ -12,9 +12,13 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
@@ -41,10 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by xq.tian on 2016/12/20.
@@ -77,7 +78,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private OrganizationProvider organizationProvider;
-
+    @Autowired
+    private ContractProvider contractProvider;
+    @Autowired
+    private ContractBuildingMappingProvider contractBuildingMappingProvider;
     @Autowired
     private SmsProvider smsProvider;
 
@@ -172,7 +176,29 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     private String processBuildingName(EnterpriseOpRequest applyEntry) {
         String buildingName = "";
         if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
-			//续租的 
+			//续租的
+            if (null != applyEntry.getContractId()) {
+                Contract contract = contractProvider.findContractById(applyEntry.getContractId());
+
+                List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
+                        contract.getContractNumber());
+                Set<String> buildingNames = new HashSet<>();
+                buildings.forEach(b -> buildingNames.add(b.getBuildingName()));
+
+                StringBuilder sb = new StringBuilder();
+                int n = 1;
+                for (String name: buildingNames) {
+
+                    if (n == buildingNames.size()) {
+                        sb.append(name);
+                    }else {
+                        sb.append(name).append(",");
+                    }
+                    n++;
+                }
+
+                buildingName = sb.toString();
+            }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
 			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
