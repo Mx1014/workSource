@@ -8,8 +8,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 -- 默认头像，add by tt, 20170527
 select max(id) into @id from `eh_configurations`;
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'talent.male.uri', 'cs://1/image/aW1hZ2UvTVRvM1pUUTJObUV6T0RNM1pEWmhOekl3TldReE5XSXdNbUV5WVRFeU5qZ3hOdw', 'talen default male uri', 0, NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'talent.female.uri', 'cs://1/image/aW1hZ2UvTVRwaVpETXdOelE1WWpJMU5tRTFPVEF4T1dJME16UXpNakUxT0dObU5USmhNZw', 'talen default female uri', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'talent.male.uri', 'cs://1/image/aW1hZ2UvTVRwaE1tRmpOalEwWVRJME1UZ3pOalUwT0RKa09HRTNZV0ZtWkdabFpHTmtOdw', 'talen default male uri', 0, NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id:=@id+1, 'talent.female.uri', 'cs://1/image/aW1hZ2UvTVRwa04yRTNaR1ZrWlRreU1XWmhabVV3WkdZd05qQTFZamxqTURSa1pHSmlNQQ', 'talen default female uri', 0, NULL);
 
 -- 菜单，add by tt, 20170527
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (40730, '企业人才', 40000, NULL, 'react:/enterprise-management/talent-list', 1, 2, '/40730/70100', 'park', 498, 40730);
