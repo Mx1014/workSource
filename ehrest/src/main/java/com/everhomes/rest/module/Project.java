@@ -16,6 +16,15 @@ public class Project {
 	private String  projectType;
 	private String projectName;
 
+	public Project(){
+
+	}
+
+	public Project(String projectType, Long projectId){
+		this.projectId = projectId;
+		this.projectType = projectType;
+	}
+
 	public Long getProjectId() {
 		return projectId;
 	}

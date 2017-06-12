@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.module.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,15 +16,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
-import com.everhomes.rest.acl.ListServiceModulesCommand;
-import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
-import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.module.AssignmentServiceModuleCommand;
-import com.everhomes.rest.module.DeleteServiceModuleAssignmentRelationCommand;
-import com.everhomes.rest.module.GetServiceModuleCommand;
-import com.everhomes.rest.module.ListServiceModuleAssignmentRelationsCommand;
-import com.everhomes.rest.module.TreeServiceModuleCommand;
 
 @RestDoc(value = "module controller", site = "core")
 @RestController
@@ -75,6 +68,32 @@ public class ModuleController extends ControllerBase {
     public RestResponse treeServiceModules(@Valid TreeServiceModuleCommand cmd) {
         List<ServiceModuleDTO> dto = serviceModuleService.treeServiceModules(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listUserRelatedCategoryProjectByModuleId</b>
+     * <p>用户的在这个模块下的分类项目列表</p>
+     */
+    @RequestMapping("listUserRelatedCategoryProjectByModuleId")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse listUserRelatedCategoryProjectByModuleId(@Valid ListUserRelatedProjectByModuleCommand cmd) {
+        RestResponse response = new RestResponse(serviceModuleService.listUserRelatedCategoryProjectByModuleId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /module/listUserRelatedProjectByModuleId</b>
+     * <p>用户的在这个模块下的项目列表</p>
+     */
+    @RequestMapping("listUserRelatedProjectByModuleId")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse listUserRelatedProjectByModuleId(@Valid ListUserRelatedProjectByModuleCommand cmd) {
+        RestResponse response = new RestResponse(serviceModuleService.listUserRelatedProjectByModuleId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -38,7 +38,8 @@ public enum EntityType {
     ROLE("EhAclRoles"),
     RESOURCE_CATEGORY("EhResourceCategories"),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
-    All("EhAll");
+    ALL("EhAll"),
+    CHILD_PROJECT("child_project");
 
     private String code;
     

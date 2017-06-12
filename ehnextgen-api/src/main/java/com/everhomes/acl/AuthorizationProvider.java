@@ -4,6 +4,7 @@ package com.everhomes.acl;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
+import com.everhomes.rest.module.Project;
 
 import java.util.List;
 
@@ -50,4 +51,6 @@ public interface AuthorizationProvider {
     void updateAuthorizationRelation(AuthorizationRelation authorizationRelation);
 
     AuthorizationRelation findAuthorizationRelationById(Long id);
+
+    List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets);
 }

@@ -2576,7 +2576,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							LOGGER.error("Unable to find the community. communityId = {}", p.getProjectId());
 						}
 
-					}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(p.getProjectType())){
+					}else if(EntityType.CHILD_PROJECT == EntityType.fromCode(p.getProjectType())){
 						ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(p.getProjectId());
 						if(null != resourceCategory){
 							p.setProjectName(resourceCategory.getName());
@@ -2825,10 +2825,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			} else {
 				//给对象授权
-				assignmentAcls(EntityType.All.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false, tag);
+				assignmentAcls(EntityType.ALL.getCode(), 0L, target.getTargetType(), target.getTargetId(), authorizationRelation.getAllFlag(), authorizationRelation.getModuleId(), privilegeIds, false, tag);
 
 				Authorization authorization = new Authorization();
-				authorization.setOwnerType(EntityType.All.getCode());
+				authorization.setOwnerType(EntityType.ALL.getCode());
 				authorization.setOwnerId(0L);
 				authorization.setTargetType(target.getTargetType());
 				authorization.setTargetId(target.getTargetId());

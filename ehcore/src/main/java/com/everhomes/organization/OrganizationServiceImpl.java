@@ -9517,7 +9517,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd) {
         List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getModuleId());
-        assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.All.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
+        assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(com.everhomes.rest.common.EntityType.ALL.getCode(), 0L, cmd.getModuleId()));//负责全部业务范围的对象，也要查询出来
         assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), 0L)); //负责全部业务模块的对象，也要查询出来
 
         //将targetType = EntityType.ORGANIZATIONS的assigments过滤出targetId的set集合

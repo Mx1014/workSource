@@ -56,9 +56,10 @@ public enum EntityType {
     SERVICE_MODULE(EhServiceModules.class.getSimpleName()),
     AUTHORIZATION_RELATION(EhAuthorizationRelations.class.getSimpleName()),
     ZUOLIN_ADMIN("EhZuolinAdmins"),
-    All("EhAll"),
+    ALL("EhAll"),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
-    ORGANIZATION_FILE("EhOrganizationFiles");
+    ORGANIZATION_FILE("EhOrganizationFiles"),
+    CHILD_PROJECT("child_project");
 
     private String code;
     

@@ -219,12 +219,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
 
         //校验全部范围下是否拥有权限
-        if(aclProvider.checkAccessEx(EntityType.All.getCode(), 0L, privilegeId, descriptors)){
+        if(aclProvider.checkAccessEx(EntityType.ALL.getCode(), 0L, privilegeId, descriptors)){
             return true;
         }
 
         //校验全部范围下是否拥有模块的全部权限
-        return checkModuleAllPrivileges(EntityType.All.getCode(), 0L, descriptors, privilegeId);
+        return checkModuleAllPrivileges(EntityType.ALL.getCode(), 0L, descriptors, privilegeId);
     }
 
 

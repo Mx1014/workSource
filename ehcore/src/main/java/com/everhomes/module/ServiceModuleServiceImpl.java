@@ -1,26 +1,37 @@
 package com.everhomes.module;
 
+import com.everhomes.acl.AuthorizationProvider;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.WebMenuPrivilege;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.menu.Target;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.acl.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.common.AllFlagType;
 import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.module.*;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang.StringUtils;
+import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +55,16 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     private OrganizationProvider organizationProvider;
 
     @Autowired
+    private OrganizationService organizationService;
+
+    @Autowired
     private ServiceModuleProvider serviceModuleProvider;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
     private UserProvider userProvider;
@@ -282,7 +302,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                 if (AllFlagType.fromCode(cmd.getAllProjectFlag()) == AllFlagType.YES) {
                     Project project_none = new Project();
                     project_none.setProjectId(0L);
-                    project_none.setProjectType(EntityType.All.getCode());
+                    project_none.setProjectType(EntityType.ALL.getCode());
                     /**3.根据moduleId进行循环处理**/
                     if (AllFlagType.fromCode(cmd.getAllModuleFlag()) == AllFlagType.YES) {
                         ServiceModuleAssignment assignment = buildAssignment(target, project_none, 0L, AllFlagType.YES.getCode(), AllFlagType.YES.getCode(), relation_id);
@@ -386,24 +406,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
             if (r.getAllProjectFlag() == AllFlagType.NO.getCode()) {
                 List<Project> projects = GsonUtil.fromJson(r.getProjectJson(), projectType);
                 for (Project project : projects) {
-                    // 判断园区
-                    if (EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY) {
-                        Community community = this.communityProvider.findCommunityById(project.getProjectId());
-                        if (community == null) {
-                            LOGGER.error("JsonParse Community is not matched. cmd = {}", cmd);
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
-                        }
-                        project.setProjectType(EntityType.COMMUNITY.getCode());
-                        project.setProjectName(community.getName());
-                    } else if (EntityType.fromCode(project.getProjectType()) == EntityType.RESOURCE_CATEGORY) {// 判断子项目
-                        ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
-                        if (resourceCategory == null) {
-                            LOGGER.error("JsonParse ResourceCategory is not matched. cmd = {}", cmd);
-                            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
-                        }
-                        project.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
-                        project.setProjectName(resourceCategory.getName());
-                    }
+                    processProject(project);
                 }
                 dto.setAllProjectFlag(AllFlagType.NO.getCode());
                 dto.setProjects(projects);
@@ -484,6 +487,112 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
                     "user non-existent.");
         }
         return user;
+    }
+
+
+    @Override
+    public List<ProjectDTO> listUserRelatedCategoryProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ProjectDTO> dtos = getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos);
+    }
+
+    @Override
+    public List<ProjectDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        return getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+    }
+
+    @Override
+    public List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<CommunityDTO> dtos = new ArrayList<>();
+        List<ProjectDTO> projects = getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        for (ProjectDTO project: projects) {
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
+                Community community = communityProvider.findCommunityById(project.getProjectId());
+                if(null != community){
+                    dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+                }
+            }
+        }
+        return dtos;
+    }
+
+    /**
+     * 获取模块下授权的用户项目
+     * @param namespaceId
+     * @param userId
+     * @param organizationId
+     * @param moduleId
+     * @return
+     */
+    private List<ProjectDTO> getUserProjectsByModuleId(Integer namespaceId, Long userId, Long organizationId, Long moduleId){
+        boolean allProjectFlag = false;
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        List<ProjectDTO> dtos = new ArrayList<>();
+        //物业超级管理员拿所有项目
+        if(resolver.checkSuperAdmin(userId, organizationId) || resolver.checkModuleAdmin(EntityType.ORGANIZATIONS.getCode(), organizationId, userId, moduleId)){
+            allProjectFlag = true;
+        }else{
+            List<Target> targets = new ArrayList<>();
+            targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+            //获取人员的所有相关机构
+            List<Long> orgIds = organizationService.getIncludeOrganizationIdsByUserId(userId, organizationId);
+            for (Long orgId: orgIds) {
+                targets.add(new Target(com.everhomes.entity.EntityType.ORGANIZATIONS.getCode(), orgId));
+            }
+
+            //获取人员和人员所有机构所赋予模块的所属项目范围
+            List<Project> projects = authorizationProvider.getAuthorizationProjectsByAuthIdAndTargets(EntityType.SERVICE_MODULE.getCode(), moduleId, targets);
+            for (Project project: projects) {
+                //在模块下拥有全部项目权限
+                if(EntityType.ALL == EntityType.fromCode(project.getProjectType())){
+                    allProjectFlag = true;
+                    break;
+                }else {
+                    processProject(project);
+                    dtos.add(ConvertHelper.convert(project, ProjectDTO.class));
+                }
+            }
+        }
+
+        if(allProjectFlag){
+            List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+            for (CommunityDTO community: communitydtos) {
+                ProjectDTO dto = new ProjectDTO();
+                dto.setProjectId(community.getId());
+                dto.setProjectName(community.getName());
+                dto.setProjectType(com.everhomes.entity.EntityType.COMMUNITY.getCode());
+                dtos.add(dto);
+            }
+        }
+        return dtos;
+    }
+
+
+    private void processProject(Project project){
+        // 判断园区
+        if (EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY) {
+            Community community = this.communityProvider.findCommunityById(project.getProjectId());
+            if (community == null) {
+                LOGGER.error("JsonParse Community is not matched. projectId = {}", project.getProjectId());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse Community is not matched.");
+            }
+            project.setProjectType(EntityType.COMMUNITY.getCode());
+            project.setProjectName(community.getName());
+        } else if (EntityType.fromCode(project.getProjectType()) == EntityType.CHILD_PROJECT) {// 判断子项目
+            ResourceCategory resourceCategory = this.communityProvider.findResourceCategoryById(project.getProjectId());
+            if (resourceCategory == null) {
+                LOGGER.error("JsonParse ResourceCategory is not matched. projectId = {}", project.getProjectId());
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "JsonParse ResourceCategory is not matched.");
+            }
+            project.setProjectType(EntityType.CHILD_PROJECT.getCode());
+            project.setProjectName(resourceCategory.getName());
+        }
     }
 
     private Organization checkOrganization(Long organizationId) {

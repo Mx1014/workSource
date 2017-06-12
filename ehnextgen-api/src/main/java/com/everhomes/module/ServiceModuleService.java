@@ -2,10 +2,8 @@ package com.everhomes.module;
 
 import java.util.List;
 
-import com.everhomes.rest.acl.ListServiceModulePrivilegesCommand;
-import com.everhomes.rest.acl.ListServiceModulesCommand;
-import com.everhomes.rest.acl.ServiceModuleAssignmentRelationDTO;
-import com.everhomes.rest.acl.ServiceModuleDTO;
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.module.*;
 
 public interface ServiceModuleService {
@@ -24,4 +22,10 @@ public interface ServiceModuleService {
 	List<ServiceModuleDTO> treeServiceModules(TreeServiceModuleCommand cmd);
 
 	ServiceModuleDTO getServiceModule(GetServiceModuleCommand cmd);
+
+	List<ProjectDTO> listUserRelatedCategoryProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd);
+
+	List<ProjectDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd);
+
+	List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd);
 }

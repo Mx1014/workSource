@@ -12,6 +12,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.menu.Target;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.acl.IdentityType;
+import com.everhomes.rest.module.Project;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAuthorizationRelationsDao;
@@ -77,6 +78,34 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		}
 		return result;
 	}
+
+	@Override
+	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Project> result  = new ArrayList<>();
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
+		cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		context.select(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.from(Tables.EH_AUTHORIZATIONS)
+				.where(cond)
+				.groupBy(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.orderBy(Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.fetch().map((r) -> {
+					result.add(new Project(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE).toString(), Long.valueOf(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID).toString())));
+					return null;
+				});
+		return result;
+	}
+
 
 	@Override
 	public List<Long> getAuthorizationModuleIdsByTarget(List<Target> targets){

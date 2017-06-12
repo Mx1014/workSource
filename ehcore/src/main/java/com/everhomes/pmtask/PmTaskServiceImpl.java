@@ -34,9 +34,11 @@ import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.parking.ParkingCardRequest;
 import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingFlowConstant;
@@ -170,6 +172,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private FamilyProvider familyProvider;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -1803,11 +1808,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
 
-		ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
-		listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
-		listUserRelatedProjectByModuleIdCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-		
-		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
+		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
+		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
 
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 
