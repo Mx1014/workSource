@@ -90,7 +90,7 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 VALUES('52000','审批管理','50000','/50000/51000','0','2','2','0','2017-05-19 11:50:20');
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
-VALUES (10137, 0, '表单管理', '表单管理 全部权限', NULL);
+VALUES (10137, 0, '审批管理', '审批管理 全部权限', NULL);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
