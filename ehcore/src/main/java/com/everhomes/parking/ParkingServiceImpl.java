@@ -618,10 +618,11 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setSubject("停车充值订单");
 		
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if(flag)
+		if(flag) {
 			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
-		else
+		} else {
 			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		}
 
 		CommonOrderDTO dto = null;
 		try {
@@ -1563,6 +1564,18 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
 
 		handler.lockParkingCar(cmd);
+	}
+
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		
+		String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+    	GetParkingCarNumsResponse response = handler.getParkingCarNums(cmd);
+    	
+		return response;
 	}
 
 }

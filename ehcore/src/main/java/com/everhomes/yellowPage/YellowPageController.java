@@ -9,7 +9,6 @@ import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ReserveRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
-import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,6 +257,33 @@ public class YellowPageController  extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateServiceAllianceEnterprise(@Valid UpdateServiceAllianceEnterpriseCommand cmd) {
     	 this.yellowPageService.updateServiceAllianceEnterprise(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDefaultOrder</b>
+   	 * <p> 更新服务联盟企业顺序 </p>
+   	 */
+    @RequestMapping("updateServiceAllianceEnterpriseDefaultOrder")
+    @RestReturn(value=ServiceAllianceListResponse.class)
+    public RestResponse updateServiceAllianceEnterpriseDefaultOrder(@Valid UpdateServiceAllianceEnterpriseDefaultOrderCommand cmd) {
+    	 RestResponse response = new RestResponse(this.yellowPageService.updateServiceAllianceEnterpriseDefaultOrder(cmd));
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
+    /**
+   	 * <b>URL: /yellowPage/updateServiceAllianceEnterpriseDisplayFlag</b>
+   	 * <p> 更新服务联盟企业是否显示在app端  </p>
+   	 */
+    @RequestMapping("updateServiceAllianceEnterpriseDisplayFlag")
+    @RestReturn(value=String.class)
+    public RestResponse updateServiceAllianceEnterpriseDisplayFlag(@Valid UpdateServiceAllianceEnterpriseDisplayFlagCommand cmd) {
+    	 this.yellowPageService.updateServiceAllianceEnterpriseDisplayFlag(cmd);
     	 RestResponse response = new RestResponse();
          response.setErrorCode(ErrorCodes.SUCCESS);
          response.setErrorDescription("OK");

@@ -228,7 +228,7 @@ public interface OrganizationProvider {
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
  
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
-	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+	List<Organization>  listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId);
   
   
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
@@ -328,5 +328,8 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listUsersOfEnterprise(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
-}
-
+	List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
+	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
+			CrossShardListingLocator locator, int pageSize);
+} 

@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>organizationId: 组织id</li>
  *     <li>communityId: 小区id</li>
  *     <li>keyword: 关键字</li>
+ *     <li>meterNumber: 表记号码</li>
  *     <li>billCategoryId: 表记项目id</li>
  *     <li>serviceCategoryId: 表记性质id</li>
  *     <li>meterType: 表记类型 {@link com.everhomes.rest.energy.EnergyMeterType}</li>
@@ -23,6 +24,7 @@ public class SearchEnergyMeterCommand {
     @NotNull private Long organizationId;
     private Long communityId;
     private String keyword;
+    private String meterNumber;
     private Long billCategoryId;
     private Long serviceCategoryId;
     @EnumType(value = EnergyMeterType.class, nullValue = true)
@@ -61,6 +63,14 @@ public class SearchEnergyMeterCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public String getMeterNumber() {
+        return meterNumber;
+    }
+
+    public void setMeterNumber(String meterNumber) {
+        this.meterNumber = meterNumber;
     }
 
     public String getKeyword() {

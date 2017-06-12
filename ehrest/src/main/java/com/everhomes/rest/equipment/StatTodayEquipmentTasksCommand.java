@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetId: 任务所属项目等的id</li>
  *  <li>targetType: 任务所属项目类型，如community</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>dateTime: 时间戳</li>
  * </ul>
  * Created by ying.xiong on 2017/4/18.
  */
@@ -17,6 +18,16 @@ public class StatTodayEquipmentTasksCommand {
     private String targetType;
 
     private Long inspectionCategoryId;
+
+    private Long dateTime;
+
+    public Long getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(Long dateTime) {
+        this.dateTime = dateTime;
+    }
 
     public Long getInspectionCategoryId() {
         return inspectionCategoryId;

@@ -23,10 +23,11 @@ public enum FlowOwnerType {
 	RENTALRESOURCETYPE("RENTALRESOURCETYPE"),
     PMTASK("PMTASK"),
     GENERAL_APPROVAL("GENERAL_APPROVAL"),
-	RESERVER_PLACE("RESERVER_PLACE"),
-	EhOrganizations("EhOrganizations"),
+	RESERVER_PLACE("RESERVER_PLACE"), 
+	EhOrganizations("EhOrganizations"), 
+    WAREHOUSE_REQUEST("WAREHOUSEREQUEST") 
     ;
-	
+
 	private String code;
     private FlowOwnerType(String code) {
         this.code = code;

@@ -540,4 +540,18 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /parking/getParkingCarNums</b>
+     * <p>获取停车场在场车辆数，目前只对接了博士高接口（科技园），其他园区请考虑返回为空的情况。</p>
+     */
+    @RequestMapping("getParkingCarNums")
+    @RestReturn(value=GetParkingCarNumsResponse.class)
+    public RestResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+
+        RestResponse response = new RestResponse(parkingService.getParkingCarNums(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

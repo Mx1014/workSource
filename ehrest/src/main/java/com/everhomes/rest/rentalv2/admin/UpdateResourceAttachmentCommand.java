@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 给资源增加单元格
  * <li>rentalSiteId: 资源id</li> 
- * <li>attachments: 预约需要提交的信息</li> 
+ * <li>attachments: 预约需要提交的信息 </li>
  * </ul>
  */
 public class UpdateResourceAttachmentCommand {

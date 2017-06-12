@@ -7,6 +7,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+/**
+ * 使用{@link com.everhomes.flow.FlowTimeoutJob}代替
+ */
+@Deprecated
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FlowTimeoutAction implements Runnable {

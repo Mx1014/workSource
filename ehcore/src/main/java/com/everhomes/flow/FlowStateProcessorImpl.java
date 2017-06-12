@@ -352,21 +352,33 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 //		}
 		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
-		
+
 		//TODO use schedule ? scheduler.execute();
 		
 		//TODO do build in a delay thread
 		if(curr.getMessageAction() != null) {
-			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getSmsAction() != null) {
-			curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getSmsAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getTickMessageAction() != null) {
-			curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getTickMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getTickSMSAction() != null) {
-			curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getTickSMSAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		
 		switch(fromStep) {

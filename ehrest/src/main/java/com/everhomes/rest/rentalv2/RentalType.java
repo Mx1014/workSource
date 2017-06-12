@@ -1,12 +1,11 @@
 package com.everhomes.rest.rentalv2;
 
-import com.everhomes.rest.techpark.punch.PunchStatus;
 /**
  * <ul>预定时间类型
  * <li>HOUR(0): 按小时</li>
  * <li>HALFDAY(1): 按半天</li>
  * <li>DAY(2): 按天</li>
- * 
+ * <li>THREETIMEADAY(3): 按半天 (支持晚上)</li>
  * </ul>
  */
 public enum RentalType {

@@ -55,6 +55,7 @@ import com.everhomes.rest.general_approval.GeneralFormNumDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
+import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
 import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
@@ -64,6 +65,7 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.PostFormCommand;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -614,6 +616,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		return processGeneralFormDTO(form);
 	}
 
+ 
 	@Override
 	public void enableGeneralApproval(GeneralApprovalIdCommand cmd) { 
 		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
@@ -644,6 +647,17 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		
 		
 		return listGeneralApproval(cmd2);
-	}
+	} 
+//	@Override
+//	public GetTemplateByApprovalIdResponse getActiveGeneralFormByOriginId(GetActiveGeneralFormByOriginIdCommand cmd) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
+//	@Override
+//	public GetTemplateByApprovalIdResponse postForm(PostFormCommand cmd) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	} 
 
 }
