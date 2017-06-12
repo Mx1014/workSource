@@ -128,6 +128,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -9944,23 +9945,23 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
-        System.out.println(StringHelper.toJsonString(mapLogs));
 
-        //  存入日志
+/*        //  存入日志
+        System.out.println(StringHelper.toJsonString(mapLogs));
         this.addProfileLogs(organizationMemberDetails.getId(), organizationMemberDetails.getNamespaceId(),
                 OperatingType.UPDATE.getCode(), "eh_organization_member_details",
-                StringHelper.toJsonString(mapLogs));
+                StringHelper.toJsonString(mapLogs));*/
     }
 
     @Override
     public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
+        User user =UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
         OrganizationMemberEducations education = new OrganizationMemberEducations();
-        Map<String, String> mapLog = new HashMap<>();
         education.setDetailId(cmd.getDetailId());
-        education.setNamespaceId(cmd.getNamespaceId());
+        education.setNamespaceId(user.getNamespaceId());
         education.setSchoolName(cmd.getSchoolName());
 //        maplog.put("学校名字：")
         education.setDegree(cmd.getDegree());
@@ -9972,8 +9973,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Timestamp now = new Timestamp(date.getTime());
         education.setCreateTime(now);
         //	获取操作人员
-        if (cmd.getCreatorUid() != null)
-            education.setCreatorUid(cmd.getCreatorUid());
+        if (user.getId() != null)
+            education.setCreatorUid(user.getId());
         else
             education.setCreatorUid(Long.valueOf(0));
         //  暂且设置新增数据为有效数据
@@ -10038,12 +10039,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberWorkExperiencesDTO addOrganizationMemberWorkExperiences(AddOrganizationMemberWorkExperiencesCommand cmd) {
+        User user =UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
         OrganizationMemberWorkExperiences experience = new OrganizationMemberWorkExperiences();
         experience.setDetailId(cmd.getDetailId());
-        experience.setNamespaceId(cmd.getNamespaceId());
+        experience.setNamespaceId(user.getNamespaceId());
         experience.setEnterpriseName(cmd.getEnterpriseName());
         experience.setPosition(cmd.getPosition());
         experience.setJobType(cmd.getJobType());
@@ -10054,8 +10056,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Timestamp now = new Timestamp(date.getTime());
         experience.setCreateTime(now);
         //	获取操作人员
-        if (cmd.getCreatorUid() != null)
-            experience.setCreatorUid(cmd.getCreatorUid());
+        if (user.getId() != null)
+            experience.setCreatorUid(user.getId());
         else
             experience.setCreatorUid(Long.valueOf(0));
         //  暂且设置新增数据为有效数据
@@ -10119,12 +10121,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd) {
+        User user = UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
         OrganizationMemberInsurances insurance = new OrganizationMemberInsurances();
         insurance.setDetailId(cmd.getDetailId());
-        insurance.setNamespaceId(cmd.getNamespaceId());
+        insurance.setNamespaceId(user.getNamespaceId());
         insurance.setName(cmd.getName());
         insurance.setEnterprise(cmd.getEnterprise());
         insurance.setNumber(cmd.getNumber());
@@ -10135,8 +10138,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Timestamp now = new Timestamp(date.getTime());
         insurance.setCreateTime(now);
         //	获取操作人员
-        if (cmd.getCreatorUid() != null)
-            insurance.setCreatorUid(cmd.getCreatorUid());
+        if (user.getId() != null)
+            insurance.setCreatorUid(user.getId());
         else
             insurance.setCreatorUid(Long.valueOf(0));
         //  暂且设置新增数据为有效数据
@@ -10201,12 +10204,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberContractsDTO addOrganizationMemberContracts(AddOrganizationMemberContractsCommand cmd) {
+        User user = UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
         OrganizationMemberContracts contract = new OrganizationMemberContracts();
         contract.setDetailId(cmd.getDetailId());
-        contract.setNamespaceId(cmd.getNamespaceId());
+        contract.setNamespaceId(user.getNamespaceId());
         contract.setContractNumber(cmd.getContractNumber());
         contract.setStartTime(java.sql.Date.valueOf(cmd.getStartTime()));
         contract.setEndTime(java.sql.Date.valueOf(cmd.getEndTime()));
@@ -10215,8 +10219,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         Timestamp now = new Timestamp(date.getTime());
         contract.setCreateTime(now);
         //	获取操作人员
-        if (cmd.getCreatorUid() != null)
-            contract.setCreatorUid(cmd.getCreatorUid());
+        if (user.getId() != null)
+            contract.setCreatorUid(user.getId());
         else
             contract.setCreatorUid(Long.valueOf(0));
         //  暂且设置新增数据为有效数据
@@ -10280,19 +10284,34 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
+
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
         }
     }
 
     @Override
-    public ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd) {
-        return null;
+    public List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd) {
+        List<MemberRecordChangesByJobDTO> response = new ArrayList<>();
+        List<OrganizationMemberProfileLogs> logs = this.organizationProvider.listMemberRecordChanges(cmd.getDetailId());
+        DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        if(logs != null){
+            logs.forEach(r ->{
+                MemberRecordChangesByJobDTO dto = new MemberRecordChangesByJobDTO();
+                dto.setOperationTime(sdf.format(r.getOperationTime()));
+                dto.setPersonChangeType(r.getPersonChangeType());
+                dto.setReason(r.getPersonChangeReason());
+                response.add(dto);
+            });
+        }
+        return response;
     }
 
     @Override
     public ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd) {
-        ListMemberProfileRecordsCommandResponse response = new ListMemberProfileRecordsCommandResponse();
+/*        ListMemberProfileRecordsCommandResponse response = new ListMemberProfileRecordsCommandResponse();
         List<OrganizationMemberProfileLogs> records = this.organizationProvider.listMemberRecordChanges(cmd.getDetailId());
         if(records != null){
             response.setMemberProfileRecords(records.stream().map(r -> {
@@ -10300,7 +10319,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return dto;
             }).collect(Collectors.toList()));
         }
-        return response;
+        return response;*/
+        return null;
     }
 
     public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
@@ -10422,15 +10442,25 @@ public class OrganizationServiceImpl implements OrganizationService {
         return detail;
     }
 
+    private void addProfileJobChangeLogs(Long detailId, String personChangeType,String tableName, String personChangeReason){
+        User user = UserContext.current().getUser();
+        OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
+        log.setDetailId(detailId);
+        log.setNamespaceId(user.getNamespaceId());
+        log.setOperatorUid(user.getId());
+        log.setPersonChangeType(personChangeType);
+        log.setPersonChangeReason(personChangeReason);
+        log.setResourceType(tableName);
+        log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        this.organizationProvider.createProfileLogs(log);
+    }
 
     private void addProfileLogs(Long detailId, Integer namespaceId, String operationType, String tableName, String auditContent){
         OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
         log.setDetailId(detailId);
         log.setNamespaceId(namespaceId);
         log.setOperationType(operationType);
-        Date date = new Date();
-        Timestamp now = new Timestamp(date.getTime());
-        log.setOperationTime(now);
+        log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         //  操作人未设置
         log.setResourceType(tableName);
         log.setAuditContent(auditContent);

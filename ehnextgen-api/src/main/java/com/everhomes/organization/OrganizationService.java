@@ -495,7 +495,7 @@ public interface OrganizationService {
 
     void updateOrganizationEmployeeStatus(UpdateOrganizationEmployeeStatusCommand cmd);
 
-    ListMemberRecordChangesByJobCommandResponse listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
+    List<MemberRecordChangesByJobDTO> listMemberRecordChangesByJob(ListMemberRecordChangesByJobCommand cmd);
 
     ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
 

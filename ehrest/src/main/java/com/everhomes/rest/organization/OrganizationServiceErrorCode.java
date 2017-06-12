@@ -62,6 +62,6 @@ public interface OrganizationServiceErrorCode {
     int ERROR_JOBPOSITION_ISNULL = 700004;  //  岗位未填写
     int ERROR_CHECKINTIME_ISNULL = 700005;  //  入职日期未填写
     int ERROR_EMPLOYEESTATUS_ISNULL = 700006;   //  试用期未填写
-    int ERROR_EMPLOYEETIME_ISNULL = 700008; //  转正日期未填写
+    int ERROR_EMPLOYEETIME_ISNULL = 700007; //  转正日期未填写
 
 }

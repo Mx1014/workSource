@@ -4616,6 +4616,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         List<OrganizationMemberProfileLogs> result = new ArrayList<>();
         SelectQuery<EhOrganizationMemberProfileLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_PROFILE_LOGS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_PROFILE_LOGS.DETAIL_ID.eq(detailId));
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_PROFILE_LOGS.OPERATION_TIME.desc());
         query.fetch().map(r -> {
             result.add(ConvertHelper.convert(r,OrganizationMemberProfileLogs.class));
             return null;
