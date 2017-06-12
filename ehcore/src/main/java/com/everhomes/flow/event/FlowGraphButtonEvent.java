@@ -261,10 +261,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			log.setLogType(logType.getCode());
 			log.setFlowNodeId(next.getFlowNode().getId());
 			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
-			
-			if(!btn.getFlowButton().getRemindCount().equals(0)
-					&& remindLogs != null 
-					&& remindLogs.size() > btn.getFlowButton().getRemindCount()) {
+
+            Integer remindCount = btn.getFlowButton().getRemindCount();
+            if (remindCount == null || remindCount == 0) {
+                remindCount = 1;
+                btn.getFlowButton().setRemindCount(1);
+            }
+            if(remindLogs != null && remindLogs.size() > remindCount) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_REMIND_ERROR,
                         "remind count overflow");
 			}

@@ -30,7 +30,7 @@ public class FlowVarsButtonMsgCurrentProcessors implements FlowVariableUserResol
                                           Long entityId, FlowUserSelection userSelection, int loopCnt) {
 
         //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
-        long stepCount = ctx.getFlowCase().getStepCount() - 1L;
+        long stepCount = ctx.getFlowCase().getStepCount();// - 1L;
         List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
                 ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId(), stepCount);
         List<Long> users = new ArrayList<>();
