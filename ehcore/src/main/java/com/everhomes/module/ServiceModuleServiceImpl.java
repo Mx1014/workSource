@@ -493,24 +493,30 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
     @Override
     public List<ProjectDTO> listUserRelatedCategoryProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
         User user = UserContext.current().getUser();
+        Long userId = cmd.getUserId();
+        if(null == cmd.getUserId()){
+            userId = user.getId();
+        }
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ProjectDTO> dtos = getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> dtos = getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
         return rolePrivilegeService.getTreeProjectCategories(namespaceId, dtos);
     }
 
     @Override
     public List<ProjectDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
         User user = UserContext.current().getUser();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        return getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        Long userId = cmd.getUserId();
+        if(null == cmd.getUserId()){
+            userId = user.getId();
+        }
+        return getUserProjectsByModuleId(userId, cmd.getOrganizationId(), cmd.getModuleId());
     }
 
     @Override
     public List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd) {
         User user = UserContext.current().getUser();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<CommunityDTO> dtos = new ArrayList<>();
-        List<ProjectDTO> projects = getUserProjectsByModuleId(namespaceId,user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
+        List<ProjectDTO> projects = getUserProjectsByModuleId(user.getId(), cmd.getOrganizationId(), cmd.getModuleId());
         for (ProjectDTO project: projects) {
             if(EntityType.fromCode(project.getProjectType()) == EntityType.COMMUNITY){
                 Community community = communityProvider.findCommunityById(project.getProjectId());
@@ -524,13 +530,12 @@ public class ServiceModuleServiceImpl implements ServiceModuleService {
 
     /**
      * 获取模块下授权的用户项目
-     * @param namespaceId
      * @param userId
      * @param organizationId
      * @param moduleId
      * @return
      */
-    private List<ProjectDTO> getUserProjectsByModuleId(Integer namespaceId, Long userId, Long organizationId, Long moduleId){
+    private List<ProjectDTO> getUserProjectsByModuleId(Long userId, Long organizationId, Long moduleId){
         boolean allProjectFlag = false;
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         List<ProjectDTO> dtos = new ArrayList<>();

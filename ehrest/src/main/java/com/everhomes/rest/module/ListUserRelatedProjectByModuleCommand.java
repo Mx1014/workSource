@@ -26,6 +26,10 @@ public class ListUserRelatedProjectByModuleCommand {
     @NotNull
     private Long moduleId;
 
+    @NotNull
+    private Long userId;
+
+
     public Long getModuleId() {
         return moduleId;
     }
@@ -56,6 +60,14 @@ public class ListUserRelatedProjectByModuleCommand {
 
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     @Override
