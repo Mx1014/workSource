@@ -23,8 +23,17 @@ public class FlowVarsTextButtonCurrentAllProcessorsName implements FlowVariableT
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount()-1l); //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
+
+	    //stepCount-1 的原因是，当前节点处理人是上一个 stepCount 计算的 node_enter 的值
+        long stepCount = ctx.getFlowCase().getStepCount() - 1L;
+        // 如果下一个节点还是当前节点，说明stepCount也没变，所以不用减 1
+        if (ctx.getCurrentNode() != null && ctx.getCurrentNode().equals(ctx.getNextNode())) {
+            stepCount = ctx.getFlowCase().getStepCount();
+        }
+
+        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
+		        ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
+				, stepCount);
 		String txt = "";
 		int i = 0;
 		

@@ -195,7 +195,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			//Remove the old logs
 			log = flowEventLogProvider.getValidEnterStep(firedUser.getId(), ctx.getFlowCase());
 			if(null != log) {
-				log.setStepCount(-1l); // mark as invalid
+				log.setStepCount(-1L); // mark as invalid
 				ctx.getUpdateLogs().add(log);
 				log = null;
 			}
