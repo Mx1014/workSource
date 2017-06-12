@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,6 +18,7 @@ import com.everhomes.util.StringHelper;
 public class DeleteTalentCategoryCommand {
 	@NotNull
 	private Long organizationId;
+	@ItemType(Long.class)
 	private List<Long> ids;
 
 	public DeleteTalentCategoryCommand() {
