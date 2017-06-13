@@ -94,6 +94,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private XContentBuilder createDoc(Organization organization){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("id", organization.getId());
             b.field("namespaceId", organization.getNamespaceId());
             Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
             b.field("communityId", communityId);
@@ -289,7 +290,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         builder.setQuery(qb);
         
         
-        builder.addSort("_id", SortOrder.DESC);
+        builder.addSort("id", SortOrder.DESC);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
