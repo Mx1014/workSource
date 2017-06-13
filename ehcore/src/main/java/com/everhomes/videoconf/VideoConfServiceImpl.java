@@ -2978,7 +2978,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private void sendExpirationRemi1derPhoneMsg(ConfOrders order ,Calendar calendar , int templateId) {
 		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		String phoneNum = findContactNumber(order);
-		if(null != phoneNum)
+		if(null == phoneNum)
 			return; 
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize =Integer.MAX_VALUE;
