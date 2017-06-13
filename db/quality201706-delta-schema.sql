@@ -53,6 +53,7 @@ CREATE TABLE `eh_quality_inspection_sample_score_stat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE eh_quality_inspection_specification_item_results ADD COLUMN `manual_flag` BIGINT NOT NULL DEFAULT '0' COMMENT '0: auto 1:manual 2:sample';
+ALTER TABLE eh_quality_inspection_specification_item_results ADD COLUMN `sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample';
 
 -- 品质核查例行检查相关项目扣分项统计表
 CREATE TABLE `eh_quality_inspection_sample_community_specification_stat` (
