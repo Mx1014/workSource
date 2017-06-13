@@ -115,6 +115,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.omg.CORBA.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5087,9 +5088,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 List<String> groupTypes = new ArrayList<>();
                 if (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0) {
                     Condition cond = null;
-
                     if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())) {
                         cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
+                        if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
+                            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                        }
                     }
                     if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode())) {
                         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
@@ -8579,7 +8582,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
-        java.util.Date nDate = new java.util.Date();
+        java.util.Date nDate = DateHelper.currentGMTTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
@@ -8588,7 +8591,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         java.sql.Date employmentTime = cmd.getEmploymentTime() != null ? java.sql.Date.valueOf(cmd.getEmploymentTime()):now;
 
         organizationMember.setCheckInTime(checkInTime);
-        organizationMember.setEmploymentTime(employmentTime);
+        if (organizationMember.getEmployeeStatus() != null) {
+            if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION)) {
+                organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
+            } else {
+                organizationMember.setEmploymentTime(employmentTime);
+            }
+        } else {
+            organizationMember.setEmploymentTime(employmentTime);
+        }
 
         //手机号已注册，就把user id 跟通讯录关联起来
         if (null != userIdentifier) {
@@ -8618,6 +8629,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<Long> enterpriseIds = new ArrayList<>();
         List<Long> memberDetailIds = new ArrayList<>();
         List<Long> current_detailId = new ArrayList<>();
+        // 需要添加直属的企业ID集合
+        List<Long> direct_under_enterpriseIds = new ArrayList<>();
 
         Map<Long, Boolean> joinEnterpriseMap = new HashMap<>();
 
@@ -8645,6 +8658,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				return null;
 //			}
             /**modify by lei.lv*/
+            //总公司和分公司的ID集合
             enterpriseIds.add(org.getId());
 
             if (null != departmentIds) {
@@ -8652,14 +8666,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                     Organization o = checkOrganization(departmentId);
                     if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
                         if (!enterpriseIds.contains(o.getId())) {
+                            //直属场景
+                            direct_under_enterpriseIds.add(o.getId());
                             enterpriseIds.add(o.getId());
                         }
                     } else {
                         if (!enterpriseIds.contains(o.getDirectlyEnterpriseId())) {
+                            //挂靠场景
                             enterpriseIds.add(o.getDirectlyEnterpriseId());
                         }
                     }
                 }
+            }else{//如果没有选择部门，则默认直属当前的organizationId
+                direct_under_enterpriseIds.add(org.getId());
             }
 
             // 先把把成员从公司所有部门都删除掉
@@ -8686,9 +8705,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 Organization enterprise = checkOrganization(enterpriseId);
                 List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, cmd.getContactToken());
                 for (OrganizationMember member : members) {
-                    if(!member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//删除所有非总公司的记录
+                    if(!member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){//删除所有非公司的记录
                         organizationProvider.deleteOrganizationMemberById(member.getId());
-                    }else if(member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && !enterpriseIds.contains(member.getOrganizationId())){//删除分公司的记录
+                    }else if(member.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode()) && !enterpriseIds.contains(member.getOrganizationId())){//删除其他公司（既是本次退出公司）的记录
                         organizationProvider.deleteOrganizationMemberById(member.getId());
                         leaveMembers.add(member);
                     }
@@ -8740,6 +8759,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if(enterpriseId.equals(org.getId())){
                         current_detailId.add(new_detail_id);
                     }
+                }
+            }
+
+            //添加直属公司的记录
+            if (null != direct_under_enterpriseIds) {
+                OrganizationMember direct_under_enterprise_members = ConvertHelper.convert(organizationMember, OrganizationMember.class);
+                for (Long oId : direct_under_enterpriseIds) {
+                    Organization direct_under_enterprise = checkOrganization(oId);
+                    direct_under_enterprise_members.setGroupPath(direct_under_enterprise.getPath());
+                    direct_under_enterprise_members.setGroupType(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+                    direct_under_enterprise_members.setOrganizationId(oId);
+                    OrganizationMemberDetails direct_under_enterprise_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(oId, cmd.getContactToken());
+                    /**Modify BY lei.lv cause MemberDetail**/
+                    direct_under_enterprise_members.setDetailId(direct_under_enterprise_detail.getId());
+                    organizationProvider.createOrganizationMember(direct_under_enterprise_members);
                 }
             }
 
@@ -10469,6 +10503,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<OrganizationDTO> repeatCreateOrganizationmembers(List<Long> organizationIds, String contact_token, List<Long> enterpriseIds, OrganizationMember organizationMember){
         List<OrganizationDTO> results = new ArrayList<>();
+        OrganizationMember member = ConvertHelper.convert(organizationMember,OrganizationMember.class);
         if (null != organizationIds) {
             removeRepeat(organizationIds);
             // 重新把成员添加到公司多个部门
@@ -10477,11 +10512,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (!enterpriseIds.contains(oId)) {
                     Organization group = checkOrganization(oId);
 
-                    organizationMember.setGroupPath(group.getPath());
+                    member.setGroupPath(group.getPath());
 
-                    organizationMember.setGroupType(group.getGroupType());
+                    member.setGroupType(group.getGroupType());
 
-                    organizationMember.setOrganizationId(oId);
+                    member.setOrganizationId(oId);
 
                     /**Modify BY lei.lv cause MemberDetail**/
                     if (OrganizationGroupType.ENTERPRISE != OrganizationGroupType.fromCode(group.getGroupType())) {
@@ -10492,8 +10527,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TYPE,
                                     "Cannot find DirectlyEnterpriseId for this org");
                         }
-                        organizationMember.setDetailId(old_detail.getId());
-                        organizationProvider.createOrganizationMember(organizationMember);
+                        member.setDetailId(old_detail.getId());
+                        organizationProvider.createOrganizationMember(member);
                         results.add(ConvertHelper.convert(group, OrganizationDTO.class));
                     }
                 }
