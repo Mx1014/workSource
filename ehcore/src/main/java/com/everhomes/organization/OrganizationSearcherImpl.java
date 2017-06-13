@@ -288,11 +288,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         builder.setQuery(qb);
         
+        
+        builder.addSort("_id", SortOrder.DESC);
+        
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
         }
-        
-        builder.addSort("_id", SortOrder.DESC);
         
         SearchResponse rsp = builder.execute().actionGet();
         
