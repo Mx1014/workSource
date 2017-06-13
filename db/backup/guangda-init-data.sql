@@ -1553,3 +1553,4 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 -- fix #11162 add by xq.tian  2017/06/13
 UPDATE eh_launch_pad_items SET action_data = '{"pageType":"0","resourceTypeId":10513,"payMode":1}', item_label = '资源预订' WHERE namespace_id = 999979 AND item_label = '资源预定';
+UPDATE eh_rentalv2_resource_types SET pay_mode = 1 WHERE id = 10513;
