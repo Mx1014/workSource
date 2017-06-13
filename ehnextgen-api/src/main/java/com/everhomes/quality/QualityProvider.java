@@ -2,6 +2,7 @@ package com.everhomes.quality;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.everhomes.listing.CrossShardListingLocator;
@@ -151,4 +152,7 @@ public interface QualityProvider {
 	QualityInspectionSampleScoreStat findQualityInspectionSampleScoreStat(Long sampleId);
 
 	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId);
+	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime);
+	List<QualityInspectionTasks> listQualityInspectionTasksBySample(Long sampleId, Timestamp startTime, Timestamp endTime);
+	Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime);
 }

@@ -2419,8 +2419,11 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskName(cmd.getName());
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
-		task.setExecutivePositionId(cmd.getGroup().getPositionId());
+		if(cmd.getGroup() != null) {
+			task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+			task.setExecutivePositionId(cmd.getGroup().getPositionId());
+		}
+
 		task.setExecutiveExpireTime(new Timestamp(cmd.getExecutiveExpireTime()));
 		task.setCategoryId(cmd.getSpecificationId());
 		
@@ -2428,6 +2431,11 @@ public class QualityServiceImpl implements QualityService {
 		task.setCategoryPath(specification.getPath());
 		//fix bug ： byte to long old:task.setManualFlag((byte) 1);
 		task.setManualFlag(1L);
+		if(cmd.getSampleId() != null) {
+			task.setParentId(cmd.getSampleId());
+			task.setManualFlag(2L);
+		}
+
 		
 		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
@@ -3182,6 +3190,9 @@ public class QualityServiceImpl implements QualityService {
 		QualityInspectionSamples sample = ConvertHelper.convert(cmd, QualityInspectionSamples.class);
 		sample.setStartTime(new Timestamp(cmd.getStartTime()));
 		sample.setEndTime(new Timestamp(cmd.getEndTime()));
+		sample.setStatus(exist.getStatus());
+		sample.setNamespaceId(exist.getNamespaceId());
+		sample.setSampleNumber(exist.getSampleNumber());
 		sample.setCreateTime(exist.getCreateTime());
 		sample.setCreatorUid(exist.getCreatorUid());
 		qualityProvider.updateQualityInspectionSample(sample);
@@ -3437,7 +3448,7 @@ public class QualityServiceImpl implements QualityService {
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
 		if(dtos != null && dtos.size() > 0) {
 			dtos.forEach(dto -> {
-				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId());
+				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId(), dto.getOwnerType(), dto.getOwnerId());
 				dto.setCommunityCount(scoreStat.getCommunityCount());
 				dto.setHighestScore(scoreStat.getHighestScore());
 				dto.setLowestScore(scoreStat.getLowestScore());
@@ -3448,12 +3459,64 @@ public class QualityServiceImpl implements QualityService {
 		return response;
 	}
 
-	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId) {
+	private QualityInspectionSampleScoreStat getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
+		long now = System.currentTimeMillis();
+		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
+		Map<Long, QualityInspectionSampleCommunitySpecificationStat> communitySpecificationStat = qualityProvider.listCommunitySpecifitionStatBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
+		if(tasks != null) {
+			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
+			Integer correctionCount = 0;
+			for(QualityInspectionTasks task : tasks) {
+				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
+						 || QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
+						 || QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+					correctionCount ++;
+				}
+			}
+			List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
+
+			if(results != null) {
+				results.forEach(result -> {
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
+					QualityInspectionSampleCommunitySpecificationStat stat = communitySpecificationStat.get(result.getTargetId());
+					if(stat != null) {
+						stat.setDeductScore(stat.getDeductScore() + result.getTotalScore());
+					}
+				});
+			}
+			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
+		}
+
+
+//		scoreStat.setHighestScore();
+//		scoreStat.setLowestScore();
+		return scoreStat;
+	}
+
+	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
 		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);
 		if(scoreStat != null) {
-
+			getNewestScoreStat(scoreStat);
 		} else {
+			scoreStat = new QualityInspectionSampleScoreStat();
+			scoreStat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+			if(communityMaps != null) {
+				scoreStat.setCommunityCount(communityMaps.size());
+			} else {
+				scoreStat.setCommunityCount(0);
+			}
 
+			scoreStat.setOwnerId(ownerId);
+			scoreStat.setOwnerType(ownerType);
+			scoreStat.setSampleId(sampleId);
+			scoreStat.setTaskCount(0);
+			scoreStat.setCorrectionCount(0);
+			scoreStat.setDeductScore(0.0);
+			scoreStat.setHighestScore(0.0);
+			scoreStat.setLowestScore(0.0);
+
+			getNewestScoreStat(scoreStat);
 		}
 		return scoreStat;
 	}

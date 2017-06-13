@@ -644,7 +644,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			CrossShardListingLocator locator, Integer pageSize) {
 
 		List<EquipmentInspectionAccessories> accessories = new ArrayList<EquipmentInspectionAccessories>();
-		
+
 		if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhEquipmentInspectionAccessories.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
@@ -652,16 +652,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhEquipmentInspectionAccessoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES);
-            
+
             if(locator.getAnchor() != null && locator.getAnchor() != 0L){
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.lt(locator.getAnchor()));
             }
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.STATUS.ne((byte) 0));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_ACCESSORIES.ID.desc());
             query.addLimit(pageSize - accessories.size());
-            
+
             query.fetch().map((r) -> {
-            	
+
             	accessories.add(ConvertHelper.convert(r, EquipmentInspectionAccessories.class));
                 return null;
             });

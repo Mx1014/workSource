@@ -2492,4 +2492,19 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return result;
 	}
+
+	@Override
+	public List<QualityInspectionTasks> listQualityInspectionTasksBySample(Long sampleId, Timestamp startTime, Timestamp endTime) {
+		return null;
+	}
+
+	@Override
+	public List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime) {
+		return null;
+	}
+
+	@Override
+	public Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime) {
+		return null;
+	}
 }
