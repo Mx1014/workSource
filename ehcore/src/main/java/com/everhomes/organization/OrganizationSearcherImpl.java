@@ -14,11 +14,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.ToXContent.Params;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,6 +291,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
         }
+        
+        builder.addSort("_id", SortOrder.DESC);
         
         SearchResponse rsp = builder.execute().actionGet();
         
