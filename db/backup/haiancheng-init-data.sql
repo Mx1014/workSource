@@ -2649,3 +2649,5 @@ delete from eh_web_menu_scopes where owner_id = 999993 and menu_id = 20160;
 SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'pmtask.handler-999983', 'flow', '', '0', NULL);
 
+-- fix #11173 add by xq.tian 2017/06/13
+DELETE FROM eh_web_menu_scopes WHERE owner_type = 'EhNamespaces' AND owner_id = 999993 AND menu_id = 20160;
