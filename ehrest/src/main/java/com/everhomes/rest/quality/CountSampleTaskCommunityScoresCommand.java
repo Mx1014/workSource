@@ -10,7 +10,7 @@ import java.util.List;
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
- *  <li>routineId: 任务所属检查id</li>
+ *  <li>sampleId: 任务所属检查id</li>
  *  <li>targetIds: 任务所属项目等的id列表</li>
  *  <li>targetType: 任务所属项目类型，如community</li>
  *  <li>specificationId: 父类型id  </li>

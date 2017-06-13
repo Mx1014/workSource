@@ -1964,7 +1964,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId,
-			String superiorPath, Long startTime, Long endTime) {
+			String superiorPath, Long startTime, Long endTime, Long sampleId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		ScoreDTO score = new ScoreDTO();
 		score.setScore(0.0);
@@ -1990,7 +1990,10 @@ public class QualityProviderImpl implements QualityProvider {
 		if(endTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(new Timestamp(endTime)));
 		}
-		
+
+		if(sampleId != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SAMPLE_ID.eq(sampleId));
+		}
 		//不加上的话 在上级统计分数的时候会扣除所有扣分，但点进看下级情况时，已删除的规范不会列出来，会造成上下两层分数的差异 by xiongying20170123
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_ID.in(getActiveSpecifications(ownerType, ownerId)));
 		

@@ -103,7 +103,7 @@ public interface QualityProvider {
 	List<QualityInspectionSpecifications> listAddAndModifyChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, List<Long> scopeIds, Long parentId, Byte inspectionType);
 
 	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count);
-	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime);
+	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime, Long sampleId);
 	
 	void populateRecordItemResults(final List<QualityInspectionTaskRecords> records);
 	void populateRecordItemResult(QualityInspectionTaskRecords record);
