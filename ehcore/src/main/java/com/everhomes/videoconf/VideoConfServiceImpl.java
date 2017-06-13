@@ -2921,6 +2921,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd) {
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), cmd.getEnterpriseId(), ConfAccountStatus.INACTIVE.getCode());
+		
 		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
 		if (null == categories || categories.size() == 0){
 			//没有初始化categories表,没有添加6方账号
@@ -2945,8 +2947,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		cmd2.setInvoiceFlag((byte) 0);
 		cmd2.setMakeOutFlag((byte) 0);
 		Long orderId = createConfAccountOrder(cmd2);  
-		//查是否有活跃账号
-		if(enterprise != null && enterprise.getActiveAccountAmount() >0) {
+		//之前是否有活跃账号
+		if(activeAccounts != null ) {
 			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT,  "has active account");
 		}
 	}
