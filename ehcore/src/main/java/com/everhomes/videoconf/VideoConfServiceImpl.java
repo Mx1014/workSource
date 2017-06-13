@@ -2983,6 +2983,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize =Integer.MAX_VALUE;
 		List<ConfOrderAccountMap> orderMap = vcProvider.findOrderAccountByOrderId(order.getId(), locator, pageSize);
+		if(orderMap == null || orderMap.size() == 0){
+			LOGGER.error("order cannot found order map "+ order );
+			return;
+		}
 		StringBuilder accountName = new StringBuilder();
 	
 		orderMap.stream().map(r -> {
