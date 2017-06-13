@@ -2998,7 +2998,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	} 
 	@Override
 	public void testSendPhoneMsg(String phoneNum,int templateId,int namespaceId){
-
+		scheduledExpirationReminder();
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("accountName", "账号1");
 		smsProvider.addToTupleList(variables, "date", "2017年5月22日"); 
 		String templateLocale = RentalNotificationTemplateCode.locale; 
