@@ -68,3 +68,6 @@ CREATE TABLE `eh_quality_inspection_sample_community_specification_stat` (
   `create_time` DATETIME ,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_quality_inspection_sample_score_stat ADD COLUMN `update_time` DATETIME;
+ALTER TABLE eh_quality_inspection_sample_community_specification_stat ADD COLUMN `specification_path` VARCHAR(128);
