@@ -92,6 +92,10 @@ public class PollServiceImpl implements PollService {
             }
             poll.setStatus(PollStatus.Published.getCode());
             poll.setId(cmd.getId());
+
+            // 添加tag标签   add by yanjun 20170613
+            poll.setTag(cmd.getTag());
+
             pollProvider.createPoll(poll);
             List<PollItem> pollItems = cmd.getItemList().stream().map(r->{
                 PollItem item=ConvertHelper.convert(r, PollItem.class);

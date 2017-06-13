@@ -60,6 +60,7 @@ import com.everhomes.util.StringHelper;
  * <li>groupId: 俱乐部id</li>
  * <li>groupName: 俱乐部名称</li>
  * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布  参考{@link com.everhomes.rest.forum.PostStatus}</li>
+ * <li>tag: tag</li>
  * </ul>
  */
 public class PostDTO {
@@ -166,6 +167,8 @@ public class PostDTO {
     private String groupName;
     
     private Byte status;
+
+    private String tag;
 
     public Long getGroupId() {
 		return groupId;
@@ -574,7 +577,15 @@ public class PostDTO {
 		this.status = status;
 	}
 
-	@Override
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
