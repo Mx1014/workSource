@@ -2325,6 +2325,11 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.SAMPLE_ID.eq(sampleId));
 
 		List<QualityInspectionSampleGroupMap> result = new ArrayList<>();
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("findQualityInspectionSampleGroupMapBySample, sql=" + query.getSQL());
+			LOGGER.debug("findQualityInspectionSampleGroupMapBySample, bindValues=" + query.getBindValues());
+		}
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, QualityInspectionSampleGroupMap.class));
 			return null;

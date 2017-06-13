@@ -187,10 +187,11 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
 
-        if(LOGGER.isDebugEnabled())
-            LOGGER.info("quality sample task searcher query builder ："+builder);
-
         SearchResponse rsp = builder.execute().actionGet();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("quality sample task searcher query builder ："+builder);
+            LOGGER.info("quality sample task searcher query rsp ："+rsp);
+        }
 
         return rsp;
     }
