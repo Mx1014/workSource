@@ -2476,4 +2476,9 @@ public class QualityProviderImpl implements QualityProvider {
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSampleScoreStat.class, stat.getId());
 	}
+
+	@Override
+	public List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId) {
+		return null;
+	}
 }
