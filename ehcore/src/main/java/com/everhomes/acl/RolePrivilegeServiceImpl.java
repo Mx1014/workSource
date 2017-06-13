@@ -21,6 +21,7 @@ import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -69,7 +70,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
+
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
+	 
 	@Autowired
 	private OrganizationService organizationService;
 	
@@ -1329,6 +1333,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		if (org.getSetAdminFlag() == null || org.getSetAdminFlag().byteValue() == TrueOrFalseFlag.FALSE.getCode()) {
 			org.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
 			organizationProvider.updateOrganization(org);
+			organizationSearcher.feedDoc(org);
 		}
 	}
 	
@@ -1575,6 +1580,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			if (list == null || list.size() == 0) {
 				organization.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
 				organizationProvider.updateOrganization(organization);
+				organizationSearcher.feedDoc(organization);
 			}
 		}
 	}

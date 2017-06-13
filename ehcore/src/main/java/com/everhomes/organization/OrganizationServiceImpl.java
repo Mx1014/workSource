@@ -747,6 +747,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         addExtraInfo(dtos);
         resp.setDtos(dtos);
+        resp.setNextPageAnchor(rlt.getPageAnchor());
 		return resp;
 	}
 	
