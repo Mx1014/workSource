@@ -655,7 +655,7 @@ public class QualityController extends ControllerBase {
 	 * <b>URL: /quality/listSampleQualityInspection</b>
 	 * <p>列出品质核查例行检查-web</p>
 	 */
-	@RequestMapping("listSampleQualityInspection")
+	@RequestMapping("searchSampleQualityInspection")
 	@RestReturn(value = ListSampleQualityInspectionResponse.class)
 	public RestResponse searchSampleQualityInspection(SearchSampleQualityInspectionCommand cmd) {
 
