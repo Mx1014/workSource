@@ -146,7 +146,7 @@ public interface QualityProvider {
 
 	Integer getSampleCommunities(Long sampleId);
 
-	void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample);
-	void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample);
+	void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
+	void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
 	QualityInspectionSampleScoreStat findQualityInspectionSampleScoreStat(Long sampleId);
 }

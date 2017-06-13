@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
  *     <li>name: 检查名称</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/6/1.
  */
@@ -27,6 +29,10 @@ public class SearchSampleQualityInspectionCommand {
     private Long endTime;
 
     private String name;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
 
     public Long getEndTime() {
         return endTime;
@@ -66,6 +72,22 @@ public class SearchSampleQualityInspectionCommand {
 
     public void setStartTime(Long startTime) {
         this.startTime = startTime;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

@@ -2438,16 +2438,16 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample) {
+	public void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSampleScoreStat.class));
 
-		sample.setId(id);
-		sample.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		LOGGER.info("createQualityInspectionSampleScoreStat: " + sample);
+		stat.setId(id);
+		stat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("createQualityInspectionSampleScoreStat: " + stat);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleScoreStat.class, id));
 		EhQualityInspectionSampleScoreStatDao dao = new EhQualityInspectionSampleScoreStatDao(context.configuration());
-		dao.insert(sample);
+		dao.insert(stat);
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSampleScoreStat.class, null);
 	}
@@ -2465,7 +2465,11 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat sample) {
+	public void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleScoreStat.class, stat.getId()));
+		EhQualityInspectionSampleScoreStatDao dao = new EhQualityInspectionSampleScoreStatDao(context.configuration());
+		dao.update(stat);
 
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSampleScoreStat.class, stat.getId());
 	}
 }

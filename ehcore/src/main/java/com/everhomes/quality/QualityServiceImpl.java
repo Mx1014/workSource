@@ -3325,13 +3325,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd) {
-//		communityCount: 关联小区数量
-//		averageScore: 平均得分
-//		taskCount: 任务数
-//		correctionRate: 整改率
-//
 		CountSampleTasksResponse response = new CountSampleTasksResponse();
-
+		QualityInspectionSampleScoreStat stat = qualityProvider.findQualityInspectionSampleScoreStat(cmd.getSampleId());
+		if(stat != null) {
+			response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
+			Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
+			response.setAverageScore(averageScore);
+		}
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
 			response.setName(sample.getName());

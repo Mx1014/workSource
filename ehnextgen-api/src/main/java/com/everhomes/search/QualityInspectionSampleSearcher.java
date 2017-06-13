@@ -1,9 +1,7 @@
 package com.everhomes.search;
 
 import com.everhomes.quality.QualityInspectionSamples;
-import com.everhomes.rest.quality.ListSampleQualityInspectionResponse;
-import com.everhomes.rest.quality.SearchQualityTasksCommand;
-import com.everhomes.rest.quality.SearchSampleQualityInspectionCommand;
+import com.everhomes.rest.quality.*;
 
 import java.util.List;
 
@@ -16,4 +14,5 @@ public interface QualityInspectionSampleSearcher {
     void feedDoc(QualityInspectionSamples sample);
     void syncFromDb();
     ListSampleQualityInspectionResponse query(SearchSampleQualityInspectionCommand cmd);
+    CountSampleTaskScoresResponse queryCount(CountSampleTaskScoresCommand cmd);
 }
