@@ -115,7 +115,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.omg.CORBA.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8582,23 +8581,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
-        java.util.Date nDate = DateHelper.currentGMTTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String sDate = sdf.format(nDate);
-        java.sql.Date now = java.sql.Date.valueOf(sDate);
 
-        java.sql.Date checkInTime = cmd.getCheckInTime() != null ? java.sql.Date.valueOf(cmd.getCheckInTime()):now;
-        java.sql.Date employmentTime = cmd.getEmploymentTime() != null ? java.sql.Date.valueOf(cmd.getEmploymentTime()):now;
-
-        organizationMember.setCheckInTime(checkInTime);
+        organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
         if (organizationMember.getEmployeeStatus() != null) {
-            if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION)) {
+            if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
                 organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
             } else {
-                organizationMember.setEmploymentTime(employmentTime);
+                organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
             }
         } else {
-            organizationMember.setEmploymentTime(employmentTime);
+            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
         }
 
         //手机号已注册，就把user id 跟通讯录关联起来
@@ -10603,7 +10595,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (null != r.getCells().get("G"))
                 data.setEmployeeStatus(r.getCells().get("G").trim());
             if (null != r.getCells().get("H"))
-                data.setEmployeeTime(r.getCells().get("H").trim());
+                data.setEmploymentTime(r.getCells().get("H").trim());
             if (null != r.getCells().get("I"))
                 data.setJobLevel(r.getCells().get("I").trim());
             if (null != r.getCells().get("J"))
@@ -10658,6 +10650,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 data.setDepartureTime(r.getCells().get("AH").trim());
             if (null != r.getCells().get("AI"))
                 data.setSalaryCardNumber(r.getCells().get("AI").trim());
+            if (null != r.getCells().get("AJ"))
+                data.setSocialSecurityNumber(r.getCells().get("AJ").trim());
             if (null != r.getCells().get("AK"))
                 data.setProvidentFundNumber(r.getCells().get("AK").trim());
             if (null != r.getCells().get("AL"))
@@ -10745,7 +10739,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.saveOrganizationMemberInsurances(data,detailId);
             this.saveOrganizationMemberContracts(data,detailId);
         }
-        return null;
+        return errorDataLogs;
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMembers(
@@ -10819,7 +10813,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         if (!StringUtils.isEmpty(data.getCheckInTime())) {
-            if (StringUtils.isEmpty(data.getEmployeeTime())) {
+            if (StringUtils.isEmpty(data.getEmploymentTime())) {
                 LOGGER.warn("Organization member employeeTime is null. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Organization member employeeTime is null");
@@ -11118,8 +11112,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         memberCommand.setEmployeeStatus(employeeStatus);
 
         //  转正日期
-        if(StringUtils.isEmpty(data.getEmployeeTime()))
-            memberCommand.setEmploymentTime(data.getEmployeeTime());
+        if(!StringUtils.isEmpty(data.getEmploymentTime()))
+            memberCommand.setEmploymentTime(data.getEmploymentTime());
 
         //  职级
         if (!StringUtils.isEmpty(data.getJobLevel())) {
@@ -11194,6 +11188,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  公积金卡号
         member.setSocialSecurityNumber(data.getSocialSecurityNumber());
         //  社保卡号
+        member.setProvidentFundNumber(data.getProvidentFundNumber());
+
         this.updateOrganizationMemberBackGround(member);
     }
     private void saveOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data, Long detailId){
@@ -11391,9 +11387,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             row.createCell(4).setCellValue(jobPositionStr);
 
-            row.createCell(5).setCellValue(member.getCheckInTime());
+            row.createCell(5).setCellValue(String.valueOf(member.getCheckInTime()));
             row.createCell(6).setCellValue(member.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())? "是" : "否");
-            row.createCell(7).setCellValue(member.getEmploymentTime());
+            row.createCell(7).setCellValue(String.valueOf(member.getEmploymentTime()));
 
             //  职级
             List<OrganizationDTO> jobLevels = member.getJobLevels();
@@ -11428,7 +11424,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     row.createCell(9).setCellValue("");
                 row.createCell(11).setCellValue(StringUtils.isEmpty(memberDetails.getEnName()) ? "":memberDetails.getEnName());
                 row.createCell(12).setCellValue(StringUtils.isEmpty(memberDetails.getBirthday()) ? "":String.valueOf(memberDetails.getBirthday()));
-                row.createCell(13).setCellValue(StringUtils.isEmpty(memberDetails.getMaritalFlag().equals(MaritalFlag.MARRIED.getCode())) ? "已婚": "未婚");
+                row.createCell(13).setCellValue(memberDetails.getMaritalFlag().equals(MaritalFlag.MARRIED.getCode()) ? "已婚": "未婚");
                 row.createCell(14).setCellValue(StringUtils.isEmpty(memberDetails.getPoliticalStatus()) ? "":memberDetails.getPoliticalStatus());
                 row.createCell(15).setCellValue(StringUtils.isEmpty(memberDetails.getNativePlace()) ? "":memberDetails.getNativePlace());
                 row.createCell(16).setCellValue(StringUtils.isEmpty(memberDetails.getRegResidence()) ? "":memberDetails.getRegResidence());
@@ -11469,8 +11465,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 row.createCell(24).setCellValue(education.getSchoolName());
                 row.createCell(25).setCellValue(education.getDegree());
                 row.createCell(26).setCellValue(education.getMajor());
-                row.createCell(27).setCellValue(education.getEnrollmentTime());
-                row.createCell(28).setCellValue(education.getGraduationTime());
+                row.createCell(27).setCellValue(String.valueOf(education.getEnrollmentTime()));
+                row.createCell(28).setCellValue(String.valueOf(education.getGraduationTime()));
             }else{
                 row.createCell(24).setCellValue("");
                 row.createCell(25).setCellValue("");
@@ -11495,8 +11491,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 else if(workExperience.getJobType().equals(EmployeeType.LABORDISPATCH.getCode()))
                     jobType = "劳动派遣";
                 row.createCell(31).setCellValue(jobType);
-                row.createCell(32).setCellValue(workExperience.getEntryTime());
-                row.createCell(33).setCellValue(workExperience.getDepartureTime());
+                row.createCell(32).setCellValue(String.valueOf(workExperience.getEntryTime()));
+                row.createCell(33).setCellValue(String.valueOf(workExperience.getDepartureTime()));
             }else{
                 row.createCell(29).setCellValue("");
                 row.createCell(30).setCellValue("");
@@ -11512,8 +11508,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 row.createCell(37).setCellValue(insurance.getName());
                 row.createCell(38).setCellValue(insurance.getEnterprise());
                 row.createCell(39).setCellValue(insurance.getNumber());
-                row.createCell(40).setCellValue(insurance.getStartTime());
-                row.createCell(41).setCellValue(insurance.getEndTime());
+                row.createCell(40).setCellValue(String.valueOf(insurance.getStartTime()));
+                row.createCell(41).setCellValue(String.valueOf(insurance.getEndTime()));
             }else{
                 row.createCell(37).setCellValue("");
                 row.createCell(38).setCellValue("");
@@ -11527,8 +11523,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(contracts != null && contracts.size()>0){
                 OrganizationMemberContracts contract = contracts.get(0);
                 row.createCell(42).setCellValue(contract.getContractNumber());
-                row.createCell(43).setCellValue(contract.getStartTime());
-                row.createCell(44).setCellValue(contract.getEndTime());
+                row.createCell(43).setCellValue(String.valueOf(contract.getStartTime()));
+                row.createCell(44).setCellValue(String.valueOf(contract.getEndTime()));
             }else{
                 row.createCell(42).setCellValue("");
                 row.createCell(43).setCellValue("");

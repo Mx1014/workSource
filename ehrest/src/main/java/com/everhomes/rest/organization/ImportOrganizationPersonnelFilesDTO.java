@@ -21,7 +21,7 @@ public class ImportOrganizationPersonnelFilesDTO {
 
     private String employeeStatus = "";
 
-    private String employeeTime = "";
+    private String employmentTime = "";
 
     private String jobLevel = "";
 
@@ -153,12 +153,12 @@ public class ImportOrganizationPersonnelFilesDTO {
         this.employeeStatus = employeeStatus;
     }
 
-    public String getEmployeeTime() {
-        return employeeTime;
+    public String getEmploymentTime() {
+        return employmentTime;
     }
 
-    public void setEmployeeTime(String employeeTime) {
-        this.employeeTime = employeeTime;
+    public void setEmploymentTime(String employmentTime) {
+        this.employmentTime = employmentTime;
     }
 
     public String getJobLevel() {
