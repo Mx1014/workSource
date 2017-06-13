@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
  *     <li>sampleId: 例行检查id</li>
  *     <li>communityName: 项目名称</li>
  *     <li>executorName: 执行人姓名</li>
- *     <li>executeStatus: 执行状态</li>
+ *     <li>executeStatus: 执行状态 参考{@link com.everhomes.rest.quality.QualityInspectionTaskStatus}</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */

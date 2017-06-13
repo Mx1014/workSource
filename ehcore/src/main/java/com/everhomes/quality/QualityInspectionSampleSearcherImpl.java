@@ -6,6 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.QualityInspectionSampleSearcher;
@@ -109,7 +110,10 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         for(Long id : ids) {
             QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
             SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
-
+            List<OrganizationMember> creator = organizationProvider.listOrganizationMembersByUId(sample.getCreatorUid());
+            if(creator != null && creator.size() > 0) {
+                dto.setCreatorName(creator.get(0).getContactName());
+            }
             dtos.add(dto);
         }
         response.setSampleQualityInspectionDTOList(dtos);
@@ -164,6 +168,7 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", Status.ACTIVE.getCode()));
 
         if(cmd.getStartTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("startTime");

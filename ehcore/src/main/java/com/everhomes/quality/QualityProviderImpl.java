@@ -96,6 +96,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.quality.*;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
@@ -389,7 +390,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 //		List<QualityInspectionSamples> samples  = new ArrayList<>();
 		SelectQuery<EhQualityInspectionSamplesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLES);
-
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.STATUS.in(Status.ACTIVE.getCode()));
 		if(locator.getAnchor() != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.lt(locator.getAnchor()));
 		}
@@ -2479,6 +2480,16 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SAMPLE_ID.eq(sampleId));
+
+		List<QualityInspectionSpecificationItemResults> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecificationItemResults.class));
+			return null;
+		});
+
+		return result;
 	}
 }

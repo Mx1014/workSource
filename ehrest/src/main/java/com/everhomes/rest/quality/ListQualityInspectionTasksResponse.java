@@ -9,6 +9,10 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>tasks: 参考com.everhomes.rest.quality.QualityInspectionTaskDTO</li>
+ *  <li>sampleName: 例行检查名称</li>
+ *  <li>communityCount: 例行检查关联项目数</li>
+ *  <li>startTime: 例行检查开始时间</li>
+ *  <li>endTime: 例行检查结束时间</li>
  *  <li>pageAnchor: 下一页的锚点，没有下一页则没有</li>
  * </ul>
  */
