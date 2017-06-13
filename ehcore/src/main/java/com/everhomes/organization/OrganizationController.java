@@ -1695,7 +1695,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("importOrganizationPersonnelFiles")
     @RestReturn(value = ImportFileTaskDTO.class)
-    public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+    public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
 
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
