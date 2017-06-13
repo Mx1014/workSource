@@ -1183,7 +1183,9 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
 				building.setContact(data.getPhone());
-				building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
 				String contactToken = data.getPhone();
 				if(ct.get(contactToken) != null) {
 					OrganizationMember om = ct.get(contactToken);
@@ -1209,7 +1211,9 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setAliasName(data.getAliasName());
 				building.setAddress(data.getAddress());
 				building.setContact(data.getPhone());
-				building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
 				String contactToken = data.getPhone();
 				if(ct.get(contactToken) != null) {
 					OrganizationMember om = ct.get(contactToken);
