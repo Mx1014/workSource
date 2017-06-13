@@ -2264,7 +2264,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setAccountCategoryId(order.getAccountCategoryId());
 				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
 					//对于新增测试账号:如果之前该用户之前有有效账号,则不分配;没有有效账号,则给他分配
-					ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), order.getOwnerId(), ConfAccountStatus.INACTIVE.getCode());
+					ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), order.getOwnerId(), ConfAccountStatus.ACTIVE.getCode());
 					if(null == activeAccounts)
 						account.setOwnerId(UserContext.current().getUser().getId());
 					account.setAccountType((byte) 1);
@@ -2921,7 +2921,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd) {
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
-		ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), cmd.getEnterpriseId(), ConfAccountStatus.INACTIVE.getCode());
+		ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), cmd.getEnterpriseId(), ConfAccountStatus.ACTIVE.getCode());
 		
 		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
 		if (null == categories || categories.size() == 0){
