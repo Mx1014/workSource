@@ -1757,12 +1757,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		List<ImportApartmentDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
-			ImportApartmentDataDTO data = new ImportApartmentDataDTO();
-			data.setBuildingName(trim(r.getA()));
-			data.setApartmentName(trim(r.getB()));
-			data.setStatus(trim(r.getC()));
-			data.setAreaSize(trim(r.getD()));
-			list.add(data);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD())) {
+				ImportApartmentDataDTO data = new ImportApartmentDataDTO();
+				data.setBuildingName(trim(r.getA()));
+				data.setApartmentName(trim(r.getB()));
+				data.setStatus(trim(r.getC()));
+				data.setAreaSize(trim(r.getD()));
+				list.add(data);
+			}
 		}
 		return list;
 	}

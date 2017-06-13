@@ -1282,17 +1282,21 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ImportBuildingDataDTO> list = new ArrayList<>();
 		for(int i = 1; i < resultList.size(); i++) {
 			RowResult r = (RowResult) resultList.get(i);
-			ImportBuildingDataDTO data = new ImportBuildingDataDTO();
-			data.setName(trim(r.getA()));
-			data.setAliasName(trim(r.getB()));
-			data.setAddress(trim(r.getC()));
-			data.setLongitudeLatitude(trim(r.getD()));
-			data.setTrafficDescription(trim(r.getE()));
-			data.setAreaSize(trim(r.getF()));
-			data.setContactor(trim(r.getG()));
-			data.setPhone(trim(r.getH()));
-			data.setDescription(trim(r.getI()));
-			list.add(data);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+					StringUtils.isNotBlank(r.getI())) {
+				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
+				data.setName(trim(r.getA()));
+				data.setAliasName(trim(r.getB()));
+				data.setAddress(trim(r.getC()));
+				data.setLongitudeLatitude(trim(r.getD()));
+				data.setTrafficDescription(trim(r.getE()));
+				data.setAreaSize(trim(r.getF()));
+				data.setContactor(trim(r.getG()));
+				data.setPhone(trim(r.getH()));
+				data.setDescription(trim(r.getI()));
+				list.add(data);
+			}
 		}
 		return list;
 	}

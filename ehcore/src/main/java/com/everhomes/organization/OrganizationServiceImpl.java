@@ -5943,30 +5943,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<ImportEnterpriseDataDTO> datas = new ArrayList<>();
 		for(int i = 1; i < list.size(); i++) {
 			RowResult r = (RowResult)list.get(i);
-			ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
-			if(null != r.getA())
-				data.setName(r.getA().trim());
-			if(null != r.getB())
-				data.setDisplayName(r.getB().trim());
-			if(null != r.getC())
-				data.setAdminName(r.getC().trim());
-			if(null != r.getD())
-				data.setAdminToken(r.getD().trim());
-			if(null != r.getE())
-				data.setEmail(r.getE().trim());
-			if(null != r.getF())
-				data.setBuildingName(r.getF().trim());
-			if(null != r.getG())
-				data.setAddress(r.getG().trim());
-			if(null != r.getH())
-				data.setContact(r.getH().trim());
-			if(null != r.getI())
-				data.setNumber(r.getI().trim());
-			if(null != r.getJ())
-				data.setCheckinDate(r.getJ().trim());
-			if(null != r.getK())
-				data.setDescription(r.getK().trim());
-			datas.add(data);
+			if (org.apache.commons.lang.StringUtils.isNotBlank(r.getA()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getB()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getC()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getD()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getE()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getF()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getG()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getH()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getI()) || org.apache.commons.lang.StringUtils.isNotBlank(r.getJ()) || 
+					org.apache.commons.lang.StringUtils.isNotBlank(r.getK())) {
+				ImportEnterpriseDataDTO data = new ImportEnterpriseDataDTO();
+				if(null != r.getA())
+					data.setName(r.getA().trim());
+				if(null != r.getB())
+					data.setDisplayName(r.getB().trim());
+				if(null != r.getC())
+					data.setAdminName(r.getC().trim());
+				if(null != r.getD())
+					data.setAdminToken(r.getD().trim());
+				if(null != r.getE())
+					data.setEmail(r.getE().trim());
+				if(null != r.getF())
+					data.setBuildingName(r.getF().trim());
+				if(null != r.getG())
+					data.setAddress(r.getG().trim());
+				if(null != r.getH())
+					data.setContact(r.getH().trim());
+				if(null != r.getI())
+					data.setNumber(r.getI().trim());
+				if(null != r.getJ())
+					data.setCheckinDate(r.getJ().trim());
+				if(null != r.getK())
+					data.setDescription(r.getK().trim());
+				datas.add(data);
+			}
 		}
 		return datas;
 	}
