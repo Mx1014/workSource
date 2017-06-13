@@ -1,5 +1,8 @@
 package com.everhomes.util.excel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 针对每个excel模板中的一行自定义的对象
  * @author jelly
@@ -32,9 +35,11 @@ public class RowResult {
 	private String X;
 	private String Y;
 	private String Z;
-	private String AA;
-	private String AB;
-	private String AC;
+	//	expand by R 13th,June
+	private Map<String,String> cells;
+	public RowResult() {
+		this.cells = new HashMap<>();
+	}
 	public String getA() {
 		return A;
 	}
@@ -216,31 +221,24 @@ public class RowResult {
 	public void setZ(String z) {
 		Z = z;
 	}
-	public String getAA() {
-		return AA;
+
+	//	expand by R 13th,June
+	public Map<String, String> getCells() {
+		return cells;
 	}
-	public void setAA(String AA) {
-		this.AA = AA;
+	public void setCells(Map<String, String> cells) {
+		this.cells = cells;
 	}
-	public String getAB() {
-		return AB;
-	}
-	public void setAB(String AB) {
-		this.AB = AB;
-	}
-	public String getAC() {
-		return AC;
-	}
-	public void setAC(String AC) {
-		this.AC = AC;
-	}
+
+    //	由新的 Map 来做处理(By R 13th June)
 	@Override
 	public String toString() {
 		
-		return "RowResult [A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", E="+ E + ", F=" + F + ", G=" + G + ", H=" + H + 
+/*		return "RowResult [A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", E="+ E + ", F=" + F + ", G=" + G + ", H=" + H +
 				", I=" +I + ", J=" + J + ", K=" + K + ", L="+ L + ", M=" + M + ", N=" + N + ", O=" + O + ", P=" + P + ", Q=" + Q
 				 + ", R=" + R + ", S=" + S + ", T=" + T + ", U=" + U + ", V=" + V + ", W=" + W + ", X=" + X + ", Y=" + Y
-				 + ", Z=" + Z +"]";
+				 + ", Z=" + Z +"]";*/
+		return "RowResult: [" + cells.toString() + "]";
 	}
 	
 	public static String trimString(String str){

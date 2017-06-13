@@ -10541,7 +10541,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return ConvertHelper.convert(task, ImportFileTaskDTO.class);
     }
 
-    private List<ImportOrganizationPersonnelFilesDTO> handleImportOrganizationPersonnelFiles(List list){
+    private List<ImportOrganizationPersonnelFilesDTO> handleImportOrganizationPersonnelFiles(List list) {
         List<ImportOrganizationPersonnelFilesDTO> datas = new ArrayList<>();
         int row = 1;
         for (Object o : list) {
@@ -10551,58 +10551,95 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             RowResult r = (RowResult) o;
             ImportOrganizationPersonnelFilesDTO data = new ImportOrganizationPersonnelFilesDTO();
-            if (null != r.getA())
-                data.setContactName(r.getA().trim());
-            if (null != r.getB())
-                data.setGender(r.getB().trim());
-            if (null != r.getC())
-                data.setContactToken(r.getC().trim());
-            if (null != r.getD())
-                data.setOrgnaizationPath(r.getD().trim());
-            if (null != r.getE())
-                data.setJobPosition(r.getE().trim());
-            if (null != r.getF())
-                data.setCheckInTime(r.getF().trim());
-            if (null != r.getG())
-                data.setEmployeeStatus(r.getG().trim());
-            if (null != r.getH())
-                data.setEmployeeTime(r.getH().trim());
-            if (null != r.getI())
-                data.setJobLevel(r.getI().trim());
-            if (null != r.getK())
-                data.setEmployeeNo(r.getK().trim());
-            if (null != r.getL())
-                data.setEnName(r.getL().trim());
-            if (null != r.getM())
-                data.setBirthday(r.getM().trim());
-            if (null != r.getN())
-                data.setMaritalFlag(r.getF().trim());
-            if (null != r.getO())
-                data.setPoliticalStatus(r.getO().trim());
-            if (null != r.getP())
-                data.setNativePlace(r.getP().trim());
-            if (null != r.getQ())
-                data.setRegResidence(r.getQ().trim());
-            if (null != r.getR())
-                data.setIdNumber(r.getR().trim());
-            if (null != r.getS())
-                data.setEmail(r.getS().trim());
-            if (null != r.getT())
-                data.setWechat(r.getT().trim());
-            if (null != r.getU())
-                data.setQq(r.getU().trim());
-            if (null != r.getV())
-                data.setEmergencyName(r.getV().trim());
-            if (null != r.getW())
-                data.setEmergencyContact(r.getW().trim());
-            if (null != r.getX())
-                data.setAddress(r.getX().trim());
-            if (null != r.getY())
-                data.setSchoolName(r.getY().trim());
-            if (null != r.getZ())
-                data.setDegree(r.getZ().trim());
-            if (null != r.getAA())
-                data.setMajor(r.getAA().trim());
+            if (null != r.getCells().get("A"))
+                data.setContactName(r.getCells().get("A").trim());
+            if (null != r.getCells().get("B"))
+                data.setGender(r.getCells().get("B").trim());
+            if (null != r.getCells().get("C"))
+                data.setContactToken(r.getCells().get("C").trim());
+            if (null != r.getCells().get("D"))
+                data.setOrgnaizationPath(r.getCells().get("D").trim());
+            if (null != r.getCells().get("E"))
+                data.setJobPosition(r.getCells().get("E").trim());
+            if (null != r.getCells().get("F"))
+                data.setCheckInTime(r.getCells().get("F").trim());
+            if (null != r.getCells().get("G"))
+                data.setEmployeeStatus(r.getCells().get("G").trim());
+            if (null != r.getCells().get("H"))
+                data.setEmployeeTime(r.getCells().get("H").trim());
+            if (null != r.getCells().get("I"))
+                data.setJobLevel(r.getCells().get("I").trim());
+            if (null != r.getCells().get("J"))
+                data.setEmployeeType(r.getCells().get("J").trim());
+            if (null != r.getCells().get("K"))
+                data.setEmployeeNo(r.getCells().get("K").trim());
+            if (null != r.getCells().get("L"))
+                data.setEnName(r.getCells().get("L").trim());
+            if (null != r.getCells().get("M"))
+                data.setBirthday(r.getCells().get("M").trim());
+            if (null != r.getCells().get("N"))
+                data.setMaritalFlag(r.getCells().get("N").trim());
+            if (null != r.getCells().get("O"))
+                data.setPoliticalStatus(r.getCells().get("O").trim());
+            if (null != r.getCells().get("P"))
+                data.setNativePlace(r.getCells().get("P").trim());
+            if (null != r.getCells().get("Q"))
+                data.setRegResidence(r.getCells().get("Q").trim());
+            if (null != r.getCells().get("R"))
+                data.setIdNumber(r.getCells().get("R").trim());
+            if (null != r.getCells().get("S"))
+                data.setEmail(r.getCells().get("S").trim());
+            if (null != r.getCells().get("T"))
+                data.setWechat(r.getCells().get("T").trim());
+            if (null != r.getCells().get("U"))
+                data.setQq(r.getCells().get("U").trim());
+            if (null != r.getCells().get("V"))
+                data.setEmergencyName(r.getCells().get("V").trim());
+            if (null != r.getCells().get("W"))
+                data.setEmergencyContact(r.getCells().get("W").trim());
+            if (null != r.getCells().get("X"))
+                data.setAddress(r.getCells().get("X").trim());
+            if (null != r.getCells().get("Y"))
+                data.setSchoolName(r.getCells().get("Y").trim());
+            if (null != r.getCells().get("Z"))
+                data.setDegree(r.getCells().get("Z").trim());
+            if (null != r.getCells().get("AA"))
+                data.setMajor(r.getCells().get("AA").trim());
+            if (null != r.getCells().get("AB"))
+                data.setEnrollmentTime(r.getCells().get("AB").trim());
+            if (null != r.getCells().get("AC"))
+                data.setGraduationTime(r.getCells().get("AC").trim());
+            if (null != r.getCells().get("AD"))
+                data.setEnterpriseName(r.getCells().get("AD").trim());
+            if (null != r.getCells().get("AE"))
+                data.setPosition(r.getCells().get("AE").trim());
+            if (null != r.getCells().get("AF"))
+                data.setJobType(r.getCells().get("AF").trim());
+            if (null != r.getCells().get("AG"))
+                data.setEntryTime(r.getCells().get("AG").trim());
+            if (null != r.getCells().get("AH"))
+                data.setDepartureTime(r.getCells().get("AH").trim());
+            if (null != r.getCells().get("AI"))
+                data.setSalaryCardNumber(r.getCells().get("AI").trim());
+            if (null != r.getCells().get("AK"))
+                data.setProvidentFundNumber(r.getCells().get("AK").trim());
+            if (null != r.getCells().get("AL"))
+                data.setInsuranceName(r.getCells().get("AL").trim());
+            if (null != r.getCells().get("AM"))
+                data.setInsuranceEnterprise(r.getCells().get("AM").trim());
+            if (null != r.getCells().get("AN"))
+                data.setInsuranceNumber(r.getCells().get("AN").trim());
+            if (null != r.getCells().get("AO"))
+                data.setInsuranceStartTime(r.getCells().get("AO").trim());
+            if (null != r.getCells().get("AP"))
+                data.setInsuranceEndTime(r.getCells().get("AP").trim());
+            if (null != r.getCells().get("AQ"))
+                data.setContractNumber(r.getCells().get("AQ").trim());
+            if (null != r.getCells().get("AR"))
+                data.setContractStartTime(r.getCells().get("AR").trim());
+            if (null != r.getCells().get("AS"))
+                data.setContractEndTime(r.getCells().get("AS").trim());
+
             datas.add(data);
         }
         return datas;
@@ -10632,7 +10669,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // 开始校验
         for (ImportOrganizationPersonnelFilesDTO data : list) {
-            log = this.checkImportOrganizationMembers(data,cmd.getOrganizationId(),deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
+            log = this.checkImportOrganizationMembers(data,deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
             if (log != null) {
                 errorDataLogs.add(log);
                 continue;
@@ -10675,10 +10712,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMembers(
-            ImportOrganizationPersonnelFilesDTO data, Long organizationId,
-            Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
-            Map<String, Organization> jobLevelMap, Organization org,
-            int namespaceId) {
+            ImportOrganizationPersonnelFilesDTO data, Map<String, Organization> deptMap,
+            Map<String, Organization> jobPositionMap, Map<String, Organization> jobLevelMap,
+            Organization org, int namespaceId) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
         if (StringUtils.isEmpty(data.getContactName())) {
@@ -10798,31 +10834,194 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }
 
-        return log;
+        return null;
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data) {
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if(!StringUtils.isEmpty(data.getEmergencyContact())){
+            if(!AccountValidatorUtil.isMobile(data.getEmergencyContact())){
+                LOGGER.warn("Wrong emergencyContact format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Wrong emergencyContact format");
+                log.setCode(OrganizationServiceErrorCode.ERROR_EMERGENCYCONTACT_FORMAT);
+                return log;
+            }
+        }
         return null;
 
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data) {
-        return null;
 
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if (!StringUtils.isEmpty(data.getSchoolName()) && !StringUtils.isEmpty(data.getDegree())
+                && !StringUtils.isEmpty(data.getMajor()) && !StringUtils.isEmpty(data.getEnrollmentTime())
+                && !StringUtils.isEmpty(data.getGraduationTime())) {
+            return null;
+        } else if (StringUtils.isEmpty(data.getSchoolName()) && StringUtils.isEmpty(data.getDegree())
+                && StringUtils.isEmpty(data.getMajor()) && StringUtils.isEmpty(data.getEnrollmentTime())
+                && StringUtils.isEmpty(data.getGraduationTime())) {
+            return null;
+        } else {
+            if (StringUtils.isEmpty(data.getSchoolName())) {
+                LOGGER.warn("Organization member schoolName is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member schoolName is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_SCHOOLNAME_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getDegree())) {
+                LOGGER.warn("Organization member degree is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member degree is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_DEGREE_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getMajor())) {
+                LOGGER.warn("Organization member major is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member major is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_MAJOR_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getEnrollmentTime())) {
+                LOGGER.warn("Organization member enrollmentTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member enrollmentTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_STARTTIME_ISNULL);
+                return log;
+            } else {
+                LOGGER.warn("Organization member graduationTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member graduationTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
+                return log;
+            }
+        }
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data) {
-        return null;
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if (!StringUtils.isEmpty(data.getEnterpriseName()) && !StringUtils.isEmpty(data.getPosition())
+                && !StringUtils.isEmpty(data.getJobType()) && !StringUtils.isEmpty(data.getEntryTime())
+                && !StringUtils.isEmpty(data.getDepartureTime())) {
+            return null;
+        } else if (StringUtils.isEmpty(data.getEnterpriseName()) && StringUtils.isEmpty(data.getPosition())
+                && StringUtils.isEmpty(data.getJobType()) && StringUtils.isEmpty(data.getEntryTime())
+                && StringUtils.isEmpty(data.getDepartureTime())) {
+            return null;
+        } else {
+            if (StringUtils.isEmpty(data.getEnterpriseName())) {
+                LOGGER.warn("Organization member enterpriseName is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member enterpriseName is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_ENTERPRISENAME_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getPosition())) {
+                LOGGER.warn("Organization member position is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member position is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_POSITION_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getJobType())) {
+                LOGGER.warn("Organization member jobType is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member jobType is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_JOBTYPE_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getEntryTime())) {
+                LOGGER.warn("Organization member entryTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member entryTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_STARTTIME_ISNULL);
+                return log;
+            } else {
+                LOGGER.warn("Organization member departureTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member departureTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
+                return log;
+            }
+        }
 
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data) {
-        return null;
 
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if (!StringUtils.isEmpty(data.getInsuranceName()) && !StringUtils.isEmpty(data.getInsuranceEnterprise())
+                && !StringUtils.isEmpty(data.getInsuranceNumber()) && !StringUtils.isEmpty(data.getInsuranceStartTime())
+                && !StringUtils.isEmpty(data.getInsuranceEndTime())) {
+            return null;
+        } else if (StringUtils.isEmpty(data.getInsuranceName()) && StringUtils.isEmpty(data.getInsuranceEnterprise())
+                && StringUtils.isEmpty(data.getInsuranceNumber()) && StringUtils.isEmpty(data.getInsuranceStartTime())
+                && StringUtils.isEmpty(data.getInsuranceEndTime())) {
+            return null;
+        } else {
+            if (StringUtils.isEmpty(data.getInsuranceName())) {
+                LOGGER.warn("Organization member insuranceName is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member insuranceName is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_INSURANCENAME_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getInsuranceEnterprise())) {
+                LOGGER.warn("Organization member insuranceEnterprise is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member insuranceEnterprise is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_INSURANCEENTERPRISE_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getInsuranceNumber())) {
+                LOGGER.warn("Organization member insuranceNumber is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member insuranceNumber is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_INSURANCENUMBER_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getInsuranceStartTime())) {
+                LOGGER.warn("Organization member insuranceStartTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member insuranceStartTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_STARTTIME_ISNULL);
+                return log;
+            } else {
+                LOGGER.warn("Organization member insuranceEndTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member insuranceEndTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
+                return log;
+            }
+        }
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data) {
-        return null;
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        if (!StringUtils.isEmpty(data.getContractNumber()) && !StringUtils.isEmpty(data.getContractStartTime())
+                && !StringUtils.isEmpty(data.getContractEndTime())) {
+            return null;
+        } else if (StringUtils.isEmpty(data.getContractNumber()) && StringUtils.isEmpty(data.getContractStartTime())
+                && StringUtils.isEmpty(data.getContractEndTime())) {
+            return null;
+        } else {
+            if (StringUtils.isEmpty(data.getContractNumber())) {
+                LOGGER.warn("Organization member contractNumber is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member contractNumber is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTRACTNUMBER_ISNULL);
+                return log;
+            } else if (StringUtils.isEmpty(data.getContractStartTime())) {
+                LOGGER.warn("Organization member contractStartTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member contractStartTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_STARTTIME_ISNULL);
+                return log;
+            } else {
+                LOGGER.warn("Organization member contractEndTime is null. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member contractEndTime is null");
+                log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
+                return log;
+            }
+        }
 
     }
 
@@ -10933,18 +11132,98 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private void saveOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data, Long detailId){
 
+        UpdateOrganizationMemberBackGroundCommand member = new UpdateOrganizationMemberBackGroundCommand();
+        //  员工标识号
+        member.setDetailId(detailId);
+        member.setEnName(data.getEnName());
+        member.setBirthday(data.getBirthday());
+        //  婚姻状态
+        if(data.getMaritalFlag().equals("已婚")){
+            member.setMaritalFlag(MaritalFlag.MARRIED.getCode());
+        }else
+            member.setMaritalFlag(MaritalFlag.UNMARRIED.getCode());
+        member.setPoliticalStatus(data.getPoliticalStatus());
+        member.setNativePlace(data.getNativePlace());
+        member.setRegResidence(data.getRegResidence());
+        member.setIdNumber(data.getIdNumber());
+        member.setEmail(data.getEmail());
+        member.setWechat(data.getWechat());
+        member.setQq(data.getQq());
+        member.setEmergencyName(data.getEmergencyName());
+        member.setEmergencyContact(data.getEmergencyContact());
+        member.setAddress(data.getAddress());
+        //  工资卡号
+        member.setSalaryCardNumber(data.getSalaryCardNumber());
+        //  公积金卡号
+        member.setSocialSecurityNumber(data.getSocialSecurityNumber());
+        //  社保卡号
+        this.updateOrganizationMemberBackGround(member);
     }
     private void saveOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data, Long detailId){
 
+        AddOrganizationMemberEducationsCommand education = new AddOrganizationMemberEducationsCommand();
+        //  员工标识号
+        education.setDetailId(detailId);
+        education.setSchoolName(data.getSchoolName());
+        education.setDegree(data.getDegree());
+        education.setMajor(data.getMajor());
+        education.setEnrollmentTime(data.getEnrollmentTime());
+        education.setGraduationTime(data.getGraduationTime());
+
+        this.addOrganizationMemberEducations(education);
     }
     private void saveOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data, Long detailId){
 
+        AddOrganizationMemberWorkExperiencesCommand workExperiences = new AddOrganizationMemberWorkExperiencesCommand();
+
+        //  员工标识号
+        workExperiences.setDetailId(detailId);
+        workExperiences.setEnterpriseName(data.getEnterpriseName());
+        workExperiences.setPosition(data.getPosition());
+        //  工作类型
+        Byte jobType;
+        if(!StringUtils.isEmpty(data.getJobType())){
+            if(data.getEmployeeType().equals("全职")){
+                jobType = 0;
+            }else if(data.getEmployeeType().equals("兼职")){
+                jobType = 1;
+            }else if(data.getEmployeeType().equals("实习")){
+                jobType = 2;
+            }else{
+                jobType = 3;
+            }
+            workExperiences.setJobType(jobType);
+        }
+        workExperiences.setEntryTime(data.getEntryTime());
+        workExperiences.setDepartureTime(data.getDepartureTime());
+
+        this.addOrganizationMemberWorkExperiences(workExperiences);
     }
     private void saveOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data, Long detailId){
 
+        AddOrganizationMemberInsurancesCommand insuraces = new AddOrganizationMemberInsurancesCommand();
+
+        //  员工标识号
+        insuraces.setDetailId(detailId);
+        insuraces.setName(data.getInsuranceName());
+        insuraces.setEnterprise(data.getInsuranceEnterprise());
+        insuraces.setNumber(data.getContractNumber());
+        insuraces.setStartTime(data.getInsuranceStartTime());
+        insuraces.setEndTime(data.getInsuranceEndTime());
+
+        this.addOrganizationMemberInsurances(insuraces);
     }
     private void saveOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data, Long detailId){
 
+        AddOrganizationMemberContractsCommand contracts = new AddOrganizationMemberContractsCommand();
+
+        //  员工标识号
+        contracts.setDetailId(detailId);
+        contracts.setContractNumber(data.getContractNumber());
+        contracts.setStartTime(data.getContractStartTime());
+        contracts.setEndTime(data.getContractEndTime());
+
+        this.addOrganizationMemberContracts(contracts);
     }
 
 }

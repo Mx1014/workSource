@@ -1365,19 +1365,18 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-/*    *//**
-     * <b>URL: /org/addOrganizationMember</b>
-     * <p>新增员工</p>
-     *//*
-    @RequestMapping("addOrganizationMember")
-    @RestReturn(value = OrganizationMemberV2DTO.class)
-    public RestResponse addOrganizationMember(@Valid AddOrganizationMemberCommand cmd) {
-        OrganizationMemberV2DTO res = this.organizationService.addOrganizationMember(cmd);
-        RestResponse response = new RestResponse(res);
+    /**
+     * <b>URL: /admin/org/addOrganizationPersonnelV2</b>
+     * <p>添加成员到多部门多岗位</p>
+     */
+    @RequestMapping("addOrganizationPersonnelV2")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse addOrganizationPersonnelV2(@Valid AddOrganizationPersonnelV2Command cmd) {
+        RestResponse response = new RestResponse(organizationService.addOrganizationPersonnel(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
     /**
      * <b>URL: /org/getOrganizationMemberBasicInfo</b>

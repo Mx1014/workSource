@@ -147,18 +147,7 @@ public class MySheetContentsHandler implements XSSFSheetXMLHandler.SheetContents
 			{
 				rowResult.setZ(s1);
 			}
-			else if(s.startsWith("AA"))
-			{
-				rowResult.setAA(s1);
-			}
-			else if(s.startsWith("AB"))
-			{
-				rowResult.setAB(s1);
-			}
-			else if(s.startsWith("AC"))
-			{
-				rowResult.setAC(s1);
-			}
+			rowResult.getCells().put(s.replace(String.valueOf(resultList.size()), ""), s1);
 		}
 	}
 
