@@ -112,6 +112,7 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
             dtos.add(dto);
         }
+        response.setSampleQualityInspectionDTOList(dtos);
 
         return response;
     }
@@ -161,7 +162,7 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
 //        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
 
         if(cmd.getStartTime() != null) {

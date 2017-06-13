@@ -3278,7 +3278,7 @@ public class QualityServiceImpl implements QualityService {
 			dto.setSampleCommunities(sampleCommunities);
 		}
 		List<QualityInspectionSampleGroupMap> sampleGroupMaps = qualityProvider.findQualityInspectionSampleGroupMapBySample(sample.getId());
-		LOGGER.info("SAMPLE GROUP MAPS: {}", sampleGroupMaps);
+
 		if(sampleGroupMaps != null && sampleGroupMaps.size() > 0) {
 			List<SampleGroupDTO> sampleGroupDTOs = new ArrayList<>();
 			sampleGroupMaps.forEach(map -> {
@@ -3299,6 +3299,7 @@ public class QualityServiceImpl implements QualityService {
 				}
 				sampleGroupDTOs.add(sampleGroupDTO);
 			});
+			dto.setSampleGroupDTOs(sampleGroupDTOs);
 		}
 
 		return dto;
@@ -3457,6 +3458,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 		CountSampleTaskSpecificationItemScoresResponse response = new CountSampleTaskSpecificationItemScoresResponse();
+		List<SpecificationItemScores> itemScores = new ArrayList<>();
+
 		return response;
 	}
 }

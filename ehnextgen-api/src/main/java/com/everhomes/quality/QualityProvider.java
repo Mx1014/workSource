@@ -149,4 +149,6 @@ public interface QualityProvider {
 	void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
 	void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
 	QualityInspectionSampleScoreStat findQualityInspectionSampleScoreStat(Long sampleId);
+
+	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId);
 }
