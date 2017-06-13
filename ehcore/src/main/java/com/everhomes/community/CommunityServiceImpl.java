@@ -1196,7 +1196,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setTrafficDescription(data.getTrafficDescription());
 				
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
-					String[] temp = data.getLongitudeLatitude().split(",");
+					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
