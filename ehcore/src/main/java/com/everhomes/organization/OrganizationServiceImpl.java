@@ -1127,13 +1127,15 @@ public class OrganizationServiceImpl implements OrganizationService {
          dbProvider.execute((TransactionStatus status) -> {
 
  			this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
- 			for (AttachmentDescriptor attachmentDescriptor : attachments) {
- 				OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
- 				attachment.setCreatorUid(userId);
- 		        attachment.setOrganizationId(id);
- 		        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
- 		      	this.organizationProvider.createOrganizationAttachment(attachment);
- 			}
+ 			if (attachments != null && attachments.size() > 0) {
+ 				for (AttachmentDescriptor attachmentDescriptor : attachments) {
+ 					OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+ 					attachment.setCreatorUid(userId);
+ 					attachment.setOrganizationId(id);
+ 					attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+ 					this.organizationProvider.createOrganizationAttachment(attachment);
+ 				}
+			}
  			return null;
  		});
 
@@ -1151,15 +1153,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
 
-			for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
-				OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
-				address.setOrganizationId(id);
-				address.setCreatorUid(userId);
-				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
-			    this.organizationProvider.createOrganizationAddress(address);
+			if (addressDTOs != null && addressDTOs.size() > 0) {
+				for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+					OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
+					address.setOrganizationId(id);
+					address.setCreatorUid(userId);
+					address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+				    this.organizationProvider.createOrganizationAddress(address);
+				}
 			}
+			
 			return null;
 		});
 
@@ -1194,6 +1199,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
 				organizationDetail.setEmailDomain(cmd.getEmailDomain());
@@ -1207,6 +1213,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
 
@@ -1228,14 +1235,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
 
-		if(null != attachments && 0 != attachments.size()){
+//		if(null != attachments && 0 != attachments.size()){
 			this.addAttachments(organization.getId(), attachments, user.getId());
-		}
+//		}
 
 		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-		if(null != addressDTOs && 0 != addressDTOs.size()){
+//		if(null != addressDTOs && 0 != addressDTOs.size()){
 			this.addAddresses(organization.getId(), addressDTOs, user.getId());
-		}
+//		}
 	}
 
 	@Override
