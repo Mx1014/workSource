@@ -108,4 +108,8 @@ update eh_locale_templates SET text='您收到一条${categoryName}:${serviceAll
 ${notemessage}
  您可以登录管理后台查看详情' WHERE scope='serviceAlliance.request.notification' AND `code`=1;
 
+-- 黑名单消息 by sfyan 20170612
+update `eh_locale_templates` set text = '由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系客服。' where scope = 'blacklist.notification' and code = 1;
+update `eh_locale_templates` set text = '您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系客服。' where scope = 'blacklist.notification' and code = 2;
+
 	
