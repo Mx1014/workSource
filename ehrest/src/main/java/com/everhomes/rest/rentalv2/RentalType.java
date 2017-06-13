@@ -10,7 +10,7 @@ package com.everhomes.rest.rentalv2;
  */
 public enum RentalType {
    
-    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1),THREETIMEADAY((byte)3);
+    HOUR((byte)0),DAY((byte)2),HALFDAY((byte)1),THREETIMEADAY((byte)3), MONTH((byte)4);
     
     private byte code;
     private RentalType(byte code) {
