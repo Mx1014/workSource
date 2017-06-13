@@ -1,11 +1,16 @@
 package com.everhomes.quality;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.quality.*;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.SearchUtils;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -24,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Created by ying.xiong on 2017/6/9.
@@ -38,6 +46,12 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
 
     @Autowired
     private ConfigurationProvider configProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public String getIndexType() {
@@ -91,7 +105,15 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             ids.remove(ids.size() - 1);
         }
 
-        return null;
+        List<SampleQualityInspectionDTO> dtos = new ArrayList<>();
+        for(Long id : ids) {
+            QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
+            SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+
+            dtos.add(dto);
+        }
+
+        return response;
     }
 
     @Override
@@ -113,7 +135,13 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             ids.remove(ids.size() - 1);
         }
 
-        return null;
+        List<SampleTaskScoreDTO> dtos = new ArrayList<>();
+        for(Long id : ids) {
+            QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
+            SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
+            dtos.add(dto);
+        }
+        return response;
     }
 
     private SearchResponse search(SearchSampleQualityInspectionCommand cmd) {

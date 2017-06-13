@@ -3342,7 +3342,25 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTaskScoresResponse countSampleTaskScores(CountSampleTaskScoresCommand cmd) {
-		return null;
+		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
+		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
+		if(dtos != null && dtos.size() > 0) {
+			dtos.forEach(dto -> {
+				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId());
+				dto.setCommunityCount(scoreStat.getCommunityCount());
+				dto.setHighestScore(scoreStat.getHighestScore());
+				dto.setLowestScore(scoreStat.getLowestScore());
+				Double averageScore = (100*scoreStat.getCommunityCount() - scoreStat.getDeductScore())/scoreStat.getCommunityCount();
+				dto.setAverageScore(averageScore);
+			});
+		}
+		return response;
+	}
+
+	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId) {
+		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);
+
+		return scoreStat;
 	}
 
 	@Override
