@@ -123,14 +123,9 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskTemplates
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.CronDateUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Field;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -376,6 +371,10 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 
 		query.addConditions(con);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listQualityInspectionSampleGroupMapByOrgAndPosition, sql=" + query.getSQL());
+			LOGGER.debug("listQualityInspectionSampleGroupMapByOrgAndPosition, bindValues=" + query.getBindValues());
+		}
 		query.fetch().map((r) -> {
 			maps.add(ConvertHelper.convert(r, QualityInspectionSampleGroupMap.class));
 			return null;
@@ -388,7 +387,7 @@ public class QualityProviderImpl implements QualityProvider {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-		List<QualityInspectionSamples> samples  = new ArrayList<>();
+//		List<QualityInspectionSamples> samples  = new ArrayList<>();
 		SelectQuery<EhQualityInspectionSamplesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLES);
 
 		if(locator.getAnchor() != null) {
@@ -418,12 +417,9 @@ public class QualityProviderImpl implements QualityProvider {
 			LOGGER.debug("Query samples by count, bindValues=" + query.getBindValues());
 		}
 
-		query.fetch().map((EhQualityInspectionSamplesRecord record) -> {
-			samples.add(ConvertHelper.convert(record, QualityInspectionSamples.class));
-			return null;
-		});
+		return query.fetch().map(new DefaultRecordMapper(Tables.EH_QUALITY_INSPECTION_SAMPLES.recordType(), QualityInspectionSamples.class));
 
-		return samples;
+//		return samples;
 	}
 
 	@Override

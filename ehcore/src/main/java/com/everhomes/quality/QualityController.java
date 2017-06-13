@@ -652,7 +652,7 @@ public class QualityController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /quality/listSampleQualityInspection</b>
+	 * <b>URL: /quality/searchSampleQualityInspection</b>
 	 * <p>列出品质核查例行检查-web</p>
 	 */
 	@RequestMapping("searchSampleQualityInspection")

@@ -161,7 +161,8 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", cmd.getOwnerType()));
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
 
         if(cmd.getStartTime() != null) {
             RangeFilterBuilder rf = new RangeFilterBuilder("startTime");
