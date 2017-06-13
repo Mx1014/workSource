@@ -9840,13 +9840,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         return response;
     }
 
-    @Override
     //  Updated By R form function addOrganizationPersonnel
-
-    public OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd) {
+    @Override
+    public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
+        this.addOrganizationPersonnel(ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class));
         return null;
+
     }
 
+    @Override
     public OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd) {
         LOGGER.info("Invoke GetOrganizationMemberInfoCommand.cmd.getDetailId={}", cmd.getDetailId());
         if (cmd.getDetailId() == null) {

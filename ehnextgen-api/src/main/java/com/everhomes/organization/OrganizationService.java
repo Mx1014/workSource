@@ -439,27 +439,16 @@ public interface OrganizationService {
 
     /****** new interface ******/
 
-//    List<OrganizationMemberV2DTO> convertV2DTO(List<OrganizationMemberDetails> organizationMemberDetails, Organization org);
-
     ListPersonnelsV2CommandResponse listOrganizationPersonnelsV2(ListPersonnelsV2Command cmd);
 
     PersonnelsDetailsV2Response getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd);
 
-    OrganizationMemberV2DTO addOrganizationMember(AddOrganizationMemberCommand cmd);
+	OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd);
 
     OrganizationMemberBasicDTO getOrganizationMemberBasicInfo(GetOrganizationMemberInfoCommand cmd);
 
-    //  尝试将部门写成一个方法方便直接调用
-//    void getDepartmentFromOrganization(Long organizationId, OrganizationMemberBasicDTO memberBasicDTO);
-/*    OrganizationMemberV2DTO getDepartmentFromOrganization(Organization org, OrganizationDTO orgDTO,
-                                                          Long directlyOrgId, String contactToken,
-                                                          String targetType, Long targetId, String nickName);*/
-
     void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd);
 
-    //	OrganizationMemberPersonalDTO getOrganizationMemberPersonal(GetOrganizationMemberPersonalCommand cmd);
-//	void updateOrganizationMemberContacts(UpdateOrganizationMemberContactsCommand cmd);
-//	OrganizationMemberContactsDTO getOrganizationMemberContacts(GetOrganizationMemberContactsCommand cmd);
     OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd);
 
     List<OrganizationMemberEducationsDTO> listOrganizationMemberEducations(ListOrganizationMemberEducationsCommand cmd);
@@ -475,8 +464,7 @@ public interface OrganizationService {
     void deleteOrganizationMemberWorkExperiences(DeleteOrganizationMemberWorkExperiencesCommand cmd);
 
     void updateOrganizationMemberWorkExperiences(UpdateOrganizationMemberWorkExperiencesCommand cmd);
-    //	void updateOrganizationMemberNumbers(UpdateOrganizationMemberNumbersCommand cmd);
-//	OrganizationMemberNumbersDTO getOrganizationMemberNumbers(GetOrganizationMemberNumbersCommand cmd);
+
     OrganizationMemberInsurancesDTO addOrganizationMemberInsurances(AddOrganizationMemberInsurancesCommand cmd);
 
     List<OrganizationMemberInsurancesDTO> listOrganizationMemberInsurances(ListOrganizationMemberInsurancesCommand cmd);

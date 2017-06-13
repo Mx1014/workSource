@@ -1358,7 +1358,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("getOrganizationPersonnelDetailsV2")
     @RestReturn(value = PersonnelsDetailsV2Response.class)
     public RestResponse getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
-        PersonnelsDetailsV2Response res = organizationService.getOrganizationPersonnelDetailsV2(cmd);
+        PersonnelsDetailsV2Response res = this.organizationService.getOrganizationPersonnelDetailsV2(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -1372,7 +1372,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("addOrganizationPersonnelV2")
     @RestReturn(value = OrganizationDTO.class)
     public RestResponse addOrganizationPersonnelV2(@Valid AddOrganizationPersonnelV2Command cmd) {
-        RestResponse response = new RestResponse(organizationService.addOrganizationPersonnel(cmd));
+        RestResponse response = new RestResponse(this.organizationService.addOrganizationPersonnelV2(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1695,7 +1695,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("importOrganizationPersonnelFiles")
     @RestReturn(value = ImportFileTaskDTO.class)
-    public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
+    public RestResponse importOrganizationPersonelFiles(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
 
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
