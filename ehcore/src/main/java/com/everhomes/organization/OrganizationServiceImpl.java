@@ -10645,7 +10645,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return datas;
     }
 
-    // update from importOrganizationPersonnel by R. 7th, June
+    // update from importOrganizationPersonnel by R at 7th.June
     private List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> importOrganizationPersonnelFiles(List<ImportOrganizationPersonnelFilesDTO> list, Long userId, ImportOrganizationPersonnelDataCommand cmd) {
         List<ImportFileResultLog<ImportOrganizationPersonnelFilesDTO>> errorDataLogs = new ArrayList<>();
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
