@@ -60,8 +60,7 @@ public interface VideoConfProvider {
 	List<Long> findUsersByEnterpriseId(Long enterpriseId);
 //	
 	void createConfOrderAccountMap(ConfOrderAccountMap map);
-	void updateConfOrderAccountMap(ConfOrderAccountMap map);
-	List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId, CrossShardListingLocator locator, Integer pageSize);
+	void updateConfOrderAccountMap(ConfOrderAccountMap map); 
 	List<ConfOrderAccountMap> findOrderAccountByAccountId(Long accountId);
 //	
 //	Long countVideoconfAccountByConfType(Byte confType);
@@ -117,5 +116,9 @@ public interface VideoConfProvider {
 	List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize);  
 	List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories, Calendar calendar);
 	List<Long> findAccountCategoriesByNotInConfType(Byte confType);
+	List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
+			CrossShardListingLocator locator, Integer pageSize, Byte assigedFlag);
+	ConfAccounts findAccountByUserIdAndEnterpriseIdAndStatus(Long userId, Long enterpriseId,
+			Byte status);
 	
 }

@@ -21,6 +21,7 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -51,6 +53,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.videoconf.ConfAccountStatus;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.OrderBriefDTO;
@@ -468,7 +471,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
-			CrossShardListingLocator locator, Integer pageSize) {
+			CrossShardListingLocator locator, Integer pageSize,Byte assigedFlag) {
 		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
 		if (locator.getShardIterator() == null) {
@@ -485,8 +488,9 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             
             if(orderId != null)
             	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
-            
-            query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)1));
+
+            if(assigedFlag != null)
+            	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq(assigedFlag));
             query.addLimit(pageSize - accounts.size());
             
             query.fetch().map((r) -> {
@@ -1566,6 +1570,35 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		return null;
 	}
 
+	@Override
+	public ConfAccounts findAccountByUserIdAndEnterpriseIdAndStatus(Long userId,
+			Long enterpriseId,Byte status) {
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.eq(status));
+		 
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, sql=" + query.getSQL());
+            LOGGER.debug("Query findAccountByUserIdAndEnterpriseId, bindValues=" + query.getBindValues());
+        }
+		
+		
+		query.fetch().map((r) -> {
+			accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+            return null;
+		});
+
+		if(accounts != null && accounts.size() > 0) {
+			return accounts.get(0);
+		}
+
+		return null;
+	}
 	@Override
 	public List<Long> findAccountCategoriesByNotInConfType(Byte confType) {
 

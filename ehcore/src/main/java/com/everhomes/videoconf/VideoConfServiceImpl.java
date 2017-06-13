@@ -76,6 +76,7 @@ import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountCommand;
 import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountResponse;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
+import com.everhomes.rest.videoconf.ConfAccountStatus;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfEnterprisesBuyChannel;
@@ -1011,7 +1012,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
-		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1);
+		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1,(byte)1);
 		List<ConfAccounts> accounts = order.stream().map(r -> {
 			ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
 			return account;
@@ -2262,7 +2263,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 				
 				account.setAccountCategoryId(order.getAccountCategoryId());
 				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
-					account.setOwnerId(UserContext.current().getUser().getId());
+					//对于新增测试账号:如果之前该用户之前有有效账号,则不分配;没有有效账号,则给他分配
+					ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), order.getOwnerId(), ConfAccountStatus.INACTIVE.getCode());
+					if(null == activeAccounts)
+						account.setOwnerId(UserContext.current().getUser().getId());
 					account.setAccountType((byte) 1);
 				} else {
 					account.setAccountType((byte) 2);
@@ -2299,7 +2303,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE);
+			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE,(byte)1);
 			if(maps != null && maps.size() > 0) {
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 				int toActive = 0;
@@ -2940,7 +2944,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		cmd2.setPeriod(0);
 		cmd2.setInvoiceFlag((byte) 0);
 		cmd2.setMakeOutFlag((byte) 0);
-		createConfAccountOrder(cmd2);  
+		Long orderId = createConfAccountOrder(cmd2);  
 		//查是否有活跃账号
 		if(enterprise != null && enterprise.getActiveAccountAmount() >0) {
 			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT,  "has active account");
@@ -2982,7 +2986,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			return; 
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize =Integer.MAX_VALUE;
-		List<ConfOrderAccountMap> orderMap = vcProvider.findOrderAccountByOrderId(order.getId(), locator, pageSize);
+		List<ConfOrderAccountMap> orderMap = vcProvider.findOrderAccountByOrderId(order.getId(), locator, pageSize,null);
 		if(orderMap == null || orderMap.size() == 0){
 			LOGGER.error("order cannot found order map "+ order );
 			return;
