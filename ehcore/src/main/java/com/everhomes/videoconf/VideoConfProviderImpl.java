@@ -1592,7 +1592,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		calendar.setTime(calendar1.getTime());
 		List<ConfOrders> results = new ArrayList<ConfOrders>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		SelectQuery<EhConfOrdersRecord> query = context.selectQuery(Tables.EH_CONF_ORDERS);
 		query.addConditions(Tables.EH_CONF_ORDERS.ACCOUNT_CATEGORY_ID.in(categories));
 		query.addConditions(Tables.EH_CONF_ORDERS.EXPIRED_DATE.greaterOrEqual(new Timestamp(calendar.getTimeInMillis())));
 		calendar.add(Calendar.DAY_OF_MONTH, 1); 
