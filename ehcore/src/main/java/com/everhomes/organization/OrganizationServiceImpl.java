@@ -11263,6 +11263,282 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.addOrganizationMemberContracts(contracts);
     }
 
+    public void exportOrganizationPersonnelFiles(
+            ExcelOrganizationPersonnelCommand cmd,
+            HttpServletResponse httpResponse){
+
+        ListPersonnelsV2Command command =new ListPersonnelsV2Command();
+        command.setKeywords(cmd.getKeywords());
+        command.setOrganizationId(cmd.getOrganizationId());
+        command.setPageSize(100000);
+        ListPersonnelsV2CommandResponse response = this.listOrganizationPersonnelsV2(command);
+        List<OrganizationMemberV2DTO> memberDTOs =response.getMembers();
+        ByteArrayOutputStream out = null;
+        XSSFWorkbook wb = this.createXSSFPersonnelFiles(memberDTOs);
+        try {
+            out = new ByteArrayOutputStream();
+            wb.write(out);
+            DownloadUtil.download(out, httpResponse);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally {
+            try {
+                wb.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
+
+    private XSSFWorkbook createXSSFPersonnelFiles(List<OrganizationMemberV2DTO> members){
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "通讯录";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum++);
+        row1.setRowStyle(style);
+        row1.createCell(0).setCellValue("姓名");
+        row1.createCell(1).setCellValue("性别");
+        row1.createCell(2).setCellValue("手机号");
+        row1.createCell(3).setCellValue("所属部门");
+        row1.createCell(4).setCellValue("岗位");
+        row1.createCell(5).setCellValue("入职日期");
+        row1.createCell(6).setCellValue("试用期");
+        row1.createCell(7).setCellValue("转正日期");
+        row1.createCell(8).setCellValue("职级");
+        row1.createCell(9).setCellValue("员工类型");
+        row1.createCell(10).setCellValue("员工编号");
+        row1.createCell(11).setCellValue("英文名");
+        row1.createCell(12).setCellValue("出生日期");
+        row1.createCell(13).setCellValue("婚姻状态");
+        row1.createCell(14).setCellValue("政治面貌");
+        row1.createCell(15).setCellValue("籍贯");
+        row1.createCell(16).setCellValue("户口");
+        row1.createCell(17).setCellValue("身份证");
+        row1.createCell(18).setCellValue("邮箱");
+        row1.createCell(19).setCellValue("微信");
+        row1.createCell(20).setCellValue("QQ");
+        row1.createCell(21).setCellValue("紧急联系人");
+        row1.createCell(22).setCellValue("紧急联系电话");
+        row1.createCell(23).setCellValue("住址");
+        row1.createCell(24).setCellValue("学校名称");
+        row1.createCell(25).setCellValue("学历");
+        row1.createCell(26).setCellValue("专业");
+        row1.createCell(27).setCellValue("入学时间");
+        row1.createCell(28).setCellValue("毕业时间");
+        row1.createCell(29).setCellValue("公司名称");
+        row1.createCell(30).setCellValue("职位");
+        row1.createCell(31).setCellValue("类型");
+        row1.createCell(32).setCellValue("加入时间");
+        row1.createCell(33).setCellValue("离开时间");
+        row1.createCell(34).setCellValue("工资卡号");
+        row1.createCell(35).setCellValue("社保电脑号");
+        row1.createCell(36).setCellValue("公积金卡号");
+        row1.createCell(37).setCellValue("保险名称");
+        row1.createCell(38).setCellValue("保险公司");
+        row1.createCell(39).setCellValue("保单编号");
+        row1.createCell(40).setCellValue("生效时间");
+        row1.createCell(41).setCellValue("到期时间");
+        row1.createCell(42).setCellValue("劳动合同编号");
+        row1.createCell(43).setCellValue("生效时间");
+        row1.createCell(44).setCellValue("到期时间");
+        for(OrganizationMemberV2DTO member : members){
+            XSSFRow row = sheet.createRow(rowNum++);
+
+            //  写入初始信息
+            row.createCell(0).setCellValue(member.getContactName());
+            row.createCell(1).setCellValue(null == member.getGender() ? "" : member.getGender() == 1 ? "男" : "女");
+            row.createCell(2).setCellValue(member.getContactToken());
+
+            //  岗位
+            List<OrganizationDTO> departments = member.getDepartments();
+            String departmentStr = "";
+            if (null != departments) {
+                for (OrganizationDTO department : departments) {
+                    departmentStr += "," + department.getPathName();
+                }
+            }
+
+            if (!StringUtils.isEmpty(departmentStr)) {
+                departmentStr = departmentStr.substring(1);
+            }
+            row.createCell(3).setCellValue(departmentStr);
+
+            //  部门
+            List<OrganizationDTO> jobPositions = member.getJobPositions();
+            String jobPositionStr = "";
+            if (null != jobPositions) {
+                for (OrganizationDTO jobPosition : jobPositions) {
+                    jobPositionStr += "," + jobPosition.getName();
+                }
+            }
+
+            if (!StringUtils.isEmpty(jobPositionStr)) {
+                jobPositionStr = jobPositionStr.substring(1);
+            }
+            row.createCell(4).setCellValue(jobPositionStr);
+
+            row.createCell(5).setCellValue(member.getCheckInTime());
+            row.createCell(6).setCellValue(member.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())? "是" : "否");
+            row.createCell(7).setCellValue(member.getEmploymentTime());
+
+            //  职级
+            List<OrganizationDTO> jobLevels = member.getJobLevels();
+            String jobLevelStr = "";
+            if (null != jobLevels) {
+                for (OrganizationDTO jobLevel : jobLevels) {
+                    jobLevelStr += "," + jobLevel.getName();
+                }
+            }
+
+            if (!StringUtils.isEmpty(jobLevelStr)) {
+                jobLevelStr = jobLevelStr.substring(1);
+            }
+            row.createCell(8).setCellValue(jobLevelStr);
+            row.createCell(10).setCellValue(StringUtils.isEmpty(member.getEmployeeNo()) ? "" : member.getEmployeeNo());
+
+            //  开始写入 detail 信息
+            OrganizationMemberDetails memberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+            if(memberDetails != null){
+                if(!StringUtils.isEmpty(memberDetails.getEmployeeType())) {
+                    String employeeType = "";
+                    if (memberDetails.getEmployeeType().equals(EmployeeType.FULLTIME.getCode()))
+                        employeeType = "全职";
+                    else if (memberDetails.getEmployeeType().equals(EmployeeType.PARTTIME.getCode()))
+                        employeeType = "兼职";
+                    else if (memberDetails.getEmployeeType().equals(EmployeeType.INTERSHIP.getCode()))
+                        employeeType = "实习";
+                    else if (memberDetails.getEmployeeType().equals(EmployeeType.LABORDISPATCH.getCode()))
+                        employeeType = "劳动派遣";
+                    row.createCell(9).setCellValue(employeeType);
+                }else
+                    row.createCell(9).setCellValue("");
+                row.createCell(11).setCellValue(StringUtils.isEmpty(memberDetails.getEnName()) ? "":memberDetails.getEnName());
+                row.createCell(12).setCellValue(StringUtils.isEmpty(memberDetails.getBirthday()) ? "":String.valueOf(memberDetails.getBirthday()));
+                row.createCell(13).setCellValue(StringUtils.isEmpty(memberDetails.getMaritalFlag().equals(MaritalFlag.MARRIED.getCode())) ? "已婚": "未婚");
+                row.createCell(14).setCellValue(StringUtils.isEmpty(memberDetails.getPoliticalStatus()) ? "":memberDetails.getPoliticalStatus());
+                row.createCell(15).setCellValue(StringUtils.isEmpty(memberDetails.getNativePlace()) ? "":memberDetails.getNativePlace());
+                row.createCell(16).setCellValue(StringUtils.isEmpty(memberDetails.getRegResidence()) ? "":memberDetails.getRegResidence());
+                row.createCell(17).setCellValue(StringUtils.isEmpty(memberDetails.getIdNumber()) ? "":memberDetails.getIdNumber());
+                row.createCell(18).setCellValue(StringUtils.isEmpty(memberDetails.getEmail()) ? "":memberDetails.getEmail());
+                row.createCell(19).setCellValue(StringUtils.isEmpty(memberDetails.getWechat()) ? "":memberDetails.getWechat());
+                row.createCell(20).setCellValue(StringUtils.isEmpty(memberDetails.getQq()) ? "":memberDetails.getQq());
+                row.createCell(21).setCellValue(StringUtils.isEmpty(memberDetails.getEmergencyName()) ? "":memberDetails.getEmergencyName());
+                row.createCell(22).setCellValue(StringUtils.isEmpty(memberDetails.getEmergencyContact()) ? "":memberDetails.getEmergencyContact());
+                row.createCell(23).setCellValue(StringUtils.isEmpty(memberDetails.getAddress()) ? "":memberDetails.getAddress());
+                row.createCell(34).setCellValue(StringUtils.isEmpty(memberDetails.getSalaryCardNumber()) ? "":memberDetails.getSalaryCardNumber());
+                row.createCell(35).setCellValue(StringUtils.isEmpty(memberDetails.getSocialSecurityNumber()) ? "":memberDetails.getSocialSecurityNumber());
+                row.createCell(36).setCellValue(StringUtils.isEmpty(memberDetails.getProvidentFundNumber()) ? "":memberDetails.getProvidentFundNumber());
+            }else{
+                row.createCell(9).setCellValue("");
+                row.createCell(11).setCellValue("");
+                row.createCell(12).setCellValue("");
+                row.createCell(13).setCellValue("");
+                row.createCell(14).setCellValue("");
+                row.createCell(15).setCellValue("");
+                row.createCell(16).setCellValue("");
+                row.createCell(17).setCellValue("");
+                row.createCell(18).setCellValue("");
+                row.createCell(19).setCellValue("");
+                row.createCell(20).setCellValue("");
+                row.createCell(21).setCellValue("");
+                row.createCell(22).setCellValue("");
+                row.createCell(23).setCellValue("");
+                row.createCell(34).setCellValue("");
+                row.createCell(35).setCellValue("");
+                row.createCell(36).setCellValue("");
+            }
+
+            //  导出教育信息
+            List<OrganizationMemberEducations> educations = this.organizationProvider.listOrganizationMemberEducations(member.getDetailId());
+            if(educations != null && educations.size()>0){
+                OrganizationMemberEducations education = educations.get(0);
+                row.createCell(24).setCellValue(education.getSchoolName());
+                row.createCell(25).setCellValue(education.getDegree());
+                row.createCell(26).setCellValue(education.getMajor());
+                row.createCell(27).setCellValue(education.getEnrollmentTime());
+                row.createCell(28).setCellValue(education.getGraduationTime());
+            }else{
+                row.createCell(24).setCellValue("");
+                row.createCell(25).setCellValue("");
+                row.createCell(26).setCellValue("");
+                row.createCell(27).setCellValue("");
+                row.createCell(28).setCellValue("");
+            }
+
+            //  导出工作经历
+            List<OrganizationMemberWorkExperiences> workExperiences = this.organizationProvider.listOrganizationMemberWorkExperiences(member.getDetailId());
+            if(workExperiences != null && workExperiences.size()>0){
+                OrganizationMemberWorkExperiences workExperience = workExperiences.get(0);
+                row.createCell(29).setCellValue(workExperience.getEnterpriseName());
+                row.createCell(30).setCellValue(workExperience.getPosition());
+                String jobType ="";
+                if(workExperience.getJobType().equals(EmployeeType.FULLTIME.getCode()))
+                    jobType = "全职";
+                else if(workExperience.getJobType().equals(EmployeeType.PARTTIME.getCode()))
+                    jobType = "兼职";
+                else if(workExperience.getJobType().equals(EmployeeType.INTERSHIP.getCode()))
+                    jobType = "实习";
+                else if(workExperience.getJobType().equals(EmployeeType.LABORDISPATCH.getCode()))
+                    jobType = "劳动派遣";
+                row.createCell(31).setCellValue(jobType);
+                row.createCell(32).setCellValue(workExperience.getEntryTime());
+                row.createCell(33).setCellValue(workExperience.getDepartureTime());
+            }else{
+                row.createCell(29).setCellValue("");
+                row.createCell(30).setCellValue("");
+                row.createCell(31).setCellValue("");
+                row.createCell(32).setCellValue("");
+                row.createCell(33).setCellValue("");
+            }
+
+            // 导出保险信息
+            List<OrganizationMemberInsurances> insurances = this.organizationProvider.listOrganizationMemberInsurances(member.getDetailId());
+            if(insurances != null && insurances.size()>0){
+                OrganizationMemberInsurances insurance = insurances.get(0);
+                row.createCell(37).setCellValue(insurance.getName());
+                row.createCell(38).setCellValue(insurance.getEnterprise());
+                row.createCell(39).setCellValue(insurance.getNumber());
+                row.createCell(40).setCellValue(insurance.getStartTime());
+                row.createCell(41).setCellValue(insurance.getEndTime());
+            }else{
+                row.createCell(37).setCellValue("");
+                row.createCell(38).setCellValue("");
+                row.createCell(39).setCellValue("");
+                row.createCell(40).setCellValue("");
+                row.createCell(41).setCellValue("");
+            }
+
+            //  导出合同信息
+            List<OrganizationMemberContracts> contracts = this.organizationProvider.listOrganizationMemberContracts(member.getDetailId());
+            if(contracts != null && contracts.size()>0){
+                OrganizationMemberContracts contract = contracts.get(0);
+                row.createCell(42).setCellValue(contract.getContractNumber());
+                row.createCell(43).setCellValue(contract.getStartTime());
+                row.createCell(44).setCellValue(contract.getEndTime());
+            }else{
+                row.createCell(42).setCellValue("");
+                row.createCell(43).setCellValue("");
+                row.createCell(44).setCellValue("");
+            }
+
+        }
+        return wb;
+    }
+
 }
 
 

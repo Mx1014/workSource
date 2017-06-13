@@ -1709,4 +1709,18 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /org/exportOrganizationPersonnelFiles</b>
+     * <p>通讯录成员导出</p>
+     */
+    @RequestMapping("exportOrganizationPersonnelFiles")
+    @RestReturn(value = String.class)
+    public RestResponse exportOrganizationPersonnelFiles(@Valid ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse) {
+        this.organizationService.exportOrganizationPersonnelFiles(cmd, httpResponse);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
