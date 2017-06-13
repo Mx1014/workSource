@@ -1587,7 +1587,9 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<ConfOrders> findConfOrdersByCategoriesAndDate(List<Long> categories,
-			Calendar calendar) {
+			Calendar calendar1) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(calendar1.getTime());
 		List<ConfOrders> results = new ArrayList<ConfOrders>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);

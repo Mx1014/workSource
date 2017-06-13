@@ -2949,7 +2949,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	
 
-	@Scheduled(cron = "0 0 11 * * ?") 
+	@Scheduled(cron = "0 20 11 * * ?") 
 	private void scheduledExpirationReminder(){
 		//提前三天提醒试用的
 		
@@ -2962,6 +2962,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		calendar.set(Calendar.MILLISECOND, 0);
 		List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
 		for(ConfOrders order : orders){
+			LOGGER.debug("send trial remainder to order "+ order);
 			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_TRIAL_EXPIRATION_REMINDER);
 		}
 		//提前7天提醒正式的
@@ -2969,6 +2970,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		calendar.add(Calendar.DAY_OF_MONTH, 4); 
 		orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
 		for(ConfOrders order : orders){
+			LOGGER.debug("send  remainder to order "+ order);
 			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_EXPIRATION_REMINDER);
 		}
 	} 
