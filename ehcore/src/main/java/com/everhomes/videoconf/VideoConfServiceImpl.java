@@ -3017,7 +3017,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private void processAccountName(StringBuilder accountName, ConfOrderAccountMap r,String phoneNum) {
 		ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
 		if(!accountName.equals(""))
-			accountName.append(",");
+			accountName.append("，");
 
 		if(null != account.getOwnerId()){
 
