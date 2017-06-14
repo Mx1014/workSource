@@ -2223,6 +2223,11 @@ public class FamilyServiceImpl implements FamilyService {
         if(history != null) {
             this.userGroupHistoryProvider.deleteUserGroupHistory(history);
         }
+        LeaveFamilyCommand cmd = new LeaveFamilyCommand();
+        if(GroupDiscriminator.FAMILY == GroupDiscriminator.fromCode(history.getGroupDiscriminator()))
+            cmd.setType(ParamType.FAMILY.getCode());
+        cmd.setId(history.getGroupId());
+        leave(cmd, null);
     }
 
 	@Override
