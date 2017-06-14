@@ -747,6 +747,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         addExtraInfo(dtos);
         resp.setDtos(dtos);
+        resp.setNextPageAnchor(rlt.getPageAnchor());
 		return resp;
 	}
 	
@@ -1126,13 +1127,15 @@ public class OrganizationServiceImpl implements OrganizationService {
          dbProvider.execute((TransactionStatus status) -> {
 
  			this.organizationProvider.deleteOrganizationAttachmentsByOrganizationId(id);
- 			for (AttachmentDescriptor attachmentDescriptor : attachments) {
- 				OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
- 				attachment.setCreatorUid(userId);
- 		        attachment.setOrganizationId(id);
- 		        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
- 		      	this.organizationProvider.createOrganizationAttachment(attachment);
- 			}
+ 			if (attachments != null && attachments.size() > 0) {
+ 				for (AttachmentDescriptor attachmentDescriptor : attachments) {
+ 					OrganizationAttachment attachment = ConvertHelper.convert(attachmentDescriptor, OrganizationAttachment.class);
+ 					attachment.setCreatorUid(userId);
+ 					attachment.setOrganizationId(id);
+ 					attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+ 					this.organizationProvider.createOrganizationAttachment(attachment);
+ 				}
+			}
  			return null;
  		});
 
@@ -1150,15 +1153,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			this.organizationProvider.deleteOrganizationAddressByOrganizationId(id);
 
-			for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
-				OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
-				address.setOrganizationId(id);
-				address.setCreatorUid(userId);
-				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
-			    this.organizationProvider.createOrganizationAddress(address);
+			if (addressDTOs != null && addressDTOs.size() > 0) {
+				for (OrganizationAddressDTO organizationAddressDTO : addressDTOs) {
+					OrganizationAddress address = ConvertHelper.convert(organizationAddressDTO, OrganizationAddress.class);
+					address.setOrganizationId(id);
+					address.setCreatorUid(userId);
+					address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					address.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					address.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+				    this.organizationProvider.createOrganizationAddress(address);
+				}
 			}
+			
 			return null;
 		});
 
@@ -1195,6 +1201,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationDetail.setLatitude(cmd.getLatitude());
 				organizationDetail.setLongitude(cmd.getLongitude());
+				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
 				organizationDetail.setEmailDomain(cmd.getEmailDomain());
@@ -1210,6 +1217,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationDetail.setLatitude(cmd.getLatitude());
 				organizationDetail.setLongitude(cmd.getLongitude());
+				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
 
@@ -1231,14 +1239,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
 
-		if(null != attachments && 0 != attachments.size()){
+//		if(null != attachments && 0 != attachments.size()){
 			this.addAttachments(organization.getId(), attachments, user.getId());
-		}
+//		}
 
 		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-		if(null != addressDTOs && 0 != addressDTOs.size()){
+//		if(null != addressDTOs && 0 != addressDTOs.size()){
 			this.addAddresses(organization.getId(), addressDTOs, user.getId());
-		}
+//		}
 	}
 
 	@Override
@@ -5648,6 +5656,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		Integer namespaceId = exNamespaceId;
 
+		Organization org = checkOrganization(cmd.getOrganizationId());
+
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 
 		return this.dbProvider.execute((TransactionStatus status) -> {
@@ -5661,10 +5671,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
 				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
 			}else{
-				if(OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE){
-					m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					m.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-					organizationProvider.updateOrganizationMember(m);
+				List<OrganizationMember> members = listOrganizationMemberByOrganizationPathAndContactToken(org.getPath(), cmd.getAccountPhone());
+				for (OrganizationMember organizationMember: members) {
+					organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					organizationMember.setContactName(cmd.getAccountName());
+					organizationProvider.updateOrganizationMember(organizationMember);
 				}
 			}
 			UserIdentifier userIdentifier = null;
@@ -6863,7 +6874,8 @@ System.out.println();
 	 * @param organizationIds
 	 * @return
      */
-	private List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds){
+	@Override
+	public List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds){
 		List<OrganizationManagerDTO>  dtos = new ArrayList<>();
 		//机构经理
 		List<String> types = new ArrayList<>();

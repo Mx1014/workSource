@@ -1021,5 +1021,11 @@ delete from eh_launch_pad_items where namespace_id = 1 and item_label in('物业
 	
 -- fix 11023 by xiongying20170609	
 update eh_launch_pad_items set action_type = 50  where namespace_id = 1 and item_label = '最新活动';
+
+UPDATE eh_launch_pad_items SET action_data = '{"pageType":0,"resourceTypeId":10821}'
+WHERE namespace_id = 1 AND item_label = '华润通会议室';
+
+DELETE FROM eh_rentalv2_resource_types WHERE id = 10825;
+
 	
 	

@@ -23,8 +23,8 @@ public class FlowVarsTextRemindCurrentAllProcessorsName implements FlowVariableT
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount());
+		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
+		        ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
 		String txt = "";
 		int i = 0;
 		

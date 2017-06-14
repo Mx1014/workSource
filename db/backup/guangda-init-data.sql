@@ -1549,10 +1549,8 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@mapping_id := @mapping_id + 1), 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A4-410', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@mapping_id := @mapping_id + 1), 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A4-411', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@mapping_id := @mapping_id + 1), 1012516, 240111044331056800, (@address_id := @address_id + 1), 'A4-412', '0');
-    
-    
-    
-    
-    
-    
-    
+
+
+-- fix #11162 add by xq.tian  2017/06/13
+UPDATE eh_launch_pad_items SET action_data = '{"pageType":"0","resourceTypeId":10513,"payMode":1}', item_label = '资源预订' WHERE namespace_id = 999979 AND item_label = '资源预定';
+UPDATE eh_rentalv2_resource_types SET pay_mode = 1 WHERE id = 10513;
