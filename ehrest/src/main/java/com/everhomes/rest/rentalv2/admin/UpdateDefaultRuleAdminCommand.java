@@ -45,6 +45,8 @@ import com.everhomes.util.StringHelper;
  * <li>approvingUserWorkdayPrice: 外部客户工作日价格</li>
  * <li>approvingUserWeekendPrice: 外部客户节假日价格</li>
  * <li>halfDayTimeIntervals: 半天时间设置 {@link com.everhomes.rest.rentalv2.admin.TimeIntervalDTO}</li>
+ * <li>rentalTypes: 时间单元类型列表 {@link com.everhomes.rest.rentalv2.RentalType}</li>
+ * <li>priceRules: 价格策略列表 {@link com.everhomes.rest.rentalv2.admin.PriceRuleDTO}</li>
  * </ul>
  */
 public class UpdateDefaultRuleAdminCommand {
@@ -62,7 +64,6 @@ public class UpdateDefaultRuleAdminCommand {
 	private Byte multiTimeInterval;
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
-	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Double timeStep;
@@ -75,8 +76,6 @@ public class UpdateDefaultRuleAdminCommand {
 	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
-	private BigDecimal workdayPrice;
-	private BigDecimal weekendPrice;
 	private Double siteCounts;
 	@ItemType(SiteNumberDTO.class)
 	private List<SiteNumberDTO> siteNumbers;
@@ -86,10 +85,25 @@ public class UpdateDefaultRuleAdminCommand {
 
 	private Byte rentalStartTimeFlag;
 	private Byte rentalEndTimeFlag;
-	private BigDecimal orgMemberWorkdayPrice;
-	private BigDecimal orgMemberWeekendPrice;
 
+	@ItemType(Byte.class)
+	private List<Byte> rentalTypes;
+	@ItemType(PriceRuleDTO.class)
+	private List<PriceRuleDTO> priceRules;
+	
+	@Deprecated
+	private Byte rentalType;
+	@Deprecated
+	private BigDecimal workdayPrice;
+	@Deprecated
+	private BigDecimal weekendPrice;
+	@Deprecated
+	private BigDecimal orgMemberWorkdayPrice;
+	@Deprecated
+	private BigDecimal orgMemberWeekendPrice;
+	@Deprecated
 	private BigDecimal approvingUserWorkdayPrice;
+	@Deprecated
 	private BigDecimal approvingUserWeekendPrice;
 
 	@ItemType(TimeIntervalDTO.class)
