@@ -3505,7 +3505,7 @@ public class QualityServiceImpl implements QualityService {
 		communitySpecificationStats.entrySet().stream().sorted(Comparator.comparing(e->e.getValue()))
 				.forEach(e ->result.put(e.getKey(), e.getValue()));
 
-		if(result != null) {
+		if(result != null && result.size() > 0) {
 			scoreStat.setHighestScore(100-result.entrySet().iterator().next().getValue());
 			Iterator<Map.Entry<Long, Double>> iterator = result.entrySet().iterator();
 			Map.Entry<Long, Double> tail = null;
