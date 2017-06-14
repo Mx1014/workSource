@@ -1541,7 +1541,7 @@ public class QualityServiceImpl implements QualityService {
 							String taskNum = timestampToStr(new Timestamp(now)) + now;
 							task.setTaskNumber(taskNum);
 							qualityProvider.createVerificationTasks(task);
-								
+							taskSearcher.feedDoc(task);
 						});
 					}
 
@@ -1635,6 +1635,7 @@ public class QualityServiceImpl implements QualityService {
 			List<AttachmentDescriptor> attachmentList, List<ReportSpecificationItemResultsDTO> itemResults) {
 		
 		qualityProvider.updateVerificationTasks(task);
+		taskSearcher.feedDoc(task);
 		qualityProvider.createQualityInspectionTaskRecords(record);
 		
 		User user = UserContext.current().getUser();
@@ -2432,14 +2433,13 @@ public class QualityServiceImpl implements QualityService {
 			task.setManualFlag(2L);
 		}
 
-		
-		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			Timestamp startTime = new Timestamp(current);
 			task.setExecutiveStartTime(startTime);
 			String taskNum = timestampToStr(new Timestamp(current)) + current;
 			task.setTaskNumber(taskNum);
 			qualityProvider.createVerificationTasks(task);
+			taskSearcher.feedDoc(task);
 			
 			if(cmd.getTemplateFlag()) {
 				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
@@ -3474,7 +3474,7 @@ public class QualityServiceImpl implements QualityService {
 		return scoreStat;
 	}
 
-	private QualityInspectionSampleScoreStat getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
+	private List<QualityInspectionSpecificationItemResults> getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		calculateTasks(scoreStat, now);
 		Map<Long, Double> communitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
@@ -3506,7 +3506,7 @@ public class QualityServiceImpl implements QualityService {
 			scoreStat.setLowestScore(100-tail.getValue());
 		}
 
-		return scoreStat;
+		return results;
 	}
 
 //	//按map的value排序
@@ -3536,7 +3536,7 @@ public class QualityServiceImpl implements QualityService {
 				sampleScoreStatMaps.entrySet().forEach(sampleScoreStatMap -> {
 					QualityInspectionSampleScoreStat stat = sampleScoreStatMap.getValue();
 					samplesMap.remove(sampleScoreStatMap.getKey());
-					getNewestScoreStat(stat);
+					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					stat.setUpdateTime(now);
 					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
 				});
@@ -3562,7 +3562,7 @@ public class QualityServiceImpl implements QualityService {
 					} else {
 						stat.setCommunityCount(0);
 					}
-					getNewestScoreStat(stat);
+					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					qualityProvider.createQualityInspectionSampleScoreStat(stat);
 				});
 			}
@@ -3570,6 +3570,11 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_community_specification_stat的数据
+	public void updateSampleCommunitySpecificationStat(List<QualityInspectionSpecificationItemResults> results) {
+		if(results != null) {
+
+		}
+	}
 
 
 	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
