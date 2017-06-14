@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
@@ -16,13 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
-
-
-
-
-
+import java.util.stream.Stream;
 
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +29,7 @@ import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSamples;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -3459,56 +3455,125 @@ public class QualityServiceImpl implements QualityService {
 		return response;
 	}
 
-	private QualityInspectionSampleScoreStat getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
-		long now = System.currentTimeMillis();
-		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
-		Map<Long, QualityInspectionSampleCommunitySpecificationStat> communitySpecificationStats = qualityProvider.listCommunitySpecifitionStatBySampleId(scoreStat.getSampleId());
+	private QualityInspectionSampleScoreStat calculateTasks(QualityInspectionSampleScoreStat scoreStat, Timestamp now) {
+		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
+
 		if(tasks != null) {
 			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
 			Integer correctionCount = 0;
 			for(QualityInspectionTasks task : tasks) {
 				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						 || QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
-						 || QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
+						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
 					correctionCount ++;
 				}
-			}
-			//时间段内的扣分项 应该填到对应的community和一级specification里面 所以是个组合key 要改下
-			List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
-
-			if(results != null) {
-				results.forEach(result -> {
-					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-					QualityInspectionSampleCommunitySpecificationStat stat = communitySpecificationStats.get(result.getTargetId());
-					if(stat != null) {
-						stat.setDeductScore(stat.getDeductScore() + result.getTotalScore());
-						communitySpecificationStats.put(result.getTargetId(), stat);
-					}
-				});
 			}
 			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
 		}
 
-		Map<Long, Double> communityScore = new HashMap<>();
-		communitySpecificationStats.entrySet().forEach(stat -> {
-			QualityInspectionSampleCommunitySpecificationStat communitySpecificationStat = stat.getValue();
-			if(communityScore.get(communitySpecificationStat.getCommunityId()) != null) {
-				Double deductScore = communityScore.get(communitySpecificationStat.getCommunityId()) + communitySpecificationStat.getDeductScore();
-				communityScore.put(communitySpecificationStat.getCommunityId(), deductScore);
-			}else {
-				communityScore.put(communitySpecificationStat.getCommunityId(), communitySpecificationStat.getDeductScore());
-			}
-
-		});
-		//按map的value排序 第一个和最后一个是扣分最多和最少的项目
-
-
-//		scoreStat.setHighestScore();
-//		scoreStat.setLowestScore();
 		return scoreStat;
 	}
 
+	private QualityInspectionSampleScoreStat getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		calculateTasks(scoreStat, now);
+		Map<Long, Double> communitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		//时间段内的扣分项
+		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
+
+		if(results != null) {
+			results.forEach(result -> {
+				scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
+				Double statScore = communitySpecificationStats.get(result.getTargetId());
+				if(statScore != null) {
+					statScore = statScore + result.getTotalScore();
+					communitySpecificationStats.put(result.getTargetId(), statScore);
+				}
+			});
+		}
+		//按map的value排序 第一个和最后一个是扣分最少和最多的项目
+		Map<Long, Double> result = new LinkedHashMap<>();
+		communitySpecificationStats.entrySet().stream().sorted(Comparator.comparing(e->e.getValue()))
+				.forEach(e ->result.put(e.getKey(), e.getValue()));
+
+		if(result != null) {
+			scoreStat.setHighestScore(100-result.entrySet().iterator().next().getValue());
+			Iterator<Map.Entry<Long, Double>> iterator = result.entrySet().iterator();
+			Map.Entry<Long, Double> tail = null;
+			while (iterator.hasNext()) {
+				tail = iterator.next();
+			}
+			scoreStat.setLowestScore(100-tail.getValue());
+		}
+
+		return scoreStat;
+	}
+
+//	//按map的value排序
+//	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+//		Map<K, V> result = new LinkedHashMap<>();
+//		Stream<Map.Entry<K, V>> st = map.entrySet().stream();
+//
+//		st.sorted(Comparator.comparing(e -> e.getValue())).forEach(e -> result.put(e.getKey(), e.getValue()));
+//
+//		return result;
+//	}
+
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat和eh_quality_inspection_sample_community_specification_stat的数据
+	public void updateSampleScoreStat() {
+		List<QualityInspectionSamples> samples = qualityProvider.listActiveQualityInspectionSamples(null);
+		if(samples != null && samples.size() > 0) {
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			Map<Long, QualityInspectionSamples> samplesMap =  new HashMap<>();
+			samples.forEach(sample -> {
+				samplesMap.put(sample.getId(), sample);
+			});
+			List<Long> sampleIds = samples.stream().map(QualityInspectionSamples::getId).collect(Collectors.toList());
+			//查统计表
+			Map<Long, QualityInspectionSampleScoreStat> sampleScoreStatMaps = qualityProvider.getQualityInspectionSampleScoreStat(sampleIds);
+			if(sampleScoreStatMaps != null && sampleScoreStatMaps.size() > 0) {
+				//更新统计表
+				sampleScoreStatMaps.entrySet().forEach(sampleScoreStatMap -> {
+					QualityInspectionSampleScoreStat stat = sampleScoreStatMap.getValue();
+					samplesMap.remove(sampleScoreStatMap.getKey());
+					calculateTasks(stat, now);
+					//tongjikoufen
+
+					stat.setUpdateTime(now);
+					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
+				});
+			}
+
+			if(samplesMap != null && samplesMap.size() > 0) {
+				samplesMap.entrySet().forEach(sampleMap -> {
+					QualityInspectionSamples sample = sampleMap.getValue();
+					Long sampleId = sampleMap.getKey();
+					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+					QualityInspectionSampleScoreStat stat = new QualityInspectionSampleScoreStat();
+					stat.setNamespaceId(sample.getNamespaceId());
+					stat.setTaskCount(0);
+					stat.setCorrectionCount(0);
+					stat.setOwnerType(sample.getOwnerType());
+					stat.setOwnerId(sample.getOwnerId());
+					stat.setSampleId(sampleId);
+					stat.setDeductScore(0.0);
+					stat.setHighestScore(0.0);
+					stat.setLowestScore(0.0);
+					if(communityMap != null && communityMap.size() > 0) {
+						stat.setCommunityCount(communityMap.size());
+					} else {
+						stat.setCommunityCount(0);
+					}
+
+					calculateTasks(stat, now);
+					qualityProvider.createQualityInspectionSampleScoreStat(stat);
+				});
+			}
+
+
+		}
+	}
+
 
 	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
 		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);

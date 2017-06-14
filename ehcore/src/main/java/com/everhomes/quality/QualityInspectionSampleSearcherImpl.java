@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -113,6 +114,23 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             List<OrganizationMember> creator = organizationProvider.listOrganizationMembersByUId(sample.getCreatorUid());
             if(creator != null && creator.size() > 0) {
                 dto.setCreatorName(creator.get(0).getContactName());
+            }
+
+            List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
+            if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
+                List<SampleCommunity> sampleCommunities = new ArrayList<>();
+                List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
+                Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
+                sampleCommunityMaps.forEach(map -> {
+                    SampleCommunity sc = new SampleCommunity();
+                    sc.setSampleId(sample.getId());
+                    sc.setCommunityId(map.getCommunityId());
+                    Community community = communityMap.get(map.getCommunityId());
+                    sc.setCommunityName(community.getName());
+                    sampleCommunities.add(sc);
+                });
+
+                dto.setSampleCommunities(sampleCommunities);
             }
             dtos.add(dto);
         }
