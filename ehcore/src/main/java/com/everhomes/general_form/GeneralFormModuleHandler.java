@@ -14,7 +14,5 @@ public interface GeneralFormModuleHandler {
 
     PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd);
 
-    PostGeneralFormDTO updateGeneralFormPost(PostGeneralFormCommand cmd);
-
     GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 }

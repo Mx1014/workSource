@@ -18,7 +18,6 @@ import java.util.List;
  * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link GeneralFormTemplateType}</li>
  * <li>formName: 表单名字</li>
  * <li>formFields: 表单控件数据 {@link GeneralFormFieldDTO}</li>
- * <li>customObject: 业务模块json数据</li>
  * </ul>
  * @author janson
  *
@@ -41,16 +40,6 @@ public class GeneralFormDTO {
 
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
-
-    private String customObject;
-
-	public String getCustomObject() {
-		return customObject;
-	}
-
-	public void setCustomObject(String customObject) {
-		this.customObject = customObject;
-	}
 
 	public Long getOwnerId() {
 		return ownerId;

@@ -27,16 +27,6 @@ public class PostGeneralFormCommand {
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
 
-	private String customObject;
-
-	public String getCustomObject() {
-		return customObject;
-	}
-
-	public void setCustomObject(String customObject) {
-		this.customObject = customObject;
-	}
-
 	public String getSourceType() {
 		return sourceType;
 	}

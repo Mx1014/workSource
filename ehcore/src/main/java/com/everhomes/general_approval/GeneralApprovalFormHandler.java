@@ -29,7 +29,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
-        String json = cmd.getCustomObject();
+        String json = null;
 
         PostApprovalFormCommand cmd2 = JSONObject.parseObject(json, PostApprovalFormCommand.class);
         cmd2.setApprovalId(cmd.getSourceId());
@@ -59,11 +59,6 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         PostGeneralFormDTO dto = new PostGeneralFormDTO();
         dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
-    }
-
-    @Override
-    public PostGeneralFormDTO updateGeneralFormPost(PostGeneralFormCommand cmd) {
-        return null;
     }
 
     @Override
@@ -101,7 +96,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
-        dto.setCustomObject(JSONObject.toJSONString(ga));
+//        dto.setCustomObject(JSONObject.toJSONString(ga));
         return dto;
     }
 }

@@ -34,7 +34,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
     @Override
     public PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd) {
 
-        String json = cmd.getCustomObject();
+        String json = null;
 
         EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
 
@@ -67,11 +67,6 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         PostGeneralFormDTO dto = new PostGeneralFormDTO();
         dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
-    }
-
-    @Override
-    public PostGeneralFormDTO updateGeneralFormPost(PostGeneralFormCommand cmd) {
-        return null;
     }
 
     @Override
