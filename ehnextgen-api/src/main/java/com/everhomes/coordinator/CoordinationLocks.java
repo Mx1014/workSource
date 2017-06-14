@@ -72,9 +72,10 @@ public enum CoordinationLocks {
     USER_NOTIFICATION_SETTING("user.notification.setting"),
     UPDATE_WAREHOUSE("warehouse.update"),
     UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
-    UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update");
+    UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
-
+    FLOW_CASE_UPDATE("flowCase.update"),
+    ;
 
     private String code;
     private CoordinationLocks(String code) {

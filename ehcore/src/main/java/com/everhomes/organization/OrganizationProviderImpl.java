@@ -2674,7 +2674,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name) {
 	       DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-	        List<Organization> result  = new ArrayList<Organization>();
+	        List<Organization> result  = new ArrayList<>();
 	        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 	        
 	        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
@@ -2683,7 +2683,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	        if(namespaceId != null) {
 	            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 	        }
-	        
 	        if(name != null && !"".equals(name)) {
 	            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" + name + "%"));
 	        }
@@ -2857,7 +2856,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
  
 	@Override
-	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) { 
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -2867,9 +2866,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.setDistinct(true);
 		if(communityId != null)
 			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
-
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
 		if(emailDomain != null)
-			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain)); 
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
 			return ConvertHelper.convert(r, Organization.class);

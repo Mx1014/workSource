@@ -2,35 +2,28 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlows;
+import com.everhomes.server.schema.tables.records.EhFlowsRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowsDao;
-import com.everhomes.server.schema.tables.pojos.EhFlows;
-import com.everhomes.server.schema.tables.records.EhFlowsRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.List;
 
 @Component
 public class FlowProviderImpl implements FlowProvider {
@@ -118,7 +111,7 @@ public class FlowProviderImpl implements FlowProvider {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
         obj.setStopTime(obj.getCreateTime());
-        obj.setStopTime(obj.getCreateTime());
+        // obj.setRunTime(new Timestamp(DateHelper.parseDataString("1997-01-01", "yyyy-MM-dd").getTime()));
         obj.setRunTime(new Timestamp(DateHelper.parseDataString("1997-01-01", "yyyy-MM-dd").getTime()));
         obj.setUpdateTime(obj.getCreateTime());
     }
@@ -287,8 +280,8 @@ public class FlowProviderImpl implements FlowProvider {
 				}
 				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
-				query.addConditions( Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode())
-						.or(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.CONFIG.getCode())) );
+				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode())
+						.or(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.CONFIG.getCode())));
 				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l));
 				query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
 				

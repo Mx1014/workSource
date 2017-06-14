@@ -647,47 +647,52 @@ public class OrganizationServiceImpl implements OrganizationService {
         return resp;
     }
 
-    private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag) {
+    private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
+        Long userId = UserContext.current().getUser().getId();
+
         Organization organization = organizationProvider.findOrganizationById(id);
         OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
-        if (null == organization) {
+        if(null == organization){
             LOGGER.debug("organization is null, id = " + id);
             return null;
-        } else if (OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE) {
+        }else if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
             LOGGER.debug("organization not is enterprise, id = " + id);
             return null;
-        } else if (organization.getParentId() != 0L) {
+        }else if(organization.getParentId() != 0L){
             LOGGER.debug("organization is children organization, id = " + id);
             return null;
         }
 
-        if (null == org) {
+        OrganizationDTO organizationDTO = processOrganizationCommunity(ConvertHelper.convert(organization, OrganizationDTO.class));
+
+        if(null == org){
             org = new OrganizationDetail();
+            org.setOrganizationId(organization.getId());
         }
-        org.setOrganizationId(organization.getId());
-        org.setDisplayName(organization.getName());
 
         OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
         //modify by dengs,20170512,将经纬度转换成 OrganizationDetailDTO 里面的类型，不改动dto，暂时不影响客户端。后面考虑将dto的经纬度改成Double
-        if (null != org.getLatitude())
+        if(null != org.getLatitude())
             dto.setLatitude(org.getLatitude().toString());
-        if (null != org.getLongitude())
+        if(null != org.getLongitude())
             dto.setLongitude(org.getLongitude().toString());
         //end
         dto.setEmailDomain(org.getEmailDomain());
         dto.setName(organization.getName());
+        dto.setCommunityId(organizationDTO.getCommunityId());
+        dto.setCommunityName(organizationDTO.getCommunityName());
         dto.setAvatarUri(org.getAvatar());
-        if (null != org.getCheckinDate())
+        if(null != org.getCheckinDate())
             dto.setCheckinDate(org.getCheckinDate().getTime());
-        if (!StringUtils.isEmpty(org.getAvatar()))
+        if(!StringUtils.isEmpty(org.getAvatar()))
             dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
 
-        if (!StringUtils.isEmpty(dto.getPostUri()))
+        if(!StringUtils.isEmpty(dto.getPostUri()))
             dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
 
         List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
-        List<AddressDTO> addresses = organizationAddresses.stream().map(r -> {
-            OrganizationAddressDTO address = ConvertHelper.convert(r, OrganizationAddressDTO.class);
+        List<AddressDTO> addresses = organizationAddresses.stream().map(r->{
+            OrganizationAddressDTO address = ConvertHelper.convert(r,OrganizationAddressDTO.class);
             Address addr = addressProvider.findAddressById(address.getAddressId());
             return ConvertHelper.convert(addr, AddressDTO.class);
         }).collect(Collectors.toList());
@@ -695,22 +700,20 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setAddresses(addresses);
         List<OrganizationAttachment> attachments = organizationProvider.listOrganizationAttachments(dto.getOrganizationId());
 
-        if (null != attachments && 0 != attachments.size()) {
+        if(null != attachments && 0 != attachments.size()){
             for (OrganizationAttachment attachment : attachments) {
                 attachment.setContentUrl(contentServerService.parserUri(attachment.getContentUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
             }
 
-            dto.setAttachments(attachments.stream().map(r -> {
-                return ConvertHelper.convert(r, AttachmentDescriptor.class);
-            }).collect(Collectors.toList()));
+            dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
         }
 
         List<Long> roles = new ArrayList<Long>();
         roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 
-        if (flag) {
+        if(flag){
             List<OrganizationMember> members = this.getOrganizationAdminMemberRole(dto.getOrganizationId(), roles);
-            if (members.size() > 0) {
+            if(members.size() > 0){
                 dto.setMember(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
             }
         }
@@ -719,9 +722,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setAccountPhone(org.getContact());
 
         dto.setServiceUserId(org.getServiceUserId());
+
+        OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, id);
+        if(null != m ){
+            dto.setMember(ConvertHelper.convert(m, OrganizationMemberDTO.class));
+        }
+
         return dto;
     }
-
 
     @Override
     public ListEnterprisesCommandResponse listEnterprises(
@@ -6832,11 +6840,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         return map;
     }
 
-    private String getNotifyText(Organization org, OrganizationMember member, User user, int code) {
+    private String getNotifyText(Organization org, OrganizationMember member, User user, int code){
         Map<String, String> map = new HashMap<String, String>();
-
         map.put("enterpriseName", org.getName());
-        map.put("userName", member.getContactName());
+        map.put("userName", null == member.getContactName() ? member.getContactToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : member.getContactName());
         if (member.getApplyDescription() != null && member.getApplyDescription().length() > 0) {
             map.put("description", String.format("(%s)", member.getApplyDescription()));
         } else {
@@ -8052,13 +8059,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListOrganizationsByNameResponse resp = new ListOrganizationsByNameResponse();
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        List<Organization> orgs = organizationProvider.listOrganizationByName(locator, pageSize, cmd.getNamespaceId(), cmd.getName());
+        List<Organization> orgs = organizationProvider.listOrganizationByName(locator, pageSize, namespaceId, cmd.getName());
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
-        if (orgs != null) {
-            for (Organization org : orgs) {
+        if(orgs != null) {
+            for(Organization org : orgs) {
                 OrganizationDTO dto = ConvertHelper.convert(org, OrganizationDTO.class);
-                if (dto != null) {
+                if(dto != null) {
                     dtos.add(dto);
                 }
             }
@@ -9229,15 +9237,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         Long userId = UserContext.current().getUser().getId();
 //		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         //通过namespace和email domain 找企业
-        String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@") + 1);
-        List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain, cmd.getCommunityId());
+        String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
+        List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(UserContext.getCurrentNamespaceId(), emailDomain,cmd.getCommunityId());
         //TODO: 判断邮箱是否被使用
-        OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(), cmd.getEmail());
-        if (null != member) {
+        OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
+        if(null != member ){
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_REPEAT,
                     "email already exists");
         }
-        if (null == organizations || organizations.size() == 0) {
+        if(null == organizations || organizations.size() == 0){
             return null;
         }
         //如果只有一个公司,直接认证
@@ -9246,9 +9254,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 //			cmd2.setOrganizationId(organizations.get(0).getId());
 //			applyForEnterpriseContactByEmail(cmd2);
 //		}
-
-        return organizations.stream().map(r -> {
-            return ConvertHelper.convert(r, OrganizationDTO.class);
+        return organizations.stream().map(r->{
+            OrganizationDTO dto = processOrganizationCommunity(ConvertHelper.convert(r, OrganizationDTO.class));
+            OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(dto.getId());
+            if(null != detail){
+                dto.setDisplayName(detail.getDisplayName());
+            }
+            OrganizationMember m = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, r.getId());
+            if(null != m ){
+                dto.setMemberStatus(m.getStatus());
+            }
+            return dto;
         }).collect(Collectors.toList());
     }
 
@@ -9261,7 +9277,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setEnterpriseId(cmd.getOrganizationId());
 
         // 添加联系人
-        CreateOrganizationMemberCommand cmd2 = new CreateOrganizationMemberCommand();
+        CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
         cmd2.setContactType(ContactType.MOBILE.getCode());
         UserIdentifier useridentifier = this.getUserMobileIdentifier(userId);
         cmd2.setContactToken(useridentifier.getIdentifierToken());
@@ -9270,24 +9286,24 @@ public class OrganizationServiceImpl implements OrganizationService {
         cmd2.setTargetId(userId);
         applyForEnterpriseContact(cmd2);
         //目前写死30分钟
-        dto.setEndTime(DateHelper.currentGMTTime().getTime() + 30 * 60 * 1000L);
+        dto.setEndTime(DateHelper.currentGMTTime().getTime()+30*60*1000L);
         String verifyToken = WebTokenGenerator.getInstance().toWebToken(dto);
-        String host = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
-        String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken=" + verifyToken;
+        String host =  configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
+        String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
         //TODO: send email
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        String account = configProvider.getValue(UserContext.getCurrentNamespaceId(), "mail.smtp.account", "zuolin@zuolin.com");
+        Map<String,Object> map = new HashMap<String, Object>();
+        String nickName = UserContext.current().getUser().getNickName();
+        String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
         String locale = "zh_CN";
-        map.put("nickName", UserContext.current().getUser().getNickName());
-        Namespace namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
+        map.put("nickName", null == nickName ? useridentifier.getIdentifierToken().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2") : nickName);
+        Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
         String appName = "左邻";
-        if (null != namespace && namespace.getName() != null)
+        if(null != namespace && namespace.getName() != null)
             appName = namespace.getName();
         map.put("appName", appName);
         map.put("verifyUrl", verifyUrl);
         String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
-        String mailSubject = this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
+        String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
                 VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件");
 //		Email email = new EmailBuilder()
 //	    .from(appName,account)
@@ -9572,7 +9588,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
             }
         }
-
         return dtos;
     }
 
@@ -9599,6 +9614,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         return dtos;
     }
 
+	@Override
+	public List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId){
+		return listOrganizationContactByJobPositionId(null, organizationIds, jobPositionId);
+	}
 
     @Override
     public List<OrganizationContactDTO> listModuleOrganizationContactByJobPositionId(ListModuleOrganizationContactByJobPositionIdCommand cmd) {
@@ -9617,10 +9636,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId) {
         return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
-    }
-
-    private List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId) {
-        return listOrganizationContactByJobPositionId(null, organizationIds, jobPositionId);
     }
 
     private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, List<Long> organizationIds, Long jobPositionId) {
@@ -9774,5 +9789,4 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 }
-
 
