@@ -472,7 +472,9 @@ public class FamilyServiceImpl implements FamilyService {
     	long userId = user.getId();
     	long familyId = cmd.getId();
     	Group group = this.groupProvider.findGroupById(familyId);
-    	
+        if(!group.getNamespaceId().equals(UserContext.getCurrentNamespaceId()))
+            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_FAMILY_NOT_EXIST,
+                    "Invalid familyId parameter");
         boolean flag = this.dbProvider.execute((TransactionStatus status) -> {
     		
     		GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(familyId, EntityType.USER.getCode(), userId);
