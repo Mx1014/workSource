@@ -5093,9 +5093,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                             //寻找隶属企业的直属隐藏部门
                             Organization underDirectOrg = organizationProvider.findUnderOrganizationByParentOrgId(org.getId());
                             if(underDirectOrg == null){//没有添加过直属人员
-                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.lt(0L));//确保查询不到
+                                cond = (Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.lt(0L));//确保查询不到
                             }else{
-                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(underDirectOrg.getId()));
+                                cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(underDirectOrg.getId());
                                 cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
                             }
 
@@ -11558,10 +11558,10 @@ public class OrganizationServiceImpl implements OrganizationService {
         /**先查organization表里有没有该企业直属部门（隐藏）**/
         Organization under_org = organizationProvider.findUnderOrganizationByParentOrgId(parOrg.getId());
         //如果没有查询到该企业有直属的隐藏部门
-        if (organizationProvider == null) {
+        if (under_org == null) {
             User current_user = UserContext.current().getUser();
             Organization org_under_direct = new Organization();
-            org_under_direct.setName(org_under_direct.getName() + "_直属");
+            org_under_direct.setName(parOrg.getName() + "_直属");
             org_under_direct.setPath(parOrg.getPath());
             org_under_direct.setLevel(parOrg.getLevel() + 1);
             org_under_direct.setOrganizationType(parOrg.getOrganizationType());
