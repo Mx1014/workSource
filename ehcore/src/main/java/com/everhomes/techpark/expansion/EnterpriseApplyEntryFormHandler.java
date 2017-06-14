@@ -72,7 +72,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
 
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
         PostGeneralFormDTO dto = new PostGeneralFormDTO();
-        dto.setCustomObject(JSONObject.toJSONString(response));
+//        dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
     }
 

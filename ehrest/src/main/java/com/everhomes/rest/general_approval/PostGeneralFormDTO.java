@@ -1,17 +1,24 @@
 package com.everhomes.rest.general_approval;
 
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class PostGeneralFormDTO {
-    private String customObject;
+import java.util.List;
 
-    public String getCustomObject() {
-        return customObject;
+public class PostGeneralFormDTO {
+    @ItemType(GeneralFormFieldDTO.class)
+    private List<GeneralFormFieldDTO> formFields;
+
+    @ItemType(PostApprovalFormItem.class)
+    private List<PostApprovalFormItem> values;
+
+    public List<GeneralFormFieldDTO> getFormFields() {
+        return formFields;
     }
 
-    public void setCustomObject(String customObject) {
-        this.customObject = customObject;
+    public void setFormFields(List<GeneralFormFieldDTO> formFields) {
+        this.formFields = formFields;
     }
 
     @Override
