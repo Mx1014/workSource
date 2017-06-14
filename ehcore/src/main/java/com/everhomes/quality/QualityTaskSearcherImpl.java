@@ -173,11 +173,9 @@ public class QualityTaskSearcherImpl extends AbstractElasticSearch implements Qu
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
 
+        SearchResponse rsp = builder.execute().actionGet();
         if(LOGGER.isDebugEnabled())
             LOGGER.info("quality task searcher query builder ："+builder);
-
-        SearchResponse rsp = builder.execute().actionGet();
-
         List<Long> ids = getIds(rsp);
         ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
 

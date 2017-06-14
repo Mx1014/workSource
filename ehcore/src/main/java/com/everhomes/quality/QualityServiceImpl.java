@@ -2889,7 +2889,7 @@ public class QualityServiceImpl implements QualityService {
 //		}
 //
 //        Collections.reverse(taskIdlist);
-		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
+		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, null);
 		if(taskRecords != null ) {
 			Long startContainTime = System.currentTimeMillis();
 			for(QualityInspectionTaskRecords record : taskRecords) {
@@ -3519,7 +3519,7 @@ public class QualityServiceImpl implements QualityService {
 //		return result;
 //	}
 
-	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat和eh_quality_inspection_sample_community_specification_stat的数据
+	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat
 	public void updateSampleScoreStat() {
 		List<QualityInspectionSamples> samples = qualityProvider.listActiveQualityInspectionSamples(null);
 		if(samples != null && samples.size() > 0) {
@@ -3536,9 +3536,7 @@ public class QualityServiceImpl implements QualityService {
 				sampleScoreStatMaps.entrySet().forEach(sampleScoreStatMap -> {
 					QualityInspectionSampleScoreStat stat = sampleScoreStatMap.getValue();
 					samplesMap.remove(sampleScoreStatMap.getKey());
-					calculateTasks(stat, now);
-					//tongjikoufen
-
+					getNewestScoreStat(stat);
 					stat.setUpdateTime(now);
 					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
 				});
@@ -3564,15 +3562,14 @@ public class QualityServiceImpl implements QualityService {
 					} else {
 						stat.setCommunityCount(0);
 					}
-
-					calculateTasks(stat, now);
+					getNewestScoreStat(stat);
 					qualityProvider.createQualityInspectionSampleScoreStat(stat);
 				});
 			}
-
-
 		}
 	}
+
+	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_community_specification_stat的数据
 
 
 	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
