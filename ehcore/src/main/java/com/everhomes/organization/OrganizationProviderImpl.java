@@ -37,6 +37,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
+import javafx.scene.control.Tab;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -4366,6 +4367,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectQuery<EhOrganizationMemberEducationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.DETAIL_ID.eq(detailId));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_EDUCATIONS.GRADUATION_TIME.desc());
 		query.fetch().map(r -> {
 			result.add(ConvertHelper.convert(r,OrganizationMemberEducations.class));
 			return null;
@@ -4420,6 +4422,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     	SelectQuery<EhOrganizationMemberWorkExperiencesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES);
     	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.DETAIL_ID.eq(detailId));
     	query.addConditions(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+    	query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_WORK_EXPERIENCES.DEPARTURE_TIME.desc());
     	query.fetch().map(r ->{
     		result.add(ConvertHelper.convert(r,OrganizationMemberWorkExperiences.class));
     		return null;
@@ -4472,6 +4475,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	    SelectQuery<EhOrganizationMemberInsurancesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_INSURANCES);
 	    query.addConditions(Tables.EH_ORGANIZATION_MEMBER_INSURANCES.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_INSURANCES.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_INSURANCES.END_TIME.desc());
         query.fetch().map(r -> {
             result.add(ConvertHelper.convert(r, OrganizationMemberInsurances.class));
             return null;
@@ -4521,6 +4525,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	    SelectQuery<EhOrganizationMemberContractsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS);
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.DETAIL_ID.eq(detailId));
         query.addConditions(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+        query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_CONTRACTS.END_TIME.desc());
         query.fetch().map(r -> {
             result.add(ConvertHelper.convert(r, OrganizationMemberContracts.class));
             return null;

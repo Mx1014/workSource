@@ -1358,26 +1358,25 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("getOrganizationPersonnelDetailsV2")
     @RestReturn(value = PersonnelsDetailsV2Response.class)
     public RestResponse getOrganizationPersonnelDetailsV2(GetPersonnelDetailsV2Command cmd) {
-        PersonnelsDetailsV2Response res = organizationService.getOrganizationPersonnelDetailsV2(cmd);
+        PersonnelsDetailsV2Response res = this.organizationService.getOrganizationPersonnelDetailsV2(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
-/*    *//**
-     * <b>URL: /org/addOrganizationMember</b>
-     * <p>新增员工</p>
-     *//*
-    @RequestMapping("addOrganizationMember")
-    @RestReturn(value = OrganizationMemberV2DTO.class)
-    public RestResponse addOrganizationMember(@Valid AddOrganizationMemberCommand cmd) {
-        OrganizationMemberV2DTO res = this.organizationService.addOrganizationMember(cmd);
-        RestResponse response = new RestResponse(res);
+    /**
+     * <b>URL: /admin/org/addOrganizationPersonnelV2</b>
+     * <p>添加成员到多部门多岗位</p>
+     */
+    @RequestMapping("addOrganizationPersonnelV2")
+    @RestReturn(value = OrganizationDTO.class)
+    public RestResponse addOrganizationPersonnelV2(@Valid AddOrganizationPersonnelV2Command cmd) {
+        RestResponse response = new RestResponse(this.organizationService.addOrganizationPersonnelV2(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }*/
+    }
 
     /**
      * <b>URL: /org/getOrganizationMemberBasicInfo</b>
@@ -1706,6 +1705,20 @@ public class OrganizationController extends ControllerBase {
                     "files is null");
         }
         RestResponse response = new RestResponse(organizationService.importOrganizationPersonnelFiles(files[0], userId, cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /org/exportOrganizationPersonnelFiles</b>
+     * <p>通讯录成员导出</p>
+     */
+    @RequestMapping("exportOrganizationPersonnelFiles")
+    @RestReturn(value = String.class)
+    public RestResponse exportOrganizationPersonnelFiles(@Valid ExcelOrganizationPersonnelCommand cmd, HttpServletResponse httpResponse) {
+        this.organizationService.exportOrganizationPersonnelFiles(cmd, httpResponse);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

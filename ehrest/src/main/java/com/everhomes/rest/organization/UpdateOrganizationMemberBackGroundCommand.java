@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * <ul>
- * <li>detailId：员工编号</li>
+ * <li>detailId：员工标识号</li>
  * <li>enName：英文名</li>
  * <li>birthday: 出生日期</li>
  * <li>maritalFlag: 婚姻状况：0，保密 1，已婚 2，未婚 参考{@link com.everhomes.rest.organization.MaritalFlag}</li>

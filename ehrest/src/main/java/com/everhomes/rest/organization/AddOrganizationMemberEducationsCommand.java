@@ -7,20 +7,16 @@ import java.sql.Date;
 /**
  * <ul>
  * <li>detailId: 员工标识号</li>
- * <li>namespaceId: 域名空间，参考员工members表的命名空间</li>
  * <li>schoolName：学校名称</li>
  * <li>degree: 学位</li>
  * <li>major: 专业名称</li>
  * <li>enrollmentTime: 入学日期</li>
  * <li>graduationTime: 毕业日期</li>
- * <li>creatorUid: 创建人</li>
  * </ul>
  */
 public class AddOrganizationMemberEducationsCommand {
 
     private Long detailId;
-
-    private Integer namespaceId;
 
     private String schoolName;
 
@@ -32,8 +28,6 @@ public class AddOrganizationMemberEducationsCommand {
 
     private String graduationTime;
 
-    private Long creatorUid;
-
     public AddOrganizationMemberEducationsCommand() {
     }
 
@@ -43,14 +37,6 @@ public class AddOrganizationMemberEducationsCommand {
 
     public void setDetailId(Long detailId) {
         this.detailId = detailId;
-    }
-
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
     }
 
     public String getSchoolName() {
@@ -91,14 +77,6 @@ public class AddOrganizationMemberEducationsCommand {
 
     public void setGraduationTime(String graduationTime) {
         this.graduationTime = graduationTime;
-    }
-
-    public Long getCreatorUid() {
-        return creatorUid;
-    }
-
-    public void setCreatorUid(Long creatorUid) {
-        this.creatorUid = creatorUid;
     }
 
     @Override
