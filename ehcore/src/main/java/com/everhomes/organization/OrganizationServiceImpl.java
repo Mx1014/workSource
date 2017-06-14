@@ -9879,24 +9879,40 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationMemberDTO addOrganizationPersonnelV2(AddOrganizationPersonnelV2Command cmd) {
         OrganizationMemberDTO memberDTO = this.addOrganizationPersonnel(ConvertHelper.convert(cmd, AddOrganizationPersonnelCommand.class));
 
-        //  添加记录
-        if(StringUtils.isEmpty(cmd.getUpdateLogs())){
+        if(StringUtils.isEmpty(cmd.getDetailId())){
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
                     "eh_organization_member_details","");
         }else{
-            for(String key : cmd.getUpdateLogs().keySet()){
-                if(key.equals("selectedDepartment"))
+            if(!StringUtils.isEmpty(cmd.getUpdateLogs())){
+                if(!StringUtils.isEmpty(cmd.getUpdateLogs().getDepartment()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.DEPCHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().get(key));
-                if(key.equals("selectedJobPosition"))
+                            "eh_organization_member_details",cmd.getUpdateLogs().getDepartment());
+                if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobPosition()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.POICHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().get(key));
-                if(key.equals("jobLevelIds") && memberDTO.getJobLevels().size() > 0)
-
+                            "eh_organization_member_details",cmd.getUpdateLogs().getJobPosition());
+                if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobLevelIds()) && memberDTO.getJobLevels().size() > 0)
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.LEVCHANGE.getCode(),
                             "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName());
             }
         }
+       /* //  添加记录
+        if(StringUtils.isEmpty(cmd.getUpdateLogs()) && StringUtils.isEmpty(cmd.getDetailId())){
+            this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
+                    "eh_organization_member_details","");
+        }else{
+            for(OrganizationMemberUpdatePersonnelDataDTO updateDto : cmd.getUpdateLogs()){
+                if(updateDto.getKey().equals("department"))
+                    this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.DEPCHANGE.getCode(),
+                            "eh_organization_member_details",updateDto.getValue());
+                if(updateDto.getKey().equals("jobPosition"))
+                    this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.POICHANGE.getCode(),
+                            "eh_organization_member_details",updateDto.getValue());
+                if(updateDto.getKey().equals("jobLevelIds") && memberDTO.getJobLevels().size() > 0)
+
+                    this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.LEVCHANGE.getCode(),
+                            "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName());
+            }
+        }*/
         return memberDTO;
 
     }

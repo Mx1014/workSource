@@ -1,7 +1,9 @@
 package com.everhomes.rest.organization;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,22 +23,33 @@ import java.util.Map;
  * <li>checkInTime: 入职时间</li>
  * <li>departmentIds：添加到多部门</li>
  * <li>jobPositionIds：添加到多群组</li>
- * <li>updateLogs: 修改记录</li>
+ * <li>updateLogs: 修改记录 参考{@link OrganizationMemberUpdatePersonnelDataDTO}</li>
+ * <li>detailId: 修改标志位(有传则为修改)</li>
  * </ul>
  */
 public class AddOrganizationPersonnelV2Command extends AddOrganizationPersonnelCommand {
 
-    private Map<String,String> updateLogs;
+    private OrganizationMemberUpdatePersonnelDataDTO updateLogs;
+
+    private Long detailId;
 
     public AddOrganizationPersonnelV2Command() {
     }
 
-    public Map<String, String> getUpdateLogs() {
+    public OrganizationMemberUpdatePersonnelDataDTO getUpdateLogs() {
         return updateLogs;
     }
 
-    public void setUpdateLogs(Map<String, String> updateLogs) {
+    public void setUpdateLogs(OrganizationMemberUpdatePersonnelDataDTO updateLogs) {
         this.updateLogs = updateLogs;
+    }
+
+    public Long getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(Long detailId) {
+        this.detailId = detailId;
     }
 
     @Override
