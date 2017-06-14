@@ -90,7 +90,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 				return response;
 			}
 			
-//			String plateOwnerName = card.getUserName();
+			String plateOwnerName = card.getUserName();
 
 			String cardNumber = card.getCardID();
 			String cardType = card.getOldCardTypeName();
@@ -99,7 +99,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
 			
-//			parkingCardDTO.setPlateOwnerName(plateOwnerName);
+			parkingCardDTO.setPlateOwnerName(plateOwnerName);
 			parkingCardDTO.setPlateNumber(card.getPlateNumber());
 			parkingCardDTO.setEndTime(endTime);
 			parkingCardDTO.setCardType(cardType);
@@ -217,7 +217,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			String cost = String.valueOf((order.getPrice().intValue() * 100));
 
 			JSONObject jsonParam = new JSONObject();
-			jsonParam.put("OrderID", order.getCardNumber());
+			jsonParam.put("OrderID", order.getOrderToken());
 			jsonParam.put("PayWay", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "3" : "2");
 			jsonParam.put("Amount", cost);
 			jsonParam.put("ParkingID", parkingId);

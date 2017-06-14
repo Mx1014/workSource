@@ -10,7 +10,10 @@ package com.everhomes.rest.organization;
  */
 public enum ImportFileTaskType {
 
-    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), PERSONNEL_FILE("personnel_file");
+    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"),
+    WAREHOUSE_MATERIAL("warehouse_material"),
+    WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
+    PERSONNEL_FILE("psersonnel_file");
 
 	private String code;
 

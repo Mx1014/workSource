@@ -3400,45 +3400,46 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     public void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize) {
     }
 
-    @Override
-    public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) {
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	@Override
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-        query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN,
-                Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(Tables.EH_ORGANIZATIONS.ID)
-                        .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
-        query.setDistinct(true);
-        if (communityId != null)
-            query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN,
+				Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(Tables.EH_ORGANIZATIONS.ID)
+				.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+		query.setDistinct(true);
+		if(communityId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+		if(emailDomain != null)
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
+		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
+		List<Organization> organizations = records.stream().map((r) -> {
+			return ConvertHelper.convert(r, Organization.class);
+		}).collect(Collectors.toList());
 
-        if (emailDomain != null)
-            query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
-        List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
-        List<Organization> organizations = records.stream().map((r) -> {
-            return ConvertHelper.convert(r, Organization.class);
-        }).collect(Collectors.toList());
+		if(organizations ==null || organizations.size()==0)
+			return null;
+		return organizations;
+	}
 
-        if (organizations == null || organizations.size() == 0)
-            return null;
-        return organizations;
-    }
+	@Override
+	public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId) {
+		List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
+			return null;
+		});
+		return results;
 
-    @Override
-    public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId) {
-        List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
-        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
-        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
-        query.fetch().map(r -> {
-            results.add(ConvertHelper.convert(r, OrganizationCommunityRequest.class));
-            return null;
-        });
-        return results;
-
-    }
+	}
 
     /**
      * modify cause member_detail by lei lv
@@ -4072,7 +4073,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
         EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
         importFileTask.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("update executeTask importFileTask: {}", importFileTask);
         dao.update(importFileTask);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhImportFileTasks.class, importFileTask.getId());
     }
 
     @Override

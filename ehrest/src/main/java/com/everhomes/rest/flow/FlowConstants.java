@@ -11,4 +11,6 @@ public interface FlowConstants {
     Long PM_TASK_MODULE = 20100L;
     //电商位置预订
     Long RESERVER_PLACE = 40050L;
+    //仓库管理领用申请模块id
+    Long WAREHOUSE_REQUEST = 21000L;
 }

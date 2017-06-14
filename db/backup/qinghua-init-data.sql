@@ -2619,3 +2619,56 @@ SET @id = (SELECT MAX(id) FROM  eh_service_module_scopes );
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
 	VALUES ((@id := @id + 1, '999984', '60200', '业务授权', 'EhNamespaces', '999984', NULL, '2');
 
+	
+	
+-- 清华信息港 增加创业导师item add sfyan 20170526
+SET @service_alliance_categorie_id = (SELECT max(id) FROM `eh_service_alliance_categories`);
+SET @launch_pad_item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+SET @item_service_categry_id = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999984 and `scene_type` = 'pm_admin' and name = '专业服务');
+SET @sa_id = (SELECT max(id) FROM `eh_service_alliances`);
+
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `logo_url`)
+    VALUES ((@service_alliance_categorie_id := @service_alliance_categorie_id + 1), 'community', '240111044331055835', '0', '创业导师', '创业导师', '0', '2', '1', UTC_TIMESTAMP(), '0', NULL, '999984', '');
+INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `display_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `discount`, `category_id`, `contact_name`, `contact_mobile`, `service_type`, `service_url`, `discount_desc`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`)
+    VALUES ((@sa_id := @sa_id + 1), '0', 'community', '240111044331055835', '创业导师', '创业导师', @service_alliance_categorie_id , '', NULL, '', '', '2', NULL, NULL, NULL, '', NULL, NULL, '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','创业导师','创业导师','cs://1/image/aW1hZ2UvTVRveU1USXpZV00zWm1Jd01EY3hOemt4WXpjME5EWm1PRGd5WkdaaE5EWXlPUQ','1','1','33',CONCAT('{"type":', @service_alliance_categorie_id, ',"parentId":', @service_alliance_categorie_id, ',"displayType": "list"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',@item_service_categry_id,NULL,20);
+
+SET @item_service_categry_id = (SELECT id FROM `eh_item_service_categries` where namespace_id = 999984 and `scene_type` = 'park_tourist' and name = '专业服务');
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','创业导师','创业导师','cs://1/image/aW1hZ2UvTVRveU1USXpZV00zWm1Jd01EY3hOemt4WXpjME5EWm1PRGd5WkdaaE5EWXlPUQ','1','1','33',CONCAT('{"type":', @service_alliance_categorie_id, ',"parentId":', @service_alliance_categorie_id, ',"displayType": "list"}'),'0','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',@item_service_categry_id,NULL,20);
+
+-- 清除报修任务数据 孙稳提供
+DELETE from eh_pm_tasks;
+DELETE from eh_pm_task_logs;
+DELETE from eh_pm_task_statistics;
+DELETE from eh_pm_task_targets;
+DELETE from eh_pm_task_target_statistics;
+
+-- 删除保修任务icon，增加保修任务icon
+delete from eh_launch_pad_items where namespace_id = 999984 and item_label = '报修任务';
+SET @launch_pad_item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','任务管理','任务管理','cs://1/image/aW1hZ2UvTVRvMU5HUTVZak15WkdJMFl6ZzFOREUwWlRCa1lUWmhOemxsTWpFM09UVmxNUQ','1','1','56','','0','0','1','1','','0',NULL,NULL,NULL,'1','pm_admin','1',0,NULL,0);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`) values((@launch_pad_item_id := @launch_pad_item_id + 1),'999984','0','0','0','/home','Bizs','任务管理','任务管理','cs://1/image/aW1hZ2UvTVRvMU5HUTVZak15WkdJMFl6ZzFOREUwWlRCa1lUWmhOemxsTWpFM09UVmxNUQ','1','1','56','','0','0','1','1','','0',NULL,NULL,NULL,'1','park_tourist','1',0,NULL,0);
+
+-- 删除执行人员设置菜单，增加工作流设置菜单
+delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = 999984 and menu_id = 20160;
+SET @service_module_scope_id = (SELECT MAX(id) FROM  eh_service_module_scopes );
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
+	VALUES ((@service_module_scope_id := @service_module_scope_id + 1), '999984', '20158', '', NULL, '2');
+	
+	
+-- 增加园区	
+SET @community_id = (SELECT MAX(id) FROM `eh_communities`) + 5; 
+SET @community_geopoint_id = (SELECT MAX(id) FROM `eh_community_geopoints`) + 1; 
+SET @building_id = (SELECT MAX(id) FROM `eh_buildings`) + 1; 
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+	VALUES(@community_id, UUID(), 15306, '深圳市',  15307, '南山区', '清华信息港B', '清华信息港B', '深圳市南山区科技园北区清华信息港B', NULL, '2001年3月3日，深圳市人民政府和清华大学共同召开“清华信息港启动建设”新闻发布会，开始建设清华信息港。清华信息港园区占地4万平方米，规划建筑面积13.8万平方米，一期工程建筑面积6.7万平方米，2003年10月正式开园投入使用。二期工程（科研楼）建筑面积7.1万平方米，2014年12月正式投入使用。园区依托清华大学的科技创新优势，加强基础配套服务，营造创新创业环境。',
+	NULL, NULL, NULL, NULL, NULL, NULL,NULL, 168, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 185911, 185912, UTC_TIMESTAMP(), 999984);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`)
+	VALUES(@community_geopoint_id, @community_id, '', 113.960095, 22.547367, 'ws1030x5ytve');
+	
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(@building_id, @community_id, 'A栋', 'A栋', 0, NULL, '清华信息港', NULl, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999984);
+
+INSERT INTO `eh_organization_communities`(organization_id, community_id)
+	VALUES(1008218, @community_id);

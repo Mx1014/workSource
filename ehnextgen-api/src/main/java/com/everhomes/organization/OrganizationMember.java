@@ -9,15 +9,15 @@ import java.sql.Date;
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 
     private static final long serialVersionUID = -4420904659870582839L;
-    private java.lang.String   nickName;
-	// private java.lang.String   avatar;
+	private java.lang.String   nickName;
+    // private java.lang.String   avatar;
 
-	private String initial;
+    private String initial;
 
     private String fullPinyin;
     private String fullInitial;
 
-//	private java.lang.Long creatorUid;
+    private java.lang.Long creatorUid;
 
 	private boolean isCreate;
 
@@ -38,20 +38,30 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 	public OrganizationMember() {
     }
 
+
     public java.lang.String getNickName() {
-		return nickName;
-	}
+        return nickName;
+    }
 
 
+    public void setNickName(java.lang.String nickName) {
+        this.nickName = nickName;
+    }
 
-	public void setNickName(java.lang.String nickName) {
-		this.nickName = nickName;
-	}
+
+    public java.lang.Long getCreatorUid() {
+        return creatorUid;
+    }
 
 
-	public String getInitial() {
-		return initial;
-	}
+    public void setCreatorUid(java.lang.Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
+
+
+    public String getInitial() {
+        return initial;
+    }
 
 
     public String getApplyDescription() {
@@ -63,53 +73,48 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
     }
 
     public void setInitial(String initial) {
-		this.initial = initial;
-	}
+        this.initial = initial;
+    }
 
 
-	public String getFullPinyin() {
-		return fullPinyin;
-	}
+    public String getFullPinyin() {
+        return fullPinyin;
+    }
 
 
-
-	public void setFullPinyin(String fullPinyin) {
-		this.fullPinyin = fullPinyin;
-	}
-
+    public void setFullPinyin(String fullPinyin) {
+        this.fullPinyin = fullPinyin;
+    }
 
 
-	public String getFullInitial() {
-		return fullInitial;
-	}
+    public String getFullInitial() {
+        return fullInitial;
+    }
 
 
-
-	public void setFullInitial(String fullInitial) {
-		this.fullInitial = fullInitial;
-	}
-
+    public void setFullInitial(String fullInitial) {
+        this.fullInitial = fullInitial;
+    }
 
 
-	public int compareTo(OrganizationMember organizationMember) {
-	    return this.initial.compareTo(organizationMember.getInitial());
-	}
+    public int compareTo(OrganizationMember organizationMember) {
+        return this.initial.compareTo(organizationMember.getInitial());
+    }
 
 
-	public boolean isCreate() {
-		return isCreate;
-	}
+    public boolean isCreate() {
+        return isCreate;
+    }
 
 
-	public void setCreate(boolean isCreate) {
-		this.isCreate = isCreate;
-	}
+    public void setCreate(boolean isCreate) {
+        this.isCreate = isCreate;
+    }
 
 
     public Byte getEmployeeStatus() {
         return employeeStatus;
     }
-
     public void setEmployeeStatus(Byte employeeStatus) {
         this.employeeStatus = employeeStatus;
     }
@@ -154,7 +159,7 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 		this.employeeType = employeeType;
 	}
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

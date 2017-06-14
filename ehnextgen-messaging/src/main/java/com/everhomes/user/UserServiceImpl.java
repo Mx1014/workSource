@@ -41,9 +41,9 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumService;
-import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -77,6 +77,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.messaging.*;
@@ -2778,15 +2779,16 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
 		sceneDto.setName(organizationDto.getName());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
-		String aliasName = organizationDto.getName();
+		String aliasName = organizationDto.getDisplayName();
 		//if(sceneType.getCode().contains("park") && organizationDto.getCommunityName() != null) {
 		//    aliasName = organizationDto.getCommunityName();
 		//}
 		// 在园区通用版与左邻小区版合并后，只要不是物业公司，则优先显示小区/园区名称 by lqs 20160517
-		String orgType = organizationDto.getOrganizationType();
-		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
-			aliasName = organizationDto.getCommunityName();
-		}
+		// 不管什么公司都要显示本公司的简称 by sfyan 20170606
+//		String orgType = organizationDto.getOrganizationType();
+//		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
+//			aliasName = organizationDto.getCommunityName();
+//		}
 		sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
@@ -3750,7 +3752,13 @@ public class UserServiceImpl implements UserService {
             case GROUP:
                 Group group = groupProvider.findGroupById(cmd.getTargetId());
                 if (group != null) {
-                    dto.setName(group.getName());
+                    String name = group.getName();
+                    // 如果是公司的话，就显示公司的名称，@see com.everhomes.group.GroupServiceImpl#getGroupMemberSnapshot
+                    if (GroupDiscriminator.ENTERPRISE == GroupDiscriminator.fromCode(group.getDiscriminator())) {
+                        Organization organization = organizationProvider.findOrganizationByGroupId(group.getId());
+                        name = organization.getName();
+                    }
+                    dto.setName(name);
                     dto.setMessageType(UserMessageType.MESSAGE.getCode());
                     String avatar = parseUri(group.getAvatar(), com.everhomes.rest.common.EntityType.GROUP.getCode(), group.getId());
                     dto.setAvatar(avatar);

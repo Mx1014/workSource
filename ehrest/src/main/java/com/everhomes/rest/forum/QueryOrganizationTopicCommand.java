@@ -21,6 +21,7 @@ import java.util.List;
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>categoryId: 活动类型id</li>
  * <li>contentCategoryId: 活动主题分类id</li>
+ * <li>needTemporary: 0-不需要， 1-需要， 是否需要查询暂存的活动，用于后台查询时把暂存的贴子也查出来。 不填默认0</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -38,6 +39,7 @@ public class QueryOrganizationTopicCommand {
     private Long categoryId;
     private Byte orderByCreateTime;
     
+    
     @ItemType(Long.class)
     private List<Long> excludeCategories;
     
@@ -45,6 +47,8 @@ public class QueryOrganizationTopicCommand {
 
     @ItemType(Integer.class)
     private List<Integer> activityStatusList;
+    
+    private Byte needTemporary;
     
     public QueryOrganizationTopicCommand() {
     }
@@ -201,6 +205,13 @@ public class QueryOrganizationTopicCommand {
 		this.privateFlag = privateFlag;
 	}
 
+	public Byte getNeedTemporary() {
+		return needTemporary;
+	}
+
+	public void setNeedTemporary(Byte needTemporary) {
+		this.needTemporary = needTemporary;
+	}
 
 	@Override
     public String toString() {

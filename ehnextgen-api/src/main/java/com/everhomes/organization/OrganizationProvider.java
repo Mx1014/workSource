@@ -11,7 +11,6 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -229,7 +228,7 @@ public interface OrganizationProvider {
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
  
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
-	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+	List<Organization>  listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId);
   
   
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
@@ -300,12 +299,10 @@ public interface OrganizationProvider {
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);
- 
- 
 	OrganizationMember findActiveOrganizationMemberByOrgIdAndUId(Long userId, Long organizationId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, Long OrganizationId,
 			Byte operationType);
-  
+
 	List<OrganizationMember> listOrganizationMembers(CrossShardListingLocator locator,Integer pageSize, ListingQueryBuilderCallback queryBuilderCallback);
 	List<OrganizationMember> listOrganizationMemberByPath(String path, List<String> groupTypes, String contactToken);
 
@@ -338,12 +335,10 @@ public interface OrganizationProvider {
     List<OrganizationMemberDetails> findDetailInfoListByIdIn(List<Long> detailIds);
     List<OrganizationMemberDetails> listOrganizationMembersV2(CrossShardListingLocator locator,Integer pageSize,Organization org, List<String> groupTypes, String keywords);
 
-	//OrganizationMember findOrganizationMemberByMemberId(Long memberId);
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
     void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
 	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
-//	void updateOrganizationMemberV2(OrganizationMember organizationMember, OrganizationMemberDetails organizationMemberDetails);
 
 
 
@@ -375,7 +370,6 @@ public interface OrganizationProvider {
     void updateOrganizationEmploymentTime(Long detailId,java.sql.Date employeeTime);
     boolean updateOrganizationEmployeeStatus(Long detailId,Byte employeeStatus);
     void updateProfileIntegrity(Long detailId, Integer integrity);
-//	void updateOrganizationMemberBackGround(OrganizationMemberDetails organizationMemberDetails);
     void createProfileLogs(OrganizationMemberProfileLogs log);
 
 	List<OrganizationMemberContracts> listOrganizationMemberContracts(Long detailId);
@@ -391,3 +385,4 @@ public interface OrganizationProvider {
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
 
 }
+

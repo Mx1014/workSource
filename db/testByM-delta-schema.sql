@@ -15,7 +15,7 @@ CREATE TABLE `eh_organization_member_details` (
   `contact_description` TEXT,
   `employee_no` VARCHAR(128) COMMENT 'the employee number for the member',
   `avatar` varchar(128) COMMENT '头像',
-  `gender` TINYINT DEFAULT '0' COMMENT '0: undisclosured, 1: male, 2: female',
+  `gender` TINYINT DEFAULT 0 COMMENT '0: undisclosured, 1: male, 2: female',
   `marital_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: undisclosured, 1: married, 2: unmarried',
   `political_status` VARCHAR(128) COMMENT '政治面貌',
   `native_place` VARCHAR(128) COMMENT '籍贯',

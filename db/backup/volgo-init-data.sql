@@ -983,6 +983,7 @@ INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`,
 
 UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.male.url';
 UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.female.url';	
+UPDATE eh_configurations set `value` = 'cs://1/image/aW1hZ2UvTVRvME1ESTBaV0kwTmpNNE9UYzFZemcwT1RNNE1USTFaR1U0WVRZMU1qQTBNZw' where `name` = 'user.avatar.undisclosured.url';	
 	
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 	
@@ -991,11 +992,34 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
     VALUES ((@item_id := @item_id + 1), 1, '0', '4', '1023080', '/home', 'Bizs', '左邻会议室', '左邻会议室', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '49', '{"resourceTypeId":10617,"pageType":0}', 0, '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', 0, NULL);
 	
-update eh_launch_pad_items set default_order = 80 where namespace_id = 1 and item_label = '左邻会议室';
+update eh_launch_pad_items set default_order = 20 where namespace_id = 1 and item_label = '左邻会议室';
 update eh_launch_pad_items set display_flag = 0 where namespace_id = 1 and item_label = '公共会议室';
-update eh_launch_pad_items set display_flag = 0 where namespace_id = 1 and item_label = '会议室预订';
 	
 	
-update eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%23%2fmicroshop%2fhome%3fisfromindex%3d0%26_k%3dzlbiz#sign_suffix"}' where namespace_id = 1 and item_label = '新品推荐';	
+update eh_launch_pad_items set action_data = '{"url": "https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&isfromindex=0&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 1 and item_label = '新品推荐';
+	
+	
+	
+-- fix 10934 by xiongying20170608
+SET @org_id = (select id from eh_organizations where namespace_id = 1 and name = '华润网络（深圳）有限公司');
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`, `pay_mode`) 
+	VALUES (10825, '华润通会议室', '0', NULL, '2', '1', '0');
+SET @namespace_id=1;
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);	
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '4', @org_id, '/home', 'Bizs', '华润通会议室', '华润通会议室', 'cs://1/image/aW1hZ2UvTVRwbE5UQXhNVGhsTXpJMlkyVmxObU13TjJRM05XVTRNbUk0T0RRNU1qa3hOUQ', '1', '1', '49', '{"resourceTypeId":10825,"pageType":0}', 10, 3, '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');	
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '4', @org_id, '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRwbE1ESTRNREV6WkRnMFpEUTJZV0ZtWWpoaE56UmtZbUZrWlRreE56STJPQQ', '1', '1', '23', '', 20, 3, '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ((@item_id := @item_id + 1), @namespace_id, '0', '4', @org_id, '/home', 'Bizs', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRwaFpESXpaRGxpTWpBNVpURXpaVEF3TXpJellUa3pNakEwWkRFeU16VmlPQQ', '1', '1', '46', '', 40, 3, '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ((@item_id := @item_id + 1), 1, '0', '4', @org_id, '/home', 'Bizs', '全部', '全部', 'cs://1/image/aW1hZ2UvTVRwak1USXhPVGc0T1RrMU5HTTBOMkpoWW1VellqZGlPR0prTkRFeE56bGxNZw', '1', '1', '53', '{"itemLocation": "/home", "itemGroup": "Bizs"}', 100, 3, '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
+    
+-- fix 10690 纲哥要求拿下物业缴费和物业服务
+delete from eh_launch_pad_items where namespace_id = 1 and item_label in('物业服务','物业缴费');
+	
+-- fix 11023 by xiongying20170609	
+update eh_launch_pad_items set action_type = 50  where namespace_id = 1 and item_label = '最新活动';
+	
 	
