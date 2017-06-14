@@ -1067,6 +1067,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setMemberCount(cmd.getMemberCount());
 			enterprise.setEmailDomain(cmd.getEmailDomain());
 			enterprise.setServiceUserId(cmd.getServiceUserId());
+			if(cmd.getLatitude()!=null)
+				enterprise.setLatitude(Double.valueOf(cmd.getLatitude()));
+			if(cmd.getLongitude()!=null)
+				enterprise.setLongitude(Double.valueOf(cmd.getLongitude()));
 			organizationProvider.createOrganizationDetail(enterprise);
 
 			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
