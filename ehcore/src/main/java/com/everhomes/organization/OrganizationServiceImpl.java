@@ -1193,6 +1193,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setLatitude(cmd.getLatitude());
+				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
 				organizationDetail.setEmailDomain(cmd.getEmailDomain());
@@ -1206,6 +1208,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setLatitude(cmd.getLatitude());
+				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
 
