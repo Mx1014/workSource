@@ -116,22 +116,6 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
                 dto.setCreatorName(creator.get(0).getContactName());
             }
 
-            List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
-            if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
-                List<SampleCommunity> sampleCommunities = new ArrayList<>();
-                List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
-                Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
-                sampleCommunityMaps.forEach(map -> {
-                    SampleCommunity sc = new SampleCommunity();
-                    sc.setSampleId(sample.getId());
-                    sc.setCommunityId(map.getCommunityId());
-                    Community community = communityMap.get(map.getCommunityId());
-                    sc.setCommunityName(community.getName());
-                    sampleCommunities.add(sc);
-                });
-
-                dto.setSampleCommunities(sampleCommunities);
-            }
             dtos.add(dto);
         }
         response.setSampleQualityInspectionDTOList(dtos);

@@ -3143,6 +3143,24 @@ public class QualityServiceImpl implements QualityService {
 		}
 		List<SampleQualityInspectionDTO> sampleQualityInspectionDTOList = samples.stream().map(sample -> {
 			SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
+
+			List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
+			if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
+				List<SampleCommunity> sampleCommunities = new ArrayList<>();
+				List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
+				Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
+				sampleCommunityMaps.forEach(map -> {
+					SampleCommunity sc = new SampleCommunity();
+					sc.setSampleId(sample.getId());
+					sc.setCommunityId(map.getCommunityId());
+					Community community = communityMap.get(map.getCommunityId());
+					sc.setCommunityName(community.getName());
+					sampleCommunities.add(sc);
+				});
+
+				dto.setSampleCommunities(sampleCommunities);
+			}
+
 			return dto;
 		}).collect(Collectors.toList());
 
@@ -3539,6 +3557,7 @@ public class QualityServiceImpl implements QualityService {
 					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					stat.setUpdateTime(now);
 					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
+					updateSampleCommunitySpecificationStat(results);
 				});
 			}
 
@@ -3564,6 +3583,7 @@ public class QualityServiceImpl implements QualityService {
 					}
 					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					qualityProvider.createQualityInspectionSampleScoreStat(stat);
+					updateSampleCommunitySpecificationStat(results);
 				});
 			}
 		}
@@ -3572,7 +3592,30 @@ public class QualityServiceImpl implements QualityService {
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_community_specification_stat的数据
 	public void updateSampleCommunitySpecificationStat(List<QualityInspectionSpecificationItemResults> results) {
 		if(results != null) {
+			Map<SampleCommunitySpecification, Double> statMaps = new HashMap<>();
+			results.forEach(result -> {
+				String specification = result.getSpecificationPath();
+				String[] specificationIds = specification.substring(1,specification.length()).split("/");
 
+				SampleCommunitySpecification scs = new SampleCommunitySpecification();
+				scs.setCommunityId(result.getTargetId());
+				scs.setSampleId(result.getSampleId());
+				scs.setSpecificationId(Long.valueOf(specificationIds[0]));
+
+				if(statMaps.get(scs) == null) {
+					statMaps.put(scs, result.getTotalScore());
+				} else {
+					statMaps.put(scs, statMaps.get(scs) + result.getTotalScore());
+				}
+			});
+
+			if(statMaps != null && statMaps.size() > 0) {
+				statMaps.entrySet().forEach(statMap -> {
+					SampleCommunitySpecification scs = statMap.getKey();
+					Double deductScore = statMap.getValue();
+
+				});
+			}
 		}
 	}
 
