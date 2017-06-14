@@ -8735,7 +8735,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //                    organizationProvider.deleteOrganizationMemberById(member.getId());
 //                }
 //            }
-            /**删除公司级别以下的记录**/
+            /**删除公司级别以下及退出公司的记录**/
             for (Long enterpriseId : enterpriseIds){
                 Organization enterprise = checkOrganization(enterpriseId);
                 List<OrganizationMember> members = organizationProvider.listOrganizationMemberByPath(enterprise.getPath(), groupTypes, cmd.getContactToken());
