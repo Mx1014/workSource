@@ -154,5 +154,5 @@ public interface QualityProvider {
 	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId);
 	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime);
 	List<QualityInspectionTasks> listQualityInspectionTasksBySample(Long sampleId, Timestamp startTime, Timestamp endTime);
-	Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime);
+	Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId);
 }

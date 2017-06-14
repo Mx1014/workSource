@@ -5,9 +5,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.quality.*;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +38,10 @@ public class QualityController extends ControllerBase {
 
 	@Autowired
 	private QualityInspectionSampleSearcher sampleSearcher;
-	
+
+	@Autowired
+	private QualityTaskSearcher taskSearcher;
+
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
 	 * <p>创建品质核查标准</p>
@@ -387,7 +393,7 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("createQualityInspectionTask")
 	@RestReturn(value = QualityInspectionTaskDTO.class)
 	public RestResponse createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
-		
+
 		QualityInspectionTaskDTO task = qualityService.createQualityInspectionTask(cmd);
 		
 		RestResponse response = new RestResponse(task);
@@ -761,5 +767,41 @@ public class QualityController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/syncQualityTaskIndex</b>
+	 * <p>搜索索引同步</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("syncQualityTaskIndex")
+	@RestReturn(value=String.class)
+	public RestResponse syncQualityTaskIndex() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		taskSearcher.syncFromDb();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /quality/syncQualitySampleIndex</b>
+	 * <p>搜索索引同步</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("syncQualitySampleIndex")
+	@RestReturn(value=String.class)
+	public RestResponse syncQualitySampleIndex() {
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+
+		sampleSearcher.syncFromDb();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
 	}
 }

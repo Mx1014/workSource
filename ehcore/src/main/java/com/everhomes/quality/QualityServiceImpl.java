@@ -3462,7 +3462,7 @@ public class QualityServiceImpl implements QualityService {
 	private QualityInspectionSampleScoreStat getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
 		long now = System.currentTimeMillis();
 		List<QualityInspectionTasks> tasks = qualityProvider.listQualityInspectionTasksBySample(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
-		Map<Long, QualityInspectionSampleCommunitySpecificationStat> communitySpecificationStat = qualityProvider.listCommunitySpecifitionStatBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
+		Map<Long, QualityInspectionSampleCommunitySpecificationStat> communitySpecificationStats = qualityProvider.listCommunitySpecifitionStatBySampleId(scoreStat.getSampleId());
 		if(tasks != null) {
 			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
 			Integer correctionCount = 0;
@@ -3473,25 +3473,42 @@ public class QualityServiceImpl implements QualityService {
 					correctionCount ++;
 				}
 			}
+			//时间段内的扣分项 应该填到对应的community和一级specification里面 所以是个组合key 要改下
 			List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), new Timestamp(now));
 
 			if(results != null) {
 				results.forEach(result -> {
 					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
-					QualityInspectionSampleCommunitySpecificationStat stat = communitySpecificationStat.get(result.getTargetId());
+					QualityInspectionSampleCommunitySpecificationStat stat = communitySpecificationStats.get(result.getTargetId());
 					if(stat != null) {
 						stat.setDeductScore(stat.getDeductScore() + result.getTotalScore());
+						communitySpecificationStats.put(result.getTargetId(), stat);
 					}
 				});
 			}
 			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
 		}
 
+		Map<Long, Double> communityScore = new HashMap<>();
+		communitySpecificationStats.entrySet().forEach(stat -> {
+			QualityInspectionSampleCommunitySpecificationStat communitySpecificationStat = stat.getValue();
+			if(communityScore.get(communitySpecificationStat.getCommunityId()) != null) {
+				Double deductScore = communityScore.get(communitySpecificationStat.getCommunityId()) + communitySpecificationStat.getDeductScore();
+				communityScore.put(communitySpecificationStat.getCommunityId(), deductScore);
+			}else {
+				communityScore.put(communitySpecificationStat.getCommunityId(), communitySpecificationStat.getDeductScore());
+			}
+
+		});
+		//按map的value排序 第一个和最后一个是扣分最多和最少的项目
+
 
 //		scoreStat.setHighestScore();
 //		scoreStat.setLowestScore();
 		return scoreStat;
 	}
+
+	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat和eh_quality_inspection_sample_community_specification_stat的数据
 
 	private QualityInspectionSampleScoreStat getSampleScoreStat(Long sampleId, String ownerType, Long ownerId) {
 		QualityInspectionSampleScoreStat scoreStat = qualityProvider.findQualityInspectionSampleScoreStat(sampleId);

@@ -2495,16 +2495,61 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionTasks> listQualityInspectionTasksBySample(Long sampleId, Timestamp startTime, Timestamp endTime) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.PARENT_ID.eq(sampleId));
+
+		if(startTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startTime));
+		}
+
+		if(endTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endTime));
+		}
+		List<QualityInspectionTasks> result = new ArrayList<QualityInspectionTasks>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTasks.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	@Override
 	public List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SAMPLE_ID.eq(sampleId));
+
+		if(startTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startTime));
+		}
+
+		if(endTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endTime));
+		}
+		List<QualityInspectionSpecificationItemResults> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecificationItemResults.class));
+			return null;
+		});
+
+		return result;
 	}
 
 	@Override
-	public Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime) {
-		return null;
+	public Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunitySpecificationStatRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.eq(sampleId));
+
+
+		Map<Long, QualityInspectionSampleCommunitySpecificationStat> result = new HashMap<>();
+		query.fetch().map((r) -> {
+			result.put(r.getCommunityId(), ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
+			return null;
+		});
+
+		return result;
 	}
 }
