@@ -57,7 +57,8 @@ public class CreateOrUpdateTalentCommand {
 	@NotNull
 	@Size(min=1)
 	private String phone;
-
+	@NotNull
+	@Size(min=1)
 	private String remark;
 
 	public CreateOrUpdateTalentCommand() {
