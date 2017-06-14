@@ -2563,11 +2563,11 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SAMPLE_ID.eq(sampleId));
 
 		if(startTime != null) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startTime));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.ge(startTime));
 		}
 
 		if(endTime != null) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endTime));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(endTime));
 		}
 		List<QualityInspectionSpecificationItemResults> result = new ArrayList<>();
 		query.fetch().map((r) -> {
