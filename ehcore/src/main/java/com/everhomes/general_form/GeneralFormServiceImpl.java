@@ -1,6 +1,7 @@
 package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -166,12 +167,15 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 						case IMAGE:
 							//工作流images怎么传
 							PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormImageValue.class);
+							List<String> urls = new ArrayList<>();
 							for(String uriString : imageValue.getUris()){
 								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-								formVal.setFieldValue(url);
-								PostApprovalFormItem formVal2 = ConvertHelper.convert(formVal, PostApprovalFormItem.class);
-								result.add(formVal2);
+								urls.add(url);
 							}
+							imageValue.setUrls(urls);
+							formVal.setFieldValue(JSONObject.toJSONString(imageValue));
+//							PostApprovalFormItem formVal2 = ConvertHelper.convert(formVal, PostApprovalFormItem.class);
+							result.add(formVal);
 							break;
 						case FILE:
 							//TODO:工作流需要新增类型file
