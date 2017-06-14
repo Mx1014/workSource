@@ -8592,16 +8592,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setOperatorUid(user.getId());
         organizationMember.setGroupId(0l);
         /**Modify by lei.lv**/
+        java.util.Date nDate = DateHelper.currentGMTTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDate = sdf.format(nDate);
+        java.sql.Date now = java.sql.Date.valueOf(sDate);
 
-        organizationMember.setCheckInTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+        java.sql.Date checkInTime = cmd.getCheckInTime() != null ? java.sql.Date.valueOf(cmd.getCheckInTime()):now;
+
+        organizationMember.setCheckInTime(checkInTime);
         if (organizationMember.getEmployeeStatus() != null) {
             if (organizationMember.getEmployeeStatus().equals(EmployeeStatus.PROBATION.getCode())) {
                 organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getEmploymentTime()));
             } else {
-                organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+                organizationMember.setEmploymentTime(checkInTime);
             }
         } else {
-            organizationMember.setEmploymentTime(java.sql.Date.valueOf(cmd.getCheckInTime()));
+            organizationMember.setEmploymentTime(checkInTime);
         }
 
         //手机号已注册，就把user id 跟通讯录关联起来
