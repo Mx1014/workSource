@@ -148,6 +148,7 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
             SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
             dtos.add(dto);
         }
+        response.setSampleTasks(dtos);
         return response;
     }
 

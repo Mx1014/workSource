@@ -205,14 +205,15 @@ public class QualityProviderImpl implements QualityProvider {
 	@PostConstruct
 	public void init() {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
-		if(taskServer.equals(equipmentIp)) {
-			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
-				String qualityInspectionTriggerName = "QualityInspection " + System.currentTimeMillis();
+//		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+//		if(taskServer.equals(equipmentIp)) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).enter(()-> {
+				String qualityInspectionTriggerName = "QualityInspection";
 				scheduleProvider.scheduleCronJob(qualityInspectionTriggerName, qualityInspectionTriggerName,
 						"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
+				return null;
 			});
-		}
+//		}
 
 		//五分钟后启动通知
 		Long notifyTime = System.currentTimeMillis() + 300000;

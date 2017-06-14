@@ -27,9 +27,6 @@ import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.quality.*;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
-import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSamples;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -3452,15 +3449,18 @@ public class QualityServiceImpl implements QualityService {
 		CountSampleTaskScoresResponse response = sampleSearcher.queryCount(cmd);
 		List<SampleTaskScoreDTO> dtos = response.getSampleTasks();
 		if(dtos != null && dtos.size() > 0) {
-			dtos.forEach(dto -> {
+			response.setSampleTasks(dtos.stream().map(dto -> {
 				QualityInspectionSampleScoreStat scoreStat = getSampleScoreStat(dto.getId(), dto.getOwnerType(), dto.getOwnerId());
 				dto.setCommunityCount(scoreStat.getCommunityCount());
 				dto.setHighestScore(scoreStat.getHighestScore());
 				dto.setLowestScore(scoreStat.getLowestScore());
 				Double averageScore = (100*scoreStat.getCommunityCount() - scoreStat.getDeductScore())/scoreStat.getCommunityCount();
 				dto.setAverageScore(averageScore);
-			});
+
+				return dto;
+			}).collect(Collectors.toList()));
 		}
+//		response.setSampleTasks(dtos);
 		return response;
 	}
 
@@ -3592,6 +3592,9 @@ public class QualityServiceImpl implements QualityService {
 				scs.setCommunityId(result.getTargetId());
 				scs.setSampleId(result.getSampleId());
 				scs.setSpecificationId(Long.valueOf(specificationIds[0]));
+				scs.setOwnerId(result.getOwnerId());
+				scs.setOwnerType(result.getOwnerType());
+				scs.setNamespaceId(result.getNamespaceId());
 
 				if(statMaps.get(scs) == null) {
 					statMaps.put(scs, result.getTotalScore());
@@ -3609,18 +3612,10 @@ public class QualityServiceImpl implements QualityService {
 						stat.setDeductScore(stat.getDeductScore() + deductScore);
 						qualityProvider.updateQualityInspectionSampleCommunitySpecificationStat(stat);
 					} else {
-						//还有没有数据也没有扣分的 也要新建 扣分为0
-						QualityInspectionSampleCommunitySpecificationStat newStat = new QualityInspectionSampleCommunitySpecificationStat();
+						QualityInspectionSampleCommunitySpecificationStat newStat = ConvertHelper.convert(scs, QualityInspectionSampleCommunitySpecificationStat.class);
+						newStat.setDeductScore(deductScore);
+						qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(newStat);
 
-//						`id` BIGINT NOT NULL,
-//						`namespace_id` INTEGER NOT NULL DEFAULT '0',
-//						`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the template, enterprise, etc',
-//						`owner_id` BIGINT NOT NULL DEFAULT '0',
-//						`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
-//						`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_communities',
-//						`specification_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_quality_inspection_specifications',
-//						`deduct_score` DOUBLE NOT NULL DEFAULT '0.0',
-//						`create_time` DATETIME ,
 					}
 				});
 			}
