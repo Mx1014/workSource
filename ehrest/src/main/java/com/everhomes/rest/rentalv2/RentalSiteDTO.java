@@ -64,6 +64,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStartTimeFlag: 最多提前预约时间标志 1：限制 0：不限制 {@link com.everhomes.rest.rentalv2.NormalFlag}</li>
  * <li>resourceTypeId: 资源类型id</li>
  * <li>payMode: 支付模式</li>
+ * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -87,11 +88,6 @@ public class RentalSiteDTO {
 	private String notice; 
 	private java.lang.String     coverUri;
 	private java.lang.String     coverUrl;
-	private java.lang.Byte       discountType;
-	private java.math.BigDecimal fullPrice;
-	private java.math.BigDecimal cutPrice;
-	private java.lang.Double     discountRatio;
-	private java.lang.Byte       rentalType;
 	private Double   timeStep;
 	private Long  dayBeginTime;
 	private Long  dayEndTime;
@@ -131,6 +127,19 @@ public class RentalSiteDTO {
     private Long resourceTypeId;
     private Byte payMode;
 
+    @ItemType(SitePriceRuleDTO.class)
+    private List<SitePriceRuleDTO> sitePriceRules;
+    
+    @Deprecated
+	private java.lang.Byte       discountType;
+    @Deprecated
+	private java.math.BigDecimal fullPrice;
+    @Deprecated
+	private java.math.BigDecimal cutPrice;
+    @Deprecated
+	private java.lang.Double     discountRatio;
+    @Deprecated
+	private java.lang.Byte       rentalType;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
