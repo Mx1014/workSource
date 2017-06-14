@@ -4624,4 +4624,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }
 
+    @Override
+    public Organization findUnderOrganizationByParentOrgId(Long parentOrgId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+        query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentOrgId));
+        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+        return ConvertHelper.convert(query.fetchOne(), Organization.class);
+    }
+
 }

@@ -388,4 +388,6 @@ public interface OrganizationProvider {
 
     List<OrganizationMemberProfileLogs> listMemberRecordChanges(Long detailId);
 
+	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
+
 }

@@ -115,7 +115,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.omg.CORBA.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5089,9 +5088,19 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if (null != cmd.getFilterScopeTypes() && cmd.getFilterScopeTypes().size() > 0) {
                     Condition cond = null;
                     if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CURRENT.getCode())) {
-                        cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
+                        /**当前节点是企业**/
                         if (org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())) {
-                            cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                            //寻找隶属企业的直属隐藏部门
+                            Organization underDirectOrg = organizationProvider.findUnderOrganizationByParentOrgId(org.getId());
+                            if(underDirectOrg == null){//没有添加过直属人员
+                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.lt(0L));//确保查询不到
+                            }else{
+                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(underDirectOrg.getId()));
+                                cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode()));
+                            }
+
+                        }else{/**当前节点不是企业**/
+                            cond = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(org.getId());
                         }
                     }
                     if (cmd.getFilterScopeTypes().contains(FilterOrganizationContactScopeType.CHILD_DEPARTMENT.getCode())) {
@@ -5106,10 +5115,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                         groupTypes.add(OrganizationGroupType.GROUP.getCode());
                     }
 
+                    //多条件查询中选择了本结点且选择了其他group条件
                     if (groupTypes.size() > 0 && null != cond) {
                         cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "%");
                         cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
-                    } else if (groupTypes.size() > 0) {
+                    } else if (groupTypes.size() > 0) {//多条件查询中没有选择了本结点但选择了其他group条件
                         cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(org.getPath() + "/%");
                         cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
                     }
@@ -8657,6 +8667,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				organizationProvider.createOrganizationMember(organizationMember);
 //				return null;
 //			}
+
             /**modify by lei.lv*/
             //总公司和分公司的ID集合
             enterpriseIds.add(org.getId());
@@ -8679,6 +8690,20 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }else{//如果没有选择部门，则默认直属当前的organizationId
                 direct_under_enterpriseIds.add(org.getId());
+            }
+
+
+            //创建直属企业的直属部门
+            if (null != direct_under_enterpriseIds) {
+                //遍历需要添加直属的企业
+                for (Long enterPriseId : direct_under_enterpriseIds) {
+                    //寻找企业下的直属隐藏部门的organizationId
+                    Long hiddenDirectId = findDirectUnderOrganizationId(enterPriseId);
+                    //把需要添加直属的公司隐藏部门点加到departmentIds
+                    if (!departmentIds.contains(hiddenDirectId)) {
+                        departmentIds.add(hiddenDirectId);
+                    }
+                }
             }
 
             // 先把把成员从公司所有部门都删除掉
@@ -8762,20 +8787,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
             }
 
-            //添加直属公司的记录
-            if (null != direct_under_enterpriseIds) {
-                OrganizationMember direct_under_enterprise_members = ConvertHelper.convert(organizationMember, OrganizationMember.class);
-                for (Long oId : direct_under_enterpriseIds) {
-                    Organization direct_under_enterprise = checkOrganization(oId);
-                    direct_under_enterprise_members.setGroupPath(direct_under_enterprise.getPath());
-                    direct_under_enterprise_members.setGroupType(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
-                    direct_under_enterprise_members.setOrganizationId(oId);
-                    OrganizationMemberDetails direct_under_enterprise_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(oId, cmd.getContactToken());
-                    /**Modify BY lei.lv cause MemberDetail**/
-                    direct_under_enterprise_members.setDetailId(direct_under_enterprise_detail.getId());
-                    organizationProvider.createOrganizationMember(direct_under_enterprise_members);
-                }
-            }
 
             //添加除公司之外的机构成员
             departments.addAll(repeatCreateOrganizationmembers(departmentIds,cmd.getContactToken(),enterpriseIds,organizationMember));
@@ -10982,6 +10993,30 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     }
 
+    private Long findDirectUnderOrganizationId(Long enterPriseId) {
+        Organization parOrg = checkOrganization(enterPriseId);
+        /**先查organization表里有没有该企业直属部门（隐藏）**/
+        Organization under_org = organizationProvider.findUnderOrganizationByParentOrgId(parOrg.getId());
+        //如果没有查询到该企业有直属的隐藏部门
+        if (organizationProvider == null) {
+            User current_user = UserContext.current().getUser();
+            Organization org_under_direct = new Organization();
+            org_under_direct.setName(org_under_direct.getName() + "_直属");
+            org_under_direct.setPath(parOrg.getPath());
+            org_under_direct.setLevel(parOrg.getLevel() + 1);
+            org_under_direct.setOrganizationType(parOrg.getOrganizationType());
+            org_under_direct.setStatus(OrganizationStatus.ACTIVE.getCode());
+            org_under_direct.setNamespaceId(parOrg.getNamespaceId());
+            org_under_direct.setCreatorUid(current_user.getId());
+            org_under_direct.setGroupType(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
+            org_under_direct.setDirectlyEnterpriseId(parOrg.getId());
+            org_under_direct.setParentId(parOrg.getId());
+            organizationProvider.createOrganization(org_under_direct);
+            return org_under_direct.getId();
+        } else {//如果查询到该企业有直属的隐藏部门
+            return under_org.getId();
+        }
+    }
 }
 
 
