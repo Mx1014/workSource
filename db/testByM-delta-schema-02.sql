@@ -105,7 +105,7 @@ ALTER TABLE `eh_feedbacks` ADD INDEX i_eh_feedbacks_target_id(`target_id`);
 -- merge form feedback-1.0
 -- 修改举报content_category的注释 add by yanjun 20170427
 ALTER TABLE `eh_feedbacks` CHANGE `content_category` `content_category` BIGINT(20) DEFAULT '0' NOT NULL COMMENT '0-其它、1-产品bug、2-产品改进、3-版本问题;11-敏感信息、12-版权问题、13-暴力色情、14-诈骗和虚假信息、15-骚扰；16-谣言、17-恶意营销、18-诱导分享；19-政治';
--- merge from 4.5.2 start
+-- merge from 4.5.2 end
 
 -- merge from 4.5.4 start
 -- 自寄服务地址表，add by tt, 20170413
@@ -516,7 +516,6 @@ ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_org_member_price` DECIMAL(10,2
 ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_approving_user_original_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-原价-如果打折则有（外部客户价）';
 ALTER TABLE `eh_rentalv2_cells`  ADD COLUMN `half_approving_user_price` DECIMAL(10,2) DEFAULT NULL COMMENT '半场-实际价格-打折则为折后价（外部客户价）';
 -- merge from 4.5.5 end
-
 
 -- merge from 4.6.0 start
 -- 给工作流评价项增加允许输入评价内容flag字段  add by xq.tian  2017/05/12
