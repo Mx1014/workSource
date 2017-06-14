@@ -3141,25 +3141,16 @@ public class QualityServiceImpl implements QualityService {
 			samples.remove(samples.size() - 1);
 			nextPageAnchor = samples.get(samples.size() - 1).getId();
 		}
+		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		List<SampleQualityInspectionDTO> sampleQualityInspectionDTOList = samples.stream().map(sample -> {
 			SampleQualityInspectionDTO dto = ConvertHelper.convert(sample, SampleQualityInspectionDTO.class);
-
-			List<QualityInspectionSampleCommunityMap> sampleCommunityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sample.getId());
-			if(sampleCommunityMaps != null && sampleCommunityMaps.size() > 0) {
-				List<SampleCommunity> sampleCommunities = new ArrayList<>();
-				List<Long> communityIds = sampleCommunityMaps.stream().map(QualityInspectionSampleCommunityMap::getCommunityId).collect(Collectors.toList());
-				Map<Long, Community> communityMap = communityProvider.listCommunitiesByIds(communityIds);
-				sampleCommunityMaps.forEach(map -> {
-					SampleCommunity sc = new SampleCommunity();
-					sc.setSampleId(sample.getId());
-					sc.setCommunityId(map.getCommunityId());
-					Community community = communityMap.get(map.getCommunityId());
-					sc.setCommunityName(community.getName());
-					sampleCommunities.add(sc);
-				});
-
-				dto.setSampleCommunities(sampleCommunities);
-			}
+			List<SampleCommunity> sampleCommunities = new ArrayList<>();
+			SampleCommunity sc = new SampleCommunity();
+			sc.setSampleId(sample.getId());
+			sc.setCommunityId(cmd.getCommunityId());
+			sc.setCommunityName(community.getName());
+			sampleCommunities.add(sc);
+			dto.setSampleCommunities(sampleCommunities);
 
 			return dto;
 		}).collect(Collectors.toList());
@@ -3613,7 +3604,24 @@ public class QualityServiceImpl implements QualityService {
 				statMaps.entrySet().forEach(statMap -> {
 					SampleCommunitySpecification scs = statMap.getKey();
 					Double deductScore = statMap.getValue();
+					QualityInspectionSampleCommunitySpecificationStat stat = qualityProvider.findBySampleCommunitySpecification(scs.getSampleId(),scs.getCommunityId(),scs.getSpecificationId());
+					if(stat != null) {
+						stat.setDeductScore(stat.getDeductScore() + deductScore);
+						qualityProvider.updateQualityInspectionSampleCommunitySpecificationStat(stat);
+					} else {
+						//还有没有数据也没有扣分的 也要新建 扣分为0
+						QualityInspectionSampleCommunitySpecificationStat newStat = new QualityInspectionSampleCommunitySpecificationStat();
 
+//						`id` BIGINT NOT NULL,
+//						`namespace_id` INTEGER NOT NULL DEFAULT '0',
+//						`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the template, enterprise, etc',
+//						`owner_id` BIGINT NOT NULL DEFAULT '0',
+//						`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
+//						`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_communities',
+//						`specification_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_quality_inspection_specifications',
+//						`deduct_score` DOUBLE NOT NULL DEFAULT '0.0',
+//						`create_time` DATETIME ,
+					}
 				});
 			}
 		}

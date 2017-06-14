@@ -110,6 +110,7 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFac
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleCommunitySpecificationStat;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSampleScoreStat;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSamples;
@@ -2494,6 +2495,30 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
+	public void createQualityInspectionSampleCommunitySpecificationStat(QualityInspectionSampleCommunitySpecificationStat stat) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSampleCommunitySpecificationStat.class));
+
+		stat.setId(id);
+		stat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("createQualityInspectionSampleCommunitySpecificationStat: " + stat);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleCommunitySpecificationStat.class, id));
+		EhQualityInspectionSampleCommunitySpecificationStatDao dao = new EhQualityInspectionSampleCommunitySpecificationStatDao(context.configuration());
+		dao.insert(stat);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSampleCommunitySpecificationStat.class, null);
+	}
+
+	@Override
+	public void updateQualityInspectionSampleCommunitySpecificationStat(QualityInspectionSampleCommunitySpecificationStat stat) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSampleCommunitySpecificationStat.class, stat.getId()));
+		EhQualityInspectionSampleCommunitySpecificationStatDao dao = new EhQualityInspectionSampleCommunitySpecificationStatDao(context.configuration());
+		dao.update(stat);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSampleCommunitySpecificationStat.class, stat.getId());
+	}
+
+	@Override
 	public List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
@@ -2606,5 +2631,26 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 
 		return result;
+	}
+
+	@Override
+	public QualityInspectionSampleCommunitySpecificationStat findBySampleCommunitySpecification(Long sampleId, Long communityId, Long specificationId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunitySpecificationStatRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.eq(sampleId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SPECIFICATION_ID.eq(specificationId));
+
+
+		List<QualityInspectionSampleCommunitySpecificationStat> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
+			return null;
+		});
+
+		if(result.size() == 0) {
+			return  null;
+		}
+		return result.get(0);
 	}
 }

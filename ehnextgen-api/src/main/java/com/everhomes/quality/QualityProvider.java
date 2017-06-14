@@ -149,6 +149,8 @@ public interface QualityProvider {
 
 	void createQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
 	void updateQualityInspectionSampleScoreStat(QualityInspectionSampleScoreStat stat);
+	void createQualityInspectionSampleCommunitySpecificationStat(QualityInspectionSampleCommunitySpecificationStat stat);
+	void updateQualityInspectionSampleCommunitySpecificationStat(QualityInspectionSampleCommunitySpecificationStat stat);
 	QualityInspectionSampleScoreStat findQualityInspectionSampleScoreStat(Long sampleId);
 	Map<Long, QualityInspectionSampleScoreStat> getQualityInspectionSampleScoreStat(List<Long> sampleIds);
 
@@ -159,4 +161,6 @@ public interface QualityProvider {
 
 	List<QualityInspectionSamples> listActiveQualityInspectionSamples(Timestamp lastStatTime);
 	Map<Long, Double> listCommunityScore(Long sampleId);
+
+	QualityInspectionSampleCommunitySpecificationStat findBySampleCommunitySpecification(Long sampleId, Long communityId, Long specificationId);
 }
