@@ -57,7 +57,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
 
         GetTemplateByApprovalIdResponse response = generalApprovalService.postApprovalForm(cmd2);
         PostGeneralFormDTO dto = new PostGeneralFormDTO();
-        dto.setCustomObject(JSONObject.toJSONString(response));
+//        dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
     }
 
