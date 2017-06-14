@@ -1844,6 +1844,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return DoorAccessDriverType.fromCode(t);
     }
     
+    private DoorAccessDriverType getQrDriverZuolinInner(Integer namespaceId) {
+        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_ZUOLIN_INNER, DoorAccessDriverType.ZUOLIN.getCode());
+        return DoorAccessDriverType.fromCode(t);
+    }
+    
     private String getLinglingId() {
 	    User user = UserContext.current().getUser();
 	    if(null == user) {
@@ -2020,7 +2025,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setExpireTimeMs(auth.getKeyValidTime());
         qr.setHardwares(hardwares);
         qr.setId(auth.getId());
-        qr.setQrDriver(DoorAccessDriverType.ZUOLIN.getCode());
+        qr.setQrDriver(this.getQrDriverZuolinInner(UserContext.getCurrentNamespaceId()).getCode());
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCurrentTime(DateHelper.currentGMTTime().getTime());
         
         qr.setQrCodeKey(aesUserKey.getSecret());
         
@@ -2428,7 +2435,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
         auth.setDescription(cmd.getDescription());
         auth.setDoorId(cmd.getDoorId());
-        auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+        auth.setDriver(this.getQrDriverZuolinInner(cmd.getNamespaceId()).getCode());
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());

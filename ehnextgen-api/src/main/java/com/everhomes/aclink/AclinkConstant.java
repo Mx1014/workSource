@@ -11,6 +11,7 @@ public interface AclinkConstant {
     public static final String ACLINK_QR_TIMEOUTS = "aclink.qr_timeout";
     public static final String ACLINK_VISITOR_CNT = "aclink.qr_visitor_cnt";
     public static final String ACLINK_QR_DRIVER_EXT = "aclink.qr_driver_ext";
+    public static final String ACLINK_QR_DRIVER_ZUOLIN_INNER = "aclink.qr_driver_zuolin_inner";
     public static final String ACLINK_USERKEY_TIMEOUTS = "aclink.user_key_timeout";
     public static final String ACLINK_NEW_USER_AUTO_AUTH = "aclink.new_user_auto_auth";
 }
