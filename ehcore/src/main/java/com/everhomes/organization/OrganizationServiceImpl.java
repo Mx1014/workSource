@@ -10867,7 +10867,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }
 
-        if (!StringUtils.isEmpty(data.getCheckInTime())) {
+        if (StringUtils.isEmpty(data.getCheckInTime())) {
+            LOGGER.warn("Organization member checkInTime is null. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member checkInTime is null");
+            log.setCode(OrganizationServiceErrorCode.ERROR_CHECKINTIME_ISNULL);
+            return log;
+        }
+
+        if (data.getEmployeeStatus().equals("否")) {
             if (StringUtils.isEmpty(data.getEmploymentTime())) {
                 LOGGER.warn("Organization member employeeTime is null. data = {}", data);
                 log.setData(data);
@@ -10876,14 +10884,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 return log;
             }
         } else {
-            LOGGER.warn("Organization member checkInTime is null. data = {}", data);
-            log.setData(data);
-            log.setErrorLog("Organization member checkInTime is null");
-            log.setCode(OrganizationServiceErrorCode.ERROR_CHECKINTIME_ISNULL);
-            return log;
-        }
-
-        if (StringUtils.isEmpty(data.getEmployeeStatus())) {
             LOGGER.warn("Organization member employeeStatus is null. data = {}", data);
             log.setData(data);
             log.setErrorLog("Organization member employeeStatus is null");
