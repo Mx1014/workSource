@@ -1898,16 +1898,19 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         if (organizationId != null && community != null && address != null) {
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
             if (communityAddressMapping == null) {
-                CommunityAddressMapping addressMapping = new CommunityAddressMapping();
-                addressMapping.setOrganizationId(organizationId);
-                addressMapping.setCommunityId(community.getId());
-                addressMapping.setAddressId(address.getId());
-                addressMapping.setOrganizationAddress(address.getAddress());
-                addressMapping.setLivingStatus(livingStatus);
-                addressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                addressMapping.setUpdateTime(addressMapping.getCreateTime());
-                organizationProvider.createOrganizationAddressMapping(addressMapping);
-            }
+                communityAddressMapping = new CommunityAddressMapping();
+                communityAddressMapping.setOrganizationId(organizationId);
+                communityAddressMapping.setCommunityId(community.getId());
+                communityAddressMapping.setAddressId(address.getId());
+                communityAddressMapping.setOrganizationAddress(address.getAddress());
+                communityAddressMapping.setLivingStatus(livingStatus);
+                communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+                organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+            }else {
+				communityAddressMapping.setLivingStatus(livingStatus);
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}
         }
     }
 
