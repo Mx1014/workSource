@@ -3780,7 +3780,12 @@ public class QualityServiceImpl implements QualityService {
 				SpecificationItemScores score = new SpecificationItemScores();
 				score.setSpecificationId(specificationId);
 				score.setSpecificationDeducted(deductedScore);
-				score.setSpecificationDeductedProportion(deductedScore/totaldeducted);
+				if(Double.compare(totaldeducted, 0.0) == 0) {
+					score.setSpecificationDeductedProportion(0.0);
+				} else {
+					score.setSpecificationDeductedProportion(deductedScore/totaldeducted);
+				}
+
 				if(specification != null) {
 					score.setSpecificationName(specification.getName());
 				}
