@@ -3541,4 +3541,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		int totalRecords = query.fetchCount();
 		return totalRecords;
 	}
+	
+	/**
+	 * add by janson
+	 * @param organizationId
+	 * @param buildId
+	 * @return
+	 */
+	@Override
+	public List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(Long organizationId, Long buildId) {
+		
+		List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildId));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.ne(OrganizationAddressStatus.INACTIVE.getCode()));
+					query.fetch().map((EhOrganizationAddressesRecord record) -> {
+						ea.add(ConvertHelper.convert(record, OrganizationAddress.class));
+		            	return null;
+					});
+					
+					return true;
+				});
+		return ea;
+	}
 }
