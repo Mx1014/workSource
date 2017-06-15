@@ -787,7 +787,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 				Cell cell4 = tempRow.createCell(4);
 				cell4.setCellStyle(style);
 				PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
-				if(pmTask.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
+				if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
 					Address address = addressProvider.findAddressById(pmTask.getAddressId());
 					if(null != address)
 						cell4.setCellValue(address.getAddress());
