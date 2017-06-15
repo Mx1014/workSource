@@ -3458,6 +3458,12 @@ public class QualityServiceImpl implements QualityService {
 			getNewestScoreStat(stat);
 		}
 		CountSampleTasksResponse response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
+		if(stat.getTaskCount() == 0) {
+			response.setCorrectionRate(0.0);
+		} else {
+			Double correctionRate = 1.00*stat.getCorrectionCount()/stat.getTaskCount();
+			response.setCorrectionRate(correctionRate);
+		}
 		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
 		response.setAverageScore(averageScore);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -3610,7 +3616,7 @@ public class QualityServiceImpl implements QualityService {
 					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					stat.setUpdateTime(now);
 					qualityProvider.updateQualityInspectionSampleScoreStat(stat);
-					updateSampleCommunitySpecificationStat(results);
+					updateSampleCommunitySpecificationStat(results, now);
 				});
 			}
 
@@ -3636,14 +3642,14 @@ public class QualityServiceImpl implements QualityService {
 					}
 					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					qualityProvider.createQualityInspectionSampleScoreStat(stat);
-					updateSampleCommunitySpecificationStat(results);
+					updateSampleCommunitySpecificationStat(results, now);
 				});
 			}
 		}
 	}
 
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_community_specification_stat的数据
-	public void updateSampleCommunitySpecificationStat(List<QualityInspectionSpecificationItemResults> results) {
+	public void updateSampleCommunitySpecificationStat(List<QualityInspectionSpecificationItemResults> results, Timestamp now) {
 		if(results != null) {
 			Map<SampleCommunitySpecification, Double> statMaps = new HashMap<>();
 			results.forEach(result -> {
@@ -3672,6 +3678,7 @@ public class QualityServiceImpl implements QualityService {
 					QualityInspectionSampleCommunitySpecificationStat stat = qualityProvider.findBySampleCommunitySpecification(scs.getSampleId(),scs.getCommunityId(),scs.getSpecificationId());
 					if(stat != null) {
 						stat.setDeductScore(stat.getDeductScore() + deductScore);
+						stat.setUpdateTime(now);
 						qualityProvider.updateQualityInspectionSampleCommunitySpecificationStat(stat);
 					} else {
 						QualityInspectionSampleCommunitySpecificationStat newStat = ConvertHelper.convert(scs, QualityInspectionSampleCommunitySpecificationStat.class);
@@ -3717,33 +3724,51 @@ public class QualityServiceImpl implements QualityService {
 	public CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 		CountSampleTaskSpecificationItemScoresResponse response = new CountSampleTaskSpecificationItemScoresResponse();
 		List<SpecificationItemScores> itemScores = new ArrayList<>();
-		123
-		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId());
+		QualityInspectionSampleScoreStat sampleScoreStat = qualityProvider.findQualityInspectionSampleScoreStat(cmd.getSampleId());
+		Map<Long, Double> specificationScore = qualityProvider.listSpecificationScore(cmd.getSampleId());
+		if(specificationScore == null || specificationScore.size() == 0) {
+			List<QualityInspectionSampleCommunityMap> scms = qualityProvider.findQualityInspectionSampleCommunityMapBySample(cmd.getSampleId());
+			if(scms != null && scms.size() > 0) {
+				scms.forEach(scm -> {
+//							查每个项目的第一级类型
+					List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sampleScoreStat.getOwnerType(), sampleScoreStat.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sampleScoreStat.getOwnerType(), sampleScoreStat.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+					if(dtos != null && dtos.size() > 0) {
+						dtos.forEach(dto -> {
+							specificationScore.put(dto.getId(), 0.0);
+						});
+					}
+				});
+			}
+		}
+		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId(), sampleScoreStat.getUpdateTime(), new Timestamp(System.currentTimeMillis()));
 		if(itemResults != null && itemResults.size() > 0) {
-			Map<Long, Double> scoreMap = new HashMap<>();
 			List<Double> scoreList = new ArrayList<>();
 			itemResults.forEach(itemResult -> {
-				scoreList.add(itemResult.getTotalScore());
 				String specificationPath = itemResult.getSpecificationPath();
 				specificationPath = specificationPath.substring(1,specificationPath.length());
 				String[] pathIds = specificationPath.split("/");
 
 				Long rootSpecification = Long.valueOf(pathIds[0]);
-				if(scoreMap.get(rootSpecification) != null) {
-					scoreMap.put(rootSpecification, scoreMap.get(rootSpecification) + itemResult.getTotalScore());
+				if(specificationScore.get(rootSpecification) != null) {
+					specificationScore.put(rootSpecification, specificationScore.get(rootSpecification) + itemResult.getTotalScore());
 				} else {
-					scoreMap.put(rootSpecification, itemResult.getTotalScore());
+					specificationScore.put(rootSpecification, itemResult.getTotalScore());
 				}
 			});
 
+			specificationScore.entrySet().forEach(score -> {
+				scoreList.add(score.getValue());
+			});
 			Double totalScore = 0.0;
 			for(Double score : scoreList) {
 				totalScore = totalScore + score;
 			}
 
 			Double totaldeducted = totalScore;
-			if(scoreMap != null && scoreMap.size() > 0) {
-				scoreMap.entrySet().forEach(map -> {
+			if(specificationScore != null && specificationScore.size() > 0) {
+				specificationScore.entrySet().forEach(map -> {
 					Long specificationId = map.getKey();
 					Double deductedScore = map.getValue();
 					QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId());

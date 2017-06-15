@@ -2653,6 +2653,26 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
+	public Map<Long, Double> listSpecificationScore(Long sampleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunitySpecificationStatRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.eq(sampleId));
+
+
+		Map<Long, Double> result = new HashMap<>();
+		query.fetch().map((r) -> {
+			if(result.get(r.getSpecificationId()) == null) {
+				result.put(r.getSpecificationId(), r.getDeductScore());
+			} else {
+				result.put(r.getSpecificationId(), result.get(r.getSpecificationId()) + r.getDeductScore());
+			}
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
 	public List<QualityInspectionSamples> listActiveQualityInspectionSamples(Timestamp lastStatTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSamplesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLES);
