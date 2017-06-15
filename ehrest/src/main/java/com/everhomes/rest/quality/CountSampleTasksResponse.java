@@ -31,7 +31,7 @@ public class CountSampleTasksResponse {
 
     private Integer communityCount;
 
-    private Long taskCount;
+    private Integer taskCount;
 
     private Double averageScore;
 
@@ -93,11 +93,11 @@ public class CountSampleTasksResponse {
         this.correctionRate = correctionRate;
     }
 
-    public Long getTaskCount() {
+    public Integer getTaskCount() {
         return taskCount;
     }
 
-    public void setTaskCount(Long taskCount) {
+    public void setTaskCount(Integer taskCount) {
         this.taskCount = taskCount;
     }
 
