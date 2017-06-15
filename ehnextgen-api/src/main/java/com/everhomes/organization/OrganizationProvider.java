@@ -332,4 +332,6 @@ public interface OrganizationProvider {
 	List<Long> listOrganizationIdByCommunityId(Long communityId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator);
 	List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType, Byte setAdminFlag,
 			CrossShardListingLocator locator, int pageSize);
+
+	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 } 

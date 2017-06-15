@@ -1256,6 +1256,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void deleteEnterpriseById(DeleteOrganizationIdCommand cmd) {
 		Organization organization = checkOrganization(cmd.getId());
+		User user = UserContext.current().getUser();
 
 		dbProvider.execute((TransactionStatus status) -> {
 			organization.setStatus(OrganizationStatus.DELETED.getCode());
@@ -1280,6 +1281,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 					organizationProvider.updateOrganizationAddress(organizationAddress);
 				}
 			}
+
+			/**modify by lei.lv**/
+			//删除organizaiton时，需要把organizaiton下面的所有机构状态置为无效，而且把人员和机构的关系置为无效状态
+			List<Organization> underOrganiztions = organizationProvider.findOrganizationByPath(organization.getPath());
+			underOrganiztions.stream().map((o) ->{
+				//更新机构
+				o.setStatus(OrganizationStatus.INACTIVE.getCode());
+				o.setUpdateTime(now);
+				organizationProvider.updateOrganization(o);
+				//更新人员
+				List<OrganizationMember> underOrganiztionsMembers = organizationProvider.listOrganizationMembersByOrgIdWithAllStatus(o.getId());
+				for (OrganizationMember m : underOrganiztionsMembers){
+					m.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
+					m.setUpdateTime(now);
+					m.setOperatorUid(user.getId());
+					organizationProvider.updateOrganizationMember(m);
+					//解除门禁权限
+					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
+				}
+				return null;
+			});
 
 			organizationSearcher.deleteById(cmd.getId());
 			return null;
@@ -2105,11 +2127,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				//把机构入驻的园区关系修改成无效
 				deleteCurrentOrganizationCommunityReqeust(user.getId(), org.getId());
 				//把机构下的人员修改成无效
-				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(org.getId(), null);
+				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdWithAllStatus(org.getId());
 				for (OrganizationMember member: members) {
 					member.setOperatorUid(user.getId());
 					member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 					organizationProvider.updateOrganizationMember(member);
+					//解除门禁权限
+					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), member.getOrganizationId(), member.getTargetId());
 				}
 			}
 			return null;
