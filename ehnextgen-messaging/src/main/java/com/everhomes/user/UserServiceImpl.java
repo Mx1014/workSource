@@ -101,6 +101,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -2769,6 +2770,10 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+    public static void main(String[] args) {
+        System.out.println(GeoHashUtils.encode(22.322272, 114.043532));
+    }
+
 	@Override
 	public SceneDTO toOrganizationSceneDTO(Integer namespaceId, Long userId, OrganizationDTO organizationDto, SceneType sceneType) {
 		SceneDTO sceneDto = new SceneDTO();
@@ -2777,7 +2782,7 @@ public class UserServiceImpl implements UserService {
 		sceneDto.setSceneType(sceneType.getCode());
 
 		sceneDto.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
-		sceneDto.setName(organizationDto.getName());
+		sceneDto.setName(organizationDto.getName().trim());
 		// 在园区先暂时优先显示园区名称，后面再考虑怎样显示公司名称 by lqs 20160514
 		String aliasName = organizationDto.getDisplayName();
 		//if(sceneType.getCode().contains("park") && organizationDto.getCommunityName() != null) {
@@ -2789,7 +2794,10 @@ public class UserServiceImpl implements UserService {
 //		if(!OrganizationType.isGovAgencyOrganization(orgType)) {
 //			aliasName = organizationDto.getCommunityName();
 //		}
-		sceneDto.setAliasName(aliasName);
+        if (aliasName == null || aliasName.trim().isEmpty()) {
+            aliasName = organizationDto.getName().trim();
+        }
+        sceneDto.setAliasName(aliasName);
 		sceneDto.setAvatar(organizationDto.getAvatarUri());
 		sceneDto.setAvatarUrl(organizationDto.getAvatarUrl());
 

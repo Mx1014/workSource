@@ -267,7 +267,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
                 remindCount = 1;
                 btn.getFlowButton().setRemindCount(1);
             }
-            if(remindLogs != null && remindLogs.size() > remindCount) {
+            if(remindLogs != null && remindLogs.size() >= remindCount) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_REMIND_ERROR,
                         "remind count overflow");
 			}

@@ -1027,5 +1027,9 @@ WHERE namespace_id = 1 AND item_label = '华润通会议室';
 
 DELETE FROM eh_rentalv2_resource_types WHERE id = 10825;
 
-	
-	
+-- fix #11216 by xq.tian  2017/06/14
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14972696334874027363%3F_k%3Dzlbiz#sign_suffix"}' WHERE `id` = 114210;
+
+-- fix #11269 by xq.tian  2017/06/14
+UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fisfromindex%3d0%23%2fmicroshop%2fhome%3f_k%3dzlbiz#sign_suffix"}' WHERE `id` = 114203;
+
