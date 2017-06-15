@@ -3731,8 +3731,8 @@ public class QualityServiceImpl implements QualityService {
 			if(scms != null && scms.size() > 0) {
 				scms.forEach(scm -> {
 //							查每个项目的第一级类型
-					List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sampleScoreStat.getOwnerType(), sampleScoreStat.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
-					List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sampleScoreStat.getOwnerType(), sampleScoreStat.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+					List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
 					List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
 					if(dtos != null && dtos.size() > 0) {
 						dtos.forEach(dto -> {
@@ -3742,7 +3742,11 @@ public class QualityServiceImpl implements QualityService {
 				});
 			}
 		}
-		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId(), sampleScoreStat.getUpdateTime(), new Timestamp(System.currentTimeMillis()));
+		Timestamp lastTime = null;
+		if(sampleScoreStat != null) {
+			lastTime = sampleScoreStat.getUpdateTime();
+		}
+		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId(), lastTime, new Timestamp(System.currentTimeMillis()));
 		if(itemResults != null && itemResults.size() > 0) {
 			List<Double> scoreList = new ArrayList<>();
 			itemResults.forEach(itemResult -> {
