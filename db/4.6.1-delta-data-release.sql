@@ -148,6 +148,7 @@ VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_appli
 INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ((@flow_var_max_id := @flow_var_max_id + 1), 0, 0, '', 0, '', 'user_applier_department_manager', '发起人的部门经理', 'node_user_processor', 'bean_id', 'flow-variable-applier-department-manager', 1);
 
+-- 新的二维码支持与门禁权限 added by janson
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.join_company_auto_auth', 'building,176121,DE:2E:71:67:3A:2F;company,1000001,DE:2E:71:67:3A:2F', '为生产力大楼自动授权');
 
