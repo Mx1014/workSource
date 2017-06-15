@@ -68,4 +68,6 @@ public interface QualityService {
 	CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd);
 	CountScoresResponse countSampleTaskCommunityScores(CountSampleTaskCommunityScoresCommand cmd);
 	CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd);
+
+	void updateSampleScoreStat();
 }

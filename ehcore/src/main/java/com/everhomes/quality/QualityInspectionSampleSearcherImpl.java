@@ -146,6 +146,10 @@ public class QualityInspectionSampleSearcherImpl extends AbstractElasticSearch i
         for(Long id : ids) {
             QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(id, cmd.getOwnerType(), cmd.getOwnerId());
             SampleTaskScoreDTO dto = ConvertHelper.convert(sample, SampleTaskScoreDTO.class);
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(dto.getCreatorUid());
+            if(members != null && members.size() > 0) {
+                dto.setCreatorName(members.get(0).getContactName());
+            }
             dtos.add(dto);
         }
         response.setSampleTasks(dtos);

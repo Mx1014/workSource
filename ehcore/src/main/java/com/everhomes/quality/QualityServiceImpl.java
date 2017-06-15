@@ -881,6 +881,10 @@ public class QualityServiceImpl implements QualityService {
 		Long startTime = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 
+
+
+
+
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
 		if(members == null || members.size() == 0) {
 			return new ArrayList<ExecuteGroupAndPosition>();
@@ -2811,7 +2815,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		List<TaskCountDTO> tasks = qualityProvider.countTasks(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId(), cmd.getStartTime(), cmd.getEndTime(),
-				offset, pageSize+1);
+				offset, pageSize+1, cmd.getSampleId());
 		
 		if(tasks != null && tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
@@ -3429,13 +3433,33 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountSampleTasksResponse countSampleTasks(CountSampleTasksCommand cmd) {
-		CountSampleTasksResponse response = new CountSampleTasksResponse();
 		QualityInspectionSampleScoreStat stat = qualityProvider.findQualityInspectionSampleScoreStat(cmd.getSampleId());
 		if(stat != null) {
-			response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
-			Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
-			response.setAverageScore(averageScore);
+			getNewestScoreStat(stat);
+		} else {
+			stat = new QualityInspectionSampleScoreStat();
+			stat.setNamespaceId(UserContext.getCurrentNamespaceId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(cmd.getSampleId());
+			if(communityMaps != null) {
+				stat.setCommunityCount(communityMaps.size());
+			} else {
+				stat.setCommunityCount(0);
+			}
+
+			stat.setOwnerId(cmd.getOwnerId());
+			stat.setOwnerType(cmd.getOwnerType());
+			stat.setSampleId(cmd.getSampleId());
+			stat.setTaskCount(0);
+			stat.setCorrectionCount(0);
+			stat.setDeductScore(0.0);
+			stat.setHighestScore(100.0);
+			stat.setLowestScore(100.0);
+
+			getNewestScoreStat(stat);
 		}
+		CountSampleTasksResponse response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
+		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
+		response.setAverageScore(averageScore);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
 			response.setName(sample.getName());
@@ -3529,6 +3553,7 @@ public class QualityServiceImpl implements QualityService {
 //	}
 
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat
+	@Override
 	public void updateSampleScoreStat() {
 		List<QualityInspectionSamples> samples = qualityProvider.listActiveQualityInspectionSamples(null);
 		if(samples != null && samples.size() > 0) {
@@ -3538,6 +3563,43 @@ public class QualityServiceImpl implements QualityService {
 				samplesMap.put(sample.getId(), sample);
 			});
 			List<Long> sampleIds = samples.stream().map(QualityInspectionSamples::getId).collect(Collectors.toList());
+			//查eh_quality_inspection_sample_community_specification_stat 没有的循环添加
+			Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> sampleCommunitySpecificationStat = qualityProvider.listCommunitySpecifitionStatBySampleId(sampleIds);
+			Map<Long, QualityInspectionSamples> unStatSamples = samplesMap;
+			if(sampleCommunitySpecificationStat != null && sampleCommunitySpecificationStat.size() > 0) {
+				sampleCommunitySpecificationStat.entrySet().forEach(scss -> {
+					unStatSamples.remove(scss.getKey());
+				});
+			}
+			if(unStatSamples != null && unStatSamples.size() > 0) {
+				unStatSamples.entrySet().forEach(unStatSample -> {
+					List<QualityInspectionSampleCommunityMap> scms = qualityProvider.findQualityInspectionSampleCommunityMapBySample(unStatSample.getKey());
+					if(scms != null && scms.size() > 0) {
+						scms.forEach(scm -> {
+							QualityInspectionSamples sample = unStatSample.getValue();
+//							查每个项目的第一级类型
+							List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+							List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
+							List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+							if(dtos != null && dtos.size() > 0) {
+								dtos.forEach(dto -> {
+									QualityInspectionSampleCommunitySpecificationStat scss = new QualityInspectionSampleCommunitySpecificationStat();
+									scss.setNamespaceId(sample.getNamespaceId());
+									scss.setOwnerId(sample.getOwnerId());
+									scss.setOwnerType(sample.getOwnerType());
+									scss.setSampleId(sample.getId());
+									scss.setCommunityId(scm.getCommunityId());
+									scss.setSpecificationId(dto.getId());
+									scss.setSpecificationPath(dto.getPath());
+									scss.setDeductScore(0.0);
+									qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(scss);
+								});
+							}
+						});
+					}
+				});
+			}
+
 			//查统计表
 			Map<Long, QualityInspectionSampleScoreStat> sampleScoreStatMaps = qualityProvider.getQualityInspectionSampleScoreStat(sampleIds);
 			if(sampleScoreStatMaps != null && sampleScoreStatMaps.size() > 0) {
@@ -3565,8 +3627,8 @@ public class QualityServiceImpl implements QualityService {
 					stat.setOwnerId(sample.getOwnerId());
 					stat.setSampleId(sampleId);
 					stat.setDeductScore(0.0);
-					stat.setHighestScore(0.0);
-					stat.setLowestScore(0.0);
+					stat.setHighestScore(100.0);
+					stat.setLowestScore(100.0);
 					if(communityMap != null && communityMap.size() > 0) {
 						stat.setCommunityCount(communityMap.size());
 					} else {
@@ -3643,8 +3705,8 @@ public class QualityServiceImpl implements QualityService {
 			scoreStat.setTaskCount(0);
 			scoreStat.setCorrectionCount(0);
 			scoreStat.setDeductScore(0.0);
-			scoreStat.setHighestScore(0.0);
-			scoreStat.setLowestScore(0.0);
+			scoreStat.setHighestScore(100.0);
+			scoreStat.setLowestScore(100.0);
 
 			getNewestScoreStat(scoreStat);
 		}

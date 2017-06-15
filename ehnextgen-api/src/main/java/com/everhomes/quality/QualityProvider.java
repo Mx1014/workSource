@@ -103,7 +103,7 @@ public interface QualityProvider {
 	List<QualityInspectionSpecifications> listChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Long parentId, Byte inspectionType);
 	List<QualityInspectionSpecifications> listAddAndModifyChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, List<Long> scopeIds, Long parentId, Byte inspectionType);
 
-	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count);
+	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count, Long sampleId);
 	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime, Long sampleId);
 	
 	void populateRecordItemResults(final List<QualityInspectionTaskRecords> records);
@@ -157,7 +157,7 @@ public interface QualityProvider {
 	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId);
 	List<QualityInspectionSpecificationItemResults> listSpecifitionItemResultsBySampleId(Long sampleId, Timestamp startTime, Timestamp endTime);
 	List<QualityInspectionTasks> listQualityInspectionTasksBySample(Long sampleId, Timestamp startTime, Timestamp endTime);
-	Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId);
+	Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> listCommunitySpecifitionStatBySampleId(List<Long> sampleIds);
 
 	List<QualityInspectionSamples> listActiveQualityInspectionSamples(Timestamp lastStatTime);
 	Map<Long, Double> listCommunityScore(Long sampleId);

@@ -17,6 +17,8 @@ import java.sql.Timestamp;
  *     <li>averageScore: 平均得分</li>
  *     <li>highestScore: 最高得分</li>
  *     <li>lowestScore: 最低得分</li>
+ *     <li>creatorUid: 创建人id</li>
+ *     <li>creatorName: 创建人姓名</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -43,6 +45,26 @@ public class SampleTaskScoreDTO {
     private Double highestScore;
 
     private Double lowestScore;
+
+    private Long creatorUid;
+
+    private String creatorName;
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
 
     public String getOwnerType() {
         return ownerType;

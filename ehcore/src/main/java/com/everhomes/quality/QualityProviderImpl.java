@@ -99,6 +99,7 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.quality.*;
+import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAssetBills;
@@ -222,6 +223,15 @@ public class QualityProviderImpl implements QualityProvider {
 		String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
 		scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
 				notifyCorn, QualityInspectionTaskNotifyScheduleJob.class, null);
+
+
+		String qualityInspectionStatTriggerName = "QualityInspectionStat ";
+		String statCorn = configurationProvider.getValue(ConfigConstants.QUALITY_STAT_CORN, "0 0 0 * * ? ");
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_STAT.getCode()).enter(()-> {
+			scheduleProvider.scheduleCronJob(qualityInspectionStatTriggerName, qualityInspectionStatTriggerName,
+					statCorn, QualityInspectionStatScheduleJob.class, null);
+			return null;
+		});
 	}
 
 	@Override
@@ -1827,7 +1837,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public List<TaskCountDTO> countTasks(String ownerType, Long ownerId,
 			String targetType, Long targetId, Long startTime, Long endTime,
-			int offset, int count) {
+			int offset, int count, Long sampleId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
 		
@@ -1848,7 +1858,10 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 //		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
-		
+		if(sampleId != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.PARENT_ID.eq(sampleId));
+		}
+
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
 		}
@@ -2579,15 +2592,22 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public Map<Long, QualityInspectionSampleCommunitySpecificationStat> listCommunitySpecifitionStatBySampleId(Long sampleId) {
+	public Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> listCommunitySpecifitionStatBySampleId(List<Long> sampleIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionSampleCommunitySpecificationStatRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT);
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.eq(sampleId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.in(sampleIds));
 
 
-		Map<Long, QualityInspectionSampleCommunitySpecificationStat> result = new HashMap<>();
+		Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> result = new HashMap<>();
 		query.fetch().map((r) -> {
-			result.put(r.getCommunityId(), ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
+			if(result.get(r.getSampleId()) == null) {
+				List<QualityInspectionSampleCommunitySpecificationStat> stat = new ArrayList<>();
+				stat.add(ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
+				result.put(r.getSampleId(), stat);
+			} else {
+				result.get(r.getSampleId()).add(ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
+				result.put(r.getSampleId(), result.get(r.getSampleId()));
+			}
 			return null;
 		});
 
