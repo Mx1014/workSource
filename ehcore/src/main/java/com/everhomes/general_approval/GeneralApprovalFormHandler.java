@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
@@ -34,29 +35,25 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         PostApprovalFormCommand cmd2 = JSONObject.parseObject(json, PostApprovalFormCommand.class);
         cmd2.setApprovalId(cmd.getSourceId());
         cmd2.setValues(cmd.getValues());
-//        for (PostApprovalFormItem item: cmd.getValues()) {
-//            switch (GeneralFormDataSourceType.fromCode(item.getFieldName())) {
-//                case USER_NAME:
-//                    cmd2.setApplyUserName(item.getFieldValue());
-//                    break;
-//                case USER_PHONE:
-//                    cmd2.setContactPhone(item.getFieldValue());
-//                    break;
-//                case USER_COMPANY:
-//                    //工作流images怎么传
-//                    cmd2.setEnterpriseName(item.getFieldValue());
-//                    break;
-//                case ORGANIZATION_ID:
-//
-//                    break;
-//                case USER_ADDRESS:
-//                    break;
-//
-//            }
-//        }
+        for (PostApprovalFormItem item: cmd.getValues()) {
+            GeneralFormDataSourceType sourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
+            if (null != sourceType) {
+                switch (sourceType) {
+                    case CUSTOM_DATA:
+                        json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                }
+            }
+
+        }
 
         GetTemplateByApprovalIdResponse response = generalApprovalService.postApprovalForm(cmd2);
-        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(JSONObject.toJSONString(response));
 //        dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
     }
@@ -92,6 +89,17 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
         organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
         organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        fieldDTOs.add(organizationIdField);
+
+        organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        organizationIdField.setFieldValue(JSONObject.toJSONString(ga));
         fieldDTOs.add(organizationIdField);
 
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);

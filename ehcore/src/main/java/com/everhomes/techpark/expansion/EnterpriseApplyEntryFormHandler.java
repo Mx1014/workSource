@@ -11,6 +11,7 @@ import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -38,40 +39,69 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
 
-        String json = null;
+        List<PostApprovalFormItem> values = cmd.getValues();
 
-        EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
-        cmd2.setRequestFormId(request.getSourceId());
-        cmd2.setNamespaceId(cmd.getNamespaceId());
-        cmd2.setCommunityId(cmd.getOwnerId());
-        cmd2.setFormValues(cmd.getValues());
-        for (PostApprovalFormItem item: cmd.getValues()) {
+        String json = null;
+        String applyUserName = null;
+        String contactPhone = null;
+        String enterpriseName = null;
+        String description = null;
+
+        for (PostApprovalFormItem item: values) {
             GeneralFormDataSourceType dataSourceType = GeneralFormDataSourceType.fromCode(item.getFieldName());
+
+            LeasePromotionFormDataSourceType rentSourceType = LeasePromotionFormDataSourceType.fromCode(item.getFieldName());
             if (null != dataSourceType) {
                 switch (dataSourceType) {
                     case USER_NAME:
-                        cmd2.setApplyUserName(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                        applyUserName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                     case USER_PHONE:
-                        cmd2.setContactPhone(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                        contactPhone = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
                     case USER_COMPANY:
                         //工作流images怎么传
-                        cmd2.setEnterpriseName(JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText());
+                        enterpriseName = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
                         break;
-                    case ORGANIZATION_ID:
+                    case CUSTOM_DATA:
+                        json = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
+                }
+            }
 
+            if (null != rentSourceType) {
+                switch (rentSourceType) {
+                    case LEASE_PROMOTION_BUILDING:
                         break;
-                    case USER_ADDRESS:
+                    case LEASE_PROMOTION_APARTMENT:
                         break;
-
+                    case LEASE_PROMOTION_DESCRIPTION:
+                        description = JSON.parseObject(item.getFieldValue(), PostApprovalFormTextValue.class).getText();
+                        break;
                 }
             }
 
         }
 
+        EnterpriseApplyEntryCommand cmd2 = JSONObject.parseObject(json, EnterpriseApplyEntryCommand.class);
+        cmd2.setApplyUserName(applyUserName);
+        cmd2.setContactPhone(contactPhone);
+        cmd2.setEnterpriseName(enterpriseName);
+        cmd2.setDescription(description);
+
+        cmd2.setRequestFormId(request.getSourceId());
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        cmd2.setCommunityId(cmd.getOwnerId());
+        cmd2.setFormValues(cmd.getValues());
+
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
-        PostGeneralFormDTO dto = new PostGeneralFormDTO();
+        PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
+
+        PostApprovalFormItem item = new PostApprovalFormItem();
+        item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        item.setFieldValue(JSONObject.toJSONString(response));
+
 //        dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
     }
@@ -153,27 +183,51 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         dtos.add(organizationIdField);
 
         organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.USER_ADDRESS.getCode());
-        organizationIdField.setFieldDisplayName("楼栋门牌");
+        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_BUILDING.getCode());
+        organizationIdField.setFieldDisplayName("楼栋名称");
         organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
         organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
         organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
         organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.USER_ADDRESS.getCode());
+        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_BUILDING.getCode());
         organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
         organizationIdField.setFieldExtra("{\"limitWord\":20}");
         dtos.add(organizationIdField);
 
         organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName("description");
-        organizationIdField.setFieldDisplayName("备注说明");
-        organizationIdField.setFieldType(GeneralFormFieldType.MULTI_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NONEED.getCode());
+        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_APARTMENT.getCode());
+        organizationIdField.setFieldDisplayName("门牌号码");
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
         organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
         organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
         organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_APARTMENT.getCode());
         organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
+        organizationIdField.setFieldExtra("{\"limitWord\":20}");
+        dtos.add(organizationIdField);
+
+        organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_DESCRIPTION.getCode());
+        organizationIdField.setFieldDisplayName("备注说明");
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NONEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_DESCRIPTION.getCode());
+        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
+        dtos.add(organizationIdField);
+
+        organizationIdField = new GeneralFormFieldDTO();
+        organizationIdField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
+        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        organizationIdField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
         dtos.add(organizationIdField);
 
         return dtos;
