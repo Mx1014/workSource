@@ -3747,8 +3747,8 @@ public class QualityServiceImpl implements QualityService {
 			lastTime = sampleScoreStat.getUpdateTime();
 		}
 		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId(), lastTime, new Timestamp(System.currentTimeMillis()));
+		List<Double> scoreList = new ArrayList<>();
 		if(itemResults != null && itemResults.size() > 0) {
-			List<Double> scoreList = new ArrayList<>();
 			itemResults.forEach(itemResult -> {
 				String specificationPath = itemResult.getSpecificationPath();
 				specificationPath = specificationPath.substring(1,specificationPath.length());
@@ -3761,33 +3761,34 @@ public class QualityServiceImpl implements QualityService {
 					specificationScore.put(rootSpecification, itemResult.getTotalScore());
 				}
 			});
-
-			specificationScore.entrySet().forEach(score -> {
-				scoreList.add(score.getValue());
-			});
-			Double totalScore = 0.0;
-			for(Double score : scoreList) {
-				totalScore = totalScore + score;
-			}
-
-			Double totaldeducted = totalScore;
-			if(specificationScore != null && specificationScore.size() > 0) {
-				specificationScore.entrySet().forEach(map -> {
-					Long specificationId = map.getKey();
-					Double deductedScore = map.getValue();
-					QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId());
-					SpecificationItemScores score = new SpecificationItemScores();
-					score.setSpecificationId(specificationId);
-					score.setSpecificationDeducted(deductedScore);
-					score.setSpecificationDeductedProportion(deductedScore/totaldeducted);
-					if(specification != null) {
-						score.setSpecificationName(specification.getName());
-					}
-
-					itemScores.add(score);
-				});
-			}
 		}
+
+		specificationScore.entrySet().forEach(score -> {
+			scoreList.add(score.getValue());
+		});
+		Double totalScore = 0.0;
+		for(Double score : scoreList) {
+			totalScore = totalScore + score;
+		}
+
+		Double totaldeducted = totalScore;
+		if(specificationScore != null && specificationScore.size() > 0) {
+			specificationScore.entrySet().forEach(map -> {
+				Long specificationId = map.getKey();
+				Double deductedScore = map.getValue();
+				QualityInspectionSpecifications specification = qualityProvider.findSpecificationById(specificationId, cmd.getOwnerType(), cmd.getOwnerId());
+				SpecificationItemScores score = new SpecificationItemScores();
+				score.setSpecificationId(specificationId);
+				score.setSpecificationDeducted(deductedScore);
+				score.setSpecificationDeductedProportion(deductedScore/totaldeducted);
+				if(specification != null) {
+					score.setSpecificationName(specification.getName());
+				}
+
+				itemScores.add(score);
+			});
+		}
+
 		response.setItemScores(itemScores);
 		return response;
 	}
