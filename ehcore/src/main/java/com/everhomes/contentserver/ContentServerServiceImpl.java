@@ -362,10 +362,14 @@ public class ContentServerServiceImpl implements ContentServerService {
                 try {
                     ContentServer server = selectContentServer();
                     port = server.getPublicPort();
+
                 } catch (Exception e) {
                     LOGGER.error("Get scheme. Failed to find content server", e);
                     return null;
                 }
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getScheme using port = {}", port);
             }
             if(80 == port || 443 == port){
                 return HTTPS;
@@ -390,7 +394,11 @@ public class ContentServerServiceImpl implements ContentServerService {
             // https 默认端口443 by sfyan 20161226
             Integer port = server.getPublicPort();
 
-            if(getScheme(port).equals(HTTPS)){
+            String scheme = getScheme(port);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getContentServer getScheme schema = {}", scheme);
+            }
+            if(scheme.equals(HTTPS)){
                 port = 443;
             }
             return String.format("%s:%d",server.getPublicAddress(),port);
