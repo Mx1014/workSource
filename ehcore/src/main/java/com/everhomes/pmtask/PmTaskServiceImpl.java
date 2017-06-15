@@ -1905,9 +1905,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
 						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						dto.setOrganizationId(o.getId());
-						dto.setDisplayName(o.getName());
-						dto.setAddressId(address.getId());
+						if(dto != null) {
+							dto.setOrganizationId(o.getId());
+							dto.setDisplayName(o.getName());
+							dto.setAddressId(address.getId());
+						}
 						return dto;
 					}).collect(Collectors.toList());
 
