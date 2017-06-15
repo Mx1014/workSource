@@ -66,6 +66,8 @@ public class OrganizationMemberBasicDTO {
 
     private Date checkInTime;
 
+    private Date employmentTime;
+
     private Byte contactType;
     private String contactToken;
 
@@ -183,6 +185,14 @@ public class OrganizationMemberBasicDTO {
 
     public void setCheckInTime(Date checkInTime) {
         this.checkInTime = checkInTime;
+    }
+
+    public Date getEmploymentTime() {
+        return employmentTime;
+    }
+
+    public void setEmploymentTime(Date employmentTime) {
+        this.employmentTime = employmentTime;
     }
 
     public Byte getContactType() {
