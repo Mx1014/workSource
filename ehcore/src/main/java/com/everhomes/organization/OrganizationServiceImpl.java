@@ -6385,7 +6385,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 
         List<String> groupTypes = new ArrayList<>();
-        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        //只过滤onNode的记录，排除掉belongTo在公司下的记录
+        groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
 
