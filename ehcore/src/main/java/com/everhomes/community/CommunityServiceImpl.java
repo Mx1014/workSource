@@ -19,6 +19,7 @@ import com.everhomes.rest.community.*;
 import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
@@ -728,6 +729,8 @@ public class CommunityServiceImpl implements CommunityService {
 		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
 		cmd.setSourceType(EntityType.BUILDING.getCode());
 		cmd.setSourceId(building.getId());
+		cmd.setOriginFieldNameFlag(NormalFlag.NEED.getCode());
+
 		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 		building.setFormValues(formValues);
 

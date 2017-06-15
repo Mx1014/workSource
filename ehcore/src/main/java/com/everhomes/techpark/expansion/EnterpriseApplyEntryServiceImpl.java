@@ -21,6 +21,7 @@ import com.everhomes.rest.flow.*;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.UserIdentifier;
@@ -775,6 +776,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
 			cmd.setSourceType(EntityType.LEASEPROMOTION.getCode());
 			cmd.setSourceId(dto.getId());
+			cmd.setOriginFieldNameFlag(NormalFlag.NEED.getCode());
 			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 			dto.setFormValues(formValues);
 

@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字</li>
+ * <li>fieldDisplayName: 字段展示名字</li>
  * <li>fieldValue: 提交的数据
  * 数字值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 文本值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
@@ -20,7 +21,16 @@ public class PostApprovalFormItem {
 	private String fieldType;
 	private String fieldName;
 	private String fieldValue;
-	
+	private String fieldDisplayName;
+
+	public String getFieldDisplayName() {
+		return fieldDisplayName;
+	}
+
+	public void setFieldDisplayName(String fieldDisplayName) {
+		this.fieldDisplayName = fieldDisplayName;
+	}
+
 	public String getFieldType() {
 		return fieldType;
 	}

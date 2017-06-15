@@ -97,11 +97,14 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         ApplyEntryResponse response = enterpriseApplyEntryService.applyEntry(cmd2);
         PostGeneralFormDTO dto = ConvertHelper.convert(cmd, PostGeneralFormDTO.class);
 
+        List<PostApprovalFormItem> items = new ArrayList<>();
         PostApprovalFormItem item = new PostApprovalFormItem();
         item.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
         item.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
         item.setFieldValue(JSONObject.toJSONString(response));
 
+        items.add(item);
+        dto.setValues(items);
 //        dto.setCustomObject(JSONObject.toJSONString(response));
         return dto;
     }
