@@ -9910,10 +9910,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberBasicDTO memberDTO = ConvertHelper.convert(memberDetails, OrganizationMemberBasicDTO.class);
 
             //  计算在职天数
-            Date date = new Date();
-            java.sql.Date nowDate = new java.sql.Date(date.getTime());
-            Long workingDays = ((nowDate.getTime() - memberDetails.getCheckInTime().getTime()) / (24 * 60 * 60 * 1000));
+            Long workingDays = ((new Timestamp(DateHelper.currentGMTTime().getTime()).getTime() - memberDetails.getCheckInTime().getTime()) / (24 * 60 * 60 * 1000));
             memberDTO.setWorkingDays(workingDays);
+
 
             Long orgId;
             Organization org = this.checkOrganization(memberDTO.getOrganizationId());
