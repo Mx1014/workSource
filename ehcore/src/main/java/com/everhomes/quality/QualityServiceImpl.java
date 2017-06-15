@@ -146,6 +146,9 @@ public class QualityServiceImpl implements QualityService {
 
 	@Autowired
 	private QualityTaskSearcher taskSearcher;
+
+	@Autowired
+	private ConfigurationProvider configProvider;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -3328,20 +3331,52 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionTasksResponse listSampleQualityInspectionTasks(ListSampleQualityInspectionTasksCommand cmd) {
 		SearchQualityTasksCommand command = ConvertHelper.convert(cmd, SearchQualityTasksCommand.class);
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Long anchor = 0l;
+		if(cmd.getPageAnchor() != null) {
+			anchor = cmd.getPageAnchor();
+		}
 		command.setTargetId(cmd.getCommunityId());
 		command.setTargetName(cmd.getCommunityName());
-		ListQualityInspectionTasksResponse tasks = taskSearcher.query(command);
+		command.setPageSize(pageSize);
+		command.setPageAnchor(anchor);
+		List<Long> taskIds = taskSearcher.query(command);
 
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+		if(taskIds.size() > pageSize) {
+            response.setNextPageAnchor(anchor + 1);
+			taskIds.remove(taskIds.size() - 1);
+        }
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+		for(QualityInspectionTasks task : tasks) {
+			QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+			if(record != null) {
+				task.setRecord(record);
+				records.add(task.getRecord());
+			}
+
+		}
+
+		this.qualityProvider.populateRecordAttachments(records);
+		this.qualityProvider.populateRecordItemResults(records);
+
+		for(QualityInspectionTaskRecords record : records) {
+			populateRecordAttachements(record, record.getAttachments());
+		}
+
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, UserContext.current().getUser().getId());
+		response.setTasks(dtoList);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
-			tasks.setSampleName(sample.getName());
-			tasks.setStartTime(sample.getStartTime());
-			tasks.setEndTime(sample.getEndTime());
+			response.setSampleName(sample.getName());
+			response.setStartTime(sample.getStartTime());
+			response.setEndTime(sample.getEndTime());
 		}
 
 		Integer communityCount = qualityProvider.getSampleCommunities(cmd.getSampleId());
-		tasks.setCommunityCount(communityCount);
-		return tasks;
+		response.setCommunityCount(communityCount);
+		return response;
 	}
 
 	@Override

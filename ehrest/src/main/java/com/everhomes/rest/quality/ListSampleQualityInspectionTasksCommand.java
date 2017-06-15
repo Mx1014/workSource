@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
  *     <li>communityName: 项目名称</li>
  *     <li>executorName: 执行人姓名</li>
  *     <li>executeStatus: 执行状态 参考{@link com.everhomes.rest.quality.QualityInspectionTaskStatus}</li>
+ *      <li>pageAnchor: 锚点</li>
+ *      <li>pageSize: 页面大小</li>
  * </ul>
  * Created by ying.xiong on 2017/6/2.
  */
@@ -33,6 +35,26 @@ public class ListSampleQualityInspectionTasksCommand {
     private String executorName;
 
     private Byte executeStatus;
+
+    private Long pageAnchor;
+
+    private Integer pageSize;
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
 
     public Long getCommunityId() {
         return communityId;

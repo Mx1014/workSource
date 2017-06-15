@@ -106,7 +106,7 @@ public class QualityTaskSearcherImpl extends AbstractElasticSearch implements Qu
     }
 
     @Override
-    public ListQualityInspectionTasksResponse query(SearchQualityTasksCommand cmd) {
+    public List<Long> query(SearchQualityTasksCommand cmd) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         QueryBuilder qb = null;
         if(cmd.getTargetName() == null || cmd.getTargetName().isEmpty()) {
@@ -179,37 +179,37 @@ public class QualityTaskSearcherImpl extends AbstractElasticSearch implements Qu
             LOGGER.info("quality task searcher query rsp ："+rsp);
         }
         List<Long> ids = getIds(rsp);
-        ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
-
-        if(ids.size() > pageSize) {
-            response.setNextPageAnchor(anchor + 1);
-            ids.remove(ids.size() - 1);
-        }
-
-        List<QualityInspectionTaskDTO> dtos = new ArrayList<QualityInspectionTaskDTO>();
-        for(Long id : ids) {
-            QualityInspectionTasks task = qualityProvider.findVerificationTaskById(id);
-            if(task != null) {
-                QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
-                Community community = communityProvider.findCommunityById(dto.getTargetId());
-                if(community != null)
-                    dto.setTargetName(community.getName());
-
-                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
-                if(executors != null && executors.size() > 0) {
-                    dto.setExecutorName(executors.get(0).getContactName());
-                }
-
-                QualityInspectionSpecifications category = qualityProvider.findSpecificationById(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
-                if(category != null) {
-                    dto.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
-                }
-                dtos.add(dto);
-            }
-        }
-        LOGGER.info("query quality task: {}", dtos);
-        response.setTasks(dtos);
-        return response;
+//        ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+//
+//        if(ids.size() > pageSize) {
+//            response.setNextPageAnchor(anchor + 1);
+//            ids.remove(ids.size() - 1);
+//        }
+//
+//        List<QualityInspectionTaskDTO> dtos = new ArrayList<QualityInspectionTaskDTO>();
+//        for(Long id : ids) {
+//            QualityInspectionTasks task = qualityProvider.findVerificationTaskById(id);
+//            if(task != null) {
+//                QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
+//                Community community = communityProvider.findCommunityById(dto.getTargetId());
+//                if(community != null)
+//                    dto.setTargetName(community.getName());
+//
+//                List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+//                if(executors != null && executors.size() > 0) {
+//                    dto.setExecutorName(executors.get(0).getContactName());
+//                }
+//
+//                QualityInspectionSpecifications category = qualityProvider.findSpecificationById(dto.getCategoryId(), dto.getOwnerType(), dto.getOwnerId());
+//                if(category != null) {
+//                    dto.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
+//                }
+//                dtos.add(dto);
+//            }
+//        }
+//        LOGGER.info("query quality task: {}", dtos);
+//        response.setTasks(dtos);
+        return ids;
     }
 
     private String getSpecificationNamePath(String path, String ownerType, Long ownerId) {

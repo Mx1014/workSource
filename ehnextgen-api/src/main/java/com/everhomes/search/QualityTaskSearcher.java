@@ -15,5 +15,5 @@ public interface QualityTaskSearcher {
     void bulkUpdate(List<QualityInspectionTasks> tasks);
     void feedDoc(QualityInspectionTasks task);
     void syncFromDb();
-    ListQualityInspectionTasksResponse query(SearchQualityTasksCommand cmd);
+    List<Long> query(SearchQualityTasksCommand cmd);
 }
