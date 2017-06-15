@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -232,6 +233,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private OrderUtil commonOrderUtil;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private Rentalv2PriceRuleProvider rentalv2PriceRuleProvider;
 
 	/**cellList : 当前线程用到的单元格 */
 	private static ThreadLocal<List<RentalCell>> cellList = new ThreadLocal<List<RentalCell>>() {
@@ -406,6 +409,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				setRentalRuleTimeIntervals(RentalTimeIntervalOwnerType.DEFAULT_HALF_DAY.getCode(), defaultRule.getId(), cmd.getTimeIntervals());
 			}
 
+			createPriceRules(PriceRuleType.DEFAULT, defaultRule.getId(), cmd.getPriceRules());
+			
 			//close dates
 			setRentalRuleCloseDates(cmd.getCloseDates(), defaultRule.getId(), EhRentalv2DefaultRules.class.getSimpleName());
 
@@ -414,6 +419,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
+	}
+
+	private void createPriceRules(PriceRuleType priceRuleType, Long ruleId, List<PriceRuleDTO> priceRules) {
+		if (priceRules != null && !priceRules.isEmpty()) {
+			priceRules.forEach(p->createPriceRule(priceRuleType, ruleId, p));
+		}
+	}
+	
+	private void createPriceRule(PriceRuleType priceRuleType, Long ruleId, PriceRuleDTO priceRule) {
+		Rentalv2PriceRule rentalv2PriceRule = ConvertHelper.convert(priceRule, Rentalv2PriceRule.class);
+		rentalv2PriceRule.setOwnerType(priceRuleType.getCode());
+		rentalv2PriceRule.setOwnerId(ruleId);
+		rentalv2PriceRuleProvider.createRentalv2PriceRule(rentalv2PriceRule);
 	}
 
 	private String convertOpenWeekday(List<Integer> openWeekdays) {
@@ -450,63 +468,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public QueryDefaultRuleAdminResponse queryDefaultRule(QueryDefaultRuleAdminCommand cmd){
-
-		RentalDefaultRule defaultRule = this.rentalv2Provider
-				.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceTypeId());
-		QueryDefaultRuleAdminResponse response;
+		RentalDefaultRule defaultRule = this.rentalv2Provider.getRentalDefaultRule(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getResourceTypeId());
 
 		if(null == defaultRule){
-			AddDefaultRuleAdminCommand addCmd = new AddDefaultRuleAdminCommand();
-	        addCmd.setOwnerType(cmd.getOwnerType());
-	        addCmd.setOwnerId(cmd.getOwnerId());
-	        addCmd.setResourceTypeId(cmd.getResourceTypeId());
-	        addCmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
-	        addCmd.setUnit(1.0);
-	        addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
-	        addCmd.setMultiUnit(NormalFlag.NEED.getCode());
-	        addCmd.setNeedPay(NormalFlag.NEED.getCode());
-	        addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
-	        addCmd.setAttachments(new ArrayList<>());
-	        AttachmentConfigDTO attachment = new AttachmentConfigDTO();
-			attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
-			attachment.setMustOptions(NormalFlag.NONEED.getCode());
-	        addCmd.getAttachments().add(attachment);
-	        addCmd.setRentalType(RentalType.DAY.getCode());
-
-// 			addCmd.setTimeStep(1.0);
-//	        cmd.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
-	        addCmd.setBeginDate(new java.util.Date().getTime());
-	        //当前时间+100天
-	        addCmd.setEndDate(new java.util.Date().getTime()+1000*60*60*24*100L);
-	        addCmd.setOpenWeekday(new ArrayList<>());
-	        addCmd.getOpenWeekday().add(1);
-	        addCmd.getOpenWeekday().add(2);
-	        addCmd.getOpenWeekday().add(3);
-	        addCmd.getOpenWeekday().add(4);
-	        addCmd.setCloseDates(null);
-	        addCmd.setWorkdayPrice(new BigDecimal(0));
-	        addCmd.setWeekendPrice(new BigDecimal(0));
-	        addCmd.setSiteCounts(1.0);
-	        addCmd.setCancelTime(0L);
-	        addCmd.setRefundFlag(NormalFlag.NEED.getCode());
-	        addCmd.setRefundRatio(30);
-
-			addCmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
-			addCmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
-			//默认不开启
-			addCmd.setRentalEndTime(0L);
-			addCmd.setRentalStartTime(0L);
-
-			addCmd.setApprovingUserWeekendPrice(new BigDecimal(0));
-			addCmd.setApprovingUserWorkdayPrice(new BigDecimal(0));
-			addCmd.setOrgMemberWeekendPrice(new BigDecimal(0));
-			addCmd.setOrgMemberWorkdayPrice(new BigDecimal(0));
-			this.addDefaultRule(addCmd);
-
-			response = ConvertHelper.convert(addCmd, QueryDefaultRuleAdminResponse.class);
-			return response;
+			return addDefaultRule(cmd);
 		} 
-		response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
+		QueryDefaultRuleAdminResponse response = convert(defaultRule);
 		response.setSiteCounts(defaultRule.getResourceCounts());
 		if(null != defaultRule.getBeginDate())
 			response.setBeginDate(defaultRule.getBeginDate().getTime());
@@ -517,6 +484,73 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		populateRentalRule(response, EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId());
 
 		return response;
+	}
+	
+	private QueryDefaultRuleAdminResponse convert(RentalDefaultRule defaultRule) {
+		QueryDefaultRuleAdminResponse response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.DEFAULT.getCode(), defaultRule.getId());
+		response.setPriceRules(priceRules.stream().map(this::convert).collect(Collectors.toList()));
+		response.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
+		return response;
+	}
+	
+	private PriceRuleDTO convert(Rentalv2PriceRule priceRule) {
+		return ConvertHelper.convert(priceRule, PriceRuleDTO.class);
+	}
+
+	private QueryDefaultRuleAdminResponse addDefaultRule(QueryDefaultRuleAdminCommand cmd) {
+		AddDefaultRuleAdminCommand addCmd = new AddDefaultRuleAdminCommand();
+        addCmd.setOwnerType(cmd.getOwnerType());
+        addCmd.setOwnerId(cmd.getOwnerId());
+        addCmd.setResourceTypeId(cmd.getResourceTypeId());
+        addCmd.setExclusiveFlag(NormalFlag.NONEED.getCode());
+        addCmd.setUnit(1.0);
+        addCmd.setAutoAssign(NormalFlag.NONEED.getCode());
+        addCmd.setMultiUnit(NormalFlag.NEED.getCode());
+        addCmd.setNeedPay(NormalFlag.NEED.getCode());
+        addCmd.setMultiTimeInterval(NormalFlag.NEED.getCode());
+        addCmd.setAttachments(new ArrayList<>());
+        AttachmentConfigDTO attachment = new AttachmentConfigDTO();
+		attachment.setAttachmentType(AttachmentType.ATTACHMENT.getCode());
+		attachment.setMustOptions(NormalFlag.NONEED.getCode());
+        addCmd.getAttachments().add(attachment);
+
+//			addCmd.setTimeStep(1.0);
+//        cmd.setTimeIntervals(new ArrayList<TimeIntervalDTO>());
+        addCmd.setBeginDate(new java.util.Date().getTime());
+        //当前时间+100天
+        addCmd.setEndDate(new java.util.Date().getTime()+1000*60*60*24*100L);
+        addCmd.setOpenWeekday(new ArrayList<>());
+        addCmd.getOpenWeekday().add(1);
+        addCmd.getOpenWeekday().add(2);
+        addCmd.getOpenWeekday().add(3);
+        addCmd.getOpenWeekday().add(4);
+        addCmd.setCloseDates(null);
+        addCmd.setSiteCounts(1.0);
+        addCmd.setCancelTime(0L);
+        addCmd.setRefundFlag(NormalFlag.NEED.getCode());
+        addCmd.setRefundRatio(30);
+
+		addCmd.setRentalStartTimeFlag(NormalFlag.NONEED.getCode());
+		addCmd.setRentalEndTimeFlag(NormalFlag.NONEED.getCode());
+		//默认不开启
+		addCmd.setRentalEndTime(0L);
+		addCmd.setRentalStartTime(0L);
+
+		PriceRuleDTO priceRuleDTO = new PriceRuleDTO();
+		priceRuleDTO.setRentalType(RentalType.DAY.getCode());
+		priceRuleDTO.setWorkdayPrice(new BigDecimal(0));
+		priceRuleDTO.setWeekendPrice(new BigDecimal(0));
+		priceRuleDTO.setApprovingUserWeekendPrice(new BigDecimal(0));
+		priceRuleDTO.setApprovingUserWorkdayPrice(new BigDecimal(0));
+		priceRuleDTO.setOrgMemberWeekendPrice(new BigDecimal(0));
+		priceRuleDTO.setOrgMemberWorkdayPrice(new BigDecimal(0));
+		addCmd.setPriceRules(Arrays.asList(priceRuleDTO));
+		addCmd.setRentalTypes(Arrays.asList(RentalType.DAY.getCode()));
+		
+		this.addDefaultRule(addCmd);
+
+		return ConvertHelper.convert(addCmd, QueryDefaultRuleAdminResponse.class);
 	}
 
 	private void populateRentalRule(QueryDefaultRuleAdminResponse response, String ownerType, Long ownerId) {
@@ -659,6 +693,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			newDefaultRule.setResourceCounts(cmd.getSiteCounts());
 			this.rentalv2Provider.updateRentalDefaultRule(newDefaultRule);
 
+			
+			
 			//先删除
 			rentalv2Provider.deleteRentalResourceNumbersByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(), defaultRule.getId());
 			//set site number

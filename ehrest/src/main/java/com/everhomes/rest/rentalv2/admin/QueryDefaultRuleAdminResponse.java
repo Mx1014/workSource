@@ -113,6 +113,18 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
+	public List<Byte> getRentalTypes() {
+		return rentalTypes;
+	}
+	public void setRentalTypes(List<Byte> rentalTypes) {
+		this.rentalTypes = rentalTypes;
+	}
+	public List<PriceRuleDTO> getPriceRules() {
+		return priceRules;
+	}
+	public void setPriceRules(List<PriceRuleDTO> priceRules) {
+		this.priceRules = priceRules;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
