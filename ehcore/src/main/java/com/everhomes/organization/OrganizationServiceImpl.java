@@ -10499,14 +10499,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         detail.setContactName(member.getContactName());
         detail.setContactToken(member.getContactToken());
         detail.setContactDescription(member.getContactDescription());
-        detail.setEmployeeNo(member.getEmployeeNo());
+        detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
         detail.setAvatar(member.getAvatar());
         detail.setGender(member.getGender());
         detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
         detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
         detail.setProfileIntegrity(member.getProfileIntegrity());
         detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
-        detail.setEmployeeNo(member.getEmployeeNo());
         detail.setEmployeeType(member.getEmployeeType());
 
         return detail;
