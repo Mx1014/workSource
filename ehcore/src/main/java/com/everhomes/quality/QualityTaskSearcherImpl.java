@@ -129,8 +129,8 @@ public class QualityTaskSearcherImpl extends AbstractElasticSearch implements Qu
         if(cmd.getTargetId() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetId", cmd.getTargetId()));
 
-//        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
-//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
+        if(!StringUtils.isNullOrEmpty(cmd.getTargetType()))
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("targetType", OwnerType.fromCode(cmd.getTargetType()).getCode()));
 
         if(cmd.getExecuteStatus() != null)
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getExecuteStatus()));
