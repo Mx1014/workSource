@@ -400,7 +400,7 @@ public class QualityProviderImpl implements QualityProvider {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
-//		List<QualityInspectionSamples> samples  = new ArrayList<>();
+		List<QualityInspectionSamples> samples  = new ArrayList<>();
 		SelectQuery<EhQualityInspectionSamplesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLES);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.STATUS.in(Status.ACTIVE.getCode()));
 		if(locator.getAnchor() != null) {
@@ -418,10 +418,8 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.OWNER_TYPE.eq(ownerType));
 		}
 
-		Condition con = Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId);
-		con.and(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID));
-		query.addJoin(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP, con);
-
+		query.addJoin(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP, Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.desc());
 		query.addLimit(count);
 
@@ -429,10 +427,14 @@ public class QualityProviderImpl implements QualityProvider {
 			LOGGER.debug("Query samples by count, sql=" + query.getSQL());
 			LOGGER.debug("Query samples by count, bindValues=" + query.getBindValues());
 		}
-		return query.fetchInto(QualityInspectionSamples.class);
+
+		List<EhQualityInspectionSamplesRecord> records = query.fetch().map(new QualityInspectionSamplesRecordMapper());
+		records.forEach((r) -> {
+			samples.add(ConvertHelper.convert(r, QualityInspectionSamples.class));
+		});
 //		return query.fetch().map(new DefaultRecordMapper(Tables.EH_QUALITY_INSPECTION_SAMPLES.recordType(), QualityInspectionSamples.class));
 
-//		return samples;
+		return samples;
 	}
 
 	@Override
@@ -2608,6 +2610,22 @@ public class QualityProviderImpl implements QualityProvider {
 				result.get(r.getSampleId()).add(ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
 				result.put(r.getSampleId(), result.get(r.getSampleId()));
 			}
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public List<QualityInspectionSampleCommunitySpecificationStat> listSampleCommunitySpecifitionStat(Long sampleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSampleCommunitySpecificationStatRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.SAMPLE_ID.eq(sampleId));
+
+
+		List<QualityInspectionSampleCommunitySpecificationStat> result = new ArrayList<>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSampleCommunitySpecificationStat.class));
 			return null;
 		});
 

@@ -3717,6 +3717,7 @@ public class QualityServiceImpl implements QualityService {
 	public CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd) {
 		CountSampleTaskSpecificationItemScoresResponse response = new CountSampleTaskSpecificationItemScoresResponse();
 		List<SpecificationItemScores> itemScores = new ArrayList<>();
+		123
 		List<QualityInspectionSpecificationItemResults> itemResults = qualityProvider.listSpecifitionItemResultsBySampleId(cmd.getSampleId());
 		if(itemResults != null && itemResults.size() > 0) {
 			Map<Long, Double> scoreMap = new HashMap<>();
