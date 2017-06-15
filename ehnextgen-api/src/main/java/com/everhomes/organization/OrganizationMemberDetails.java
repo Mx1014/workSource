@@ -25,7 +25,7 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
 
 
     public OrganizationMemberDetails(OrganizationMember member) {
-        java.util.Date nDate = new java.util.Date();
+/*        java.util.Date nDate = new java.util.Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
@@ -48,10 +48,10 @@ public class OrganizationMemberDetails extends EhOrganizationMemberDetails {
         this.setEmployeeNo(member.getEmployeeNo());
         this.setAvatar(member.getAvatar());
         this.setGender(member.getGender());
-        this.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
-        this.setEmploymentTime(member.getEmploymentTime()!= null ? member.getCheckInTime() : now);
-        this.setProfileIntegrity(member.getProfileIntegrity());
         this.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
+        this.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
+        this.setEmploymentTime(member.getEmploymentTime()!= null ? member.getEmploymentTime() : member.getCheckInTime());
+        this.setProfileIntegrity(member.getProfileIntegrity());*/
     }
 
     public String getTargetType() {
