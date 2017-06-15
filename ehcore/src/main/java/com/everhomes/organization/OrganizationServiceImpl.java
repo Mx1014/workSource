@@ -10418,8 +10418,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             result.setBasicIntegrity(0);
         else if (response.getBasic().getGender() == null)
             result.setBasicIntegrity(0);
-        else if (response.getBasic().getAvatar() == null)
-            result.setBasicIntegrity(0);
         else if (response.getBasic().getDepartments().size() <= 0)
             result.setBasicIntegrity(0);
         else if (response.getBasic().getJobPositions().size() <= 0)
