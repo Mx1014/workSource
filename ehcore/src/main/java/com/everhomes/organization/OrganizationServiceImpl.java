@@ -6105,16 +6105,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 
 			OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
+			Organization org = organizationProvider.findOrganizationByName(data.getName(), OrganizationGroupType.ENTERPRISE.getCode(), 0L, namespaceId);
 
-			if(null != orgAddress){
-//				LOGGER.error("address has been checked in, address = {}", data.getAddress());
-//				log.setData(data);
-//				log.setErrorLog("address has been checked in");
-//				errorDataLogs.add(log);
+			if(null != orgAddress && org.getId().longValue() != orgAddress.getOrganizationId().longValue()){
+				LOGGER.error("address has been checked in, address = {}", data.getAddress());
+				log.setData(data);
+				log.setErrorLog("address has been checked in");
+				log.setCode(OrganizationServiceErrorCode.ERROR_APARTMENT_CHECKED_IN);
+				errorDataLogs.add(log);
 				continue;
 			}
 
-			Organization org = organizationProvider.findOrganizationByName(data.getName(), OrganizationGroupType.ENTERPRISE.getCode(), 0L, namespaceId);
 
 			if(null == org){
 				OrganizationDTO dto = this.createEnterprise(enterpriseCommand);

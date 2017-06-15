@@ -63,5 +63,6 @@ public interface OrganizationServiceErrorCode {
     int ERROR_APARTMENT_NAME_EMPTY = 80003;
     int ERROR_BUILDING_NOT_EXIST = 80004;
     int ERROR_APARTMENT_NOT_EXIST = 80005;
+    int ERROR_APARTMENT_CHECKED_IN = 80006;
     int ERROR_NO_DATA = 800000;
 }
