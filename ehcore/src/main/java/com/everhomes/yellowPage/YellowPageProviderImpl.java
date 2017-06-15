@@ -297,7 +297,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
      
         
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_SERVICE_ALLIANCES.ID.gt(locator.getAnchor()));
+        	query.addConditions(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.gt(locator.getAnchor()));
             }
         
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
@@ -317,6 +317,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		}
         //by dengs,客户端不能查看displayFlag为 HIDE的服务联盟
         query.addConditions(Tables.EH_SERVICE_ALLIANCES.DISPLAY_FLAG.eq(DisplayFlagType.SHOW.getCode()));
+        query.addOrderBy(Tables.EH_SERVICE_ALLIANCES.DEFAULT_ORDER.asc());
         query.addLimit(pageSize);
 
         LOGGER.info(query.toString());

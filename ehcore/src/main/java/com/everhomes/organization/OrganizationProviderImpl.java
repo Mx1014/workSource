@@ -2915,6 +2915,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(emailDomain != null)
 			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
 		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
 			return ConvertHelper.convert(r, Organization.class);

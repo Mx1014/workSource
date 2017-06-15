@@ -1067,6 +1067,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setMemberCount(cmd.getMemberCount());
 			enterprise.setEmailDomain(cmd.getEmailDomain());
 			enterprise.setServiceUserId(cmd.getServiceUserId());
+			if(cmd.getLatitude()!=null)
+				enterprise.setLatitude(Double.valueOf(cmd.getLatitude()));
+			if(cmd.getLongitude()!=null)
+				enterprise.setLongitude(Double.valueOf(cmd.getLongitude()));
 			organizationProvider.createOrganizationDetail(enterprise);
 
 			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
@@ -1199,6 +1203,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setLatitude(cmd.getLatitude());
+				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
@@ -1213,6 +1219,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationDetail.setServiceUserId(cmd.getServiceUserId());
+				organizationDetail.setLatitude(cmd.getLatitude());
+				organizationDetail.setLongitude(cmd.getLongitude());
 				organizationDetail.setMemberCount(cmd.getMemberCount());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
