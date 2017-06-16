@@ -1158,6 +1158,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public void updateEnterprise(UpdateEnterpriseCommand cmd) {
+		updateEnterprise(cmd, true);
+	}
+	
+	public void updateEnterprise(UpdateEnterpriseCommand cmd, boolean updateAttachmentAndAddress) {
 		//先判断，后台管理员才能创建。状态直接设为正常
 		Organization organization = checkOrganization(cmd.getId());
 		User user = UserContext.current().getUser();
@@ -1217,16 +1221,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return null;
 		});
 
-		List<AttachmentDescriptor> attachments = cmd.getAttachments();
+		if (updateAttachmentAndAddress) {
+			List<AttachmentDescriptor> attachments = cmd.getAttachments();
 
-		if(null != attachments && 0 != attachments.size()){
-			this.addAttachments(organization.getId(), attachments, user.getId());
-		}
+			if(null != attachments && 0 != attachments.size()){
+				this.addAttachments(organization.getId(), attachments, user.getId());
+			}
 
-		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-		if(null != addressDTOs && 0 != addressDTOs.size()){
-			this.addAddresses(organization.getId(), addressDTOs, user.getId());
+			List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
+			if(null != addressDTOs && 0 != addressDTOs.size()){
+				this.addAddresses(organization.getId(), addressDTOs, user.getId());
+			}
 		}
+		
 	}
 
 	@Override
@@ -6129,7 +6136,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}else {
 				UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
 				updateEnterpriseCommand.setId(org.getId());
-				updateEnterprise(updateEnterpriseCommand);
+				updateEnterprise(updateEnterpriseCommand, false);
 			}
 
 			//添加门牌入住
