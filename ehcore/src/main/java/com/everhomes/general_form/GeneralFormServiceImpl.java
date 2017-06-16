@@ -106,7 +106,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	public void addGeneralFormValues(addGeneralFormValuesCommand cmd) {
 		// 把values 存起来
 		if (null != cmd.getValues()) {
-			GeneralForm form = generalFormProvider.getGeneralFormById(cmd.getGeneralFormId());
+			GeneralForm form = generalFormProvider.getActiveGeneralFormByOriginId(cmd.getGeneralFormId());
 
 			dbProvider.execute(status -> {
 				if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
