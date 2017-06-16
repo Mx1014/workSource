@@ -752,6 +752,15 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
+	public QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
+		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(cmd.getTaskId());
+		if(task != null)
+			return ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
+
+		return null;
+	}
+
+	@Override
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
 		
