@@ -338,6 +338,7 @@ public interface OrganizationProvider {
 	OrganizationMemberDetails findOrganizationMemberDetailsByDetailId(Long detailId);
 	Long createOrganizationMemberDetails(OrganizationMemberDetails memberDetails);
     void updateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
+    void updateOrganizationMemberSomeDetails(OrganizationMemberDetails organizationMemberDetails, Long detailId);
 	void createOrganizationMemberV2(OrganizationMember organizationMember, Long detailId);
 
 

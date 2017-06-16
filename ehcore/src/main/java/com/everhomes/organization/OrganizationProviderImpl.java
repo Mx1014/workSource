@@ -4280,6 +4280,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, id);
     }
 
+    public void updateOrganizationMemberSomeDetails(OrganizationMemberDetails memberDetail, Long detailId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ORGANIZATION_MEMBER_DETAILS)
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_NAME,memberDetail.getContactName())
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.GENDER, memberDetail.getGender())
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_TYPE, memberDetail.getEmployeeType())
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.EMPLOYEE_NO, memberDetail.getEmployeeNo())
+                .set(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CHECK_IN_TIME, memberDetail.getCheckInTime())
+                .where(Tables.EH_ORGANIZATION_MEMBER_DETAILS.ID.eq(detailId)).execute();
+    }
+
+
     public void delateOrganizationMemberDetails(OrganizationMemberDetails organizationMemberDetails){
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMemberDetailsDao dao = new EhOrganizationMemberDetailsDao(context.configuration());

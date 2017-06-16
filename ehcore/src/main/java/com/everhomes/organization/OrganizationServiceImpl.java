@@ -4724,7 +4724,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
             } else { /**如果档案表中有记录**/
                 organizationMemberDetail.setId(old_detail.getId());
-                organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+                organizationProvider.updateOrganizationMemberSomeDetails(organizationMemberDetail, organizationMemberDetail.getId());
                 new_detail_id = organizationMemberDetail.getId();
             }
             /**绑定member表的detail_id**/
@@ -10459,6 +10459,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             result.setBasicIntegrity(0);
         else if (response.getBasic().getContactToken() == null)
             result.setBasicIntegrity(0);
+        else if (response.getBasic().getEmployeeNo() == null)
+            result.setBasicIntegrity(0);
         else
             result.setBasicIntegrity(25);
 
@@ -10518,39 +10520,49 @@ public class OrganizationServiceImpl implements OrganizationService {
         return result;
     }
 
-    @Override
-    public OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
-        OrganizationMemberDetails detail = new OrganizationMemberDetails();
+    private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
+        return getDetailFromOrganizationMember(member, true, null);
+    }
 
+    private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member, Boolean isCreate, OrganizationMemberDetails find_detail) {
+        OrganizationMemberDetails detail = new OrganizationMemberDetails();
         java.util.Date nDate = new java.util.Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String sDate = sdf.format(nDate);
         java.sql.Date now = java.sql.Date.valueOf(sDate);
 
-//        //需要判断organizationMember在detail表中organization_id的取值。应该取公司或者子公司
-//        Long directOrgId = 0L;
-//        if (member.getGroupType().equals("ENTERPRISE")) {a
-//            directOrgId = member.getOrganizationId();
-//        } else {
-//            Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-//            directOrgId = org.getDirectlyEnterpriseId();
-//        }
-
-        detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
-        detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
-//        detail.setOrganizationId(directOrgId);
-        detail.setContactName(member.getContactName());
-        detail.setContactToken(member.getContactToken());
-        detail.setContactDescription(member.getContactDescription());
-        detail.setEmployeeNo(member.getEmployeeNo());
-        detail.setAvatar(member.getAvatar());
-        detail.setGender(member.getGender());
-        detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
-        detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
-        detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
-        detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
-        detail.setEmployeeType(member.getEmployeeType());
-
+        if (isCreate && find_detail == null) {
+            detail.setId(member.getDetailId() != null ? member.getDetailId() : 0L);
+            detail.setNamespaceId(member.getNamespaceId() != null ? member.getNamespaceId() : 0);
+            detail.setContactName(member.getContactName());
+            detail.setContactToken(member.getContactToken());
+            detail.setContactDescription(member.getContactDescription());
+            detail.setEmployeeNo(member.getEmployeeNo());
+            detail.setAvatar(member.getAvatar());
+            detail.setGender(member.getGender());
+            detail.setCheckInTime(member.getCheckInTime() != null ? member.getCheckInTime() : now);
+            detail.setEmployeeStatus(member.getEmployeeStatus() != null ? member.getEmployeeStatus() : (byte) 0);
+            detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
+            detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
+            detail.setEmployeeType(member.getEmployeeType());
+        } else {
+            detail.setId(find_detail.getId());
+            if (member.getContactName() != null) {
+                detail.setContactName(member.getContactName());
+            }
+            if (member.getGender() != null) {
+                detail.setGender(member.getGender());
+            }
+            if (member.getEmployeeType() != null) {
+                detail.setEmployeeType(member.getEmployeeType());
+            }
+            if (member.getEmployeeNo() != null) {
+                detail.setEmployeeNo(member.getEmployeeNo());
+            }
+            if (member.getCheckInTime() != null) {
+                detail.setCheckInTime(detail.getCheckInTime());
+            }
+        }
         return detail;
     }
 
@@ -11713,15 +11725,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private Long getDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId, String contactToken){
-        OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember);
-        organizationMemberDetail.setOrganizationId(organizationId);
+
         //更新或创建detail记录
         OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, contactToken);
         Long new_detail_id = 0L;
         if (old_detail == null) { /**如果档案表中无记录**/
+            OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /**如果档案表中有记录**/
-            organizationMemberDetail.setId(old_detail.getId());
+            OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, false, old_detail);
             organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
             new_detail_id = organizationMemberDetail.getId();
         }

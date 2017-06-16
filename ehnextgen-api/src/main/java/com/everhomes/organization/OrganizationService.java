@@ -491,8 +491,6 @@ public interface OrganizationService {
 
     OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
 
-	OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member);
-
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);
     List<Object> getOrganizationMemberIdAndVisibleFlag(String contactToken, Long organizationId);
