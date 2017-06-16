@@ -217,6 +217,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 									FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
 									String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
 									ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+									fileDTO.setUri(dto2.getUri());
 									fileDTO.setUrl(url);
 									fileDTO.setFileName(dto2.getFileName());
 									fileDTO.setFileSize(resource.getResourceSize());

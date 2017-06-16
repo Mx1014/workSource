@@ -130,6 +130,7 @@ public class EnterpriseApplyEntryProviderImpl implements EnterpriseApplyEntryPro
 		}
 		if (null != leasePromotion.getCreateUid()) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.le(leasePromotion.getCreateUid()));
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(LeaseIssuerType.NORMAL_USER.getCode()));
 		}
 
 		if(null != locator.getAnchor()){
