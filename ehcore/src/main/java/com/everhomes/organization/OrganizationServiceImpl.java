@@ -11731,6 +11731,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         Long new_detail_id = 0L;
         if (old_detail == null) { /**如果档案表中无记录**/
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, true, null);
+            organizationMemberDetail.setOrganizationId(organizationId);
             new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
         } else { /**如果档案表中有记录**/
             OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember, false, old_detail);
