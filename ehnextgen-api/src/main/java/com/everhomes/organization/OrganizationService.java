@@ -183,7 +183,7 @@ public interface OrganizationService {
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
 	void addPersonnelsToGroup(AddPersonnelsToGroup cmd);
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
-	OrganizationMemberDTO createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
+	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);

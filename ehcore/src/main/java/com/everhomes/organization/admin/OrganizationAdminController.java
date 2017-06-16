@@ -771,19 +771,19 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /admin/org/createOrganizationPersonnel</b>
-     * <p>添加机构成员</p>
-     */
-    @RequestMapping("createOrganizationPersonnel")
-    @RestReturn(value = String.class)
-    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
-        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
-        RestResponse response = new RestResponse(dto);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /admin/org/createOrganizationPersonnel</b>
+//     * <p>添加机构成员</p>
+//     */
+//    @RequestMapping("createOrganizationPersonnel")
+//    @RestReturn(value = String.class)
+//    public RestResponse createOrganizationPersonnel(@Valid CreateOrganizationMemberCommand cmd) {
+//        OrganizationMemberDTO dto = organizationService.createOrganizationPersonnel(cmd);
+//        RestResponse response = new RestResponse(dto);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
     /**
      * <b>URL: /admin/org/updateOrganizationPersonnel</b>

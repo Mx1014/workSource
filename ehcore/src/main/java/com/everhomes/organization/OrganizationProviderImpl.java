@@ -352,6 +352,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
         dao.update(departmentMember);
+        LOGGER.warn(departmentMember.getGroupPath());
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
     }
 

@@ -5336,7 +5336,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public OrganizationMemberDTO createOrganizationPersonnel(
+    public OrganizationMember createOrganizationPersonnel(
             CreateOrganizationMemberCommand cmd) {
         User user = UserContext.current().getUser();
 
@@ -5354,58 +5354,100 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setGroupId(0l);
         organizationMember.setGroupType(org.getGroupType());
         organizationMember.setGroupPath(org.getPath());
+        organizationMember.setGender(cmd.getGender());
         if (StringUtils.isEmpty(organizationMember.getTargetId())) {
             organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
             organizationMember.setTargetId(0l);
         }
 
+//        dbProvider.execute((TransactionStatus status) -> {
+//
+//            Long organizationId = cmd.getOrganizationId();
+//            Long groupId = cmd.getGroupId();
+//
+//            if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+//                OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
+//                if (null == groupId || 0 == groupId) {
+//                    if (null != desOrgMember) {
+//                        LOGGER.error("phone number already exists. organizationId = {}", organizationId);
+//                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+//                                "phone number already exists.");
+//                    }
+//                    organizationMember.setOrganizationId(organizationId);
+//                    organizationProvider.createOrganizationMember(organizationMember);
+//                    return null;
+//                }
+//
+//                if (null == desOrgMember) {
+//                    organizationMember.setOrganizationId(organizationId);
+//                    organizationProvider.createOrganizationMember(organizationMember);
+//                }
+//            } else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT) {
+//                groupId = cmd.getOrganizationId();
+//                organizationId = org.getDirectlyEnterpriseId();
+//                OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
+//                if (null == desOrgMember) {
+//                    organizationMember.setOrganizationId(organizationId);
+//                    organizationProvider.createOrganizationMember(organizationMember);
+//                }
+//            } else {
+//                groupId = cmd.getOrganizationId();
+//            }
+//
+//            Organization group = checkOrganization(groupId);
+//            organizationMember.setGroupPath(group.getPath());
+//            OrganizationMember groupMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), groupId);
+//            if (null != groupMember) {
+//                LOGGER.error("phone number already exists. organizationId = {}", groupId);
+//                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+//                        "phone number already exists.");
+//            }
+//            organizationMember.setOrganizationId(groupId);
+//            organizationProvider.createOrganizationMember(organizationMember);
+//
+//            return null;
+//        });
+
         dbProvider.execute((TransactionStatus status) -> {
 
             Long organizationId = cmd.getOrganizationId();
-            Long groupId = cmd.getGroupId();
 
             if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
                 OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
-                if (null == groupId || 0 == groupId) {
-                    if (null != desOrgMember) {
-                        LOGGER.error("phone number already exists. organizationId = {}", organizationId);
-                        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-                                "phone number already exists.");
-                    }
-                    organizationMember.setOrganizationId(organizationId);
-                    organizationProvider.createOrganizationMember(organizationMember);
-                    return null;
-                }
+                //获取detailId
+                Long new_detail_id = getDetailOfOrganizationMember(organizationMember, organizationId, cmd.getContactToken());
 
+                //如果企业中没有有该记录
                 if (null == desOrgMember) {
+                    //创建belongTo的记录
                     organizationMember.setOrganizationId(organizationId);
+                    //绑定member表的detail_id
+                    organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
-                }
-            } else if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT) {
-                groupId = cmd.getOrganizationId();
-                organizationId = org.getDirectlyEnterpriseId();
-                OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), organizationId);
-                if (null == desOrgMember) {
-                    organizationMember.setOrganizationId(organizationId);
-                    organizationProvider.createOrganizationMember(organizationMember);
-                }
-            } else {
-                groupId = cmd.getOrganizationId();
-            }
 
-            Organization group = checkOrganization(groupId);
-            organizationMember.setGroupPath(group.getPath());
-            OrganizationMember groupMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), groupId);
-            if (null != groupMember) {
-                LOGGER.error("phone number already exists. organizationId = {}", groupId);
+                    //寻找企业下的直属隐藏部门的organizationId，创建onNode的记录
+                    Long hiddenDirectId = findDirectUnderOrganizationId(organizationId);
+                    Organization hiddenDirectOrganiztion = checkOrganization(hiddenDirectId);
+
+                    organizationMember.setGroupPath(hiddenDirectOrganiztion.getPath());
+
+                    organizationMember.setGroupType(hiddenDirectOrganiztion.getGroupType());
+
+                    organizationMember.setOrganizationId(hiddenDirectId);
+
+                    organizationMember.setDetailId(new_detail_id);
+                    organizationProvider.createOrganizationMember(organizationMember);
+
+                }
+                //如果有该记录，则不做处理
+            } else {//如果不是企业，则报错
+                LOGGER.error("organization is not a enterprise. organizationId = {}", organizationId);
                 throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-                        "phone number already exists.");
+                        "organization is not a enterprise.");
             }
-            organizationMember.setOrganizationId(groupId);
-            organizationProvider.createOrganizationMember(organizationMember);
-
             return null;
         });
+
 
         //记录新增 log
         OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
@@ -5423,7 +5465,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             userSearcher.feedDoc(organizationMember);
         }
         sendMessageForContactApproved(organizationMember);
-        return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
+        return organizationMember;
     }
 
 
@@ -5599,7 +5641,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 memberCmd.setContactToken(cmd.getAccountPhone());
                 memberCmd.setOrganizationId(cmd.getOrganizationId());
                 memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
-                m = ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
+                m = this.createOrganizationPersonnel(memberCmd);
             } else {
                 if (OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE) {
                     m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -8753,19 +8795,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 organizationMember.setOrganizationId(enterpriseId);
                 organizationMember.setGroupType(enterprise.getGroupType());
                 organizationMember.setGroupPath(enterprise.getPath());
-                OrganizationMemberDetails organizationMemberDetail  = getDetailFromOrganizationMember(organizationMember);
-                organizationMemberDetail.setOrganizationId(enterpriseId);
 
-                //更新或创建detail记录
-                OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(enterpriseId, cmd.getContactToken());
-                Long new_detail_id = 0L;
-                if (old_detail == null) { /**如果档案表中无记录**/
-                    new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
-                } else { /**如果档案表中有记录**/
-                    organizationMemberDetail.setId(old_detail.getId());
-                    organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
-                    new_detail_id = organizationMemberDetail.getId();
-                }
+                //获取detailId
+                Long new_detail_id = getDetailOfOrganizationMember(organizationMember, enterpriseId, cmd.getContactToken());
 
                 if (null == desOrgMember) {
                     // 记录一下，成员是新加入公司的
@@ -11678,6 +11710,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {//如果查询到该企业有直属的隐藏部门
             return under_org.getId();
         }
+    }
+
+    private Long getDetailOfOrganizationMember(OrganizationMember organizationMember, Long organizationId, String contactToken){
+        OrganizationMemberDetails organizationMemberDetail = getDetailFromOrganizationMember(organizationMember);
+        organizationMemberDetail.setOrganizationId(organizationId);
+        //更新或创建detail记录
+        OrganizationMemberDetails old_detail = organizationProvider.findOrganizationMemberDetailsByOrganizationIdAndContactToken(organizationId, contactToken);
+        Long new_detail_id = 0L;
+        if (old_detail == null) { /**如果档案表中无记录**/
+            new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
+        } else { /**如果档案表中有记录**/
+            organizationMemberDetail.setId(old_detail.getId());
+            organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+            new_detail_id = organizationMemberDetail.getId();
+        }
+        return new_detail_id;
     }
 }
 
