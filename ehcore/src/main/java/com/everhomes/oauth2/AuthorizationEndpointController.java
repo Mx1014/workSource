@@ -170,6 +170,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 				return "oauth2-authorize";
 			}
 		} catch (RuntimeErrorException e) {
+			LOGGER.error("Unexpected exception code = {}", e.getErrorCode());
 			LOGGER.error("Unexpected exception", e);
 
 			switch(e.getErrorCode()) {

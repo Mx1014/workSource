@@ -798,8 +798,14 @@ public class UserServiceImpl implements UserService {
 		User user;
 		user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("findUserByAccountName user is null");
+            }
 			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
 			if(identifier != null) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("findClaimedIdentifierByToken identifier is null");
+                }
 				user = this.userProvider.findUserById(identifier.getOwnerUid());
 			}
 		}
