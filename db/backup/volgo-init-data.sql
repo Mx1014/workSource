@@ -1033,3 +1033,9 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com
 -- fix #11269 by xq.tian  2017/06/14
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3a%2f%2fbiz.zuolin.com%2fnar%2fbiz%2fweb%2fapp%2fuser%2findex.html%3fisfromindex%3d0%23%2fmicroshop%2fhome%3f_k%3dzlbiz#sign_suffix"}' WHERE `id` = 114203;
 
+-- fix #11356 by xq.tian  2017/06/14
+SET @max_id = (SELECT max(id) FROM eh_app_urls);
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+VALUES ((@max_id := @max_id + 1), 1, 'Volgo', 1, 'https://itunes.apple.com/cn/app/volgo/id1237505762?mt=8', 'cs://1/image/aW1hZ2UvTVRveE5UUTNObUZqWlRneFkyRmtaREl4TmpJNU5Ea3pNMlV6Tm1VeFpUbGhNZw', '这里，将改变世界');
+INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
+VALUES ((@max_id := @max_id + 1), 1, 'Volgo', 2, 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.oa', 'cs://1/image/aW1hZ2UvTVRveE5UUTNObUZqWlRneFkyRmtaREl4TmpJNU5Ea3pNMlV6Tm1VeFpUbGhNZw', '这里，将改变世界');
