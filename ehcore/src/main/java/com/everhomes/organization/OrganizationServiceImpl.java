@@ -6386,6 +6386,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         List<String> groupTypes = new ArrayList<>();
         //只过滤onNode的记录，排除掉belongTo在公司下的记录
+        //OrganizationGroupType.ENTERPRISE的记录都是belongTo的记录
         groupTypes.add(OrganizationGroupType.DIRECT_UNDER_ENTERPRISE.getCode());
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
