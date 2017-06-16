@@ -10546,7 +10546,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
             detail.setEmployeeType(member.getEmployeeType());
         } else {
-            detail.setId(find_detail.getId());
+            detail = find_detail;
             if (member.getContactName() != null) {
                 detail.setContactName(member.getContactName());
             }
