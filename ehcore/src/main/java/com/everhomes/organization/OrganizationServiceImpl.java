@@ -6179,7 +6179,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(address.getId());
 			Organization org = organizationProvider.findOrganizationByName(data.getName(), OrganizationGroupType.ENTERPRISE.getCode(), 0L, namespaceId);
 
-			if(null != orgAddress && org != null && org.getId().longValue() != orgAddress.getOrganizationId().longValue()){
+			if(null != orgAddress && (org == null || org.getId().longValue() != orgAddress.getOrganizationId().longValue())){
 				LOGGER.error("address has been checked in, address = {}", data.getAddress());
 				log.setData(data);
 				log.setErrorLog("address has been checked in");
