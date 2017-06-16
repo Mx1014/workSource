@@ -6,50 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.quality.CountScoresCommand;
-import com.everhomes.rest.quality.CountScoresResponse;
-import com.everhomes.rest.quality.CountTasksCommand;
-import com.everhomes.rest.quality.CountTasksResponse;
-import com.everhomes.rest.quality.CreatQualityStandardCommand;
-import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
-import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
-import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
-import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
-import com.everhomes.rest.quality.DeleteQualityStandardCommand;
-import com.everhomes.rest.quality.DeleteFactorCommand;
-import com.everhomes.rest.quality.GetGroupMembersCommand;
-import com.everhomes.rest.quality.GetQualitySpecificationCommand;
-import com.everhomes.rest.quality.GroupUserDTO;
-import com.everhomes.rest.quality.ListEvaluationsCommand;
-import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
-import com.everhomes.rest.quality.ListQualityCategoriesCommand;
-import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
-import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
-import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
-import com.everhomes.rest.quality.ListQualityStandardsCommand;
-import com.everhomes.rest.quality.ListQualityStandardsResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
-import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
-import com.everhomes.rest.quality.ListFactorsCommand;
-import com.everhomes.rest.quality.ListFactorsResponse;
-import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
-import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
-import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskDTO;
-import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
-import com.everhomes.rest.quality.QualityStandardsDTO;
-import com.everhomes.rest.quality.ReportRectifyResultCommand;
-import com.everhomes.rest.quality.ReportVerificationResultCommand;
-import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
-import com.everhomes.rest.quality.ReviewVerificationResultCommand;
-import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
-import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
-import com.everhomes.rest.quality.UpdateQualityStandardCommand;
-import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.quality.*;
 
 public interface QualityService {
 
@@ -100,4 +57,6 @@ public interface QualityService {
 	ListQualityInspectionTasksResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd);
 	void deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd);
 	void sendTaskMsg(Long startTime, Long endTime);
+
+	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 }

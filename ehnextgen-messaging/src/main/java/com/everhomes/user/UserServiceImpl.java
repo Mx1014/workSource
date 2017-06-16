@@ -795,23 +795,32 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User logonDryrun(String userIdentifierToken, String password) {
-		User user = null;
-
+		User user;
 		user = this.userProvider.findUserByAccountName(userIdentifierToken);
 		if(user == null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("findUserByAccountName user is null");
+            }
 			UserIdentifier identifier = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, userIdentifierToken);
 			if(identifier != null) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("findClaimedIdentifierByToken identifier is null");
+                }
 				user = this.userProvider.findUserById(identifier.getOwnerUid());
 			}
 		}
 
-		if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash()))
-			return null;
-
-		assert(user != null);
-		if(UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE)
-			return null;
-
+        if (user != null) {
+            if (!EncryptionUtils.validateHashPassword(password, user.getSalt(), user.getPasswordHash())) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("logonDryrun validateHashPassword failure");
+                }
+                return null;
+            }
+            if (UserStatus.fromCode(user.getStatus()) != UserStatus.ACTIVE) {
+                return null;
+            }
+        }
 		return user;
 	}
 
