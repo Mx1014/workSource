@@ -82,7 +82,7 @@ import freemarker.template.Template;
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
-
+	private static final Long MODULE_ID = 52000L;
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalServiceImpl.class);
 	@Autowired
 	private GeneralApprovalValProvider generalApprovalValProvider;
@@ -641,7 +641,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		if(null == cmd2.getModuleType())
 			cmd2.setModuleType(FlowModuleType.NO_MODULE.getCode());
 		if(null == cmd2.getModuleId())
-			cmd2.setModuleId(52000L);
+			cmd2.setModuleId(MODULE_ID);
 		if(null == cmd2.getOwnerType())
 			cmd2.setOwnerType("EhOrganizations"); 
 		
