@@ -155,3 +155,9 @@ INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`
 -- remove qr driver config by janson
 delete from `eh_configurations` where `name` = 'aclink.qr_driver_zuolin_inner' and `namespace_id` = 1000000 limit 1;
 
+-- update menu add by xq.tian 2017/06/16
+UPDATE eh_web_menus SET data_type='react:/approval-management/approval-list/40500/community' WHERE id =40541;
+
+UPDATE eh_web_menus
+SET data_type = 'react:/approval-management/approval-list/52000/EhOrganizations'
+WHERE id = 52000;
