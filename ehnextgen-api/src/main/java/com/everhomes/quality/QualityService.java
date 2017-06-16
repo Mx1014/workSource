@@ -70,4 +70,5 @@ public interface QualityService {
 	CountSampleTaskSpecificationItemScoresResponse countSampleTaskSpecificationItemScores(CountSampleTaskSpecificationItemScoresCommand cmd);
 
 	void updateSampleScoreStat();
+	QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd);
 }

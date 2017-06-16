@@ -5,12 +5,14 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.quality.*;
 import com.everhomes.search.QualityInspectionSampleSearcher;
 import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -253,6 +255,22 @@ public class QualityController extends ControllerBase {
 		ListQualityInspectionTasksResponse tasks = qualityService.listQualityInspectionTasks(cmd);
 		
 		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /quality/findQualityInspectionTask</b>
+	 * <p>查看核查任务详情</p>
+	 */
+	@RequestMapping("findQualityInspectionTask")
+	@RestReturn(value = QualityInspectionTaskDTO.class)
+	public RestResponse findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
+
+		QualityInspectionTaskDTO task = qualityService.findQualityInspectionTask(cmd);
+
+		RestResponse response = new RestResponse(task);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
