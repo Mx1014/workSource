@@ -1039,3 +1039,23 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 VALUES ((@max_id := @max_id + 1), 1, 'Volgo', 1, 'https://itunes.apple.com/cn/app/volgo/id1237505762?mt=8', 'cs://1/image/aW1hZ2UvTVRveE5UUTNObUZqWlRneFkyRmtaREl4TmpJNU5Ea3pNMlV6Tm1VeFpUbGhNZw', '这里，将改变世界');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`)
 VALUES ((@max_id := @max_id + 1), 1, 'Volgo', 2, 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.oa', 'cs://1/image/aW1hZ2UvTVRveE5UUTNObUZqWlRneFkyRmtaREl4TmpJNU5Ea3pNMlV6Tm1VeFpUbGhNZw', '这里，将改变世界');
+
+-- fix #11373 by xq.tian  2017/06/14
+-- 给volgo加审批和表单管理的菜单
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@id := @id + 1), '52000', '', 'EhNamespaces', '1', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@id := @id + 1), '50900', '', 'EhNamespaces', '1', '2');
+
+-- 给volgo加审批item
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '1', '0', '0', '0', '/home', 'Bizs', '审批', '审批', 'cs://1/image/aW1hZ2UvTVRveU4yTXlaVGMwTXpRMlpqSTVZamsyWlRZek9ERm1NamhpWkRZMVpUQTFNZw', '1', '1', '65', '', '80', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', 89, NULL, '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '1', '0', '0', '0', '/home', 'Bizs', '审批', '审批', 'cs://1/image/aW1hZ2UvTVRveU4yTXlaVGMwTXpRMlpqSTVZamsyWlRZek9ERm1NamhpWkRZMVpUQTFNZw', '1', '1', '65', '', '80', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', 89, NULL, '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`)
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '1', '0', '4', '1023082', '/home', 'Bizs', '审批', '审批', 'cs://1/image/aW1hZ2UvTVRveU4yTXlaVGMwTXpRMlpqSTVZamsyWlRZek9ERm1NamhpWkRZMVpUQTFNZw', '1', '1', '65', '', '80', '3', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', 91, NULL, '0', NULL);
+
+DELETE FROM `eh_launch_pad_items`
+WHERE `namespace_id` = 1 AND `item_label` IN ('服务联盟','电子屏预订');
