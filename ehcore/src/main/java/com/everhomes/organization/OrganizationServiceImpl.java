@@ -55,6 +55,7 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
@@ -102,6 +103,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
@@ -6040,6 +6042,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 
+		// 业务太复杂，导入企业时如果本身系统里面已存在，要覆盖掉，如果是本次导入了同一企业多行，要合并门牌及管理员
+		Map<Long, List<Long>> orgAddressIds = new HashMap<>();
+		Map<Long, List<String>> orgAdminAccounts = new HashMap<>();
+		
 		for (ImportEnterpriseDataDTO data : list) {
 			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
 			ImportFileResultLog<ImportEnterpriseDataDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
@@ -6120,31 +6126,62 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == org){
 				OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
 				org = ConvertHelper.convert(dto, Organization.class);
+			}else {
+				UpdateEnterpriseCommand updateEnterpriseCommand = ConvertHelper.convert(enterpriseCommand, UpdateEnterpriseCommand.class);
+				updateEnterpriseCommand.setId(org.getId());
+				updateEnterprise(updateEnterpriseCommand);
 			}
 
 			//添加门牌入住
-			orgAddress = new OrganizationAddress();
-			orgAddress.setBuildingName(building.getName());
-			orgAddress.setBuildingId(building.getId());
-			orgAddress.setAddressId(address.getId());
-			orgAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
-			orgAddress.setOrganizationId(org.getId());
-			orgAddress.setCreatorUid(user.getId());
-			orgAddress.setOperatorUid(user.getId());
-			organizationProvider.createOrganizationAddress(orgAddress);
+			if (orgAddressIds.get(org.getId()) == null) {
+				organizationProvider.deleteOrganizationAddressByOrganizationId(org.getId());
+				orgAddressIds.put(org.getId(), new ArrayList<>());
+			}
+			if (!orgAddressIds.get(org.getId()).contains(address.getId())) {
+				orgAddress = new OrganizationAddress();
+				orgAddress.setBuildingName(building.getName());
+				orgAddress.setBuildingId(building.getId());
+				orgAddress.setAddressId(address.getId());
+				orgAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+				orgAddress.setOrganizationId(org.getId());
+				orgAddress.setCreatorUid(user.getId());
+				orgAddress.setOperatorUid(user.getId());
+				organizationProvider.createOrganizationAddress(orgAddress);
+				orgAddressIds.get(org.getId()).add(address.getId());
+			}
 
 			//添加管理员
-			CreateOrganizationAccountCommand accountCommand = new CreateOrganizationAccountCommand();
-			accountCommand.setOrganizationId(org.getId());
-			accountCommand.setAccountPhone(data.getAdminToken());
-			accountCommand.setAccountName(data.getAdminName());
-			if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
-				this.createOrganizationAccount(accountCommand, RoleConstants.ENTERPRISE_SUPER_ADMIN);
+			if (orgAdminAccounts.get(org.getId()) == null) {
+				deleteOrganizationAllAdmins(org.getId());
+				orgAdminAccounts.put(org.getId(), new ArrayList<>());
+			}
+			if (!orgAdminAccounts.get(org.getId()).contains(data.getAdminToken())) {
+				CreateOrganizationAccountCommand accountCommand = new CreateOrganizationAccountCommand();
+				accountCommand.setOrganizationId(org.getId());
+				accountCommand.setAccountPhone(data.getAdminToken());
+				accountCommand.setAccountName(data.getAdminName());
+				if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
+					this.createOrganizationAccount(accountCommand, RoleConstants.ENTERPRISE_SUPER_ADMIN);
+				}
+				orgAdminAccounts.get(org.getId()).add(data.getAdminToken());
 			}
 
 		}
 		return errorDataLogs;
 
+	}
+
+	private void deleteOrganizationAllAdmins(Long organizationId) {
+		ListServiceModuleAdministratorsCommand listCmd = new ListServiceModuleAdministratorsCommand();
+		listCmd.setOwnerType(EhOrganizations.class.getSimpleName());
+		listCmd.setOwnerId(0L);
+		listCmd.setOrganizationId(organizationId);
+		List<OrganizationContactDTO> list = rolePrivilegeService.listOrganizationAdministrators(listCmd);
+		DeleteOrganizationAdminCommand deleteCmd = ConvertHelper.convert(listCmd, DeleteOrganizationAdminCommand.class);
+		for (OrganizationContactDTO organizationContactDTO : list) {
+			deleteCmd.setUserId(organizationContactDTO.getTargetId());
+			rolePrivilegeService.deleteOrganizationAdministrators(deleteCmd);
+		}
 	}
 
 	private List<ImportFileResultLog<ImportOrganizationContactDataDTO>> importOrganizationPersonnel(List<ImportOrganizationContactDataDTO> list, Long userId, ImportOrganizationPersonnelDataCommand cmd){

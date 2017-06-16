@@ -1909,6 +1909,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
             }else {
 				communityAddressMapping.setLivingStatus(livingStatus);
+				communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
 			}
         }

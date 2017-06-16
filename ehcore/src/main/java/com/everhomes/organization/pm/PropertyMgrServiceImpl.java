@@ -2074,6 +2074,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             address.setStatus(AddressAdminStatus.ACTIVE.getCode());
             address.setNamespaceId(community.getNamespaceId());
         	addressProvider.createAddress(address);
+		}else if (AddressAdminStatus.fromCode(address.getStatus()) != AddressAdminStatus.ACTIVE) {
+			address.setAreaSize(cmd.getAreaSize());
+            address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+            addressProvider.updateAddress(address);
 		}else {
 			throw RuntimeErrorException.errorWith(AddressServiceErrorCode.SCOPE, AddressServiceErrorCode.ERROR_EXISTS_APARTMENT_NAME, "exists apartment name");
 		}
@@ -2171,19 +2175,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private void insertOrganizationAddressMapping(Long organizationId, Community community, Address address, Byte livingStatus) {
-        if (organizationId != null && community != null && address != null) {
+		if (organizationId != null && community != null && address != null) {
             CommunityAddressMapping communityAddressMapping = organizationProvider.findOrganizationAddressMapping(organizationId, community.getId(), address.getId());
             if (communityAddressMapping == null) {
-                CommunityAddressMapping addressMapping = new CommunityAddressMapping();
-                addressMapping.setOrganizationId(organizationId);
-                addressMapping.setCommunityId(community.getId());
-                addressMapping.setAddressId(address.getId());
-                addressMapping.setOrganizationAddress(address.getAddress());
-                addressMapping.setLivingStatus(livingStatus);
-                addressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                addressMapping.setUpdateTime(addressMapping.getCreateTime());
-                organizationProvider.createOrganizationAddressMapping(addressMapping);
-            }
+                communityAddressMapping = new CommunityAddressMapping();
+                communityAddressMapping.setOrganizationId(organizationId);
+                communityAddressMapping.setCommunityId(community.getId());
+                communityAddressMapping.setAddressId(address.getId());
+                communityAddressMapping.setOrganizationAddress(address.getAddress());
+                communityAddressMapping.setLivingStatus(livingStatus);
+                communityAddressMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                communityAddressMapping.setUpdateTime(communityAddressMapping.getCreateTime());
+                organizationProvider.createOrganizationAddressMapping(communityAddressMapping);
+            }else {
+				communityAddressMapping.setLivingStatus(livingStatus);
+				communityAddressMapping.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organizationProvider.updateOrganizationAddressMapping(communityAddressMapping);
+			}
         }
     }
 
