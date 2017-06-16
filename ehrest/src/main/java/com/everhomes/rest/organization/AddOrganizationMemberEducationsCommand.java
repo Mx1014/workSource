@@ -2,6 +2,7 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
 import java.sql.Date;
 
 /**
@@ -16,16 +17,22 @@ import java.sql.Date;
  */
 public class AddOrganizationMemberEducationsCommand {
 
+    @NotNull
     private Long detailId;
 
+    @NotNull
     private String schoolName;
 
+    @NotNull
     private String degree;
 
+    @NotNull
     private String major;
 
+    @NotNull
     private String enrollmentTime;
 
+    @NotNull
     private String graduationTime;
 
     public AddOrganizationMemberEducationsCommand() {

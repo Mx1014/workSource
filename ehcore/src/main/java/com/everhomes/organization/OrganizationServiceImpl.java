@@ -108,10 +108,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -9965,11 +9962,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             organizationMemberDetails.setEnName(cmd.getEnName());
             mapLogs.put("enName: ", cmd.getEnName());
         }
-        if(cmd.getBirthday() != null){
+        if(!StringUtils.isEmpty(cmd.getBirthday())){
             organizationMemberDetails.setBirthday(java.sql.Date.valueOf(cmd.getBirthday()));
             mapLogs.put("birthday: ", cmd.getBirthday());
         }
-        if(cmd.getMaritalFlag() != null){
+        if(!StringUtils.isEmpty(cmd.getMaritalFlag())){
             organizationMemberDetails.setMaritalFlag(cmd.getMaritalFlag());
             mapLogs.put("maritalFlag: ", String.valueOf(cmd.getMaritalFlag()));
         }
@@ -10787,16 +10784,27 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
 
-            Long detailId = this.saveOrganizationMembers(data,cmd.getOrganizationId(),deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
-            this.saveOrganizationMemberDetails(data,detailId);
-            this.saveOrganizationMemberEducations(data,detailId);
-            this.saveOrganizationMemberWorkExperiences(data,detailId);
-            this.saveOrganizationMemberInsurances(data,detailId);
-            this.saveOrganizationMemberContracts(data,detailId);
+            Long detailId = this.saveOrganizationMembers(data, cmd.getOrganizationId(), deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
+            this.saveOrganizationMemberDetails(data, detailId);
+
+            //  判断为空时则不需要添加
+            if (this.checkEducationQualification(data).equals(1)) {
+                this.saveOrganizationMemberEducations(data, detailId);
+            }
+            if (this.checkWorkExperiencesQualification(data).equals(1)) {
+                this.saveOrganizationMemberWorkExperiences(data, detailId);
+            }
+            if (this.checkInsurancesQualification(data).equals(1)) {
+                this.saveOrganizationMemberInsurances(data, detailId);
+            }
+            if (this.checkContractsQualification(data).equals(1)) {
+                this.saveOrganizationMemberContracts(data, detailId);
+            }
         }
         return errorDataLogs;
     }
 
+    //  校验 member 基础信息
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMembers(
             ImportOrganizationPersonnelFilesDTO data, Map<String, Organization> deptMap,
             Map<String, Organization> jobPositionMap, Map<String, Organization> jobLevelMap,
@@ -10942,15 +10950,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberEducations(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (!StringUtils.isEmpty(data.getSchoolName()) && !StringUtils.isEmpty(data.getDegree())
-                && !StringUtils.isEmpty(data.getMajor()) && !StringUtils.isEmpty(data.getEnrollmentTime())
-                && !StringUtils.isEmpty(data.getGraduationTime())) {
-            return null;
-        } else if (StringUtils.isEmpty(data.getSchoolName()) && StringUtils.isEmpty(data.getDegree())
-                && StringUtils.isEmpty(data.getMajor()) && StringUtils.isEmpty(data.getEnrollmentTime())
-                && StringUtils.isEmpty(data.getGraduationTime())) {
-            return null;
-        } else {
+        if (this.checkEducationQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getSchoolName())) {
                 LOGGER.warn("Organization member schoolName is null. data = {}", data);
                 log.setData(data);
@@ -10982,21 +10982,27 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
+        } else {
+            return null;
         }
+    }
+    private Integer checkEducationQualification(ImportOrganizationPersonnelFilesDTO data){
+        if (!StringUtils.isEmpty(data.getSchoolName()) && !StringUtils.isEmpty(data.getDegree())
+                && !StringUtils.isEmpty(data.getMajor()) && !StringUtils.isEmpty(data.getEnrollmentTime())
+                && !StringUtils.isEmpty(data.getGraduationTime())) {
+            return 1;
+        } else if (StringUtils.isEmpty(data.getSchoolName()) && StringUtils.isEmpty(data.getDegree())
+                && StringUtils.isEmpty(data.getMajor()) && StringUtils.isEmpty(data.getEnrollmentTime())
+                && StringUtils.isEmpty(data.getGraduationTime())) {
+            return 2;
+        }else
+            return 0;
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (!StringUtils.isEmpty(data.getEnterpriseName()) && !StringUtils.isEmpty(data.getPosition())
-                && !StringUtils.isEmpty(data.getJobType()) && !StringUtils.isEmpty(data.getEntryTime())
-                && !StringUtils.isEmpty(data.getDepartureTime())) {
-            return null;
-        } else if (StringUtils.isEmpty(data.getEnterpriseName()) && StringUtils.isEmpty(data.getPosition())
-                && StringUtils.isEmpty(data.getJobType()) && StringUtils.isEmpty(data.getEntryTime())
-                && StringUtils.isEmpty(data.getDepartureTime())) {
-            return null;
-        } else {
+        if(this.checkWorkExperiencesQualification(data).equals(0)){
             if (StringUtils.isEmpty(data.getEnterpriseName())) {
                 LOGGER.warn("Organization member enterpriseName is null. data = {}", data);
                 log.setData(data);
@@ -11028,22 +11034,29 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
+        }else{
+            return null;
         }
+    }
 
+    private Integer checkWorkExperiencesQualification(ImportOrganizationPersonnelFilesDTO data){
+        if (!StringUtils.isEmpty(data.getEnterpriseName()) && !StringUtils.isEmpty(data.getPosition())
+                && !StringUtils.isEmpty(data.getJobType()) && !StringUtils.isEmpty(data.getEntryTime())
+                && !StringUtils.isEmpty(data.getDepartureTime())) {
+            return 1;
+        } else if (StringUtils.isEmpty(data.getEnterpriseName()) && StringUtils.isEmpty(data.getPosition())
+                && StringUtils.isEmpty(data.getJobType()) && StringUtils.isEmpty(data.getEntryTime())
+                && StringUtils.isEmpty(data.getDepartureTime())) {
+            return 2;
+        }else{
+            return 0;
+        }
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (!StringUtils.isEmpty(data.getInsuranceName()) && !StringUtils.isEmpty(data.getInsuranceEnterprise())
-                && !StringUtils.isEmpty(data.getInsuranceNumber()) && !StringUtils.isEmpty(data.getInsuranceStartTime())
-                && !StringUtils.isEmpty(data.getInsuranceEndTime())) {
-            return null;
-        } else if (StringUtils.isEmpty(data.getInsuranceName()) && StringUtils.isEmpty(data.getInsuranceEnterprise())
-                && StringUtils.isEmpty(data.getInsuranceNumber()) && StringUtils.isEmpty(data.getInsuranceStartTime())
-                && StringUtils.isEmpty(data.getInsuranceEndTime())) {
-            return null;
-        } else {
+        if (this.checkInsurancesQualification(data).equals(0)){
             if (StringUtils.isEmpty(data.getInsuranceName())) {
                 LOGGER.warn("Organization member insuranceName is null. data = {}", data);
                 log.setData(data);
@@ -11075,19 +11088,28 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
+        }else{
+            return null;
         }
     }
 
+    private Integer checkInsurancesQualification(ImportOrganizationPersonnelFilesDTO data) {
+        if (!StringUtils.isEmpty(data.getInsuranceName()) && !StringUtils.isEmpty(data.getInsuranceEnterprise())
+                && !StringUtils.isEmpty(data.getInsuranceNumber()) && !StringUtils.isEmpty(data.getInsuranceStartTime())
+                && !StringUtils.isEmpty(data.getInsuranceEndTime())) {
+            return 1;
+        } else if (StringUtils.isEmpty(data.getInsuranceName()) && StringUtils.isEmpty(data.getInsuranceEnterprise())
+                && StringUtils.isEmpty(data.getInsuranceNumber()) && StringUtils.isEmpty(data.getInsuranceStartTime())
+                && StringUtils.isEmpty(data.getInsuranceEndTime())) {
+            return 2;
+        } else {
+            return 0;
+        }
+    }
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (!StringUtils.isEmpty(data.getContractNumber()) && !StringUtils.isEmpty(data.getContractStartTime())
-                && !StringUtils.isEmpty(data.getContractEndTime())) {
-            return null;
-        } else if (StringUtils.isEmpty(data.getContractNumber()) && StringUtils.isEmpty(data.getContractStartTime())
-                && StringUtils.isEmpty(data.getContractEndTime())) {
-            return null;
-        } else {
+        if(this.checkContractsQualification(data).equals(0)){
             if (StringUtils.isEmpty(data.getContractNumber())) {
                 LOGGER.warn("Organization member contractNumber is null. data = {}", data);
                 log.setData(data);
@@ -11107,8 +11129,21 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
+        }else{
+            return null;
         }
+    }
 
+    private Integer checkContractsQualification(ImportOrganizationPersonnelFilesDTO data) {
+        if (!StringUtils.isEmpty(data.getContractNumber()) && !StringUtils.isEmpty(data.getContractStartTime())
+                && !StringUtils.isEmpty(data.getContractEndTime())) {
+            return 1;
+        } else if (StringUtils.isEmpty(data.getContractNumber()) && StringUtils.isEmpty(data.getContractStartTime())
+                && StringUtils.isEmpty(data.getContractEndTime())) {
+            return 2;
+        } else {
+            return 0;
+        }
     }
 
     private Long saveOrganizationMembers(
@@ -11347,6 +11382,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         String sheetName = "通讯录";
         XSSFSheet sheet = wb.createSheet(sheetName);
         XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        XSSFDataFormat format = wb.createDataFormat();
+        style.setDataFormat(format.getFormat("yyyy-MM-dd"));
         Font font = wb.createFont();
         font.setFontHeightInPoints((short) 20);
         font.setFontName("Courier New");
