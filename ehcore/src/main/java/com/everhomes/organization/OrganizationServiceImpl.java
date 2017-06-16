@@ -10427,6 +10427,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             result.setBasicIntegrity(0);
         else if (response.getBasic().getContactToken() == null)
             result.setBasicIntegrity(0);
+        else if (response.getBasic().getEmployeeNo() == null)
+            result.setBasicIntegrity(0);
         else
             result.setBasicIntegrity(25);
 
