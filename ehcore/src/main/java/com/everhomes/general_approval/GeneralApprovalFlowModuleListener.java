@@ -55,8 +55,7 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	protected GeneralApprovalValProvider generalApprovalValProvider;
 	@Autowired
-	protected GeneralFormProvider generalFormProvider;
-	private static final long MODULE_ID = 51000;
+	protected GeneralFormProvider generalFormProvider; 
 	
 	public GeneralApprovalFlowModuleListener() {
 		for (GeneralFormDataSourceType value : GeneralFormDataSourceType.values()) {
@@ -313,9 +312,9 @@ public class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
-        ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
+        ServiceModule module = serviceModuleProvider.findServiceModuleById(GeneralApprovalController.MODULE_ID);
         moduleInfo.setModuleName(module.getName());
-        moduleInfo.setModuleId(MODULE_ID);
+        moduleInfo.setModuleId(GeneralApprovalController.MODULE_ID);
         return moduleInfo;
 	}
      

@@ -26,6 +26,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 @RestController
 @RequestMapping("/general_approval")
 public class GeneralApprovalController extends ControllerBase {
+	public static final Long MODULE_ID = 52000L;
 	@Autowired
 	private GeneralApprovalService generalApprovalService;
     /**
