@@ -90,25 +90,37 @@ public class UpdateDefaultRuleAdminCommand {
 	private List<Byte> rentalTypes;
 	@ItemType(PriceRuleDTO.class)
 	private List<PriceRuleDTO> priceRules;
-	
-	@Deprecated
-	private Byte rentalType;
-	@Deprecated
-	private BigDecimal workdayPrice;
-	@Deprecated
-	private BigDecimal weekendPrice;
-	@Deprecated
-	private BigDecimal orgMemberWorkdayPrice;
-	@Deprecated
-	private BigDecimal orgMemberWeekendPrice;
-	@Deprecated
-	private BigDecimal approvingUserWorkdayPrice;
-	@Deprecated
-	private BigDecimal approvingUserWeekendPrice;
+//	
+//	@Deprecated
+//	private Byte rentalType;
+//	@Deprecated
+//	private BigDecimal workdayPrice;
+//	@Deprecated
+//	private BigDecimal weekendPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal orgMemberWeekendPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWorkdayPrice;
+//	@Deprecated
+//	private BigDecimal approvingUserWeekendPrice;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
+	public List<Byte> getRentalTypes() {
+		return rentalTypes;
+	}
+	public void setRentalTypes(List<Byte> rentalTypes) {
+		this.rentalTypes = rentalTypes;
+	}
+	public List<PriceRuleDTO> getPriceRules() {
+		return priceRules;
+	}
+	public void setPriceRules(List<PriceRuleDTO> priceRules) {
+		this.priceRules = priceRules;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -192,14 +204,14 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setAttachments(List<AttachmentConfigDTO> attachments) {
 		this.attachments = attachments;
 	}
-
-	public Byte getRentalType() {
-		return rentalType;
-	}
-
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
-	}
+//
+//	public Byte getRentalType() {
+//		return rentalType;
+//	}
+//
+//	public void setRentalType(Byte rentalType) {
+//		this.rentalType = rentalType;
+//	}
 
 	public Long getRentalEndTime() {
 		return rentalEndTime;
@@ -261,22 +273,22 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setCloseDates(List<Long> closeDates) {
 		this.closeDates = closeDates;
 	}
-
-	public BigDecimal getWorkdayPrice() {
-		return workdayPrice;
-	}
-
-	public void setWorkdayPrice(BigDecimal workdayPrice) {
-		this.workdayPrice = workdayPrice;
-	}
-
-	public BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-	public void setWeekendPrice(BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
+//
+//	public BigDecimal getWorkdayPrice() {
+//		return workdayPrice;
+//	}
+//
+//	public void setWorkdayPrice(BigDecimal workdayPrice) {
+//		this.workdayPrice = workdayPrice;
+//	}
+//
+//	public BigDecimal getWeekendPrice() {
+//		return weekendPrice;
+//	}
+//
+//	public void setWeekendPrice(BigDecimal weekendPrice) {
+//		this.weekendPrice = weekendPrice;
+//	}
 
 	public Double getSiteCounts() {
 		return siteCounts;
@@ -331,38 +343,38 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setRentalEndTimeFlag(Byte rentalEndTimeFlag) {
 		this.rentalEndTimeFlag = rentalEndTimeFlag;
 	}
-
-	public BigDecimal getOrgMemberWorkdayPrice() {
-		return orgMemberWorkdayPrice;
-	}
-
-	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
-		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
-	}
-
-	public BigDecimal getOrgMemberWeekendPrice() {
-		return orgMemberWeekendPrice;
-	}
-
-	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
-		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
-	}
-
-	public BigDecimal getApprovingUserWorkdayPrice() {
-		return approvingUserWorkdayPrice;
-	}
-
-	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
-		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
-	}
-
-	public BigDecimal getApprovingUserWeekendPrice() {
-		return approvingUserWeekendPrice;
-	}
-
-	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
-		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
-	}
+//
+//	public BigDecimal getOrgMemberWorkdayPrice() {
+//		return orgMemberWorkdayPrice;
+//	}
+//
+//	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
+//		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
+//	}
+//
+//	public BigDecimal getOrgMemberWeekendPrice() {
+//		return orgMemberWeekendPrice;
+//	}
+//
+//	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
+//		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
+//	}
+//
+//	public BigDecimal getApprovingUserWorkdayPrice() {
+//		return approvingUserWorkdayPrice;
+//	}
+//
+//	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
+//		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
+//	}
+//
+//	public BigDecimal getApprovingUserWeekendPrice() {
+//		return approvingUserWeekendPrice;
+//	}
+//
+//	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
+//		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
+//	}
 
 	public List<TimeIntervalDTO> getHalfDayTimeIntervals() {
 		return halfDayTimeIntervals;

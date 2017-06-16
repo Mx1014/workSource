@@ -50,7 +50,15 @@ public class UpdateRentalSiteRulesAdminCommand {
 
 	private BigDecimal approvingUserOriginalPrice;
 	private BigDecimal approvingUserPrice;
+	
+	private Byte rentalType;
 
+	public Byte getRentalType() {
+		return rentalType;
+	}
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

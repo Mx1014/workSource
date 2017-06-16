@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.rentalv2.admin.PriceRuleDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalv2PriceRulesDao;
@@ -48,11 +50,29 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 	}
 
 	@Override
+	public void deletePriceRuleByOwnerId(String ownerType, Long ownerId) {
+		getReadWriteContext().delete(Tables.EH_RENTALV2_PRICE_RULES)
+			.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
+			.execute();
+	}
+
+	@Override
 	public Rentalv2PriceRule findRentalv2PriceRuleById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), Rentalv2PriceRule.class);
 	}
 	
+	@Override
+	public PriceRuleDTO findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_RULES)
+				.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_RENTALV2_PRICE_RULES.RENTAL_TYPE.eq(rentalType))
+				.fetchOne();
+		return record == null ? null : ConvertHelper.convert(record, PriceRuleDTO.class);
+	}
+
 	@Override
 	public List<Rentalv2PriceRule> listRentalv2PriceRule() {
 		return getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_RULES)
