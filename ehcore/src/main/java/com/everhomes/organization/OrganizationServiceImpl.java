@@ -1715,7 +1715,9 @@ public class OrganizationServiceImpl implements OrganizationService {
                 if(subOrg.getGroupId() != null) {
                     groupDto = groupProvider.findGroupById(subOrg.getGroupId());
                 }
-                if(groupDto != null) {
+                // 添加forumId不为空，空的话后面会报空指针异常。在forum-2.0中，新建帖子和查询帖子的分类都已把子公司去除了。
+				// 此处查询"全部"暂时保留   add by yanjun 20170616
+                if(groupDto != null && !StringUtils.isEmpty(groupDto.getOwningForumId())) {
                     forumIdList.add(groupDto.getOwningForumId());
                 }
             }
