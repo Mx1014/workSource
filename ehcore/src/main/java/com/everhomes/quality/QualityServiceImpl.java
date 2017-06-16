@@ -901,10 +901,6 @@ public class QualityServiceImpl implements QualityService {
 		Long startTime = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 
-
-
-
-
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
 		if(members == null || members.size() == 0) {
 			return new ArrayList<ExecuteGroupAndPosition>();
@@ -933,9 +929,10 @@ public class QualityServiceImpl implements QualityService {
 
 							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
 							if(groupOrg != null) {
-								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
-								group.setPositionId(map.getJobPositionId());
-								groupDtos.add(group);
+								ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+								topGroup.setGroupId(groupOrg.getDirectlyEnterpriseId());
+								topGroup.setPositionId(map.getJobPositionId());
+								groupDtos.add(topGroup);
 							}
 
 						}
