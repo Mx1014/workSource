@@ -4724,7 +4724,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 new_detail_id = organizationProvider.createOrganizationMemberDetails(organizationMemberDetail);
             } else { /**如果档案表中有记录**/
                 organizationMemberDetail.setId(old_detail.getId());
-                organizationProvider.updateOrganizationMemberDetails(organizationMemberDetail, organizationMemberDetail.getId());
+                organizationProvider.updateOrganizationMemberSomeDetails(organizationMemberDetail, organizationMemberDetail.getId());
                 new_detail_id = organizationMemberDetail.getId();
             }
             /**绑定member表的detail_id**/
