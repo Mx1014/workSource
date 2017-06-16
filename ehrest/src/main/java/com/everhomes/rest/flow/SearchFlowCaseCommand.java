@@ -7,12 +7,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间 ID </li>
  * <li>userId: 用户ID，为空则为当前用户 </li>
+ * <li>organizationId: 公司id </li>
  * <li>moduleId: 业务模块ID，选择了 moduleId 则不需要 keyword，可为空 </li>
  * <li>ownerId: 业务实体的 ID，可为空 </li>
  * <li>ownerId: 业务实体的类型，可为空 </li>
  * <li>keyword: 搜索关键字 </li>
- * <li>flowCaseStatus: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus}</li>
- * <li>flowSearchType: 0 我的申请， 1: 待办任务， 2: 已办任务， 3: 我的督办 {@link com.everhomes.rest.flow.FlowCaseSearchType}</li>
+ * <li>flowCaseStatus: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
+ * <li>flowSearchType: 0 我的申请， 1: 待办任务， 2: 已办任务， 3: 我的督办 {@link com.everhomes.rest.flow.FlowCaseSearchType} </li>
  * <li>projectId: 项目ID</li>
  * <li>projectType: 项目类型</li>
  * </ul>
@@ -22,6 +23,7 @@ import com.everhomes.util.StringHelper;
 public class SearchFlowCaseCommand {
 	private Integer namespaceId;
 	private Long userId;
+	private Long organizationId;
 	private Byte flowCaseStatus;
 	private Long moduleId;
 	private Long ownerId;
@@ -115,7 +117,15 @@ public class SearchFlowCaseCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Long getProjectId() {
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getProjectId() {
 		return projectId;
 	}
 

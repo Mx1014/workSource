@@ -158,7 +158,7 @@ public class CmdUtil {
     public static byte[] updateTime(byte[] curServerKey, byte ver) {
         byte cmd = 0x5;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + EXPIRE_TIME;
+        int expireTime = curTime + 50*6*EXPIRE_TIME;//50 years
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];

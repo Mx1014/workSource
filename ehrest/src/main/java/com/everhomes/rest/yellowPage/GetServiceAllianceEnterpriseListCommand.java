@@ -38,7 +38,7 @@ public class GetServiceAllianceEnterpriseListCommand {
 	private Long type;
 	
 	private Byte sourceRequestType;
-	
+
 	public Long getCommunityId() {
 		return communityId;
 	}

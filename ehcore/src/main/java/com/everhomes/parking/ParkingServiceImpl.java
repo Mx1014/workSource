@@ -1566,4 +1566,16 @@ public class ParkingServiceImpl implements ParkingService {
 		handler.lockParkingCar(cmd);
 	}
 
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		
+		String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+    	GetParkingCarNumsResponse response = handler.getParkingCarNums(cmd);
+    	
+		return response;
+	}
+
 }

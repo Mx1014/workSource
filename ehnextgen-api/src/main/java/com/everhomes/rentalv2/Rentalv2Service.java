@@ -6,92 +6,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.rest.rentalv2.AddItemAdminCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
-import com.everhomes.rest.rentalv2.AddRentalBillItemCommandResponse;
-import com.everhomes.rest.rentalv2.AddRentalSiteCommand;
-import com.everhomes.rest.rentalv2.BatchCompleteBillCommand;
-import com.everhomes.rest.rentalv2.BatchCompleteBillCommandResponse;
-import com.everhomes.rest.rentalv2.BatchIncompleteBillCommand;
-import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
-import com.everhomes.rest.rentalv2.CompleteBillCommand;
-import com.everhomes.rest.rentalv2.ConfirmBillCommand;
-import com.everhomes.rest.rentalv2.DeleteItemAdminCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalSiteCommand;
-import com.everhomes.rest.rentalv2.DeleteRentalSiteRulesCommand;
-import com.everhomes.rest.rentalv2.DisableRentalSiteCommand;
-import com.everhomes.rest.rentalv2.EnableRentalSiteCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
-import com.everhomes.rest.rentalv2.FindRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteItemsAndAttachmentsResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteMonthStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteRulesCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteRulesCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSiteWeekStatusCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommand;
-import com.everhomes.rest.rentalv2.FindRentalSitesCommandResponse;
-import com.everhomes.rest.rentalv2.FindRentalSitesStatusCommand;
-import com.everhomes.rest.rentalv2.FindRentalSitesStatusCommandResponse;
-import com.everhomes.rest.rentalv2.GetItemListAdminCommand;
-import com.everhomes.rest.rentalv2.GetItemListCommandResponse;
-import com.everhomes.rest.rentalv2.GetRentalSiteTypeResponse;
-import com.everhomes.rest.rentalv2.GetRentalTypeRuleCommand;
-import com.everhomes.rest.rentalv2.GetRentalTypeRuleCommandResponse;
-import com.everhomes.rest.rentalv2.IncompleteBillCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillCountCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillCountCommandResponse;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
-import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommand;
-import com.everhomes.rest.rentalv2.OnlinePayCallbackCommandResponse;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
-import com.everhomes.rest.rentalv2.UpdateRentalRuleCommand;
-import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
-import com.everhomes.rest.rentalv2.VerifyRentalBillCommandResponse;
-import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
-import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
-import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.CreateResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.DefaultRuleDTO;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceCommand;
-import com.everhomes.rest.rentalv2.admin.DeleteResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListCommand;
-import com.everhomes.rest.rentalv2.admin.GetRefundOrderListResponse;
-import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
-import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
-import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
-import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
-import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.rentalv2.*;
+import com.everhomes.rest.rentalv2.admin.*;
 
 public interface Rentalv2Service { 
 //	void updateRentalRule(UpdateRentalRuleCommand cmd);
@@ -177,6 +94,7 @@ public interface Rentalv2Service {
 	GetResourceListAdminResponse getResourceList(GetResourceListAdminCommand cmd);
 	void addResource(AddResourceAdminCommand cmd);
 	void updateResource(UpdateResourceAdminCommand cmd);
+	void updateResourceOrder(@Valid UpdateResourceOrderAdminCommand cmd);
 	void updateItem(UpdateItemAdminCommand cmd);
 	void updateItems(UpdateItemsAdminCommand cmd);
 	FindAutoAssignRentalSiteWeekStatusResponse findAutoAssignRentalSiteWeekStatus(
@@ -258,9 +176,12 @@ public interface Rentalv2Service {
 	void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd);
 
 
-	void changeOfflinePayOrderSuccess(RentalOrder order);
+	void changeRentalOrderStatus(RentalOrder order, Byte status, Boolean cancelOtherOrderFlag);
 
 
 	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
 
+	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
+
+	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
 }

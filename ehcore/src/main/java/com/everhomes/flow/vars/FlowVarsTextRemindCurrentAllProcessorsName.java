@@ -1,17 +1,11 @@
 package com.everhomes.flow.vars;
 
-import java.util.List;
-
+import com.everhomes.flow.*;
+import com.everhomes.rest.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowVariableTextResolver;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
+import java.util.List;
 
 /**
  * 节点提醒的 本节点处理人姓名
@@ -29,8 +23,8 @@ public class FlowVarsTextRemindCurrentAllProcessorsName implements FlowVariableT
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount());
+		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
+		        ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId(), ctx.getFlowCase().getStepCount());
 		String txt = "";
 		int i = 0;
 		

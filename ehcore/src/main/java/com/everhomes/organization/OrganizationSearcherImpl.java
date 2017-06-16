@@ -14,11 +14,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.ToXContent.Params;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +94,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private XContentBuilder createDoc(Organization organization){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("id", organization.getId());
             b.field("namespaceId", organization.getNamespaceId());
             Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
             b.field("communityId", communityId);
@@ -281,9 +285,12 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
-        builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
+        builder.setFrom(pageNum * pageSize).setSize(pageSize + 1);
         
         builder.setQuery(qb);
+        
+        
+        builder.addSort("id", SortOrder.DESC);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Query organization, cmd={}, builder={}", cmd, builder);
@@ -297,13 +304,17 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         List<Long> ids = getIds(rsp);
         GroupQueryResult result = new GroupQueryResult();
-        if(ids.size() > filter.getPageSize()) {
-            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+//        if(ids.size() > filter.getPageSize()) {
+//            result.setPageAnchor(new Long(filter.getPageNumber() + 1));
+//            ids.remove(ids.size() - 1);
+//         } else {
+//            result.setPageAnchor(null);
+//            }
+
+        if(ids.size() > pageSize){
+            result.setPageAnchor(Long.valueOf(pageNum + 1));
             ids.remove(ids.size() - 1);
-         } else {
-            result.setPageAnchor(null);    
-            }
-        
+        }
         result.setIds(ids);
         
         return result;

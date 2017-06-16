@@ -1010,7 +1010,7 @@ public class PropertyMgrController extends ControllerBase {
 
 	/*@RequestMapping("deletePmComment")
 	@RestReturn(value=String.class)
-	public RestResponse deletePmComment(DeleteCommentCommand cmd) {
+	public RestResponse deletePmComment(DeleteCommonCommentCommand cmd) {
 
 		// ???
 		RestResponse response = new RestResponse();

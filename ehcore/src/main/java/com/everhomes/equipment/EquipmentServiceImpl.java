@@ -1318,7 +1318,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
 		List<EquipmentAccessoriesDTO> dtos = accessories.getAccessories();
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())
@@ -2523,7 +2523,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	private Timestamp dateStrToTimestamp(String str) {
 		LocalDate localDate = LocalDate.parse(str,dateSF);
-		Timestamp ts = Timestamp.from(Date.valueOf(localDate).toInstant());
+		Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
 		return ts;
 	}
 	
@@ -3775,7 +3775,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if(cmd.getDateTime() == null) {
+			cmd.setDateTime(DateHelper.currentGMTTime().getTime());
+		}
+		cal.setTime(new Timestamp(cmd.getDateTime()));
 
 		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));

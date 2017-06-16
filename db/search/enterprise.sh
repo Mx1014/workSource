@@ -7,6 +7,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
     "enterprise" : {
 	"_all": { "analyzer": "whitespace" },
         "properties" : {
+	    "id":{"type":"long"},
             "name": {
                 "type": "multi_field", 
                 "analyzer":"simple",

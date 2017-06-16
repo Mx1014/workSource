@@ -1,37 +1,5 @@
 // @formatter:off
 package com.everhomes.organization;
- 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
-import org.jooq.JoinType;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Result;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.everhomes.community.Community;
 import com.everhomes.db.AccessSpec;
@@ -51,43 +19,15 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
-import com.everhomes.rest.organization.OrganizationAddressStatus;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
-import com.everhomes.rest.organization.OrganizationCommunityRequestType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationJobPositionStatus;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionMapsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
@@ -95,6 +35,22 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
  
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
@@ -2719,17 +2675,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name) {
 	       DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
-	        List<Organization> result  = new ArrayList<Organization>();
+	        List<Organization> result  = new ArrayList<>();
 	        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
 	        
-	        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode())
-	                .or(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.PM.getCode())));
+	        query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
 	        query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 	        
 	        if(namespaceId != null) {
 	            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 	        }
-	        
 	        if(name != null && !"".equals(name)) {
 	            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" + name + "%"));
 	        }
@@ -2903,7 +2857,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     }
  
 	@Override
-	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) { 
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(Integer namesapceId, String emailDomain, Long communityId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -2913,9 +2867,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.setDistinct(true);
 		if(communityId != null)
 			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
-
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.eq(OrganizationCommunityRequestStatus.ACTIVE.getCode()));
 		if(emailDomain != null)
-			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain)); 
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namesapceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
 		List<Organization> organizations = records.stream().map((r) -> {
 			return ConvertHelper.convert(r, Organization.class);
@@ -3490,7 +3446,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhImportFileTasks.class));
 		EhImportFileTasksDao dao = new EhImportFileTasksDao(context.configuration());
 		importFileTask.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		LOGGER.info("update executeTask importFileTask: {}", importFileTask);
 		dao.update(importFileTask);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhImportFileTasks.class, importFileTask.getId());
 	}
 
 	@Override
@@ -3537,5 +3496,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			queryBuilderCallback.buildCondition(locator, query);
 		int totalRecords = query.fetchCount();
 		return totalRecords;
+	}
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizaitonId)).fetch();
+		if (records != null && !records.isEmpty()) {
+			for (Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return list;
+	}
+/**
+	 * add by janson
+	 * @param organizationId
+	 * @param buildId
+	 * @return
+	 */
+	@Override
+	public List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(Long organizationId, Long buildId) {
+		
+		List<OrganizationAddress> ea = new ArrayList<OrganizationAddress>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildId));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.ne(OrganizationAddressStatus.INACTIVE.getCode()));
+					query.fetch().map((EhOrganizationAddressesRecord record) -> {
+						ea.add(ConvertHelper.convert(record, OrganizationAddress.class));
+		            	return null;
+					});
+					
+					return true;
+				});
+		return ea;
 	}
 }
