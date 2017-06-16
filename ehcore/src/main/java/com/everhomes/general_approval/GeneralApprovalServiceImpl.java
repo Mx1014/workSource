@@ -558,15 +558,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 						if (null != cmd.getStatus())
 							query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.eq(cmd
 									.getStatus()));
-
-						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
-						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
-						if(entityType == EntityType.COMMUNITY){
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
-									.getProjectId()));
-							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
-									.getProjectType()));
-						}
+						//注释掉, 2017年6月16日 不想过滤的条件就不要传好了,不用在这里假先知
+//						EntityType entityType = EntityType.fromCode(cmd.getProjectType());
+//						//by dengs, 20170509 如果是园区才匹配查询园区相关信息，如果是公司，则不匹配。
+//						if(entityType == EntityType.COMMUNITY){
+//							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd
+//									.getProjectId()));
+//							query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd
+//									.getProjectType()));
+//						}
 						return query;
 					}
 				});
@@ -641,7 +641,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		if(null == cmd2.getModuleType())
 			cmd2.setModuleType(FlowModuleType.NO_MODULE.getCode());
 		if(null == cmd2.getModuleId())
-			cmd2.setModuleId(51000L);
+			cmd2.setModuleId(52000L);
 		if(null == cmd2.getOwnerType())
 			cmd2.setOwnerType("EhOrganizations"); 
 		
