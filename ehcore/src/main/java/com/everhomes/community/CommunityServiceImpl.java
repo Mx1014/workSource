@@ -729,7 +729,7 @@ public class CommunityServiceImpl implements CommunityService {
 		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
 		cmd.setSourceType(EntityType.BUILDING.getCode());
 		cmd.setSourceId(building.getId());
-		cmd.setOriginFieldNameFlag(NormalFlag.NEED.getCode());
+		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
 
 		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 		building.setFormValues(formValues);
@@ -979,6 +979,7 @@ public class CommunityServiceImpl implements CommunityService {
 		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
 		cmdValues.setSourceType(EntityType.BUILDING.getCode());
 		cmdValues.setSourceId(dto.getId());
+		cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
 		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
 		dto.setFormValues(formValues);
 

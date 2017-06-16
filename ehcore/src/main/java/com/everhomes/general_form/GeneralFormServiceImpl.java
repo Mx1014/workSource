@@ -5,11 +5,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowCaseFileDTO;
+import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
@@ -105,31 +108,34 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		if (null != cmd.getValues()) {
 			GeneralForm form = generalFormProvider.getGeneralFormById(cmd.getGeneralFormId());
 
-			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 使用表单/审批 注意状态 config
-				form.setStatus(GeneralFormStatus.RUNNING.getCode());
-				generalFormProvider.updateGeneralForm(form);
-			}
+			dbProvider.execute(status -> {
+				if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
+					// 使用表单/审批 注意状态 config
+					form.setStatus(GeneralFormStatus.RUNNING.getCode());
+					generalFormProvider.updateGeneralForm(form);
+				}
 
-			for (PostApprovalFormItem val : cmd.getValues()) {
-				GeneralFormVal obj = new GeneralFormVal();
-				//与表单信息一致
-				obj.setNamespaceId(form.getNamespaceId());
-				obj.setOrganizationId(form.getOrganizationId());
-				obj.setOwnerId(form.getOwnerId());
-				obj.setOwnerType(form.getOwnerType());
-				obj.setModuleId(form.getModuleId());
-				obj.setModuleType(form.getModuleType());
-				obj.setFormOriginId(form.getFormOriginId());
-				obj.setFormVersion(form.getFormVersion());
+				for (PostApprovalFormItem val : cmd.getValues()) {
+					GeneralFormVal obj = new GeneralFormVal();
+					//与表单信息一致
+					obj.setNamespaceId(form.getNamespaceId());
+					obj.setOrganizationId(form.getOrganizationId());
+					obj.setOwnerId(form.getOwnerId());
+					obj.setOwnerType(form.getOwnerType());
+					obj.setModuleId(form.getModuleId());
+					obj.setModuleType(form.getModuleType());
+					obj.setFormOriginId(form.getFormOriginId());
+					obj.setFormVersion(form.getFormVersion());
 
-				obj.setSourceType(cmd.getSourceType());
-				obj.setSourceId(cmd.getSourceId());
-				obj.setFieldName(val.getFieldName());
-				obj.setFieldType(val.getFieldType());
-				obj.setFieldValue(val.getFieldValue());
-				generalFormValProvider.createGeneralFormVal(obj);
-			}
+					obj.setSourceType(cmd.getSourceType());
+					obj.setSourceId(cmd.getSourceId());
+					obj.setFieldName(val.getFieldName());
+					obj.setFieldType(val.getFieldType());
+					obj.setFieldValue(val.getFieldValue());
+					generalFormValProvider.createGeneralFormVal(obj);
+				}
+				return null;
+			});
 		}
 	}
 
@@ -144,6 +150,10 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 
+			if (null == cmd.getOriginFieldFlag()) {
+				cmd.setOriginFieldFlag(NormalFlag.NONEED.getCode());
+			}
+
 			for (GeneralFormVal val : vals) {
 				try{
 
@@ -157,7 +167,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 					}
 					PostApprovalFormItem formVal = new PostApprovalFormItem();
 
-					if (null != cmd.getOriginFieldNameFlag() && NormalFlag.NEED.getCode() == cmd.getOriginFieldNameFlag()) {
+					if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
 						formVal.setFieldName(dto.getFieldName());
 						formVal.setFieldDisplayName(dto.getFieldDisplayName());
 					}else {
@@ -169,11 +179,19 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 					if (null != fieldType) {
 						switch (fieldType) {
 							case SINGLE_LINE_TEXT:
-								formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
+									formVal.setFieldValue(val.getFieldValue());
+								}else{
+									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								}
 								result.add(formVal);
 								break;
 							case MULTI_LINE_TEXT:
-								formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
+									formVal.setFieldValue(val.getFieldValue());
+								}else{
+									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								}
 								result.add(formVal);
 								break;
 							case IMAGE:
@@ -192,25 +210,30 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 							case FILE:
 								//TODO:工作流需要新增类型file
 								PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormFileValue.class);
-								if (null == fileValue || fileValue.getFiles() ==null )
+								if (null == fileValue || fileValue.getFiles() == null )
 									break;
-//						List<FlowCaseFileDTO> files = new ArrayList<>();
-//						for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-//							FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-//							String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-//							ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
-//							fileDTO.setUrl(url);
-//							fileDTO.setFileName(dto2.getFileName());
-//							fileDTO.setFileSize(resource.getResourceSize());
-//							files.add(fileDTO);
-//						}
-//						FlowCaseFileValue value = new FlowCaseFileValue();
-//						value.setFiles(files);
-//						e.setValue(JSON.toJSONString(value));
-//						entities.add(e);
+								List<FlowCaseFileDTO> files = new ArrayList<>();
+								for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
+									FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+									String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+									ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
+									fileDTO.setUrl(url);
+									fileDTO.setFileName(dto2.getFileName());
+									fileDTO.setFileSize(resource.getResourceSize());
+									files.add(fileDTO);
+								}
+								FlowCaseFileValue value = new FlowCaseFileValue();
+								value.setFiles(files);
+								formVal.setFieldValue(JSON.toJSONString(value));
+								result.add(formVal);
+
 								break;
 							case INTEGER_TEXT:
-								formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
+									formVal.setFieldValue(val.getFieldValue());
+								}else{
+									formVal.setFieldValue(JSON.parseObject(val.getFieldValue(), PostApprovalFormTextValue.class).getText());
+								}
 								result.add(formVal);
 								break;
 

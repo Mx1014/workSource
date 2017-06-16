@@ -440,13 +440,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 
 			buildingIds.add(opRequestBuilding.getBuildingId());
+			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(issuerType)) {
-                FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
+				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
                 request.setFlowcaseId(flowCase1.getId());
-                enterpriseApplyEntryProvider.updateApplyEntry(request);
-                return flowCase1;
             }
-            return null;
+			request.setIssuerType(issuerType);
+			enterpriseApplyEntryProvider.updateApplyEntry(request);
+
+			return flowCase1;
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
@@ -776,7 +778,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
 			cmd.setSourceType(EntityType.LEASEPROMOTION.getCode());
 			cmd.setSourceId(dto.getId());
-			cmd.setOriginFieldNameFlag(NormalFlag.NEED.getCode());
+			cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
 			List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
 			dto.setFormValues(formValues);
 
@@ -839,6 +841,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			populateRentDTO(dto);
 
+			if (LeaseIssuerType.NORMAL_USER.getCode().equals(cmd.getIssuerType())) {
+				dto.setDeleteFlag(LeasePromotionFlag.ENABLED.getCode());
+			}
 			return dto;
 		});
 	}
