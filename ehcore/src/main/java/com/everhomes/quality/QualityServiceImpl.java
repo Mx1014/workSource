@@ -776,8 +776,12 @@ public class QualityServiceImpl implements QualityService {
 		Long targetId = cmd.getTargetId();
 		String targetType = cmd.getTargetType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+		if(null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Integer offset = cmd.getPageAnchor().intValue();
         Timestamp startDate = null;
         Timestamp endDate = null;
         if(cmd.getStartDate() != null) {
@@ -822,7 +826,7 @@ public class QualityServiceImpl implements QualityService {
 
 		if(isAdmin) {
 			//管理员查询所有任务
-			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
+			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
             		cmd.getTaskType(), null, startDate, endDate,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
 		} else {
@@ -848,7 +852,7 @@ public class QualityServiceImpl implements QualityService {
 					}
 
 				}
-				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
+				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate,
 						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag());
 			}
@@ -858,10 +862,14 @@ public class QualityServiceImpl implements QualityService {
 		}
         
         Long nextPageAnchor = null;
-        if(tasks.size() > pageSize) {
-        	tasks.remove(tasks.size() - 1);
-            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
-        }
+//        if(tasks.size() > pageSize) {
+//        	tasks.remove(tasks.size() - 1);
+//            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
+//        }
+		if (tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			nextPageAnchor = (long) (offset + 1);
+		}
         
         List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {

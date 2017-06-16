@@ -273,17 +273,17 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType,
+	public List<QualityInspectionTasks> listVerificationTasks(Integer offset, int count, Long ownerId, String ownerType, Long targetId, String targetType,
 		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
 		List<Long> standardIds, Byte manualFlag) {
-		assert(locator.getEntityId() != 0);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
+//		assert(locator.getEntityId() != 0);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
     
-        if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
-        }
+//        if(locator.getAnchor() != null) {
+//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+//        }
 		//总公司 分公司 改用namespaceId by xiongying20170329
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.NAMESPACE_ID.eq(UserContext.getCurrentNamespaceId()));
 //        if(ownerId != null && ownerId != 0) {
@@ -344,9 +344,10 @@ public class QualityProviderImpl implements QualityProvider {
 			//fix bug :byte to long ...MANUAL_FLAG.eq(manualFlag));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(manualFlag)));
 		}
-        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
-        query.addLimit(count);
-        
+//        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+//        query.addLimit(count);
+		query.addLimit(offset * (count-1), count);
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
             LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
@@ -357,9 +358,9 @@ public class QualityProviderImpl implements QualityProvider {
         	return null;
         });
         
-        if(tasks.size() > 0) {
-            locator.setAnchor(tasks.get(tasks.size() -1).getId());
-        }
+//        if(tasks.size() > 0) {
+//            locator.setAnchor(tasks.get(tasks.size() -1).getId());
+//        }
         
 		return tasks;
 	}
