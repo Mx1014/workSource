@@ -1220,7 +1220,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setDescription(cmd.getDescription());
 				organizationDetail.setAvatar(cmd.getAvatar());
 				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+					java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+					if(null != checkinDate){
+						organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
+					}
 				}
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
