@@ -4782,6 +4782,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setRequestType(RequestType.USER.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
+                
+                this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), cmd.getEnterpriseId(), cmd.getUserId());
             }
 
         } else {
@@ -8747,6 +8749,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgLog.setRequestType(RequestType.ADMIN.getCode());
                 orgLog.setOperatorUid(UserContext.current().getUser().getId());
                 this.organizationProvider.createOrganizationMemberLog(orgLog);
+                
+                this.doorAccessService.joinCompanyAutoAuth(UserContext.getCurrentNamespaceId(), enterpriseId, organizationMember.getTargetId());
             }
         }
         // 如果有退出的公司 需要发离开公司的消息等系列操作 add by sfyan  20170428

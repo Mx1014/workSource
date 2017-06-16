@@ -11,6 +11,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
+
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -330,5 +331,7 @@ public interface OrganizationProvider {
 	Integer countUsersOfEnterprise(CrossShardListingLocator locator, ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<Organization> listOrganizations(String organizationType, Long parentId, Long pageAnchor, Integer pageSize);
+	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
+			Long organizationId, Long buildId);
 }
 

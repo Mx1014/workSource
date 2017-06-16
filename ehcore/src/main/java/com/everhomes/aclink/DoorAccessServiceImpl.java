@@ -2029,6 +2029,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreateTimeMs(auth.getCreateTime().getTime());
         qr.setCurrentTime(DateHelper.currentGMTTime().getTime());
         
+        Long qrImageTimeout = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_IMAGE_TIMEOUTS, 1*60);
+        qr.setQrImageTimeout(qrImageTimeout*1000l);
+        
         qr.setQrCodeKey(aesUserKey.getSecret());
         
         qrKeys.add(qr);
@@ -3519,6 +3522,72 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			if(LOGGER.isInfoEnabled()) {
 				LOGGER.info("identifier not found, identifierId=" + identifierId + " claimed=" + identifier);	
 			}
+		}
+	}
+	
+	@Override
+	public void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId) {
+		String info = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_JOIN_COMPANY_AUTO_AUTH, "");
+		if(info == null || info.isEmpty()) {
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info("join company info not found, info=" + info + " orgId=" + orgId + " userId=" + userId);	
+			}	
+			return;
+		}
+		String[] iters = info.split(";");
+		for(String s : iters) {
+			String[] infos = s.split(",");
+			if(infos.length != 3) {
+				if(LOGGER.isInfoEnabled()) {
+					LOGGER.info("join company info error, info=" + info + " orgId=" + orgId + " userId=" + userId);	
+				}	
+				return;
+			}
+			if(infos[0].equals("building")) {
+				Long buildingId = Long.valueOf(infos[1]);
+				List<OrganizationAddress> addresses = this.organizationProvider.findOrganizationAddressByOrganizationIdAndBuildingId(orgId, buildingId);
+				if(addresses == null || addresses.isEmpty()) {
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("join company info address not found, info=" + info + " orgId=" + orgId + " userId=" + userId);	
+					}
+					continue;
+				}
+				
+			} else if(infos[0].equals("company")) {
+				if(!orgId.equals(Long.valueOf(infos[1]))) {
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("join company info company not found, info=" + info + " orgId=" + orgId + " userId=" + userId);	
+					}
+					continue;
+				}
+			} else {
+				if(LOGGER.isInfoEnabled()) {
+					LOGGER.info("join company info type not found, info=" + info + " orgId=" + orgId + " userId=" + userId);	
+				}
+				continue;
+			}
+			String mac = infos[2];
+			DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(mac);
+			if(doorAccess == null) {
+				LOGGER.warn("join company info mac not found, info=" + info + " orgId=" + orgId + " userId=" + userId);
+				continue;
+			}
+			
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(userId);
+			CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
+			cmd.setApproveUserId(User.SYSTEM_UID);
+			cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+			cmd.setAuthType(DoorAuthType.FOREVER.getCode());
+			cmd.setDescription("new user auto created");
+			cmd.setDoorId(doorAccess.getId());
+			cmd.setNamespaceId(userId);
+			if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+				cmd.setPhone(userInfo.getPhones().get(0));	
+			}
+			cmd.setRightOpen((byte)1);
+			cmd.setRightRemote((byte)1);
+			cmd.setUserId(userId);
+			createDoorAuth(cmd);			
 		}
 	}
 }
