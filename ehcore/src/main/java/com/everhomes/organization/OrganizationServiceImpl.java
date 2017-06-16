@@ -1301,7 +1301,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), m.getOrganizationId(), m.getTargetId());
 				}
 				return null;
-			});
+			}).collect(Collectors.toList());
 
 			organizationSearcher.deleteById(cmd.getId());
 			return null;
@@ -2128,7 +2128,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				deleteCurrentOrganizationCommunityReqeust(user.getId(), org.getId());
 				//把机构下的人员修改成无效
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdWithAllStatus(org.getId());
-				for (OrganizationMember member: members) {
+				 for (OrganizationMember member: members) {
 					member.setOperatorUid(user.getId());
 					member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
 					organizationProvider.updateOrganizationMember(member);
