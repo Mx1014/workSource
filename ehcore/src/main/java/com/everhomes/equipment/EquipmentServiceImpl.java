@@ -2952,10 +2952,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 								//取path后的第一个路径 为顶层公司 by xiongying 20170323
 								String[] path = organization.getPath().split("/");
 								Long organizationId = Long.valueOf(path[1]);
-
-								group.setGroupId(organizationId);
-								group.setPositionId(map.getJobPositionId());
-								groupDtos.add(group);
+								ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+								topGroup.setGroupId(organizationId);
+								topGroup.setPositionId(map.getJobPositionId());
+								groupDtos.add(topGroup);
 							}
 
 						}
