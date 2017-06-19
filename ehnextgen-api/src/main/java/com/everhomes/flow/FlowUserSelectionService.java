@@ -1,10 +1,8 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
-import com.everhomes.organization.Organization;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.user.UserInfo;
+
+import java.util.List;
 
 public interface FlowUserSelectionService {
 	/**
@@ -34,7 +32,10 @@ public interface FlowUserSelectionService {
 	 */
 	List<Long> findManagersByDepartmentId(Long parentOrgId, Long departmentId, Flow flow);
 
-	List<Long> findUsersByDudy(Long parentOrgId, Long moduleId,
-			String departmentType, Long departmentId);
+    /**
+     * 业务责任部门的经理
+     */
+    List<Long> findModuleDutyManagers(Long organizationId, Long moduleId, String projectType, Long projectId);
 
+    List<Long> findUsersByDudy(Long parentOrgId, Long moduleId, String departmentType, Long departmentId, Long jobPositionId);
 }
