@@ -9,7 +9,7 @@ package com.everhomes.rest.organization;
  */
 public enum ImportFileTaskType {
 
-    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"),
+    ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"), BUILDING("building"), APARTMENT("apartment"),
     WAREHOUSE_MATERIAL("warehouse_material"),
     WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category");
 

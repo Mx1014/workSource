@@ -52,6 +52,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.SearchSyncManager;
@@ -395,8 +396,8 @@ public class CommunityAdminController extends ControllerBase {
      * <p>导入楼栋信息excel</p>
      */
     @RequestMapping("importBuildingData")
-    @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+    @RestReturn(value=ImportFileTaskDTO.class)
+    public RestResponse importBuildingData(@RequestParam("communityId") Long communityId, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -404,12 +405,33 @@ public class CommunityAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
-        RestResponse response = new RestResponse(importDataResponse);
+//		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+        RestResponse response = new RestResponse(communityService.importBuildingData(communityId, files[0]));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+//    
+//    /**
+//     * <b>URL: /admin/community/importBuildingData</b>
+//     * <p>导入楼栋信息excel</p>
+//     */
+//    @RequestMapping("importBuildingData")
+//    @RestReturn(value=ImportDataResponse.class)
+//    public RestResponse importBuildingData(@RequestParam(value = "attachment") MultipartFile[] files){
+//    	User manaUser = UserContext.current().getUser();
+//    	Long userId = manaUser.getId();
+//    	if(null == files || null == files[0]){
+//    		LOGGER.error("files is null。userId="+userId);
+//    		throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+//    				"files is null");
+//    	}
+//    	ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
+//    	RestResponse response = new RestResponse(importDataResponse);
+//    	response.setErrorCode(ErrorCodes.SUCCESS);
+//    	response.setErrorDescription("OK");
+//    	return response;
+//    }
     
     /**
      * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>

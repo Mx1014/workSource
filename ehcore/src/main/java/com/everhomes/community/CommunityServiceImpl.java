@@ -66,6 +66,9 @@ import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
@@ -83,6 +86,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
@@ -240,6 +244,9 @@ public class CommunityServiceImpl implements CommunityService {
 	private GeneralFormValProvider generalFormValProvider;
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+
+	@Autowired
+	private  ImportFileService importFileService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1180,6 +1187,210 @@ public class CommunityServiceImpl implements CommunityService {
 
 		response.setBuildings(buildingDTOs);
 		return response;
+	}
+
+
+	@Override
+	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(communityId);
+			task.setType(ImportFileTaskType.BUILDING.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportBuildingDataDTO> datas = handleImportBuildingData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportBuildingDataDTO>> results = importBuildingData(datas, userId, communityId);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+
+	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,
+			Long userId, Long communityId) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
+		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
+		for (ImportBuildingDataDTO data : datas) {
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
+			if (log != null) {
+				list.add(log);
+				continue;
+			}
+			
+			
+			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
+			if (building == null) {
+				building = new Building();
+				building.setName(data.getName());
+				building.setAliasName(data.getAliasName());
+				building.setAddress(data.getAddress());
+				building.setContact(data.getPhone());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				String contactToken = data.getPhone();
+				if(ct.get(contactToken) != null) {
+					OrganizationMember om = ct.get(contactToken);
+					building.setManagerUid(om.getTargetId());
+				}else {
+					///////////////////////////////////
+				}
+				building.setCommunityId(communityId);
+				building.setDescription(data.getDescription());
+				building.setTrafficDescription(data.getTrafficDescription());
+				
+				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
+					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
+					building.setLongitude(Double.parseDouble(temp[0]));
+					building.setLatitude(Double.parseDouble(temp[1]));
+				}
+				
+				building.setNamespaceId(org.getNamespaceId());
+				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				communityProvider.createBuilding(userId, building);
+			}else {
+				building.setAliasName(data.getAliasName());
+				building.setAddress(data.getAddress());
+				building.setContact(data.getPhone());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				String contactToken = data.getPhone();
+				if(ct.get(contactToken) != null) {
+					OrganizationMember om = ct.get(contactToken);
+					building.setManagerUid(om.getTargetId());
+				}else {
+					///////////////////////////////////
+				}
+				building.setDescription(data.getDescription());
+				building.setTrafficDescription(data.getTrafficDescription());
+				
+				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
+					String[] temp = data.getLongitudeLatitude().split(",");
+					building.setLongitude(Double.parseDouble(temp[0]));
+					building.setLatitude(Double.parseDouble(temp[1]));
+				}
+				
+				building.setNamespaceId(org.getNamespaceId());
+				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				communityProvider.updateBuilding(building);
+			}
+			
+		}
+		return list;
+	}
+
+
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
+		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		if (StringUtils.isEmpty(data.getName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+			log.setData(data);
+			log.setErrorLog("building name cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getAddress())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
+			log.setData(data);
+			log.setErrorLog("address cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getContactor())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
+			log.setData(data);
+			log.setErrorLog("contactor cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getPhone())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_PHONE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("phone cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").contains(",")) {
+			log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_LONGITUDE);
+			log.setData(data);
+			log.setErrorLog("latitude longitude error");
+			return log;
+		}
+		
+		return null;
+	}
+
+
+	private List<ImportBuildingDataDTO> handleImportBuildingData(List resultList) {
+		List<ImportBuildingDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+					StringUtils.isNotBlank(r.getI())) {
+				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
+				data.setName(trim(r.getA()));
+				data.setAliasName(trim(r.getB()));
+				data.setAddress(trim(r.getC()));
+				data.setLongitudeLatitude(trim(r.getD()));
+				data.setTrafficDescription(trim(r.getE()));
+				data.setAreaSize(trim(r.getF()));
+				data.setContactor(trim(r.getG()));
+				data.setPhone(trim(r.getH()));
+				data.setDescription(trim(r.getI()));
+				list.add(data);
+			}
+		}
+		return list;
+	}
+	
+	private String trim(String string) {
+		if (string != null) {
+			return string.trim();
+		}
+		return "";
+	}
+	
+	private Long getCurrentCommunityId(Long userId) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		if (org != null) {
+			return org.getCommunityId();
+		}
+		return null;
 	}
 
 

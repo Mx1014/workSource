@@ -42,6 +42,7 @@ import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.community.admin.ListCommunityByNamespaceIdResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 
@@ -157,4 +158,5 @@ public interface CommunityService {
 	List<ProjectDTO> getTreeProjectCategories(GetTreeProjectCategoriesCommand cmd);
 
 	void updateBuildingOrder(@Valid UpdateBuildingOrderCommand cmd);
+	ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file);
 }

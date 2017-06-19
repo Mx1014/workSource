@@ -205,6 +205,8 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         for(Long id : ids) {
         	ConfAccountDTO dto = new ConfAccountDTO();
         	ConfAccounts account = vcProvider.findVideoconfAccountById(id);
+        	if(null == account)
+        		continue;
         	dto.setId(account.getId());
 			dto.setUserId(account.getOwnerId());
 			dto.setValidDate(account.getExpiredDate());
