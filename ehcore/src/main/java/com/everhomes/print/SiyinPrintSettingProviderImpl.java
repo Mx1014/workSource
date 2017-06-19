@@ -99,17 +99,27 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 		return dbProvider.getDslContext(accessSpec);
 	}
 
-	@Override
-	public void deleteSiyinPrintSettings(String ownerType, Long ownerId) {
-		getReadWriteContext().delete(Tables.EH_SIYIN_PRINT_SETTINGS)
-			.where(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_TYPE.eq(ownerType))
-			.and(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_ID.eq(ownerId)).execute();
-		
-	}
 
 	@Override
-	public void createSiyinPrintSettings(List<SiyinPrintSetting> list) {
-		
-		
+	public void createSiyinPrintSettings(List<SiyinPrintSetting> list,String ownerType, Long ownerId) {
+	    DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+	    dbProvider.execute(r -> {
+	    	//删除原来的设置
+	    	getReadWriteContext().delete(Tables.EH_SIYIN_PRINT_SETTINGS)
+			.where(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_ID.eq(ownerId)).execute();
+	    	//更新原来的设置
+		    for (SiyinPrintSetting siyinPrintSetting : list) {
+		    	Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintSettings.class));
+				siyinPrintSetting.setId(id);
+				siyinPrintSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				siyinPrintSetting.setCreatorUid(UserContext.current().getUser().getId());
+				siyinPrintSetting.setOperateTime(siyinPrintSetting.getCreateTime());
+				siyinPrintSetting.setOperatorUid(siyinPrintSetting.getCreatorUid());
+				getReadWriteDao().insert(siyinPrintSetting);
+				DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintSettings.class, null);
+		    }
+		    return null;
+	    });
 	}
 }

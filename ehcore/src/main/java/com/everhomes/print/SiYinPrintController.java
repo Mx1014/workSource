@@ -71,7 +71,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("updatePrintSetting")
 	 @RestReturn(value=String.class)
 	 public RestResponse updatePrintSetting(UpdatePrintSettingCommand cmd) {
-		
+		 siyinPrintService.updatePrintSetting(cmd);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
@@ -87,7 +87,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=GetPrintStatResponse.class)
 	 public RestResponse getPrintStat(GetPrintStatCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintStat(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;

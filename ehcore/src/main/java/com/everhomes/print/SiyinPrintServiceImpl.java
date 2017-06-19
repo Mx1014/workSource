@@ -76,25 +76,30 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
+		//检查参数
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		
+		//获取设置对象集合
 		List<SiyinPrintSetting> printSettingList = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		
+		//集合装返回的response
 		return processPrintSettingResponse(printSettingList);
 	}
 
 
 	@Override
 	public void updatePrintSetting(UpdatePrintSettingCommand cmd) {
+		//检查参数，并生成更新集合对象
 		List<SiyinPrintSetting> list = checkUpdatePrintSettingCommand(cmd);
-		siyinPrintSettingProvider.deleteSiyinPrintSettings(cmd.getOwnerType(),cmd.getOwnerId());
-		siyinPrintSettingProvider.createSiyinPrintSettings(list);
 		
+		//删除后创建 设置对象，并在一个事物里面
+		siyinPrintSettingProvider.createSiyinPrintSettings(list,cmd.getOwnerType(),cmd.getOwnerId());
 	}
 
 	@Override
 	public GetPrintStatResponse getPrintStat(GetPrintStatCommand cmd) {
-		// TODO Auto-generated method stub
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		
 		return null;
 	}
 
@@ -211,11 +216,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 				//设置价格
 				setPrintCopyScanPrice(response,siyinPrintSetting);
 			}
-			else if(settingtype == PrintSettingType.PRINT_COPY_SCAN){
+			else if(settingtype == PrintSettingType.COURSE_HOTLINE){
 				//设置教程/热线
 				response.setHotline(siyinPrintSetting.getHotline());
-				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("|")));
-				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("|")));
+				response.setPrintCourseList(Arrays.asList(siyinPrintSetting.getPrintCourse().split("\\|")));
+				response.setScanCopyCourseList(Arrays.asList(siyinPrintSetting.getScanCopyCourse().split("\\|")));
 			}
 		}
 		return response;
@@ -319,14 +324,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
 		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId());
 		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId()));
-		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId()));
+		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId(),cmd.getHotline()));
 		return list;
 	}
 
 	/**
 	 * 检查打印/复印扫描教程并产生实体
 	 */
-	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String string, Long long1) {
+	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String string, Long long1,String hotline) {
 		if(printCourseList == null || printCourseList.size() == 0)
 		{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, printCourseList = " + printCourseList);
@@ -341,13 +346,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		setting.setOwnerType(string);
 		setting.setOwnerId(long1);
 		setting.setSettingType(PrintSettingType.COURSE_HOTLINE.getCode());
+		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
 		for (String string2 : scancopyCourseList) {
-			setting.setScanCopyCourse(setting.getScanCopyCourse()+string2);
+			setting.setScanCopyCourse(setting.getScanCopyCourse() +string2+ "|");
 		}
 		
 		for (String string2 : printCourseList) {
-			setting.setPrintCourse(setting.getPrintCourse()+string2);
+			setting.setPrintCourse(setting.getPrintCourse()+string2+"|");
 		}
+		
+		setting.setHotline(hotline);
 		return setting;
 	}
 
@@ -385,6 +393,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		settinga4.setJobType(PrintJobTypeType.PRINT.getCode());
 		settinga5.setJobType(PrintJobTypeType.PRINT.getCode());
 		settinga6.setJobType(PrintJobTypeType.PRINT.getCode());
+		
+		settinga3.setPaperSize(PrintPaperSizeType.A3.getCode());
+		settinga4.setPaperSize(PrintPaperSizeType.A4.getCode());
+		settinga5.setPaperSize(PrintPaperSizeType.A5.getCode());
+		settinga6.setPaperSize(PrintPaperSizeType.A6.getCode());
+		
+		settinga3.setNamespaceId(UserContext.getCurrentNamespaceId());
+		settinga4.setNamespaceId(UserContext.getCurrentNamespaceId());
+		settinga5.setNamespaceId(UserContext.getCurrentNamespaceId());
+		settinga6.setNamespaceId(UserContext.getCurrentNamespaceId());
 		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
 	}
 
@@ -399,6 +417,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		setting.setOwnerId(long1);
 		setting.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
 		setting.setJobType(PrintJobTypeType.SCAN.getCode());
+		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
 		return setting;
 	}
 	

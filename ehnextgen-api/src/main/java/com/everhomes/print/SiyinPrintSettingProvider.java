@@ -11,8 +11,6 @@ public interface SiyinPrintSettingProvider {
 
 	List<SiyinPrintSetting> listSiyinPrintSetting();
 
-	void deleteSiyinPrintSettings(String ownerType, Long ownerId);
-
-	void createSiyinPrintSettings(List<SiyinPrintSetting> list);
+	void createSiyinPrintSettings(List<SiyinPrintSetting> list,String ownerType, Long ownerId);
 
 }

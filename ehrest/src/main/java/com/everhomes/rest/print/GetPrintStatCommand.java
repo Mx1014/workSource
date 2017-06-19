@@ -1,5 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.print;
+
+import java.sql.Timestamp;
+
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -14,6 +19,36 @@ package com.everhomes.rest.print;
 public class GetPrintStatCommand {
 	private String ownerType;
 	private Long ownerId;
-    private Long startTime;
-    private Long endTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public Timestamp getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(Timestamp startTime) {
+		this.startTime = startTime;
+	}
+	public Timestamp getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(Timestamp endTime) {
+		this.endTime = endTime;
+	}
+    
+    @Override
+    public String toString() {
+    	// TODO Auto-generated method stub
+    	return StringHelper.toJsonString(this);
+    }
 }

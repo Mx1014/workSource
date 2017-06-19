@@ -1,5 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.print;
+
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -16,4 +19,34 @@ public class GetPrintStatResponse {
 	private PrintStatDTO copyStat;
 	private PrintStatDTO scanStat;
 	private PrintStatDTO allStat;
+	public PrintStatDTO getPrintStat() {
+		return printStat;
+	}
+	public void setPrintStat(PrintStatDTO printStat) {
+		this.printStat = printStat;
+	}
+	public PrintStatDTO getCopyStat() {
+		return copyStat;
+	}
+	public void setCopyStat(PrintStatDTO copyStat) {
+		this.copyStat = copyStat;
+	}
+	public PrintStatDTO getScanStat() {
+		return scanStat;
+	}
+	public void setScanStat(PrintStatDTO scanStat) {
+		this.scanStat = scanStat;
+	}
+	public PrintStatDTO getAllStat() {
+		return allStat;
+	}
+	public void setAllStat(PrintStatDTO allStat) {
+		this.allStat = allStat;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return StringHelper.toJsonString(this);
+	}
 }
