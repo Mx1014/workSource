@@ -2890,8 +2890,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		Long uId = UserContext.current().getUser().getId();
 //		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
-//
-		List<Long> taskIdlist = new ArrayList<Long>();
+		Set<Long> taskIds = new HashSet<>();
+//		List<Long> taskIdlist = new ArrayList<Long>();
 //        for(final Long value : taskIds){
 //
 //        	taskIdlist.add(value);
@@ -2908,27 +2908,63 @@ public class QualityServiceImpl implements QualityService {
 //
 //        Collections.reverse(taskIdlist);
 		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, null);
+		Map<Long, Timestamp> taskRecordTime = new HashMap<>();
 		if(taskRecords != null ) {
 			Long startContainTime = System.currentTimeMillis();
 			for(QualityInspectionTaskRecords record : taskRecords) {
-				if(!taskIdlist.contains(record.getTaskId())) {
-					taskIdlist.add(record.getTaskId());
+//				if(!taskIdlist.contains(record.getTaskId())) {
+//					taskIdlist.add(record.getTaskId());
+//				}
+
+				Timestamp recordTime = taskRecordTime.get(record.getTaskId());
+				if(recordTime == null) {
+					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
+				}else if(recordTime != null && recordTime.before(record.getCreateTime())) {
+					taskRecordTime.put(record.getTaskId(),record.getCreateTime());
 				}
 			}
+
+			taskIds = taskRecordTime.keySet();
 			Long endContainTime = System.currentTimeMillis();
 			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIdlist size = {}, elapse = {}",
-						taskRecords.size(), taskIdlist.size(), endContainTime-startContainTime);
+				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIds size = {}, elapse = {}",
+						taskRecords.size(), taskIds.size(), endContainTime-startContainTime);
 			}
 		}
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        if(taskIdlist.size() > pageSize) {
-			taskIdlist = taskIdlist.subList(0,pageSize);
-        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
+
+		Map<Long, Timestamp> sortedMap = new LinkedHashMap<Long, Timestamp>();
+		List<Map.Entry<Long, Timestamp>> list = new ArrayList<Map.Entry<Long, Timestamp>>(taskRecordTime.entrySet());
+
+		Collections.sort(list, new Comparator<Map.Entry<Long, Timestamp>>() {
+			public int compare(Map.Entry<Long, Timestamp> o1,
+							   Map.Entry<Long, Timestamp> o2) {
+				if(o2.getValue().after(o1.getValue()))
+					return 1;
+				return -1;
+			}
+		});
+
+        if(taskIds.size() > pageSize) {
+			list = list.subList(0,pageSize);
+			response.setNextPageAnchor(list.get(list.size()-1).getKey());
+
+//			taskIdlist = taskIdlist.subList(0,pageSize);
+//        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
         }
+
+		Iterator<Map.Entry<Long, Timestamp>> iter = list.iterator();
+		Map.Entry<Long, Timestamp> tmpEntry = null;
+		while (iter.hasNext()) {
+			tmpEntry = iter.next();
+			sortedMap.put(tmpEntry.getKey(), tmpEntry.getValue());
+		}
+
+		taskIds = sortedMap.keySet();
        
-		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIdlist);
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIds);
+
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
         	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
@@ -2945,9 +2981,15 @@ public class QualityServiceImpl implements QualityService {
 		for(QualityInspectionTaskRecords record : records) {
 			populateRecordAttachements(record, record.getAttachments());
 		}
-        
+
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
-		response.setTasks(dtoList);
+		Map<Long, QualityInspectionTaskDTO> tasksMap = new HashMap<>();
+		dtoList.forEach(dto -> {
+			tasksMap.put(dto.getId(), dto);
+		});
+
+		List<QualityInspectionTaskDTO> sortDto = sortedMap.entrySet().stream().map(map -> tasksMap.get(map.getKey())).collect(Collectors.toList());
+		response.setTasks(sortDto);
 		return response;
 	}
 

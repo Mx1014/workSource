@@ -114,6 +114,7 @@ public interface QualityProvider {
 	List<QualityInspectionTaskRecords> listRecordsByOperatorId(Long operatorId, Timestamp createTime);
 
 	List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds);
+	List<QualityInspectionTasks> listTaskByIds(Set<Long> taskIds);
 	List<QualityInspectionTasks> listTaskByParentId(Long parentId);
 
 	void createQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);

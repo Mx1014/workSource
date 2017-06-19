@@ -795,7 +795,6 @@ public class QualityProviderImpl implements QualityProvider {
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {
 
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionTaskRecords.class));
-		
 		record.setId(id);
 		record.setProcessTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		record.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -2106,6 +2105,21 @@ public class QualityProviderImpl implements QualityProvider {
 			return null;
 		});
 		
+		return result;
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listTaskByIds(Set<Long> taskIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.in(taskIds));
+
+		List<QualityInspectionTasks> result = new ArrayList<QualityInspectionTasks>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTasks.class));
+			return null;
+		});
+
 		return result;
 	}
 
