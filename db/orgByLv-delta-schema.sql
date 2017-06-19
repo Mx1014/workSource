@@ -14,5 +14,6 @@ CREATE TABLE `eh_user_organization` (
   `namespace_id` int(11) DEFAULT '0',
   `create_time` datetime,
   `visible_flag` tinyint(4) DEFAULT '0' COMMENT '0 show 1 hide',
+  `update_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
