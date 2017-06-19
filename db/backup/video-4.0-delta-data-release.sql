@@ -1,4 +1,4 @@
--- 资源预订短信模板，add by wh, 20161219
+-- 视频会议短信模板，add by wh, 20170615
 SET @id =(SELECT MAX(id) FROM eh_locale_templates);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@id:=@id+1),'sms.default.yzx','51','zh_CN','视频会-左邻','53378','0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@id:=@id+1),'sms.default.yzx','52','zh_CN','视测会-左邻','53385','0');
