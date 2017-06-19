@@ -3584,7 +3584,6 @@ CREATE TABLE `eh_flow_cases` (
   `applier_phone` VARCHAR(64),
   `flow_main_id` BIGINT NOT NULL,
   `flow_version` INTEGER NOT NULL,
-
   `apply_user_id` BIGINT NOT NULL,
   `process_user_id` BIGINT NOT NULL DEFAULT 0,
   `refer_id` BIGINT NOT NULL DEFAULT 0,
@@ -3600,7 +3599,6 @@ CREATE TABLE `eh_flow_cases` (
   `content` TEXT,
   `evaluate_score` INTEGER NOT NULL DEFAULT 0,
   `title` VARCHAR(64),
-  
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
   `string_tag3` VARCHAR(128),
@@ -3612,8 +3610,9 @@ CREATE TABLE `eh_flow_cases` (
   `integral_tag4` BIGINT NOT NULL DEFAULT 0,
   `integral_tag5` BIGINT NOT NULL DEFAULT 0,
   `organization_id` BIGINT COMMENT 'the same as eh_flows organization_id',
+  `applier_organization_id` BIGINT COMMENT 'applier current organization_id',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_flow_evaluate_items`;
@@ -5396,8 +5395,10 @@ CREATE TABLE `eh_organization_community_requests` (
   `string_tag3` VARCHAR(128),
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  PRIMARY KEY (`id`),
+  KEY `member_id` (`member_id`),
+  KEY `community_id` (`community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 --
@@ -5827,7 +5828,7 @@ CREATE TABLE `eh_organizations` (
   `size` INTEGER COMMENT 'job level size',
   `creator_uid` BIGINT,
   `operator_uid` BIGINT,
-  
+  `set_admin_flag` TINYINT DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `i_eh_org_name_level` (`name`,`level`),
   KEY `i_eh_org_path` (`path`),
@@ -8869,7 +8870,7 @@ CREATE TABLE `eh_service_alliances` (
   `description` TEXT,
   `poster_uri` VARCHAR(128),
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
-  `default_order` INTEGER,
+  `default_order` BIGINT COMMENT 'default value is id',
   `longitude` DOUBLE,
   `latitude` DOUBLE,
   `geohash` VARCHAR(32),
@@ -8897,8 +8898,9 @@ CREATE TABLE `eh_service_alliances` (
   `support_type` TINYINT NOT NULL DEFAULT 2 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
   `button_title` VARCHAR(64),
   `description_height` INTEGER DEFAULT 2 COMMENT '0:not collapse , N: collapse N lines',
+  `display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0:hide,1:display',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- 
@@ -9337,6 +9339,62 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_talent_categories` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `name` VARCHAR(64),
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_talent_query_histories`;
+
+CREATE TABLE `eh_talent_query_histories` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `keyword` VARCHAR(64),
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_talents`;
+
+CREATE TABLE `eh_talents` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
+  `name` VARCHAR(64),
+  `avatar_uri` VARCHAR(2048),
+  `phone` VARCHAR(32),
+  `gender` TINYINT,
+  `position` VARCHAR(64),
+  `category_id` BIGINT,
+  `experience` INTEGER,
+  `graduate_school` VARCHAR(64),
+  `degree` TINYINT,
+  `remark` TEXT,
+  `enabled` TINYINT,
+  `default_order` BIGINT,
+  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 科技园同步数据备份表，add by tt, 20161212
 DROP TABLE IF EXISTS `eh_techpark_syncdata_backup`;
