@@ -10802,7 +10802,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // 开始校验
         for (ImportOrganizationPersonnelFilesDTO data : list) {
-            log = this.checkImportOrganizationMembers(data,deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
+            log = this.checkImportOrganizationMembers(data, deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
             if (log != null) {
                 errorDataLogs.add(log);
                 continue;
@@ -10991,8 +10991,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(!StringUtils.isEmpty(data.getEmergencyContact())){
-            if(!AccountValidatorUtil.isMobile(data.getEmergencyContact())){
+        if (!StringUtils.isEmpty(data.getEmergencyContact())) {
+            if (!AccountValidatorUtil.isMobile(data.getEmergencyContact())) {
                 LOGGER.warn("Wrong emergencyContact format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Wrong emergencyContact format");
@@ -11039,11 +11039,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else {
+        } else {
             return null;
         }
     }
-    private Integer checkEducationQualification(ImportOrganizationPersonnelFilesDTO data){
+
+    private Integer checkEducationQualification(ImportOrganizationPersonnelFilesDTO data) {
         if (!StringUtils.isEmpty(data.getSchoolName()) && !StringUtils.isEmpty(data.getDegree())
                 && !StringUtils.isEmpty(data.getMajor()) && !StringUtils.isEmpty(data.getEnrollmentTime())
                 && !StringUtils.isEmpty(data.getGraduationTime())) {
@@ -11052,7 +11053,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 && StringUtils.isEmpty(data.getMajor()) && StringUtils.isEmpty(data.getEnrollmentTime())
                 && StringUtils.isEmpty(data.getGraduationTime())) {
             return 2;
-        }else
+        } else
             return 0;
     }
 
@@ -11096,7 +11097,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-    private Integer checkWorkExperiencesQualification(ImportOrganizationPersonnelFilesDTO data){
+    private Integer checkWorkExperiencesQualification(ImportOrganizationPersonnelFilesDTO data) {
         if (!StringUtils.isEmpty(data.getEnterpriseName()) && !StringUtils.isEmpty(data.getPosition())
                 && !StringUtils.isEmpty(data.getJobType()) && !StringUtils.isEmpty(data.getEntryTime())
                 && !StringUtils.isEmpty(data.getDepartureTime())) {
@@ -11105,7 +11106,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 && StringUtils.isEmpty(data.getJobType()) && StringUtils.isEmpty(data.getEntryTime())
                 && StringUtils.isEmpty(data.getDepartureTime())) {
             return 2;
-        }else{
+        } else {
             return 0;
         }
     }
@@ -11113,7 +11114,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (this.checkInsurancesQualification(data).equals(0)){
+        if (this.checkInsurancesQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getInsuranceName())) {
                 LOGGER.warn("Organization member insuranceName is null. data = {}", data);
                 log.setData(data);
@@ -11145,7 +11146,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -11163,10 +11164,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             return 0;
         }
     }
+
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(this.checkContractsQualification(data).equals(0)){
+        if (this.checkContractsQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getContractNumber())) {
                 LOGGER.warn("Organization member contractNumber is null. data = {}", data);
                 log.setData(data);
@@ -11186,7 +11188,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -11203,7 +11205,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
-    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportDateFormat(ImportOrganizationPersonnelFilesDTO data){
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportDateFormat(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
         try {
@@ -11228,7 +11230,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 java.sql.Date.valueOf(data.getContractStartTime());
             if (!StringUtils.isEmpty(data.getContractEndTime()))
                 java.sql.Date.valueOf(data.getContractEndTime());
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.warn("Organization member date format error. data = {}", data);
             log.setData(data);
             log.setErrorLog("Organization member date format error");
