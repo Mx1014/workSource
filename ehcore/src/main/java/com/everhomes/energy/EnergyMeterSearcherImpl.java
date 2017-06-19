@@ -8,6 +8,7 @@ import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
+import com.mysql.jdbc.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -119,8 +120,8 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("meterNumber", 5.0f)
-                    .field("name", 2.0f);
+//                    .field("meterNumber", 5.0f)
+                    .field("name", 5.0f);
         }
         /*FilterBuilder fb = new AndFilterBuilder();
         if (cmd.getCommunityId() != null) {
@@ -145,6 +146,11 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         }*/
 
         List<FilterBuilder> filterBuilders = new ArrayList<>();
+        //编号精确搜索 by xiongying20170525
+        if (!StringUtils.isNullOrEmpty(cmd.getMeterNumber())) {
+            TermFilterBuilder meterNumberTermFilter = FilterBuilders.termFilter("meterNumber", cmd.getMeterNumber().toLowerCase());
+            filterBuilders.add(meterNumberTermFilter);
+        }
         if (cmd.getCommunityId() != null) {
             TermFilterBuilder communityIdTermFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
             filterBuilders.add(communityIdTermFilter);

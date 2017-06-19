@@ -369,3 +369,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 51000, '', 'EhNamespaces', 999978, 2);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `default_order`, `apply_policy`)
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 999978, 51000, '举报管理', NULL, 2);
+
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES('user.agent.blacklist','Apache-HttpClient','UserAgent黑名单，含该关键字的UserAgent会被禁止访问，多个关键字使用逗号分隔','0',NULL);

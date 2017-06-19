@@ -99,4 +99,7 @@ public interface ForumService {
 	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd); 
 	ListUserGroupPostResponse listUserGroupPost(VisibilityScope scope, Long communityId, List<Long> forumIdList, Long userId, Long pageAnchor, Integer pageSize); 
+	
+	//发布暂存的帖子
+	void publisTopic(PublishTopicCommand cmd);
 }

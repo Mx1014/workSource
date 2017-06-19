@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
- * <li>USER_NAME: 当前用户名</li>
+ * <li>USER_NAME: 当前用户名  </li>
  * <li>USER_PHONE: 当前用户手机号</li>
  * <li>USER_COMPANY: 用户所在公司</li>
  * <li>SOURCE_ID: 来源id</li>
@@ -27,7 +27,7 @@ public enum GeneralFormDataSourceType {
 	LEASE_PROMOTION_DESCRIPTION("LEASE_PROMOTION_DESCRIPTION")
 	/*----- 园区入驻 ----*/
 	;
-	
+
 	private String code;
 	
 	private GeneralFormDataSourceType(String code){

@@ -16,10 +16,12 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.community.ResourceCategoryType;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
@@ -68,7 +70,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
-	
+
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
+	 
 	@Autowired
 	private OrganizationService organizationService;
 	
@@ -100,11 +105,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> privilegeIds = new ArrayList<>();
 
 		List<Long> ids = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		LOGGER.info("Get user privilegeIds={}", StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
-
 		ids = this.getAllResourcePrivilegeIds(cmd.getOrganizationId(), user.getId());
+		LOGGER.info("Get All resource privilegeIds={}", StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
@@ -739,22 +747,30 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 		List<Long> ids = this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
+		LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", organizationId, userId, StringHelper.toJsonString(ids));
+
 		if(null != ids){
 			privilegeIds.addAll(ids);
 		}
 		for (CommunityDTO communityDTO:communityDTOs) {
 			List<Long> pIds = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
+			LOGGER.info("Get COMMUNITY ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), userId, StringHelper.toJsonString(ids));
+
 			if(null != pIds){
 				privilegeIds.addAll(pIds);
 			}
 			if(pIds.size() == 0){
 				for (OrganizationDTO dto: organizationDTOs) {
 					ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), dto.getId());
+					LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), dto.getId(), StringHelper.toJsonString(ids));
+
 					if(null != ids){
 						privilegeIds.addAll(ids);
 					}
 				}
 				ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), organizationId);
+				LOGGER.info("Get ORGANIZATIONS ownerId={}, roleId={}, privilegeIds={}", communityDTO.getId(), organizationId, StringHelper.toJsonString(ids));
+
 				if(null != ids){
 					privilegeIds.addAll(ids);
 				}
@@ -1312,6 +1328,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 * 分配权限
 		 */
 		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
+		
+		// 增加管理员，修改organization表中的setAdminFlag标记
+		if (org.getSetAdminFlag() == null || org.getSetAdminFlag().byteValue() == TrueOrFalseFlag.FALSE.getCode()) {
+			org.setSetAdminFlag(TrueOrFalseFlag.TRUE.getCode());
+			organizationProvider.updateOrganization(org);
+			organizationSearcher.feedDoc(org);
+		}
 	}
 	
 	@Override
@@ -1549,6 +1572,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
 		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
+		//删除管理员修改organization表setAdminFlag标记
+		Organization organization = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if (organization != null && (organization.getSetAdminFlag() == null || organization.getSetAdminFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode())) {
+			ListServiceModuleAdministratorsCommand listCmd = ConvertHelper.convert(cmd, ListServiceModuleAdministratorsCommand.class);
+			List<OrganizationContactDTO> list = listOrganizationAdministrators(listCmd);
+			if (list == null || list.size() == 0) {
+				organization.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
+				organizationProvider.updateOrganization(organization);
+				organizationSearcher.feedDoc(organization);
+			}
+		}
 	}
 
 	@Override

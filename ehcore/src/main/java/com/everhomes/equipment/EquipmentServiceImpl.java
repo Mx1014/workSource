@@ -7,6 +7,10 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,7 @@ import com.everhomes.util.*;
 
 import com.everhomes.util.doc.DocUtil;
 import com.google.zxing.WriterException;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -117,7 +122,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 	final String downloadDir ="\\download\\";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentServiceImpl.class);
-	
+
+	DateTimeFormatter dateSF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 	@Autowired
 	private EquipmentStandardSearcher equipmentStandardSearcher;
 	
@@ -1312,7 +1318,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		SearchEquipmentAccessoriesResponse accessories = equipmentAccessoriesSearcher.query(cmd);
 		List<EquipmentAccessoriesDTO> dtos = accessories.getAccessories();
 		
-		URL rootPath = RentalServiceImpl.class.getResource("/");
+		URL rootPath = EquipmentServiceImpl.class.getResource("/");
 		String filePath =rootPath.getPath() + this.downloadDir ;
 		File file = new File(filePath);
 		if(!file.exists())
@@ -2473,7 +2479,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private List<String> importEquipmentsData(ImportOwnerCommand cmd, List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
-
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -2484,10 +2489,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setEquipmentModel(s[3]);
 				equipment.setParameter(s[4]);
 				equipment.setManufacturer(s[5]);
-				equipment.setLocation(s[7]);
-				equipment.setQuantity(Long.valueOf(s[8]));
-				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
-					equipment.setRemarks(s[9]);
+				if(!StringUtils.isBlank(s[6])) {
+					equipment.setInstallationTime(dateStrToTimestamp(s[6]));
+				}
+				if(!StringUtils.isBlank(s[7])) {
+					equipment.setRepairTime(dateStrToTimestamp(s[7]));
+				}
+				equipment.setLocation(s[8]);
+				equipment.setQuantity(Long.valueOf(s[9]));
+				if(!StringUtils.isEmpty(s[10]) && !"null".equals(s[10])) {
+					equipment.setRemarks(s[10]);
 				}
 				equipment.setNamespaceId(namespaceId);
 				equipment.setOwnerType(cmd.getOwnerType());
@@ -2508,6 +2519,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		return errorDataLogs;
 		
+	}
+
+	private Timestamp dateStrToTimestamp(String str) {
+		LocalDate localDate = LocalDate.parse(str,dateSF);
+		Timestamp ts = new Timestamp(Date.valueOf(localDate).getTime());
+		return ts;
 	}
 	
 	private List<String> importEquipmentAccessoriesData(ImportOwnerCommand cmd, List<String> list, Long userId){
@@ -2591,7 +2608,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			sb.append(r.getH()).append("||");
 			sb.append(r.getI()).append("||");
 			sb.append(r.getJ()).append("||");
-				
+			sb.append(r.getK()).append("||");
+
 			
 			result.add(sb.toString());
 		}
@@ -2745,6 +2763,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (equipment != null) {
 				dto.setEquipmentLocation(equipment.getLocation());
 				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+				dto.setEquipmentName(equipment.getName());
 			}
 
 			return dto;
@@ -2924,20 +2943,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 					if(maps != null && maps.size() > 0) {
 						for(OrganizationJobPositionMap map : maps) {
 							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(map.getOrganizationId());
+							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
 							group.setPositionId(map.getJobPositionId());
 							groupDtos.add(group);
 
-							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-							if(groupOrg != null) {
-								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+//							if(groupOrg != null) {
+//								//取path后的第一个路径 为顶层公司 by xiongying 20170323
 								String[] path = organization.getPath().split("/");
 								Long organizationId = Long.valueOf(path[1]);
-
-								group.setGroupId(organizationId);
-								group.setPositionId(map.getJobPositionId());
-								groupDtos.add(group);
-							}
+								ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+								topGroup.setGroupId(organizationId);
+								topGroup.setPositionId(map.getJobPositionId());
+								groupDtos.add(topGroup);
+//							}
 
 						}
 
@@ -3666,7 +3685,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
 				BASE64Encoder encoder=new BASE64Encoder();
 				dataMap.put("qrCode", encoder.encode(data));
@@ -3698,17 +3717,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto1.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto1.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto1.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
 				BASE64Encoder encoder=new BASE64Encoder();
 				dataMap.put("qrCode1", encoder.encode(data));
 			}
 
 			if(QRCodeFlag.ACTIVE.equals(QRCodeFlag.fromStatus(dto2.getQrCodeFlag()))) {
-				ByteArrayOutputStream out = generateQRCode(dto2.getQrCodeToken());
+				ByteArrayOutputStream out = generateQRCode(Base64.encodeBase64String(dto2.getQrCodeToken().getBytes()));
 				byte[] data=out.toByteArray();
 				BASE64Encoder encoder=new BASE64Encoder();
 				dataMap.put("qrCode2", encoder.encode(data));
+//				dataMap.put("qrCode2", data.toString());
 			}
 
 			String savePath = filePath + dto1.getId()+ "-" + dto1.getName() +
@@ -3755,7 +3775,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public StatTodayEquipmentTasksResponse statTodayEquipmentTasks(StatTodayEquipmentTasksCommand cmd) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if(cmd.getDateTime() == null) {
+			cmd.setDateTime(DateHelper.currentGMTTime().getTime());
+		}
+		cal.setTime(new Timestamp(cmd.getDateTime()));
 
 		TasksStatData stat = equipmentProvider.statDaysEquipmentTasks(cmd.getTargetId(), cmd.getTargetType(),
 				cmd.getInspectionCategoryId(), getDayBegin(cal, 0), getDayEnd(cal, 0));
@@ -3862,6 +3885,21 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(tasks != null && tasks.size() > 0) {
 			List<EquipmentTaskDTO> dtos =tasks.stream().map(task -> {
 				EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				if(equipment != null) {
+					dto.setEquipmentName(equipment.getName());
+					dto.setEquipmentLocation(equipment.getLocation());
+				}
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				if(standard != null) {
+					dto.setTaskType(standard.getStandardType());
+				}
+				if(task.getExecutorId() != null && task.getExecutorId() != 0) {
+					List<OrganizationMember> executors = organizationProvider.listOrganizationMembersByUId(task.getExecutorId());
+					if(executors != null && executors.size() > 0) {
+						dto.setExecutorName(executors.get(0).getContactName());
+					}
+				}
 				return dto;
 			}).collect(Collectors.toList());
 

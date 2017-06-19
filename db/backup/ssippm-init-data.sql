@@ -543,4 +543,7 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 -- redmine 9431 add by xiongying20170504
 update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14937991534523928845%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id = 999977 and item_label = '嘀嗒咖啡';
 
+-- redmine 10276 add by dengs 20170522
+update eh_launch_pad_items set action_data ='{"itemLocation":"/home","itemGroup":"Bizs"}' WHERE namespace_id = '999977' AND item_name = 'More';
+
 SET FOREIGN_KEY_CHECKS = 1;

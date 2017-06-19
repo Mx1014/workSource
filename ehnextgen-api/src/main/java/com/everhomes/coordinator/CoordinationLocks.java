@@ -65,12 +65,17 @@ public enum CoordinationLocks {
     WARNING_QUALITY_TASK("warning.quality.task"),
 
     OS_OBJECT("os.object"),
-
     ENERGY_METER_PRICE_CONFIG("energyMeter.price.config"),
+ 
+    UPDATE_EXPRESS_ORDER("update.express.order"),
 
-    USER_NOTIFICATION_SETTING("user.notification.setting")
+    USER_NOTIFICATION_SETTING("user.notification.setting"),
+    UPDATE_WAREHOUSE("warehouse.update"),
+    UPDATE_WAREHOUSE_CATEGORY("warehouse.category.update"),
+    UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
+
+    FLOW_CASE_UPDATE("flowCase.update"),
     ;
-
 
     private String code;
     private CoordinationLocks(String code) {

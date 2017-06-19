@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：场所id</li>   
  * <li>rentalBillId：订单id</li>
  * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
- * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li> 
+ * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li>
  * </ul>
  */
 public class AddRentalBillItemCommand {
@@ -24,7 +24,7 @@ public class AddRentalBillItemCommand {
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
 	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> rentalAttachments; 
+	private List<AttachmentDTO> rentalAttachments;
 
 	@Override
 	public String toString() {
@@ -64,8 +64,6 @@ public class AddRentalBillItemCommand {
 
 	public void setRentalAttachments(List<AttachmentDTO> rentalAttachments) {
 		this.rentalAttachments = rentalAttachments;
-	} 
- 
- 
- 
+	}
+
 }

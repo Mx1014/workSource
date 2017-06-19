@@ -37,4 +37,18 @@ public class SiteNumberDTO {
 		this.groupLockFlag = groupLockFlag;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		SiteNumberDTO that = (SiteNumberDTO) o;
+
+		return siteNumber != null ? siteNumber.equals(that.siteNumber) : that.siteNumber == null;
+	}
+
+	@Override
+	public int hashCode() {
+		return siteNumber != null ? siteNumber.hashCode() : 0;
+	}
 }

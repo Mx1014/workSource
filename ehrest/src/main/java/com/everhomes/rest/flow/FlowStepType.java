@@ -14,8 +14,17 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowStepType {
-	NO_STEP("no_step"), START_STEP("start_step"), APPROVE_STEP("approve_step"), REJECT_STEP("reject_step"), TRANSFER_STEP("transfer_step"), COMMENT_STEP("comment_step"),
-	ABSORT_STEP("absort_step"), REMINDER_STEP("reminder_step"), EVALUATE_STEP("evaluate_step"), END_STEP("end_step");
+	NO_STEP("no_step"),
+    START_STEP("start_step"),
+    APPROVE_STEP("approve_step"),
+    REJECT_STEP("reject_step"),
+    TRANSFER_STEP("transfer_step"),
+    COMMENT_STEP("comment_step"),
+	ABSORT_STEP("absort_step"),
+    REMINDER_STEP("reminder_step"),
+    EVALUATE_STEP("evaluate_step"),
+    END_STEP("end_step"),
+    ;
 	
 	private String code;
     private FlowStepType(String code) {

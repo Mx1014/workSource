@@ -9,11 +9,13 @@ import com.everhomes.util.StringHelper;
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
  * <li>fieldExtra: 不同的字段类型，还有额外的数据信息。
- * 数字类型：{@link GeneralFormNumDTO}
- * 文本类型：{@link GeneralFormTextDTO}
- * 图片类型：{@link GeneralFormImageDTO}
- * 文件类型：{@link GeneralFormFileDTO}
- * </li>
+ * 数字类型：{@link com.everhomes.rest.general_approval.GeneralFormNumDTO}
+ * 文本类型：{@link com.everhomes.rest.general_approval.GeneralFormTextDTO}
+ * 图片类型：{@link com.everhomes.rest.general_approval.GeneralFormImageDTO}
+ * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO}
+ * 日期类型：{@link com.everhomes.rest.general_approval.GeneralFormDateDTO}
+ * 下拉框类型：{@link com.everhomes.rest.general_approval.GeneralFormDropBoxDTO}
+ * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO}</li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
  * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link GeneralFormDataVisibleType}</li>

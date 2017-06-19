@@ -6,6 +6,7 @@ import com.everhomes.util.RuntimeErrorException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -30,14 +31,24 @@ public class HttpUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
 
 
+
+    /**
+     *
+     * @param url
+     * @param params json格式 content-type : application/json
+     * @return
+     */
     public static String post(String url, JSONObject params) {
+        //设置body json格式
+        Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", "application/json");
         return post(url, params, null);
     }
 
     /**
      *
      * @param url
-     * @param params json格式 content-type : application/json
+     * @param params
      * @param headers
      * @return
      */
@@ -58,8 +69,6 @@ public class HttpUtils {
         try {
             StringEntity stringEntity = new StringEntity(params.toString(), StandardCharsets.UTF_8);
             httpPost.setEntity(stringEntity);
-            //设置body json格式
-            httpPost.addHeader("content-type", "application/json");
 
             if (null != headers) {
                 Set<Map.Entry<String, String>> headersEntry = headers.entrySet();
@@ -70,7 +79,9 @@ public class HttpUtils {
 
             response = httpclient.execute(httpPost);
 
-            int status = response.getStatusLine().getStatusCode();
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
 
             if(status == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();
@@ -138,7 +149,9 @@ public class HttpUtils {
             }
 
             response = httpclient.execute(httpPost);
-            int status = response.getStatusLine().getStatusCode();
+            StatusLine statusLine = response.getStatusLine();
+            LOGGER.info("Parking responseCode={}, responseProtocol", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
+            int status = statusLine.getStatusCode();
 
             if(status == HttpStatus.SC_OK) {
                 HttpEntity entity = response.getEntity();

@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>userId: 公司通讯录成员对应的用户ID，要在公司认证过的用户才有</li>
  * <li>tag: 标签</li>
  * <li>contactOf: 是否是公司通讯录成员，1-是(成员状态为待认证时也置为1，也就是服务器有记录则为1，还需要根据<code>contactStatus</code>来判断是否是认证成员)、0-否</li>
- * <li>contactStatus: 公司通讯录成员状态，{@link com.everhomes.rest.enterprise.EnterpriseContactStatus}</li>
+ * <li>contactStatus: 公司通讯录成员状态，{@link com.everhomes.rest.organization.OrganizationMemberStatus}</li>
  * <li>contactNickName: 公司通讯录成员在公司内的昵称，是公司通讯录成员时字段才有效</li>
  * <li>contactRole: 公司通讯录成员角色，用于判断是否为管理员，参考{@link com.everhomes.rest.acl.RoleConstants}</li>
  * <li>creatorUid: 公司实体创建者ID</li>
