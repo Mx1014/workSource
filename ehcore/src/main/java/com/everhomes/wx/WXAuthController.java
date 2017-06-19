@@ -296,18 +296,9 @@ public class WXAuthController {// extends ControllerBase
         callbackUrl = appendParamToUrl(callbackUrl, params);
 
         String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-//        String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-//                + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
-//                URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
-
-        //test start
-
         String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
-                + "&redirect_uri=%s&response_type=code&scope=snsapi_base&state=%s#wechat_redirect", appId,
+                + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
                 URLEncoder.encode(callbackUrl, "UTF-8"), sessionId);
-
-        //test end
-
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.info("Process weixin auth request(send auth to weixin), authorizeUrl={}, callbackUrl={}", authorizeUri, callbackUrl);

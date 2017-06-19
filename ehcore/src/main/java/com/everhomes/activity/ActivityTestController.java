@@ -68,7 +68,7 @@ public class ActivityTestController extends ControllerBase {
      */
     @RequestMapping("testCookie")
     @RequireAuthentication(false)
-    @RestReturn(value=Cookie.class)
+    @RestReturn(value=String.class)
     public RestResponse testCookie(HttpServletRequest request){
         Cookie cookie = findCookieInRequest(name, request);
         if(cookie == null){
@@ -77,7 +77,7 @@ public class ActivityTestController extends ControllerBase {
             System.out.println("cookie name: " + cookie.getName() + "cookie value: " +  cookie.getValue());
         }
 
-        RestResponse res = new RestResponse(cookie);
+        RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
