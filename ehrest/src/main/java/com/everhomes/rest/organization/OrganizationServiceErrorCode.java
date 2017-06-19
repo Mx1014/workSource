@@ -65,10 +65,10 @@ public interface OrganizationServiceErrorCode {
     int ERROR_EMPLOYEETIME_ISNULL = 700007; //  转正日期未填写
     int ERROR_EMERGENCYCONTACT_FORMAT = 700008; //  电话号码格式错误
     int ERROR_SCHOOLNAME_ISNULL =700009;    //  学校名字为空
-    int ERROR_DEGREE_ISNULL = 700010;   //  学位名字为空
+    int ERROR_DEGREE_ISNULL = 700010;   //  学历为空
     int ERROR_MAJOR_ISNULL = 700011;    //  专业为空
-    int ERROR_STARTTIME_ISNULL = 700012;    //  起始日期为空
-    int ERROR_ENDTIME_ISNULL =700013;   //  结束日期为空
+    int ERROR_STARTTIME_ISNULL = 700012;    //  起始日期未填写
+    int ERROR_ENDTIME_ISNULL =700013;   //  结束日期未填写
     int ERROR_ENTERPRISENAME_ISNULL = 700014;   //  企业名字为空
     int ERROR_POSITION_ISNULL = 700015; //  职位为空
     int ERROR_JOBTYPE_ISNULL =700016;   //  职位类型为空
@@ -76,5 +76,5 @@ public interface OrganizationServiceErrorCode {
     int ERROR_INSURANCEENTERPRISE_ISNULL = 700018;  //  保险企业名为空
     int ERROR_INSURANCENUMBER_ISNULL = 700019;  //  保险号为空
     int ERROR_CONTRACTNUMBER_ISNULL = 700020;   //  合同号为空
-
+    int ERROR_DATA_FORMAT_WRONG = 700021;   //  日期格式错误
 }

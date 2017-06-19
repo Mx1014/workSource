@@ -10069,7 +10069,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
-        User user =UserContext.current().getUser();
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+	    User user =UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
@@ -10096,6 +10102,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.createOranizationMemberEducationInfo(education);
 
 //        this.addProfileLogs(education.getDetailId(),);
+//        LOGGER.debug("No organization community filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
         return ConvertHelper.convert(education, OrganizationMemberEducationsDTO.class);
     }
 
@@ -10924,6 +10931,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member checkInTime is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CHECKINTIME_ISNULL);
             return log;
+        }else{
+            try{
+                java.sql.Date.valueOf(data.getCheckInTime());
+            }catch (Exception e){
+                LOGGER.warn("Organization member checkInTime format error. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Organization member checkInTime format error");
+                log.setCode(OrganizationServiceErrorCode.ERROR_DATA_FORMAT_WRONG);
+                return log;
+            }
         }
 
         if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
