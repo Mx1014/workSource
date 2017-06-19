@@ -10069,7 +10069,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
-
 /*        try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -10898,7 +10897,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member department Non-existent. departmentName = {}", deptName);
                     log.setData(data);
                     log.setErrorLog("Organization member department Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_DEPARTMENT_NOT_EXIST);
                     return log;
                 }
             }
@@ -10918,7 +10917,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member jobPosition Non-existent. jobPositionName = {}", jobPositionName);
                     log.setData(data);
                     log.setErrorLog("Organization member jobPosition Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_POSITION_NOT_EXIST);
                     return log;
                 }
             }
@@ -10964,7 +10963,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member jobLevel Non-existent. jobLevelName = {}", jobLevelName);
                     log.setData(data);
                     log.setErrorLog("Organization member jobLevel Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_LEVEL_NOT_EXIST);
                     return log;
                 }
             }
