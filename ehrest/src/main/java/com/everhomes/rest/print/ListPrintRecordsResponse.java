@@ -3,6 +3,8 @@ package com.everhomes.rest.print;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * 
  * <ul>
@@ -14,6 +16,7 @@ import java.util.List;
  */
 public class ListPrintRecordsResponse {
 	private Long nextPageAnchor;
+	@ItemType(PrintRecordDTO.class)
 	private List<PrintRecordDTO> printRecordsList;
 
 }

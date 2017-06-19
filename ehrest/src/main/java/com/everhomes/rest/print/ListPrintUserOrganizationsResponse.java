@@ -3,6 +3,8 @@ package com.everhomes.rest.print;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * 
  * <ul>
@@ -12,5 +14,6 @@ import java.util.List;
  *  @author:dengs 2017年6月16日
  */
 public class ListPrintUserOrganizationsResponse {
+	@ItemType(String.class)
 	private List<String> organizationList;
 }

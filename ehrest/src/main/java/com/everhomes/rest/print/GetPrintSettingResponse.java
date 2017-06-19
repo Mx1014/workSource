@@ -3,6 +3,8 @@ package com.everhomes.rest.print;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * 
  * <ul>
@@ -20,6 +22,8 @@ public class GetPrintSettingResponse {
 	private PrintSettingPaperSizePriceDTO paperSizePriceDTO;
 	private PrintSettingColorTypeDTO colorTypeDTO;
 	private String hotline;
+	@ItemType(String.class)
 	private List<String> printCourseList;
+	@ItemType(String.class)
 	private List<String> scanCopyCourseList;
 }
