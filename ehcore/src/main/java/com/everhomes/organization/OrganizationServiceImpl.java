@@ -10927,13 +10927,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             return log;
         }
 
-        if (data.getEmployeeStatus().equals("否")) {
-            if (StringUtils.isEmpty(data.getEmploymentTime())) {
-                LOGGER.warn("Organization member employeeTime is null. data = {}", data);
-                log.setData(data);
-                log.setErrorLog("Organization member employeeTime is null");
-                log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEETIME_ISNULL);
-                return log;
+        if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
+            if (data.getEmployeeStatus().equals("否")) {
+                if (StringUtils.isEmpty(data.getEmploymentTime())) {
+                    LOGGER.warn("Organization member employeeTime is null. data = {}", data);
+                    log.setData(data);
+                    log.setErrorLog("Organization member employeeTime is null");
+                    log.setCode(OrganizationServiceErrorCode.ERROR_EMPLOYEETIME_ISNULL);
+                    return log;
+                }
             }
         } else {
             LOGGER.warn("Organization member employeeStatus is null. data = {}", data);
