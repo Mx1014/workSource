@@ -1,23 +1,13 @@
 package com.everhomes.flow.vars;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowVariableTextResolver;
+import com.everhomes.flow.*;
 import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
-import com.everhomes.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 节点跟踪的 被转交人姓名
@@ -33,8 +23,8 @@ public class FlowVarsTextTrackerTargetTransferName implements FlowVariableTextRe
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
 	
-	@Autowired
-	UserService userService;
+	// @Autowired
+	// UserService userService;
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
@@ -43,7 +33,7 @@ public class FlowVarsTextTrackerTargetTransferName implements FlowVariableTextRe
 			if(sels == null || sels.size() == 0) {
 				return null;
 			}
-			UserInfo ui = userService.getUserSnapshotInfoWithPhone(sels.get(0).getEntityId());
+            UserInfo ui = flowService.getUserInfoInContext(ctx, sels.get(0).getEntityId());
 			if(ui != null) {
 				return ui.getNickName();
 			}
@@ -51,14 +41,12 @@ public class FlowVarsTextTrackerTargetTransferName implements FlowVariableTextRe
 			//获取转交进入节点的日志
 			FlowEventLog log = flowEventLogProvider.getLastNodeEnterStep(ctx.getFlowCase());
 			if(log != null && FlowStepType.TRANSFER_STEP.getCode().equals(log.getButtonFiredStep())) {
-				UserInfo ui = userService.getUserSnapshotInfoWithPhone(log.getFlowUserId());
+                UserInfo ui = flowService.getUserInfoInContext(ctx, log.getFlowUserId());
 				if(ui != null) {
 					return ui.getNickName();
 				}	
 			}
 		}
-		
 		return null;
 	}
-
 }

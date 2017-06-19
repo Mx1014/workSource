@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *                            所管理的片区ID（片区ID实际上为机构ID）；contentCategory选公告/报修/咨询与求助/投诉与建议，actionCategory不填；</li>
  * </ul>
  * <ul>字段：
+ * <li>oldId: 老ID，当暂存过后提交时要传来老的Id用于删除老数据</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -47,9 +48,12 @@ import com.everhomes.util.StringHelper;
  * <li>isVideoSupport: 为空则不开启，为 1 则开启直播 </li>
  * <li>videoUrl: TODO 需要么？</li>
  * <li>maxQuantity: 限制人数</li>
+ * <li>status: 活动状态，0-已删除，1-待确认，2-正常。用于暂存或者立刻发布，不传默认2立刻发布，参考{@link com.everhomes.rest.forum.PostStatus}</li>
  * </ul>
  */
 public class NewTopicCommand {
+	private Long oldId;
+	
     private String ownerType;
 
     private Long ownerId;
@@ -107,6 +111,16 @@ public class NewTopicCommand {
     private Byte mediaDisplayFlag;
     
     private Integer maxQuantity;
+    
+    private Byte status;
+    
+	public Long getOldId() {
+		return oldId;
+	}
+
+	public void setOldId(Long oldId) {
+		this.oldId = oldId;
+	}
 
 	public Integer getMaxQuantity() {
 		return maxQuantity;
@@ -321,7 +335,15 @@ public class NewTopicCommand {
         this.currentOrgId = currentOrgId;
     }
 
-    @Override
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

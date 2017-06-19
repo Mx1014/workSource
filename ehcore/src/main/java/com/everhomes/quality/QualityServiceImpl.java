@@ -27,7 +27,12 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.rest.equipment.*;
 import com.everhomes.rest.quality.*;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
+import com.everhomes.rest.quality.StandardGroupDTO;
+import com.everhomes.rest.quality.TaskCountDTO;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -74,7 +79,6 @@ import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -752,6 +756,15 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
+	public QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
+		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(cmd.getTaskId());
+		if(task != null)
+			return ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
+
+		return null;
+	}
+
+	@Override
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
 		
@@ -900,17 +913,23 @@ public class QualityServiceImpl implements QualityService {
 					if(maps != null && maps.size() > 0) {
 						for(OrganizationJobPositionMap map : maps) {
 							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-							group.setGroupId(map.getOrganizationId());
+							group.setGroupId(organization.getParentId());//具体岗位所属的部门公司组等 by xiongying20170619
 							group.setPositionId(map.getJobPositionId());
 							groupDtos.add(group);
 
-							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
-							if(groupOrg != null) {
-								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
-								group.setPositionId(map.getJobPositionId());
-								groupDtos.add(group);
-							}
-
+//							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+//							if(groupOrg != null) {
+//								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
+//								group.setPositionId(map.getJobPositionId());
+//								groupDtos.add(group);
+//							}
+							//取path后的第一个路径 为顶层公司 by xiongying 20170323
+							String[] path = organization.getPath().split("/");
+							Long organizationId = Long.valueOf(path[1]);
+							ExecuteGroupAndPosition topGroup = new ExecuteGroupAndPosition();
+							topGroup.setGroupId(organizationId);
+							topGroup.setPositionId(map.getJobPositionId());
+							groupDtos.add(topGroup);
 						}
 
 					}
@@ -2857,27 +2876,40 @@ public class QualityServiceImpl implements QualityService {
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
 		
 		Long uId = UserContext.current().getUser().getId();
-		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
+//		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
+//
 		List<Long> taskIdlist = new ArrayList<Long>();
-
-        for(final Long value : taskIds){
-
-        	taskIdlist.add(value);
-
-        }
-
-        Collections.sort(taskIdlist);
-		if(cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0L) {
-			if(taskIdlist.contains(cmd.getPageAnchor())) {
-				int last = taskIdlist.indexOf(cmd.getPageAnchor());
-				taskIdlist = taskIdlist.subList(0, last);
+//        for(final Long value : taskIds){
+//
+//        	taskIdlist.add(value);
+//
+//        }
+//
+//        Collections.sort(taskIdlist);
+//		if(cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0L) {
+//			if(taskIdlist.contains(cmd.getPageAnchor())) {
+//				int last = taskIdlist.indexOf(cmd.getPageAnchor());
+//				taskIdlist = taskIdlist.subList(0, last);
+//			}
+//		}
+//
+//        Collections.reverse(taskIdlist);
+		List<QualityInspectionTaskRecords> taskRecords = qualityProvider.listRecordsByOperatorId(uId, new Timestamp(cmd.getPageAnchor()));
+		if(taskRecords != null ) {
+			Long startContainTime = System.currentTimeMillis();
+			for(QualityInspectionTaskRecords record : taskRecords) {
+				if(!taskIdlist.contains(record.getTaskId())) {
+					taskIdlist.add(record.getTaskId());
+				}
+			}
+			Long endContainTime = System.currentTimeMillis();
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug("listUserHistoryTasks list contain taskRecords size = {}, taskIdlist size = {}, elapse = {}",
+						taskRecords.size(), taskIdlist.size(), endContainTime-startContainTime);
 			}
 		}
 
-        Collections.reverse(taskIdlist);
-        
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         if(taskIdlist.size() > pageSize) {
 			taskIdlist = taskIdlist.subList(0,pageSize);
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));

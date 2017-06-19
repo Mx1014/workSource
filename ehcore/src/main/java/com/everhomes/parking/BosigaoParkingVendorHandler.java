@@ -414,4 +414,10 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	}
 
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

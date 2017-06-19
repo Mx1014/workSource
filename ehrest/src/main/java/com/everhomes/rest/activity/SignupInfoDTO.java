@@ -1,6 +1,9 @@
 //@formatter:off
 package com.everhomes.rest.activity;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
@@ -13,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>realName: 真实姓名</li>
  * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
  * <li>communityName: 园区名称</li>
+ * <li>organizationId:公司Id，如果用户没有使用当前场景的公司，则不传id仅传名称</li>
  * <li>organizationName: 企业名称</li>
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
@@ -23,6 +27,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>signupTime: 报名时间 yyyy-MM-dd HH:MM</li>
  * <li>email: 邮箱</li>
  * <li>order: 序号</li>
+ * <li>payFlag: 支付标志  参考{@link com.everhomes.rest.activity.ActivityRosterPayFlag}</li>
+ * <li>orderNo:支付订单号</li>
+ *<li>orderStartTime:订单开始时间，用于计算取消订单</li>
+ *<li>orderCountdown:订单倒计时时间长度</li>
+ *<li>vendorType:支付方式 10001: alipay, 10002: wechatpay 参考 {@link com.everhomes.rest.organization.VendorType }</li>
+ *<li>payAmount:支付金额</li>
+ *<li>payTime:支付时间</li>
+ *<li>refundOrderNo:退款订单号</li>
+ *<li>refundAmount:退款金额</li>
+ *<li>refundTime:退款时间</li>
+ *<li>status:订单状态 0: cancel, 1: reject, 2:normal 参考 {@link com.everhomes.rest.activity.ActivityRosterStatus }</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -33,6 +48,7 @@ public class SignupInfoDTO {
 	private Byte gender;
 	private String genderText;
 	private String communityName;
+	private Long organizationId;
 	private String organizationName;
 	private String position;
 	private Byte leaderFlag;
@@ -49,6 +65,17 @@ public class SignupInfoDTO {
 	private String signupTime;
 	private String email;
 	private String order;
+	private Byte payFlag;
+	private Long orderNo;
+    private Timestamp orderStartTime;
+    private Long orderCountdown;
+    private String vendorType;
+    private BigDecimal payAmount;
+    private Timestamp payTime;
+    private Long refundOrderNo;
+    private BigDecimal refundAmount;
+    private Timestamp refundTime;
+	private Byte status;
 	
 	public Byte getCreateFlag() {
 		return createFlag;
@@ -128,6 +155,12 @@ public class SignupInfoDTO {
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
 	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 	public String getOrganizationName() {
 		return organizationName;
 	}
@@ -188,6 +221,74 @@ public class SignupInfoDTO {
 	}
 	public void setOrder(String order) {
 		this.order = order;
+	}
+	public Byte getPayFlag() {
+		return payFlag;
+	}
+	public void setPayFlag(Byte payFlag) {
+		this.payFlag = payFlag;
+	}
+	public Long getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(Long orderNo) {
+		this.orderNo = orderNo;
+	}
+	public Timestamp getOrderStartTime() {
+		return orderStartTime;
+	}
+	public void setOrderStartTime(Timestamp orderStartTime) {
+		this.orderStartTime = orderStartTime;
+	}
+	public Long getOrderCountdown() {
+		return orderCountdown;
+	}
+	public void setOrderCountdown(Long orderCountdown) {
+		this.orderCountdown = orderCountdown;
+	}
+	public String getVendorType() {
+		return vendorType;
+	}
+	public void setVendorType(String vendorType) {
+		this.vendorType = vendorType;
+	}
+	
+	public BigDecimal getPayAmount() {
+		return payAmount;
+	}
+	public void setPayAmount(BigDecimal payAmount) {
+		this.payAmount = payAmount;
+	}
+	public BigDecimal getRefundAmount() {
+		return refundAmount;
+	}
+	public void setRefundAmount(BigDecimal refundAmount) {
+		this.refundAmount = refundAmount;
+	}
+	public Timestamp getPayTime() {
+		return payTime;
+	}
+	public void setPayTime(Timestamp payTime) {
+		this.payTime = payTime;
+	}
+	public Long getRefundOrderNo() {
+		return refundOrderNo;
+	}
+	public void setRefundOrderNo(Long refundOrderNo) {
+		this.refundOrderNo = refundOrderNo;
+	}
+	
+	public Timestamp getRefundTime() {
+		return refundTime;
+	}
+	public void setRefundTime(Timestamp refundTime) {
+		this.refundTime = refundTime;
+	}
+	public Byte getStatus() {
+		return status;
+	}
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 	@Override
 	public String toString() {

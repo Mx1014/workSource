@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.util.ConvertHelper;
@@ -52,6 +55,7 @@ public class ActivityController extends ControllerBase {
 //    }
     /**
      * 报名
+     * <b>URL: /activity/signup</b>
      * @return {@link ActivityDTO}
      */
     @RequestMapping("signup")
@@ -62,6 +66,20 @@ public class ActivityController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         response.setResponseObject(result);
+        return response;
+    }
+    
+    /**
+     * <b>URL: /activity/createSignupOrder</b>
+     * <p>创建活动报名收费订单</p>
+     */
+    @RequestMapping("createSignupOrder")
+    @RestReturn(value=CommonOrderDTO.class)
+    public RestResponse createSignupOrder(@Valid CreateSignupOrderCommand cmd) {
+    	CommonOrderDTO dto = activityService.createSignupOrder(cmd);
+    	RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
     
@@ -473,6 +491,47 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /activity/setRosterOrderSetting</b>
+     * <p>设置订单支付有效期</p>
+     */
+    @RequestMapping("setRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse setRosterOrderSetting(SetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.setRosterOrderSetting(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getRosterOrderSetting</b>
+     * <p>查询订单支付有效期</p>
+     */
+    @RequestMapping("getRosterOrderSetting")
+    @RestReturn(value=RosterOrderSettingDTO.class)
+    public RestResponse getRosterOrderSetting(GetRosterOrderSettingCommand cmd){
+    	return new RestResponse(activityService.getRosterOrderSetting(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/setActivityTime</b>
+     * <p>设置活动提醒、订单有效期</p>
+     */
+    @RequestMapping("setActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse setActivityTime(SetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.setActivityTime(cmd));
+    }
+    
+    /**
+     * <b>URL: /activity/getActivityTime</b>
+     * <p>查询活动提醒、订单有效期</p>
+     */
+    @RequestMapping("getActivityTime")
+    @RestReturn(value=ActivityTimeResponse.class)
+    public RestResponse getActivityTime(GetActivityTimeCommand cmd){
+    	return new RestResponse(activityService.getActivityTime(cmd));
+    }
+    
+    
+    /**
 	 * <b>URL: /activity/listActivityEntryCategories</b>
 	 * <p> 列出活动类型 </p>
 	 */
@@ -667,4 +726,62 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+     * <b>URL: /activity/statisticsSummary</b>
+     * <p>统计总览</p>
+     */
+    @RequestMapping("statisticsSummary")
+    @RestReturn(value=StatisticsSummaryResponse.class)
+    public RestResponse statisticsSummary(StatisticsSummaryCommand cmd){
+    	StatisticsSummaryResponse result = activityService.statisticsSummary(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsActivity</b>
+     * <p>统计活动</p>
+     */
+    @RequestMapping("statisticsActivity")
+    @RestReturn(value=StatisticsActivityResponse.class)
+    public RestResponse statisticsActivity(StatisticsActivityCommand cmd){
+    	StatisticsActivityResponse result = activityService.statisticsActivity(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsOrganization</b>
+     * <p>统计企业</p>
+     */
+    @RequestMapping("statisticsOrganization")
+    @RestReturn(value=StatisticsOrganizationResponse.class)
+    public RestResponse statisticsOrganization(StatisticsOrganizationCommand cmd){
+    	StatisticsOrganizationResponse result = activityService.statisticsOrganization(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * <b>URL: /activity/statisticsTag</b>
+     * <p>统计标签</p>
+     */
+    @RequestMapping("statisticsTag")
+    @RestReturn(value=StatisticsTagResponse.class)
+    public RestResponse statisticsTag(StatisticsTagCommand cmd){
+    	StatisticsTagResponse result = activityService.statisticsTag(cmd);
+        RestResponse response = new RestResponse(result);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    
 }

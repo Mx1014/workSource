@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  *     <li>organizationId: 组织id</li>
  *     <li>communityId: 小区id</li>
  *     <li>keyword: 关键字</li>
+ *     <li>meterNumber: 表记号码</li>
  *     <li>operatorName: 抄表人</li>
  *     <li>meterId: 表记id</li>
  *     <li>billCategoryId: 表记项目id</li>
@@ -25,6 +26,7 @@ public class SearchEnergyMeterReadingLogsCommand {
     @NotNull private Long organizationId;
     private Long communityId;
     private String keyword;
+    private String meterNumber;
     private String operatorName;
     private Long meterId;
     private Long billCategoryId;
@@ -83,6 +85,14 @@ public class SearchEnergyMeterReadingLogsCommand {
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
+    }
+
+    public String getMeterNumber() {
+        return meterNumber;
+    }
+
+    public void setMeterNumber(String meterNumber) {
+        this.meterNumber = meterNumber;
     }
 
     public String getKeyword() {

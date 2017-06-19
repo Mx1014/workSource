@@ -174,5 +174,34 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	
     	return response;
     }
-    
+    /**
+     * <b>URL: /admin/general_approval/enableGeneralApproval</b>
+     * <p> 启用审批 </p>
+     * @return
+     */
+    @RequestMapping("enableGeneralApproval")
+    @RestReturn(value=String.class)
+    public RestResponse enableGeneralApproval(@Valid GeneralApprovalIdCommand cmd) {
+    	generalApprovalService.enableGeneralApproval(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	return response;
+    }
+    /**
+     * <b>URL: /admin/general_approval/disableGeneralApproval</b>
+     * <p> 不启用审批 </p>
+     * @return
+     */
+    @RequestMapping("disableGeneralApproval")
+    @RestReturn(value=String.class)
+    public RestResponse disableGeneralApproval(@Valid GeneralApprovalIdCommand cmd) {
+    	generalApprovalService.disableGeneralApproval(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	return response;
+    }
 }

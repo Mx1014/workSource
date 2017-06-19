@@ -1,11 +1,25 @@
+// @formatter:off
 package com.everhomes.rest.flow;
-
-import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
+/**
+ * <ul>
+ *     <li>flowId: 工作流id</li>
+ *     <li>needEvaluate: 允许评价开关</li>
+ *     <li>evaluateStart: 评价区间开始</li>
+ *     <li>evaluateEnd: 评价区间结束</li>
+ *     <li>evaluateStep: 评价完成后的动作</li>
+ *     <li>messageAction: 消息信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>smsAction: 短信信息{@link com.everhomes.rest.flow.FlowActionInfo}</li>
+ *     <li>items: 评价项列表{@link com.everhomes.rest.flow.FlowEvaluateItemDTO}</li>
+ * </ul>
+ */
 public class UpdateFlowEvaluateCommand {
+
 	private Long flowId;
 	private Byte needEvaluate;
 	private Long evaluateStart;
@@ -15,8 +29,8 @@ public class UpdateFlowEvaluateCommand {
 	private FlowActionInfo messageAction;
 	private FlowActionInfo smsAction;
 	
-	@ItemType(String.class)
-	private List<String> items;
+	@ItemType(FlowEvaluateItemDTO.class)
+	private List<FlowEvaluateItemDTO> items;
 
 	public Byte getNeedEvaluate() {
 		return needEvaluate;
@@ -66,15 +80,15 @@ public class UpdateFlowEvaluateCommand {
 		this.smsAction = smsAction;
 	}
 
-	public List<String> getItems() {
-		return items;
-	}
+    public List<FlowEvaluateItemDTO> getItems() {
+        return items;
+    }
 
-	public void setItems(List<String> items) {
-		this.items = items;
-	}
+    public void setItems(List<FlowEvaluateItemDTO> items) {
+        this.items = items;
+    }
 
-	public Long getFlowId() {
+    public Long getFlowId() {
 		return flowId;
 	}
 

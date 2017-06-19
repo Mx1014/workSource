@@ -1,10 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
 
 /**
  * <ul>
@@ -18,158 +17,160 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class OrganizationContactDTO {
-	private Long     id;
-	private Long     organizationId;
-	private String   contactName;
-	private Byte     contactType;
-	private String   contactToken;
-	private Long     creatorUid;
-	private Timestamp createTime;
+    private Long id;
+    private Long organizationId;
+    private String contactName;
+    private Byte contactType;
+    private String contactToken;
+    private Long creatorUid;
+    private Timestamp createTime;
 
-	private String initial;
-	private String fullPinyin;
-	private String fullInitial;
-	private String   nickName;
-	private String   avatar;
-	private Long   employeeNo;
-	private Byte   gender;
-	private Long targetId;
+    private String initial;
+    private String fullPinyin;
+    private String fullInitial;
+    private String nickName;
+    private String avatar;
+    private Long employeeNo;
+    private Byte gender;
+    private Long targetId;
 
-	private String targetType;
+    private String targetType;
 
-	public OrganizationContactDTO() {
+    public OrganizationContactDTO() {
     }
-	
-	public Long getId() {
-		return id;
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getOrganizationId() {
-		return organizationId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
+    public Long getOrganizationId() {
+        return organizationId;
+    }
 
-	public String getContactName() {
-		return contactName;
-	}
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
-	}
+    public String getContactName() {
+        return contactName;
+    }
 
-	public Byte getContactType() {
-		return contactType;
-	}
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
 
-	public void setContactType(Byte contactType) {
-		this.contactType = contactType;
-	}
+    public Byte getContactType() {
+        return contactType;
+    }
 
-	public String getContactToken() {
-		return contactToken;
-	}
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
+    }
 
-	public void setContactToken(String contactToken) {
-		this.contactToken = contactToken;
-	}
+    public String getContactToken() {
+        return contactToken;
+    }
 
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
 
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
 
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
 
-	public String getInitial() {
-		return initial;
-	}
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
 
-	public void setInitial(String initial) {
-		this.initial = initial;
-	}
+    public String getInitial() {
+        return initial;
+    }
 
-	public String getFullPinyin() {
-		return fullPinyin;
-	}
+    public void setInitial(String initial) {
+        this.initial = initial;
+    }
 
-	public void setFullPinyin(String fullPinyin) {
-		this.fullPinyin = fullPinyin;
-	}
+    public String getFullPinyin() {
+        return fullPinyin;
+    }
 
-	public String getFullInitial() {
-		return fullInitial;
-	}
+    public void setFullPinyin(String fullPinyin) {
+        this.fullPinyin = fullPinyin;
+    }
 
-	public void setFullInitial(String fullInitial) {
-		this.fullInitial = fullInitial;
-	}
+    public String getFullInitial() {
+        return fullInitial;
+    }
 
-	public String getNickName() {
-		return nickName;
-	}
+    public void setFullInitial(String fullInitial) {
+        this.fullInitial = fullInitial;
+    }
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
+    public String getNickName() {
+        return nickName;
+    }
 
-	public String getAvatar() {
-		return avatar;
-	}
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
+    public String getAvatar() {
+        return avatar;
+    }
 
-	public Long getEmployeeNo() {
-		return employeeNo;
-	}
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
-	public void setEmployeeNo(Long employeeNo) {
-		this.employeeNo = employeeNo;
-	}
+    public Long getEmployeeNo() {
+        return employeeNo;
+    }
 
-	public Byte getGender() {
-		return gender;
-	}
+    public void setEmployeeNo(Long employeeNo) {
+        this.employeeNo = employeeNo;
+    }
 
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
+    public Byte getGender() {
+        return gender;
+    }
 
-	public Long getTargetId() {
-		return targetId;
-	}
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
+    public Long getTargetId() {
+        return targetId;
+    }
 
-	public String getTargetType() {
-		return targetType;
-	}
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
+    public String getTargetType() {
+        return targetType;
+    }
 
-	@Override
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
 }

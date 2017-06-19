@@ -122,7 +122,7 @@ public class EquipmentTaskDTO {
 	private Byte qrCodeFlag;
 
 	private Byte pictureFlag;
-	
+
 	public Long getId() {
 		return id;
 	}

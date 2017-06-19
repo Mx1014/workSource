@@ -125,4 +125,8 @@ public interface DoorAccessService {
 
 	AclinkGetServerKeyResponse getServerKey(AclinkGetServerKeyCommand cmd);
 
+	public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
+
+	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
+
 }

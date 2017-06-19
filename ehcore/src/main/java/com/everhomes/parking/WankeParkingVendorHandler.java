@@ -336,7 +336,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		String url = configProvider.getValue("parking.wanke.url", "");
 		List<WankeCardType> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		String json = HttpUtils.post(url + GET_TYPES, param);
+		String json = HttpUtils.post(url + GET_TYPES, param, null);
 		
 		WankeJsonEntity<List<WankeCardType>> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<List<WankeCardType>>>(){});
 
@@ -357,7 +357,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		
 		param.put("plateNo", plateNumber);
 		param.put("flag", "2");
-		String json = HttpUtils.post(url + GET_CARD, param);
+		String json = HttpUtils.post(url + GET_CARD, param, null);
         
 		LOGGER.info("Result={}, param={}", json, param);
         
@@ -385,7 +385,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("payTime", sdf1.format(new Date()));
 	    param.put("sign", "");
 	    
-		String json = HttpUtils.post(url + RECHARGE, param);
+		String json = HttpUtils.post(url + RECHARGE, param, null);
         
 		LOGGER.info("Result={}, param={}", json, param);
         
@@ -412,7 +412,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
-		String json = HttpUtils.post(url + PAY_TEMP_FEE, param);
+		String json = HttpUtils.post(url + PAY_TEMP_FEE, param, null);
 
 		LOGGER.info("Result={}, param={}", json, param);
         
@@ -456,7 +456,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		
-		String json = HttpUtils.post(url + GET_TEMP_FEE, param);
+		String json = HttpUtils.post(url + GET_TEMP_FEE, param, null);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
@@ -503,5 +503,11 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public void lockParkingCar(LockParkingCarCommand cmd) {
 
+	}
+
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

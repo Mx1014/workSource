@@ -11,7 +11,14 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowUserSourceType {
-	SOURCE_USER("source_user"), SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position"), SOURCE_NODEID("source_nodeid"), SOURCE_VARIABLE("source_variable"), SOURCE_DUTY_DEPARTMENT("source_duty_department"), SOURCE_DUTY_MANAGER("source_duty_manager");
+	SOURCE_USER("source_user"),
+    SOURCE_DEPARTMENT("source_department"),
+    SOURCE_POSITION("source_position"),
+    SOURCE_NODEID("source_nodeid"),
+    SOURCE_VARIABLE("source_variable"),
+    SOURCE_DUTY_DEPARTMENT("source_duty_department"),
+    SOURCE_DUTY_MANAGER("source_duty_manager"),
+    ;
 	
 	private String code;
     private FlowUserSourceType(String code) {

@@ -90,31 +90,35 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//业务的下一个节点是当前节点
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 
-		if (null == currentNode || currentNode instanceof FlowGraphNodeEnd)
+		String stepType = ctx.getStepType().getCode();
+
+		if (null == currentNode)
 			return;
 
-		FlowNode flowNode = currentNode.getFlowNode();
+		FlowNode currentFlowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
 
-
-		String stepType = ctx.getStepType().getCode();
-		String params = flowNode.getParams();
-
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
+		String params = currentFlowNode.getParams();
 
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		String tag1 = flow.getStringTag1();
 
-		LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+		LOGGER.debug("update pmtask request, stepType={}, tag1={}", stepType, tag1);
+		//当是下一步时，如果是end节点，直接return，如果是驳回，则不管下一个节点类型，都置任务状态为已取消
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
+
+			if (currentNode instanceof FlowGraphNodeEnd)
+				return;
+
+			if(StringUtils.isBlank(params)) {
+				LOGGER.error("Invalid flowNode param.");
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+						"Invalid flowNode param.");
+			}
+			JSONObject paramJson = JSONObject.parseObject(params);
+			String nodeType = paramJson.getString("nodeType");
+			LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 
 			if ("ACCEPTING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nodeType));
