@@ -30,7 +30,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
      */
     @RequestMapping("createApprovalForm")
     @RestReturn(value=GeneralFormDTO.class)
-    public RestResponse createApprovalForm(@Valid CreateGeneralFormCommand cmd) {
+    public RestResponse createApprovalForm(@Valid CreateApprovalFormCommand cmd) {
     	GeneralFormDTO result = generalFormService.createGeneralForm(cmd);
     	RestResponse response = new RestResponse(result);
     	response.setErrorCode(ErrorCodes.SUCCESS);
@@ -45,7 +45,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
      */
     @RequestMapping("updateApprovalForm")
     @RestReturn(value=GeneralFormDTO.class)
-    public RestResponse updateApprovalForm(@Valid UpdateGeneralFormCommand cmd) {
+    public RestResponse updateApprovalForm(@Valid UpdateApprovalFormCommand cmd) {
     	GeneralFormDTO result = generalFormService.updateGeneralForm(cmd);
     	RestResponse response = new RestResponse(result);
     	response.setErrorCode(ErrorCodes.SUCCESS);
@@ -93,12 +93,12 @@ public class GeneralApprovalAdminController extends ControllerBase {
      */
     @RequestMapping("deleteApprovalFormById")
     @RestReturn(value=String.class)
-    public RestResponse deleteApprovalFormById(@Valid GeneralFormIdCommand cmd) {
+    public RestResponse deleteApprovalFormById(@Valid ApprovalFormIdCommand cmd) {
     	generalApprovalService.deleteApprovalFormById(cmd);
     	RestResponse response = new RestResponse( );
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
-    	
+
     	return response;
     }
     

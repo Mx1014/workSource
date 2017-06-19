@@ -6,8 +6,7 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
- * <ul>
- * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
+ * <ul> 
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
  * <li>organizationId: 属于的公司 ID</li>
@@ -19,25 +18,16 @@ import java.util.List;
  * @author janson
  *
  */
-public class UpdateGeneralFormCommand {
-    private Long     formOriginId;
+public class CreateApprovalFormCommand {
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
     private String     moduleType;
     private Long     organizationId;
     private String     formName;
-    
+
     @ItemType(GeneralFormFieldDTO.class)
     List<GeneralFormFieldDTO> formFields;
-
-	public Long getFormOriginId() {
-		return formOriginId;
-	}
-
-	public void setFormOriginId(Long formOriginId) {
-		this.formOriginId = formOriginId;
-	}
 
 	public Long getOwnerId() {
 		return ownerId;

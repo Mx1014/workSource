@@ -8,13 +8,13 @@ public interface GeneralFormService {
 
 	GeneralFormDTO getTemplateByFormId(GetTemplateByFormIdCommand cmd);
 
-	GeneralFormDTO createGeneralForm(CreateGeneralFormCommand cmd);
+	GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd);
 
 	ListGeneralFormResponse listGeneralForms(ListGeneralFormsCommand cmd);
 
 	void deleteGeneralFormById(GeneralFormIdCommand cmd);
 
-	GeneralFormDTO updateGeneralForm(UpdateGeneralFormCommand cmd);
+	GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd);
 
 	GeneralFormDTO getGeneralForm(GeneralFormIdCommand cmd);
 

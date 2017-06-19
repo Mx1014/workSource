@@ -1,7 +1,6 @@
 package com.everhomes.general_form;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
@@ -261,7 +260,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	}
 
 	@Override
-	public GeneralFormDTO createGeneralForm(CreateGeneralFormCommand cmd) {
+	public GeneralFormDTO createGeneralForm(CreateApprovalFormCommand cmd) {
 
 		GeneralForm form = ConvertHelper.convert(cmd, GeneralForm.class);
 		form.setTemplateType(GeneralFormTemplateType.DEFAULT_JSON.getCode());
@@ -281,7 +280,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 	}
 
 	@Override
-	public GeneralFormDTO updateGeneralForm(UpdateGeneralFormCommand cmd) {
+	public GeneralFormDTO updateGeneralForm(UpdateApprovalFormCommand cmd) {
 		return this.dbProvider.execute((TransactionStatus status) -> {
 			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
 					.getFormOriginId());

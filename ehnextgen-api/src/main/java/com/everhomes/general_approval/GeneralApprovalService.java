@@ -21,7 +21,11 @@ public interface GeneralApprovalService {
 
 	GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd);
 
-	void deleteApprovalFormById(GeneralFormIdCommand cmd);
+	GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd);
+
+	ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd);
+
+	void deleteApprovalFormById(ApprovalFormIdCommand cmd);
 
 	GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd);
 
