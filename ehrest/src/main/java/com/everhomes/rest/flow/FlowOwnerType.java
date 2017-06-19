@@ -10,6 +10,7 @@ package com.everhomes.rest.flow;
  * <li>PMTASK("PMTASK"): PMTASK</li>
  * <li>GENERAL_APPROVAL("GENERAL_APPROVAL"): GENERAL_APPROVAL</li>
  * <li>RESERVER_PLACE("RESERVER_PLACE"): RESERVER_PLACE</li>
+ * <li>EhOrganizations("EhOrganizations"): EhOrganizations</li>
  * </ul>
  * @author janson
  *
@@ -22,8 +23,9 @@ public enum FlowOwnerType {
 	RENTALRESOURCETYPE("RENTALRESOURCETYPE"),
     PMTASK("PMTASK"),
     GENERAL_APPROVAL("GENERAL_APPROVAL"),
-	RESERVER_PLACE("RESERVER_PLACE"),
-    WAREHOUSE_REQUEST("WAREHOUSEREQUEST"),
+	RESERVER_PLACE("RESERVER_PLACE"), 
+	EhOrganizations("EhOrganizations"), 
+    WAREHOUSE_REQUEST("WAREHOUSEREQUEST") 
     ;
 
 	private String code;

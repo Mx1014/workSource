@@ -185,7 +185,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             return avatarUri;
         }*/
 
-        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId); 
         if (resource == null) {
             LOGGER.error("Resource not found, orginResourceId=" + orginResourceId +
                     ", decodeResourceId=" + resourceId + ", loginToken=" + login);

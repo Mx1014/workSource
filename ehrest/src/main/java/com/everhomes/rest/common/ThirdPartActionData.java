@@ -17,6 +17,8 @@ public class ThirdPartActionData implements Serializable{
     private static final long serialVersionUID = 5331800144156878448L;
     //{"url": "http://www.baidu.com"}  
     private String url;
+
+    private Byte declareFlag;
     
     public String getUrl() {
         return url;
@@ -24,6 +26,14 @@ public class ThirdPartActionData implements Serializable{
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Byte getDeclareFlag() {
+        return declareFlag;
+    }
+
+    public void setDeclareFlag(Byte declareFlag) {
+        this.declareFlag = declareFlag;
     }
 
     @Override

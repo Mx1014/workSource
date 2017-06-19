@@ -26,11 +26,12 @@ public class FlowVarsTextButtonTargetAllProcessorsName implements FlowVariableTe
 		if(ctx.getNextNode() == null) {
 			return null;
 		}
-		
-		List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
+
+        //stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
+        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(ctx.getNextNode().getFlowNode().getId()
 				, ctx.getFlowCase().getId()
-				, ctx.getFlowCase().getStepCount()); ////stepCount 不加 1 的原因是，目标节点处理人是当前 stepCount 计算的 node_enter 的值
-		
+				, ctx.getFlowCase().getStepCount());
+
 		String txt = "";
 		int i = 0;
 		

@@ -50,6 +50,7 @@ import com.everhomes.approval.ApprovalCategoryProvider;
 import com.everhomes.approval.ApprovalDayActualTimeProvider;
 import com.everhomes.approval.ApprovalRangeStatistic;
 import com.everhomes.approval.ApprovalRangeStatisticProvider;
+import com.everhomes.approval.ApprovalRequestDefaultHandler;
 import com.everhomes.approval.ApprovalRequestProvider;
 import com.everhomes.approval.ApprovalRule;
 import com.everhomes.approval.ApprovalRuleProvider;
@@ -60,6 +61,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -73,6 +76,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -191,23 +195,14 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 @Service
 public class PunchServiceImpl implements PunchService {
 	final String downloadDir ="\\download\\";
-	private static final String PUNCH_STATUS_SCOPE ="punch.status";
-	private static final String PUNCH_DEFAULT_SCOPE ="punch.default";
-	private static final String PUNCH_PUSH_SCOPE ="punch.push";
-	private static final String PUNCH_EXCEL_SCOPE ="punch.excel";
-	private static final String EXCEL_SCHEDULE = "schedule";
-	private static final String EXCEL_RULE = "rule";
-	private static final String PUNCH_REMINDER ="1";
-	private static final String PUNCH_TIME_RULE_NAME = "timeRuleName";
-
-	@Autowired
+ 
 	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
- 
-
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
     private static ThreadLocal<SimpleDateFormat> dateSF = new ThreadLocal<SimpleDateFormat>(){
-        protected SimpleDateFormat initialValue() {
+    	protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy-MM-dd");
         }
     }; 
@@ -301,7 +296,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == status){
 			return "";
 		}
-		LocaleString localeString = localeStringProvider.find( PUNCH_STATUS_SCOPE, status.toString(),
+		LocaleString localeString = localeStringProvider.find( PunchConstants.PUNCH_STATUS_SCOPE, status.toString(),
 				UserContext.current().getUser().getLocale());
 		if(null == localeString)
 			return "";
@@ -711,15 +706,27 @@ public class PunchServiceImpl implements PunchService {
 				//是否有请求的flag
 				if(exceptionRequest.getApprovalStatus() != null ){
 					pdl.setRequestFlag(NormalFlag.YES.getCode());
-					pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+					else
+						pdl.setRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getMorningApprovalStatus() != null ){
 					pdl.setMorningRequestFlag(NormalFlag.YES.getCode());
-					pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setMorningRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+					else
+						pdl.setMorningRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				if(exceptionRequest.getAfternoonApprovalStatus() != null ){
 					pdl.setAfternoonRequestFlag(NormalFlag.YES.getCode());
-					pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
+					FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(exceptionRequest.getRequestId(), ApprovalRequestDefaultHandler.REFER_TYPE ,PunchConstants.PUNCH_MODULE_ID);
+					if(null != flowCase)
+						pdl.setAfternoonRequestToken(ApprovalRequestDefaultHandler.processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId()));
+					else
+						pdl.setAfternoonRequestToken(WebTokenGenerator.getInstance().toWebToken(exceptionRequest.getRequestId()));
 				}
 				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 				
@@ -886,9 +893,8 @@ public class PunchServiceImpl implements PunchService {
 			NoonLeaveTimeCalendar.setTimeInMillis((logDay.getTimeInMillis()+
 					(punchTimeRule.getNoonLeaveTimeLong()==null?convertTimeToGMTMillisecond(punchTimeRule.getNoonLeaveTime()):punchTimeRule.getNoonLeaveTimeLong())));
 			 
-			long realWorkTime = 0L;
-			//到达时间<中午离开时间 并且 离开时间>下午上班时间
-			if(leaveCalendar.after(AfternoonArriveCalendar)&&arriveCalendar.before(NoonLeaveTimeCalendar)){
+			long realWorkTime = 0L;  
+			if(leaveCalendar.after(AfternoonArriveCalendar)&&arriveCalendar.before(NoonLeaveTimeCalendar)){ 
 				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
 					-punchTimeRule.getAfternoonArriveTime().getTime() +punchTimeRule.getNoonLeaveTime().getTime();
 			}else {
@@ -4815,8 +4821,8 @@ public class PunchServiceImpl implements PunchService {
 		anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
 		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
 
-		//推送消息
-		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_PUSH_SCOPE, PUNCH_REMINDER,"zh_CN");
+		//推送消息 
+		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
 		if(null == scheduleLocaleString ){
 			return;
 		}
@@ -5560,9 +5566,9 @@ public class PunchServiceImpl implements PunchService {
 						dto.setTimeRuleId(timeRule.getId());
 						dto.setTimeRuleName(timeRule.getName());
 						dto.setTimeRuleDescription(timeRule.getDescription());
-					}else{
-                        //TODO : 减少IO 做成MAP
-						LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_DEFAULT_SCOPE, PUNCH_TIME_RULE_NAME,"zh_CN");
+					}else{ 
+						//TODO : 减少IO 做成MAP
+						LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_DEFAULT_SCOPE, PunchConstants.PUNCH_TIME_RULE_NAME,"zh_CN");   
 						dto.setTimeRuleName( scheduleLocaleString==null?"":scheduleLocaleString.getText());
 					}
 				}
@@ -5620,7 +5626,7 @@ public class PunchServiceImpl implements PunchService {
 		if(!file.exists())
 			file.mkdirs();
 
-		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
+		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
 		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+".xlsx";
 		//新建了一个文件
@@ -5665,17 +5671,18 @@ public class PunchServiceImpl implements PunchService {
 						e.getLocalizedMessage());
 			}
 	}
-	private void createPunchSchedulingsBookSheetHead(Sheet sheet) {
-
-		LocaleString scheduleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_SCHEDULE,
-				UserContext.current().getUser().getLocale());
+	private void createPunchSchedulingsBookSheetHead(Sheet sheet) { 
 		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+ 
+		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE, UserContext.current().getUser().getLocale());
+ 
 //		scheduleLocaleString==null?"":scheduleLocaleString.getText()
 //		
 //		row = sheet.createRow(sheet.getLastRowNum()+1); 
-		int i =-1 ;
+ 
 
-		LocaleString ruleLocaleString = localeStringProvider.find( PUNCH_EXCEL_SCOPE, EXCEL_RULE ,
+		LocaleString ruleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_RULE , 
 				UserContext.current().getUser().getLocale());
 		row.createCell(++i).setCellValue(scheduleLocaleString==null?"":scheduleLocaleString.getText());
 		row.createCell(++i).setCellValue(ruleLocaleString==null?"":ruleLocaleString.getText());

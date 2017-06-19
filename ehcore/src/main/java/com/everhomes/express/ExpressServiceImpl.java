@@ -345,7 +345,7 @@ public class ExpressServiceImpl implements ExpressService {
 		ExpressOwner owner = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		ExpressOrder expressOrder = expressOrderProvider.findExpressOrderById(cmd.getId());
 		if (expressOrder != null) {
-			if (checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId()) || expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue()) {
+			if (expressOrder.getCreatorUid().longValue() == owner.getUserId().longValue() || checkPrivilege(owner, expressOrder.getServiceAddressId(), expressOrder.getExpressCompanyId())) {
 				return new GetExpressOrderDetailResponse(convertToExpressOrderDTOForDetail(expressOrder));
 			}
 		}

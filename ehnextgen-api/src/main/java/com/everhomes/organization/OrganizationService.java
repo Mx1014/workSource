@@ -214,8 +214,10 @@ public interface OrganizationService {
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
-	
-	PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
+
+    List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds);
+
+    PostDTO acceptTask(ProcessOrganizationTaskCommand cmd);
 	
 	PostDTO refuseTask(ProcessOrganizationTaskCommand cmd);
 	
@@ -450,4 +452,6 @@ public interface OrganizationService {
 	 * @return ListOrganizationContactCommandResponse
 	 */
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
+	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
+	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
 }
