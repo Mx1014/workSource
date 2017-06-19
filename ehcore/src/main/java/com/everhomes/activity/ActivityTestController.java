@@ -77,7 +77,7 @@ public class ActivityTestController extends ControllerBase {
             System.out.println("cookie name: " + cookie.getName() + "cookie value: " +  cookie.getValue());
         }
 
-        RestResponse res = new RestResponse();
+        RestResponse res = new RestResponse("cookie value: " + cookie.getValue());
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;
