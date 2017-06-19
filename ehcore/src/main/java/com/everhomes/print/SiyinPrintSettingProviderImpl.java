@@ -41,26 +41,26 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintSetting.class));
 	}
 	
-	@Override
-	public void createSiyinPrintSetting(SiyinPrintSetting siyinPrintSetting) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintSettings.class));
-		siyinPrintSetting.setId(id);
-		siyinPrintSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintSetting.setCreatorUid(UserContext.current().getUser().getId());
-//		siyinPrintSetting.setUpdateTime(siyinPrintSetting.getCreateTime());
-		siyinPrintSetting.setOperatorUid(siyinPrintSetting.getCreatorUid());
-		getReadWriteDao().insert(siyinPrintSetting);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintSettings.class, null);
-	}
+//	@Override
+//	public void createSiyinPrintSetting(SiyinPrintSetting siyinPrintSetting) {
+//		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintSettings.class));
+//		siyinPrintSetting.setId(id);
+//		siyinPrintSetting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		siyinPrintSetting.setCreatorUid(UserContext.current().getUser().getId());
+////		siyinPrintSetting.setUpdateTime(siyinPrintSetting.getCreateTime());
+//		siyinPrintSetting.setOperatorUid(siyinPrintSetting.getCreatorUid());
+//		getReadWriteDao().insert(siyinPrintSetting);
+//		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintSettings.class, null);
+//	}
 
-	@Override
-	public void updateSiyinPrintSetting(SiyinPrintSetting siyinPrintSetting) {
-		assert (siyinPrintSetting.getId() != null);
-//		siyinPrintSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintSetting.setOperatorUid(UserContext.current().getUser().getId());
-		getReadWriteDao().update(siyinPrintSetting);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinPrintSettings.class, siyinPrintSetting.getId());
-	}
+//	@Override
+//	public void updateSiyinPrintSettings(List<SiyinPrintSetting> siyinPrintSettings) {
+//		assert (siyinPrintSetting.getId() != null);
+////		siyinPrintSetting.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		siyinPrintSetting.setOperatorUid(UserContext.current().getUser().getId());
+//		getReadWriteDao().update(siyinPrintSetting);
+//		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinPrintSettings.class, siyinPrintSetting.getId());
+//	}
 
 	@Override
 	public SiyinPrintSetting findSiyinPrintSettingById(Long id) {
@@ -97,5 +97,19 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public void deleteSiyinPrintSettings(String ownerType, Long ownerId) {
+		getReadWriteContext().delete(Tables.EH_SIYIN_PRINT_SETTINGS)
+			.where(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_ID.eq(ownerId)).execute();
+		
+	}
+
+	@Override
+	public void createSiyinPrintSettings(List<SiyinPrintSetting> list) {
+		
+		
 	}
 }

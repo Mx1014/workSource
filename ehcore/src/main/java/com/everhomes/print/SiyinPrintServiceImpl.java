@@ -2,6 +2,7 @@
 package com.everhomes.print;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +15,6 @@ import org.springframework.util.StringUtils;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -86,8 +86,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void updatePrintSetting(UpdatePrintSettingCommand cmd) {
-		// TODO Auto-generated method stub
-
+		List<SiyinPrintSetting> list = checkUpdatePrintSettingCommand(cmd);
+		siyinPrintSettingProvider.deleteSiyinPrintSettings(cmd.getOwnerType(),cmd.getOwnerId());
+		siyinPrintSettingProvider.createSiyinPrintSettings(list);
+		
 	}
 
 	@Override
@@ -247,8 +249,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		response.getPaperSizePriceDTO().getAsixPrice().setBlackWhitePrice(defaultdecimal);
 		response.getPaperSizePriceDTO().getAsixPrice().setColorPrice(defaultdecimal);
 		
-		response.setPrintCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST).split("|")));
-		response.setScanCopyCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST).split("|")));
+		response.setPrintCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.PRINT_COURSE_LIST).split("\\|")));
+		response.setScanCopyCourseList(Arrays.asList(getLocalActivityString(PrintErrorCode.SCAN_COPY_COURSE_LIST).split("\\|")));
 		return response;
 	}
 	
@@ -311,4 +313,107 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			break;
 		}
 	}
+	
+	private List<SiyinPrintSetting> checkUpdatePrintSettingCommand(UpdatePrintSettingCommand cmd) {
+		// TODO Auto-generated method stub
+		checkOwner(cmd.getOwnerType(),cmd.getOwnerId());
+		List<SiyinPrintSetting> list = checkPaperSizePriceDTO(cmd.getPaperSizePriceDTO(),cmd.getOwnerType(),cmd.getOwnerId());
+		list.add(checkColorTypeDTO(cmd.getColorTypeDTO(),cmd.getOwnerType(),cmd.getOwnerId()));
+		list.add(checkCourseList(cmd.getScanCopyCourseList(),cmd.getPrintCourseList(),cmd.getOwnerType(),cmd.getOwnerId()));
+		return list;
+	}
+
+	/**
+	 * 检查打印/复印扫描教程并产生实体
+	 */
+	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String string, Long long1) {
+		if(printCourseList == null || printCourseList.size() == 0)
+		{
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, printCourseList = " + printCourseList);
+		}
+		if(printCourseList.size() == 0 || scancopyCourseList.size() == 0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, scancopyCourseList = " + scancopyCourseList);
+		}
+		
+		SiyinPrintSetting setting = new SiyinPrintSetting();
+		setting.setScanCopyCourse("");
+		setting.setPrintCourse("");
+		setting.setOwnerType(string);
+		setting.setOwnerId(long1);
+		setting.setSettingType(PrintSettingType.COURSE_HOTLINE.getCode());
+		for (String string2 : scancopyCourseList) {
+			setting.setScanCopyCourse(setting.getScanCopyCourse()+string2);
+		}
+		
+		for (String string2 : printCourseList) {
+			setting.setPrintCourse(setting.getPrintCourse()+string2);
+		}
+		return setting;
+	}
+
+
+	/**
+	 * 检查打印扫描价格的DTO，并生成实体
+	 */
+	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1) {
+		// TODO Auto-generated method stub
+		checkPrice(paperSizePriceDTO.getAthreePrice());
+		checkPrice(paperSizePriceDTO.getAfourPrice());
+		checkPrice(paperSizePriceDTO.getAfivePrice());
+		checkPrice(paperSizePriceDTO.getAsixPrice());
+		
+		SiyinPrintSetting settinga3 = ConvertHelper.convert(paperSizePriceDTO.getAthreePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga4 = ConvertHelper.convert(paperSizePriceDTO.getAfourPrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga5 = ConvertHelper.convert(paperSizePriceDTO.getAfivePrice(), SiyinPrintSetting.class);
+		SiyinPrintSetting settinga6 = ConvertHelper.convert(paperSizePriceDTO.getAsixPrice(), SiyinPrintSetting.class);
+		
+		settinga3.setOwnerType(string);
+		settinga3.setOwnerId(long1);
+		settinga4.setOwnerType(string);
+		settinga4.setOwnerId(long1);
+		settinga5.setOwnerType(string);
+		settinga5.setOwnerId(long1);
+		settinga6.setOwnerType(string);
+		settinga6.setOwnerId(long1);
+		
+		settinga3.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga4.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga5.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		settinga6.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		
+		settinga3.setJobType(PrintJobTypeType.PRINT.getCode());
+		settinga4.setJobType(PrintJobTypeType.PRINT.getCode());
+		settinga5.setJobType(PrintJobTypeType.PRINT.getCode());
+		settinga6.setJobType(PrintJobTypeType.PRINT.getCode());
+		return new ArrayList<SiyinPrintSetting>(Arrays.asList(new SiyinPrintSetting[]{settinga3,settinga4,settinga5,settinga6}));
+	}
+
+
+	/**
+	 * 检查扫描价格，并生成实体
+	 */
+	private SiyinPrintSetting checkColorTypeDTO(PrintSettingColorTypeDTO colorTypeDTO, String string, Long long1) {
+		checkPrice(colorTypeDTO);
+		SiyinPrintSetting setting = ConvertHelper.convert(colorTypeDTO, SiyinPrintSetting.class);
+		setting.setOwnerType(string);
+		setting.setOwnerId(long1);
+		setting.setSettingType(PrintSettingType.PRINT_COPY_SCAN.getCode());
+		setting.setJobType(PrintJobTypeType.SCAN.getCode());
+		return setting;
+	}
+	
+	/**
+	 * 检查价格信息
+	 */
+	private void checkPrice(PrintSettingColorTypeDTO colorTypeDTO) {
+		if(colorTypeDTO.getBlackWhitePrice().compareTo(BigDecimal.ZERO) < 0)
+		{
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, blackWhitePrice = " + colorTypeDTO.getBlackWhitePrice());
+		}
+		if(colorTypeDTO.getColorPrice().compareTo(BigDecimal.ZERO) < 0){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, colorPrice = " + colorTypeDTO.getBlackWhitePrice());
+		}
+	}
+	
+
 }

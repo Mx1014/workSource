@@ -1,5 +1,11 @@
 // @formatter:off
 package com.everhomes.rest.print;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -20,4 +26,55 @@ public class UpdatePrintSettingCommand {
 	private PrintSettingPaperSizePriceDTO paperSizePriceDTO;
 	private PrintSettingColorTypeDTO colorTypeDTO;
 	private String hotline;
+	@ItemType(String.class)
+	private List<String> printCourseList;
+	@ItemType(String.class)
+	private List<String> scanCopyCourseList;
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public PrintSettingPaperSizePriceDTO getPaperSizePriceDTO() {
+		return paperSizePriceDTO;
+	}
+	public void setPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO) {
+		this.paperSizePriceDTO = paperSizePriceDTO;
+	}
+	public PrintSettingColorTypeDTO getColorTypeDTO() {
+		return colorTypeDTO;
+	}
+	public void setColorTypeDTO(PrintSettingColorTypeDTO colorTypeDTO) {
+		this.colorTypeDTO = colorTypeDTO;
+	}
+	public String getHotline() {
+		return hotline;
+	}
+	public void setHotline(String hotline) {
+		this.hotline = hotline;
+	}
+	public List<String> getPrintCourseList() {
+		return printCourseList;
+	}
+	public void setPrintCourseList(List<String> printCourseList) {
+		this.printCourseList = printCourseList;
+	}
+	public List<String> getScanCopyCourseList() {
+		return scanCopyCourseList;
+	}
+	public void setScanCopyCourseList(List<String> scanCopyCourseList) {
+		this.scanCopyCourseList = scanCopyCourseList;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
