@@ -76,5 +76,5 @@ public interface OrganizationServiceErrorCode {
     int ERROR_INSURANCEENTERPRISE_ISNULL = 700018;  //  保险企业名为空
     int ERROR_INSURANCENUMBER_ISNULL = 700019;  //  保险号为空
     int ERROR_CONTRACTNUMBER_ISNULL = 700020;   //  合同号为空
-    int ERROR_DATA_FORMAT_WRONG = 700021;   //  日期格式错误
+    int ERROR_DATE_FORMAT_WRONG = 700021;   //  日期格式错误
 }

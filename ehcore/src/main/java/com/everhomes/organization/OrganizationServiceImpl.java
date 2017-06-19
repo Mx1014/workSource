@@ -10070,11 +10070,11 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
 
-        try {
+/*        try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 	    User user =UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -10833,6 +10833,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 errorDataLogs.add(log);
                 continue;
             }
+            log = this.checkImportDateFormat(data);
+            if (log != null) {
+                errorDataLogs.add(log);
+                continue;
+            }
 
             Long detailId = this.saveOrganizationMembers(data, cmd.getOrganizationId(), deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
             this.saveOrganizationMemberDetails(data, detailId);
@@ -10931,16 +10936,6 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member checkInTime is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CHECKINTIME_ISNULL);
             return log;
-        }else{
-            try{
-                java.sql.Date.valueOf(data.getCheckInTime());
-            }catch (Exception e){
-                LOGGER.warn("Organization member checkInTime format error. data = {}", data);
-                log.setData(data);
-                log.setErrorLog("Organization member checkInTime format error");
-                log.setCode(OrganizationServiceErrorCode.ERROR_DATA_FORMAT_WRONG);
-                return log;
-            }
         }
 
         if (!StringUtils.isEmpty(data.getEmployeeStatus())) {
@@ -11044,7 +11039,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        } else {
+        }else {
             return null;
         }
     }
@@ -11064,7 +11059,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(this.checkWorkExperiencesQualification(data).equals(0)){
+        if (this.checkWorkExperiencesQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getEnterpriseName())) {
                 LOGGER.warn("Organization member enterpriseName is null. data = {}", data);
                 log.setData(data);
@@ -11096,7 +11091,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -11208,6 +11203,41 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportDateFormat(ImportOrganizationPersonnelFilesDTO data){
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        try {
+            java.sql.Date.valueOf(data.getCheckInTime());
+            if (!StringUtils.isEmpty(data.getEmploymentTime()))
+                java.sql.Date.valueOf(data.getEmploymentTime());
+            if (!StringUtils.isEmpty(data.getBirthday()))
+                java.sql.Date.valueOf(data.getBirthday());
+            if (!StringUtils.isEmpty(data.getEnrollmentTime()))
+                java.sql.Date.valueOf(data.getEnrollmentTime());
+            if (!StringUtils.isEmpty(data.getGraduationTime()))
+                java.sql.Date.valueOf(data.getGraduationTime());
+            if (!StringUtils.isEmpty(data.getEntryTime()))
+                java.sql.Date.valueOf(data.getEntryTime());
+            if (!StringUtils.isEmpty(data.getDepartureTime()))
+                java.sql.Date.valueOf(data.getDepartureTime());
+            if (!StringUtils.isEmpty(data.getInsuranceStartTime()))
+                java.sql.Date.valueOf(data.getInsuranceStartTime());
+            if (!StringUtils.isEmpty(data.getInsuranceEndTime()))
+                java.sql.Date.valueOf(data.getInsuranceEndTime());
+            if (!StringUtils.isEmpty(data.getContractStartTime()))
+                java.sql.Date.valueOf(data.getContractStartTime());
+            if (!StringUtils.isEmpty(data.getContractEndTime()))
+                java.sql.Date.valueOf(data.getContractEndTime());
+        }catch (Exception e){
+            LOGGER.warn("Organization member date format error. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member date format error");
+            log.setCode(OrganizationServiceErrorCode.ERROR_DATE_FORMAT_WRONG);
+            return log;
+        }
+        return null;
+    }
+
     private Long saveOrganizationMembers(
             ImportOrganizationPersonnelFilesDTO data, Long organizationId,
             Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
@@ -11281,14 +11311,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  员工类型
         Byte employeeType;
         if(!StringUtils.isEmpty(data.getEmployeeType())){
-            if(data.getEmployeeType().equals("全职")){
-                employeeType = 0;
-            }else if(data.getEmployeeType().equals("兼职")){
+            if(data.getEmployeeType().equals("兼职")){
                 employeeType = 1;
             }else if(data.getEmployeeType().equals("实习")){
                 employeeType = 2;
-            }else{
+            }else if(data.getEmployeeType().equals("劳动派遣")){
                 employeeType = 3;
+            }else{
+                employeeType = 0;
             }
             memberCommand.setEmployeeType(employeeType);
         }
@@ -11368,14 +11398,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  工作类型
         Byte jobType;
         if(!StringUtils.isEmpty(data.getJobType())){
-            if(data.getEmployeeType().equals("全职")){
-                jobType = 0;
-            }else if(data.getEmployeeType().equals("兼职")){
+            if(data.getEmployeeType().equals("兼职")){
                 jobType = 1;
             }else if(data.getEmployeeType().equals("实习")){
                 jobType = 2;
-            }else{
+            }else if(data.getEmployeeType().equals("劳动派遣")){
                 jobType = 3;
+            }else{
+                jobType = 0;
             }
             workExperiences.setJobType(jobType);
         }
