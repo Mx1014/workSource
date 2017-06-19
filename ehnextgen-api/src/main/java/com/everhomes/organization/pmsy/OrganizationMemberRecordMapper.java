@@ -44,6 +44,7 @@ public class OrganizationMemberRecordMapper implements RecordMapper<Record, Orga
         member.setStringTag5(r.getValue(t1.STRING_TAG5));
         member.setNamespaceId(r.getValue(t1.NAMESPACE_ID));
         member.setVisibleFlag(r.getValue(t1.VISIBLE_FLAG));
+        member.setGroupPath(r.getValue(t1.GROUP_PATH));
         member.setGroupType(r.getValue(t1.GROUP_TYPE));
         member.setCreatorUid(r.getValue(t1.CREATOR_UID));
         member.setOperatorUid(r.getValue(t1.OPERATOR_UID));

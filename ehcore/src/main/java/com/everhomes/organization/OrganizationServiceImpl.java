@@ -5686,7 +5686,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 m.setTargetId(userIdentifier.getOwnerUid());
                 m.setNamespaceId(namespaceId);
                 organizationProvider.updateOrganizationMember(m);
-
             }
 
             //刷新企业通讯录
