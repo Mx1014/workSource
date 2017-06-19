@@ -52,7 +52,7 @@ CREATE TABLE `eh_siyin_print_orders` (
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `order_no` BIGINT COMMENT 'order number',
-  `job_type` VARCHAR(128) COMMENT 'siyin returned,PRINT(1),COPY(2),SCAN(3)',
+  `job_type` TINYINT COMMENT 'siyin returned,PRINT(1),COPY(2),SCAN(3)',
   `print_document_name` VARCHAR(256) COMMENT 'print document name',
   `detail` TEXT COMMENT 'print/copy/scan details',
   `email` VARCHAR(128) COMMENT '',
