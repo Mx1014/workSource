@@ -84,6 +84,7 @@ CREATE TABLE `eh_salary_group_entries` (
   `number_type` TINYINT COMMENT '数值类型:0-普通数值 1-计算公式',
   `default_value` TEXT COMMENT'默认值/默认数值/计算公式',
   `need_check` TINYINT COMMENT'是否需要核算:0-否 1-是',
+  `default_order` INT,
   `visible_flag` TINYINT DEFAULT 1 COMMENT'是否展示到工资条:0-否 1-是',
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
