@@ -35,6 +35,7 @@ import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -401,6 +402,31 @@ public class AddressProviderImpl implements AddressProvider {
 			.fetch()
 			.get(0)
 			.getValue(DSL.count());
+	}
+
+	@Override
+	public void updateOrganizationOwnerAddress(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.delete(Tables.EH_ORGANIZATION_OWNER_ADDRESS)
+			.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+			.execute();
+	}
+
+	@Override
+	public void updateOrganizationAddress(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.update(Tables.EH_ORGANIZATION_ADDRESSES)
+			.set(Tables.EH_ORGANIZATION_ADDRESSES.STATUS, OrganizationAddressStatus.INACTIVE.getCode())
+			.where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+			.execute();
+	}
+
+	@Override
+	public void updateOrganizationAddressMapping(Long addressId) {
+		dbProvider.getDslContext(AccessSpec.readWrite())
+			.delete(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+			.execute();
 	}
     
 }

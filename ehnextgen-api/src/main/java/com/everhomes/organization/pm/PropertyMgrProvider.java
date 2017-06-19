@@ -2,6 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.ListOrganizationOwnerStatisticDTO;
@@ -488,4 +489,6 @@ public interface PropertyMgrProvider {
 	public Map<Long, CommunityAddressMapping> mapAddressMappingByAddressIds(List<Long> addressIds);
 
 	public Map<Long, CommunityPmBill> mapNewestBillByAddressIds(List<Long> addressIds);
+
+	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId);
 }
