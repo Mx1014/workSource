@@ -1004,7 +1004,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				SiteItemDTO siteItemDTO =convertItem2DTO(item);
 				rSiteDTO.getSiteItems().add(siteItemDTO);
 			}
-		}
+		} 
 		List<RentalConfigAttachment> attachments=this.rentalv2Provider.queryRentalConfigAttachmentByOwner(EhRentalv2Resources.class.getSimpleName(),rentalSite.getId());
 		rSiteDTO.setAttachments(convertAttachments(attachments));
 
@@ -1019,6 +1019,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
 //		rentalv2Provider.updateRentalSite(rentalSite);
 //		}
+		
 		return rSiteDTO;
 	}
 

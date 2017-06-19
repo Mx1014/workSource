@@ -140,6 +140,15 @@ public class RentalSiteDTO {
 	private java.lang.Double     discountRatio;
     @Deprecated
 	private java.lang.Byte       rentalType;
+    
+	public List<SitePriceRuleDTO> getSitePriceRules() {
+		return sitePriceRules;
+	}
+
+	public void setSitePriceRules(List<SitePriceRuleDTO> sitePriceRules) {
+		this.sitePriceRules = sitePriceRules;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

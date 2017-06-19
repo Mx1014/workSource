@@ -87,32 +87,98 @@ public class QueryDefaultRuleAdminResponse {
 	@ItemType(PriceRuleDTO.class)
 	private List<PriceRuleDTO> priceRules;
 	
-//	@Deprecated
-//	private Byte rentalType;
-//	@Deprecated
-//	private BigDecimal workdayPrice;
-//	@Deprecated
-//	private BigDecimal weekendPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal orgMemberWeekendPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWorkdayPrice;
-//	@Deprecated
-//	private BigDecimal approvingUserWeekendPrice;
-//	@Deprecated
-//	private Byte discountType;
-//	@Deprecated
-//	private java.math.BigDecimal fullPrice;
-//	@Deprecated
-//	private java.math.BigDecimal cutPrice;
-//	@Deprecated
-//    private Double discountRatio;
+	@Deprecated
+	private Byte rentalType;
+	@Deprecated
+	private BigDecimal workdayPrice;
+	@Deprecated
+	private BigDecimal weekendPrice;
+	@Deprecated
+	private BigDecimal orgMemberWorkdayPrice;
+	@Deprecated
+	private BigDecimal orgMemberWeekendPrice;
+	@Deprecated
+	private BigDecimal approvingUserWorkdayPrice;
+	@Deprecated
+	private BigDecimal approvingUserWeekendPrice;
+	@Deprecated
+	private Byte discountType;
+	@Deprecated
+	private java.math.BigDecimal fullPrice;
+	@Deprecated
+	private java.math.BigDecimal cutPrice;
+	@Deprecated
+    private Double discountRatio;
 
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> halfDayTimeIntervals;
 
+	public Byte getRentalType() {
+		return rentalType;
+	}
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+	public BigDecimal getWorkdayPrice() {
+		return workdayPrice;
+	}
+	public void setWorkdayPrice(BigDecimal workdayPrice) {
+		this.workdayPrice = workdayPrice;
+	}
+	public BigDecimal getWeekendPrice() {
+		return weekendPrice;
+	}
+	public void setWeekendPrice(BigDecimal weekendPrice) {
+		this.weekendPrice = weekendPrice;
+	}
+	public BigDecimal getOrgMemberWorkdayPrice() {
+		return orgMemberWorkdayPrice;
+	}
+	public void setOrgMemberWorkdayPrice(BigDecimal orgMemberWorkdayPrice) {
+		this.orgMemberWorkdayPrice = orgMemberWorkdayPrice;
+	}
+	public BigDecimal getOrgMemberWeekendPrice() {
+		return orgMemberWeekendPrice;
+	}
+	public void setOrgMemberWeekendPrice(BigDecimal orgMemberWeekendPrice) {
+		this.orgMemberWeekendPrice = orgMemberWeekendPrice;
+	}
+	public BigDecimal getApprovingUserWorkdayPrice() {
+		return approvingUserWorkdayPrice;
+	}
+	public void setApprovingUserWorkdayPrice(BigDecimal approvingUserWorkdayPrice) {
+		this.approvingUserWorkdayPrice = approvingUserWorkdayPrice;
+	}
+	public BigDecimal getApprovingUserWeekendPrice() {
+		return approvingUserWeekendPrice;
+	}
+	public void setApprovingUserWeekendPrice(BigDecimal approvingUserWeekendPrice) {
+		this.approvingUserWeekendPrice = approvingUserWeekendPrice;
+	}
+	public Byte getDiscountType() {
+		return discountType;
+	}
+	public void setDiscountType(Byte discountType) {
+		this.discountType = discountType;
+	}
+	public java.math.BigDecimal getFullPrice() {
+		return fullPrice;
+	}
+	public void setFullPrice(java.math.BigDecimal fullPrice) {
+		this.fullPrice = fullPrice;
+	}
+	public java.math.BigDecimal getCutPrice() {
+		return cutPrice;
+	}
+	public void setCutPrice(java.math.BigDecimal cutPrice) {
+		this.cutPrice = cutPrice;
+	}
+	public Double getDiscountRatio() {
+		return discountRatio;
+	}
+	public void setDiscountRatio(Double discountRatio) {
+		this.discountRatio = discountRatio;
+	}
 	public List<Byte> getRentalTypes() {
 		return rentalTypes;
 	}
