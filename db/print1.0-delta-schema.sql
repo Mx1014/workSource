@@ -5,6 +5,7 @@ CREATE TABLE `eh_siyin_print_settings` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
   `owner_type` VARCHAR(64) NOT NULL COMMENT 'community',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `setting_type` TINYINT COMMENT '1(scan/print/copy),2(course/hotline)',
   `job_type` TINYINT COMMENT 'job type, PRINT(1),COPY(2),SCAN(3)',
   `paper_size` TINYINT COMMENT 'paper size, A3(3),A4(4),A5(5),A6(6)',
   `black_white_price` DECIMAL(10,2) COMMENT 'black white price',
