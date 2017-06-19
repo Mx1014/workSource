@@ -33,22 +33,43 @@ public class GenerateApi {
 	public static void main(String[] args) { 
 		String[] apis = {
 //				"listContracts(1.合同列表);buildingName(String|楼栋名称),keywords(String|查询关键词),pageAnchor(Long|锚点),pageSize(Integer|每页大小);nextPageAnchor(Long|下页锚点),contracts(List<ContractDTO>|合同列表，参考{@link com.everhomes.rest.contract.ContractDTO})"
-				"listTalentCateogry(1.分类列表);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id);talentCategories(List<TalentCategoryDTO>|分类列表，参考{@link com.everhomes.rest.talent.TalentCategoryDTO})",
-				"createOrUpdateTalentCateogry(2.新增或更新分类);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),talentCategories(List<TalentCategoryDTO>|分类列表，参考{@link com.everhomes.rest.talent.TalentCategoryDTO});",
-				"deleteTalentCateogry(3.删除分类);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
-				
-				"listTalent(4.人才列表);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),categoryId(Long|分类id),gender(Byte|性别，参考{@link com.everhomes.rest.user.UserGender}),experience(Byte|经验，参考{@link com.everhomes.rest.talent.TalentExperienceConditionEnum}),degree(Byte|学历，参考{@link com.everhomes.rest.talent.TalentDegreeConditionEnum}),keyword(String|关键词),pageAnchor(Long|锚点),pageSize(Integer|每页大小);nextPageAnchor(Long|下页锚点),talents(List<TalentDTO>|人才列表，参考{@link com.everhomes.rest.talent.TalentDTO})",
-				"createOrUpdateTalent(5.更新人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id),name(String|姓名),avatarUri(String|头像),position(String|职位),categoryId(Long|分类id),gender(Byte|性别，参考{@link com.everhomes.rest.user.UserGender}),experience(Integer|经验年数),graduateSchool(String|毕业院校),degree(Byte|学历，参考{@link com.everhomes.rest.talent.TalentDegreeEnum}),phone(String|联系电话),remark(String|详细介绍);",
-				"enableTalent(6.打开/关闭人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id),enabled(Byte|1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag});",
-				"deleteTalent(7.删除人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
-				"topTalent(8.置顶人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
-				"importTalent(9.导入人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),attachment(MultipartFile[]|文件);",
-				"getTalentDetail(10.获取人才信息详情);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);talent(TalentDTO|人才信息)",
-				
-				"listTalentQueryHistory(11.人才信息查询记录);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);talentQueryHistories(List<TalentQueryHistoryDTO>|历史记录)"
+//				"listTalentCateogry(1.分类列表);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id);talentCategories(List<TalentCategoryDTO>|分类列表，参考{@link com.everhomes.rest.talent.TalentCategoryDTO})",
+//				"createOrUpdateTalentCateogry(2.新增或更新分类);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),talentCategories(List<TalentCategoryDTO>|分类列表，参考{@link com.everhomes.rest.talent.TalentCategoryDTO});",
+//				"deleteTalentCateogry(3.删除分类);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
+//				
+//				"listTalent(4.人才列表);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),categoryId(Long|分类id),gender(Byte|性别，参考{@link com.everhomes.rest.user.UserGender}),experience(Byte|经验，参考{@link com.everhomes.rest.talent.TalentExperienceConditionEnum}),degree(Byte|学历，参考{@link com.everhomes.rest.talent.TalentDegreeConditionEnum}),keyword(String|关键词),pageAnchor(Long|锚点),pageSize(Integer|每页大小);nextPageAnchor(Long|下页锚点),talents(List<TalentDTO>|人才列表，参考{@link com.everhomes.rest.talent.TalentDTO})",
+//				"createOrUpdateTalent(5.更新人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id),name(String|姓名),avatarUri(String|头像),position(String|职位),categoryId(Long|分类id),gender(Byte|性别，参考{@link com.everhomes.rest.user.UserGender}),experience(Integer|经验年数),graduateSchool(String|毕业院校),degree(Byte|学历，参考{@link com.everhomes.rest.talent.TalentDegreeEnum}),phone(String|联系电话),remark(String|详细介绍);",
+//				"enableTalent(6.打开/关闭人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id),enabled(Byte|1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag});",
+//				"deleteTalent(7.删除人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
+//				"topTalent(8.置顶人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
+//				"importTalent(9.导入人才信息);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),attachment(MultipartFile[]|文件);",
+//				"getTalentDetail(10.获取人才信息详情);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);talent(TalentDTO|人才信息)",
+//				
+//				"listTalentQueryHistory(11.人才信息查询记录);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);talentQueryHistories(List<TalentQueryHistoryDTO>|历史记录)"
 //				"deleteTalentQueryHistory(12.删除人才信息查询记录);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id),id(Long|id);",
 //				"clearTalentQueryHistory(13.清空人才信息查询记录);ownerType(String|所属类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}),ownerId(Long|所属id),organizationId(Long|管理公司id);",
-				
+				"listSalaryDefaultEntries(1.查询基础项目设置);;salaryDefaultEntries(List<SalaryDefaultEntriesDTO>)",
+				"addSalaryGroup(2.新增薪酬组);displayName(String|薪酬组名称),organizationGroupType(Byte|组类型);organizationGroups(OrganizationGroupsDTO|薪酬组信息)",
+				"updateSalaryGroup(3.更改薪酬组包含的选项+更改组名);id(LONG|薪酬组id),",
+				"listSalaryStaffs(4.根据组织架构/薪酬组/异常状态 查询人员);keywords(String|搜索关键词);contactName(String|人员姓名);",
+				"addEmployeeSalarySettings(5.设置人员薪酬字段值);groupId(Long|标签分类),groupEntryId(Long|标签分类),salaryValue(String|);salaryEmployeeSettings(SalaryEmployeeSettingsDTO|个人薪酬设定)",
+				"exportSalaryGroup(6.导出某个薪酬组excel);groupId(Long|薪酬组id);",
+				"importSalaryGroup(7.导入某个薪酬组excel);groupId(Long|薪酬组id);",
+				"exportPeriodSalary(8.根据批次导出核算表);;",
+				"importPeriodSalary(9.根据批次导入核算表);attachment(MultipartFile[]|文件);",
+
+				"getAbnormalStaffNumber(12.查询异常员工人数);ownerType(String|所属类型:Organization),ownerId(Long|所属id);abnormalStaffNumber(Integer|异常员工数量)",
+				"listPeriodSalary(13.查询谋期的(审核/发放) 批次列表);ownerType(String|所属类型:Organization),ownerId(Long|所属id),period(String|查哪一期薪酬批次:现在都是按月发放所以传YYYYMM如201702),status(List<Byte>|薪酬组本期状态:核算状态页面传空或者{0,1,3,4},发放状态页面传{1,3,4});salaryPeriodGroups(List<SalaryPeriodGroupDTO>|本期薪酬批次列表，参考{@link com.everhomes.rest.salary.SalaryPeriodGroupDTO})",
+				"listPeriodSalaryEmployees(14.查询某个批次的核算列表);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryPeriodGroupId(Long|某期薪酬批次id);salaryPeriodEmployees(List<SalaryPeriodEmployeeDTO>|某薪酬批次的员工核算列表参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeDTO})",
+				"updatePeriodSalaryEmployee(15.保存某个批次的核算后数值和更改状态);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryEmployeeId(Long|所属id),periodEmployeeEntitys(List<SalaryPeriodEmployeeEntityDTO>|批次档期的字段列表),checkFlag(Byte|核算标准0-未核算 1-核算);",
+				"checkPeriodSalary(16.设置某期薪酬批次核算完成);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryPeriodGroupId(Long|某期薪酬批次id);",
+				"getPeriodSalaryEmailContent(17.查询某批次工资条内容(说明+字段));ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryPeriodGroupId(Long|某期薪酬批次id);emailContent(String|邮件内容),salaryGroupEntitys(List<SalaryGroupEntityDTO>|字段项列表 参考{@link com.everhomes.rest.salarySalaryGroupEntityDTO})",
+				"setSalaryEmailContent(18.设置工资条邮件内容);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryGroupId(Long|薪酬批次id 如果为空就是给全局设置),emailContent(String|邮件内容);",
+				"updateSalaryGroupEntriesVisable(19.设置工资条字段项显示状态);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryGroupId(Long|薪酬批次id),salaryGroupEntitys(List<SalaryGroupEntityDTO>|字段项列表 参考{@link com.everhomes.rest.salarySalaryGroupEntityDTO};",
+				"sendPeriodSalary(20.发送某期薪酬批次);ownerType(String|所属类型:Organization),ownerId(Long|所属id),salaryPeriodGroupId(Long|某期薪酬批次id),sendTime(Long|发送时间的时间戳:如果为null则立即发送);",
+				"listSalarySendHistory(21.设置工资条邮件内容);ownerType(String|所属类型:Organization),ownerId(Long|所属id),keyWord(String|关键字,目前查询员工姓名),organizationId(Long|查询组织架构部门id),beginTime(Long|查询开始时间),endTime(Long|查询结束时间);salaryPeriodEmployees(List<SalaryPeriodEmployeeDTO>|某薪酬批次的员工核算列表参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeDTO}",
+				"exportSalarySendHistory(22.设置工资条邮件内容);ownerType(String|所属类型:Organization),ownerId(Long|所属id),keyWord(String|关键字,目前查询员工姓名),organizationId(Long|查询组织架构部门id),beginTime(Long|查询开始时间),endTime(Long|查询结束时间);"
+
 				
 				
 				};
