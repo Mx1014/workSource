@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -45,7 +46,10 @@ import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 @RestDoc(value="print controller", site="print")
 @RestController
 @RequestMapping("/siyinprint")
-public class PrintController extends ControllerBase { 
+public class SiYinPrintController extends ControllerBase { 
+	
+	@Autowired
+	private SiyinPrintService siyinPrintService;
 
 	 /**
 	  * <b>URL: /siyinprint/getPrintSetting</b>
@@ -54,8 +58,7 @@ public class PrintController extends ControllerBase {
 	 @RequestMapping("getPrintSetting")
 	 @RestReturn(value=GetPrintSettingResponse.class)
 	 public RestResponse getPrintSetting(GetPrintSettingCommand cmd) {
-		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintSetting(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;

@@ -1,0 +1,16 @@
+// @formatter:off
+package com.everhomes.print;
+
+import java.util.List;
+
+public interface SiyinPrintRecordProvider {
+
+	void createSiyinPrintRecord(SiyinPrintRecord siyinPrintRecord);
+
+	void updateSiyinPrintRecord(SiyinPrintRecord siyinPrintRecord);
+
+	SiyinPrintRecord findSiyinPrintRecordById(Long id);
+
+	List<SiyinPrintRecord> listSiyinPrintRecord();
+
+}
