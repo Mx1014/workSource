@@ -15,6 +15,8 @@ import org.springframework.util.StringUtils;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -46,11 +48,13 @@ import com.everhomes.rest.print.PayPrintOrderResponse;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.PrintJobTypeType;
+import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
 import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
 import com.everhomes.rest.print.PrintSettingType;
+import com.everhomes.rest.print.PrintStatDTO;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.user.UserContext;
@@ -73,6 +77,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private SiyinPrintSettingProvider siyinPrintSettingProvider;
 	@Autowired
     private LocaleStringProvider localeStringProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -98,9 +105,30 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintStatResponse getPrintStat(GetPrintStatCommand cmd) {
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		PrintOwnerType printOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		
-		return null;
+		List<String> ownerTypeList = new ArrayList<String>();
+		List<Long> ownerIdList = new ArrayList<Long>();
+		
+		if(printOwnerType == PrintOwnerType.ENTERPRISE){
+			List<OrganizationCommunity> list = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
+			if(list == null || list.size() == 0){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, organizationId = {}, have empty community",cmd.getOwnerId());
+			}
+			list.forEach(r -> {
+				ownerIdList.add(r.getCommunityId());
+				ownerTypeList.add(PrintOwnerType.COMMUNITY.getCode());
+			});
+		}else{
+			ownerTypeList.add(cmd.getOwnerType());
+			ownerIdList.add(cmd.getOwnerId());
+		}
+		
+		//查询订单
+		List<SiyinPrintOrder> orders = siyinPrintOrderProvider.listSiyinPrintOrder(cmd.getStartTime(), cmd.getEndTime(), ownerTypeList, ownerIdList);
+		
+		//计算订单
+		return processGetPrintStatResponse(orders);
 	}
 
 	@Override
@@ -187,7 +215,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return null;
 	}
 	
-	private void checkOwner(String ownerType, Long ownerId) {
+	private PrintOwnerType checkOwner(String ownerType, Long ownerId) {
 		// TODO Auto-generated method stub
 		if(ownerId == null || StringUtils.isEmpty(ownerType)){
 			Long userId = UserContext.current().getUser().getId();
@@ -203,6 +231,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			LOGGER.error(stringBuffer.append("Invalid owner type, operatorId=").append(userId).append(", ownerType=").append(ownerType).toString());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, Unknown ownerType = "+ ownerType+". ");
 		}
+		return printOwnerType;
 	}
 	
 	/**
@@ -433,6 +462,57 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, colorPrice = " + colorTypeDTO.getBlackWhitePrice());
 		}
 	}
-	
+	/**
+	 *计算订单统计值 
+	 */
+	private GetPrintStatResponse processGetPrintStatResponse(List<SiyinPrintOrder> orders) {
+		GetPrintStatResponse response = new GetPrintStatResponse();
+		
+		PrintStatDTO printStat = new PrintStatDTO(new BigDecimal(0),new BigDecimal(0),new BigDecimal(0));
+		PrintStatDTO copyStat = new PrintStatDTO(new BigDecimal(0),new BigDecimal(0),new BigDecimal(0));
+		PrintStatDTO scanStat = new PrintStatDTO(new BigDecimal(0),new BigDecimal(0),new BigDecimal(0));
+		PrintStatDTO allStat = new PrintStatDTO(new BigDecimal(0),new BigDecimal(0),new BigDecimal(0));
+		
+		for (SiyinPrintOrder siyinPrintOrder : orders) {
+			PrintJobTypeType jobType = PrintJobTypeType.fromCode(siyinPrintOrder.getJobType());
+			PrintOrderStatusType orderStatusType = PrintOrderStatusType.fromCode(siyinPrintOrder.getOrderStatus());
+			//总体统计
+			addOrderTotalAmountToStat(allStat,siyinPrintOrder.getOrderTotalAmount(),orderStatusType);
+			
+			switch (jobType) {
+			case PRINT:
+				addOrderTotalAmountToStat(printStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				break;
+			case COPY:
+				addOrderTotalAmountToStat(copyStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				break;
+			case SCAN:
+				addOrderTotalAmountToStat(scanStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				break;
+
+			default:
+				break;
+			}
+		}
+		
+		response.setAllStat(allStat);
+		response.setCopyStat(copyStat);
+		response.setPrintStat(printStat);
+		response.setScanStat(scanStat);
+		return response;
+	}
+
+
+	/**
+	 * 加上某个订单的值到统计对象
+	 */
+	private void addOrderTotalAmountToStat(PrintStatDTO allStat, BigDecimal orderTotalAmount, PrintOrderStatusType orderStatusType) {
+		allStat.setAll(allStat.getAll().add(orderTotalAmount));
+		if(orderStatusType == PrintOrderStatusType.PAID)
+			allStat.setPaid(allStat.getPaid().add(orderTotalAmount));
+		else if(orderStatusType == PrintOrderStatusType.UNPAID)
+			allStat.setUnpaid(allStat.getUnpaid().add(orderTotalAmount));
+	}
+
 
 }

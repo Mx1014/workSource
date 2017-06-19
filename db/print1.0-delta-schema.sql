@@ -87,7 +87,7 @@ CREATE TABLE `eh_siyin_print_records` (
   `client_name` VARCHAR(128) COMMENT 'siyin returned, documents sended source commputer name',
   `client_mac` VARCHAR(128) COMMENT 'siyin returned, documents sended source commputer mac',
   `driver_name` VARCHAR(128) COMMENT 'siyin returned, driver name',
-  `job_type` VARCHAR(128) COMMENT 'siyin returned,PRINT(1),COPY(2),SCAN(3)',
+  `job_type` TINYINT COMMENT 'siyin returned,PRINT(1),COPY(2),SCAN(3)',
   `start_time` VARCHAR(128) COMMENT 'siyin returned, job start time',
   `end_time` VARCHAR(128) COMMENT 'siyin returned, job end time',
   `document_name` VARCHAR(512) COMMENT 'siyin returned, print document name',

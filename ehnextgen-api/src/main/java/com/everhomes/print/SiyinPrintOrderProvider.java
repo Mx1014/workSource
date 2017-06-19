@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface SiyinPrintOrderProvider {
@@ -11,6 +12,7 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findSiyinPrintOrderById(Long id);
 
-	List<SiyinPrintOrder> listSiyinPrintOrder();
+	List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
+			List<Long> ownerIdList);
 
 }

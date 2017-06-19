@@ -4,7 +4,10 @@ package com.everhomes.print;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Query;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,10 +61,22 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 	
 	@Override
-	public List<SiyinPrintOrder> listSiyinPrintOrder() {
-		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
-				.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintOrder.class));
+	public List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
+			List<Long> ownerIdList) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.between(startTime, endTime));
+		Condition condition = null;
+		for (int i = 0; i < ownerTypeList.size(); i++) {
+			if(condition == null)
+				condition = Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i))
+					.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerIdList.get(i)));
+			else
+				condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerIdList.get(i))));
+		}
+		return query.and(condition)
+		.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.asc())
+		.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintOrder.class));
 	}
 	
 	private EhSiyinPrintOrdersDao getReadWriteDao() {
