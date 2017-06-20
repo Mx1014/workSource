@@ -104,6 +104,8 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.userOrganization.UserOrganization;
+import com.everhomes.userOrganization.UserOrganizationProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
@@ -246,6 +248,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private UserOrganizationProvider userOrganizationProvider;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -4716,6 +4721,12 @@ public class OrganizationServiceImpl implements OrganizationService {
             Organization o = checkOrganization(member.getOrganizationId());
             if (OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(o.getGroupType())) {
                 enterpriseId = o.getId();
+                //新增userOrganization表记录 modify at 17/06/18
+                //仅当target为user且grouptype为企业时添加
+                if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && member.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+                    UserOrganization userOrganization = this.getUserOrganization(member);
+                    this.userOrganizationProvider.createUserOrganization(userOrganization);
+                }
             } else {
                 enterpriseId = o.getDirectlyEnterpriseId();
             }
@@ -5648,6 +5659,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 m.setNamespaceId(namespaceId);
                 organizationProvider.updateOrganizationMember(m);
 
+                //创建管理员的同时会同时创建一个用户，因此需要在user_organization中添加一条记录 modify at 17/6/20
+                //仅当target为user且grouptype为企业时添加
+                if(m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && m.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+                    UserOrganization userOrganization = this.getUserOrganization(m);
+                    this.userOrganizationProvider.createUserOrganization(userOrganization);
+                }
             }
 
             //刷新企业通讯录
@@ -8784,17 +8801,30 @@ public class OrganizationServiceImpl implements OrganizationService {
                     if(enterpriseId.equals(org.getId())){
                         current_detailId.add(new_detail_id);
                     }
+                    //新增userOrganization表记录
+                    //仅当target为user且grouptype为企业时添加
+                    if(organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+                        UserOrganization userOrganization = this.getUserOrganization(organizationMember);
+                        this.userOrganizationProvider.createUserOrganization(userOrganization);
+                    }
                 } else {
-                    organizationMember.setId(desOrgMember.getId());
-                    //organizationProvider.updateOrganizationMember(organizationMember);
                     /**Modify BY lei.lv cause MemberDetail**/
                     //绑定member表的detail_id
-                    organizationMember.setDetailId(new_detail_id);
-                    organizationProvider.updateOrganizationMember(organizationMember);
+                    desOrgMember.setDetailId(new_detail_id);
+                    desOrgMember.setOrganizationId(organizationMember.getOrganizationId());
+                    desOrgMember.setGroupType(organizationMember.getGroupType());
+                    desOrgMember.setGroupPath(organizationMember.getGroupPath());
+                    organizationProvider.updateOrganizationMember(desOrgMember);
                     memberDetailIds.add(new_detail_id);
                     //保存当前企业关联的detailId,用于多个返回值时进行比对
-                    if(enterpriseId.equals(org.getId())){
+                    if (enterpriseId.equals(org.getId())) {
                         current_detailId.add(new_detail_id);
+                    }
+                    //更新userOrganization表记录
+                    //仅当target为user且grouptype为企业时添加
+                    if (desOrgMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && desOrgMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())) {
+                        UserOrganization userOrganization = this.getUserOrganization(desOrgMember);
+                        this.userOrganizationProvider.updateUserOrganization(userOrganization);
                     }
                 }
             }
@@ -11615,6 +11645,27 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {//如果查询到该企业有直属的隐藏部门
             return under_org.getId();
         }
+    }
+
+    private UserOrganization getUserOrganization(OrganizationMember organizationMember){
+        //根据namespaceId、organizationId、userId（userIdentifier.getOwnerUid()）来判断唯一记录
+        UserOrganization userOrganization = userOrganizationProvider.findUserOrganization(organizationMember.getNamespaceId(), organizationMember.getOrganizationId(), organizationMember.getTargetId());
+        if(userOrganization == null){
+            userOrganization = new UserOrganization();
+            userOrganization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }else{
+            userOrganization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
+        //赋值
+        userOrganization.setUserId(organizationMember.getTargetId());
+        userOrganization.setOrganizationId(organizationMember.getOrganizationId());
+        userOrganization.setGroupPath(organizationMember.getGroupPath());
+        userOrganization.setGroupType(organizationMember.getGroupType());
+        userOrganization.setStatus(organizationMember.getStatus());
+        userOrganization.setNamespaceId(organizationMember.getNamespaceId());
+        userOrganization.setVisibleFlag(organizationMember.getVisibleFlag());
+
+        return userOrganization;
     }
 }
 
