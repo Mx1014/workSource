@@ -405,7 +405,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     				}
     			}
     			
-    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
+    		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
+
+			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
     			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
@@ -438,8 +440,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
+			if (null != opRequestBuilding.getBuildingId()) {
+				buildingIds.add(opRequestBuilding.getBuildingId());
+			}
 
-			buildingIds.add(opRequestBuilding.getBuildingId());
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(issuerType)) {
 				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
