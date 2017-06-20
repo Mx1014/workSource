@@ -1982,11 +1982,6 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
 
-			//最新活跃时间 add by sfyan 20170620
-			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(user.getId());
-			if(userActivities.size() > 0){
-				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
-			}
 			Set<OrganizationDetailDTO> organizationDTOs = new HashSet<>();
 			if(null != members){
 
@@ -2036,7 +2031,14 @@ public class CommunityServiceImpl implements CommunityService {
 			dtos = dtos.subList(0, pageSize);
 			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
 		}
-		res.setUserCommunities(dtos);
+		res.setUserCommunities(dtos.stream().map(r->{
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId());
+			if(userActivities.size() > 0){
+				r.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
+			return r;
+		}).collect(Collectors.toList()));
 		return res;
 	}
 
