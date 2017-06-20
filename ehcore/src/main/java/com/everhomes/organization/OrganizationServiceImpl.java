@@ -9986,85 +9986,29 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
         OrganizationMemberDetails organizationMemberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-//        log.setOriginalContent(StringHelper.toJsonString(organizationMemberDetails));
 
-        Map<String,String> mapLogs = new HashMap<>();
-        if(cmd.getEnName() != null){
-            organizationMemberDetails.setEnName(cmd.getEnName());
-            mapLogs.put("enName: ", cmd.getEnName());
-        }
-        if(!StringUtils.isEmpty(cmd.getBirthday())){
-            organizationMemberDetails.setBirthday(java.sql.Date.valueOf(cmd.getBirthday()));
-            mapLogs.put("birthday: ", cmd.getBirthday());
-        }
-        if(!StringUtils.isEmpty(cmd.getMaritalFlag())){
+        organizationMemberDetails.setEnName(cmd.getEnName() != null ? cmd.getEnName() : "");
+        organizationMemberDetails.setBirthday(!StringUtils.isEmpty(cmd.getBirthday()) ? java.sql.Date.valueOf(cmd.getBirthday()) : null);
+        if (!StringUtils.isEmpty(cmd.getMaritalFlag())) {
             organizationMemberDetails.setMaritalFlag(cmd.getMaritalFlag());
-            mapLogs.put("maritalFlag: ", String.valueOf(cmd.getMaritalFlag()));
         }
-        if(cmd.getPoliticalStatus() != null){
-            organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus());
-            mapLogs.put("politicalStatus: ", cmd.getPoliticalStatus());
-        }
-        if(cmd.getNativePlace() != null){
-            organizationMemberDetails.setNativePlace(cmd.getNativePlace());
-            mapLogs.put("nativePlace: ", cmd.getNativePlace());
-        }
-        if(cmd.getRegResidence() != null){
-            organizationMemberDetails.setRegResidence(cmd.getRegResidence());
-            mapLogs.put("regResidence: ", cmd.getRegResidence());
-        }
-        if(cmd.getIdNumber() != null){
-            organizationMemberDetails.setIdNumber(cmd.getIdNumber());
-            mapLogs.put("idNumber: ", cmd.getIdNumber());
-        }
-        if(cmd.getEmail() != null){
-            organizationMemberDetails.setEmail(cmd.getEmail());
-            mapLogs.put("eamil: ", cmd.getEmail());
-        }
-        if(cmd.getWechat() != null){
-            organizationMemberDetails.setWechat(cmd.getWechat());
-            mapLogs.put("wechat: ", cmd.getWechat());
-        }
-        if(cmd.getEnName() != null){
-            organizationMemberDetails.setEnName(cmd.getEnName());
-            mapLogs.put("EnName: ", cmd.getEnName());
-        }
-        if(cmd.getQq() != null){
-            organizationMemberDetails.setQq(cmd.getQq());
-            mapLogs.put("qq: ", cmd.getQq());
-        }
-        if(cmd.getEmergencyName() != null){
-            organizationMemberDetails.setEmergencyName(cmd.getEmergencyName());
-            mapLogs.put("emergencyName: ", cmd.getEmergencyName());
-        }
-        if(cmd.getEmergencyContact() != null){
-            organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact());
-            mapLogs.put("emergencyContact: ", cmd.getEmergencyContact());
-        }
-        if(cmd.getAddress() != null){
-            organizationMemberDetails.setAddress(cmd.getAddress());
-            mapLogs.put("address: ", cmd.getAddress());
-        }
-        if(cmd.getSalaryCardNumber() != null){
-            organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber());
-            mapLogs.put("salaryCardNumber: ", cmd.getSalaryCardNumber());
-        }
-        if(cmd.getSocialSecurityNumber() != null){
-            organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
-            mapLogs.put("socialSecurityNumber: ", cmd.getSocialSecurityNumber());
-        }
-        if(cmd.getProvidentFundNumber() != null){
-            organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber());
-            mapLogs.put("providentFundNumber: ", cmd.getProvidentFundNumber());
-        }
+        organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus() != null ? cmd.getPoliticalStatus() : "");
+        organizationMemberDetails.setNativePlace(cmd.getNativePlace() != null ? cmd.getNativePlace() : "");
+        organizationMemberDetails.setRegResidence(cmd.getRegResidence() != null ? cmd.getRegResidence() : "");
+        organizationMemberDetails.setIdNumber(cmd.getIdNumber() != null ? cmd.getIdNumber() : "");
+        organizationMemberDetails.setEmail(cmd.getEmail() != null ? cmd.getEmail() : "");
+        organizationMemberDetails.setWechat(cmd.getWechat() != null ? cmd.getWechat() : "");
+        organizationMemberDetails.setQq(cmd.getQq() != null ? cmd.getQq() : "");
+        organizationMemberDetails.setEmergencyName(cmd.getEmergencyName() != null ? cmd.getEmergencyName() : "");
+        organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact() != null ? cmd.getEmergencyContact() : "");
+        organizationMemberDetails.setAddress(cmd.getAddress() != null ? cmd.getAddress() : "");
+        organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber() != null ? cmd.getSalaryCardNumber() : "");
+        organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber() != null ? cmd.getSocialSecurityNumber() : "");
+        organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber() != null ? cmd.getProvidentFundNumber() : "");
 
-        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
 
-/*        //  存入日志
-        System.out.println(StringHelper.toJsonString(mapLogs));
-        this.addProfileLogs(organizationMemberDetails.getId(), organizationMemberDetails.getNamespaceId(),
-                OperatingType.UPDATE.getCode(), "eh_organization_member_details",
-                StringHelper.toJsonString(mapLogs));*/
+        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails, cmd.getDetailId());
+
     }
 
     @Override
@@ -10552,21 +10496,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setEmployeeType(member.getEmployeeType());
         } else {
             detail = find_detail;
-            if (member.getContactName() != null) {
-                detail.setContactName(member.getContactName());
-            }
-            if (member.getGender() != null) {
-                detail.setGender(member.getGender());
-            }
-            if (member.getEmployeeType() != null) {
-                detail.setEmployeeType(member.getEmployeeType());
-            }
-            if (member.getEmployeeNo() != null) {
-                detail.setEmployeeNo(member.getEmployeeNo());
-            }
-            if (member.getCheckInTime() != null) {
-                detail.setCheckInTime(detail.getCheckInTime());
-            }
+            detail.setContactName(member.getContactName());
+            detail.setGender(member.getGender());
+            detail.setEmployeeType(member.getEmployeeType());
+            detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
+            detail.setCheckInTime(detail.getCheckInTime());
         }
         return detail;
     }
