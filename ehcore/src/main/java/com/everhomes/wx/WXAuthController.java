@@ -177,13 +177,8 @@ public class WXAuthController {// extends ControllerBase
         
         LoginToken loginToken = userService.getLoginToken(request);
         // 没有登录，则请求微信授权
-        if(!userService.isValid(loginToken)) {
-            sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
-            return;
-        }
-
-        // 因为公众号有一对多的情况，需要增加检查域空间，当域空间不一致时用户登出，并且需要重新走授权登录流程。   add by yanjun 20170620
-        if(!checkUserNamespaceId(namespaceId)) {
+        // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId，当域空间不一致时用户登出，并且需要重新走授权登录流程。   add by yanjun 20170620
+        if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
             sendAuthRequestToWeixin(namespaceId, sessionId, params, response);
             return;
         }
@@ -234,13 +229,9 @@ public class WXAuthController {// extends ControllerBase
             redirectByWx(response, codeUrl);
         } else {
             LoginToken loginToken = userService.getLoginToken(request);
-            if(!userService.isValid(loginToken)) {
-                // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
-                processUserInfo(namespaceId, request, response);
-            }
 
             // 因为公众号有一对多的情况，需要增加检查域空间checkUserNamespaceId方法，当域空间不一致时用户登出。   add by yanjun 20170620
-            if(!checkUserNamespaceId(namespaceId)) {
+            if(!userService.isValid(loginToken) || !checkUserNamespaceId(namespaceId)) {
                 // 如果是微信授权回调请求，则通过该请求来获取到用户信息并登录
                 processUserInfo(namespaceId, request, response);
             }
@@ -579,6 +570,7 @@ public class WXAuthController {// extends ControllerBase
     private boolean checkUserNamespaceId(Integer namespaceId){
 
 	    Integer currentNamespaceId = UserContext.getCurrentNamespaceId();
+        LOGGER.info("checkUserNamespaceId, namespaceId={}, currentNamespaceId={}", namespaceId, currentNamespaceId);
         if(currentNamespaceId == null){
             return false;
         }
@@ -588,6 +580,7 @@ public class WXAuthController {// extends ControllerBase
                 UserLogin login = UserContext.current().getLogin();
                 if(login != null){
                     userService.logoff(login);
+                    LOGGER.info("checkUserNamespaceId, userService.logoff");
                 }
             }
             return false;
