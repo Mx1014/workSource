@@ -10839,20 +10839,28 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             Long detailId = this.saveOrganizationMembers(data, cmd.getOrganizationId(), deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
-            this.saveOrganizationMemberDetails(data, detailId);
 
-            //  判断为空时则不需要添加
-            if (this.checkEducationQualification(data).equals(1)) {
-                this.saveOrganizationMemberEducations(data, detailId);
-            }
-            if (this.checkWorkExperiencesQualification(data).equals(1)) {
-                this.saveOrganizationMemberWorkExperiences(data, detailId);
-            }
-            if (this.checkInsurancesQualification(data).equals(1)) {
-                this.saveOrganizationMemberInsurances(data, detailId);
-            }
-            if (this.checkContractsQualification(data).equals(1)) {
-                this.saveOrganizationMemberContracts(data, detailId);
+            if (detailId != null) {
+                this.saveOrganizationMemberDetails(data, detailId);
+
+                //  判断为空时则不需要添加
+                if (this.checkEducationQualification(data).equals(1)) {
+                    this.saveOrganizationMemberEducations(data, detailId);
+                }
+                if (this.checkWorkExperiencesQualification(data).equals(1)) {
+                    this.saveOrganizationMemberWorkExperiences(data, detailId);
+                }
+                if (this.checkInsurancesQualification(data).equals(1)) {
+                    this.saveOrganizationMemberInsurances(data, detailId);
+                }
+                if (this.checkContractsQualification(data).equals(1)) {
+                    this.saveOrganizationMemberContracts(data, detailId);
+                }
+
+                //  计算档案完整度
+                GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+                integrity.setDetailId(detailId);
+                this.getProfileIntegrity(integrity);
             }
         }
         return errorDataLogs;
