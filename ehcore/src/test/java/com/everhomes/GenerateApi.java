@@ -20,15 +20,15 @@ import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 
 public class GenerateApi { 
-	private static final String FTL_PATH = "E:/workspace/ehnextgen/ehcore/src/test/java/com/everhomes/generate/ftl";
-	private static final String EH_CORE_API_PROJECT_PATH = "E:/workspace/ehnextgen/ehnextgen-api";
-	private static final String EH_CORE_PROJECT_PATH = "E:/workspace/ehnextgen/ehcore";
-	private static final String EH_REST_PROJECT_PATH = "E:/workspace/ehnextgen/ehrest";
-	private static final String TARGET_PACKAGE = "com.everhomes.talent2";
-	private static final String TARGET_REST_PACKAGE = "com.everhomes.rest.talent2";
-	private static final String TARGET_CONTROLLER = "Talent2Controller";
-	private static final String TARGET_SERVICE = "Talent2Service";
-	private static final String CONTROLLER_MAPPING = "/talent2";
+	private static final String FTL_PATH = "D:/workspace/ehnextgen/ehcore/src/test/java/com/everhomes/generate/ftl";
+	private static final String EH_CORE_API_PROJECT_PATH = "D:/workspace/ehnextgen/ehnextgen-api";
+	private static final String EH_CORE_PROJECT_PATH = "D:/workspace/ehnextgen/ehcore";
+	private static final String EH_REST_PROJECT_PATH = "D:/workspace/ehnextgen/ehrest";
+	private static final String TARGET_PACKAGE = "com.everhomes.salary";
+	private static final String TARGET_REST_PACKAGE = "com.everhomes.rest.salary";
+	private static final String TARGET_CONTROLLER = "SalaryController";
+	private static final String TARGET_SERVICE = "SalaryService";
+	private static final String CONTROLLER_MAPPING = "/salary";
 
 	public static void main(String[] args) { 
 		String[] apis = {
