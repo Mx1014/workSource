@@ -2,6 +2,7 @@ package com.everhomes.techpark.expansion;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
@@ -42,6 +43,16 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+
+        Long requestFormId = request.getSourceId();
+        if (null == request) {
+            //查询初始默认数据
+            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+
+            GeneralForm form = handler.getDefaultGeneralForm();
+            requestFormId = form.getFormOriginId();
+        }
 
         List<PostApprovalFormItem> values = cmd.getValues();
 
@@ -93,7 +104,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         cmd2.setEnterpriseName(enterpriseName);
         cmd2.setDescription(description);
 
-        cmd2.setRequestFormId(request.getSourceId());
+        cmd2.setRequestFormId(requestFormId);
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());
         cmd2.setFormValues(cmd.getValues());
@@ -131,27 +142,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
             dto.setFormFields(fileds);
         } else {
             //查询初始默认数据
-            List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
-                    Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
-                        @Override
-                        public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-                                                                            SelectQuery<? extends Record> query) {
-                            query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(0));
-                            query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(0L));
-                            query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(EntityType.LEASEPROMOTION.getCode()));
-                            return query;
-                        }
-                    });
-            if(forms == null || forms.isEmpty()) {
-                throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-                        GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "Init leasePromotion form not found");
-            }
-
-            GeneralForm form = forms.get(0);
-            if(form == null ) {
-                throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-                        GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "Init leasePromotion form not found");
-            }
+            GeneralForm form = getDefaultGeneralForm();
 
             dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 //		form.setFormVersion(form.getFormVersion());
@@ -164,6 +155,32 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
 
         return dto;
+    }
+
+    GeneralForm getDefaultGeneralForm() {
+        List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
+                Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                                                                        SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_GENERAL_FORMS.NAMESPACE_ID.eq(0));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(0L));
+                        query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(EntityType.LEASEPROMOTION.getCode()));
+                        return query;
+                    }
+                });
+        if(forms == null || forms.isEmpty()) {
+            throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "Init leasePromotion form not found");
+        }
+
+        GeneralForm form = forms.get(0);
+        if(form == null ) {
+            throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
+                    GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "Init leasePromotion form not found");
+        }
+
+        return form;
     }
 
     private List<GeneralFormFieldDTO> createFiled() {
