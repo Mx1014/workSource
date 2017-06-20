@@ -12,10 +12,10 @@ import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 
 public class GenerateProvider { 
-	private static final String FTL_PATH = "E:/workspace/ehnextgen/ehcore/src/test/java/com/everhomes/generate/ftl";
-	private static final String EH_CORE_API_PROJECT_PATH = "E:/workspace/ehnextgen/ehnextgen-api";
-	private static final String EH_CORE_PROJECT_PATH = "E:/workspace/ehnextgen/ehcore";
-	private static final String PROVIDER_PACKAGE = "com.everhomes.talent2";
+	private static final String FTL_PATH = "D:/workspace/ehnextgen/ehcore/src/test/java/com/everhomes/generate/ftl";
+	private static final String EH_CORE_API_PROJECT_PATH = "D:/workspace/ehnextgen/ehnextgen-api";
+	private static final String EH_CORE_PROJECT_PATH = "D:/workspace/ehnextgen/ehcore";
+	private static final String PROVIDER_PACKAGE = "com.everhomes.salary";
 	
 	private static final Random RANDOM = new Random();
 	
@@ -23,7 +23,7 @@ public class GenerateProvider {
 		//请在此处填写要生成的provider，直接填写表名即可
 		
 //		String[] entities = {"eh_express_service_addresses","eh_express_companies","eh_express_users","eh_express_addresses","eh_express_orders","eh_express_query_histories"};
-		String[] entities = {"eh_talents"};
+		String[] entities = {"eh_salary_default_entries","eh_salary_entrie_categories","eh_salary_group_entries","eh_salary_employee_origin_vals","eh_salary_groups","eh_salary_employees","eh_salary_employee_period_vals"};
 		  
 		for (String entity : entities) {
 			generateAll(underlineToCamel(entity.replace("eh_", "").toLowerCase()));
