@@ -13,4 +13,6 @@ public interface SiyinPrintEmailProvider {
 
 	List<SiyinPrintEmail> listSiyinPrintEmail();
 
+	SiyinPrintEmail findSiyinPrintEmailByUserId(Long userId);
+
 }

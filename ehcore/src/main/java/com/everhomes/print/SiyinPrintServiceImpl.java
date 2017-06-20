@@ -5,6 +5,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,10 @@ import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -57,6 +64,7 @@ import com.everhomes.rest.print.PrintSettingType;
 import com.everhomes.rest.print.PrintStatDTO;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -64,6 +72,8 @@ import com.everhomes.util.RuntimeErrorException;
 @Component
 public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
+	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
+	
 	
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
@@ -80,6 +90,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -139,32 +152,62 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintJobTypesResponse listPrintJobTypes(ListPrintJobTypesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		List<PrintJobTypeType> list = new ArrayList<PrintJobTypeType>(Arrays.asList(PrintJobTypeType.values()));
+		return new ListPrintJobTypesResponse(list.stream().map(r -> r.getCode()).collect(Collectors.toList()));
 	}
 
 	@Override
 	public ListPrintOrderStatusResponse listPrintOrderStatus(ListPrintOrderStatusCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		List<PrintOrderStatusType> list = new ArrayList<PrintOrderStatusType>(Arrays.asList(PrintOrderStatusType.values()));
+		return new ListPrintOrderStatusResponse(list.stream().map(r -> r.getCode()).collect(Collectors.toList()));
+	
 	}
 
 	@Override
 	public ListPrintUserOrganizationsResponse listPrintUserOrganizations(ListPrintUserOrganizationsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		if(cmd.getCreatorUid() == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, creatorUid = null");
+		}
+		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
+		User user = new User();
+		user.setId(cmd.getCreatorUid());
+		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, user);
+		return new ListPrintUserOrganizationsResponse(list.stream().map(r->r.getName()).collect(Collectors.toList()));
 	}
 
 	@Override
 	public void updatePrintUserEmail(UpdatePrintUserEmailCommand cmd) {
-		// TODO Auto-generated method stub
-
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		checkEmailFormat(cmd.getEmail());
+		SiyinPrintEmail siyinPrintEmail = processSiyinPrintEmail(cmd);
+		if(cmd.getId() == null){
+			siyinPrintEmailProvider.createSiyinPrintEmail(siyinPrintEmail);
+		}else{
+			siyinPrintEmailProvider.updateSiyinPrintEmail(siyinPrintEmail);
+		}
 	}
+
+
+	private SiyinPrintEmail processSiyinPrintEmail(UpdatePrintUserEmailCommand cmd) {
+		SiyinPrintEmail siyinPrintEmail = ConvertHelper.convert(cmd, SiyinPrintEmail.class);
+		if(cmd.getId()!=null){
+			siyinPrintEmail = siyinPrintEmailProvider.findSiyinPrintEmailById(cmd.getId());
+			siyinPrintEmail.setEmail(cmd.getEmail());
+			siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
+			return siyinPrintEmail;
+		}
+		siyinPrintEmail.setNamespaceId(UserContext.getCurrentNamespaceId());
+		siyinPrintEmail.setUserId(UserContext.current().getUser().getId());
+		siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
+		return siyinPrintEmail;
+	}
+
 
 	@Override
 	public GetPrintUserEmailResponse getPrintUserEmail(GetPrintUserEmailCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		return ConvertHelper.convert(siyinPrintEmailProvider.
+				findSiyinPrintEmailByUserId(UserContext.current().getUser().getId()),GetPrintUserEmailResponse.class);
 	}
 
 	@Override
@@ -512,6 +555,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			allStat.setPaid(allStat.getPaid().add(orderTotalAmount));
 		else if(orderStatusType == PrintOrderStatusType.UNPAID)
 			allStat.setUnpaid(allStat.getUnpaid().add(orderTotalAmount));
+	}
+	
+	/**
+	 * 邮箱格式校验
+	 */
+	private void checkEmailFormat(String email) {
+		 Matcher matcher = emailregex.matcher(email);    
+		 boolean isMatched = matcher.matches();   
+		 if(!isMatched){
+			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, email format error, email = "+email);
+		 }
 	}
 
 

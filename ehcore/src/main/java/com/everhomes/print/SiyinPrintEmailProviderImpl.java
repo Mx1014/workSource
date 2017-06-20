@@ -5,6 +5,12 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Query;
+import org.jooq.Record;
+import org.jooq.ResultQuery;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +19,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintEmailsDao;
@@ -23,6 +30,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SiyinPrintEmailProviderImpl implements SiyinPrintEmailProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintEmailProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -34,23 +42,49 @@ public class SiyinPrintEmailProviderImpl implements SiyinPrintEmailProvider {
 	public void createSiyinPrintEmail(SiyinPrintEmail siyinPrintEmail) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintEmails.class));
 		siyinPrintEmail.setId(id);
-		siyinPrintEmail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		siyinPrintEmail.setCreatorUid(UserContext.current().getUser().getId());
-//		siyinPrintEmail.setUpdateTime(siyinPrintEmail.getCreateTime());
+		siyinPrintEmail.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		siyinPrintEmail.setOperatorUid(siyinPrintEmail.getCreatorUid());
-		getReadWriteDao().insert(siyinPrintEmail);
+		siyinPrintEmail.setOperateTime(siyinPrintEmail.getCreateTime());
+		dbProvider.execute(r->{
+			getReadWriteContext().update(Tables.EH_SIYIN_PRINT_EMAILS).set(Tables.EH_SIYIN_PRINT_EMAILS.STATUS, CommonStatus.INACTIVE.getCode())
+			.where(Tables.EH_SIYIN_PRINT_EMAILS.USER_ID.eq(siyinPrintEmail.getUserId())).execute();
+			getReadWriteDao().insert(siyinPrintEmail);
+			return null;
+		});
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintEmails.class, null);
 	}
 
 	@Override
 	public void updateSiyinPrintEmail(SiyinPrintEmail siyinPrintEmail) {
 		assert (siyinPrintEmail.getId() != null);
-//		siyinPrintEmail.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintEmail.setOperatorUid(UserContext.current().getUser().getId());
-		getReadWriteDao().update(siyinPrintEmail);
+		
+		dbProvider.execute(r -> {
+			getReadWriteContext().update(Tables.EH_SIYIN_PRINT_EMAILS).set(Tables.EH_SIYIN_PRINT_EMAILS.STATUS, CommonStatus.INACTIVE.getCode())
+			.where(Tables.EH_SIYIN_PRINT_EMAILS.USER_ID.eq(siyinPrintEmail.getUserId())).execute();
+			
+			siyinPrintEmail.setOperatorUid(UserContext.current().getUser().getId());
+			getReadWriteDao().update(siyinPrintEmail);
+			return null;
+		});
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinPrintEmails.class, siyinPrintEmail.getId());
 	}
 
+	@Override
+	public SiyinPrintEmail findSiyinPrintEmailByUserId(Long userId) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_EMAILS)
+			.where(Tables.EH_SIYIN_PRINT_EMAILS.USER_ID.eq(userId))
+			.and(Tables.EH_SIYIN_PRINT_EMAILS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		LOGGER.debug(query.getSQL(),query.getParams());
+		List<SiyinPrintEmail> list = query.fetch()
+			.map(r->ConvertHelper.convert(r, SiyinPrintEmail.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	
 	@Override
 	public SiyinPrintEmail findSiyinPrintEmailById(Long id) {
 		assert (id != null);

@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.print;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -115,7 +117,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=ListPrintJobTypesResponse.class)
 	 public RestResponse listPrintJobTypes(ListPrintJobTypesCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintJobTypes(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -129,7 +131,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=ListPrintOrderStatusResponse.class)
 	 public RestResponse listPrintOrderStatus(ListPrintOrderStatusCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintOrderStatus(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -141,9 +143,9 @@ public class SiYinPrintController extends ControllerBase {
 	  */
 	 @RequestMapping("listPrintUserOrganizations")
 	 @RestReturn(value=ListPrintUserOrganizationsResponse.class)
-	 public RestResponse listPrintUserOrganizations(ListPrintUserOrganizationsCommand cmd) {
+	 public RestResponse listPrintUserOrganizations(@Valid ListPrintUserOrganizationsCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintUserOrganizations(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -156,7 +158,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("updatePrintUserEmail")
 	 @RestReturn(value=String.class)
 	 public RestResponse updatePrintUserEmail(UpdatePrintUserEmailCommand cmd) {
-		
+		 siyinPrintService.updatePrintUserEmail(cmd);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
@@ -171,7 +173,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=GetPrintUserEmailResponse.class)
 	 public RestResponse getPrintUserEmail(GetPrintUserEmailCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintUserEmail(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;

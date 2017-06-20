@@ -4,6 +4,7 @@ package com.everhomes.rest.print;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * 
@@ -14,6 +15,26 @@ import com.everhomes.discover.ItemType;
  *  @author:dengs 2017年6月16日
  */
 public class ListPrintJobTypesResponse {
-	@ItemType(PrintJobTypeType.class)
-	private List<PrintJobTypeType> jobTypeList;
+	@ItemType(Byte.class)
+	private List<Byte> jobTypeList;
+	
+	public ListPrintJobTypesResponse() {
+	}
+	
+	public ListPrintJobTypesResponse(List<Byte> jobTypeList) {
+		this.jobTypeList = jobTypeList;
+	}
+
+	public List<Byte> getJobTypeList() {
+		return jobTypeList;
+	}
+
+	public void setJobTypeList(List<Byte> jobTypeList) {
+		this.jobTypeList = jobTypeList;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
