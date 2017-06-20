@@ -1020,7 +1020,62 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		rentalv2Provider.updateRentalSite(rentalSite);
 //		}
 		
+		setSitePriceRules(rSiteDTO);
+		
 		return rSiteDTO;
+	}
+
+	private void setSitePriceRules(RentalSiteDTO rentalSiteDTO) {
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalSiteDTO.getRentalSiteId());
+		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(this::convertToSitePriceRuleDTO).collect(Collectors.toList()));
+	}
+
+	private SitePriceRuleDTO convertToSitePriceRuleDTO(Rentalv2PriceRule priceRule) {
+		SitePriceRuleDTO sitePriceRuleDTO = ConvertHelper.convert(priceRule, SitePriceRuleDTO.class);
+		sitePriceRuleDTO.setRentalType(priceRule.getRentalType());
+		sitePriceRuleDTO.setMaxPrice(getMaxPrice(priceRule));
+		sitePriceRuleDTO.setMinPrice(getMinPrice(priceRule));
+		return sitePriceRuleDTO;
+	}
+	
+	private BigDecimal getMaxPrice(Rentalv2PriceRule priceRule) {
+		return max(priceRule.getWorkdayPrice(), priceRule.getWeekendPrice(), priceRule.getOrgMemberWorkdayPrice(), 
+				priceRule.getOrgMemberWeekendPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+	}
+	
+	private BigDecimal getMinPrice(Rentalv2PriceRule priceRule) {
+		return min(priceRule.getWorkdayPrice(), priceRule.getWeekendPrice(), priceRule.getOrgMemberWorkdayPrice(), 
+				priceRule.getOrgMemberWeekendPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+	}
+	
+	private BigDecimal max(BigDecimal ... b) {
+		BigDecimal max = new BigDecimal(0);
+		for (BigDecimal bigDecimal : b) {
+			max = maxBig(max, bigDecimal);
+		}
+		return max;
+	}
+	
+	private BigDecimal maxBig(BigDecimal b1, BigDecimal b2) {
+		if (b2 != null && b2.compareTo(b1) > 0) {
+			return b2;
+		}
+		return b1;
+	}
+
+	private BigDecimal min(BigDecimal ... b) {
+		BigDecimal min = new BigDecimal(0);
+		for (BigDecimal bigDecimal : b) {
+			min = minBig(min, bigDecimal);
+		}
+		return min;
+	}
+	
+	private BigDecimal minBig(BigDecimal b1, BigDecimal b2) {
+		if (b2 != null && b2.compareTo(b1) < 0) {
+			return b2;
+		}
+		return b1;
 	}
 
 	private String calculatePrice(RentalResource rentalSite, RentalSiteDTO rSiteDTO, SceneTokenDTO sceneTokenDTO) {
