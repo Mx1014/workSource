@@ -7,11 +7,13 @@ public class AccessControlActionData {
 
     private String hardwareId;
 
-    private int isSupportSmart; //是否支持智能门禁，0不支持、1支持
+    private int isSupportSmart; 	//是否支持智能门禁，0不支持、1支持
 
-    private int isSupportQR; //是否支持二维码门禁，0不支持，1支持
+    private int isSupportQR; 		//是否支持二维码门禁，0不支持，1支持
 
     private String doorId;
+    
+    private int isSupportKeyShowing; //是否显示我的钥匙
 
     public int getIsSupportSmart() {
         return isSupportSmart;
@@ -45,7 +47,15 @@ public class AccessControlActionData {
         this.doorId = doorId;
     }
 
-    @Override
+    public int getIsSupportKeyShowing() {
+		return isSupportKeyShowing;
+	}
+
+	public void setIsSupportKeyShowing(int isSupportKeyShowing) {
+		this.isSupportKeyShowing = isSupportKeyShowing;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
