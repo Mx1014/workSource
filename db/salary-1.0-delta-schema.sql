@@ -55,7 +55,7 @@ CREATE TABLE `eh_salary_default_entries` (
 
 
 -- 薪酬批次可用的选项的标签类型 基础数据
-CREATE TABLE `eh_salary_entrie_categories` (
+CREATE TABLE `eh_salary_entry_categories` (
   `id` BIGINT,
   `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
   `owner_type` VARCHAR(32),
