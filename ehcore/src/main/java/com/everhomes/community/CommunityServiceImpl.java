@@ -1298,7 +1298,7 @@ public class CommunityServiceImpl implements CommunityService {
 				building.setTrafficDescription(data.getTrafficDescription());
 				
 				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
-					String[] temp = data.getLongitudeLatitude().split(",");
+					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
 					building.setLongitude(Double.parseDouble(temp[0]));
 					building.setLatitude(Double.parseDouble(temp[1]));
 				}
@@ -1344,7 +1344,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return log;
 		}
 		
-		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").contains(",")) {
+		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").replace("、", ",").contains(",")) {
 			log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_LONGITUDE);
 			log.setData(data);
 			log.setErrorLog("latitude longitude error");
