@@ -76,6 +76,7 @@ CREATE TABLE `eh_salary_group_entries` (
   `id` BIGINT COMMENT 'id of the record', 
   `namespace_id` INT ,
   `group_id` BIGINT COMMENT '标签(统计分类) organization group表pk',
+  `origin_entry_id` BIGINT,
   `type` TINYINT COMMENT '字段类型:0文本类;1数值类',
   `category_id` BIGINT COMMENT '标签(统计分类) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:基础,应发,应收,合计',
