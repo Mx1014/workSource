@@ -3588,6 +3588,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public FindRentalSiteMonthStatusCommandResponse findRentalSiteMonthStatus(
 			FindRentalSiteMonthStatusCommand cmd) {
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		FindRentalSiteMonthStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteMonthStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
@@ -3621,6 +3622,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public FindRentalSiteWeekStatusCommandResponse findRentalSiteWeekStatus(FindRentalSiteWeekStatusCommand cmd) {
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteWeekStatusCommandResponse.class);
 		response.setRentalSiteId(rs.getId());
@@ -3800,6 +3802,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		java.util.Date reserveTime = new java.util.Date(); 
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		FindAutoAssignRentalSiteWeekStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteWeekStatusResponse.class);
 		//场所数量和编号
@@ -3952,6 +3955,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		java.util.Date reserveTime = new java.util.Date(); 
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		FindAutoAssignRentalSiteMonthStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteMonthStatusResponse.class);
 		//场所数量和编号
@@ -4082,6 +4086,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		java.util.Date reserveTime = new java.util.Date(); 
 		
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		FindAutoAssignRentalSiteDayStatusResponse response = ConvertHelper.convert(rs, FindAutoAssignRentalSiteDayStatusResponse.class);
 		response.setRentalSiteId(rs.getId());
@@ -4909,14 +4914,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"rental resource (site) cannot found ");
-		PriceRuleDTO priceRuleDTO = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), cmd.getRentalType());
-		rs.setRentalType(priceRuleDTO.getRentalType());
-		rs.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-		rs.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-		rs.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-		rs.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-		rs.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-		rs.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+		correctRetalResource(rs, cmd.getRentalType());
 		
 		proccessCells(rs);
 		if(null==cmd.getRuleId())
@@ -5061,6 +5059,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		
 		
+	}
+
+	private void correctRetalResource(RentalResource rs, Byte rentalType) {
+		PriceRuleDTO priceRuleDTO = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
+		rs.setRentalType(priceRuleDTO.getRentalType());
+		rs.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+		rs.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+		rs.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+		rs.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+		rs.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+		rs.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+		rs.setDiscountType(priceRuleDTO.getDiscountType());
+		rs.setFullPrice(priceRuleDTO.getFullPrice());
+		rs.setCutPrice(priceRuleDTO.getCutPrice());
+		rs.setDiscountRatio(priceRuleDTO.getDiscountRatio());
 	}
 
 	private RentalCell findRentalSiteRuleById(Long ruleId) {
