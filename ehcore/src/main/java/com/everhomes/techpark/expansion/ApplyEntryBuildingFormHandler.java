@@ -44,7 +44,7 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
 
-        Long requestFormId = request.getSourceId();
+        Long requestFormId = null;
         if (null == request) {
             //查询初始默认数据
             ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
@@ -52,6 +52,8 @@ public class ApplyEntryBuildingFormHandler implements GeneralFormModuleHandler {
 
             GeneralForm form = handler.getDefaultGeneralForm();
             requestFormId = form.getFormOriginId();
+        }else {
+            requestFormId = request.getSourceId();
         }
 
         List<PostApprovalFormItem> values = cmd.getValues();
