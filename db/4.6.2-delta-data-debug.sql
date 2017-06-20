@@ -66,5 +66,8 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 SET @id := (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'video.help','https://videomeeting.kf5.com/hc/','video help doc','0',NULL);
 
-
-
+-- 园区入驻 add by sw 20170620
+SET @eh_general_forms := (SELECT MAX(id) FROM `eh_general_forms`) + 1;
+INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `form_origin_id`, `form_version`, `template_type`, `template_text`, `status`, `update_time`, `create_time`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) 
+	VALUES (@eh_general_forms, 0, 0, 0, 'EhLeasePromotions', NULL, NULL, '招租管理', @eh_general_forms, '0', 'DEFAULT_JSON', '[]', '2', '2017-06-10 18:46:36', '2017-06-10 18:45:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+UPDATE eh_lease_configs set display_name_str = '园区介绍, 虚位以待', display_order_str = '1,2';
