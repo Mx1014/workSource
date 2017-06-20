@@ -108,6 +108,7 @@ public class PrintDemoController extends ControllerBase {
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         RestResponse printResponse = new RestResponse();
+        printResponse.setResponseObject("success");
         User user = UserContext.current().getUser();
         user.setId(10001l);
         if(null != valueOperations.get(key)){

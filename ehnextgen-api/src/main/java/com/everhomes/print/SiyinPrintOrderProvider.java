@@ -14,5 +14,9 @@ public interface SiyinPrintOrderProvider {
 
 	List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
 			List<Long> ownerIdList);
+	
+	List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId);
+	
+	List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor);
 
 }

@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.print;
 
+import org.springframework.web.context.request.async.DeferredResult;
+
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -54,7 +57,7 @@ public interface SiyinPrintService {
 
 	GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd);
 
-	LogonPrintResponse logonPrint(LogonPrintCommand cmd);
+	DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd);
 
 	InformPrintResponse informPrint(InformPrintCommand cmd);
 

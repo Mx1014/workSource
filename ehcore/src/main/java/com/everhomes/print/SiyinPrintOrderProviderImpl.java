@@ -16,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintOrdersDao;
@@ -101,5 +102,27 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId) {
+		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+	
+	}
+
+	@Override
+	public List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId));
+		if(pageAnchor!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
+		}
+		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc())
+				.fetch()
+				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 	}
 }

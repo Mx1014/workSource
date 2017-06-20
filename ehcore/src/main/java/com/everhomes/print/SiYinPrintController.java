@@ -43,6 +43,7 @@ import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.util.RequireAuthentication;
 
 
 @RestDoc(value="print controller", site="print")
@@ -185,9 +186,10 @@ public class SiYinPrintController extends ControllerBase {
 	  */
 	 @RequestMapping("getPrintLogonUrl")
 	 @RestReturn(value=GetPrintLogonUrlResponse.class)
+	 @RequireAuthentication(false)
 	 public RestResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintLogonUrl(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -199,16 +201,17 @@ public class SiYinPrintController extends ControllerBase {
 	  */
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
-	 public RestResponse logonPrint(LogonPrintCommand cmd) {
-		 
-//		 public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
+	 @RequireAuthentication(false)
+	public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
+//	 public RestResponse logonPrint(LogonPrintCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
-	     response.setErrorCode(ErrorCodes.SUCCESS);
-	     response.setErrorDescription("OK");
-	     DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
-	     deferredResult.setResult(response);
-	     return response;
+//	     RestResponse response = new RestResponse(siyinPrintService.logonPrint(cmd));
+//	     response.setErrorCode(ErrorCodes.SUCCESS);
+//	     response.setErrorDescription("OK");
+//	     DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+//	     deferredResult.setResult(response);
+//	     return deferredResult;
+	     return siyinPrintService.logonPrint(cmd);
 	 }
 	 
 	 /**
@@ -219,7 +222,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=InformPrintResponse.class)
 	 public RestResponse informPrint(InformPrintCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.informPrint(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -232,7 +235,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("printImmediately")
 	 @RestReturn(value=String.class)
 	 public RestResponse printImmediately(PrintImmediatelyCommand cmd) {
-		
+		 siyinPrintService.printImmediately(cmd);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
@@ -247,7 +250,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=ListPrintOrdersResponse.class)
 	 public RestResponse listPrintOrders(ListPrintOrdersCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintOrders(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -261,7 +264,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=GetPrintUnpaidOrderResponse.class)
 	 public RestResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.getPrintUnpaidOrder(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -289,7 +292,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=ListPrintingJobsResponse.class)
 	 public RestResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintingJobs(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;

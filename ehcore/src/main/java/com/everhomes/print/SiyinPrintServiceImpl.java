@@ -4,7 +4,10 @@ package com.everhomes.print;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -12,15 +15,27 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.DeferredResult;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.bus.LocalBusSubscriber.Action;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
@@ -55,6 +70,8 @@ import com.everhomes.rest.print.PayPrintOrderResponse;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.PrintJobTypeType;
+import com.everhomes.rest.print.PrintLogonStatusType;
+import com.everhomes.rest.print.PrintOrderDTO;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
@@ -64,16 +81,21 @@ import com.everhomes.rest.print.PrintSettingType;
 import com.everhomes.rest.print.PrintStatDTO;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.sequence.LocalSequenceGenerator;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
 	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
-	
+	private static final String REDIS_PRINT_IDENTIFIER_TOKEN = "print-uid";
+	private static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
+	private static final String PRINT_SUBJECT = "print";
 	
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
@@ -93,6 +115,18 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private BigCollectionProvider bigCollectionProvider;
+	
+	@Autowired
+	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+	
+	@Autowired
+	private LocalBus localBus;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -212,38 +246,130 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO 再商议
+		//将identifierToken丢到redis
+		long identifierToken = LocalSequenceGenerator.getNextSequence();
+        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        String key = REDIS_PRINT_IDENTIFIER_TOKEN + identifierToken;
+        String value = String.valueOf(identifierToken);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(key, value, 1, TimeUnit.MINUTES);
+        
+        //将通知登陆的接口返回给前端
+        String logonURL = getLocalActivityString(PrintErrorCode.INFORM_PRINT_URL) + identifierToken;
+        GetPrintLogonUrlResponse response = new GetPrintLogonUrlResponse();
+        response.setLogonURL(logonURL);
+        response.setIdentifierToken(identifierToken);
+        return response;
 	}
 
 	@Override
-	public LogonPrintResponse logonPrint(LogonPrintCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
+		// TODO 
+		//不知道这里对不对
+		DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
+		RestResponse response =  new RestResponse();
+		String subject = PRINT_SUBJECT;
+		localBusSubscriberBuilder.build(subject + "." + cmd.getIdentifierToken(), new LocalBusOneshotSubscriber() {
+		    @Override
+		    public Action onLocalBusMessage(Object sender, String subject,
+		                                    Object logonResponse, String path) {
+		        //这里可以清掉redis的uid
+		        deferredResult.setResult((RestResponse)logonResponse);
+		        return null;
+		    }
+		    @Override
+		    public void onLocalBusListeningTimeout() {
+		        response.setResponseObject("print logon timed out");
+		        response.setErrorCode(408);
+		        deferredResult.setResult(response);
+		    }
+		
+		}).setTimeout(10000).create();
+		
+		return deferredResult;
 	}
 
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		//验证redis中存的identifierToken
+        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        
+        RestResponse printResponse = new RestResponse();
+        User user = UserContext.current().getUser();
+        if(null != valueOperations.get(key)){
+            printResponse.setResponseObject(user);
+            printResponse.setErrorCode(ErrorCodes.SUCCESS);
+        }else{
+            printResponse.setResponseObject("uid invalid");
+            printResponse.setErrorCode(409);
+        }
+
+        String subject = PRINT_SUBJECT;
+
+        // 必须重启一个线程来发布通知，通知二维码扫描成功，跳转到成功页面
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
+            }
+        });
+
+        // TODO 逻辑，通知app
+        return new InformPrintResponse(checkUnpaidOrder());
+    
 	}
 
 	@Override
 	public void printImmediately(PrintImmediatelyCommand cmd) {
-		// TODO Auto-generated method stub
+		Long id = UserContext.current().getUser().getId();
+		
+		//做计数
+        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        String key = REDIS_PRINTING_TASK_COUNT + id;
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        
+        String value = valueOperations.get(key);
+        if(value == null){
+        	value = "0";
+        }
+        
+        //计算值
+        valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), 30, TimeUnit.MINUTES);
 
 	}
 
 	@Override
 	public ListPrintOrdersResponse listPrintOrders(ListPrintOrdersCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Long userId = UserContext.current().getUser().getId();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByUserId(userId,pageSize+1,cmd.getPageAnchor());
+		
+		ListPrintOrdersResponse response = new ListPrintOrdersResponse();
+		if(printOrdersList == null)
+			return response;
+		if(printOrdersList.size() > pageSize){
+			response.setNextPageAnchor(printOrdersList.get(printOrdersList.size()-1).getId());
+			printOrdersList.remove(printOrdersList.size()-1);
+		}
+		response.setPrintOrdersList(printOrdersList.stream().map(r->ConvertHelper.convert(r, PrintOrderDTO.class)).collect(Collectors.toList()));
+		return response;
 	}
 
 	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder());
 	}
 
 	@Override
@@ -254,8 +380,20 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Long id = UserContext.current().getUser().getId();
+		
+		//做计数
+        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+        String key = REDIS_PRINTING_TASK_COUNT + id;
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        
+        String value = valueOperations.get(key);
+        if(value == null){
+        	value = "0";
+        }
+		return new ListPrintingJobsResponse(Integer.parseInt(value));
 	}
 	
 	private PrintOwnerType checkOwner(String ownerType, Long ownerId) {
@@ -303,7 +441,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 */
 	private GetPrintSettingResponse getDefaultSettingResponse() {
 		GetPrintSettingResponse response = new GetPrintSettingResponse();
-		BigDecimal defaultdecimal = new BigDecimal(0.1);
+		BigDecimal defaultdecimal = new BigDecimal(getLocalActivityString(PrintErrorCode.PRINT_DEFAULT_PRICE));
 		response.setColorTypeDTO(new PrintSettingColorTypeDTO());
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
@@ -568,5 +706,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		 }
 	}
 
-
+	/**
+	 * 检查用户存在未支付的订单
+	 */
+	private Byte checkUnpaidOrder() {
+		User user = UserContext.current().getUser();
+		
+		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId());
+		
+		if(list == null || list.size() == 0){
+			return PrintLogonStatusType.LOGON_SUCCESS.getCode();
+		}
+		return PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode();
+	}
 }
