@@ -491,6 +491,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.DEFAULT.getCode(), defaultRule.getId());
 		response.setPriceRules(priceRules.stream().map(this::convert).collect(Collectors.toList()));
 		response.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
+		if (priceRules.size() > 0) {
+			Rentalv2PriceRule priceRule = priceRules.get(0);
+			response.setRentalType(priceRule.getRentalType());
+			response.setWorkdayPrice(priceRule.getWorkdayPrice());
+			response.setWeekendPrice(priceRule.getWeekendPrice());
+			response.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
+			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
+			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
+			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+		}
 		return response;
 	}
 	
@@ -499,6 +509,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalResource.getId());
 		response.setPriceRules(priceRules.stream().map(this::convert).collect(Collectors.toList()));
 		response.setRentalTypes(priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList()));
+		if (priceRules.size() > 0) {
+			Rentalv2PriceRule priceRule = priceRules.get(0);
+			response.setRentalType(priceRule.getRentalType());
+			response.setWorkdayPrice(priceRule.getWorkdayPrice());
+			response.setWeekendPrice(priceRule.getWeekendPrice());
+			response.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
+			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
+			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
+			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+		}
 		return response;
 	}
 	
@@ -928,7 +948,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, SceneTokenDTO sceneTokenDTO){
-
+		
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
 		long time1 = System.currentTimeMillis();
@@ -938,7 +958,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		long time2 = System.currentTimeMillis();
 		LOGGER.info("proccessCells time={}", time2 - time1);
 
-		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
+		RentalSiteDTO rSiteDTO = convertToDTO(rentalSite);
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configurationProvider.getValue(ConfigConstants.RENTAL_RESOURCE_DETAIL_URL, "");
@@ -1020,14 +1040,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		rentalv2Provider.updateRentalSite(rentalSite);
 //		}
 		
-		setSitePriceRules(rSiteDTO);
+//		setSitePriceRules(rSiteDTO);
 		
 		return rSiteDTO;
 	}
 
-	private void setSitePriceRules(RentalSiteDTO rentalSiteDTO) {
-		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalSiteDTO.getRentalSiteId());
+	private RentalSiteDTO convertToDTO(RentalResource rentalSite) {
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalSite.getId());
+		if (priceRules.size() > 0) {
+			Rentalv2PriceRule priceRule = priceRules.get(0);
+			rentalSite.setRentalType(priceRule.getRentalType());
+			rentalSite.setWorkdayPrice(priceRule.getWorkdayPrice());
+			rentalSite.setWeekendPrice(priceRule.getWeekendPrice());
+			rentalSite.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
+			rentalSite.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
+			rentalSite.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
+			rentalSite.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+			rentalSite.setDiscountType(priceRule.getDiscountType());
+			rentalSite.setDiscountRatio(priceRule.getDiscountRatio());
+			rentalSite.setFullPrice(priceRule.getFullPrice());
+			rentalSite.setCutPrice(priceRule.getCutPrice());
+		}
+		RentalSiteDTO rentalSiteDTO = ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(this::convertToSitePriceRuleDTO).collect(Collectors.toList()));
+		return rentalSiteDTO;
 	}
 
 	private SitePriceRuleDTO convertToSitePriceRuleDTO(Rentalv2PriceRule priceRule) {
@@ -5063,17 +5099,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private void correctRetalResource(RentalResource rs, Byte rentalType) {
 		PriceRuleDTO priceRuleDTO = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
-		rs.setRentalType(priceRuleDTO.getRentalType());
-		rs.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-		rs.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-		rs.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-		rs.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-		rs.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-		rs.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-		rs.setDiscountType(priceRuleDTO.getDiscountType());
-		rs.setFullPrice(priceRuleDTO.getFullPrice());
-		rs.setCutPrice(priceRuleDTO.getCutPrice());
-		rs.setDiscountRatio(priceRuleDTO.getDiscountRatio());
+		if (priceRuleDTO != null) {
+			rs.setRentalType(priceRuleDTO.getRentalType());
+			rs.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
+			rs.setWeekendPrice(priceRuleDTO.getWeekendPrice());
+			rs.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
+			rs.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
+			rs.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
+			rs.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
+			rs.setDiscountType(priceRuleDTO.getDiscountType());
+			rs.setFullPrice(priceRuleDTO.getFullPrice());
+			rs.setCutPrice(priceRuleDTO.getCutPrice());
+			rs.setDiscountRatio(priceRuleDTO.getDiscountRatio());
+		}
 	}
 
 	private RentalCell findRentalSiteRuleById(Long ruleId) {
