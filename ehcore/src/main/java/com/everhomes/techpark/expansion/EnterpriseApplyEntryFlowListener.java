@@ -7,7 +7,9 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
+import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
@@ -22,6 +24,8 @@ import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
@@ -47,9 +51,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-/**
- * Created by xq.tian on 2016/12/20.
- */
 @Component
 public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
@@ -57,38 +58,32 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
-
     @Autowired
     private LocaleTemplateService localeTemplateService;
-
     @Autowired
     private LocaleStringService localeStringService;
-
     @Autowired
     private YellowPageProvider yellowPageProvider;
     @Autowired
     private FlowService flowService;
-
     @Autowired
     private CommunityProvider communityProvider;
     @Autowired
     private AddressProvider addressProvider;
     @Autowired
     private BuildingProvider buildingProvider;
-
-    @Autowired
-    private OrganizationProvider organizationProvider;
     @Autowired
     private ContractProvider contractProvider;
     @Autowired
     private ContractBuildingMappingProvider contractBuildingMappingProvider;
     @Autowired
     private SmsProvider smsProvider;
-
     @Autowired
     private FlowEventLogProvider flowEventLogProvider;
     @Autowired
     private UserProvider userProvider;
+    @Autowired
+    private GeneralFormService generalFormService;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -162,7 +157,14 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
 
-            return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+            GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
+            cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+            cmd2.setSourceId(dto.getId());
+            List<FlowCaseEntity> formEntities = generalFormService.getGeneralFormFlowEntities(cmd2);
+
+            FlowCaseEntityList result = (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+            result.addAll(result.size() - 1, formEntities);
+            return result;
         } else {
             LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
         }
@@ -198,6 +200,11 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 }
 
                 buildingName = sb.toString();
+            }else {
+                Building building = communityProvider.findBuildingById(applyEntry.getBuildingId());
+                if (null != building) {
+                    buildingName = building.getName();
+                }
             }
 
 		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){

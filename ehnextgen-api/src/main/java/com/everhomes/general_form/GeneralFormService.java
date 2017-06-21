@@ -1,5 +1,6 @@
 package com.everhomes.general_form;
 
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.general_approval.*;
 
 import java.util.List;
@@ -25,4 +26,10 @@ public interface GeneralFormService {
 	GeneralFormDTO getTemplateBySourceId(GetTemplateBySourceIdCommand cmd);
 
 	PostGeneralFormDTO postGeneralForm(PostGeneralFormCommand cmd);
+
+	List<FlowCaseEntity> resolveFormVal(GeneralFormFieldDTO dto, GeneralFormVal val);
+
+	void processFlowEntities(List<FlowCaseEntity> entities, List<GeneralFormVal> vals, List<GeneralFormFieldDTO> fieldDTOs);
+
+	List<FlowCaseEntity> getGeneralFormFlowEntities(GetGeneralFormValuesCommand cmd);
 }

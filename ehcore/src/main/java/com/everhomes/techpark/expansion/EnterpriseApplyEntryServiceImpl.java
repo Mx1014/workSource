@@ -307,7 +307,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				}
 
 				GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
-				cmd2.setSourceType(EntityType.LEASEPROMOTION.getCode());
+				cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
 				cmd2.setSourceId(dto.getId());
 				List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd2);
 				dto.setFormValues(formValues);
@@ -374,7 +374,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			//对接表单
 			if (null != cmd.getRequestFormId()) {
-				addGeneralFormInfo(cmd.getRequestFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+				addGeneralFormInfo(cmd.getRequestFormId(), cmd.getFormValues(), EntityType.ENTERPRISE_OP_REQUEST.getCode(),
 						request.getId(), LeasePromotionFlag.ENABLED.getCode());
 			}
 
@@ -414,6 +414,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						Building building =communityProvider.findBuildingByCommunityIdAndName(cmd.getCommunityId(), address.getBuildingName());
 						if (null != building) {
 							opRequestBuilding.setBuildingId(building.getId());
+							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
 
 							request.setBuildingId(building.getId());
 							request.setAddressId(address.getId());
