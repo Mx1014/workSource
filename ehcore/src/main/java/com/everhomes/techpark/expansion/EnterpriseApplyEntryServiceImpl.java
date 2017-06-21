@@ -407,6 +407,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			
     		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
 
+				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(cmd.getEnterpriseId());
+				if (!addresses.isEmpty()) {
+					Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
+					if (null != address) {
+						Building building =communityProvider.findBuildingByCommunityIdAndName(cmd.getCommunityId(), address.getBuildingName());
+						if (null != building) {
+							opRequestBuilding.setBuildingId(building.getId());
+
+							request.setBuildingId(building.getId());
+							request.setAddressId(address.getId());
+						}
+					}
+				}
 			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
@@ -607,9 +620,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
 		String sourceTypeName = sourceType.getDescription();
 
-		byte i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
+		byte i = -1;
 		if (ApplyEntrySourceType.BUILDING == sourceType) {
 			i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
+		}else if (ApplyEntrySourceType.FOR_RENT == sourceType) {
+			i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
 		}
 		if (null != config.getDisplayNames() ) {
 			for (Integer k: config.getDisplayOrders()) {
