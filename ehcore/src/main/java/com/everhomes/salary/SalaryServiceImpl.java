@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.salary.AddSalaryGroupCommand;
 import com.everhomes.rest.salary.AddSalaryGroupResponse;
+import com.everhomes.rest.salary.BatchSetEmployeeCheckFlagCommand;
 import com.everhomes.rest.salary.CheckPeriodSalaryCommand;
 import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
@@ -160,6 +161,12 @@ public class SalaryServiceImpl implements SalaryService {
 	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd) {
 	
 
+	}
+
+	@Override
+	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

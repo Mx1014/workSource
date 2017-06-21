@@ -11,29 +11,25 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
- * <li>salaryEmployeeId: 所属id</li>
- * <li>periodEmployeeEntitys: 批次档期的字段列表  参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
- * <li>checkFlag: 核算标准0-未核算 1-核算</li>
+ * <li>salaryEmployeeIds: 员工id列表</li> 
+ * <li>checkFlag: 核算标准0-未核算 1-核算 默认是核算</li>
  * </ul>
  */
-public class UpdatePeriodSalaryEmployeeCommand {
+public class BatchSetEmployeeCheckFlagCommand {
 
 	private String ownerType;
 
 	private Long ownerId;
-
-	private Long salaryEmployeeId;
-
-	@ItemType(SalaryPeriodEmployeeEntityDTO.class)
-	private List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys;
-
+	
+	@ItemType(Long.class)
+	private List<Long> salaryEmployeeIds; 
 	private Byte checkFlag;
 
-	public UpdatePeriodSalaryEmployeeCommand() {
+	public BatchSetEmployeeCheckFlagCommand() {
 
 	}
 
-	public UpdatePeriodSalaryEmployeeCommand(String ownerType, Long ownerId, Long salaryEmployeeId, List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys, Byte checkFlag) {
+	public BatchSetEmployeeCheckFlagCommand(String ownerType, Long ownerId, Long salaryEmployeeId, List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys, Byte checkFlag) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;

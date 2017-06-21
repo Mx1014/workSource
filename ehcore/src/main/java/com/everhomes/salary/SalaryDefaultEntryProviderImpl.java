@@ -36,8 +36,8 @@ public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvide
 		salaryDefaultEntry.setId(id);
 		salaryDefaultEntry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryDefaultEntry.setCreatorUid(UserContext.current().getUser().getId());
-		salaryDefaultEntry.setUpdateTime(salaryDefaultEntry.getCreateTime());
-		salaryDefaultEntry.setOperatorUid(salaryDefaultEntry.getCreatorUid());
+//		salaryDefaultEntry.setUpdateTime(salaryDefaultEntry.getCreateTime());
+//		salaryDefaultEntry.setOperatorUid(salaryDefaultEntry.getCreatorUid());
 		getReadWriteDao().insert(salaryDefaultEntry);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryDefaultEntries.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvide
 	@Override
 	public void updateSalaryDefaultEntry(SalaryDefaultEntry salaryDefaultEntry) {
 		assert (salaryDefaultEntry.getId() != null);
-		salaryDefaultEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryDefaultEntry.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryDefaultEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryDefaultEntry.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryDefaultEntry);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryDefaultEntries.class, salaryDefaultEntry.getId());
 	}

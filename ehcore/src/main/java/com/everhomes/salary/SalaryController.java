@@ -10,6 +10,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.salary.AddSalaryGroupCommand;
 import com.everhomes.rest.salary.AddSalaryGroupResponse;
+import com.everhomes.rest.salary.BatchSetEmployeeCheckFlagCommand;
 import com.everhomes.rest.salary.CheckPeriodSalaryCommand;
 import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
@@ -192,6 +193,16 @@ public class SalaryController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	/**
+	 * <p>15-2.保存某个批次的核算后数值和更改状态</p>
+	 * <b>URL: /salary/batchSetEmployeeCheckFlag</b>
+	 */
+	@RequestMapping("batchSetEmployeeCheckFlag")
+	@RestReturn(String.class)
+	public RestResponse batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd){
+		salaryService.batchSetEmployeeCheckFlag(cmd);
+		return new RestResponse();
+	}
 	/**
 	 * <p>16.设置某期薪酬批次核算完成</p>
 	 * <b>URL: /salary/checkPeriodSalary</b>
