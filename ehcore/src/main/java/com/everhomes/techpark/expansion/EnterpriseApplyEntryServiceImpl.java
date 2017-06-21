@@ -281,7 +281,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//对于不同的类型有不同的sourceName 和 楼栋
 			if(dto.getApplyType() == ApplyEntryApplyType.RENEW.getCode()){
 				//续租的搜
-				dto.setSourceName("续租");
+//				dto.setSourceName("续租");
 				List<EnterpriseOpRequestBuilding> opBuildings = enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null, Integer.MAX_VALUE,  new ListingQueryBuilderCallback() {
 					//续租申请，申请来源=续租 续租申请，楼栋=合同里关联的楼栋（可能多个）
 		            @Override
@@ -332,12 +332,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
 				if(null != yellowPage){
-					dto.setSourceName("创客申请");
+//					dto.setSourceName("创客申请");
 					if(yellowPage.getBuildingId()!=null){
 						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
 						if (null != building) {
 							dto.getBuildings().add(processBuildingDTO(building));
-						}					}
+						}
+					}
 				}
 			}
 		}
@@ -407,6 +408,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			
     		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
 
+				request.setSourceType(ApplyEntrySourceType.RENEW.getCode());
 				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(cmd.getEnterpriseId());
 				if (!addresses.isEmpty()) {
 					Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
@@ -540,7 +542,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             }
         }
         
-        if (flowCase != null ) {
+        if (flowCase != null) {
         	//TODO: 组装resp
         	String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
         	resp.setUrl(url);
@@ -553,8 +555,34 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		  
 		
 	}
+
+	private int convertSourceType(String type) {
+		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(type);
+		switch (sourceType) {
+			case BUILDING:
+				return 1;
+			case FOR_RENT:
+				return 2;
+			case RENEW:
+				return 3;
+			case MARKET_ZONE:
+				return 4;
+			default:
+				return 0;
+		}
+	}
+
     private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType, Set<Long> buildingIds) {
-        Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+
+		String tempOwnerId = String.valueOf(request.getCommunityId()) + convertSourceType(request.getSourceType());
+
+		Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
+				null, Long.valueOf(tempOwnerId), FlowOwnerType.LEASE_PROMOTION.getCode());
+
+		if (null == flow) {
+			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
+					null, request.getCommunityId(), FlowOwnerType.LEASE_PROMOTION.getCode());
+		}
 
 		if(null == flow) {
 			LOGGER.error("Enable flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
@@ -581,23 +609,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		flowCaseCmd.setProjectId(projectId);
 
 		return flowService.createFlowCase(flowCaseCmd);
-//        else {
-//        	GeneralModuleInfo gm = new GeneralModuleInfo();
-//        	gm.setOrganizationId(request.getEnterpriseId());
-//        	gm.setProjectType(projectType);
-//        	gm.setProjectId(projectId);
-//        	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
-//        	gm.setModuleId(ExpansionConst.MODULE_ID);
-//			gm.setOwnerId(request.getCommunityId());
-//			gm.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
-//			return flowService.createDumpFlowCase(gm, flowCaseCmd);
-//        }
+
     }
 
     private String getBriefContent(EnterpriseOpRequest request, Set<Long> buildingIds) {
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
-        String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
 
         StringBuilder sb = new StringBuilder();
         int n = 1;
@@ -619,7 +636,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		LeasePromotionConfigDTO config = getLeasePromotionConfig(cmd);
 
 		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
-		String sourceTypeName = sourceType.getDescription();
+		String sourceTypeName = null != sourceType ? sourceType.getDescription() : "";
 
 		byte i = -1;
 		if (ApplyEntrySourceType.BUILDING == sourceType) {

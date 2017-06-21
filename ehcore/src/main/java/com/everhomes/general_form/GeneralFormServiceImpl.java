@@ -180,8 +180,11 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 
 					GeneralFormFieldType fieldType = GeneralFormFieldType.fromCode(val.getFieldType());
 					if (null != fieldType) {
-						switch (fieldType) {
+						switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
 							case SINGLE_LINE_TEXT:
+							case NUMBER_TEXT:
+							case DATE:
+							case DROP_BOX :
 								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
 									formVal.setFieldValue(val.getFieldValue());
 								}else{
@@ -230,7 +233,6 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 								value.setFiles(files);
 								formVal.setFieldValue(JSON.toJSONString(value));
 								result.add(formVal);
-
 								break;
 							case INTEGER_TEXT:
 								if (NormalFlag.NEED.getCode() == cmd.getOriginFieldFlag()) {
@@ -240,7 +242,34 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 								}
 								result.add(formVal);
 								break;
+							case SUBFORM:
 
+//								PostApprovalFormSubformValue subFormValue = JSON.parseObject(val.getFieldValue(), PostApprovalFormSubformValue.class);
+//								//取出设置的子表单fields
+//								GeneralFormSubformDTO subFromExtra = JSON.parseObject(dto.getFieldExtra(), GeneralFormSubformDTO.class) ;
+//								//给子表单计数从1开始
+//								int formCount = 1;
+//								//循环取出每一个子表单值
+//								for(PostApprovalFormSubformItemValue subForm1:subFormValue.getForms()){
+//									e = new FlowCaseEntity();
+//									e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
+//									e.setEntityType(FlowCaseEntityType.LIST.getCode());
+//									e.setValue(formCount++ +"");
+//									entities.add(e);
+//									List<GeneralApprovalVal> subVals = new ArrayList<>();
+//									//循环取出一个子表单的每一个字段值
+//									for(PostApprovalFormItem subFromValue1:subForm1.getValues()){
+//										GeneralApprovalVal obj =  new GeneralApprovalVal();
+//										obj.setFieldName(subFromValue1.getFieldName());
+//										obj.setFieldType(subFromValue1.getFieldType());
+//										obj.setFieldStr3(subFromValue1.getFieldValue());
+//										subVals.add(obj);
+//									}
+//									List<FlowCaseEntity> subSingleEntities = new ArrayList<>();
+//									processEntities(subSingleEntities, subVals,subFromExtra.getFormFields());
+//									entities.addAll(subSingleEntities);
+//								}
+								break;
 						}
 					}
 				}catch(NullPointerException e){
