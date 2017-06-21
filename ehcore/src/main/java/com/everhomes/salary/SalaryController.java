@@ -2,6 +2,7 @@
 package com.everhomes.salary;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.salary.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,36 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.salary.AddSalaryGroupCommand;
-import com.everhomes.rest.salary.AddSalaryGroupResponse;
-import com.everhomes.rest.salary.BatchSetEmployeeCheckFlagCommand;
-import com.everhomes.rest.salary.CheckPeriodSalaryCommand;
-import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
-import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
-import com.everhomes.rest.salary.ExportSalaryGroupCommand;
-import com.everhomes.rest.salary.ExportSalarySendHistoryCommand;
-import com.everhomes.rest.salary.GetAbnormalEmployeeNumberCommand;
-import com.everhomes.rest.salary.GetAbnormalEmployeeNumberResponse;
-import com.everhomes.rest.salary.GetPeriodSalaryEmailContentCommand;
-import com.everhomes.rest.salary.GetPeriodSalaryEmailContentResponse;
-import com.everhomes.rest.salary.ImportPeriodSalaryCommand;
-import com.everhomes.rest.salary.ImportSalaryGroupCommand;
-import com.everhomes.rest.salary.ListPeriodSalaryCommand;
-import com.everhomes.rest.salary.ListPeriodSalaryEmployeesCommand;
-import com.everhomes.rest.salary.ListPeriodSalaryEmployeesResponse;
-import com.everhomes.rest.salary.ListPeriodSalaryResponse;
-import com.everhomes.rest.salary.ListSalaryDefaultEntitiesResponse;
-import com.everhomes.rest.salary.ListSalarySendHistoryCommand;
-import com.everhomes.rest.salary.ListSalarySendHistoryResponse;
-import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
-import com.everhomes.rest.salary.ListSalaryEmployeesResponse;
-import com.everhomes.rest.salary.SaveSalaryEmployeeOriginValsCommand;
-import com.everhomes.rest.salary.SendPeriodSalaryCommand;
-import com.everhomes.rest.salary.SetSalaryEmailContentCommand;
-import com.everhomes.rest.salary.UpdatePeriodSalaryEmployeeCommand;
-import com.everhomes.rest.salary.UpdateSalaryGroupCommand;
-import com.everhomes.rest.salary.UpdateSalaryGroupEntitiesVisableCommand;
-import com.everhomes.rest.salary.UpdateSalaryGroupResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -95,6 +66,17 @@ public class SalaryController extends ControllerBase {
 		salaryService.deleteSalaryGroup(cmd);
 		return new RestResponse();
 	}
+
+    /**
+     * <p>复制薪酬组</p>
+     * <b>URL: /salary/copySalaryGroup</b>
+     */
+    @RequestMapping("copySalaryGroup")
+    @RestReturn(String.class)
+    public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
+        salaryService.copySalaryGroup(cmd);
+        return new RestResponse();
+    }
 
 	/**
 	 * <p>5.根据组织架构/薪酬组/异常状态 查询人员</p>
