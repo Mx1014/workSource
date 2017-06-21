@@ -70,5 +70,6 @@ CREATE TABLE `eh_quality_inspection_sample_community_specification_stat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE eh_quality_inspection_sample_score_stat ADD COLUMN `update_time` DATETIME;
+ALTER TABLE eh_quality_inspection_sample_score_stat ADD COLUMN `correction_qualified_count` INTEGER NOT NULL DEFAULT '0';
 ALTER TABLE eh_quality_inspection_sample_community_specification_stat ADD COLUMN `update_time` DATETIME;
 ALTER TABLE eh_quality_inspection_sample_community_specification_stat ADD COLUMN `specification_path` VARCHAR(128);
