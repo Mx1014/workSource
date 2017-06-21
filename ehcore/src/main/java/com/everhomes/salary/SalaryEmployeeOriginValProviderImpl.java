@@ -36,8 +36,8 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 		salaryEmployeeOriginVal.setId(id);
 		salaryEmployeeOriginVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryEmployeeOriginVal.setCreatorUid(UserContext.current().getUser().getId());
-		salaryEmployeeOriginVal.setUpdateTime(salaryEmployeeOriginVal.getCreateTime());
-		salaryEmployeeOriginVal.setOperatorUid(salaryEmployeeOriginVal.getCreatorUid());
+//		salaryEmployeeOriginVal.setUpdateTime(salaryEmployeeOriginVal.getCreateTime());
+//		salaryEmployeeOriginVal.setOperatorUid(salaryEmployeeOriginVal.getCreatorUid());
 		getReadWriteDao().insert(salaryEmployeeOriginVal);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeeOriginVals.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 	@Override
 	public void updateSalaryEmployeeOriginVal(SalaryEmployeeOriginVal salaryEmployeeOriginVal) {
 		assert (salaryEmployeeOriginVal.getId() != null);
-		salaryEmployeeOriginVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeeOriginVal.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryEmployeeOriginVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryEmployeeOriginVal.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryEmployeeOriginVal);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployeeOriginVals.class, salaryEmployeeOriginVal.getId());
 	}

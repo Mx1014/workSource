@@ -36,8 +36,8 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 		salaryEmployeePeriodVal.setId(id);
 		salaryEmployeePeriodVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryEmployeePeriodVal.setCreatorUid(UserContext.current().getUser().getId());
-		salaryEmployeePeriodVal.setUpdateTime(salaryEmployeePeriodVal.getCreateTime());
-		salaryEmployeePeriodVal.setOperatorUid(salaryEmployeePeriodVal.getCreatorUid());
+//		salaryEmployeePeriodVal.setUpdateTime(salaryEmployeePeriodVal.getCreateTime());
+//		salaryEmployeePeriodVal.setOperatorUid(salaryEmployeePeriodVal.getCreatorUid());
 		getReadWriteDao().insert(salaryEmployeePeriodVal);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeePeriodVals.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	@Override
 	public void updateSalaryEmployeePeriodVal(SalaryEmployeePeriodVal salaryEmployeePeriodVal) {
 		assert (salaryEmployeePeriodVal.getId() != null);
-		salaryEmployeePeriodVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeePeriodVal.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryEmployeePeriodVal.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryEmployeePeriodVal.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryEmployeePeriodVal);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployeePeriodVals.class, salaryEmployeePeriodVal.getId());
 	}

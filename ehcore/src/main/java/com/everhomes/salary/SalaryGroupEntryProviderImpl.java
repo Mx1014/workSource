@@ -36,8 +36,8 @@ public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
 		salaryGroupEntry.setId(id);
 		salaryGroupEntry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryGroupEntry.setCreatorUid(UserContext.current().getUser().getId());
-		salaryGroupEntry.setUpdateTime(salaryGroupEntry.getCreateTime());
-		salaryGroupEntry.setOperatorUid(salaryGroupEntry.getCreatorUid());
+//		salaryGroupEntry.setUpdateTime(salaryGroupEntry.getCreateTime());
+//		salaryGroupEntry.setOperatorUid(salaryGroupEntry.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupEntry);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryGroupEntries.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
 	@Override
 	public void updateSalaryGroupEntry(SalaryGroupEntry salaryGroupEntry) {
 		assert (salaryGroupEntry.getId() != null);
-		salaryGroupEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupEntry.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryGroupEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryGroupEntry.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryGroupEntry);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupEntries.class, salaryGroupEntry.getId());
 	}

@@ -3,6 +3,7 @@ package com.everhomes.salary;
 
 import com.everhomes.rest.salary.AddSalaryGroupCommand;
 import com.everhomes.rest.salary.AddSalaryGroupResponse;
+import com.everhomes.rest.salary.BatchSetEmployeeCheckFlagCommand;
 import com.everhomes.rest.salary.CheckPeriodSalaryCommand;
 import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
@@ -95,5 +96,8 @@ public interface SalaryService {
 
 
 	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd);
+
+
+	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd);
 
 }

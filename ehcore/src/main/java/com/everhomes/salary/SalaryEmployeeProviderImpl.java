@@ -36,8 +36,8 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		salaryEmployee.setId(id);
 		salaryEmployee.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryEmployee.setCreatorUid(UserContext.current().getUser().getId());
-		salaryEmployee.setUpdateTime(salaryEmployee.getCreateTime());
-		salaryEmployee.setOperatorUid(salaryEmployee.getCreatorUid());
+//		salaryEmployee.setUpdateTime(salaryEmployee.getCreateTime());
+//		salaryEmployee.setOperatorUid(salaryEmployee.getCreatorUid());
 		getReadWriteDao().insert(salaryEmployee);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployees.class, null);
 	}
@@ -45,8 +45,8 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	@Override
 	public void updateSalaryEmployee(SalaryEmployee salaryEmployee) {
 		assert (salaryEmployee.getId() != null);
-		salaryEmployee.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployee.setOperatorUid(UserContext.current().getUser().getId());
+//		salaryEmployee.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		salaryEmployee.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(salaryEmployee);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryEmployees.class, salaryEmployee.getId());
 	}
