@@ -4,7 +4,7 @@ package com.everhomes.salary;
 import com.everhomes.server.schema.tables.pojos.EhSalaryDefaultEntries;
 import com.everhomes.util.StringHelper;
 
-public class SalaryDefaultEntry extends EhSalaryDefaultEntries {
+public class SalaryDefaultEntity extends EhSalaryDefaultEntries {
 	
 	private static final long serialVersionUID = -7357614545925109711L;
 	

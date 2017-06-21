@@ -22,7 +22,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvider {
+public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntityProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -31,7 +31,7 @@ public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvide
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createSalaryDefaultEntry(SalaryDefaultEntry salaryDefaultEntry) {
+	public void createSalaryDefaultEntity(SalaryDefaultEntity salaryDefaultEntry) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryDefaultEntries.class));
 		salaryDefaultEntry.setId(id);
 		salaryDefaultEntry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -43,7 +43,7 @@ public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvide
 	}
 
 	@Override
-	public void updateSalaryDefaultEntry(SalaryDefaultEntry salaryDefaultEntry) {
+	public void updateSalaryDefaultEntity(SalaryDefaultEntity salaryDefaultEntry) {
 		assert (salaryDefaultEntry.getId() != null);
 //		salaryDefaultEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		salaryDefaultEntry.setOperatorUid(UserContext.current().getUser().getId());
@@ -52,16 +52,16 @@ public class SalaryDefaultEntryProviderImpl implements SalaryDefaultEntryProvide
 	}
 
 	@Override
-	public SalaryDefaultEntry findSalaryDefaultEntryById(Long id) {
+	public SalaryDefaultEntity findSalaryDefaultEntryById(Long id) {
 		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryDefaultEntry.class);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryDefaultEntity.class);
 	}
 	
 	@Override
-	public List<SalaryDefaultEntry> listSalaryDefaultEntry() {
+	public List<SalaryDefaultEntity> listSalaryDefaultEntry() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_DEFAULT_ENTRIES)
 				.orderBy(Tables.EH_SALARY_DEFAULT_ENTRIES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryDefaultEntry.class));
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryDefaultEntity.class));
 	}
 	
 	private EhSalaryDefaultEntriesDao getReadWriteDao() {

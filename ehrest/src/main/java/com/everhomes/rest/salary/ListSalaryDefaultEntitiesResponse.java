@@ -12,16 +12,16 @@ import com.everhomes.util.StringHelper;
  * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntityDTO}</li>
  * </ul>
  */
-public class ListSalaryDefaultEntriesResponse {
+public class ListSalaryDefaultEntitiesResponse {
 
 	@ItemType(SalaryDefaultEntityDTO.class)
 	private List<SalaryDefaultEntityDTO> salaryDefaultEntries;
 
-	public ListSalaryDefaultEntriesResponse() {
+	public ListSalaryDefaultEntitiesResponse() {
 
 	}
 
-	public ListSalaryDefaultEntriesResponse(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
+	public ListSalaryDefaultEntitiesResponse(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
 		super();
 		this.salaryDefaultEntries = salaryDefaultEntries;
 	}

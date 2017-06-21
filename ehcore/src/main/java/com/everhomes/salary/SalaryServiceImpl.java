@@ -21,7 +21,7 @@ import com.everhomes.rest.salary.ListPeriodSalaryCommand;
 import com.everhomes.rest.salary.ListPeriodSalaryEmployeesCommand;
 import com.everhomes.rest.salary.ListPeriodSalaryEmployeesResponse;
 import com.everhomes.rest.salary.ListPeriodSalaryResponse;
-import com.everhomes.rest.salary.ListSalaryDefaultEntriesResponse;
+import com.everhomes.rest.salary.ListSalaryDefaultEntitiesResponse;
 import com.everhomes.rest.salary.ListSalarySendHistoryCommand;
 import com.everhomes.rest.salary.ListSalarySendHistoryResponse;
 import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
@@ -31,16 +31,16 @@ import com.everhomes.rest.salary.SendPeriodSalaryCommand;
 import com.everhomes.rest.salary.SetSalaryEmailContentCommand;
 import com.everhomes.rest.salary.UpdatePeriodSalaryEmployeeCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupCommand;
-import com.everhomes.rest.salary.UpdateSalaryGroupEntriesVisableCommand;
+import com.everhomes.rest.salary.UpdateSalaryGroupEntitiesVisableCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupResponse;
 
 @Component
 public class SalaryServiceImpl implements SalaryService {
 
 	@Override
-	public ListSalaryDefaultEntriesResponse listSalaryDefaultEntries() {
+	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
 	
-		return new ListSalaryDefaultEntriesResponse();
+		return new ListSalaryDefaultEntitiesResponse();
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	@Override
-	public void updateSalaryGroupEntriesVisable(UpdateSalaryGroupEntriesVisableCommand cmd) {
+	public void updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd) {
 	
 
 	}

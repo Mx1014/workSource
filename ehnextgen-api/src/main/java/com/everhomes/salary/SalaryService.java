@@ -19,7 +19,7 @@ import com.everhomes.rest.salary.ListPeriodSalaryCommand;
 import com.everhomes.rest.salary.ListPeriodSalaryEmployeesCommand;
 import com.everhomes.rest.salary.ListPeriodSalaryEmployeesResponse;
 import com.everhomes.rest.salary.ListPeriodSalaryResponse;
-import com.everhomes.rest.salary.ListSalaryDefaultEntriesResponse;
+import com.everhomes.rest.salary.ListSalaryDefaultEntitiesResponse;
 import com.everhomes.rest.salary.ListSalarySendHistoryCommand;
 import com.everhomes.rest.salary.ListSalarySendHistoryResponse;
 import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
@@ -29,13 +29,13 @@ import com.everhomes.rest.salary.SendPeriodSalaryCommand;
 import com.everhomes.rest.salary.SetSalaryEmailContentCommand;
 import com.everhomes.rest.salary.UpdatePeriodSalaryEmployeeCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupCommand;
-import com.everhomes.rest.salary.UpdateSalaryGroupEntriesVisableCommand;
+import com.everhomes.rest.salary.UpdateSalaryGroupEntitiesVisableCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupResponse;
 
 public interface SalaryService {
 
 
-	public ListSalaryDefaultEntriesResponse listSalaryDefaultEntries();
+	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities();
 
 
 	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd);
@@ -86,7 +86,7 @@ public interface SalaryService {
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd);
 
 
-	public void updateSalaryGroupEntriesVisable(UpdateSalaryGroupEntriesVisableCommand cmd);
+	public void updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd);
 
 
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd);
