@@ -73,4 +73,8 @@ ALTER TABLE `eh_service_alliances` CHANGE COLUMN `default_order` `default_order`
 -- 给flowCase增加申请人在当前场景下的公司id字段   add by xq.tian  2017/06/08
 ALTER TABLE `eh_flow_cases` ADD COLUMN `applier_organization_id` BIGINT COMMENT 'applier current organization_id';
 
+-- 给eh_content_server_resources表添加前缀索引，并且修改类型为VARCHAR   add by xq.tian  2017/06/21
+ALTER TABLE `eh_content_server_resources`	MODIFY COLUMN `resource_id` VARCHAR(512);
+ALTER TABLE `eh_content_server_resources`	ADD KEY `i_eh_resource_id` (`resource_id`(20));
+
   
