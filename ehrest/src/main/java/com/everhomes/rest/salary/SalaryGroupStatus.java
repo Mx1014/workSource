@@ -30,7 +30,7 @@ public enum SalaryGroupStatus {
 	public static LayoutType fromCode(Byte code) {
 		if (code != null) {
 			for (LayoutType a : LayoutType.values()) {
-				if (code.byteValue() == a.code.byteValue()) {
+				if (code.byteValue() == a.getCode().byteValue()) {
 					return a;
 				}
 			}
