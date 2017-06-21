@@ -14,16 +14,13 @@ public class ImportPeriodSalaryCommand {
 
 	private Long organizationId;
 
-	private MultipartFile[] attachment;
-
 	public ImportPeriodSalaryCommand() {
 
 	}
 
-	public ImportPeriodSalaryCommand(Long organizationId, MultipartFile[] attachment) {
+	public ImportPeriodSalaryCommand(Long organizationId) {
 		super();
 		this.organizationId = organizationId;
-		this.attachment = attachment;
 	}
 
 	public Long getOrganizationId() {
@@ -32,14 +29,6 @@ public class ImportPeriodSalaryCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public MultipartFile[] getAttachment() {
-		return attachment;
-	}
-
-	public void setAttachment(MultipartFile[] attachment) {
-		this.attachment = attachment;
 	}
 
 	@Override

@@ -1,8 +1,10 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.constants.ErrorCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
@@ -37,6 +39,9 @@ import com.everhomes.rest.salary.UpdatePeriodSalaryEmployeeCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupEntriesVisableCommand;
 import com.everhomes.rest.salary.UpdateSalaryGroupResponse;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/salary")
@@ -52,7 +57,11 @@ public class SalaryController extends ControllerBase {
 	@RequestMapping("listSalaryDefaultEntries")
 	@RestReturn(ListSalaryDefaultEntriesResponse.class)
 	public RestResponse listSalaryDefaultEntries(){
-		return new RestResponse(salaryService.listSalaryDefaultEntries());
+		ListSalaryDefaultEntriesResponse res = this.salaryService.listSalaryDefaultEntries();
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -113,7 +122,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("exportSalaryGroup")
 	@RestReturn(String.class)
-	public RestResponse exportSalaryGroup(ExportSalaryGroupCommand cmd){
+	public RestResponse exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpResponse){
 		salaryService.exportSalaryGroup(cmd);
 		return new RestResponse();
 	}
@@ -124,7 +133,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importSalaryGroup")
 	@RestReturn(String.class)
-	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd){
+	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
 		salaryService.importSalaryGroup(cmd);
 		return new RestResponse();
 	}
@@ -135,7 +144,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("exportPeriodSalary")
 	@RestReturn(String.class)
-	public RestResponse exportPeriodSalary(ExportPeriodSalaryCommand cmd){
+	public RestResponse exportPeriodSalary(ExportPeriodSalaryCommand cmd, HttpServletResponse httpResponse){
 		salaryService.exportPeriodSalary(cmd);
 		return new RestResponse();
 	}
@@ -146,7 +155,7 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("importPeriodSalary")
 	@RestReturn(String.class)
-	public RestResponse importPeriodSalary(ImportPeriodSalaryCommand cmd){
+	public RestResponse importPeriodSalary(ImportPeriodSalaryCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
 		salaryService.importPeriodSalary(cmd);
 		return new RestResponse();
 	}

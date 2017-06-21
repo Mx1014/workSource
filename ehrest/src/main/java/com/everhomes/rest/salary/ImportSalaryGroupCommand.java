@@ -17,17 +17,15 @@ public class ImportSalaryGroupCommand {
 
 	private Long organizationId;
 
-	private MultipartFile[] attachment;
 
 	public ImportSalaryGroupCommand() {
 
 	}
 
-	public ImportSalaryGroupCommand(Long salaryGroupId, Long organizationId, MultipartFile[] attachment) {
+	public ImportSalaryGroupCommand(Long salaryGroupId, Long organizationId) {
 		super();
 		this.salaryGroupId = salaryGroupId;
 		this.organizationId = organizationId;
-		this.attachment = attachment;
 	}
 
 	public Long getSalaryGroupId() {
@@ -44,14 +42,6 @@ public class ImportSalaryGroupCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
-	}
-
-	public MultipartFile[] getAttachment() {
-		return attachment;
-	}
-
-	public void setAttachment(MultipartFile[] attachment) {
-		this.attachment = attachment;
 	}
 
 	@Override
