@@ -29,12 +29,11 @@ public class BatchSetEmployeeCheckFlagCommand {
 
 	}
 
-	public BatchSetEmployeeCheckFlagCommand(String ownerType, Long ownerId, Long salaryEmployeeId, List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys, Byte checkFlag) {
+	public BatchSetEmployeeCheckFlagCommand(String ownerType, Long ownerId, List<Long> salaryEmployeeIds, Byte checkFlag) {
 		super();
+		this.salaryEmployeeIds = salaryEmployeeIds;
 		this.ownerType = ownerType;
-		this.ownerId = ownerId;
-		this.salaryEmployeeId = salaryEmployeeId;
-		this.periodEmployeeEntitys = periodEmployeeEntitys;
+		this.ownerId = ownerId; 
 		this.checkFlag = checkFlag;
 	}
 
@@ -53,23 +52,7 @@ public class BatchSetEmployeeCheckFlagCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-
-	public Long getSalaryEmployeeId() {
-		return salaryEmployeeId;
-	}
-
-	public void setSalaryEmployeeId(Long salaryEmployeeId) {
-		this.salaryEmployeeId = salaryEmployeeId;
-	}
-
-	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntitys() {
-		return periodEmployeeEntitys;
-	}
-
-	public void setPeriodEmployeeEntitys(List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys) {
-		this.periodEmployeeEntitys = periodEmployeeEntitys;
-	}
-
+ 
 	public Byte getCheckFlag() {
 		return checkFlag;
 	}
@@ -81,6 +64,14 @@ public class BatchSetEmployeeCheckFlagCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public List<Long> getSalaryEmployeeIds() {
+		return salaryEmployeeIds;
+	}
+
+	public void setSalaryEmployeeIds(List<Long> salaryEmployeeIds) {
+		this.salaryEmployeeIds = salaryEmployeeIds;
 	}
 
 }
