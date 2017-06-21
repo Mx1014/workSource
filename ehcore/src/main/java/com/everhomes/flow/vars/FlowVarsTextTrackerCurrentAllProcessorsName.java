@@ -1,24 +1,15 @@
 package com.everhomes.flow.vars;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowVariableTextResolver;
+import com.everhomes.flow.*;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 节点跟踪的 本节点处理人姓名
@@ -36,18 +27,30 @@ public class FlowVarsTextTrackerCurrentAllProcessorsName implements FlowVariable
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		Map<Long, Long> userMap = new HashMap<Long, Long>();
-		List<Long> users = new ArrayList<Long>();
-		for(FlowEventLog log : ctx.getLogs()) {
-			if(log.getLogType().equals(FlowLogType.NODE_ENTER.getCode())) {
-				if(log.getFlowUserId() != null && !userMap.containsKey(log.getFlowUserId())) {
-					users.add(log.getFlowUserId());
-					userMap.put(log.getFlowUserId(), 1l);
-				}
-			}
-		}
-		
-		String txt = "";
+        List<Long> users = new ArrayList<>();
+
+        Long maxStepCount = flowEventLogProvider.findMaxStepCountByNodeEnterLog(
+                ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId());
+        List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(
+                ctx.getCurrentNode().getFlowNode().getId(), ctx.getFlowCase().getId(), maxStepCount);
+
+        for (FlowEventLog log : logs) {
+            if(log.getFlowUserId() != null) {
+                users.add(log.getFlowUserId());
+            }
+        }
+
+        for(FlowEventLog log : ctx.getLogs()) {
+            if(log.getLogType().equals(FlowLogType.NODE_ENTER.getCode())) {
+                if(log.getFlowUserId() != null) {
+                    users.add(log.getFlowUserId());
+                }
+            }
+        }
+
+        users = users.stream().distinct().collect(Collectors.toList());
+
+        String txt = "";
 		int i = 0;
 		for(Long u : users) {
 			UserInfo ui = flowService.getUserInfoInContext(ctx, u);

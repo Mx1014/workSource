@@ -240,3 +240,63 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('war
 
 -- 修改menu返回
 update eh_web_menus set data_type = 'react:/repair-management/task-list' where name = '任务列表' and id = 20140;
+
+-- 资源预约2.6 add by sw 20170601
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 28, 'zh_CN', '线下支付模式,审批通过短信', '38570');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 29, 'zh_CN', '审批驳回短信', '38572');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 30, 'zh_CN', '支付成功短信', '38573');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 31, 'zh_CN', '审批线上支付模式,审批通过短信', '38574');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 32, 'zh_CN', '取消短信', '38575');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 33, 'zh_CN', '催办短信', '38832');
+UPDATE `eh_locale_templates` SET `text`='您申请预约的${useTime}的${resourceName}已经被其他客户抢先预约成功，您可以继续申请预约其他时段，由此给您造成的不便，敬请谅解，感谢您的使用。'
+	WHERE `scope`='rental.notification' and `code`='6' and `locale`='zh_CN' and `namespace_id`='0';
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('50910', '内部会议室', '50000', NULL, NULL, '1', '2', '/50000/50910', 'park', '440', '40400');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('50912', '默认参数', '50910', NULL, 'resource--defaultParameter/status/3', '0', '2', '/50000/50910/50912', 'park', '441', '40400');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('50914', '资源发布', '50910', NULL, 'resource_publish/status/3', '0', '2', '/50000/50910/50914', 'park', '444', '40400');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('50916', '预订详情', '50910', NULL, 'rental_info/status/3', '0', '2', '/50000/50910/50916', 'park', '446', '40400');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('50920', '工作流设置', '50910', NULL, 'react:/working-flow/flow-list/resource-reservation/40400?status=3', '0', '2', '/50000/50910/50920', 'park', '475', '40400');
+	
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50912, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50914, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50914, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50916, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10023, 50920, '内部会议室', 1, 1, '内部会议室  全部权限', 202);
+		
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50910, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50912, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50914, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50916, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 50920, '', 'EhNamespaces', 1000000, 2);
+
+UPDATE `eh_rentalv2_resource_types` SET `status`='2';
+	
+UPDATE `eh_rentalv2_resource_types` SET `status`='3' WHERE `name`='左邻会议室' and `namespace_id`='1000000';
+
+DELETE from eh_web_menus where id = 50918;
+DELETE from eh_web_menu_privileges where menu_id = 50918 and privilege_id = 10023;
+
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('rental.resource.detail.url', '/resource-reservation/build/index.html?namespaceId=%s&id=%s', NULL, '0', NULL);

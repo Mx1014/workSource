@@ -8,7 +8,7 @@ public class FlowSubject extends EhFlowSubjects {
 	 */
 	private static final long serialVersionUID = 5020988711127444590L;
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

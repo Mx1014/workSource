@@ -288,7 +288,7 @@ public class OrganizationController extends ControllerBase {
 	 */
 	/*@RequestMapping("deleteOrgComment")
 	@RestReturn(value=String.class)
-	public RestResponse deleteOrgComment(DeleteCommentCommand cmd) {
+	public RestResponse deleteOrgComment(DeleteCommonCommentCommand cmd) {
 
 		// ???
 		RestResponse response = new RestResponse();

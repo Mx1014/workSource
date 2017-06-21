@@ -1,5 +1,8 @@
 package com.everhomes.general_approval;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,4 +90,38 @@ public class GeneralApprovalTest extends LoginAuthTestCase {
     	GeneralApprovalDTO dto = generalApprovalService.createGeneralApproval(cmd);
     	Assert.assertTrue(dto.getId() > 0);
     }
+    @Test
+    public void testCheckNumberDefaultValue(){
+    	Map<String,Integer> fieldNames = new HashMap<>();
+    	fieldNames.put("A.a",1);
+    	fieldNames.put("B.a",1);
+    	fieldNames.put("b",1);
+    	String defaultValue = "5";
+    	Assert.assertTrue(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "5+53";
+    	Assert.assertTrue(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "53*(56+21)/8-5";
+    	Assert.assertTrue(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "(A.a*(45+3)-b)*B.a";
+    	Assert.assertTrue(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "sum(A.a*(45+3)-b)*B.a";
+    	Assert.assertTrue(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+
+    	defaultValue = "5++";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "5+6+";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "+6+8";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "sum(*A.a*(45+3)-b)*B.a";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "sum(C.a*(45+3)-b)*B.a";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "sum(A.a*(45+3-b)*B.a";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	defaultValue = "sum(A.a*(45+3)-b)*B.a)";
+    	Assert.assertFalse(generalApprovalService.checkNumberDefaultValue(defaultValue, fieldNames));
+    	 
+    }
 }
+

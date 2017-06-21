@@ -4,66 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.general_approval.GeneralApproval;
-import com.everhomes.rest.flow.ActionStepType;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowPostSubjectCommand;
-import com.everhomes.rest.flow.FlowPostSubjectDTO;
-import com.everhomes.rest.flow.FlowResolveUsersResponse;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowSubjectDTO;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowModulesCommand;
-import com.everhomes.rest.flow.ListFlowModulesResponse;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
-import com.everhomes.rest.flow.ListScriptsCommand;
-import com.everhomes.rest.flow.ListScriptsResponse;
-import com.everhomes.rest.flow.ListSelectUsersCommand;
-import com.everhomes.rest.flow.ListSelectUsersResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 
 public interface FlowService {
@@ -469,5 +410,9 @@ public interface FlowService {
 	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
 	void fixupUserInfoInContext(FlowCaseState ctx, UserInfo ui);
-	
+
+    /**
+     * 删除flowCase
+     */
+    void deleteFlowCase(DeleteFlowCaseCommand cmd);
 }

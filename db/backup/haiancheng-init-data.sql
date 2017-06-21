@@ -2632,3 +2632,39 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 SELECT MAX(id) FROM `eh_locale_templates` INTO @max_id;
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@max_id := @max_id + 1, 'sms.default.yzx', 8, 'zh_CN', '门禁-海岸', '42958', 999993);
+
+-- fix 10971 add by xiongying20170608
+SET @lease_config_id = (SELECT max(id) FROM `eh_lease_configs`);
+INSERT INTO `eh_lease_configs` (`id`, `namespace_id`, `rent_amount_flag`, `issuing_lease_flag`, `issuer_manage_flag`, `park_indroduce_flag`, `renew_flag`, `area_search_flag`) VALUES ((@lease_config_id := @lease_config_id + 1), '999993', '1', '1', '1', '1', '1', '0');
+
+-- fix 10972 add by xiongying20170608
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40130,'', 'EhNamespaces', 999993,2);
+
+-- fix 10968 add by xiongying20170609
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),20158,'', 'EhNamespaces', 999993,2);
+delete from eh_web_menu_scopes where owner_id = 999993 and menu_id = 20160;
+
+-- fix 10969 add by xiongying20170609
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'pmtask.handler-999983', 'flow', '', '0', NULL);
+
+-- fix #11173 add by xq.tian 2017/06/13
+DELETE FROM eh_web_menu_scopes WHERE owner_type = 'EhNamespaces' AND owner_id = 999993 AND menu_id = 20160;
+
+-- fix #11188 add by xq.tian 2017/06/14
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
+VALUES ('pmtask.handler-999993', 'flow', 'pmtask handle', 0, NULL);
+-- ----------------------------------------------------------
+SET @max_id = (SELECT MAX(id) FROM `eh_categories`);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
+VALUES ((@max_id := @max_id + 1), 6, 0, '家政服务', '任务/家政服务', 0, 2, NOW(), NULL, NULL, NULL, 999993);
+
+UPDATE `eh_launch_pad_items` SET `action_type` = 60, `action_data` = CONCAT('{"url":"zl://propertyrepair/create?type=user&taskCategoryId=', @max_id, '&displayName=家政服务"}')
+WHERE `namespace_id`=999993 AND `item_label` = '家政服务';
+-- ----------------------------------------------------------
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`)
+VALUES ((@max_id := @max_id + 1), 6, 0, '综合维修', '任务/综合维修', 0, 2, NOW(), NULL, NULL, NULL, 999993);
+
+UPDATE `eh_launch_pad_items` SET `action_type` = 60, `action_data` = CONCAT('{"url":"zl://propertyrepair/create?type=user&taskCategoryId=', @max_id, '&displayName=综合维修"}')
+WHERE `namespace_id`=999993 AND `item_label` = '综合维修';

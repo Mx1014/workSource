@@ -217,7 +217,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 			String cost = String.valueOf((order.getPrice().intValue() * 100));
 
 			JSONObject jsonParam = new JSONObject();
-			jsonParam.put("OrderID", order.getCardNumber());
+			jsonParam.put("OrderID", order.getOrderToken());
 			jsonParam.put("PayWay", VendorType.ZHI_FU_BAO.getCode().equals(order.getPaidType()) ? "3" : "2");
 			jsonParam.put("Amount", cost);
 			jsonParam.put("ParkingID", parkingId);
@@ -573,5 +573,39 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
 		return entity.isSuccess();
+	}
+
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		String url = configProvider.getValue("parking.techpark.url", "");
+		String companyId = configProvider.getValue("parking.techpark.companyId", "");
+		
+		JSONObject jsonParam = new JSONObject();
+		jsonParam.put("CompanyID", companyId);
+		
+		Map<String, String> params = new HashMap<>();
+		params.put("data", jsonParam.toString());
+		String json = HttpUtils.post(url + "OISGetPKCarNum", params);
+		
+		BosigaoJsonEntity<List<BosigaoCarNum>> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<List<BosigaoCarNum>>>(){});
+
+		if(entity.isSuccess()){
+			List<BosigaoCarNum> carNumList = entity.getData();
+			LOGGER.info("carNumList = {}",carNumList);
+			if(carNumList != null){
+				for (BosigaoCarNum bosigaoCarNum : carNumList) {
+					if(bosigaoCarNum!=null){
+						GetParkingCarNumsResponse response = new GetParkingCarNumsResponse();
+						response.setParkName(bosigaoCarNum.getParkName());
+						response.setAllCarNum(bosigaoCarNum.getCarNum());
+						response.setEmptyCarNum(bosigaoCarNum.getSpaceNum());
+						response.setCarNum(bosigaoCarNum.getInCarNum());
+						return response;
+					}
+				}
+			}
+		}else
+			LOGGER.info("request {}OISGetPKCarNum failed! param = {}",url,params);
+		return null;
 	}
 }

@@ -56,4 +56,5 @@ public interface OrganizationServiceErrorCode {
     int ERROR_CONTACTNAME_ISNULL = 700000;
 
     int ERROR_CONTACTTOKEN_ISNULL = 700001;
+    int ERROR_NO_DATA = 800000;
 }

@@ -98,7 +98,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 							}
 						}else {
 
-							rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
+//							rentalv2Service.changeRentalOrderStatus(order, SiteBillStatus.SUCCESS.getCode(), true);
 
 							FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, moduleId);
 

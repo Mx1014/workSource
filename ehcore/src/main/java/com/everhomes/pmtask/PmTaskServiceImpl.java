@@ -767,7 +767,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 			for(int i=0;i<size;i++){
 				Row tempRow = sheet.createRow(i + 4);
 				PmTaskDTO task = list.get(i);
-				Category category = checkCategory(task.getTaskCategoryId());
+				Category category = null;
+				if(UserContext.getCurrentNamespaceId() == 999983 && null != cmd.getTaskCategoryId() &&
+						cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+					category = createEbeiCategory();
+				} else {
+					category = checkCategory(task.getTaskCategoryId());
+				}
+
 				Cell cell1 = tempRow.createCell(1);
 				cell1.setCellStyle(style);
 				cell1.setCellValue(i + 1);
@@ -780,15 +787,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 				Cell cell4 = tempRow.createCell(4);
 				cell4.setCellStyle(style);
 				PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
-				if(pmTask.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
-					Address address = addressProvider.findAddressById(pmTask.getAddressId());
-					if(null != address)
-						cell4.setCellValue(address.getAddress());
-				}else {
-					Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
-					if(null != organization)
-						cell4.setCellValue(organization.getName());
+				if(pmTask != null) {
+					if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
+						Address address = addressProvider.findAddressById(pmTask.getAddressId());
+						if(null != address)
+							cell4.setCellValue(address.getAddress());
+					}else {
+						Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
+						if(null != organization)
+							cell4.setCellValue(organization.getName());
+					}
 				}
+
 
 				Cell cell5 = tempRow.createCell(5);
 				cell5.setCellStyle(style);
@@ -1226,6 +1236,14 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Category not found.");
         }
+		return category;
+	}
+
+	private Category createEbeiCategory() {
+		Category category = new Category();
+		category.setId(PmTaskHandle.EBEI_TASK_CATEGORY);
+		category.setName("物业报修");
+		category.setParentId(0L);
 		return category;
 	}
 	
@@ -1887,9 +1905,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
 						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						dto.setOrganizationId(o.getId());
-						dto.setDisplayName(o.getName());
-						dto.setAddressId(address.getId());
+						if(dto != null) {
+							dto.setOrganizationId(o.getId());
+							dto.setDisplayName(o.getName());
+							dto.setAddressId(address.getId());
+						}
 						return dto;
 					}).collect(Collectors.toList());
 

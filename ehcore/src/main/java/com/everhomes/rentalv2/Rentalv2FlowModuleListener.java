@@ -345,18 +345,20 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		Map<String,String> customObject = new HashMap<String,String>();
 
-    	Map<String, String> map = new HashMap<String, String>(); 
+    	Map<String, String> map = new HashMap<String, String>();
 
+		String contentString = "";
 		if(null != order.getOfflinePayeeUid()){
 			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
 			if(null!=member){
 				map.put("offlinePayeeName", member.getContactName());
 				map.put("offlinePayeeContact", member.getContactToken());
+				map.put("offlineCashierAddress", order.getOfflineCashierAddress());
+				contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE,
+						RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
+
 			}
 		}
-        map.put("offlineCashierAddress", order.getOfflineCashierAddress()); 
-		String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
-				RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
 		customObject.put("offlinePayInfo",contentString);
 		customObject.put("orderId", String.valueOf(order.getId()));
 		flowCase.setCustomObject(JSON.toJSONString(customObject));
@@ -469,6 +471,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 		if (SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE == templateId) {
 			//线下模式审批通过 短信
+			LOGGER.info("Rental message -----------------------------, templateId={}", templateId);
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
 
@@ -516,7 +519,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
 			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
 
-		}else if (SmsTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE == templateId) {
+		}else if (SmsTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE == templateId) {
+
+//			Map<String, String> map = new HashMap<>();
+//			map.put("userName", userName);
+//			map.put("userPhone", userPhone);
+//			map.put("useTime", order.getUseDetail());
+//			map.put("resourceName", order.getResourceName());
+//			rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map,
+//					RentalNotificationTemplateCode.RENTAL_PROCESSOR_SUCCESS_CODE);
+
+			//支付成功
+			smsProvider.addToTupleList(variables, "userName", userName);
+			smsProvider.addToTupleList(variables, "userPhone", userPhone);
+			smsProvider.addToTupleList(variables, "useTime", order.getUseDetail());
+			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName());
+
+		} else if (SmsTemplateCode.APPROVE_RENTAL_APPLY_SUCCESS_CODE == templateId) {
 
 			Map<String, String> map = new HashMap<>();
 			map.put("useTime", order.getUseDetail());

@@ -1,6 +1,10 @@
 package com.everhomes.flow;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.flow.event.FlowGraphAutoStepEvent;
+import com.everhomes.flow.event.FlowGraphButtonEvent;
+import com.everhomes.flow.event.FlowGraphNoStepEvent;
+import com.everhomes.flow.event.FlowGraphStartEvent;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.flow.*;
@@ -26,6 +30,7 @@ import java.util.List;
 
 @Component
 public class FlowStateProcessorImpl implements FlowStateProcessor {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowStateProcessorImpl.class);
 	
 	@Autowired
@@ -46,27 +51,27 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     @Autowired
     private AttachmentProvider attachmentProvider;
 	
-   @Autowired
-   BigCollectionProvider bigCollectionProvider;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
    
-   @Autowired
-   private UserService userService;
-   
-   @Autowired
-   private UserProvider userProvider;
-   
-   @Autowired
-   private FlowEventLogProvider flowEventLogProvider;
-   
-   @Autowired
-   private FlowUserSelectionProvider flowUserSelectionProvider;
-   
-   ThreadPoolTaskScheduler scheduler;
-   
-   public FlowStateProcessorImpl() {
-	   scheduler = new ThreadPoolTaskScheduler();
-	   scheduler.setPoolSize(3);
-   }
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private FlowEventLogProvider flowEventLogProvider;
+
+    @Autowired
+    private FlowUserSelectionProvider flowUserSelectionProvider;
+
+    private ThreadPoolTaskScheduler scheduler;
+
+    public FlowStateProcessorImpl() {
+	    scheduler = new ThreadPoolTaskScheduler();
+	    scheduler.setPoolSize(3);
+    }
     
 //	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
@@ -210,11 +215,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS,
+                    "flowcase noexists, flowCaseId=" + flowCase);
 		}
 		
 		if(cmd.getStepCount() != null && !cmd.getStepCount().equals(flowCase.getStepCount())) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR,
+                    "step busy");
 		}
 		
 		ctx.setFlowCase(flowCase);
@@ -226,15 +233,16 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
 		if(node == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists, flowNodeId=" + flowCase.getCurrentNodeId());
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS,
+                    "flownode noexists, flowNodeId=" + flowCase.getCurrentNodeId());
 		}
 		ctx.setCurrentNode(node);
 		
 		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
 		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
 		
-		if((cmd.getContent() != null /* && !cmd.getContent().isEmpty() */ ) 
-				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
+		if((cmd.getContent() != null /* && !cmd.getContent().isEmpty() */)
+				|| (null != cmd.getImages() && cmd.getImages().size() > 0)) {
 			FlowSubject subject = new FlowSubject();
 			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 			subject.setBelongTo(cmd.getButtonId());
@@ -255,12 +263,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 					attachments.add(attach);
 				}
 				attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
-			}			
+			}
 			
 			event.setSubject(subject);
 		}
 
-		
 		event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
 		event.setCmd(cmd);
 		event.setFiredUser(ctx.getOperator());
@@ -305,7 +312,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 					//Only leave once time
 					currentNode.stepLeave(ctx, nextNode);	
 				}
-				
+
+				// if reject step, prefixNode is currentNode ?
 				ctx.setPrefixNode(currentNode);
 				ctx.setCurrentNode(nextNode);
 				ctx.setNextNode(null);
@@ -348,21 +356,33 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 //		}
 		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
-		
+
 		//TODO use schedule ? scheduler.execute();
 		
 		//TODO do build in a delay thread
 		if(curr.getMessageAction() != null) {
-			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getSmsAction() != null) {
-			curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getSmsAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getTickMessageAction() != null) {
-			curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getTickMessageAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		if(curr.getTickSMSAction() != null) {
-			curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+            Byte status = curr.getTickSMSAction().getFlowAction().getStatus();
+            if (FlowActionStatus.fromCode(status) == FlowActionStatus.ENABLED) {
+                curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+            }
 		}
 		
 		switch(fromStep) {
@@ -414,7 +434,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
 			ft.setJson(stepDTO.toString());
 			
-			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000l;
+			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute() * 60 * 1000L;
 //			Long timeoutTick = DateHelper.currentGMTTime().getTime() + 6000;
 			ft.setTimeoutTick(new Timestamp(timeoutTick));
 			
@@ -430,7 +450,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 			log.setFlowNodeId(curr.getFlowNode().getId());
-			log.setParentId(0l);
+			log.setParentId(0L);
 			log.setFlowCaseId(ctx.getFlowCase().getId());
 			if(firedUser != null) {
 				log.setFlowUserId(firedUser.getId());
@@ -503,7 +523,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 			log.setFlowNodeId(curr.getFlowNode().getId());
-			log.setParentId(0l);
+			log.setParentId(0L);
 			log.setFlowCaseId(ctx.getFlowCase().getId());
 			if(firedUser != null) {
 				log.setFlowUserId(firedUser.getId());

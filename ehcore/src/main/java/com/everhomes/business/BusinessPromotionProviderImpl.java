@@ -11,6 +11,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBusinessPromotionsDao;
 import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.server.schema.tables.records.EhBusinessPromotionsRecord;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -61,7 +62,10 @@ public class BusinessPromotionProviderImpl implements BusinessPromotionProvider 
     public long createBusinessPromotion(BusinessPromotion promotion) {
         long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessPromotions.class));
         promotion.setId(id);
-        promotion.setCreatorUid(UserContext.current().getUser().getId());
+        User user = UserContext.current().getUser();
+        if (user != null) {
+            promotion.setCreatorUid(user.getId());
+        }
         promotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBusinessPromotionsDao dao = new EhBusinessPromotionsDao(context.configuration());

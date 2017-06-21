@@ -30,6 +30,15 @@ public class AddRentalBillCommand {
 	private List<RentalBillRuleDTO> rules; 
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
+	private String sceneToken;
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
 
 	@Override
 	public String toString() {

@@ -2,11 +2,11 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
- * <li>APPLIER: 0 我的申请</li>
- * <li>TODO_LIST: 1 我的代办</li>
- * <li>DONE_LIST: 2 已处理的任务</li>
- * <li>SUPERVISOR: 3 我的督办</li>
- * <li>ADMIN: 4 管理员操作</li>
+ * <li>APPLIER(0): 我的申请</li>
+ * <li>TODO_LIST(1): 我的代办</li>
+ * <li>DONE_LIST(2): 已处理的任务</li>
+ * <li>SUPERVISOR(3): 我的督办</li>
+ * <li>ADMIN(4): 管理员操作</li>
  * </ul>
  * @author janson
  *

@@ -12,7 +12,14 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowLogType {
-	BUTTON_FIRED("button_fired"), AUTO_STEP("auto_step"), NODE_ENTER("node_enter"), STEP_TRACKER("step_tracker"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor"), NODE_REMIND("flow_remind");
+    STEP_TRACKER("step_tracker"),
+    NODE_TRACKER("node_tracker"),
+    NODE_ENTER("node_enter"),
+    BUTTON_FIRED("button_fired"),
+    FLOW_SUPERVISOR("flow_supervisor"),
+    AUTO_STEP("auto_step"),
+    NODE_REMIND("flow_remind"),
+    ;
 	
 	private String code;
     private FlowLogType(String code) {

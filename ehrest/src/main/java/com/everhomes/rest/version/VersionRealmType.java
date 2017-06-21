@@ -49,6 +49,8 @@ package com.everhomes.rest.version;
  * <li>IOS_YUNGU("iOS_YunGu"): 南山云谷 iOS版APP</li>
  * <li>ANDROID_RONGCHAO("Android_Rongchao"): 荣超股份 Android版APP</li>
  * <li>IOS_RONGCHAO("iOS_Rongchao"): 荣超股份 iOS版APP</li>
+ * <li>ANDROID_TEEC("Android_TEEC"): 嘉定新城 Android版APP</li>
+ * <li>IOS_TEEC("iOS_TEEC"): 嘉定新城 iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -111,7 +113,9 @@ public enum VersionRealmType {
     ANDROID_YUNGU("Android_YunGu"),
     IOS_YUNGU("iOS_YunGu"),
     ANDROID_RONGCHAO("Android_Rongchao"),
-    IOS_RONGCHAO("iOS_Rongchao");
+    IOS_RONGCHAO("iOS_Rongchao"),
+    ANDROID_TEEC("Android_TEEC"),
+    IOS_TEEC("iOS_TEEC");
     
     private String code;
     private VersionRealmType(String code) {

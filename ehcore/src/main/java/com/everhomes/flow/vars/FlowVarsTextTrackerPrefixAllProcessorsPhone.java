@@ -1,20 +1,11 @@
 package com.everhomes.flow.vars;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.everhomes.flow.*;
+import com.everhomes.rest.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowEventLog;
-import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowGraphNode;
-import com.everhomes.flow.FlowNode;
-import com.everhomes.flow.FlowService;
-import com.everhomes.flow.FlowVariableTextResolver;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
+import java.util.List;
 
 /**
  * 节点跟踪的 上一步处理人手机号
@@ -32,7 +23,7 @@ public class FlowVarsTextTrackerPrefixAllProcessorsPhone implements FlowVariable
 	
 	@Override
 	public String variableTextRender(FlowCaseState ctx, String variable) {
-		FlowGraphNode currNode = ctx.getCurrentNode();
+		/*FlowGraphNode currNode = ctx.getCurrentNode();
 		if(currNode.getFlowNode().getNodeLevel().equals(1)) {
 			//第一个节点，没有上个节点
 			return null;
@@ -52,13 +43,20 @@ public class FlowVarsTextTrackerPrefixAllProcessorsPhone implements FlowVariable
 				node = gnode.getFlowNode();
 				break;
 			}
-		}
-		
-		if(node != null) {
-			String txt = "";
-			int i = 0;
-			
-			logs = flowEventLogProvider.findCurrentNodeEnterLogs(node.getId(), ctx.getFlowCase().getId(), stepLog.getStepCount());
+		}*/
+
+        FlowNode node = null;
+        if (ctx.getPrefixNode() != null) {
+            node = ctx.getPrefixNode().getFlowNode();
+        }
+
+        if(node != null) {
+            String txt = "";
+            int i = 0;
+
+            Long flowCaseId = ctx.getFlowCase().getId();
+            Long maxStepCount = flowEventLogProvider.findMaxStepCountByNodeEnterLog(node.getId(), flowCaseId);
+            List<FlowEventLog> logs = flowEventLogProvider.findCurrentNodeEnterLogs(node.getId(), flowCaseId, maxStepCount);
 			if(logs != null && logs.size() > 0) {
 				for(FlowEventLog log : logs) {
 					if(log.getFlowUserId() != null && log.getFlowUserId() > 0) {

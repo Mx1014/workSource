@@ -856,7 +856,22 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
+    
+    /**
+     * <b>URL: /admin/org/exportEnterpriseByCommunityId</b>
+     * <p>后台管理 企业列表 和对于的管理员信息</p>
+     */
+    @RequestMapping("exportEnterpriseByCommunityId")
+    @RestReturn(value = String.class)
+    public RestResponse exportEnterpriseByCommunityId(@Valid ListEnterprisesCommand cmd, HttpServletResponse httpServletResponse) {
+    	cmd.setQryAdminRoleFlag(false);
+    	organizationService.exportEnterprises(cmd, httpServletResponse);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
     /**
      * <b>URL: /admin/org/listAclRoleByUserId</b>
      * <p>获取角色列表</p>

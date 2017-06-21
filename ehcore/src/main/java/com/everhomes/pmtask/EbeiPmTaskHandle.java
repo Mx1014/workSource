@@ -649,7 +649,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			//更新工作流case状态
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
-			Byte flowCaseStatus = state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+			Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
 					(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
 							FlowCaseStatus.PROCESS.getCode());
 

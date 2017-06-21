@@ -155,6 +155,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		//modify by dengs,20170425  更换模板，发送html邮件
 //		notifyMap.put("note", getNote(request)); 
 		notifyMap.put("note", changeRequestToHtml(request)); 
+		notifyMap.put("serviceAllianceName", "");
+		notifyMap.put("notemessage", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
 		
 		String creatorOrganization = "";
@@ -166,6 +168,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 				ServiceAllianceRequestNotificationTemplateCode.AN_APPLICATION_FORM, UserContext.current().getUser().getLocale(), "");
 		if(serviceOrg != null) {
 			notifyMap.put("serviceOrgName", serviceOrg.getName());
+			notifyMap.put("serviceAllianceName", serviceOrg.getName());
 			title = serviceOrg.getName() + title;
 		}
 		notifyMap.put("title", title);
@@ -226,7 +229,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
 				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
-				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
+				String fieldName = field.getFieldName()==null?"":field.getFieldName();
+				sb.append(" ").append(fieldName.trim()).append("：").append(fieldValue).append("\n");
 			}
 			
 			return sb.toString();

@@ -912,3 +912,12 @@ update `eh_launch_pad_items` set `icon_uri` = 'cs://1/image/aW1hZ2UvTVRvMU5qQTFZ
 UPDATE eh_launch_pad_items SET display_flag = 0 WHERE namespace_id = 999990 AND item_label in ('园区活动', '服务联盟', '视频会议');
 	
 UPDATE eh_service_alliance_skip_rule SET service_alliance_category_id = 0 WHERE namespace_id = 999990;
+
+-- 10731 by xiongying20170605
+SET @address_id = (SELECT MAX FROM `eh_addresses`); 
+SET @mapping_id = (SELECT MAX FROM `eh_organization_address_mappings`); 
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id +1), UUID,240111044331051500, 14964, '深圳市', 14965, '南山区' ,'中国储能大厦-59','中国储能大厦','59','2','0',UTC_TIMESTAMP(), 999990);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@mapping_id := @mapping_id + 1), 1001080, 240111044331051500, @address_id, '中国储能大厦-59', '0');
+
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES((@address_id := @address_id +1),UUID,240111044331051500, 14964, '深圳市', 14965, '南山区' ,'中国储能大厦-60','中国储能大厦','60','2','0',UTC_TIMESTAMP(), 999990);
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)VALUES ((@mapping_id := @mapping_id + 1), 1001080, 240111044331051500, @address_id, '中国储能大厦-60', '0');

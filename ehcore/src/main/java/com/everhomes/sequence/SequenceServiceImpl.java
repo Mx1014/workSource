@@ -1357,6 +1357,18 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWarehouses.class, Tables.EH_WAREHOUSES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_WAREHOUSES.ID.max()).from(Tables.EH_WAREHOUSES).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhTalents.class, Tables.EH_TALENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TALENTS.ID.max()).from(Tables.EH_TALENTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhTalentCategories.class, Tables.EH_TALENT_CATEGORIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TALENT_CATEGORIES.ID.max()).from(Tables.EH_TALENT_CATEGORIES).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhTalentQueryHistories.class, Tables.EH_TALENT_QUERY_HISTORIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TALENT_QUERY_HISTORIES.ID.max()).from(Tables.EH_TALENT_QUERY_HISTORIES).fetchOne().value1();
+        });
 
         syncTableSequence(null, EhWarehouseMaterials.class, Tables.EH_WAREHOUSE_MATERIALS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_WAREHOUSE_MATERIALS.ID.max()).from(Tables.EH_WAREHOUSE_MATERIALS).fetchOne().value1();

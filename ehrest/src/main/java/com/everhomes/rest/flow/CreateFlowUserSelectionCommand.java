@@ -1,17 +1,17 @@
 package com.everhomes.rest.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <ul> 创建用户选择
  * <li>belongTo: 属于的上级对象ID flow, flow_node, flow_action, flow_button, flow_selection, flow_user 的ID</li>
  * <li>flowEntityType: {@link com.everhomes.rest.flow.FlowEntityType} </li>
  * <li>flowUserType: supervisor 或者 processor</li>
- * <li>selections: 用户选择的信息列表 </li>
+ * <li>selections: 用户选择的信息列表{@link com.everhomes.rest.flow.FlowSingleUserSelectionCommand} </li>
  * </ul>
  * @author janson
  *

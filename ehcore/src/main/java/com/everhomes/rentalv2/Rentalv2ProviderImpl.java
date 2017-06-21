@@ -15,19 +15,7 @@ import javax.persistence.criteria.CriteriaBuilder.Case;
 
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteWhereStep;
-import org.jooq.InsertQuery;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Record4;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectOnConditionStep;
-import org.jooq.UpdateConditionStep;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -464,7 +452,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		Condition condition = Tables.EH_RENTALV2_ORDERS.ID.in(orderIds);
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode())); 
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+
 		step.where(condition);
 //		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 //				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -1457,7 +1447,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalTimeInterval> result = step
-				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_TIME_INTERVAL.ID.asc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalTimeInterval.class);
 				});
 		if (null != result && result.size() > 0)
@@ -1852,6 +1842,18 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
 		EhRentalv2Cells order = dao.findById(cellId);
 		return ConvertHelper.convert(order, RentalCell.class);
+	}
+
+	@Override
+	public List<RentalCell> getRentalCellsByIds(List<Long> cellIds) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		EhRentalv2CellsDao dao = new EhRentalv2CellsDao(context.configuration());
+//		EhRentalv2Cells order = dao.findById(cellId);
+		SelectQuery<EhRentalv2CellsRecord> query = context.selectQuery(Tables.EH_RENTALV2_CELLS);
+		query.addConditions(Tables.EH_RENTALV2_CELLS.ID.in(cellIds));
+
+		return query.fetch().map(r -> ConvertHelper.convert(r, RentalCell.class));
 	}
 	
 	@Override

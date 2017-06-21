@@ -11,7 +11,11 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowUserSelectionType {
-	DEPARTMENT("department"), POSITION("position"), MANAGER("manager"), VARIABLE("variable");
+	DEPARTMENT("department"),
+    POSITION("position"),
+    MANAGER("manager"),
+    VARIABLE("variable"),
+    ;
 	
 	private String code;
     private FlowUserSelectionType(String code) {

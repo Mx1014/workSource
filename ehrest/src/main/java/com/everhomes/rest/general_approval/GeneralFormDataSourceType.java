@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>USER_NAME: 当前用户名</li>
+ * <li>USER_NAME: 当前用户名  </li>
  * <li>USER_PHONE: 当前用户手机号</li>
  * <li>USER_COMPANY: 用户所在公司</li>
  * <li>SOURCE_ID: 来源id</li>
@@ -16,7 +16,8 @@ import com.everhomes.util.StringHelper;
  *
  */
 public enum GeneralFormDataSourceType {
-	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), SOURCE_ID("SOURCE_ID"), ORGANIZATION_ID("ORGANIZATION_ID"), USER_ADDRESS("USER_ADDRESS");
+ 	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), 
+	SOURCE_ID("SOURCE_ID"), ORGANIZATION_ID("ORGANIZATION_ID"), USER_ADDRESS("USER_ADDRESS");
 	
 	private String code;
 	

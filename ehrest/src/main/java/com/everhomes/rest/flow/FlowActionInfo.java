@@ -1,7 +1,20 @@
+// @formatter:off
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>enabled: enabled</li>
+ *     <li>reminderAfterMinute: reminderAfterMinute</li>
+ *     <li>reminderTickMinute: reminderTickMinute</li>
+ *     <li>trackerApplier: trackerApplier</li>
+ *     <li>trackerProcessor: trackerProcessor</li>
+ *     <li>templateId: templateId</li>
+ *     <li>renderText: renderText</li>
+ *     <li>userSelections: userSelections {@link com.everhomes.rest.flow.CreateFlowUserSelectionCommand}</li>
+ * </ul>
+ */
 public class FlowActionInfo {
 	private Byte enabled;
 	private Long reminderAfterMinute;

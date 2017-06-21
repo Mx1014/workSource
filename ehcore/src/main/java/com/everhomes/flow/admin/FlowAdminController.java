@@ -1,65 +1,18 @@
 package com.everhomes.flow.admin;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.DeleteFlowNodeCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowIdCommand;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowResolveUsersCommand;
-import com.everhomes.rest.flow.FlowResolveUsersResponse;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
-import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
-import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
-import com.everhomes.rest.flow.ListScriptsCommand;
-import com.everhomes.rest.flow.ListScriptsResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.flow.*;
 import com.everhomes.user.UserContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestDoc(value="Flow Admin controller", site="core")
 @RestController
@@ -166,13 +119,13 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/disableFlow</b>
-     * <p> 启用某一个业务模块下的工作流 </p>
+     * <p> 禁用某一个业务模块下的工作流 </p>
      * @return
      */
     @RequestMapping("disableFlow")
     @RestReturn(value=String.class)
     public RestResponse disableFlow(@Valid FlowIdCommand cmd) {
-    		flowService.disableFlow(cmd.getFlowId());
+        flowService.disableFlow(cmd.getFlowId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -281,7 +234,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/createFlowUserSelection</b>
      * <p> 创建一波用户选择项 </p>
-     * @return
      */
     @RequestMapping("createFlowUserSelection")
     @RestReturn(value=ListFlowUserSelectionResponse.class)
@@ -322,8 +274,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/updateFlowNodeReminder</b>
-     * <p> 创建一波用户选择项 </p>
-     * @return
+     * <p>设置用户提醒</p>
      */
     @RequestMapping("updateFlowNodeReminder")
     @RestReturn(value=FlowNodeDetailDTO.class)
@@ -478,7 +429,6 @@ public class FlowAdminController extends ControllerBase {
     /**
      * <b>URL: /admin/flow/updateFlowEvaluate</b>
      * <p> 修改工作流的评分属性 </p>
-     * @return
      */
     @RequestMapping("updateFlowEvaluate")
     @RestReturn(value=FlowEvaluateDetailDTO.class)
@@ -510,7 +460,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listScripts")
     @RestReturn(value=ListScriptsResponse.class)
-    public RestResponse getFlowEvaluate(@Valid ListScriptsCommand cmd) {
+    public RestResponse listScripts(@Valid ListScriptsCommand cmd) {
         RestResponse response = new RestResponse(flowService.listScripts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -519,8 +469,7 @@ public class FlowAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/flow/listSMSTemplates</b>
-     * <p> 获取工作流的评分信息 </p>
-     * @return
+     * <p>获取消息提醒里的短信模板</p>
      */
     @RequestMapping("listSMSTemplates")
     @RestReturn(value=FlowSMSTemplateResponse.class)

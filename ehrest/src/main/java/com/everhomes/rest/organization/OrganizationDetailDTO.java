@@ -86,6 +86,8 @@ public class OrganizationDetailDTO {
     
     private Long communityId;
 
+	private String communityName;
+
     private Integer signupCount;
     
     private Long serviceUserId;
@@ -501,6 +503,14 @@ public class OrganizationDetailDTO {
 
 	public void setEmailDomain(String emailDomain) {
 		this.emailDomain = emailDomain;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
 	}
 
 	@Override

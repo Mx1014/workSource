@@ -2,16 +2,20 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -19,21 +23,9 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowCases;
-import com.everhomes.server.schema.tables.pojos.EhFlowTimeouts;
-import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class FlowCaseProviderImpl implements FlowCaseProvider {
@@ -149,10 +141,13 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
-    	        }
+            }
     	    
         	if(cmd.getModuleId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        	}
+        	if(cmd.getOrganizationId() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
         	}
         	if(cmd.getOwnerId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
@@ -225,11 +220,13 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
-    	        }
-    	    
+            }
         	if(cmd.getModuleId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
         	}
+            if(cmd.getOrganizationId() != null) {
+                cond = cond.and(Tables.EH_FLOW_CASES.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+            }
         	if(cmd.getOwnerId() != null) {
         		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
         	}

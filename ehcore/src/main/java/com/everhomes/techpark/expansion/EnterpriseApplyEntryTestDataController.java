@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -217,7 +216,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         cmd.setEvaluateStart(4L);
         cmd.setEvaluateEnd(4L);
         cmd.setEvaluateStep(FlowStepType.NO_STEP.getCode());
-        cmd.setItems(Collections.singletonList("入驻评价"));
+        // cmd.setItems(Collections.singletonList("入驻评价"));
         flowService.updateFlowEvaluate(cmd);
     }
 

@@ -1,9 +1,13 @@
 package com.everhomes.flow;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.user.base.LoginAuthTestCase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,64 +21,9 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
-import com.everhomes.rest.flow.FlowEvaluateItemStar;
-import com.everhomes.rest.flow.FlowEvaluateResultDTO;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowSMSTemplateResponse;
-import com.everhomes.rest.flow.FlowUserSourceType;
-import com.everhomes.rest.flow.FlowActionInfo;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowIdCommand;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserSelectionType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.FlowVariableType;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.ListSMSTemplateCommand;
-import com.everhomes.rest.flow.ListScriptsCommand;
-import com.everhomes.rest.flow.ListScriptsResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.VisibleFlag;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.base.LoginAuthTestCase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class FlowEnableTest  extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -309,9 +258,17 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
     	evaluateCmd.setNeedEvaluate((byte)1);
     	evaluateCmd.setFlowId(flowDTO.getId());
-    	List<String> items = new ArrayList<String>();
-    	items.add("test item1");
-    	items.add("test item2");
+    	List<FlowEvaluateItemDTO> items = new ArrayList<>();
+
+        FlowEvaluateItemDTO evaluateItemDTO = new FlowEvaluateItemDTO();
+        evaluateItemDTO.setName("test item1");
+        items.add(evaluateItemDTO);
+
+        evaluateItemDTO = new FlowEvaluateItemDTO();
+        evaluateItemDTO.setName("test item2");
+        items.add(evaluateItemDTO);
+        // items.add("test item1");
+    	// items.add("test item2");
     	evaluateCmd.setItems(items);
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getItems().size() == 2);
@@ -1167,10 +1124,18 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
     	evaluateCmd.setNeedEvaluate((byte)1);
     	evaluateCmd.setFlowId(flowGraph.getFlow().getId());
-    	List<String> items = new ArrayList<String>();
-    	items.add("test item1");
-    	items.add("test item2");
-    	evaluateCmd.setItems(items);
+        List<FlowEvaluateItemDTO> items = new ArrayList<>();
+
+        FlowEvaluateItemDTO evaluateItemDTO = new FlowEvaluateItemDTO();
+        evaluateItemDTO.setName("test item1");
+        items.add(evaluateItemDTO);
+
+        evaluateItemDTO = new FlowEvaluateItemDTO();
+        evaluateItemDTO.setName("test item2");
+        items.add(evaluateItemDTO);
+        // items.add("test item1");
+        // items.add("test item2");
+        evaluateCmd.setItems(items);
     	
     	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
     	Assert.assertTrue(evaDTO.getEvaluateStart().equals(flowGraph.getNodes().get(1).getFlowNode().getId()));

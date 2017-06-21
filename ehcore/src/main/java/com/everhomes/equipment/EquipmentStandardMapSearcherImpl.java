@@ -126,12 +126,12 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-            		.field("name", 1.2f)
+            		.field("equipmentName", 1.2f)
                     .field("standardNumber", 1.0f);
             
             builder.setHighlighterFragmentSize(60);
             builder.setHighlighterNumOfFragments(8);
-            builder.addHighlightedField("name").addHighlightedField("standardNumber");
+            builder.addHighlightedField("equipmentName").addHighlightedField("standardNumber");
         }
 
         FilterBuilder fb = null;

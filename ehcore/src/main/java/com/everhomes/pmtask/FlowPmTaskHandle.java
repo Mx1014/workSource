@@ -167,7 +167,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
 
-			if(StringUtils.isNotBlank(task.getStringTag1())) {
+			if(task != null && StringUtils.isNotBlank(task.getStringTag1())) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
 

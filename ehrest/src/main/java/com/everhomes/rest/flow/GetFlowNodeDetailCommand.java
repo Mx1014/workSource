@@ -1,7 +1,13 @@
+// @formatter:off
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *     <li>flowNodeId: 节点id</li>
+ * </ul>
+ */
 public class GetFlowNodeDetailCommand {
 	private Long flowNodeId;
 

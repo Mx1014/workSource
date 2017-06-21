@@ -9,8 +9,12 @@ import com.everhomes.util.StringHelper;
  * <li>fieldValue: 提交的数据
  * 数字值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 文本值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
+ * 日期值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue} 
+ * 文本值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
+ * 下拉框值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue.java}
+ * 子表单值：{@link com.everhomes.rest.general_approval.PostApprovalFormSubformValue.java}
  * </li>
  * <ul>
  * @author janson

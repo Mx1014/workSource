@@ -10,6 +10,16 @@ import com.everhomes.util.StringHelper;
 public class FindRentalSiteByIdCommand {
     private Long id;
 
+    private String sceneToken;
+
+    public String getSceneToken() {
+        return sceneToken;
+    }
+
+    public void setSceneToken(String sceneToken) {
+        this.sceneToken = sceneToken;
+    }
+
     public Long getId() {
         return id;
     }

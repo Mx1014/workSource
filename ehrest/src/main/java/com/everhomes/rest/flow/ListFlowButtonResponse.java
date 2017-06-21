@@ -1,10 +1,17 @@
+// @formatter:off
 package com.everhomes.rest.flow;
-
-import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.List;
+
+/**
+ * <ul>
+ *     <Li>processorButtons: 处理人按钮列表{@link com.everhomes.rest.flow.FlowButtonDTO}</Li>
+ *     <Li>applierButtons: 申请人按钮列表{@link com.everhomes.rest.flow.FlowButtonDTO}</Li>
+ * </ul>
+ */
 public class ListFlowButtonResponse {
 	@ItemType(FlowButtonDTO.class)
 	private List<FlowButtonDTO> processorButtons;
