@@ -73,3 +73,6 @@ INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_
 UPDATE eh_lease_configs set display_name_str = '园区介绍, 虚位以待', display_order_str = '1,2';
 
 UPDATE eh_locale_templates set text = '预约楼栋: ${buildingName}\r\n申请类型: ${sourceType}' where scope = 'expansion' and `code` = 1;
+
+SELECT MAX(id) INTO @id FROM `eh_web_menu_scopes`;
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id+1, 50900, '', 'EhNamespaces', 1000000, 2);

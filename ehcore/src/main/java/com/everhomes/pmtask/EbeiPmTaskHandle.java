@@ -649,12 +649,14 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			//更新工作流case状态
 			FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
 
-			Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
-					(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
-							FlowCaseStatus.PROCESS.getCode());
+			if (FlowCaseStatus.INVALID.getCode() != flowCase.getStatus()) {
+				Byte flowCaseStatus = state.byteValue() >= PmTaskStatus.PROCESSED.getCode() ? FlowCaseStatus.FINISHED.getCode() :
+						(state.byteValue() == PmTaskStatus.INACTIVE.getCode() ? FlowCaseStatus.ABSORTED.getCode() :
+								FlowCaseStatus.PROCESS.getCode());
 
-			flowCase.setStatus(flowCaseStatus);
-			flowCaseProvider.updateFlowCase(flowCase);
+				flowCase.setStatus(flowCaseStatus);
+				flowCaseProvider.updateFlowCase(flowCase);
+			}
 
 			CategoryDTO taskCategory = createCategoryDTO();
 			dto.setTaskCategoryName(taskCategory.getName());
