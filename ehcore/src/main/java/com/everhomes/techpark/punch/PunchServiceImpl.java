@@ -4192,7 +4192,7 @@ public class PunchServiceImpl implements PunchService {
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
 
-			LOGGER.debug("members  : "+StringHelper.toJsonString(organizationMembers));
+			LOGGER.debug("members  : "+ organizationMembers.size());
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
