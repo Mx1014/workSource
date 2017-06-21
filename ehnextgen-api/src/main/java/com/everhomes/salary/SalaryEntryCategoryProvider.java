@@ -5,12 +5,12 @@ import java.util.List;
 
 public interface SalaryEntryCategoryProvider {
 
-	void createSalaryEntryCategory(SalaryEntryCategory salaryEntryCategory);
+	void createSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory);
 
-	void updateSalaryEntryCategory(SalaryEntryCategory salaryEntryCategory);
+	void updateSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory);
 
-	SalaryEntryCategory findSalaryEntryCategoryById(Long id);
+	SalaryEntityCategory findSalaryEntryCategoryById(Long id);
 
-	List<SalaryEntryCategory> listSalaryEntryCategory();
+	List<SalaryEntityCategory> listSalaryEntryCategory();
 
 }

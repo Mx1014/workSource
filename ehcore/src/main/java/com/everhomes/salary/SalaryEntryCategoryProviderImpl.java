@@ -31,7 +31,7 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createSalaryEntryCategory(SalaryEntryCategory salaryEntryCategory) {
+	public void createSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEntryCategories.class));
 		salaryEntryCategory.setId(id);
 		salaryEntryCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -43,7 +43,7 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	}
 
 	@Override
-	public void updateSalaryEntryCategory(SalaryEntryCategory salaryEntryCategory) {
+	public void updateSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory) {
 		assert (salaryEntryCategory.getId() != null);
 		salaryEntryCategory.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryEntryCategory.setOperatorUid(UserContext.current().getUser().getId());
@@ -52,16 +52,16 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	}
 
 	@Override
-	public SalaryEntryCategory findSalaryEntryCategoryById(Long id) {
+	public SalaryEntityCategory findSalaryEntryCategoryById(Long id) {
 		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryEntryCategory.class);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryEntityCategory.class);
 	}
 	
 	@Override
-	public List<SalaryEntryCategory> listSalaryEntryCategory() {
+	public List<SalaryEntityCategory> listSalaryEntryCategory() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_ENTRY_CATEGORIES)
 				.orderBy(Tables.EH_SALARY_ENTRY_CATEGORIES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryEntryCategory.class));
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEntityCategory.class));
 	}
 	
 	private EhSalaryEntryCategoriesDao getReadWriteDao() {
