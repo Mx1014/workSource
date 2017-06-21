@@ -1741,6 +1741,7 @@ public class FlowServiceImpl implements FlowService {
 
             messageDto.setMeta(meta);
 
+            flowListenerManager.onFlowMessageSend(ctx, messageDto);
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                     userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
         }
@@ -1753,7 +1754,7 @@ public class FlowServiceImpl implements FlowService {
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         } else {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
@@ -3028,7 +3029,7 @@ public class FlowServiceImpl implements FlowService {
 
         //flush timeouts
         for (FlowTimeout ft : ctx.getTimeouts()) {
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         }
     }
 

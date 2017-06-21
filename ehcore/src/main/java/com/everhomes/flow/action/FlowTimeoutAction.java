@@ -37,7 +37,7 @@ public class FlowTimeoutAction implements Runnable {
             }
 
             //delete ok, means we take it's owner
-            flowTimeoutService.processTimeout(ft);
+            flowTimeoutService.processTimeout(ft, ctx);
         } else {
             LOGGER.warn("FlowTimeoutAction.run failure timeoutId = {}", timeoutId);
         }

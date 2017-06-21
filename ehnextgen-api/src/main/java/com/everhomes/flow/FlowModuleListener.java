@@ -1,10 +1,11 @@
 package com.everhomes.flow;
 
-import java.util.List;
-
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.util.Tuple;
+
+import java.util.List;
 
 /**
  * 业务模块必须实现的接口
@@ -89,4 +90,11 @@ public interface FlowModuleListener {
 	 * @param variables
 	 */
 	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
+
+    /**
+     * 发送消息前业务可以对消息进行自定义
+     * @param ctx
+     * @param messageDto
+     */
+    default void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) { }
 }
