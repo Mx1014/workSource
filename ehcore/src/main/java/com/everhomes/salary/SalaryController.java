@@ -107,7 +107,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>6.设置人员薪酬字段值没有加有更新</p>
+	 * <p>6.设置人员薪酬字段值 有增加没有更新</p>
 	 * <b>URL: /salary/saveSalaryEmployeeOriginVals</b>
 	 */
 	@RequestMapping("saveSalaryEmployeeOriginVals")

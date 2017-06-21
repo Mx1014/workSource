@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.SalaryDefaultEntriesDTO}</li>
+ * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntriesDTO}</li>
  * </ul>
  */
 public class ListSalaryDefaultEntriesResponse {
