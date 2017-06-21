@@ -18,8 +18,8 @@ import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
 import com.everhomes.rest.salary.ExportSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportSalarySendHistoryCommand;
-import com.everhomes.rest.salary.GetAbnormalStaffNumberCommand;
-import com.everhomes.rest.salary.GetAbnormalStaffNumberResponse;
+import com.everhomes.rest.salary.GetAbnormalEmployeeNumberCommand;
+import com.everhomes.rest.salary.GetAbnormalEmployeeNumberResponse;
 import com.everhomes.rest.salary.GetPeriodSalaryEmailContentCommand;
 import com.everhomes.rest.salary.GetPeriodSalaryEmailContentResponse;
 import com.everhomes.rest.salary.ImportPeriodSalaryCommand;
@@ -163,12 +163,12 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>12.查询异常员工人数</p>
-	 * <b>URL: /salary/getAbnormalStaffNumber</b>
+	 * <b>URL: /salary/getAbnormalEmployeeNumber</b>
 	 */
-	@RequestMapping("getAbnormalStaffNumber")
-	@RestReturn(GetAbnormalStaffNumberResponse.class)
-	public RestResponse getAbnormalStaffNumber(GetAbnormalStaffNumberCommand cmd){
-		return new RestResponse(salaryService.getAbnormalStaffNumber(cmd));
+	@RequestMapping("getAbnormalEmployeeNumber")
+	@RestReturn(GetAbnormalEmployeeNumberResponse.class)
+	public RestResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd){
+		return new RestResponse(salaryService.getAbnormalEmployeeNumber(cmd));
 	}
 
 	/**

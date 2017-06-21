@@ -9,29 +9,29 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntityDTO}</li>
+ * <li>salaryDefaultEntities: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntityDTO}</li>
  * </ul>
  */
 public class ListSalaryDefaultEntitiesResponse {
 
 	@ItemType(SalaryDefaultEntityDTO.class)
-	private List<SalaryDefaultEntityDTO> salaryDefaultEntries;
+	private List<SalaryDefaultEntityDTO> salaryDefaultEntities;
 
 	public ListSalaryDefaultEntitiesResponse() {
 
 	}
 
-	public ListSalaryDefaultEntitiesResponse(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
+	public ListSalaryDefaultEntitiesResponse(List<SalaryDefaultEntityDTO> salaryDefaultEntities) {
 		super();
-		this.salaryDefaultEntries = salaryDefaultEntries;
+		this.salaryDefaultEntities = salaryDefaultEntities;
 	}
 
-	public List<SalaryDefaultEntityDTO> getSalaryDefaultEntries() {
-		return salaryDefaultEntries;
+	public List<SalaryDefaultEntityDTO> getSalaryDefaultEntities() {
+		return salaryDefaultEntities;
 	}
 
-	public void setSalaryDefaultEntries(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
-		this.salaryDefaultEntries = salaryDefaultEntries;
+	public void setSalaryDefaultEntities(List<SalaryDefaultEntityDTO> salaryDefaultEntities) {
+		this.salaryDefaultEntities = salaryDefaultEntities;
 	}
 
 	@Override

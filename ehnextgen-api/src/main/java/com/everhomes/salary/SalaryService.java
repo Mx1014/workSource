@@ -9,8 +9,8 @@ import com.everhomes.rest.salary.DeleteSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportPeriodSalaryCommand;
 import com.everhomes.rest.salary.ExportSalaryGroupCommand;
 import com.everhomes.rest.salary.ExportSalarySendHistoryCommand;
-import com.everhomes.rest.salary.GetAbnormalStaffNumberCommand;
-import com.everhomes.rest.salary.GetAbnormalStaffNumberResponse;
+import com.everhomes.rest.salary.GetAbnormalEmployeeNumberCommand;
+import com.everhomes.rest.salary.GetAbnormalEmployeeNumberResponse;
 import com.everhomes.rest.salary.GetPeriodSalaryEmailContentCommand;
 import com.everhomes.rest.salary.GetPeriodSalaryEmailContentResponse;
 import com.everhomes.rest.salary.ImportPeriodSalaryCommand;
@@ -65,7 +65,7 @@ public interface SalaryService {
 	public void importPeriodSalary(ImportPeriodSalaryCommand cmd);
 
 
-	public GetAbnormalStaffNumberResponse getAbnormalStaffNumber(GetAbnormalStaffNumberCommand cmd);
+	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd);
 
 
 	public ListPeriodSalaryResponse listPeriodSalary(ListPeriodSalaryCommand cmd);

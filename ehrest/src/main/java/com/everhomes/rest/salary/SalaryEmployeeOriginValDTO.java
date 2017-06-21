@@ -6,8 +6,8 @@ import java.sql.Timestamp;
  * <ul>
  * <li>groupId: 标签分类id</li>
  * <li>userId: 用户id</li>
- * <li>groupEntryId: 项目标签id</li>
- * <li>originEntryId: 项目标签原始id</li>
+ * <li>groupEntityId: 项目标签id</li>
+ * <li>originEntityId: 项目标签原始id</li>
  * <li>salaryValue: 项目标签值</li>
  * </ul>
  */
@@ -19,9 +19,9 @@ public class SalaryEmployeeOriginValDTO {
 
     private Long userId;
 
-    private Long groupEntryId;
+    private Long groupEntityId;
 
-    private Long originEntryId;
+    private Long originEntityId;
 
     private String salaryValue;
 
@@ -52,20 +52,20 @@ public class SalaryEmployeeOriginValDTO {
         this.userId = userId;
     }
 
-    public Long getGroupEntryId() {
-        return groupEntryId;
+    public Long getGroupEntityId() {
+        return groupEntityId;
     }
 
-    public void setGroupEntryId(Long groupEntryId) {
-        this.groupEntryId = groupEntryId;
+    public void setGroupEntityId(Long groupEntityId) {
+        this.groupEntityId = groupEntityId;
     }
 
-    public Long getOriginEntryId() {
-        return originEntryId;
+    public Long getOriginEntityId() {
+        return originEntityId;
     }
 
-    public void setOriginEntryId(Long originEntryId) {
-        this.originEntryId = originEntryId;
+    public void setOriginEntityId(Long originEntityId) {
+        this.originEntityId = originEntityId;
     }
 
     public String getSalaryValue() {

@@ -22,7 +22,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
+public class SalaryGroupEntryProviderImpl implements SalaryGroupEntityProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -31,7 +31,7 @@ public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createSalaryGroupEntry(SalaryGroupEntry salaryGroupEntry) {
+	public void createSalaryGroupEntity(SalaryGroupEntity salaryGroupEntry) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupEntries.class));
 		salaryGroupEntry.setId(id);
 		salaryGroupEntry.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -43,7 +43,7 @@ public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
 	}
 
 	@Override
-	public void updateSalaryGroupEntry(SalaryGroupEntry salaryGroupEntry) {
+	public void updateSalaryGroupEntity(SalaryGroupEntity salaryGroupEntry) {
 		assert (salaryGroupEntry.getId() != null);
 //		salaryGroupEntry.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		salaryGroupEntry.setOperatorUid(UserContext.current().getUser().getId());
@@ -52,16 +52,16 @@ public class SalaryGroupEntryProviderImpl implements SalaryGroupEntryProvider {
 	}
 
 	@Override
-	public SalaryGroupEntry findSalaryGroupEntryById(Long id) {
+	public SalaryGroupEntity findSalaryGroupEntityById(Long id) {
 		assert (id != null);
-		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupEntry.class);
+		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryGroupEntity.class);
 	}
 	
 	@Override
-	public List<SalaryGroupEntry> listSalaryGroupEntry() {
+	public List<SalaryGroupEntity> listSalaryGroupEntity() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTRIES)
 				.orderBy(Tables.EH_SALARY_GROUP_ENTRIES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntry.class));
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
 	
 	private EhSalaryGroupEntriesDao getReadWriteDao() {
