@@ -307,7 +307,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				}
 
 				GetGeneralFormValuesCommand cmd2 = new GetGeneralFormValuesCommand();
-				cmd2.setSourceType(EntityType.LEASEPROMOTION.getCode());
+				cmd2.setSourceType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
 				cmd2.setSourceId(dto.getId());
 				List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd2);
 				dto.setFormValues(formValues);
@@ -374,7 +374,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 			//对接表单
 			if (null != cmd.getRequestFormId()) {
-				addGeneralFormInfo(cmd.getRequestFormId(), cmd.getFormValues(), EntityType.LEASEPROMOTION.getCode(),
+				addGeneralFormInfo(cmd.getRequestFormId(), cmd.getFormValues(), EntityType.ENTERPRISE_OP_REQUEST.getCode(),
 						request.getId(), LeasePromotionFlag.ENABLED.getCode());
 			}
 
@@ -405,7 +405,23 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     				}
     			}
     			
-    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
+    		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
+
+				List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByOrganizationId(cmd.getEnterpriseId());
+				if (!addresses.isEmpty()) {
+					Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
+					if (null != address) {
+						Building building =communityProvider.findBuildingByCommunityIdAndName(cmd.getCommunityId(), address.getBuildingName());
+						if (null != building) {
+							opRequestBuilding.setBuildingId(building.getId());
+							enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+
+							request.setBuildingId(building.getId());
+							request.setAddressId(address.getId());
+						}
+					}
+				}
+			}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
     			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
@@ -438,8 +454,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
+			if (null != opRequestBuilding.getBuildingId()) {
+				buildingIds.add(opRequestBuilding.getBuildingId());
+			}
 
-			buildingIds.add(opRequestBuilding.getBuildingId());
 			FlowCase flowCase1 = null;
     		if (LeaseIssuerType.ORGANIZATION.getCode().equals(issuerType)) {
 				flowCase1 = this.createFlowCase(request, projectId, projectType, buildingIds);
@@ -603,9 +621,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		ApplyEntrySourceType sourceType = ApplyEntrySourceType.fromType(request.getSourceType());
 		String sourceTypeName = sourceType.getDescription();
 
-		byte i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
+		byte i = -1;
 		if (ApplyEntrySourceType.BUILDING == sourceType) {
 			i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
+		}else if (ApplyEntrySourceType.FOR_RENT == sourceType) {
+			i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
 		}
 		if (null != config.getDisplayNames() ) {
 			for (Integer k: config.getDisplayOrders()) {

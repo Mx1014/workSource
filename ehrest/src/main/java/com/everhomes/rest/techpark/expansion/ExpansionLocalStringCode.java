@@ -1,8 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
-/**
- * Created by xq.tian on 2016/12/20.
- */
+
 public interface ExpansionLocalStringCode {
 
     String SCOPE = "expansion";

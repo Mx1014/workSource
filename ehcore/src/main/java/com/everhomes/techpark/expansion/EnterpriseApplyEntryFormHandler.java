@@ -2,23 +2,30 @@ package com.everhomes.techpark.expansion;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.entity.EntityType;
 import com.everhomes.general_form.GeneralForm;
 import com.everhomes.general_form.GeneralFormModuleHandler;
 import com.everhomes.general_form.GeneralFormProvider;
 import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.general_approval.*;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFormDataSourceType;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component(GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + "EhLeasePromotions")
@@ -39,6 +46,17 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(cmd.getNamespaceId(),
                 cmd.getOwnerId(), EntityType.COMMUNITY.getCode(), EntityType.LEASEPROMOTION.getCode());
 
+        Long requestFormId = null;
+        if (null == request) {
+            //查询初始默认数据
+            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+
+            GeneralForm form = handler.getDefaultGeneralForm();
+            requestFormId = form.getFormOriginId();
+        }else {
+            requestFormId = request.getSourceId();
+        }
         List<PostApprovalFormItem> values = cmd.getValues();
 
         String json = null;
@@ -89,7 +107,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
         cmd2.setEnterpriseName(enterpriseName);
         cmd2.setDescription(description);
 
-        cmd2.setRequestFormId(request.getSourceId());
+        cmd2.setRequestFormId(requestFormId);
         cmd2.setNamespaceId(cmd.getNamespaceId());
         cmd2.setCommunityId(cmd.getOwnerId());
         cmd2.setFormValues(cmd.getValues());
@@ -125,10 +143,11 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             fileds.addAll(temp);
             dto.setFormFields(fileds);
         } else {
-            GeneralForm form = this.generalFormProvider.getGeneralFormById(56L);
-            if(form == null )
-                throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE,
-                        GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
+            //查询初始默认数据
+            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+
+            GeneralForm form = handler.getDefaultGeneralForm();
 
             dto = ConvertHelper.convert(form, GeneralFormDTO.class);
 //		form.setFormVersion(form.getFormVersion());

@@ -25,6 +25,7 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -152,14 +153,6 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserGroupHistory;
-import com.everhomes.user.UserGroupHistoryProvider;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
@@ -247,6 +240,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  ImportFileService importFileService;
+
+	@Autowired
+	private  UserActivityProvider userActivityProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -2035,7 +2031,14 @@ public class CommunityServiceImpl implements CommunityService {
 			dtos = dtos.subList(0, pageSize);
 			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
 		}
-		res.setUserCommunities(dtos);
+		res.setUserCommunities(dtos.stream().map(r->{
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId());
+			if(userActivities.size() > 0){
+				r.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
+			return r;
+		}).collect(Collectors.toList()));
 		return res;
 	}
 
