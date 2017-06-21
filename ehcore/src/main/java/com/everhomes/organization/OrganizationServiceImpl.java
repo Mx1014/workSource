@@ -5453,6 +5453,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationMember.setDetailId(new_detail_id);
                     organizationProvider.createOrganizationMember(organizationMember);
 
+                    //仅当target为user且grouptype为企业时添加
+                    if(organizationMember.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && organizationMember.getGroupType().equals(OrganizationType.ENTERPRISE.getCode())){
+                        UserOrganization userOrganization = this.getUserOrganization(organizationMember);
+                        this.userOrganizationProvider.createUserOrganization(userOrganization);
+                    }
+
                     //寻找企业下的直属隐藏部门的organizationId，创建onNode的记录
                     Long hiddenDirectId = findDirectUnderOrganizationId(organizationId);
                     Organization hiddenDirectOrganiztion = checkOrganization(hiddenDirectId);
