@@ -127,6 +127,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                     avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                     filterDto.setAvatar(avatarUri);
                     filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                    filterDto.setForumId(group.getOwningForumId());
                     tmpFilterList.add(filterDto);
                 }
             } else {
@@ -221,6 +222,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                 filterDto.setAvatar(avatarUri);
                 filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                filterDto.setForumId(community.getDefaultForumId());
                 tmpFilterList.add(filterDto);
             }
             
