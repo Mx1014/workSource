@@ -8,9 +8,9 @@ public interface SalaryDefaultEntityProvider {
 	void createSalaryDefaultEntity(SalaryDefaultEntity salaryDefaultEntity);
 
 	void updateSalaryDefaultEntity(SalaryDefaultEntity salaryDefaultEntity);
+ 
+	List<SalaryDefaultEntity> listSalaryDefaultEntity();
 
-	SalaryDefaultEntity findSalaryDefaultEntryById(Long id);
-
-	List<SalaryDefaultEntity> listSalaryDefaultEntry();
+	SalaryDefaultEntity findSalaryDefaultEntityById(Long id);
 
 }
