@@ -258,7 +258,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>21.设置工资条邮件内容</p>
+	 * <p>21.查发放历史</p>
 	 * <b>URL: /salary/listSalarySendHistory</b>
 	 */
 	@RequestMapping("listSalarySendHistory")
@@ -268,7 +268,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>22.设置工资条邮件内容</p>
+	 * <p>22.导出发放历史</p>
 	 * <b>URL: /salary/exportSalarySendHistory</b>
 	 */
 	@RequestMapping("exportSalarySendHistory")

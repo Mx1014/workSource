@@ -3,6 +3,7 @@ package com.everhomes.rest.salary;
  * 工资条的字段项DTO
  * 
  * <ul> 
+ * <li>id: id</li>
  * <li>groupId: 批次id</li>
  * <li>type: 字段类型:0文本类;1数值类</li>
  * <li>categoryId: 项目标签id</li>
@@ -17,6 +18,7 @@ package com.everhomes.rest.salary;
  * </ul>
  * */
 public class SalaryGroupEntityDTO {
+	private Long id;
 	private Long groupId;
     private Byte type;
     private Long categoryId;
@@ -94,6 +96,12 @@ public class SalaryGroupEntityDTO {
 	}
 	public void setVisibleFlag(Byte visibleFlag) {
 		this.visibleFlag = visibleFlag;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
     
 }
