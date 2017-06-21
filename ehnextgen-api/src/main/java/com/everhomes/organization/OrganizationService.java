@@ -183,7 +183,7 @@ public interface OrganizationService {
 	void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd);
 	void addPersonnelsToGroup(AddPersonnelsToGroup cmd);
 	void rejectForEnterpriseContact(RejectContactCommand cmd);
-	OrganizationMemberDTO createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
+	OrganizationMember createOrganizationPersonnel(CreateOrganizationMemberCommand cmd);
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
@@ -490,8 +490,6 @@ public interface OrganizationService {
     ListMemberProfileRecordsCommandResponse listMemberRecordChangesByProfile(ListMemberProfileRecordsCommand cmd);
 
     OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd);
-
-	OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member);
 
 	ImportFileTaskDTO importOrganizationPersonnelFiles(MultipartFile mfile,
 													   Long userId, ImportOrganizationPersonnelDataCommand cmd);

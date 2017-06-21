@@ -2,6 +2,8 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>detailId: 员工标识号</li>
@@ -14,16 +16,22 @@ import com.everhomes.util.StringHelper;
  */
 public class AddOrganizationMemberWorkExperiencesCommand {
 
+    @NotNull
     private Long detailId;
 
+    @NotNull
     private String enterpriseName;
 
+    @NotNull
     private String position;
 
+    @NotNull
     private Byte jobType;
 
+    @NotNull
     private String entryTime;
 
+    @NotNull
     private String departureTime;
 
     public AddOrganizationMemberWorkExperiencesCommand() {

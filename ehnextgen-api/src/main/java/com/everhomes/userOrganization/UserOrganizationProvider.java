@@ -5,10 +5,13 @@ package com.everhomes.userOrganization;
  */
 public interface UserOrganizationProvider {
 
-    public void createUserOrganization(UserOrganization userOrganization);
+    void createUserOrganization(UserOrganization userOrganization);
 
-    public void updateUserOrganization(UserOrganization userOrganization);
+    void updateUserOrganization(UserOrganization userOrganization);
 
-    public UserOrganization findUserOrganization(Integer namespaceId, Long organizationId, Long userId);
+    UserOrganization findUserOrganization(Integer namespaceId, Long organizationId, Long userId);
 
+    void deleteUserOrganization(UserOrganization userOrganization);
+
+    UserOrganization inactiveUserOrganization(UserOrganization userOrganization);
 }
