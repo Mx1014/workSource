@@ -10387,86 +10387,97 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
-    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
-        OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
-        PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
+    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd) {
+        OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0, 0, 0, 0);
+        PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd, GetPersonnelDetailsV2Command.class));
 
         //  基本信息完整度判断
-        if (response.getBasic().getContactName() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getGender() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getDepartments().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getJobPositions().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getJobLevels().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getEmployeeType() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getCheckInTime() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getContactToken() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getEmployeeNo() == null)
-            result.setBasicIntegrity(0);
-        else
-            result.setBasicIntegrity(25);
+        result.setBasicIntegrity(this.checkBasicIntegrity(response.getBasic()));
 
         //  背景信息完整度判断
-        if(response.getBackGround().getEnName() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getBirthday() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getMaritalFlag() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getPoliticalStatus() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getNativePlace() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getRegResidence() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getIdNumber() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmail() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getWechat() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getQq() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmergencyName() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmergencyContact() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getAddress() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEducations() == null || response.getBackGround().getEducations().isEmpty())
-            result.setBackEndIntegrity(0);
-        else
-            result.setBackEndIntegrity(45);
+        result.setBackEndIntegrity(this.checkBackEndIntegrity(response.getBackGround()));
 
         //  社保信息完整度判断
-        if(response.getSocialSecurity().getSalaryCardNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getSocialSecurityNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getProvidentFundNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getInsurances() == null || response.getSocialSecurity().getInsurances().isEmpty())
-            result.setSocialSecurityIntegrity(0);
-        else
-            result.setSocialSecurityIntegrity(15);
+        result.setSocialSecurityIntegrity(this.checkSocialSecurityIntegrity(response.getSocialSecurity()));
 
         //  合同信息完整度判断
-        if(response.getContracts() == null || response.getContracts().isEmpty())
+        if (StringUtils.isEmpty(response.getContracts()) || response.getContracts().isEmpty())
             result.setContractIntegrity(0);
         else
             result.setContractIntegrity(15);
 
         //  返回结果至数据库
-        result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
+        result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity()
+                + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
+    }
+
+    private Integer checkBasicIntegrity(OrganizationMemberBasicDTO basic) {
+        if (StringUtils.isEmpty(basic.getContactName()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getGender()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getDepartments()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getJobPositions()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getEmployeeType()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getCheckInTime()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getContactToken()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getEmployeeNo()))
+            return 0;
+        else
+            return 25;
+    }
+
+    private Integer checkBackEndIntegrity(OrganizationMemberBackGroundDTO backGround) {
+        if (StringUtils.isEmpty(backGround.getEnName()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getBirthday()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getMaritalFlag()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getPoliticalStatus()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getNativePlace()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getRegResidence()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getIdNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmail()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getWechat()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getQq()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmergencyName()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmergencyContact()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getAddress()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEducations()) || backGround.getEducations().isEmpty())
+            return 0;
+        else
+            return 45;
+    }
+
+    private Integer checkSocialSecurityIntegrity(OrganizationMemberSocialSecurityDTO social) {
+        if (StringUtils.isEmpty(social.getSalaryCardNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getSocialSecurityNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getProvidentFundNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getInsurances()) || social.getInsurances().isEmpty())
+            return 0;
+        else
+            return 15;
     }
 
     private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
