@@ -4579,6 +4579,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
+		Long ownerId =getTopEnterpriseId(cmd.getOwnerId());
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
 			Organization org = this.checkOrganization(cmd.getOwnerId());
@@ -4601,7 +4602,7 @@ public class PunchServiceImpl implements PunchService {
 			if(organizationId.equals(0L))
 				organizationId = org.getId();
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					organizationId,startDay,endDay , 
+					ownerId,startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
