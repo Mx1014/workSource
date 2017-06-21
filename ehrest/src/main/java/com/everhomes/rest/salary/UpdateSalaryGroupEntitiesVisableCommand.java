@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
  * <li>salaryGroupId: 薪酬批次id</li>
+ * <li>emailContent: 邮件内容</li>
  * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salarySalaryGroupEntityDTO}</li>
  * </ul>
  */
@@ -23,6 +24,8 @@ public class UpdateSalaryGroupEntitiesVisableCommand {
 
 	private Long salaryGroupId;
 
+	private String emailContent;
+	
 	@ItemType(SalaryGroupEntityDTO.class)
 	private List<SalaryGroupEntityDTO> salaryGroupEntitys;
 
@@ -73,6 +76,14 @@ public class UpdateSalaryGroupEntitiesVisableCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getEmailContent() {
+		return emailContent;
+	}
+
+	public void setEmailContent(String emailContent) {
+		this.emailContent = emailContent;
 	}
 
 }

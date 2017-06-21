@@ -100,4 +100,7 @@ public interface SalaryService {
 
 	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd);
 
+
+	public void revokeSendPeriodSalary(SendPeriodSalaryCommand cmd);
+
 }

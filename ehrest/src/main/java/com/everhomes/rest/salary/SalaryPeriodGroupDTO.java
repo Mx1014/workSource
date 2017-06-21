@@ -1,5 +1,7 @@
 package com.everhomes.rest.salary;
 
+import java.sql.Timestamp;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>salaryPeriod: 期数</li>
  * <li>organizationGroupId: 薪酬批次id</li>
  * <li>groupName: 薪酬批次名称</li>
+ * <li>sendTime: 发送时间</li>
  * <li>status:本期批次状态 参考{@link com.everhomes.rest.salary.SalaryGroupStatus} </li>
  * </ul>
  */
@@ -17,6 +20,7 @@ public class SalaryPeriodGroupDTO {
     private String salaryPeriod;
     private Long organizationGroupId;
     private String groupName; 
+    private Timestamp sendTime;
     private Byte status;
 	public Long getId() {
 		return id;
@@ -52,5 +56,11 @@ public class SalaryPeriodGroupDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Timestamp getSendTime() {
+		return sendTime;
+	}
+	public void setSendTime(Timestamp sendTime) {
+		this.sendTime = sendTime;
 	}
 }

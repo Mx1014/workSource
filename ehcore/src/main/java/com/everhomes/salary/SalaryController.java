@@ -265,6 +265,16 @@ public class SalaryController extends ControllerBase {
 		salaryService.sendPeriodSalary(cmd);
 		return new RestResponse();
 	}
+	/**
+	 * <p>20.撤销发送某期薪酬批次</p>
+	 * <b>URL: /salary/revokeSendPeriodSalary</b>
+	 */
+	@RequestMapping("revokeSendPeriodSalary")
+	@RestReturn(String.class)
+	public RestResponse revokeSendPeriodSalary(SendPeriodSalaryCommand cmd){
+		salaryService.revokeSendPeriodSalary(cmd);
+		return new RestResponse();
+	}
 
 	/**
 	 * <p>21.查发放历史</p>
