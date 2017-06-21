@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salaryEmployeeDTO}</li>
+ * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salary.salaryEmployeeDTO}</li>
  * </ul>
  */
 public class ListSalaryStaffsResponse {

@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>salaryGroupId: 薪酬批次id</li>
  * <li>userId: user id</li>
- * <li>SalaryEmployeeOriginVals: 个人薪酬设定参考{@link com.everhomes.rest.SalaryEmployeeOriginValDTO}</li>
+ * <li>SalaryEmployeeOriginVals: 个人薪酬设定参考{@link com.everhomes.rest.salary.SalaryEmployeeOriginValDTO}</li>
  * </ul>
  */
 public class SaveSalaryEmployeeOriginValsCommand {

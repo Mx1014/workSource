@@ -1,10 +1,6 @@
 package com.everhomes.rest.salary;
 
 import com.everhomes.util.StringHelper;
-
-import java.sql.Timestamp;
-
-
 /**
  * <ul>
  * <li>defaultFlag: 是否是缺省参数:0-否 1-是</li>
@@ -18,16 +14,35 @@ import java.sql.Timestamp;
  * </ul>
  */
 public class SalaryDefaultEntriesDTO {
+
+
+    private Long id;
+
     private Byte defaultFlag;
+
     private Byte type;
+
     private Long categoryId;
+
     private String categoryName;
+
     private String name;
+
     private Byte editableFlag;
+
     private String templeteName;
+
     private Integer defaultOrder;
 
     public SalaryDefaultEntriesDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Byte getDefaultFlag() {
