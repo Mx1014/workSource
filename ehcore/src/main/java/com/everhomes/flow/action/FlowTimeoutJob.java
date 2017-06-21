@@ -1,6 +1,5 @@
 package com.everhomes.flow.action;
 
-import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowTimeout;
 import com.everhomes.flow.FlowTimeoutProvider;
 import com.everhomes.flow.FlowTimeoutService;
@@ -40,7 +39,7 @@ public class FlowTimeoutJob extends QuartzJobBean {
             JobDataMap jobMap = context.getJobDetail().getJobDataMap();
 
             Long ftId = (Long)jobMap.get("flowTimeoutId");
-            FlowCaseState ctx = (FlowCaseState)jobMap.get("ctx");
+            // FlowCaseState ctx = (FlowCaseState)jobMap.get("ctx");
 
             if (flowTimeoutProvider.deleteIfValid(ftId)) {
                 FlowTimeout ft = flowTimeoutProvider.getFlowTimeoutById(ftId);
@@ -49,7 +48,7 @@ public class FlowTimeoutJob extends QuartzJobBean {
                     LOGGER.debug("FlowTimeoutAction.run success ft = {}", ft);
                 }
                 //delete ok, means we take it's owner
-                flowTimeoutService.processTimeout(ft, ctx);
+                flowTimeoutService.processTimeout(ft);
             } else {
                 LOGGER.warn("FlowTimeoutAction.run failure timeoutId = {}", ftId);
             }
