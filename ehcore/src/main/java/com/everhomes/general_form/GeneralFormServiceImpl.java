@@ -150,6 +150,7 @@ public class GeneralFormServiceImpl implements GeneralFormService {
 		if (null != vals && vals.size() != 0) {
 			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
 					vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
+			LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!, form={}, id={}, version={}", form, vals.get(0).getFormOriginId(), vals.get(0).getFormVersion());
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 
