@@ -64,13 +64,13 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 	}
 	
 	@Override
-	public PriceRuleDTO findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType) {
+	public Rentalv2PriceRule findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType) {
 		Record record = getReadOnlyContext().select().from(Tables.EH_RENTALV2_PRICE_RULES)
 				.where(Tables.EH_RENTALV2_PRICE_RULES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_RENTALV2_PRICE_RULES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_RENTALV2_PRICE_RULES.RENTAL_TYPE.eq(rentalType))
 				.fetchOne();
-		return record == null ? null : ConvertHelper.convert(record, PriceRuleDTO.class);
+		return record == null ? null : ConvertHelper.convert(record, Rentalv2PriceRule.class);
 	}
 
 	@Override

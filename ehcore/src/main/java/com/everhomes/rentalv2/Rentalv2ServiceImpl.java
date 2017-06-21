@@ -500,6 +500,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
 			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
 			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+			response.setDiscountType(priceRule.getDiscountType());
+			response.setDiscountRatio(priceRule.getDiscountRatio());
+			response.setFullPrice(priceRule.getFullPrice());
+			response.setCutPrice(priceRule.getCutPrice());
 		}
 		return response;
 	}
@@ -518,6 +522,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			response.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
 			response.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
 			response.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+			response.setDiscountType(priceRule.getDiscountType());
+			response.setDiscountRatio(priceRule.getDiscountRatio());
+			response.setFullPrice(priceRule.getFullPrice());
+			response.setCutPrice(priceRule.getCutPrice());
 		}
 		return response;
 	}
@@ -948,7 +956,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 	private RentalSiteDTO convertRentalSite2DTO(RentalResource rentalSite, SceneTokenDTO sceneTokenDTO){
-		
 		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(rentalSite.getResourceTypeId());
 
 		long time1 = System.currentTimeMillis();
@@ -2703,172 +2710,159 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		List<Long> closeDates = cmd.getCloseDates();
 
-		while (start.before(end)) {
-			Integer weekday = start.get(Calendar.DAY_OF_WEEK);
-			Integer day = start.get(Calendar.DAY_OF_MONTH);
-			if (cmd.getOpenWeekday().contains(weekday) &&
-					(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
+		// 月的需要单独计算
+		if (!cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
+			while (start.before(end)) {
+				Integer weekday = start.get(Calendar.DAY_OF_WEEK);
+				Integer day = start.get(Calendar.DAY_OF_MONTH);
+				if (cmd.getOpenWeekday().contains(weekday) &&
+						(null == closeDates || !closeDates.contains(start.getTimeInMillis()))) {
 
-				RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
-				rsr.setRentalResourceId(cmd.getRentalSiteId());
-				rsr.setAutoAssign(cmd.getAutoAssign()); 
-				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
-					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
-							rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
-									.getTime())
-									+ " "
-//									+ String.valueOf((int) i / 1)
-									+ String.valueOf((int) i)
-									+ ":"
-									+ String.valueOf((int) ((i % 1) * 60))
-									+ ":00"));
+					RentalCell rsr =ConvertHelper.convert(cmd, RentalCell.class);
+					rsr.setRentalResourceId(cmd.getRentalSiteId());
+					rsr.setAutoAssign(cmd.getAutoAssign()); 
+					if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
+						for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
+								rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
+										.getTime())
+										+ " "
+//										+ String.valueOf((int) i / 1)
+										+ String.valueOf((int) i)
+										+ ":"
+										+ String.valueOf((int) ((i % 1) * 60))
+										+ ":00"));
 
-							// i = i + cmd.getTimeStep();
-							rsr.setRentalStep(1);
-							rsr.setTimeStep(cmd.getTimeStep());
-//						i = i + 0.5;
-							i = i + cmd.getTimeStep();
-//							if(i > cmd.getEndTime())
-//								continue;
-							rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
-									.getTime())
-									+ " "
-//									+ String.valueOf((int) i / 1)
-									+ String.valueOf((int) i)
-									+ ":"
-									+ String.valueOf((int) ((i % 1) * 60))
-									+ ":00"));
-							rsr.setRentalResourceId(cmd.getRentalSiteId());
-							rsr.setRentalType(cmd.getRentalType());
-							rsr.setCounts(cmd.getSiteCounts());
-							rsr.setUnit(cmd.getUnit());
-							if (weekday == 1 || weekday == 7) {
-								rsr.setPrice(cmd.getWeekendPrice());
-								rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-								rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-							} else {
-								rsr.setPrice(cmd.getWorkdayPrice());
-								rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-								rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-							}
+								// i = i + cmd.getTimeStep();
+								rsr.setRentalStep(1);
+								rsr.setTimeStep(cmd.getTimeStep());
+//							i = i + 0.5;
+								i = i + cmd.getTimeStep();
+//								if(i > cmd.getEndTime())
+//									continue;
+								rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
+										.getTime())
+										+ " "
+//										+ String.valueOf((int) i / 1)
+										+ String.valueOf((int) i)
+										+ ":"
+										+ String.valueOf((int) ((i % 1) * 60))
+										+ ":00"));
+								rsr.setRentalResourceId(cmd.getRentalSiteId());
+								rsr.setRentalType(cmd.getRentalType());
+								rsr.setCounts(cmd.getSiteCounts());
+								rsr.setUnit(cmd.getUnit());
+								if (weekday == 1 || weekday == 7) {
+									rsr.setPrice(cmd.getWeekendPrice());
+									rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
+									rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
+								} else {
+									rsr.setPrice(cmd.getWorkdayPrice());
+									rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+									rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+								}
+								if(rsr.getUnit()<1){
+									rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+									rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+									rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+								}
+								rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
+								rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
+								rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+								rsr.setCreatorUid(userId);
+
+								createRSR(rsr, cmd);
+						}
+					}else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
+							cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
+
+						// 按半日预定
+						rsr.setRentalType(cmd.getRentalType());
+						rsr.setCounts(cmd.getSiteCounts() == null ? 1 : cmd.getSiteCounts());
+						rsr.setUnit(cmd.getUnit());
+						rsr.setRentalResourceId(cmd.getRentalSiteId());
+						rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
+						rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
+						rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rsr.setCreatorUid(userId);
+						rsr.setRentalStep(1);
+
+						if (weekday == 1 || weekday == 7) {
+							rsr.setPrice(cmd.getWeekendPrice());
+							rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
+							rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
+
+							rsr.setAmorpm(AmorpmFlag.AM.getCode());
 							if(rsr.getUnit()<1){
 								rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
 								rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
 								rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+
 							}
-							rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
-							rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
-							rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-							rsr.setCreatorUid(userId);
-
 							createRSR(rsr, cmd);
-					}
-				}else if (cmd.getRentalType().equals(RentalType.HALFDAY.getCode()) ||
-						cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())) {
-
-					// 按半日预定
-					rsr.setRentalType(cmd.getRentalType());
-					rsr.setCounts(cmd.getSiteCounts() == null ? 1 : cmd.getSiteCounts());
-					rsr.setUnit(cmd.getUnit());
-					rsr.setRentalResourceId(cmd.getRentalSiteId());
-					rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
-					rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
-					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					rsr.setCreatorUid(userId);
-					rsr.setRentalStep(1);
-
-					if (weekday == 1 || weekday == 7) {
-						rsr.setPrice(cmd.getWeekendPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-
-						rsr.setAmorpm(AmorpmFlag.AM.getCode());
-						if(rsr.getUnit()<1){
-							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-
-						}
-						createRSR(rsr, cmd);
-						rsr.setAmorpm(AmorpmFlag.PM.getCode());
-						createRSR(rsr, cmd);
-						if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-							rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+							rsr.setAmorpm(AmorpmFlag.PM.getCode());
 							createRSR(rsr, cmd);
-						}
-							
-					} else {
-						rsr.setPrice(cmd.getWorkdayPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+							if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+								rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+								createRSR(rsr, cmd);
+							}
+								
+						} else {
+							rsr.setPrice(cmd.getWorkdayPrice());
+							rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+							rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
 
-						rsr.setAmorpm(AmorpmFlag.AM.getCode());
-						if(rsr.getUnit()<1){
-							rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
-							rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
-							rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+							rsr.setAmorpm(AmorpmFlag.AM.getCode());
+							if(rsr.getUnit()<1){
+								rsr.setHalfresourcePrice(rsr.getPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
+								rsr.setHalfApprovingUserPrice(rsr.getApprovingUserPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP));
+								rsr.setHalfOrgMemberPrice(rsr.getOrgMemberPrice().divide(new BigDecimal("2"), 3, RoundingMode.HALF_UP) );
 
-						}
-						createRSR(rsr, cmd);
-						rsr.setAmorpm(AmorpmFlag.PM.getCode());
-						createRSR(rsr, cmd);
-						if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-							rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+							}
 							createRSR(rsr, cmd);
+							rsr.setAmorpm(AmorpmFlag.PM.getCode());
+							createRSR(rsr, cmd);
+							if(cmd.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+								rsr.setAmorpm(AmorpmFlag.NIGHT.getCode());
+								createRSR(rsr, cmd);
+							}
 						}
+					}else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
+						// 按日预定
+						//TODO:产品说按天预定没有场所编号，所以默认只为noneed，以后可能会改就注释掉下面这一句
+//						cmd.setAutoAssign(NormalFlag.NONEED.getCode());
+						rsr.setRentalResourceId(cmd.getRentalSiteId());
+						rsr.setRentalType(cmd.getRentalType());
+						rsr.setCounts(cmd.getSiteCounts());
+						rsr.setRentalStep(1);
+						rsr.setUnit(cmd.getUnit());
+						if (weekday == 1 || weekday == 7) {
+							rsr.setPrice(cmd.getWeekendPrice());
+							rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
+							rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
+						}else {
+							rsr.setPrice(cmd.getWorkdayPrice());
+							rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
+							rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
+						}
+						rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
+						rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
+						rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						rsr.setCreatorUid(userId);
+	  
+						createRSR(rsr, cmd );
+						
 					}
-				}else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
-					// 按日预定
-					//TODO:产品说按天预定没有场所编号，所以默认只为noneed，以后可能会改就注释掉下面这一句
-//					cmd.setAutoAssign(NormalFlag.NONEED.getCode());
-					rsr.setRentalResourceId(cmd.getRentalSiteId());
-					rsr.setRentalType(cmd.getRentalType());
-					rsr.setCounts(cmd.getSiteCounts());
-					rsr.setRentalStep(1);
-					rsr.setUnit(cmd.getUnit());
-					if (weekday == 1 || weekday == 7) {
-						rsr.setPrice(cmd.getWeekendPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-					}else {
-						rsr.setPrice(cmd.getWorkdayPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-					}
-					rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
-					rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
-					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					rsr.setCreatorUid(userId);
-  
-					createRSR(rsr, cmd );
-					
-				}else if (cmd.getRentalType().equals(RentalType.MONTH.getCode())) {
-					//TODO 月的单元格
-					rsr.setRentalResourceId(cmd.getRentalSiteId());
-					rsr.setRentalType(cmd.getRentalType());
-					rsr.setCounts(cmd.getSiteCounts());
-					rsr.setRentalStep(1);
-					rsr.setUnit(cmd.getUnit());
-					if (weekday == 1 || weekday == 7) {
-						rsr.setPrice(cmd.getWeekendPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWeekendPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWeekendPrice());
-					}else {
-						rsr.setPrice(cmd.getWorkdayPrice());
-						rsr.setApprovingUserPrice(cmd.getApprovingUserWorkdayPrice());
-						rsr.setOrgMemberPrice(cmd.getOrgMemberWorkdayPrice());
-					}
-					rsr.setResourceRentalDate(Date.valueOf(dateSF.format(start.getTime())));
-					rsr.setStatus(RentalSiteStatus.NORMAL.getCode());
-					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					rsr.setCreatorUid(userId);
-  
-					createRSR(rsr, cmd );
 				}
-
+				start.add(Calendar.DAY_OF_MONTH, 1);
 			}
-			start.add(Calendar.DAY_OF_MONTH, 1);
+		} else {
+			// 这里计算月的，先放在这不做
+			// TODO
+			
+			
+			
 		}
+		
 	}
 
 	private void createRSR(RentalCell rsr, AddRentalSiteSingleSimpleRule cmd){
@@ -5098,19 +5092,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void correctRetalResource(RentalResource rs, Byte rentalType) {
-		PriceRuleDTO priceRuleDTO = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
-		if (priceRuleDTO != null) {
-			rs.setRentalType(priceRuleDTO.getRentalType());
-			rs.setWorkdayPrice(priceRuleDTO.getWorkdayPrice());
-			rs.setWeekendPrice(priceRuleDTO.getWeekendPrice());
-			rs.setOrgMemberWeekendPrice(priceRuleDTO.getOrgMemberWeekendPrice());
-			rs.setOrgMemberWorkdayPrice(priceRuleDTO.getOrgMemberWorkdayPrice());
-			rs.setApprovingUserWeekendPrice(priceRuleDTO.getApprovingUserWeekendPrice());
-			rs.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
-			rs.setDiscountType(priceRuleDTO.getDiscountType());
-			rs.setFullPrice(priceRuleDTO.getFullPrice());
-			rs.setCutPrice(priceRuleDTO.getCutPrice());
-			rs.setDiscountRatio(priceRuleDTO.getDiscountRatio());
+		Rentalv2PriceRule priceRule = null;
+		if (rentalType != null) {
+			priceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId(), rentalType);
+		}else {
+			List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
+			if (priceRules.size() > 0) {
+				priceRule = priceRules.get(0);
+			}
+		}
+		if (priceRule != null) {
+			rs.setRentalType(priceRule.getRentalType());
+			rs.setWorkdayPrice(priceRule.getWorkdayPrice());
+			rs.setWeekendPrice(priceRule.getWeekendPrice());
+			rs.setOrgMemberWeekendPrice(priceRule.getOrgMemberWeekendPrice());
+			rs.setOrgMemberWorkdayPrice(priceRule.getOrgMemberWorkdayPrice());
+			rs.setApprovingUserWeekendPrice(priceRule.getApprovingUserWeekendPrice());
+			rs.setApprovingUserWorkdayPrice(priceRule.getApprovingUserWorkdayPrice());
+			rs.setDiscountType(priceRule.getDiscountType());
+			rs.setFullPrice(priceRule.getFullPrice());
+			rs.setCutPrice(priceRule.getCutPrice());
+			rs.setDiscountRatio(priceRule.getDiscountRatio());
 		}
 	}
 

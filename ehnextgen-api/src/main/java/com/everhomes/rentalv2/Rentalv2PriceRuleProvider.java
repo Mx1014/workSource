@@ -19,6 +19,6 @@ public interface Rentalv2PriceRuleProvider {
 
 	void deletePriceRuleByOwnerId(String ownerType, Long ownerId);
 
-	PriceRuleDTO findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType);
+	Rentalv2PriceRule findRentalv2PriceRuleByOwner(String ownerType, Long ownerId, Byte rentalType);
 
 }
