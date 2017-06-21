@@ -4909,9 +4909,10 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void dayRefreshLogScheduled() {
 
-
-        Date runDate = DateHelper.currentGMTTime();
-        dayRefreshLogScheduled(runDate);
+		coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
+	        Date runDate = DateHelper.currentGMTTime();
+	        dayRefreshLogScheduled(runDate);
+		});
     }
     @Override
     public void testDayRefreshLogs(Long runDate){
