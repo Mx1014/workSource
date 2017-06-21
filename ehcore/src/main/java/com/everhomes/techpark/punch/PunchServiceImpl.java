@@ -4191,7 +4191,8 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
-			 
+
+			LOGGER.debug("members  : "+StringHelper.toJsonString(organizationMembers));
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -4205,6 +4206,8 @@ public class PunchServiceImpl implements PunchService {
 			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
+
+		LOGGER.debug("userIds  : "+StringHelper.toJsonString(userIds));
 		return userIds;
 }
 //	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
