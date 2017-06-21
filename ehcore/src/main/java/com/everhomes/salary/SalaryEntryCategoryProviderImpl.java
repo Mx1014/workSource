@@ -22,7 +22,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvider {
+public class SalaryEntryCategoryProviderImpl implements SalaryEntityCategoryProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -31,7 +31,7 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	private SequenceProvider sequenceProvider;
 
 	@Override
-	public void createSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory) {
+	public void createSalaryEntityCategory(SalaryEntityCategory salaryEntryCategory) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEntryCategories.class));
 		salaryEntryCategory.setId(id);
 		salaryEntryCategory.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -43,7 +43,7 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	}
 
 	@Override
-	public void updateSalaryEntryCategory(SalaryEntityCategory salaryEntryCategory) {
+	public void updateSalaryEntityCategory(SalaryEntityCategory salaryEntryCategory) {
 		assert (salaryEntryCategory.getId() != null);
 		salaryEntryCategory.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		salaryEntryCategory.setOperatorUid(UserContext.current().getUser().getId());
@@ -52,13 +52,13 @@ public class SalaryEntryCategoryProviderImpl implements SalaryEntryCategoryProvi
 	}
 
 	@Override
-	public SalaryEntityCategory findSalaryEntryCategoryById(Long id) {
+	public SalaryEntityCategory findSalaryEntityCategoryById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), SalaryEntityCategory.class);
 	}
 	
 	@Override
-	public List<SalaryEntityCategory> listSalaryEntryCategory() {
+	public List<SalaryEntityCategory> listSalaryEntityCategory() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_ENTRY_CATEGORIES)
 				.orderBy(Tables.EH_SALARY_ENTRY_CATEGORIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEntityCategory.class));
