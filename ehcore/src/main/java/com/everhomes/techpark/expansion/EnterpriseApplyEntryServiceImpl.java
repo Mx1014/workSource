@@ -581,7 +581,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		if (null == flow) {
 			flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID,
-					null, request.getCommunityId(), FlowOwnerType.LEASE_PROMOTION.getCode());
+					null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 		}
 
 		if(null == flow) {
