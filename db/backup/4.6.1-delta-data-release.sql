@@ -167,3 +167,7 @@ UPDATE `eh_locale_templates` SET `description`='${username}已授权给你${door
 
 -- added by janson, add zuolin_v2
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
+
+-- added by janson, update action_data
+UPDATE `eh_launch_pad_items` SET `action_data`='{\"isSupportQR\":1,\"isSupportSmart\":0, \"isSupportKeyShowing\":1}' where namespace_id = 1000000 and action_type = 40 and scope_code =0;
+
