@@ -24,12 +24,12 @@ public class SalaryController extends ControllerBase {
 	
 	/**
 	 * <p>1.查询基础项目设置</p>
-	 * <b>URL: /salary/listSalaryDefaultEntries</b>
+	 * <b>URL: /salary/listSalaryDefaultEntities</b>
 	 */
-	@RequestMapping("listSalaryDefaultEntries")
-	@RestReturn(ListSalaryDefaultEntriesResponse.class)
-	public RestResponse listSalaryDefaultEntries(){
-		ListSalaryDefaultEntriesResponse res = this.salaryService.listSalaryDefaultEntries();
+	@RequestMapping("listSalaryDefaultEntities")
+	@RestReturn(ListSalaryDefaultEntitiesResponse.class)
+	public RestResponse listSalaryDefaultEntities(){
+		ListSalaryDefaultEntitiesResponse res = this.salaryService.listSalaryDefaultEntities();
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -145,12 +145,12 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>12.查询异常员工人数</p>
-	 * <b>URL: /salary/getAbnormalStaffNumber</b>
+	 * <b>URL: /salary/getAbnormalEmployeeNumber</b>
 	 */
-	@RequestMapping("getAbnormalStaffNumber")
-	@RestReturn(GetAbnormalStaffNumberResponse.class)
-	public RestResponse getAbnormalStaffNumber(GetAbnormalStaffNumberCommand cmd){
-		return new RestResponse(salaryService.getAbnormalStaffNumber(cmd));
+	@RequestMapping("getAbnormalEmployeeNumber")
+	@RestReturn(GetAbnormalEmployeeNumberResponse.class)
+	public RestResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd){
+		return new RestResponse(salaryService.getAbnormalEmployeeNumber(cmd));
 	}
 
 	/**
@@ -228,12 +228,12 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>19.设置工资条字段项显示状态</p>
-	 * <b>URL: /salary/updateSalaryGroupEntriesVisable</b>
+	 * <b>URL: /salary/updateSalaryGroupEntitiesVisable</b>
 	 */
-	@RequestMapping("updateSalaryGroupEntriesVisable")
+	@RequestMapping("updateSalaryGroupEntitiesVisable")
 	@RestReturn(String.class)
-	public RestResponse updateSalaryGroupEntriesVisable(UpdateSalaryGroupEntriesVisableCommand cmd){
-		salaryService.updateSalaryGroupEntriesVisable(cmd);
+	public RestResponse updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd){
+		salaryService.updateSalaryGroupEntitiesVisable(cmd);
 		return new RestResponse();
 	}
 

@@ -11,23 +11,23 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateSalaryGroupResponse {
 
-	private SalaryGroupEntityDTO salaryGroupEntry;
+	private SalaryGroupEntityDTO salaryGroupEntity;
 
 	public UpdateSalaryGroupResponse() {
 
 	}
 
-	public UpdateSalaryGroupResponse(SalaryGroupEntityDTO salaryGroupEntry) {
+	public UpdateSalaryGroupResponse(SalaryGroupEntityDTO salaryGroupEntity) {
 		super();
-		this.salaryGroupEntry = salaryGroupEntry;
+		this.salaryGroupEntity = salaryGroupEntity;
 	}
 
 	public SalaryGroupEntityDTO getSalaryGroupEntry() {
-		return salaryGroupEntry;
+		return salaryGroupEntity;
 	}
 
-	public void setSalaryGroupEntry(SalaryGroupEntityDTO salaryGroupEntry) {
-		this.salaryGroupEntry = salaryGroupEntry;
+	public void setSalaryGroupEntry(SalaryGroupEntityDTO salaryGroupEntity) {
+		this.salaryGroupEntity = salaryGroupEntity;
 	}
 
 	@Override

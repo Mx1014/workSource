@@ -1,10 +1,10 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import com.everhomes.server.schema.tables.pojos.EhSalaryGroupEntries;
+import com.everhomes.server.schema.tables.pojos.EhSalaryGroupEntities;
 import com.everhomes.util.StringHelper;
 
-public class SalaryGroupEntry extends EhSalaryGroupEntries {
+public class SalaryGroupEntity extends EhSalaryGroupEntities {
 	
 	private static final long serialVersionUID = -4759610341287325926L;
 	

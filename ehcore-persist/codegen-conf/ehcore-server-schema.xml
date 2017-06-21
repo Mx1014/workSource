@@ -161,7 +161,7 @@
         eh_user_notification_settings | eh_group_member_logs |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
         eh_talents | eh_talent_categories | eh_talent_query_histories |
-		eh_salary_default_entries | eh_salary_entry_categories | eh_salary_group_entries | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
+		eh_salary_default_entities | eh_salary_entity_categories | eh_salary_group_entities | eh_salary_employee_origin_vals | eh_salary_groups | eh_salary_employees | eh_salary_employee_period_vals |
         </includes>
 
             <!-- All elements that are excluded from your schema

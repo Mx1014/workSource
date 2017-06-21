@@ -10,17 +10,17 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 所属id</li>
  * </ul>
  */
-public class GetAbnormalStaffNumberCommand {
+public class GetAbnormalEmployeeNumberCommand {
 
 	private String ownerType;
 
 	private Long ownerId;
 
-	public GetAbnormalStaffNumberCommand() {
+	public GetAbnormalEmployeeNumberCommand() {
 
 	}
 
-	public GetAbnormalStaffNumberCommand(String ownerType, Long ownerId) {
+	public GetAbnormalEmployeeNumberCommand(String ownerType, Long ownerId) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;

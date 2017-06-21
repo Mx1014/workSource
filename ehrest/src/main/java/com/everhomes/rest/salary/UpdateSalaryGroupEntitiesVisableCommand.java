@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salarySalaryGroupEntityDTO}</li>
  * </ul>
  */
-public class UpdateSalaryGroupEntriesVisableCommand {
+public class UpdateSalaryGroupEntitiesVisableCommand {
 
 	private String ownerType;
 
@@ -26,11 +26,11 @@ public class UpdateSalaryGroupEntriesVisableCommand {
 	@ItemType(SalaryGroupEntityDTO.class)
 	private List<SalaryGroupEntityDTO> salaryGroupEntitys;
 
-	public UpdateSalaryGroupEntriesVisableCommand() {
+	public UpdateSalaryGroupEntitiesVisableCommand() {
 
 	}
 
-	public UpdateSalaryGroupEntriesVisableCommand(String ownerType, Long ownerId, Long salaryGroupId, List<SalaryGroupEntityDTO> salaryGroupEntitys) {
+	public UpdateSalaryGroupEntitiesVisableCommand(String ownerType, Long ownerId, Long salaryGroupId, List<SalaryGroupEntityDTO> salaryGroupEntitys) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;

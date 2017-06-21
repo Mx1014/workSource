@@ -6,7 +6,7 @@ import com.everhomes.rest.salary.*;
 public interface SalaryService {
 
 
-	public ListSalaryDefaultEntriesResponse listSalaryDefaultEntries();
+	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities();
 
 
 	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd);
@@ -39,7 +39,7 @@ public interface SalaryService {
 	public void importPeriodSalary(ImportPeriodSalaryCommand cmd);
 
 
-	public GetAbnormalStaffNumberResponse getAbnormalStaffNumber(GetAbnormalStaffNumberCommand cmd);
+	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd);
 
 
 	public ListPeriodSalaryResponse listPeriodSalary(ListPeriodSalaryCommand cmd);
@@ -60,7 +60,7 @@ public interface SalaryService {
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd);
 
 
-	public void updateSalaryGroupEntriesVisable(UpdateSalaryGroupEntriesVisableCommand cmd);
+	public void updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd);
 
 
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd);
