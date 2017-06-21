@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>defaultOrder: 默认顺序</li>
  * </ul>
  */
-public class SalaryDefaultEntriesDTO {
+public class SalaryDefaultEntityDTO {
 
 
     private Long id;
@@ -34,7 +34,7 @@ public class SalaryDefaultEntriesDTO {
 
     private Integer defaultOrder;
 
-    public SalaryDefaultEntriesDTO() {
+    public SalaryDefaultEntityDTO() {
     }
 
     public Long getId() {

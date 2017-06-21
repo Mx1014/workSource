@@ -9,28 +9,28 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>返回值:
- * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntriesDTO}</li>
+ * <li>salaryDefaultEntries: 基础字段参考{@link com.everhomes.rest.salary.SalaryDefaultEntityDTO}</li>
  * </ul>
  */
 public class ListSalaryDefaultEntriesResponse {
 
-	@ItemType(SalaryDefaultEntriesDTO.class)
-	private List<SalaryDefaultEntriesDTO> salaryDefaultEntries;
+	@ItemType(SalaryDefaultEntityDTO.class)
+	private List<SalaryDefaultEntityDTO> salaryDefaultEntries;
 
 	public ListSalaryDefaultEntriesResponse() {
 
 	}
 
-	public ListSalaryDefaultEntriesResponse(List<SalaryDefaultEntriesDTO> salaryDefaultEntries) {
+	public ListSalaryDefaultEntriesResponse(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
 		super();
 		this.salaryDefaultEntries = salaryDefaultEntries;
 	}
 
-	public List<SalaryDefaultEntriesDTO> getSalaryDefaultEntries() {
+	public List<SalaryDefaultEntityDTO> getSalaryDefaultEntries() {
 		return salaryDefaultEntries;
 	}
 
-	public void setSalaryDefaultEntries(List<SalaryDefaultEntriesDTO> salaryDefaultEntries) {
+	public void setSalaryDefaultEntries(List<SalaryDefaultEntityDTO> salaryDefaultEntries) {
 		this.salaryDefaultEntries = salaryDefaultEntries;
 	}
 

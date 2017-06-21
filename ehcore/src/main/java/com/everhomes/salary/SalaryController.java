@@ -98,12 +98,12 @@ public class SalaryController extends ControllerBase {
 
 	/**
 	 * <p>5.根据组织架构/薪酬组/异常状态 查询人员</p>
-	 * <b>URL: /salary/listSalaryStaffs</b>
+	 * <b>URL: /salary/listSalaryEmployees</b>
 	 */
-	@RequestMapping("listSalaryStaffs")
+	@RequestMapping("listSalaryEmployees")
 	@RestReturn(ListSalaryEmployeesResponse.class)
-	public RestResponse listSalaryStaffs(ListSalaryEmployeesCommand cmd){
-		return new RestResponse(salaryService.listSalaryStaffs(cmd));
+	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
+		return new RestResponse(salaryService.listSalaryEmployees(cmd));
 	}
 
 	/**
