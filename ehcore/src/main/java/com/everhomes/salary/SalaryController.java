@@ -79,7 +79,7 @@ public class SalaryController extends ControllerBase {
     }
 
 	/**
-	 * <p>5.根据组织架构/薪酬组/异常状态 查询人员</p>
+	 * <p>5-1.根据组织架构/薪酬组/异常状态 查询人员</p>
 	 * <b>URL: /salary/listSalaryEmployees</b>
 	 */
 	@RequestMapping("listSalaryEmployees")
@@ -87,6 +87,16 @@ public class SalaryController extends ControllerBase {
 	public RestResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd){
 		return new RestResponse(salaryService.listSalaryEmployees(cmd));
 	}
+
+    /**
+     * <p>5-2.编辑人员批次详情</p>
+     * <b>URL: /salary/updateSalaryEmployees</b>
+     */
+    @RequestMapping("updateSalaryEmployees")
+    @RestReturn(SalaryEmployeeOriginValDTO.class)
+    public RestResponse updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd){
+        return new RestResponse(salaryService.updateSalaryEmployees(cmd));
+    }
 
 	/**
 	 * <p>6.设置人员薪酬字段值 有增加没有更新</p>

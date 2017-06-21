@@ -24,6 +24,9 @@ public interface SalaryService {
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
 
 
+	public SalaryEmployeeOriginValDTO updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
+
+
 	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd);
 
 

@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>type: 字段类型:0-文本类 1-数值类</li>
  * <li>categoryId: 项目标签(统计分类) id</li>
  * <li>categoryName: 项目标签(统计分类)名称 example:基础,应发,应收,合计</li>
- * <li>name: 项目名称</li>
+ * <li>name: 项目字段名称</li>
  * <li>editableFlag: 是否可编辑(对文本类):0-否 1-是</li>
  * <li>templeteName: 模板名称</li>
  * <li>defaultOrder: 默认顺序</li>

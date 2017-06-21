@@ -4,24 +4,27 @@ import java.sql.Timestamp;
 
 /**
  * <ul>
- * <li>groupId: 标签分类id</li>
+ * <li>salaryGroupId: 批次id</li>
  * <li>userId: 用户id</li>
- * <li>groupEntityId: 项目标签id</li>
- * <li>originEntityId: 项目标签原始id</li>
- * <li>salaryValue: 项目标签值</li>
+ * <li>groupEntityId: 项目字段id</li>
+ * <li>originEntityId: 项目字段原始id</li>
+ * <li>entityName: 项目字段名称</li>
+ * <li>salaryValue: 项目字段对应值</li>
  * </ul>
  */
 public class SalaryEmployeeOriginValDTO {
 
     private Long id;
 
-    private Long groupId;
+    private Long salaryGroupId;
 
     private Long userId;
 
     private Long groupEntityId;
 
     private Long originEntityId;
+
+    private String entityName;
 
     private String salaryValue;
 
@@ -36,12 +39,12 @@ public class SalaryEmployeeOriginValDTO {
         this.id = id;
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public Long getSalaryGroupId() {
+        return salaryGroupId;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setSalaryGroupId(Long salaryGroupId) {
+        this.salaryGroupId = salaryGroupId;
     }
 
     public Long getUserId() {
@@ -66,6 +69,14 @@ public class SalaryEmployeeOriginValDTO {
 
     public void setOriginEntityId(Long originEntityId) {
         this.originEntityId = originEntityId;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
     }
 
     public String getSalaryValue() {

@@ -5,10 +5,10 @@ package com.everhomes.rest.salary;
  * <ul> 
  * <li>id: id</li>
  * <li>groupId: 批次id</li>
- * <li>type: 字段类型:0文本类;1数值类</li>
- * <li>categoryId: 项目标签id</li>
- * <li>categoryName: 项目标签</li>
- * <li>name: 字段项名</li>
+ * <li>type: 字段类型:0-文本类 1-数值类</li>
+ * <li>categoryId: 项目标签(统计分类) id</li>
+ * <li>categoryName: 项目标签(统计分类)名称 example:基础,应发,应收,合计</li>
+ * <li>name: 项目字段名称</li>
  * <li>editableFlag: 是否可编辑(对文本类):0-否   1-是</li>
  * <li>numberType: 数值类型:0-普通数值 1-计算公式</li>
  * <li>defaultValue: 默认值/默认数值/计算公式</li>

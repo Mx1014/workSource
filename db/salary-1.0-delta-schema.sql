@@ -102,6 +102,7 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `user_id` BIGINT ,
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
   `origin_entity_id` BIGINT,
+  `entity_name` VARCHAR(64) COMMENT '项目字段名称',
   `salary_value` TEXT , 
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
