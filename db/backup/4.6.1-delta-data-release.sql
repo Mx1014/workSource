@@ -161,3 +161,9 @@ UPDATE eh_web_menus SET data_type='react:/approval-management/approval-list/4050
 UPDATE eh_web_menus
 SET data_type = 'react:/approval-management/approval-list/52000/EhOrganizations'
 WHERE id = 52000;
+
+-- added by janson, fix techpark qr sms 20170619
+UPDATE `eh_locale_templates` SET `description`='${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：https://core.zuolin.com/evh/aclink/v?id=${id}（24小时有效）' where `code`= 8 and `namespace_id` = 1000000;
+
+-- added by janson, add zuolin_v2
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_zuolin_inner', 'zuolin_v2', 'use version2 of zuolin driver');
