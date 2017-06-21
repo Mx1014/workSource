@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>isException: 是否筛选异常员工: 0-否 1-是</li>
  * </ul>
  */
-public class ListSalaryStaffsCommand {
+public class ListSalaryEmployeesCommand {
 
 	private String keywords;
 
@@ -22,11 +22,11 @@ public class ListSalaryStaffsCommand {
 
 	private Byte isException;
 
-	public ListSalaryStaffsCommand() {
+	public ListSalaryEmployeesCommand() {
 
 	}
 
-	public ListSalaryStaffsCommand(String keywords, Long organizationId, Long salaryGroupId, Byte isException) {
+	public ListSalaryEmployeesCommand(String keywords, Long organizationId, Long salaryGroupId, Byte isException) {
 		super();
 		this.keywords = keywords;
 		this.organizationId = organizationId;

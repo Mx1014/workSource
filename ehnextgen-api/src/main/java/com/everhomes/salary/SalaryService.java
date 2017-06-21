@@ -22,8 +22,8 @@ import com.everhomes.rest.salary.ListPeriodSalaryResponse;
 import com.everhomes.rest.salary.ListSalaryDefaultEntriesResponse;
 import com.everhomes.rest.salary.ListSalarySendHistoryCommand;
 import com.everhomes.rest.salary.ListSalarySendHistoryResponse;
-import com.everhomes.rest.salary.ListSalaryStaffsCommand;
-import com.everhomes.rest.salary.ListSalaryStaffsResponse;
+import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
+import com.everhomes.rest.salary.ListSalaryEmployeesResponse;
 import com.everhomes.rest.salary.SaveSalaryEmployeeOriginValsCommand;
 import com.everhomes.rest.salary.SendPeriodSalaryCommand;
 import com.everhomes.rest.salary.SetSalaryEmailContentCommand;
@@ -47,7 +47,7 @@ public interface SalaryService {
 	public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd);
 
 
-	public ListSalaryStaffsResponse listSalaryStaffs(ListSalaryStaffsCommand cmd);
+	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
 
 
 	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd);

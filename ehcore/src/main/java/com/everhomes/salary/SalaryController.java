@@ -31,8 +31,8 @@ import com.everhomes.rest.salary.ListPeriodSalaryResponse;
 import com.everhomes.rest.salary.ListSalaryDefaultEntriesResponse;
 import com.everhomes.rest.salary.ListSalarySendHistoryCommand;
 import com.everhomes.rest.salary.ListSalarySendHistoryResponse;
-import com.everhomes.rest.salary.ListSalaryStaffsCommand;
-import com.everhomes.rest.salary.ListSalaryStaffsResponse;
+import com.everhomes.rest.salary.ListSalaryEmployeesCommand;
+import com.everhomes.rest.salary.ListSalaryEmployeesResponse;
 import com.everhomes.rest.salary.SaveSalaryEmployeeOriginValsCommand;
 import com.everhomes.rest.salary.SendPeriodSalaryCommand;
 import com.everhomes.rest.salary.SetSalaryEmailContentCommand;
@@ -101,8 +101,8 @@ public class SalaryController extends ControllerBase {
 	 * <b>URL: /salary/listSalaryStaffs</b>
 	 */
 	@RequestMapping("listSalaryStaffs")
-	@RestReturn(ListSalaryStaffsResponse.class)
-	public RestResponse listSalaryStaffs(ListSalaryStaffsCommand cmd){
+	@RestReturn(ListSalaryEmployeesResponse.class)
+	public RestResponse listSalaryStaffs(ListSalaryEmployeesCommand cmd){
 		return new RestResponse(salaryService.listSalaryStaffs(cmd));
 	}
 

@@ -12,16 +12,16 @@ import com.everhomes.util.StringHelper;
  * <li>salaryEmployeeDTO: 基础字段参考{@link com.everhomes.rest.salaryEmployeeDTO}</li>
  * </ul>
  */
-public class ListSalaryStaffsResponse {
+public class ListSalaryEmployeesResponse {
 
 	@ItemType(salaryEmployeeDTO.class)
 	private List<salaryEmployeeDTO> salaryEmployeeDTO;
 
-	public ListSalaryStaffsResponse() {
+	public ListSalaryEmployeesResponse() {
 
 	}
 
-	public ListSalaryStaffsResponse(List<salaryEmployeeDTO> salaryEmployeeDTO) {
+	public ListSalaryEmployeesResponse(List<salaryEmployeeDTO> salaryEmployeeDTO) {
 		super();
 		this.salaryEmployeeDTO = salaryEmployeeDTO;
 	}

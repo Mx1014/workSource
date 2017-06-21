@@ -35,7 +35,7 @@ CREATE TABLE `eh_organization_group_members` (
 
 
 -- 薪酬批次可用的选项 基础数据
-CREATE TABLE `eh_salary_default_entries` (
+CREATE TABLE `eh_salary_default_entities` (
   `id` BIGINT COMMENT 'id of the record', 
   `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
   `default_flag` TINYINT COMMENT '是否是缺省参数:0-否   1-是',
@@ -55,12 +55,12 @@ CREATE TABLE `eh_salary_default_entries` (
 
 
 -- 薪酬批次可用的选项的标签类型 基础数据
-CREATE TABLE `eh_salary_entry_categories` (
+CREATE TABLE `eh_salary_entity_categories` (
   `id` BIGINT,
   `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
   `owner_type` VARCHAR(32),
   `owner_id` BIGINT,
-  `entry_type` TINYINT COMMENT '1. ask for leave, 2. forget to punch',
+  `entity_type` TINYINT COMMENT '1. ask for leave, 2. forget to punch',
   `category_name` VARCHAR(64)  COMMENT 'name of category',
   `status` TINYINT COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
   `creator_uid` BIGINT,
@@ -72,11 +72,11 @@ CREATE TABLE `eh_salary_entry_categories` (
 
 
 -- 薪酬批次包含的选项
-CREATE TABLE `eh_salary_group_entries` (
+CREATE TABLE `eh_salary_group_entities` (
   `id` BIGINT COMMENT 'id of the record', 
   `namespace_id` INT ,
   `group_id` BIGINT COMMENT '标签(统计分类) organization group表pk',
-  `origin_entry_id` BIGINT,
+  `origin_entity_id` BIGINT,
   `type` TINYINT COMMENT '字段类型:0文本类;1数值类',
   `category_id` BIGINT COMMENT '标签(统计分类) category表pk',
   `category_name` VARCHAR(64) COMMENT '标签(统计分类)名称 example:基础,应发,应收,合计',
@@ -100,8 +100,8 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `namespace_id` INT ,
   `group_id` BIGINT COMMENT '标签(统计分类) organization group表pk', 
   `user_id` BIGINT ,
-  `group_entry_id` BIGINT COMMENT '标签(统计分类) salary group entry表pk', 
-  `origin_entry_id` BIGINT,
+  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
+  `origin_entity_id` BIGINT,
   `salary_value` TEXT , 
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
@@ -146,8 +146,8 @@ CREATE TABLE `eh_salary_employee_period_vals` (
   `id` BIGINT COMMENT 'id of the record', 
   `namespace_id` INT ,
   `salary_employee_id` BIGINT COMMENT '标签(统计分类) salary_employee表pk', 
-  `group_entry_id` BIGINT COMMENT '标签(统计分类) salary group entry表pk', 
-  `origin_entry_id` BIGINT,
+  `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
+  `origin_entity_id` BIGINT,
   `salary_value` TEXT , 
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
