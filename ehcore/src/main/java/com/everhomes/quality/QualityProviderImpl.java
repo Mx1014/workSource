@@ -101,6 +101,7 @@ import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.quality.*;
 import com.everhomes.scheduler.QualityInspectionStatScheduleJob;
 import com.everhomes.scheduler.QualityInspectionTaskNotifyScheduleJob;
+import com.everhomes.search.QualityTaskSearcher;
 import com.everhomes.server.schema.tables.*;
 import com.everhomes.server.schema.tables.EhAssetBills;
 import com.everhomes.server.schema.tables.daos.*;
@@ -199,6 +200,9 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private QualityTaskSearcher taskSearcher;
 
 	@Value("${equipment.ip}")
 	private String equipmentIp;
@@ -1417,7 +1421,8 @@ public class QualityProviderImpl implements QualityProvider {
 		EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
         dao.update(t);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, t.getId());
-		
+
+		taskSearcher.feedDoc(task);
 	}
 
 	@Override
