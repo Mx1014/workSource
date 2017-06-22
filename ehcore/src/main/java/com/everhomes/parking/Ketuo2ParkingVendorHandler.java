@@ -729,7 +729,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private Timestamp addDays(Long oldPeriod, int days) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.DATE, days);
+		calendar.add(Calendar.SECOND, days);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
