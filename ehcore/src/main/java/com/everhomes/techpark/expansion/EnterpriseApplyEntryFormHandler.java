@@ -52,7 +52,7 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
             ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            GeneralForm form = handler.getDefaultGeneralForm();
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
             requestFormId = form.getFormOriginId();
         }else {
             requestFormId = request.getSourceId();
@@ -139,119 +139,30 @@ public class EnterpriseApplyEntryFormHandler implements GeneralFormModuleHandler
 
             dto = generalFormService.getTemplateByFormId(cmd2);
             List<GeneralFormFieldDTO> temp = dto.getFormFields();
-            List<GeneralFormFieldDTO> fileds = createFiled();
-            fileds.addAll(temp);
-            dto.setFormFields(fileds);
+
+            //查询初始默认数据
+            ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
+                    GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
+
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+            fieldDTOs.addAll(temp);
+            dto.setFormFields(fieldDTOs);
         } else {
             //查询初始默认数据
             ApplyEntryBuildingFormHandler handler = PlatformContext.getComponent(
                     GeneralFormModuleHandler.GENERAL_FORM_MODULE_HANDLER_PREFIX + EntityType.BUILDING.getCode());
 
-            GeneralForm form = handler.getDefaultGeneralForm();
+            GeneralForm form = handler.getDefaultGeneralForm(EntityType.LEASEPROMOTION.getCode());
 
             dto = ConvertHelper.convert(form, GeneralFormDTO.class);
-//		form.setFormVersion(form.getFormVersion());
-//            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-//            List<GeneralFormFieldDTO> temp = dto.getFormFields();
-            List<GeneralFormFieldDTO> fields = createFiled();
-//            fields.addAll(temp);
-            dto.setFormFields(fields);
+            List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+
+            dto.setFormFields(fieldDTOs);
         }
 
         return dto;
     }
 
-    private List<GeneralFormFieldDTO> createFiled() {
-
-        List<GeneralFormFieldDTO> dtos = new ArrayList<>();
-
-        GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.USER_NAME.getCode());
-        organizationIdField.setFieldDisplayName("用户姓名");
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.USER_NAME.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        organizationIdField.setFieldExtra("{\"limitWord\":10}");
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.USER_PHONE.getCode());
-        organizationIdField.setFieldDisplayName("手机号码");
-        organizationIdField.setFieldType(GeneralFormFieldType.INTEGER_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.USER_PHONE.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        organizationIdField.setFieldExtra("{\"limitWord\":11}");
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.USER_COMPANY.getCode());
-        organizationIdField.setFieldDisplayName("公司名称");
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.USER_COMPANY.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        organizationIdField.setFieldExtra("{\"limitWord\":20}");
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_BUILDING.getCode());
-        organizationIdField.setFieldDisplayName("楼栋名称");
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_BUILDING.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        organizationIdField.setFieldExtra("{\"limitWord\":20}");
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_APARTMENT.getCode());
-        organizationIdField.setFieldDisplayName("门牌号码");
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_APARTMENT.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        organizationIdField.setFieldExtra("{\"limitWord\":20}");
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(LeasePromotionFormDataSourceType.LEASE_PROMOTION_DESCRIPTION.getCode());
-        organizationIdField.setFieldDisplayName("备注说明");
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NONEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.EDITABLE.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(LeasePromotionFormDataSourceType.LEASE_PROMOTION_DESCRIPTION.getCode());
-        organizationIdField.setValidatorType(GeneralFormValidatorType.TEXT_LIMIT.getCode());
-        dtos.add(organizationIdField);
-
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        dtos.add(organizationIdField);
-
-        return dtos;
-    }
 }

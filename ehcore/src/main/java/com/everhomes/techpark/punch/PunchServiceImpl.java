@@ -4191,7 +4191,8 @@ public class PunchServiceImpl implements PunchService {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
 					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
-			 
+
+			LOGGER.debug("members  : "+ organizationMembers.size());
 			}
 		else{
 			org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
@@ -4205,6 +4206,8 @@ public class PunchServiceImpl implements PunchService {
 			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
 				userIds.add(member.getTargetId());
 		}
+
+		LOGGER.debug("userIds  : "+StringHelper.toJsonString(userIds));
 		return userIds;
 }
 //	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
@@ -4576,6 +4579,7 @@ public class PunchServiceImpl implements PunchService {
 		
 		
 		PunchOwnerType ownerType = PunchOwnerType.fromCode(cmd.getOwnerType());
+		Long ownerId =getTopEnterpriseId(cmd.getOwnerId());
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
 			Organization org = this.checkOrganization(cmd.getOwnerId());
@@ -4598,7 +4602,7 @@ public class PunchServiceImpl implements PunchService {
 			if(organizationId.equals(0L))
 				organizationId = org.getId();
 			List<PunchDayLog> results = punchProvider.listPunchDayLogs(userIds,
-					organizationId,startDay,endDay , 
+					ownerId,startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
 					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
@@ -4905,9 +4909,10 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void dayRefreshLogScheduled() {
 
-
-        Date runDate = DateHelper.currentGMTTime();
-        dayRefreshLogScheduled(runDate);
+		coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
+	        Date runDate = DateHelper.currentGMTTime();
+	        dayRefreshLogScheduled(runDate);
+		});
     }
     @Override
     public void testDayRefreshLogs(Long runDate){
