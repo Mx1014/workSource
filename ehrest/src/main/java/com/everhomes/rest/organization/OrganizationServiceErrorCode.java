@@ -66,7 +66,7 @@ public interface OrganizationServiceErrorCode {
     int ERROR_CHECKINTIME_ISNULL = 800007;  //  入职日期未填写
     int ERROR_EMPLOYEESTATUS_ISNULL = 800008;   //  试用期未填写
     int ERROR_EMPLOYEETIME_ISNULL = 800009; //  转正日期未填写
-    int ERROR_EMERGENCYCONTACT_FORMAT = 800010; //  电话号码格式错误
+    int ERROR_CONTACTTOKEN_FORMAT = 800010; //  电话号码格式错误
     int ERROR_SCHOOLNAME_ISNULL =800011;    //  学校名字为空
     int ERROR_DEGREE_ISNULL = 800012;   //  学历为空
     int ERROR_MAJOR_ISNULL = 800013;    //  专业为空

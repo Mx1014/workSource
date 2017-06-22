@@ -10418,9 +10418,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             return 0;
         else if (StringUtils.isEmpty(basic.getGender()))
             return 0;
-        else if (StringUtils.isEmpty(basic.getDepartments()))
+        else if (StringUtils.isEmpty(basic.getDepartments()) || basic.getDepartments().isEmpty())
             return 0;
-        else if (StringUtils.isEmpty(basic.getJobPositions()))
+        else if (StringUtils.isEmpty(basic.getJobPositions()) || basic.getJobPositions().isEmpty())
+            return 0;
+        else if (StringUtils.isEmpty(basic.getJobLevels()) || basic.getJobLevels().isEmpty())
             return 0;
         else if (StringUtils.isEmpty(basic.getEmployeeType()))
             return 0;
@@ -10840,6 +10842,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member contactToken is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
+        }else{
+            if (!AccountValidatorUtil.isMobile(data.getContactToken())) {
+                LOGGER.warn("Wrong contactToken format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Wrong contactToken format");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_FORMAT);
+                return log;
+            }
         }
 
         if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
@@ -10948,7 +10958,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 LOGGER.warn("Wrong emergencyContact format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Wrong emergencyContact format");
-                log.setCode(OrganizationServiceErrorCode.ERROR_EMERGENCYCONTACT_FORMAT);
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_FORMAT);
                 return log;
             }
         }
@@ -11197,7 +11207,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
             Map<String, Organization> jobLevelMap, Organization org,
             int namespaceId) {
-        AddOrganizationPersonnelCommand memberCommand = new AddOrganizationPersonnelCommand();
+        AddOrganizationPersonnelV2Command memberCommand = new AddOrganizationPersonnelV2Command();
 
         //  公司
         memberCommand.setOrganizationId(organizationId);
@@ -11293,7 +11303,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //  新增人员并返回detailId
-        OrganizationMemberDTO member = this.addOrganizationPersonnel(memberCommand);
+        OrganizationMemberDTO member = this.addOrganizationPersonnelV2(memberCommand);
         return member.getDetailId();
     }
 
