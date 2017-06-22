@@ -3829,6 +3829,7 @@ public class QualityServiceImpl implements QualityService {
 			scoreStat.setSampleId(sampleId);
 			scoreStat.setTaskCount(0);
 			scoreStat.setCorrectionCount(0);
+			scoreStat.setCorrectionQualifiedCount(0);
 			scoreStat.setDeductScore(0.0);
 			scoreStat.setHighestScore(100.0);
 			scoreStat.setLowestScore(100.0);
