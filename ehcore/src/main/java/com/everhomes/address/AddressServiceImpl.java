@@ -1682,7 +1682,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			if (StringUtils.isEmpty(data.getApartmentName())) {
 				log.setData(data);
 				log.setErrorLog("apartment name is null");
-				log.setCode(AddressServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+				log.setCode(AddressServiceErrorCode.ERROR_APARTMENT_NAME_EMPTY);
 				errorLogs.add(log);
 				continue;
 			}
