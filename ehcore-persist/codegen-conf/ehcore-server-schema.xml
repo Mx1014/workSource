@@ -163,7 +163,7 @@
         eh_energy_meter_price_config |
         eh_user_notification_settings | eh_group_member_logs |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
-		eh_service_module_apps | eh_portal_home_pages | eh_portal_layouts | eh_portal_item_groups | eh_portal_items | eh_portal_item_scopes | eh_portal_layout_templates
+		eh_service_module_apps | eh_portal_navigation_bars | eh_portal_layouts | eh_portal_item_groups | eh_portal_items | eh_portal_layout_templates | eh_portal_item_categries | eh_portal_content_scopes | eh_portal_publish_logs | eh_portal_launch_pad_mappings |
 
         </includes>
 
