@@ -21,6 +21,9 @@ public interface SalaryService {
 	public void copySalaryGroup(CopySalaryGroupCommand cmd);
 
 
+	public ListSalaryGroupResponse listSalaryGroup();
+
+
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
 
 

@@ -37,7 +37,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>2.新增薪酬组(新增包含的选项 + 更改组名)</p>
+	 * <p>2-1.新增薪酬组(新增包含的选项 + 更改组名)</p>
 	 * <b>URL: /salary/addSalaryGroup</b>
 	 */
 	@RequestMapping("addSalaryGroup")
@@ -47,7 +47,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>3.更改薪酬组包含的选项+更改组名</p>
+	 * <p>2-2.更改薪酬组包含的选项+更改组名</p>
 	 * <b>URL: /salary/updateSalaryGroup</b>
 	 */
 	@RequestMapping("updateSalaryGroup")
@@ -57,7 +57,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>4.删除薪酬组</p>
+	 * <p>2-3.删除薪酬组</p>
 	 * <b>URL: /salary/deleteSalaryGroup</b>
 	 */
 	@RequestMapping("deleteSalaryGroup")
@@ -68,15 +68,29 @@ public class SalaryController extends ControllerBase {
 	}
 
     /**
-     * <p>复制薪酬组</p>
-     * <b>URL: /salary/copySalaryGroup</b>
-     */
-    @RequestMapping("copySalaryGroup")
-    @RestReturn(String.class)
-    public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
-        salaryService.copySalaryGroup(cmd);
-        return new RestResponse();
-    }
+	 * <p>2-4.复制薪酬组</p>
+	 * <b>URL: /salary/copySalaryGroup</b>
+	 */
+	@RequestMapping("copySalaryGroup")
+	@RestReturn(String.class)
+	public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
+		salaryService.copySalaryGroup(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>2-5.展示薪酬组</p>
+	 * <b>URL: /salary/listSalaryGroup</b>
+	 */
+	@RequestMapping("listSalaryGroup")
+	@RestReturn(ListSalaryGroupResponse.class)
+	public RestResponse listSalaryGroup(){
+        ListSalaryGroupResponse res = this.salaryService.listSalaryGroup();
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
 
 	/**
 	 * <p>5-1.根据组织架构/薪酬组/异常状态 查询人员</p>

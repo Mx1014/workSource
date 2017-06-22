@@ -2,13 +2,21 @@
 package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SalaryServiceImpl implements SalaryService {
 
+    @Autowired
+    private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
+
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
+        ListSalaryDefaultEntitiesResponse response = new ListSalaryDefaultEntitiesResponse();
+        List<SalaryDefaultEntityDTO> entity = null;
 	
 		return new ListSalaryDefaultEntitiesResponse();
 	}
@@ -38,6 +46,13 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	@Override
+    public ListSalaryGroupResponse listSalaryGroup(){
+
+	    return new ListSalaryGroupResponse();
+    }
+
+
+    @Override
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
 	
 		return new ListSalaryEmployeesResponse();
