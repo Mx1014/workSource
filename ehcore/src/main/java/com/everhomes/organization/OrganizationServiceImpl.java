@@ -10527,7 +10527,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setPersonChangeType(personChangeType);
         log.setPersonChangeReason(personChangeReason);
         log.setResourceType(tableName);
-        if(StringUtils.isEmpty(operationTime))
+        if(!StringUtils.isEmpty(operationTime))
             log.setOperationTime(operationTime);
         log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.organizationProvider.createProfileLogs(log);
