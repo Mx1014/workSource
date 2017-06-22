@@ -2423,9 +2423,25 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityInspectionTaskDTO createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
-		
 		User user = UserContext.current().getUser();
 		long current = System.currentTimeMillis();
+
+		if(cmd.getSampleId() != null) {
+			QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
+			if(sample == null || new Timestamp(current).after(sample.getEndTime())) {
+				LOGGER.error("sample = {}", sample);
+				throw RuntimeErrorException
+						.errorWith(
+								QualityServiceErrorCode.SCOPE,
+								QualityServiceErrorCode.ERROR_SAMPLE_CANNOT_CREATE_TASK,
+								localeStringService.getLocalizedString(
+										String.valueOf(QualityServiceErrorCode.SCOPE),
+										String.valueOf(QualityServiceErrorCode.ERROR_SAMPLE_CANNOT_CREATE_TASK),
+										UserContext.current().getUser().getLocale(),
+										"sample is not exist or is closed!"));
+			}
+		}
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String day = sdf.format(current);
 		
