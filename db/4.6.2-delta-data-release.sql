@@ -81,3 +81,6 @@ UPDATE `eh_locale_templates` SET `text`='[{\"key\":\"预约楼栋\",\"value\":\"
 
 SELECT MAX(id) INTO @id FROM `eh_web_menu_scopes`;
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id+1, 50900, '', 'EhNamespaces', 1000000, 2);
+
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
+	VALUES ('expansion', '6', 'zh_CN', '已下线不能修改为已招租！');

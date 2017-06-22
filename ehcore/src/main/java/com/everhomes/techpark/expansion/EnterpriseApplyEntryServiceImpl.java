@@ -992,7 +992,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
 			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
 				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
-				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw errorWith(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.ERROR_UPDATE_STATUS,
 						"Status can not be modified.");
 			}
 		}
