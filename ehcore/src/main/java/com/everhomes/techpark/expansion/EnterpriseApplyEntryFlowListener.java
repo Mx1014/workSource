@@ -61,7 +61,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     @Autowired
     private LocaleTemplateService localeTemplateService;
     @Autowired
-    private LocaleStringService localeStringService;
+    private EnterpriseApplyEntryService enterpriseApplyEntryService;
     @Autowired
     private YellowPageProvider yellowPageProvider;
     @Autowired
@@ -145,12 +145,30 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
             map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
             map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
-            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
-                    applyEntry.getApplyType() + "", locale, "");
-            map.put("applyType", defaultIfNull(applyType, ""));
-//            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
-//            this.processSourceName(applyEntry);
-//            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
+//            String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
+//                    applyEntry.getApplyType() + "", locale, "");
+            ApplyEntrySourceType applyEntrySourceType = ApplyEntrySourceType.fromType(applyEntry.getSourceType());
+            String sourceType = null != applyEntrySourceType? applyEntrySourceType.getDescription() : "";
+
+            GetLeasePromotionConfigCommand cmd = new GetLeasePromotionConfigCommand();
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+            LeasePromotionConfigDTO config = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);
+            byte i = -1;
+            if (ApplyEntrySourceType.BUILDING == applyEntrySourceType) {
+                i = LeasePromotionOrder.PARK_INTRODUCE.getCode();
+            }else if (ApplyEntrySourceType.FOR_RENT == applyEntrySourceType) {
+                i = LeasePromotionOrder.LEASE_PROMOTION.getCode();
+            }
+            if (null != config.getDisplayNames() ) {
+                for (Integer k: config.getDisplayOrders()) {
+                    if (k.byteValue() ==i) {
+                        sourceType =config.getDisplayNames().get(k - 1);
+                    }
+                }
+            }
+
+            map.put("sourceType", defaultIfNull(sourceType, ""));
+
             map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
             
             String jsonStr;
@@ -215,11 +233,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             }
 		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
 				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
-			//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
-//			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-//			if(null != leasePromotion){
-//				applyEntry.setSourceName(leasePromotion.getSubject());
-//			}
 
             LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
 
@@ -245,16 +258,6 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                 }
 			}
 		}
-//        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
-//            Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
-//            if(null != building)
-//                applyEntry.setSourceName(building.getName());
-//        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType()) ||
-//                ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())) {
-//            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-//            if (null != leasePromotion)
-//                applyEntry.setSourceName(leasePromotion.getSubject());
-//        }
 
         return buildingName;
     }
