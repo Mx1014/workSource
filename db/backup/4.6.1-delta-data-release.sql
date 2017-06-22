@@ -171,3 +171,6 @@ INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`
 -- added by janson, update action_data
 UPDATE `eh_launch_pad_items` SET `action_data`='{\"isSupportQR\":1,\"isSupportSmart\":0, \"isSupportKeyShowing\":1}' where namespace_id = 1000000 and action_type = 40 and scope_code =0;
 
+-- modify techpark sms
+update eh_locale_templates set  text = "76236"  where namespace_id = 1000000 and `code` = 8;
+
