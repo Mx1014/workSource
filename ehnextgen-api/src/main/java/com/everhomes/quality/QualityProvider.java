@@ -20,7 +20,7 @@ public interface QualityProvider {
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
 	List<QualityInspectionTasks> listVerificationTasks(Integer offset, int count, Long ownerId, String ownerType, Long targetId, String targetType,
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
-			List<Long> standardIds, Byte manualFlag);
+			List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
 			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
 

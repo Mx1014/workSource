@@ -279,7 +279,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasks(Integer offset, int count, Long ownerId, String ownerType, Long targetId, String targetType,
 		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
-		List<Long> standardIds, Byte manualFlag) {
+		List<Long> standardIds, Byte manualFlag, List<ExecuteGroupAndPosition> groupDtos) {
 //		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -324,6 +324,23 @@ public class QualityProviderImpl implements QualityProvider {
 				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
 				con = con.or(con1);
 			}
+
+			if(groupDtos != null) {
+				Condition con2 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.eq(0L);
+				Condition con3 = null;
+				for(ExecuteGroupAndPosition group : groupDtos) {
+					Condition con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(group.getGroupId());
+					con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(group.getPositionId()));
+					if(con3 == null) {
+						con3 = con4;
+					} else {
+						con3 = con3.or(con4);
+					}
+				}
+				con2 = con2.and(con3);
+				con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
+				con = con.or(con2);
+			}
 			query.addConditions(con);
 		}
 
@@ -343,6 +360,7 @@ public class QualityProviderImpl implements QualityProvider {
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 		}
+
 
 		if(manualFlag != null) {
 			//fix bug :byte to long ...MANUAL_FLAG.eq(manualFlag));

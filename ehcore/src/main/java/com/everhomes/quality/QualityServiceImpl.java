@@ -828,7 +828,7 @@ public class QualityServiceImpl implements QualityService {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
             		cmd.getTaskType(), null, startDate, endDate,
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag(), null);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 //			List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
@@ -854,7 +854,7 @@ public class QualityServiceImpl implements QualityService {
 				}
 				tasks = qualityProvider.listVerificationTasks(offset, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate,
-						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag());
+						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag(), groupDtos);
 			}
 
 
