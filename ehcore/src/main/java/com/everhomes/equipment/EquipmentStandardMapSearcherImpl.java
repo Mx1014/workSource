@@ -8,6 +8,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -57,6 +58,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 
 	@Autowired
 	private CommunityProvider communityProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -120,6 +124,8 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	@Override
 	public SearchEquipmentStandardRelationsResponse query(
 			SearchEquipmentStandardRelationsCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(EquipmentConstant.EQUIPMENT_RELATION_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {

@@ -27,12 +27,14 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.rest.equipment.*;
 import com.everhomes.rest.quality.*;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
+import com.everhomes.user.UserPrivilegeMgr;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -147,10 +149,18 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private AclProvider aclProvider;
+
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+
+	@Autowired
+	private ConfigurationProvider configProvider;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
-		
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_CREATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
 		if(cmd.getRepeat() !=null) {
@@ -239,6 +249,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		
 		User user = UserContext.current().getUser();
 
@@ -368,8 +380,11 @@ public class QualityServiceImpl implements QualityService {
 	public void deleteQualityStandard(DeleteQualityStandardCommand cmd) {
 
 		User user = UserContext.current().getUser();
-		
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getStandardId());
+
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, standard.getOwnerId(), privilegeId);
+
 		standard.setStatus(QualityStandardStatus.INACTIVE.getCode());
 		standard.setOperatorUid(user.getId());
 		standard.setDeleterUid(user.getId());
@@ -383,6 +398,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListQualityStandardsResponse listQualityStandards(ListQualityStandardsCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARD_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
@@ -419,6 +436,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void updateQualityCategory(UpdateQualityCategoryCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		User user = UserContext.current().getUser();
 		
 		if(cmd.getId() == null) {
@@ -472,6 +491,10 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void deleteQualityCategory(DeleteQualityCategoryCommand cmd) {
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
+
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, category.getOwnerId(), privilegeId);
+
 		List<QualityInspectionStandards> standards = qualityProvider.findStandardsByCategoryId(cmd.getCategoryId());
 		if(standards != null && standards.size() > 0) {
 			LOGGER.error("the category which id="+cmd.getCategoryId()+" has active standard!");
@@ -757,6 +780,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public QualityInspectionTaskDTO findQualityInspectionTask(FindQualityInspectionTaskCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(cmd.getTaskId());
 		if(task != null)
 			return ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
@@ -767,6 +792,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		
 		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
@@ -1776,7 +1803,9 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityCategoriesResponse listQualityCategories(
 			ListQualityCategoriesCommand cmd) {
-		
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_CATEGORY_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -2076,6 +2105,9 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_TASK_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
+
 		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
@@ -2336,6 +2368,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityInspectionLogsResponse listQualityInspectionLogs(
 			ListQualityInspectionLogsCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_UPDATELOG_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2475,6 +2509,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STANDARDREVIEW_REVIEW, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		
 		QualityInspectionStandards standard = qualityProvider.findStandardById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
 		standard.setReviewResult(cmd.getReviewResult());
@@ -2491,6 +2527,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_CREATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		QualityInspectionSpecifications specification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
 		specification.setNamespaceId(UserContext.getCurrentNamespaceId());
 		specification.setCreatorUid(UserContext.current().getUser().getId());
@@ -2509,6 +2547,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_UPDATE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
 		if(specification.getScopeId().equals(cmd.getScopeId())) {
@@ -2544,6 +2584,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_DELETE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(SpecificationScopeCode.fromCode(specification.getScopeCode()).equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
 				&& specification.getScopeId().equals(cmd.getScopeId())) {
@@ -2568,6 +2610,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualitySpecificationsResponse listQualitySpecifications(
 			ListQualitySpecificationsCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		ListQualitySpecificationsResponse response = new ListQualitySpecificationsResponse();
 		
 		
@@ -2725,6 +2769,8 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_SCORE, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		CountScoresResponse response = new CountScoresResponse();
 		//查列 add by xiongying 20170425
 		List<CountScoresSpecificationDTO> specificationDTOs = listChildSpecificationDTOs(cmd);
@@ -2811,6 +2857,8 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public CountTasksResponse countTasks(CountTasksCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_STAT_TASK, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		
 		CountTasksResponse response = new CountTasksResponse();
 		
@@ -2847,6 +2895,8 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public QualityInspectionSpecificationDTO getQualitySpecification(
 			GetQualitySpecificationCommand cmd) {
+		Long privilegeId = configProvider.getLongValue(QualityConstant.QUALITY_SPECIFICATION_LIST, 0L);
+		userPrivilegeMgr.checkCurrentUserAuthority(null, null, cmd.getOwnerId(), privilegeId);
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
 		QualityInspectionSpecificationDTO dto = ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class);
 		List<QualityInspectionSpecifications> children = new ArrayList<QualityInspectionSpecifications>();
