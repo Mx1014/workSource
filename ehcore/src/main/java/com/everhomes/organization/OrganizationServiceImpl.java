@@ -11770,7 +11770,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (under_org == null) {
             User current_user = UserContext.current().getUser();
             Organization org_under_direct = new Organization();
-            org_under_direct.setName(parOrg.getName() + "_直属");
+            org_under_direct.setName(parOrg.getName());
             org_under_direct.setPath(parOrg.getPath());
             org_under_direct.setLevel(parOrg.getLevel() + 1);
             org_under_direct.setOrganizationType(parOrg.getOrganizationType());
