@@ -7,6 +7,8 @@ SET FOREIGN_KEY_CHECKS=0;
 CREATE TABLE `eh_organization_member_details` (
   `id` BIGINT NOT NULL COMMENT 'id for members， reference for eh_organization_member detail_id',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(64),
+  `target_id` BIGINT NOT NULL,
   `birthday` DATE COMMENT 'the birthday of the member',
   `organization_id` BIGINT NOT NULL COMMENT 'reference for eh_organization_member organization_id' ,
   `contact_name` VARCHAR(64) COMMENT 'the name of the member',
