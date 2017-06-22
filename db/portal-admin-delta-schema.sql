@@ -172,13 +172,13 @@ CREATE TABLE `eh_portal_publish_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 门户管理和服务广场id映射关系表
+-- 门户管理和服务广场id映射关系表git 
 CREATE TABLE `eh_portal_launch_pad_mappings` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `content_type` varchar(64) DEFAULT NULL,
   `portal_content_id` bigint(20) NOT NULL,
   `launch_pad_content_id` bigint(20) NOT NULL,
-  `update_time` datetime DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL,
   `creator_uid` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
