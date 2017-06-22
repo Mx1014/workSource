@@ -617,10 +617,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
-
+    	User currUser = UserContext.current().getUser();
         if(cmd.getApproveUserId() == null) {
-            User user = UserContext.current().getUser();
-            cmd.setApproveUserId(user.getId());
+            cmd.setApproveUserId(currUser.getId());
         }
         
         if(cmd.getRightOpen() == null) {
@@ -756,10 +755,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
+        tmpUser.setNickName(currUser.getNickName());
+        List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
+        if(dtos != null && !dtos.isEmpty()) {
+        		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+            if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+            		tmpUser.setNickName(om.getContactName());
+            	}	
+        	}
+		
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
-        tmpUser.setNickName(user.getNickName());
-        
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
