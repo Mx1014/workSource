@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintPrintersDao;
@@ -86,5 +87,17 @@ public class SiyinPrintPrinterProviderImpl implements SiyinPrintPrinterProvider 
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public SiyinPrintPrinter findSiyinPrintPrinterByReadName(String readerName) {
+		List<SiyinPrintPrinter> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
+				.where(Tables.EH_SIYIN_PRINT_PRINTERS.READER_NAME.eq(readerName))
+				.and(Tables.EH_SIYIN_PRINT_PRINTERS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetch().map(r->ConvertHelper.convert(r, SiyinPrintPrinter.class));
+		if(list!=null && list.size()>0){
+			return list.get(0);
+		}
+		return null;
 	}
 }

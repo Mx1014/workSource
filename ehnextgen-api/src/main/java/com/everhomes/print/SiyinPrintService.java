@@ -4,6 +4,7 @@ package com.everhomes.print;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -29,10 +30,9 @@ import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
 import com.everhomes.rest.print.ListPrintingJobsCommand;
 import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.LogonPrintCommand;
-import com.everhomes.rest.print.LogonPrintResponse;
 import com.everhomes.rest.print.PayPrintOrderCommand;
-import com.everhomes.rest.print.PayPrintOrderResponse;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
+import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 
@@ -67,7 +67,9 @@ public interface SiyinPrintService {
 
 	GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd);
 
-	PayPrintOrderResponse payPrintOrder(PayPrintOrderCommand cmd);
+	CommonOrderDTO payPrintOrder(PayPrintOrderCommand cmd);
 
 	ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd);
+
+	void unlockPrinter(UnlockPrinterCommand cmd);
 }

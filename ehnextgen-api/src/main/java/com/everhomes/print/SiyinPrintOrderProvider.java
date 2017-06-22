@@ -19,4 +19,8 @@ public interface SiyinPrintOrderProvider {
 	
 	List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor);
 
+	void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag);
+
+	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
+
 }

@@ -10,6 +10,8 @@ public interface SiyinPrintPrinterProvider {
 	void updateSiyinPrintPrinter(SiyinPrintPrinter siyinPrintPrinter);
 
 	SiyinPrintPrinter findSiyinPrintPrinterById(Long id);
+	
+	SiyinPrintPrinter findSiyinPrintPrinterByReadName(String readerName);
 
 	List<SiyinPrintPrinter> listSiyinPrintPrinter();
 

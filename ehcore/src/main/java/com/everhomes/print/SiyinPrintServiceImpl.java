@@ -1,12 +1,16 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,18 +31,25 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
-import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -64,7 +75,6 @@ import com.everhomes.rest.print.ListPrintUserOrganizationsResponse;
 import com.everhomes.rest.print.ListPrintingJobsCommand;
 import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.LogonPrintCommand;
-import com.everhomes.rest.print.LogonPrintResponse;
 import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PayPrintOrderResponse;
 import com.everhomes.rest.print.PrintErrorCode;
@@ -72,6 +82,7 @@ import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.PrintJobTypeType;
 import com.everhomes.rest.print.PrintLogonStatusType;
 import com.everhomes.rest.print.PrintOrderDTO;
+import com.everhomes.rest.print.PrintOrderLockType;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
@@ -79,15 +90,17 @@ import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
 import com.everhomes.rest.print.PrintSettingType;
 import com.everhomes.rest.print.PrintStatDTO;
+import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
-import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.xml.XMLToJSON;
 
 @Component
 public class SiyinPrintServiceImpl implements SiyinPrintService {
@@ -127,6 +140,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private OrderUtil commonOrderUtil;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -222,22 +241,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 	}
 
-
-	private SiyinPrintEmail processSiyinPrintEmail(UpdatePrintUserEmailCommand cmd) {
-		SiyinPrintEmail siyinPrintEmail = ConvertHelper.convert(cmd, SiyinPrintEmail.class);
-		if(cmd.getId()!=null){
-			siyinPrintEmail = siyinPrintEmailProvider.findSiyinPrintEmailById(cmd.getId());
-			siyinPrintEmail.setEmail(cmd.getEmail());
-			siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
-			return siyinPrintEmail;
-		}
-		siyinPrintEmail.setNamespaceId(UserContext.getCurrentNamespaceId());
-		siyinPrintEmail.setUserId(UserContext.current().getUser().getId());
-		siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
-		return siyinPrintEmail;
-	}
-
-
 	@Override
 	public GetPrintUserEmailResponse getPrintUserEmail(GetPrintUserEmailCommand cmd) {
 		return ConvertHelper.convert(siyinPrintEmailProvider.
@@ -248,22 +251,56 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public GetPrintLogonUrlResponse getPrintLogonUrl(GetPrintLogonUrlCommand cmd) {
 		// TODO 再商议
 		//将identifierToken丢到redis
-		long identifierToken = LocalSequenceGenerator.getNextSequence();
-        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		String identifierToken = UUID.randomUUID().toString();
         String key = REDIS_PRINT_IDENTIFIER_TOKEN + identifierToken;
-        String value = String.valueOf(identifierToken);
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(key, value, 1, TimeUnit.MINUTES);
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
+        
+        String timeunit = configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_TIMEOUT_UNIT, "MINUTES");
+        int timeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_SIYIN_TIMEOUT, 10);
+        int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
+        TimeUnit unit = getTimeUnit(timeunit);
+        
+        valueOperations.set(key, identifierToken, timeout, unit);
         
         //将通知登陆的接口返回给前端
-        String logonURL = getLocalActivityString(PrintErrorCode.INFORM_PRINT_URL) + identifierToken;
+        String logonURL = configurationProvider.getValue(PrintErrorCode.PRINT_INFORM_URL, "") + identifierToken;
         GetPrintLogonUrlResponse response = new GetPrintLogonUrlResponse();
         response.setLogonURL(logonURL);
         response.setIdentifierToken(identifierToken);
+        response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);;
         return response;
 	}
+
+	/**
+	 * 单位转秒
+	 */
+	private int getScale(TimeUnit unit) {
+		switch (unit) {
+		case SECONDS:
+			return 1;
+		case MINUTES:
+			return 60;
+		case HOURS:
+			return 3600;
+		}
+		return 60;
+	}
+
+
+	private TimeUnit getTimeUnit(String timeunit) {
+		//秒 SECONDS/分 MINUTES/小时 HOURS
+		timeunit = timeunit.toUpperCase();
+		switch (timeunit) {
+		case "SECONDS":
+			return TimeUnit.SECONDS;
+		case "MINUTES":
+			return TimeUnit.MINUTES;
+		case "HOURS":
+			return TimeUnit.HOURS;
+		}
+		return TimeUnit.MINUTES;
+	}
+
 
 	@Override
 	public DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
@@ -272,11 +309,20 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 		RestResponse response =  new RestResponse();
 		String subject = PRINT_SUBJECT;
+		int scanTimeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_LOGON_SCAN_TIMOUT, 10000);
 		localBusSubscriberBuilder.build(subject + "." + cmd.getIdentifierToken(), new LocalBusOneshotSubscriber() {
 		    @Override
 		    public Action onLocalBusMessage(Object sender, String subject,
 		                                    Object logonResponse, String path) {
 		        //这里可以清掉redis的uid
+		    	String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
+		    	deleteValueOperations(key);
+		    	
+//		    	ValueOperations<String, String> valueOperations = getValueOperations(key);
+//		    	Object object = valueOperations.get(key);
+//		    	
+//		    	LOGGER.info("object is {}" + object);
+		    	
 		        deferredResult.setResult((RestResponse)logonResponse);
 		        return null;
 		    }
@@ -287,7 +333,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		        deferredResult.setResult(response);
 		    }
 		
-		}).setTimeout(10000).create();
+		}).setTimeout(scanTimeout).create();
 		
 		return deferredResult;
 	}
@@ -295,11 +341,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		//验证redis中存的identifierToken
-        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         RestResponse printResponse = new RestResponse();
         User user = UserContext.current().getUser();
@@ -307,7 +350,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
             printResponse.setResponseObject(user);
             printResponse.setErrorCode(ErrorCodes.SUCCESS);
         }else{
-            printResponse.setResponseObject("uid invalid");
+            printResponse.setResponseObject("identifierToken "+cmd.getIdentifierToken()+" time out");
             printResponse.setErrorCode(409);
         }
 
@@ -326,16 +369,40 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
     
 	}
 
+	/**
+	 * 获取key在redis操作的valueOperations
+	 */
+	private ValueOperations<String, String> getValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		return valueOperations;
+	}
+	
+	/**
+	 * 清除redis中key的缓存
+	 */
+	private void deleteValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		redisTemplate.delete(key);
+	}
+
+
 	@Override
 	public void printImmediately(PrintImmediatelyCommand cmd) {
 		Long id = UserContext.current().getUser().getId();
 		
+		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder());
+		if(statusType == PrintLogonStatusType.HAVE_UNPAID_ORDER){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
+		}
+		
 		//做计数
-        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         String key = REDIS_PRINTING_TASK_COUNT + id;
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
         if(value == null){
@@ -344,6 +411,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         
         //计算值
         valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), 30, TimeUnit.MINUTES);
+//        unlockPrinter(cmd.);
 
 	}
 
@@ -373,10 +441,75 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 	@Override
-	public PayPrintOrderResponse payPrintOrder(PayPrintOrderCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public CommonOrderDTO payPrintOrder(PayPrintOrderCommand cmd) {
+		//检查订单id是否存在，是否已经是  已支付状态
+		SiyinPrintOrder order = checkPrintOrder(cmd.getOrderId());
+		
+		//检查订单是否被锁定
+		//没有被锁定的订单，锁定他
+		PrintOrderLockType lockType = PrintOrderLockType.fromCode(order.getLockFlag());
+		if(lockType == PrintOrderLockType.UNLOCKED){
+			order = lockOrder(cmd.getOrderId());
+		}
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(PrintJobTypeType.fromCode(order.getJobType()).toString());
+		orderCmd.setOrderNo(order.getOrderNo().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
+		orderCmd.setSubject(getLocalActivityString(PrintErrorCode.PRINT_SUBJECT,"打印订单"));
+		
+		//加一个开关，方便在beta环境测试
+		boolean flag = configurationProvider.getBooleanValue("beta.print.order.amount", false);
+		if(flag) {
+			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		} else {
+			orderCmd.setTotalFee(order.getOrderTotalAmount());
+		}
+    	
+
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		
+		return dto;
+		
 	}
+
+	private SiyinPrintOrder lockOrder(Long orderId) {
+		//这里必须锁定，因为存在同时去合并打印记录到订单的情况，参考 /siyinprint/jobLogNotification ，
+		//此处需要合并打印记录到订单。也需要用到此 CoordinationLocks.PRINT_ORDER_LOCK_FLAG 锁。
+		Tuple<SiyinPrintOrder,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(new Callable<SiyinPrintOrder>() {
+			public SiyinPrintOrder call() throws Exception {
+				siyinPrintOrderProvider.updateSiyinPrintOrderLockFlag(orderId,PrintOrderLockType.LOCKED.getCode());
+				return siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
+			}
+		});
+		if(!tuple.second()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_LOCK_FAILED,
+					"paid error, can not lock order, id = "+orderId);
+		}
+		return tuple.first();
+	}
+
+
+	private SiyinPrintOrder checkPrintOrder(Long orderId) {
+		SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
+		if(order == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown orderId = "+orderId);
+		}
+		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
+		if(orderStatus == PrintOrderStatusType.PAID){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have paid orderId = "+orderId);
+		}
+		return order;
+	}
+
 
 	@Override
 	public ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
@@ -396,6 +529,116 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return new ListPrintingJobsResponse(Integer.parseInt(value));
 	}
 	
+	@Override
+	public void unlockPrinter(UnlockPrinterCommand cmd) {
+		unlockPrinter(cmd.getReaderName(),false);
+	}
+	
+	public void unlockPrinter(String readerName, boolean isDirectPrint) {
+        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVERURL, "http://siyin.zuolin.com:8119");
+        String moduleIp = getSiyinModuleIp(siyinUrl, readerName);
+        String loginData = getLoginData(siyinUrl,readerName);
+        
+        SiyinPrintEmail siyinPrintEmail = siyinPrintEmailProvider.findSiyinPrintEmailByUserId(UserContext.current().getUser().getId());
+        
+        //用户设置了邮箱，上传给司印服务器
+        if(siyinPrintEmail!=null){
+        	loginData = loginData.replace("<email_address />", "<email_address>"+siyinPrintEmail.getEmail()+"</email_address>");
+        }
+        //用户打印，则设置直接打印，上传给司印
+        if(isDirectPrint){
+        	loginData = loginData.replace("<mfp_direct_print>NO</mfp_direct_print>", "<mfp_direct_print>YES</mfp_direct_print>");
+		}
+        String resultJson = XMLToJSON.convertStandardJson(loginData);
+        LOGGER.info("siyin api:/console/loginListener resultJson:{}", resultJson);
+
+        //根据readName获取到 登录的端口 登录的 上下文地址
+        SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(readerName);
+        if(printer == null){
+        	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",readerName);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+readerName);
+        }
+        directLogin(moduleIp,printer,loginData);
+	}
+	
+	/**
+	 * 解锁打印机
+	 */
+	private void directLogin(String moduleIp, SiyinPrintPrinter printer, String loginData) {
+		Map<String, String> params = new HashMap<>();
+		params.put("reader_name", printer.getReaderName());
+		params.put("action", "QueryModule");
+		params.put("login_data", loginData);
+		String url = "http://" + moduleIp  + ":" + printer.getModulePort() + printer.getLoginContext();
+		String result;
+		try {
+			result = HttpUtils.post(url, params, 30);
+			String siyinCode = getSiyinCode(result);
+			if(!siyinCode.equals("OK")){
+				LOGGER.error("siyin api:"+url+"request failed : "+result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" request failed, message = "+result);
+			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:"+url+" request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, printer.getLoginContext()+" return exception, message = "+e.getMessage());
+		}
+		
+	}
+
+
+	/**
+	 * 获取用于解锁登录的xml
+	 */
+	private String getLoginData(String siyinUrl, String readerName) {
+		 User user = UserContext.current().getUser();
+		 Map<String, String> params = new HashMap<>();
+	     params.put("login_account", user.getId().toString());
+//	     params.put("login_password", user.getPasswordHash());
+	     params.put("reader_name", readerName);
+	     params.put("login_domain", "Sysprint_OAuth");
+	     params.put("language", "zh-cn");
+	     String result = null;
+		try {
+			result = HttpUtils.post(siyinUrl + "/console/loginListener", params, 30);
+			String siyinCode = getSiyinCode(result);
+			if(!siyinCode.equals("OK")){
+				LOGGER.error("siyin api:/console/loginListener request failed, result = {} ",result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/loginListener return failed, result = "+result);
+			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:/console/loginListener request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/loginListener return exception, message = "+e.getMessage());
+		}
+         	
+         return getSiyinData(result);
+	}
+
+
+	/**
+	 *  获取模块ip
+	 */
+	private String getSiyinModuleIp(String siyinUrl, String readerName) {
+        Map<String, String> params = new HashMap<>();
+        params.put("reader_name", readerName);
+        params.put("action", "QueryModule");
+        String result;
+		try {
+			result = HttpUtils.post(siyinUrl + "/console/mfpModuleManager", params, 30);
+			String siyinCode = getSiyinCode(result);
+			if(!siyinCode.equals("OK")){
+				LOGGER.error("siyin api:/console/mfpModuleManager request failed, result = {} ",result);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/mfpModuleManager return failed, result = "+result);
+			}
+		} catch (IOException e) {
+			LOGGER.error("siyin api:/console/mfpModuleManager request exception : "+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "/console/mfpModuleManager return exception, message = "+e.getMessage());
+			
+		}
+		  
+		return getSiyinData(result);
+	}
+
+
 	private PrintOwnerType checkOwner(String ownerType, Long ownerId) {
 		// TODO Auto-generated method stub
 		if(ownerId == null || StringUtils.isEmpty(ownerType)){
@@ -441,7 +684,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 */
 	private GetPrintSettingResponse getDefaultSettingResponse() {
 		GetPrintSettingResponse response = new GetPrintSettingResponse();
-		BigDecimal defaultdecimal = new BigDecimal(getLocalActivityString(PrintErrorCode.PRINT_DEFAULT_PRICE));
+		BigDecimal defaultdecimal = new BigDecimal(configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE,"0.1"));
 		response.setColorTypeDTO(new PrintSettingColorTypeDTO());
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
@@ -469,12 +712,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return response;
 	}
 	
-	 private String getLocalActivityString(String code){
+	 private String getLocalActivityString(String code,String defaultText){
 		LocaleString localeString = localeStringProvider.find(PrintErrorCode.SCOPE, code, UserContext.current().getUser().getLocale());
 		if (localeString != null) {
 			return localeString.getText();
 		}
-		return "";
+		return defaultText;
+	 }
+	 
+	 private String getLocalActivityString(String code){
+		 return getLocalActivityString(code,"");
 	 }
 
 
@@ -719,4 +966,28 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		return PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode();
 	}
+	
+	/**
+	 * 
+	 */
+	private SiyinPrintEmail processSiyinPrintEmail(UpdatePrintUserEmailCommand cmd) {
+		SiyinPrintEmail siyinPrintEmail = ConvertHelper.convert(cmd, SiyinPrintEmail.class);
+		if(cmd.getId()!=null){
+			siyinPrintEmail = siyinPrintEmailProvider.findSiyinPrintEmailById(cmd.getId());
+			siyinPrintEmail.setEmail(cmd.getEmail());
+			siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
+			return siyinPrintEmail;
+		}
+		siyinPrintEmail.setNamespaceId(UserContext.getCurrentNamespaceId());
+		siyinPrintEmail.setUserId(UserContext.current().getUser().getId());
+		siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
+		return siyinPrintEmail;
+	}
+	public String getSiyinCode(String result){
+        return result.substring(0, result.indexOf(":"));
+    }
+
+    public String getSiyinData(String result){
+        return result.substring(result.indexOf(":") + 1);
+    }
 }

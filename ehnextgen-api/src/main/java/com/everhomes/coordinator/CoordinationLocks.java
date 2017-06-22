@@ -75,6 +75,9 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
     FLOW_CASE_UPDATE("flowCase.update"),
+    
+    PRINT_ORDER_LOCK_FLAG("print.order.lock.flag"),
+    PRINT_UPDATE_ORDER_STATUS("print.update.order.status"),
     ;
 
     private String code;

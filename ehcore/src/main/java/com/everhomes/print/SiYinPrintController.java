@@ -3,8 +3,11 @@ package com.everhomes.print;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -41,15 +44,19 @@ import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.LogonPrintCommand;
 import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
+import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.util.RequireAuthentication;
+import com.everhomes.util.xml.XMLToJSON;
 
+import sun.misc.BASE64Decoder;
 
 @RestDoc(value="print controller", site="print")
 @RestController
 @RequestMapping("/siyinprint")
-public class SiYinPrintController extends ControllerBase { 
+public class SiYinPrintController extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiYinPrintController.class);
 	
 	@Autowired
 	private SiyinPrintService siyinPrintService;
@@ -202,15 +209,15 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
-	public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
 //	 public RestResponse logonPrint(LogonPrintCommand cmd) {
+	public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
 		
 //	     RestResponse response = new RestResponse(siyinPrintService.logonPrint(cmd));
 //	     response.setErrorCode(ErrorCodes.SUCCESS);
 //	     response.setErrorDescription("OK");
 //	     DeferredResult<RestResponse> deferredResult = new DeferredResult<>();
 //	     deferredResult.setResult(response);
-//	     return deferredResult;
+//	     return response;
 	     return siyinPrintService.logonPrint(cmd);
 	 }
 	 
@@ -278,7 +285,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=CommonOrderDTO.class)
 	 public RestResponse payPrintOrder(PayPrintOrderCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.payPrintOrder(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;
@@ -297,4 +304,64 @@ public class SiYinPrintController extends ControllerBase {
 	     response.setErrorDescription("OK");
 	     return response;
 	 }
+	 
+	 /**
+	  * <b>URL: /siyinprint/unlockPrinter</b>
+	  * <p>直接解锁打印机</p>
+	  */
+	 @RequestMapping("unlockPrinter")
+	 @RestReturn(value=String.class)
+	 public RestResponse unlockPrinter(UnlockPrinterCommand cmd) {
+		 siyinPrintService.unlockPrinter(cmd);
+	     RestResponse response = new RestResponse();
+	     response.setErrorCode(ErrorCodes.SUCCESS);
+	     response.setErrorDescription("OK");
+	     return response;
+	 }
+	 
+	 /**
+	  * 
+	  * <b>URL: /siyinprint/jobLogNotification</b>
+	  * <p>司印方调用，任务日志处理</p>
+	  */
+	 @RequestMapping("jobLogNotification")
+	 @RestReturn(String.class)
+	 @RequireAuthentication(false)
+	 public RestResponse jobLogNotification(@RequestParam(value="jobData", required=true) String jobData){
+        RestResponse restResponse = new RestResponse();
+        try{
+            LOGGER.info("siyin params request:{}", jobData);
+            BASE64Decoder decoder = new BASE64Decoder();
+            jobData = new String(decoder.decodeBuffer(jobData));
+            jobData = XMLToJSON.convertStandardJson(jobData);
+            LOGGER.info("task log json:{}", jobData);
+        }catch (Exception e){
+
+        }
+
+        return restResponse;
+	 }
+	 
+	/**
+	 * 
+	 * <b>URL: /siyinprint/mfpLogNotification</b>
+	 * <p>司印方调用，任务日志处理</p>
+	 */
+    @RequestMapping("mfpLogNotification")
+    @RestReturn(String.class)
+    @RequireAuthentication(false)
+    public RestResponse mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData){
+        RestResponse restResponse = new RestResponse();
+        try{
+            LOGGER.info("siyin mfpLogNotification request:{}", jobData);
+            BASE64Decoder decoder = new BASE64Decoder();
+            jobData = new String(decoder.decodeBuffer(jobData));
+            jobData = XMLToJSON.convertStandardJson(jobData);
+            LOGGER.info("task log json:{}", jobData);
+        }catch (Exception e){
+
+        }
+
+        return restResponse;
+    }
 }

@@ -49,7 +49,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Override
 	public void updateSiyinPrintOrder(SiyinPrintOrder siyinPrintOrder) {
 		assert (siyinPrintOrder.getId() != null);
-//		siyinPrintOrder.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		siyinPrintOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		siyinPrintOrder.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(siyinPrintOrder);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinPrintOrders.class, siyinPrintOrder.getId());
@@ -124,5 +124,20 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc())
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+	}
+
+	@Override
+	public void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag) {
+		getReadWriteContext().update(Tables.EH_SIYIN_PRINT_ORDERS).set(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG,lockFlag)
+			.where(Tables.EH_SIYIN_PRINT_ORDERS.ID.eq(id)).execute();
+	}
+
+	@Override
+	public SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo) {
+		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+		.where(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_NO.eq(orderNo)).fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		if(list!=null && list.size()>0)
+			return list.get(0);
+		return null;
 	}
 }
