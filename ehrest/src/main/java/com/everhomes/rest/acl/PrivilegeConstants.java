@@ -132,4 +132,6 @@ public interface PrivilegeConstants {
     
     long FEEDBACK_MANAGEMENT    = 10160L;// 举报管理模块权限
 
+    long ALL_SERVICE_MODULE = 10000L;
+
 }

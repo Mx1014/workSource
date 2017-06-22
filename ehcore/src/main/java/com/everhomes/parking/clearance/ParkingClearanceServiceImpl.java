@@ -1,6 +1,39 @@
 // @formatter:off
 package com.everhomes.parking.clearance;
 
+import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.APPLY_PRIVILEGE_ID;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.MODULE_ID;
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.PROCESS_PRIVILEGE_ID;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+
+import com.everhomes.rest.common.PortalType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -39,26 +72,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.ExcelUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.constraints.Size;
-import javax.validation.metadata.ConstraintDescriptor;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.everhomes.rest.parking.ParkingLocalStringCode.SCOPE_STRING_STATUS;
-import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * Parking clearance service
@@ -166,13 +180,13 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     // 校验当前用户是否有申请放行权限
     private void checkApplicantAuthority(CreateClearanceLogCommand cmd) {
-        userPrivilegeMgr.checkUserAuthority(
-                currUserId(),
-                EntityType.PARKING_LOT.getCode(),
-                cmd.getParkingLotId(),
-                cmd.getOrganizationId(),
-                APPLY_PRIVILEGE_ID
-        );
+//        userPrivilegeMgr.checkUserAuthority(
+//                currUserId(),
+//                EntityType.PARKING_LOT.getCode(),
+//                cmd.getParkingLotId(),
+//                cmd.getOrganizationId(),
+//                APPLY_PRIVILEGE_ID
+//        );
         // 上面的权限检查会放过超级管理员, 但是需求是不放过
         checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
     }
@@ -248,7 +262,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                             operator.getParkingLotId(),//
                             EntityType.USER.getCode(),//
                             operator.getOperatorId(),//
-                            null,//
                             new ArrayList<>(Collections.singletonList(privilegeId))
                     );
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
@@ -440,7 +453,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             for (ParkingLot parkingLot : parkingLots) {
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
-                            cmd.getOrganizationId(), privilegeId);
+                             cmd.getOrganizationId(), privilegeId);
 
                     // 上面的权限检查会放过超级管理员, 但是需求是不放过
                     checkUserNotInOperatorList(parkingLot.getId(), operatorType);

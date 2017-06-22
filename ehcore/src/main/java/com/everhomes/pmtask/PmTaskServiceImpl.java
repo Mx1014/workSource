@@ -34,8 +34,11 @@ import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.flow.*;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.rest.common.ServiceModuleConstants;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingFlowConstant;
@@ -170,11 +173,16 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Autowired
 	private FamilyProvider familyProvider;
 
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
@@ -190,10 +198,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
@@ -208,10 +218,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -427,9 +439,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void cancelTask(CancelTaskCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -543,10 +557,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -569,9 +585,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
 
 		User user = UserContext.current().getUser();
-		Integer namespaceId = user.getNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
 		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//Todo:为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
@@ -626,10 +645,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOrganizationId(cmd.getOrganizationId());
 		
 		cmd.setAddressType(PmTaskAddressType.FAMILY.getCode());
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -638,8 +659,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void deleteTaskCategory(DeleteTaskCategoryCommand cmd) {
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		Long id = cmd.getId();
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}		Long id = cmd.getId();
 		checkId(id);
 		
 		Category category = categoryProvider.findCategoryById(id);
@@ -660,9 +683,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public CategoryDTO createTaskCategory(CreateTaskCategoryCommand cmd) {
-		
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
 		Long parentId = cmd.getParentId();
 		String path;
 		Category category;
@@ -706,10 +731,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
 		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		//为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
@@ -725,9 +753,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -1621,9 +1651,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 //			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
 			
 			pmTaskProvider.deleteTaskTarget(pmTaskTarget);
-			
+
+			//
 			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
-					EntityType.USER.getCode(), cmd.getTargetId(), 20100L, null);
+					EntityType.USER.getCode(), cmd.getTargetId(), ServiceModuleConstants.PM_TASK_MODULE, null);
 			if (null != pmTaskTarget2) {
 				rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 						EntityType.USER.getCode(), cmd.getTargetId(), "pmtask", privilegeIds);
@@ -1769,9 +1800,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void updateTaskByOrg(UpdateTaskCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-
-		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		Integer namespaceId = cmd.getNamespaceId();
+		if (null == namespaceId) {
+			namespaceId = UserContext.getCurrentNamespaceId();
+		}
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.FLOW);
 
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 
@@ -1793,11 +1826,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
 
-		ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
-		listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
-		listUserRelatedProjectByModuleIdCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
-		
-		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+		ListUserRelatedProjectByModuleCommand listUserRelatedProjectByModuleCommand = new ListUserRelatedProjectByModuleCommand();
+		listUserRelatedProjectByModuleCommand.setOrganizationId(cmd.getOrganizationId());
+		listUserRelatedProjectByModuleCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(listUserRelatedProjectByModuleCommand);
 
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
 
@@ -1829,6 +1862,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
 			LOGGER.info("findClaimedIdentifierByToken: {}", cmd.getKeyword());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
@@ -1840,7 +1875,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 
 		Long userId = user.getId();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
@@ -2083,7 +2117,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 		String key = sb.toString();
 		
-		String handler = configProvider.getValue(key, PmTaskHandle.SHEN_YE);
+		String handler = configProvider.getValue(key, PmTaskHandle.FLOW);
 		
 		dto.setHandler(handler);
 		

@@ -5,7 +5,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+
 import com.everhomes.rest.quality.*;
+
+import com.everhomes.module.ServiceModuleService;
+import com.everhomes.rest.module.ListUserRelatedProjectByModuleCommand;
+import com.everhomes.util.ConvertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +36,9 @@ public class QualityController extends ControllerBase {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 	
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
@@ -590,10 +598,10 @@ public class QualityController extends ControllerBase {
 	@RequestMapping("listUserRelatedProjectByModuleId")
 	@RestReturn(value = CommunityDTO.class, collection = true)
 	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
-		
-		List<CommunityDTO> communitydtos = rolePrivilegeService.listUserRelatedProjectByModuleId(cmd);
-		
-		RestResponse response = new RestResponse(communitydtos);
+
+		List<CommunityDTO> dtos = serviceModuleService.listUserRelatedCommunityByModuleId(ConvertHelper.convert(cmd, ListUserRelatedProjectByModuleCommand.class));
+
+		RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

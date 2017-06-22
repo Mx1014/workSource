@@ -454,4 +454,11 @@ public interface OrganizationService {
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
+
+	/**
+	 * 查询所有管理公司
+	 */
+	List<OrganizationDTO> listAllPmOrganizations();
+
+	List<Long> getIncludeOrganizationIdsByUserId(Long userId, Long organizationId);
 }

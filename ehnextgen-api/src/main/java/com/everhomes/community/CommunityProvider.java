@@ -73,7 +73,7 @@ public interface CommunityProvider {
 	
 	List<CommunityDTO> listCommunitiesByNamespaceId(Byte communityType, Integer namespaceId, ListingLocator locator, int pageSize);
 	
-	List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
+	List<CommunityDTO> listCommunitiesByType(int namespaceId, List<Long> communityIds, Byte communityType, ListingLocator locator, int pageSize);
 
     List<Community> findCommunitiesByCityId(ListingLocator locator, int count, int namespaceId, long cityId);
 

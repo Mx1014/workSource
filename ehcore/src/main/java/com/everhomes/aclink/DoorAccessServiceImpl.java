@@ -86,6 +86,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
@@ -228,6 +230,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
     
     @Autowired
     private LocalBus localBus;
+    
+    @Autowired
+    private LocaleTemplateProvider localeTemplateProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -2022,7 +2027,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         qr.setCreatorUid(auth.getApproveUserId());
         qr.setDoorGroupId(doorAccess.getId());
         qr.setDoorName(doorAccess.getName());
-        qr.setExpireTimeMs(auth.getKeyValidTime());
+        
+        if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+        	qr.setExpireTimeMs(System.currentTimeMillis() + this.getQrTimeout());
+        } else {
+        	qr.setExpireTimeMs(auth.getValidEndMs());	
+        }
+        
         qr.setHardwares(hardwares);
         qr.setId(auth.getId());
         qr.setQrDriver(this.getQrDriverZuolinInner(UserContext.getCurrentNamespaceId()).getCode());
@@ -2082,13 +2093,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setKeys(qrKeys);
         
         for(DoorAuth auth : auths) {
-            
-            if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
-                continue;
-            }
-            
-            //Forever + true of rightOpen
-            
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
                 //The door is delete, set it to invalid
@@ -2098,14 +2102,42 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             }
             
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
+            	//Forever + true of rightOpen
+                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
+                    continue;
+                }
+                
             	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
                 doLinglingQRKey(user, doorAccess, auth, qrKeys);
             } else if(auth.getDriver().equals(DoorAccessDriverType.HUARUN_ANGUAN.getCode())){
+            	//Forever + true of rightOpen
+                if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
+                    continue;
+                }
+                
             	doHuarunQRKey(user, doorAccess, auth, qrKeys);
             } else {
+            	
+            	//rightOpen and more
+            	if(!auth.getRightOpen().equals((byte)1)) {
+            		continue;
+            		}
+            	if(!auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+            		Long now = DateHelper.currentGMTTime().getTime();
+            		if(auth.getValidEndMs() < now) {
+            			//已经失效，删除它
+                    auth.setStatus(DoorAuthStatus.INVALID.getCode());
+                    doorAuthProvider.updateDoorAuth(auth);
+                    continue;
+                    }
+            		
+            		if(auth.getValidFromMs() > now) {
+            			continue;
+            		}
+            	}
             	resp.setQrTimeout(this.getQrTimeout()/1000l);
                 doZuolinQRKey(user, doorAccess, auth, qrKeys);
-            }
+                }
            
             }
             
@@ -2442,9 +2474,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        auth.setValidFromMs(System.currentTimeMillis());
-        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        
+        if(cmd.getValidFromMs() == null) {
+        	auth.setValidFromMs(System.currentTimeMillis());	
+        } else {
+        	auth.setValidFromMs(cmd.getValidFromMs());
+        }
+        
+        if(cmd.getValidEndMs() == null) {
+        	auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        	auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        } else {
+        	auth.setKeyValidTime(cmd.getValidEndMs());
+        	auth.setValidEndMs(cmd.getValidEndMs());
+        }
+        
         auth.setUserId(0l);
         auth.setOwnerType(doorAccess.getOwnerType());
         auth.setOwnerId(doorAccess.getOwnerId());
@@ -2485,7 +2529,14 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+        		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+        	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);

@@ -11,6 +11,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.common.PortalType;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -1972,7 +1973,7 @@ public class PropertyMgrController extends ControllerBase {
     private void checkPrivilege(String ownerType, Long ownerId, Long organizationId, Long privilegeId) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         Long userId = UserContext.current().getUser().getId();
-        resolver.checkUserAuthority(userId, ownerType, ownerId, organizationId, privilegeId);
+        resolver.checkUserAuthority(userId, ownerType, ownerId,organizationId, privilegeId);
     }
 
 	/**

@@ -195,38 +195,7 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
-    /**
-     * <b>URL: /admin/acl/createRolePrivilege</b>
-     * <p>创建角色权限</p>
-     */
-    @RequestMapping("createRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse createRolePrivilege(@Valid CreateRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.createRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /admin/acl/updateRolePrivilege</b>
-     * <p>修改角色权限</p>
-     */
-    @RequestMapping("updateRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse updateRolePrivilege(@Valid UpdateRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	rolePrivilegeService.updateRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+
     
     /**
      * <b>URL: /admin/acl/qryRolePrivileges</b>
@@ -242,23 +211,7 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
-    /**
-     * <b>URL: /admin/acl/deleteRolePrivilege</b>
-     * <p>删除角色权限</p>
-     */
-    @RequestMapping("deleteRolePrivilege")
-    @RestReturn(value=String.class)
-    public RestResponse deleteRolePrivilege(@Valid DeleteRolePrivilegeCommand cmd) {
-    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	rolePrivilegeService.deleteRolePrivilege(cmd);
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+
     /**
      * <b>URL: /admin/acl/listAclRoleByOrganizationId</b>
      * <p>根据机构获取角色列表</p>
@@ -268,7 +221,7 @@ public class AclAdminController extends ControllerBase {
     public RestResponse listAclRoleByOrganizationId(@Valid ListAclRolesCommand cmd) {
     	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeList);
     	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
-    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationId(cmd));
+    	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
