@@ -209,8 +209,8 @@ public class SiYinPrintController extends ControllerBase {
 	 @RequestMapping("logonPrint")
 	 @RestReturn(value=String.class)
 	 @RequireAuthentication(false)
+	 public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
 //	 public RestResponse logonPrint(LogonPrintCommand cmd) {
-	public  DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
 		
 //	     RestResponse response = new RestResponse(siyinPrintService.logonPrint(cmd));
 //	     response.setErrorCode(ErrorCodes.SUCCESS);
@@ -307,7 +307,7 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/unlockPrinter</b>
-	  * <p>直接解锁打印机</p>
+	  * <p>直接解锁打印机,请先调用 /siyinprint/getPrintUnpaidOrder 接口检查未支付订单</p>
 	  */
 	 @RequestMapping("unlockPrinter")
 	 @RestReturn(value=String.class)
@@ -328,18 +328,11 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(String.class)
 	 @RequireAuthentication(false)
 	 public RestResponse jobLogNotification(@RequestParam(value="jobData", required=true) String jobData){
-        RestResponse restResponse = new RestResponse();
-        try{
-            LOGGER.info("siyin params request:{}", jobData);
-            BASE64Decoder decoder = new BASE64Decoder();
-            jobData = new String(decoder.decodeBuffer(jobData));
-            jobData = XMLToJSON.convertStandardJson(jobData);
-            LOGGER.info("task log json:{}", jobData);
-        }catch (Exception e){
-
-        }
-
-        return restResponse;
+		siyinPrintService.jobLogNotification(jobData);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+	    response.setErrorDescription("OK");
+        return response;
 	 }
 	 
 	/**

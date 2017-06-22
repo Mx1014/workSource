@@ -72,4 +72,6 @@ public interface SiyinPrintService {
 	ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd);
 
 	void unlockPrinter(UnlockPrinterCommand cmd);
+
+	void jobLogNotification(String jobData);
 }

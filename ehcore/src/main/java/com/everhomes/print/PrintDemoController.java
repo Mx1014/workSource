@@ -187,8 +187,8 @@ public class PrintDemoController extends ControllerBase {
             params.put("login_domain", "Sysprint_OAuth");
             params.put("language", "zh-cn");
             result = HttpUtils.post(siyinUrl + "/console/loginListener", params, 30);
-            
         	result = result.replace("<email_address />", "<email_address>864313905@qq.com</email_address>");
+        	result = result.replace("<group_name>___OAUTH___</group_name>", "<group_name>community_id</group_name>");
 //        	result = result.replace("<scan_to_home_account />", "<scan_to_home_account>shuang.deng@zuolin.com</scan_to_home_account>");
 //        	result = result.replace("<scan_to_home_pwd />", "<scan_to_home_pwd>dengs12345</scan_to_home_pwd>");
 //        	result = result.replace("<mfp_direct_print>NO</mfp_direct_print>", "<mfp_direct_print>YES</mfp_direct_print>");
@@ -244,6 +244,28 @@ public class PrintDemoController extends ControllerBase {
             LOGGER.info("task log json:{}", jobData);
         }catch (Exception e){
 
+        }
+
+        return restResponse;
+    }
+    
+    @RequestMapping("jobLogNotification/jobLogNotification")
+    @RestReturn(String.class)
+    @RequireAuthentication(false)
+    public RestResponse jobLogNotification(@RequestParam(value="jobData", required=true) String jobData){
+        RestResponse restResponse = new RestResponse();
+        try{
+            LOGGER.info("siyin params request:{}", jobData);
+            BASE64Decoder decoder = new BASE64Decoder();
+            String decodeJobData = "";
+            decodeJobData = new String(decoder.decodeBuffer(jobData));
+            decodeJobData = XMLToJSON.convertStandardJson(decodeJobData);
+            Map<String, Object> object = XMLToJSON.convertOriginalMap(new String(decoder.decodeBuffer(jobData)));
+            Map data = (Map)object.get("data");
+            Object job = (Map)data.get("job");
+            LOGGER.info("task log json:{}", jobData);
+        }catch (Exception e){
+        	e.printStackTrace();
         }
 
         return restResponse;
@@ -306,6 +328,8 @@ public class PrintDemoController extends ControllerBase {
     }
 
     public static void main(String[] args) {
+    	new PrintDemoController().jobLogNotification("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGRhdGE+CiAgPGpvYj4KICAgIDxqb2JfaWQ+MjAxNzA2MjItNzYzNC01NGQzZDBhOC00ZjY1LTRmMTgtYmUyNy0yYmZlNGJmY2RkMmQ8L2pvYl9pZD4KICAgIDxqb2Jfc3RhdHVzPkZpbmlzaEpvYjwvam9iX3N0YXR1cz4KICAgIDxmaW5hbF9yZXN1bHQ+MTwvZmluYWxfcmVzdWx0PgogICAgPGdyb3VwX25hbWU+X19fT0FVVEhfX188L2dyb3VwX25hbWU+CiAgICA8dXNlcl9uYW1lPjEwMDAxPC91c2VyX25hbWU+CiAgICA8dXNlcl9kaXNwbGF5X25hbWUgLz4KICAgIDxjbGllbnRfaXAgLz4KICAgIDxjbGllbnRfbmFtZSAvPgogICAgPGNsaWVudF9tYWMgLz4KICAgIDxkcml2ZXJfbmFtZSAvPgogICAgPGpvYl90eXBlPlBSSU5UPC9qb2JfdHlwZT4KICAgIDxqb2JfaW5fdGltZT4yMDE3LTA2LTIyIDE1OjMyOjA4PC9qb2JfaW5fdGltZT4KICAgIDxqb2Jfb3V0X3RpbWU+MjAxNy0wNi0yMiAxNTozMjoxNzwvam9iX291dF90aW1lPgogICAgPGRvY3VtZW50X25hbWU+Q1VzZXJzQWRtaW5pc3RyYXRvckRlc2t0b3DmiZPljbDmtYvor5XmlofmoaMuZG9jeDwvZG9jdW1lbnRfbmFtZT4KICAgIDxsZXZlbF9uYW1lPuWFrOW8gDwvbGV2ZWxfbmFtZT4KICAgIDxwcm9qZWN0X25hbWUgLz4KICAgIDxwcmludGVyX25hbWU+RlgtQXBlb3NQb3J0LVZJIEMzMzcwPC9wcmludGVyX25hbWU+CiAgICA8Y29sbGF0ZT4wPC9jb2xsYXRlPgogICAgPHBhcGVyX3NpemU+QTQ8L3BhcGVyX3NpemU+CiAgICA8cGFwZXJfaGVpZ2h0PjA8L3BhcGVyX2hlaWdodD4KICAgIDxwYXBlcl93aWR0aD4wPC9wYXBlcl93aWR0aD4KICAgIDxkdXBsZXg+MTwvZHVwbGV4PgogICAgPGNvcHlfY291bnQ+MTwvY29weV9jb3VudD4KICAgIDxzdXJmYWNlX2NvdW50PjI8L3N1cmZhY2VfY291bnQ+CiAgICA8Y29sb3Jfc3VyZmFjZV9jb3VudD4wPC9jb2xvcl9zdXJmYWNlX2NvdW50PgogICAgPG1vbm9fc3VyZmFjZV9jb3VudD4yPC9tb25vX3N1cmZhY2VfY291bnQ+CiAgICA8cGFnZV9jb3VudD4yPC9wYWdlX2NvdW50PgogICAgPGNvbG9yX3BhZ2VfY291bnQ+MDwvY29sb3JfcGFnZV9jb3VudD4KICAgIDxtb25vX3BhZ2VfY291bnQ+MjwvbW9ub19wYWdlX2NvdW50PgogICAgPHRvdGFsX2Nvc3Q+MC4yPC90b3RhbF9jb3N0PgogICAgPGNvbG9yX2Nvc3Q+MC4wPC9jb2xvcl9jb3N0PgogICAgPG1vbm9fY29zdD4wLjI8L21vbm9fY29zdD4KICA8L2pvYj4KPC9kYXRhPgo=");
+    
         String result = "OK:asf";
         System.out.println(result = result.substring(0, result.indexOf(":")));
         

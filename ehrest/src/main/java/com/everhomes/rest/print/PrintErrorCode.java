@@ -11,7 +11,7 @@ public class PrintErrorCode {
 	public static final String PRINT_SUBJECT= "print_subject";//打印订单
 	
 	//eh_configurations
-	public static final String PRINT_SIYIN_SERVERURL= "print.siyin.serverUrl";//司印服务器地址 : http://siyin.zuolin.com:8119
+	public static final String PRINT_SIYIN_SERVER_URL= "print.siyin.server.url";//司印服务器地址 : http://siyin.zuolin.com:8119
 	public static final String PRINT_SIYIN_TIMEOUT= "print.siyin.timeout";//二维码失效时间 : 10
 	public static final String PRINT_SIYIN_TIMEOUT_UNIT= "print.siyin.timeout.unit";//二维码失效时间的单位（1-秒/2-分/3-小时） ：2
 	public static final String PRINT_DEFAULT_PRICE= "print.default.price";//打印默认价格 ： 0.1

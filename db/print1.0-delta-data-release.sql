@@ -1,5 +1,5 @@
 -- by dengs,司印服务器ip地址,二维码时间，默认打印价格，生成打印二维码的url 20170615
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.serverUrl', 'http://siyin.zuolin.com:8119', '司印服务器ip地址', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.server.url', 'http://siyin.zuolin.com:8119', '司印服务器ip地址', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.timeout', '10', '二维码的identifierToken在redis存在的时间', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.timeout.unit', 'MINUTES', '秒 SECONDS/分 MINUTES/小时 HOURS', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.default.price', '0.1', '打印默认价格', '0', NULL);

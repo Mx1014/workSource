@@ -16,6 +16,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.print.PrintOrderLockType;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -136,6 +137,20 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	public SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo) {
 		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 		.where(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_NO.eq(orderNo)).fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		if(list!=null && list.size()>0)
+			return list.get(0);
+		return null;
+	}
+
+	@Override
+	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType) {
+		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+			.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG.eq(PrintOrderLockType.UNLOCKED.getCode()))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType))
+			.fetch()
+			.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 		if(list!=null && list.size()>0)
 			return list.get(0);
 		return null;

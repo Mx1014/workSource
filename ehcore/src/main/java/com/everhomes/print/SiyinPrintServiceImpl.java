@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.awt.PrintJob;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,6 +17,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.tools.ant.taskdefs.Recorder;
+import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +105,11 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.xml.XMLToJSON;
 
+import sun.misc.BASE64Decoder;
+/**
+ * 
+ *  @author:dengs 2017年6月22日
+ */
 @Component
 public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
@@ -340,6 +348,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		//验证redis中存的identifierToken
         String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
@@ -347,7 +356,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         RestResponse printResponse = new RestResponse();
         User user = UserContext.current().getUser();
         if(null != valueOperations.get(key)){
-            printResponse.setResponseObject(user);
+        	User logonUser  = new User();
+        	//这里设置accoutname 为用户id-园区-拥有者id，因为在jobLogNotification
+        	//中计算价格的时候，不知道用户所在的园区，所以只能依靠
+        	logonUser.setAccountName(user.getId()+"-"+cmd.getOwnerType()+"-"+cmd.getOwnerId());
+            printResponse.setResponseObject(logonUser);
             printResponse.setErrorCode(ErrorCodes.SUCCESS);
         }else{
             printResponse.setResponseObject("identifierToken "+cmd.getIdentifierToken()+" time out");
@@ -516,11 +529,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Long id = UserContext.current().getUser().getId();
 		
 		//做计数
-        final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
         String key = REDIS_PRINTING_TASK_COUNT + id;
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
         if(value == null){
@@ -531,13 +541,169 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Override
 	public void unlockPrinter(UnlockPrinterCommand cmd) {
-		unlockPrinter(cmd.getReaderName(),false);
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		//解锁打印机之前检查是否存在未支付订单。
+		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
+		}
+		unlockPrinter(cmd,false);
 	}
 	
-	public void unlockPrinter(String readerName, boolean isDirectPrint) {
-        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVERURL, "http://siyin.zuolin.com:8119");
-        String moduleIp = getSiyinModuleIp(siyinUrl, readerName);
-        String loginData = getLoginData(siyinUrl,readerName);
+	@Override
+	public void jobLogNotification(String jobData) {
+		try{
+			// TODO 记得上锁 PRINT_ORDER_LOCK_FLAG
+			//转记录对象
+           SiyinPrintRecord record = convertMapToRecordObject(jobData);
+           
+           //存在记录，不做重复计算
+           if(!record.getJobStatus().equals("FinishJob")){
+        	   return ;
+           }
+           SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
+           if(oldrecord!=null){
+        	   return ;
+           }
+           
+           //获取未支付/未锁定的订单，如没有获取到则创建一个新订单
+           SiyinPrintOrder order = getPrintOrder(record);
+           
+           //将记录合并到订单上,并更新到数据库
+           mergeRecordToOrder(record,order);
+           
+           
+		}catch (IOException e){
+			LOGGER.error("analysis jobData IOException = {}",e);
+		}
+	}
+	
+	private void mergeRecordToOrder(SiyinPrintRecord record, SiyinPrintOrder order) {
+		Map<String, BigDecimal> priceMap = new HashMap<>();
+		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
+		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, UserContext.current().getUser());
+		List<SiyinPrintSetting> settings = null;
+		if(list!=null &&list.size()>0){
+			OrganizationSimpleDTO dto = list.get(0);
+			settings = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(PrintOwnerType.COMMUNITY.getCode(), dto.getCommunityId());
+		}
+		
+//		priceMap.put(key, value);
+		
+		if(settings == null)
+		//订单为新创建的情况
+		if(order.getId() == null){
+			
+		}
+		
+	}
+
+
+	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
+		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(UserContext.current().getUser().getId(),record.getJobType());
+        if(order == null){
+        	order = new SiyinPrintOrder();
+        	order.setCreatorPhone(UserContext.current().getUser().getIdentifierToken());
+        	order.setDetail("");
+        	SiyinPrintEmail email = siyinPrintEmailProvider.findSiyinPrintEmailByUserId(UserContext.current().getUser().getId());
+        	order.setEmail(email==null?"":email.getEmail());
+        	order.setJobType(record.getJobType());
+        	order.setLockFlag(PrintOrderLockType.UNLOCKED.getCode());
+        	order.setNamespaceId(UserContext.getCurrentNamespaceId());
+        	order.setOrderNo(createOrderNo(System.currentTimeMillis()));
+        	order.setOrderStatus(PrintOrderStatusType.UNPAID.getCode());
+        	order.setOrderTotalAmount(new BigDecimal("0"));
+        }
+		return order;
+	}
+	
+	private Long createOrderNo(Long time) {
+		String suffix = String.valueOf(generateRandomNumber(3));
+		return Long.valueOf(String.valueOf(time) + suffix);
+	}
+
+	/**
+	 *
+	 * @param n 创建n位随机数
+	 * @return
+	 */
+	private long generateRandomNumber(int n){
+		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
+	}
+
+	private SiyinPrintRecord convertMapToRecordObject(String jobData) throws IOException {
+		String copyJobData = jobData;
+		BASE64Decoder decoder = new BASE64Decoder();
+		copyJobData = new String(decoder.decodeBuffer(copyJobData));
+		
+        Map<String, Object> object = XMLToJSON.convertOriginalMap(copyJobData);
+        Map<?, ?> data = (Map)object.get("data");
+        Map<?, ?> job = (Map<?, ?>)data.get("job");
+        
+		SiyinPrintRecord record = new SiyinPrintRecord();
+		record.setJobId(job.get("job_id").toString());
+		record.setJobStatus(job.get("job_status").toString());
+		record.setGroupName(job.get("group_name").toString());
+		String userIdcommuntiyID = job.get("user_name").toString();
+		String[] ids = userIdcommuntiyID.split("-");
+		record.setCreatorUid(Long.valueOf(ids[0]));
+		record.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
+		record.setOwnerId(Long.valueOf(ids[2]));
+		record.setUserDisplayName(job.get("user_display_name").toString());
+		record.setClientIp(job.get("client_ip").toString());
+		record.setClientName(job.get("client_name").toString());
+		record.setClientMac(job.get("client_mac").toString());
+		record.setDriverName(job.get("driver_name").toString());
+		record.setJobType(getPrintTypeCode(job.get("job_type").toString()));
+		record.setStartTime(job.get("job_in_time").toString());
+		record.setEndTime(job.get("job_out_time").toString());
+		record.setDocumentName(job.get("document_name").toString());
+		record.setPrinterName(job.get("printer_name").toString());
+		record.setPaperSize(getPaperSizeCode(job.get("paper_size").toString()));
+		record.setDuplex(Byte.valueOf(job.get("duplex").toString()));
+		record.setCopyCount(Integer.valueOf(job.get("copy_count").toString()));
+		record.setSurfaceCount(Integer.valueOf(job.get("surface_count").toString()));
+		record.setColorSurfaceCount(Integer.valueOf(job.get("color_surface_count").toString()));
+		record.setMonoSurfaceCount(Integer.valueOf(job.get("mono_surface_count").toString()));
+		record.setPageCount(Integer.valueOf(job.get("page_count").toString()));
+		record.setColorPageCount(Integer.valueOf(job.get("color_page_count").toString()));
+		record.setMonoPageCount(Integer.valueOf(job.get("mono_page_count").toString()));
+		record.setNamespaceId(UserContext.getCurrentNamespaceId());
+		record.setStatus(CommonStatus.ACTIVE.getCode());
+		return record;
+	}
+
+
+	private Byte getPaperSizeCode(String string) {
+		switch (string) {
+		case "PRINT":
+			return PrintJobTypeType.PRINT.getCode();
+		case "COPY":
+			return PrintJobTypeType.COPY.getCode();
+		case "SCAN":
+			return PrintJobTypeType.SCAN.getCode();
+		}
+		return null;
+	}
+
+
+	private Byte getPrintTypeCode(String string) {
+		switch (string) {
+		case "PRINT":
+			return PrintJobTypeType.PRINT.getCode();
+		case "COPY":
+			return PrintJobTypeType.COPY.getCode();
+		case "SCAN":
+			return PrintJobTypeType.SCAN.getCode();
+		}
+		return null;
+	}
+
+
+	public void unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
+        String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+        String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
+        String loginData = getLoginData(siyinUrl,cmd);
         
         SiyinPrintEmail siyinPrintEmail = siyinPrintEmailProvider.findSiyinPrintEmailByUserId(UserContext.current().getUser().getId());
         
@@ -553,10 +719,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         LOGGER.info("siyin api:/console/loginListener resultJson:{}", resultJson);
 
         //根据readName获取到 登录的端口 登录的 上下文地址
-        SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(readerName);
+        SiyinPrintPrinter printer = siyinPrintPrinterProvider.findSiyinPrintPrinterByReadName(cmd.getReaderName());
         if(printer == null){
-        	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",readerName);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+readerName);
+        	LOGGER.error("Unknown readerName = {}, register on table eh_siyin_print_printers",cmd.getReaderName());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown readerName = "+cmd.getReaderName());
         }
         directLogin(moduleIp,printer,loginData);
 	}
@@ -589,12 +755,14 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 获取用于解锁登录的xml
 	 */
-	private String getLoginData(String siyinUrl, String readerName) {
+	private String getLoginData(String siyinUrl, UnlockPrinterCommand cmd) {
 		 User user = UserContext.current().getUser();
 		 Map<String, String> params = new HashMap<>();
-	     params.put("login_account", user.getId().toString());
+		//这里设置accoutname 为用户id-园区-拥有者id，因为在jobLogNotification
+     	//中计算价格的时候，不知道用户所在的园区，所以只能依靠
+	     params.put("login_account", user.getId().toString()+"-"+cmd.getOwnerType()+"-"+cmd.getOwnerId());
 //	     params.put("login_password", user.getPasswordHash());
-	     params.put("reader_name", readerName);
+	     params.put("reader_name", cmd.getReaderName());
 	     params.put("login_domain", "Sysprint_OAuth");
 	     params.put("language", "zh-cn");
 	     String result = null;

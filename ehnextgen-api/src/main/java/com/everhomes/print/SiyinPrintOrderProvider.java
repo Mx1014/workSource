@@ -23,4 +23,6 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
 
+	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType);
+
 }

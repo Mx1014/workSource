@@ -87,4 +87,13 @@ public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public SiyinPrintRecord findSiyinPrintRecordByJobId(String jobId) {
+		List<SiyinPrintRecord> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
+			.where(Tables.EH_SIYIN_PRINT_RECORDS.JOB_ID.eq(jobId)).fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
+		if(list!=null && list.size() > 0)
+			return list.get(0);
+		return null;
+	}
 }

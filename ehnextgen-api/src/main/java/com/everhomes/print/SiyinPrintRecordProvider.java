@@ -13,4 +13,6 @@ public interface SiyinPrintRecordProvider {
 
 	List<SiyinPrintRecord> listSiyinPrintRecord();
 
+	SiyinPrintRecord findSiyinPrintRecordByJobId(String jobId);
+
 }
