@@ -20,11 +20,10 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/qualityTask" -d '
             "operatorId":{"type":"long"},
             "startDate":{"type":"date"},
             "endDate":{"type":"date"},
-            "status":{"type":"byte"}
+            "status":{"type":"byte"},
             "reviewResult":{"type":"byte"}
         }
     }
 }
 '
-
             
