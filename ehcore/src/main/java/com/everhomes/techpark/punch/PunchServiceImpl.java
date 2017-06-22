@@ -195,7 +195,7 @@ import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
-	final String downloadDir ="\\download\\";
+	final String downloadDir ="download/";
  
 	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
