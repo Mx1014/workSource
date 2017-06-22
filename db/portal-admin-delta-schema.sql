@@ -32,8 +32,8 @@ CREATE TABLE `eh_portal_navigation_bars` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `label` varchar(64) DEFAULT NULL,
   `name` varchar(64) DEFAULT NULL,
-  `content_type` varchar(64) NOT NULL,
-  `content_data` text ,
+  `action_type` varchar(64) NOT NULL,
+  `a_data` text ,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
@@ -111,21 +111,6 @@ CREATE TABLE `eh_portal_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- 门户item 范围
-CREATE TABLE `eh_portal_item_scopes` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `scope_type` varchar(64) DEFAULT NULL,
-  `scope_id` bigint(20) NOT NULL,
-  `item_id` bigint(20) NOT NULL,
-  `launch_pad_item_id` bigint(20) NOT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `operator_uid` bigint(20) NOT NULL,
-  `creator_uid` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- 门户模板表
 CREATE TABLE `eh_portal_layout_templates` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
@@ -159,11 +144,13 @@ CREATE TABLE `eh_portal_item_categries` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 门户item分类 范围
-CREATE TABLE `eh_portal_item_categry_scopes` (
+CREATE TABLE `eh_portal_content_scopes` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `scope_type` varchar(64) DEFAULT NULL,
   `scope_id` bigint(20) NOT NULL,
+  `content_type` varchar(64) DEFAULT NULL,
+  `content_id` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) NOT NULL,
