@@ -5052,23 +5052,24 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid   Id parameter in the command");
 		}
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
-		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
-			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
-				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
+		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType())){
+//			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
+//				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
 					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
 					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
-				}
-				else{
- 
-					LOGGER.error("Invalid target type or  Id parameter in the command");
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Invalid   target type or  Id parameter in the command");
-				 
-				}
-			}
-			else
-				this.punchProvider.deletePunchRuleOwnerMap(obj);
+//				}
+//				else{
+// 
+//					LOGGER.error("Invalid target type or  Id parameter in the command");
+//					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//							"Invalid   target type or  Id parameter in the command");
+//				 
+//				}
+//			}
+//			else
+//				this.punchProvider.deletePunchRuleOwnerMap(obj);
+		}
 		else{
 
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
@@ -5645,7 +5646,8 @@ public class PunchServiceImpl implements PunchService {
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+".xlsx";
+		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
+		LOGGER.debug("filePath = "+ filePath);
 		//新建了一个文件
 		
 		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));
