@@ -9909,20 +9909,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if(StringUtils.isEmpty(cmd.getDetailId())){
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
-                    "eh_organization_member_details","");
+                    "eh_organization_member_details","",DateUtil.parseTimestamp(cmd.getCheckInTime()));
         }else{
             if(!StringUtils.isEmpty(cmd.getUpdateLogs())){
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getDepartment()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.DEPCHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().getDepartment());
+                            "eh_organization_member_details",cmd.getUpdateLogs().getDepartment(),null);
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobPosition()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.POICHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().getJobPosition());
+                            "eh_organization_member_details",cmd.getUpdateLogs().getJobPosition(),null);
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobLevelIds()) && memberDTO.getJobLevels().size() > 0)
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.LEVCHANGE.getCode(),
-                            "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName());
+                            "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName(),null);
             }
         }
+
+        //  计算档案完整度
+        GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+        integrity.setDetailId(memberDTO.getDetailId());
+        this.getProfileIntegrity(integrity);
         return memberDTO;
 
     }
@@ -9986,90 +9991,39 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void updateOrganizationMemberBackGround(UpdateOrganizationMemberBackGroundCommand cmd) {
         OrganizationMemberDetails organizationMemberDetails = this.organizationProvider.findOrganizationMemberDetailsByDetailId(cmd.getDetailId());
-//        log.setOriginalContent(StringHelper.toJsonString(organizationMemberDetails));
 
-        Map<String,String> mapLogs = new HashMap<>();
-        if(cmd.getEnName() != null){
-            organizationMemberDetails.setEnName(cmd.getEnName());
-            mapLogs.put("enName: ", cmd.getEnName());
-        }
-        if(!StringUtils.isEmpty(cmd.getBirthday())){
-            organizationMemberDetails.setBirthday(java.sql.Date.valueOf(cmd.getBirthday()));
-            mapLogs.put("birthday: ", cmd.getBirthday());
-        }
-        if(!StringUtils.isEmpty(cmd.getMaritalFlag())){
+        organizationMemberDetails.setEnName(cmd.getEnName() != null ? cmd.getEnName() : "");
+        organizationMemberDetails.setBirthday(!StringUtils.isEmpty(cmd.getBirthday()) ? java.sql.Date.valueOf(cmd.getBirthday()) : null);
+        if (!StringUtils.isEmpty(cmd.getMaritalFlag())) {
             organizationMemberDetails.setMaritalFlag(cmd.getMaritalFlag());
-            mapLogs.put("maritalFlag: ", String.valueOf(cmd.getMaritalFlag()));
         }
-        if(cmd.getPoliticalStatus() != null){
-            organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus());
-            mapLogs.put("politicalStatus: ", cmd.getPoliticalStatus());
-        }
-        if(cmd.getNativePlace() != null){
-            organizationMemberDetails.setNativePlace(cmd.getNativePlace());
-            mapLogs.put("nativePlace: ", cmd.getNativePlace());
-        }
-        if(cmd.getRegResidence() != null){
-            organizationMemberDetails.setRegResidence(cmd.getRegResidence());
-            mapLogs.put("regResidence: ", cmd.getRegResidence());
-        }
-        if(cmd.getIdNumber() != null){
-            organizationMemberDetails.setIdNumber(cmd.getIdNumber());
-            mapLogs.put("idNumber: ", cmd.getIdNumber());
-        }
-        if(cmd.getEmail() != null){
-            organizationMemberDetails.setEmail(cmd.getEmail());
-            mapLogs.put("eamil: ", cmd.getEmail());
-        }
-        if(cmd.getWechat() != null){
-            organizationMemberDetails.setWechat(cmd.getWechat());
-            mapLogs.put("wechat: ", cmd.getWechat());
-        }
-        if(cmd.getEnName() != null){
-            organizationMemberDetails.setEnName(cmd.getEnName());
-            mapLogs.put("EnName: ", cmd.getEnName());
-        }
-        if(cmd.getQq() != null){
-            organizationMemberDetails.setQq(cmd.getQq());
-            mapLogs.put("qq: ", cmd.getQq());
-        }
-        if(cmd.getEmergencyName() != null){
-            organizationMemberDetails.setEmergencyName(cmd.getEmergencyName());
-            mapLogs.put("emergencyName: ", cmd.getEmergencyName());
-        }
-        if(cmd.getEmergencyContact() != null){
-            organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact());
-            mapLogs.put("emergencyContact: ", cmd.getEmergencyContact());
-        }
-        if(cmd.getAddress() != null){
-            organizationMemberDetails.setAddress(cmd.getAddress());
-            mapLogs.put("address: ", cmd.getAddress());
-        }
-        if(cmd.getSalaryCardNumber() != null){
-            organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber());
-            mapLogs.put("salaryCardNumber: ", cmd.getSalaryCardNumber());
-        }
-        if(cmd.getSocialSecurityNumber() != null){
-            organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber());
-            mapLogs.put("socialSecurityNumber: ", cmd.getSocialSecurityNumber());
-        }
-        if(cmd.getProvidentFundNumber() != null){
-            organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber());
-            mapLogs.put("providentFundNumber: ", cmd.getProvidentFundNumber());
-        }
+        organizationMemberDetails.setPoliticalStatus(cmd.getPoliticalStatus() != null ? cmd.getPoliticalStatus() : "");
+        organizationMemberDetails.setNativePlace(cmd.getNativePlace() != null ? cmd.getNativePlace() : "");
+        organizationMemberDetails.setRegResidence(cmd.getRegResidence() != null ? cmd.getRegResidence() : "");
+        organizationMemberDetails.setIdNumber(cmd.getIdNumber() != null ? cmd.getIdNumber() : "");
+        organizationMemberDetails.setEmail(cmd.getEmail() != null ? cmd.getEmail() : "");
+        organizationMemberDetails.setWechat(cmd.getWechat() != null ? cmd.getWechat() : "");
+        organizationMemberDetails.setQq(cmd.getQq() != null ? cmd.getQq() : "");
+        organizationMemberDetails.setEmergencyName(cmd.getEmergencyName() != null ? cmd.getEmergencyName() : "");
+        organizationMemberDetails.setEmergencyContact(cmd.getEmergencyContact() != null ? cmd.getEmergencyContact() : "");
+        organizationMemberDetails.setAddress(cmd.getAddress() != null ? cmd.getAddress() : "");
+        organizationMemberDetails.setSalaryCardNumber(cmd.getSalaryCardNumber() != null ? cmd.getSalaryCardNumber() : "");
+        organizationMemberDetails.setSocialSecurityNumber(cmd.getSocialSecurityNumber() != null ? cmd.getSocialSecurityNumber() : "");
+        organizationMemberDetails.setProvidentFundNumber(cmd.getProvidentFundNumber() != null ? cmd.getProvidentFundNumber() : "");
 
-        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails,cmd.getDetailId());
 
-/*        //  存入日志
-        System.out.println(StringHelper.toJsonString(mapLogs));
-        this.addProfileLogs(organizationMemberDetails.getId(), organizationMemberDetails.getNamespaceId(),
-                OperatingType.UPDATE.getCode(), "eh_organization_member_details",
-                StringHelper.toJsonString(mapLogs));*/
+        this.organizationProvider.updateOrganizationMemberDetails(organizationMemberDetails, cmd.getDetailId());
+
     }
 
     @Override
     public OrganizationMemberEducationsDTO addOrganizationMemberEducations(AddOrganizationMemberEducationsCommand cmd) {
-        User user =UserContext.current().getUser();
+/*        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+	    User user =UserContext.current().getUser();
         if (cmd.getDetailId() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter, detailId should not be null or empty");
@@ -10096,6 +10050,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.organizationProvider.createOranizationMemberEducationInfo(education);
 
 //        this.addProfileLogs(education.getDetailId(),);
+//        LOGGER.debug("No organization community filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
         return ConvertHelper.convert(education, OrganizationMemberEducationsDTO.class);
     }
 
@@ -10398,11 +10353,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
 
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
         }
     }
 
@@ -10437,86 +10392,99 @@ public class OrganizationServiceImpl implements OrganizationService {
         return null;
     }
 
-    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd){
-        OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0,0,0,0);
-        PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd,GetPersonnelDetailsV2Command.class));
+    public OrganizationMemberProfileIntegrity getProfileIntegrity(GetProfileIntegrityCommand cmd) {
+        OrganizationMemberProfileIntegrity result = new OrganizationMemberProfileIntegrity(0, 0, 0, 0);
+        PersonnelsDetailsV2Response response = this.getOrganizationPersonnelDetailsV2(ConvertHelper.convert(cmd, GetPersonnelDetailsV2Command.class));
 
         //  基本信息完整度判断
-        if (response.getBasic().getContactName() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getGender() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getDepartments().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getJobPositions().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getJobLevels().size() <= 0)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getEmployeeType() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getCheckInTime() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getContactToken() == null)
-            result.setBasicIntegrity(0);
-        else if (response.getBasic().getEmployeeNo() == null)
-            result.setBasicIntegrity(0);
-        else
-            result.setBasicIntegrity(25);
+        result.setBasicIntegrity(this.checkBasicIntegrity(response.getBasic()));
 
         //  背景信息完整度判断
-        if(response.getBackGround().getEnName() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getBirthday() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getMaritalFlag() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getPoliticalStatus() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getNativePlace() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getRegResidence() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getIdNumber() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmail() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getWechat() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getQq() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmergencyName() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEmergencyContact() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getAddress() == null)
-            result.setBackEndIntegrity(0);
-        else if(response.getBackGround().getEducations() == null || response.getBackGround().getEducations().isEmpty())
-            result.setBackEndIntegrity(0);
-        else
-            result.setBackEndIntegrity(45);
+        result.setBackEndIntegrity(this.checkBackEndIntegrity(response.getBackGround()));
 
         //  社保信息完整度判断
-        if(response.getSocialSecurity().getSalaryCardNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getSocialSecurityNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getProvidentFundNumber() == null)
-            result.setSocialSecurityIntegrity(0);
-        else if(response.getSocialSecurity().getInsurances() == null || response.getSocialSecurity().getInsurances().isEmpty())
-            result.setSocialSecurityIntegrity(0);
-        else
-            result.setSocialSecurityIntegrity(15);
+        result.setSocialSecurityIntegrity(this.checkSocialSecurityIntegrity(response.getSocialSecurity()));
 
         //  合同信息完整度判断
-        if(response.getContracts() == null || response.getContracts().isEmpty())
+        if (StringUtils.isEmpty(response.getContracts()) || response.getContracts().isEmpty())
             result.setContractIntegrity(0);
         else
             result.setContractIntegrity(15);
 
         //  返回结果至数据库
-        result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity() + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
+        result.setProfileIntegrity(result.getBasicIntegrity() + result.getBackEndIntegrity()
+                + result.getSocialSecurityIntegrity() + result.getContractIntegrity());
         this.organizationProvider.updateProfileIntegrity(cmd.getDetailId(), result.getProfileIntegrity());
         return result;
+    }
+
+    private Integer checkBasicIntegrity(OrganizationMemberBasicDTO basic) {
+        if (StringUtils.isEmpty(basic.getContactName()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getGender()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getDepartments()) || basic.getDepartments().isEmpty())
+            return 0;
+        else if (StringUtils.isEmpty(basic.getJobPositions()) || basic.getJobPositions().isEmpty())
+            return 0;
+        else if (StringUtils.isEmpty(basic.getJobLevels()) || basic.getJobLevels().isEmpty())
+            return 0;
+        else if (StringUtils.isEmpty(basic.getEmployeeType()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getCheckInTime()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getContactToken()))
+            return 0;
+        else if (StringUtils.isEmpty(basic.getEmployeeNo()))
+            return 0;
+        else
+            return 25;
+    }
+
+    private Integer checkBackEndIntegrity(OrganizationMemberBackGroundDTO backGround) {
+        if (StringUtils.isEmpty(backGround.getEnName()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getBirthday()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getMaritalFlag()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getPoliticalStatus()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getNativePlace()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getRegResidence()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getIdNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmail()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getWechat()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getQq()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmergencyName()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEmergencyContact()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getAddress()))
+            return 0;
+        else if (StringUtils.isEmpty(backGround.getEducations()) || backGround.getEducations().isEmpty())
+            return 0;
+        else
+            return 45;
+    }
+
+    private Integer checkSocialSecurityIntegrity(OrganizationMemberSocialSecurityDTO social) {
+        if (StringUtils.isEmpty(social.getSalaryCardNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getSocialSecurityNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getProvidentFundNumber()))
+            return 0;
+        else if (StringUtils.isEmpty(social.getInsurances()) || social.getInsurances().isEmpty())
+            return 0;
+        else
+            return 15;
     }
 
     private OrganizationMemberDetails getDetailFromOrganizationMember(OrganizationMember member) {
@@ -10546,26 +10514,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setEmployeeType(member.getEmployeeType());
         } else {
             detail = find_detail;
-            if (member.getContactName() != null) {
-                detail.setContactName(member.getContactName());
-            }
-            if (member.getGender() != null) {
-                detail.setGender(member.getGender());
-            }
-            if (member.getEmployeeType() != null) {
-                detail.setEmployeeType(member.getEmployeeType());
-            }
-            if (member.getEmployeeNo() != null) {
-                detail.setEmployeeNo(member.getEmployeeNo());
-            }
-            if (member.getCheckInTime() != null) {
-                detail.setCheckInTime(detail.getCheckInTime());
-            }
+            detail.setContactName(member.getContactName());
+            detail.setGender(member.getGender());
+            detail.setEmployeeType(member.getEmployeeType());
+            detail.setEmployeeNo(member.getEmployeeNo() != null ? member.getEmployeeNo() : "");
+            detail.setCheckInTime(detail.getCheckInTime());
         }
         return detail;
     }
 
-    private void addProfileJobChangeLogs(Long detailId, String personChangeType,String tableName, String personChangeReason){
+    private void addProfileJobChangeLogs(Long detailId, String personChangeType, String tableName, String personChangeReason, Timestamp operationTime) {
         User user = UserContext.current().getUser();
         OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
         log.setDetailId(detailId);
@@ -10574,7 +10532,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setPersonChangeType(personChangeType);
         log.setPersonChangeReason(personChangeReason);
         log.setResourceType(tableName);
-        log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        //  若新增的时候根据入职日期来设置入职时间
+        if (!StringUtils.isEmpty(operationTime))
+            log.setOperationTime(operationTime);
+        else
+            log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.organizationProvider.createProfileLogs(log);
     }
 
@@ -10795,7 +10758,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // 开始校验
         for (ImportOrganizationPersonnelFilesDTO data : list) {
-            log = this.checkImportOrganizationMembers(data,deptMap,jobPositionMap,jobLevelMap,org,namespaceId);
+            log = this.checkImportOrganizationMembers(data, deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
             if (log != null) {
                 errorDataLogs.add(log);
                 continue;
@@ -10826,22 +10789,35 @@ public class OrganizationServiceImpl implements OrganizationService {
                 errorDataLogs.add(log);
                 continue;
             }
+            log = this.checkImportDateFormat(data);
+            if (log != null) {
+                errorDataLogs.add(log);
+                continue;
+            }
 
             Long detailId = this.saveOrganizationMembers(data, cmd.getOrganizationId(), deptMap, jobPositionMap, jobLevelMap, org, namespaceId);
-            this.saveOrganizationMemberDetails(data, detailId);
 
-            //  判断为空时则不需要添加
-            if (this.checkEducationQualification(data).equals(1)) {
-                this.saveOrganizationMemberEducations(data, detailId);
-            }
-            if (this.checkWorkExperiencesQualification(data).equals(1)) {
-                this.saveOrganizationMemberWorkExperiences(data, detailId);
-            }
-            if (this.checkInsurancesQualification(data).equals(1)) {
-                this.saveOrganizationMemberInsurances(data, detailId);
-            }
-            if (this.checkContractsQualification(data).equals(1)) {
-                this.saveOrganizationMemberContracts(data, detailId);
+            if (detailId != null) {
+                this.saveOrganizationMemberDetails(data, detailId);
+
+                //  判断为空时则不需要添加
+                if (this.checkEducationQualification(data).equals(1)) {
+                    this.saveOrganizationMemberEducations(data, detailId);
+                }
+                if (this.checkWorkExperiencesQualification(data).equals(1)) {
+                    this.saveOrganizationMemberWorkExperiences(data, detailId);
+                }
+                if (this.checkInsurancesQualification(data).equals(1)) {
+                    this.saveOrganizationMemberInsurances(data, detailId);
+                }
+                if (this.checkContractsQualification(data).equals(1)) {
+                    this.saveOrganizationMemberContracts(data, detailId);
+                }
+
+                //  计算档案完整度
+                GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+                integrity.setDetailId(detailId);
+                this.getProfileIntegrity(integrity);
             }
         }
         return errorDataLogs;
@@ -10876,6 +10852,14 @@ public class OrganizationServiceImpl implements OrganizationService {
             log.setErrorLog("Organization member contactToken is null");
             log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_ISNULL);
             return log;
+        }else{
+            if (!AccountValidatorUtil.isMobile(data.getContactToken())) {
+                LOGGER.warn("Wrong contactToken format. data = {}", data);
+                log.setData(data);
+                log.setErrorLog("Wrong contactToken format");
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_FORMAT);
+                return log;
+            }
         }
 
         if (!StringUtils.isEmpty(data.getOrgnaizationPath())) {
@@ -10886,7 +10870,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member department Non-existent. departmentName = {}", deptName);
                     log.setData(data);
                     log.setErrorLog("Organization member department Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_DEPARTMENT_NOT_EXIST);
                     return log;
                 }
             }
@@ -10906,7 +10890,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member jobPosition Non-existent. jobPositionName = {}", jobPositionName);
                     log.setData(data);
                     log.setErrorLog("Organization member jobPosition Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_POSITION_NOT_EXIST);
                     return log;
                 }
             }
@@ -10952,7 +10936,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     LOGGER.debug("Organization member jobLevel Non-existent. jobLevelName = {}", jobLevelName);
                     log.setData(data);
                     log.setErrorLog("Organization member jobLevel Non-existent.");
-                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST);
+                    log.setCode(OrganizationServiceErrorCode.ERROR_ORG_LEVEL_NOT_EXIST);
                     return log;
                 }
             }
@@ -10979,12 +10963,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberDetails(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(!StringUtils.isEmpty(data.getEmergencyContact())){
-            if(!AccountValidatorUtil.isMobile(data.getEmergencyContact())){
+        if (!StringUtils.isEmpty(data.getEmergencyContact())) {
+            if (!AccountValidatorUtil.isMobile(data.getEmergencyContact())) {
                 LOGGER.warn("Wrong emergencyContact format. data = {}", data);
                 log.setData(data);
                 log.setErrorLog("Wrong emergencyContact format");
-                log.setCode(OrganizationServiceErrorCode.ERROR_EMERGENCYCONTACT_FORMAT);
+                log.setCode(OrganizationServiceErrorCode.ERROR_CONTACTTOKEN_FORMAT);
                 return log;
             }
         }
@@ -11031,7 +11015,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             return null;
         }
     }
-    private Integer checkEducationQualification(ImportOrganizationPersonnelFilesDTO data){
+
+    private Integer checkEducationQualification(ImportOrganizationPersonnelFilesDTO data) {
         if (!StringUtils.isEmpty(data.getSchoolName()) && !StringUtils.isEmpty(data.getDegree())
                 && !StringUtils.isEmpty(data.getMajor()) && !StringUtils.isEmpty(data.getEnrollmentTime())
                 && !StringUtils.isEmpty(data.getGraduationTime())) {
@@ -11040,14 +11025,14 @@ public class OrganizationServiceImpl implements OrganizationService {
                 && StringUtils.isEmpty(data.getMajor()) && StringUtils.isEmpty(data.getEnrollmentTime())
                 && StringUtils.isEmpty(data.getGraduationTime())) {
             return 2;
-        }else
+        } else
             return 0;
     }
 
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberWorkExperiences(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(this.checkWorkExperiencesQualification(data).equals(0)){
+        if (this.checkWorkExperiencesQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getEnterpriseName())) {
                 LOGGER.warn("Organization member enterpriseName is null. data = {}", data);
                 log.setData(data);
@@ -11079,12 +11064,12 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
 
-    private Integer checkWorkExperiencesQualification(ImportOrganizationPersonnelFilesDTO data){
+    private Integer checkWorkExperiencesQualification(ImportOrganizationPersonnelFilesDTO data) {
         if (!StringUtils.isEmpty(data.getEnterpriseName()) && !StringUtils.isEmpty(data.getPosition())
                 && !StringUtils.isEmpty(data.getJobType()) && !StringUtils.isEmpty(data.getEntryTime())
                 && !StringUtils.isEmpty(data.getDepartureTime())) {
@@ -11093,7 +11078,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 && StringUtils.isEmpty(data.getJobType()) && StringUtils.isEmpty(data.getEntryTime())
                 && StringUtils.isEmpty(data.getDepartureTime())) {
             return 2;
-        }else{
+        } else {
             return 0;
         }
     }
@@ -11101,7 +11086,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberInsurances(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if (this.checkInsurancesQualification(data).equals(0)){
+        if (this.checkInsurancesQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getInsuranceName())) {
                 LOGGER.warn("Organization member insuranceName is null. data = {}", data);
                 log.setData(data);
@@ -11133,7 +11118,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -11151,10 +11136,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             return 0;
         }
     }
+
     private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportOrganizationMemberContracts(ImportOrganizationPersonnelFilesDTO data) {
 
         ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
-        if(this.checkContractsQualification(data).equals(0)){
+        if (this.checkContractsQualification(data).equals(0)) {
             if (StringUtils.isEmpty(data.getContractNumber())) {
                 LOGGER.warn("Organization member contractNumber is null. data = {}", data);
                 log.setData(data);
@@ -11174,7 +11160,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 log.setCode(OrganizationServiceErrorCode.ERROR_ENDTIME_ISNULL);
                 return log;
             }
-        }else{
+        } else {
             return null;
         }
     }
@@ -11191,12 +11177,47 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
     }
 
+    private ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> checkImportDateFormat(ImportOrganizationPersonnelFilesDTO data) {
+
+        ImportFileResultLog<ImportOrganizationPersonnelFilesDTO> log = new ImportFileResultLog<>(OrganizationServiceErrorCode.SCOPE);
+        try {
+            java.sql.Date.valueOf(data.getCheckInTime());
+            if (!StringUtils.isEmpty(data.getEmploymentTime()))
+                java.sql.Date.valueOf(data.getEmploymentTime());
+            if (!StringUtils.isEmpty(data.getBirthday()))
+                java.sql.Date.valueOf(data.getBirthday());
+            if (!StringUtils.isEmpty(data.getEnrollmentTime()))
+                java.sql.Date.valueOf(data.getEnrollmentTime());
+            if (!StringUtils.isEmpty(data.getGraduationTime()))
+                java.sql.Date.valueOf(data.getGraduationTime());
+            if (!StringUtils.isEmpty(data.getEntryTime()))
+                java.sql.Date.valueOf(data.getEntryTime());
+            if (!StringUtils.isEmpty(data.getDepartureTime()))
+                java.sql.Date.valueOf(data.getDepartureTime());
+            if (!StringUtils.isEmpty(data.getInsuranceStartTime()))
+                java.sql.Date.valueOf(data.getInsuranceStartTime());
+            if (!StringUtils.isEmpty(data.getInsuranceEndTime()))
+                java.sql.Date.valueOf(data.getInsuranceEndTime());
+            if (!StringUtils.isEmpty(data.getContractStartTime()))
+                java.sql.Date.valueOf(data.getContractStartTime());
+            if (!StringUtils.isEmpty(data.getContractEndTime()))
+                java.sql.Date.valueOf(data.getContractEndTime());
+        } catch (Exception e) {
+            LOGGER.warn("Organization member date format error. data = {}", data);
+            log.setData(data);
+            log.setErrorLog("Organization member date format error");
+            log.setCode(OrganizationServiceErrorCode.ERROR_DATE_FORMAT_WRONG);
+            return log;
+        }
+        return null;
+    }
+
     private Long saveOrganizationMembers(
             ImportOrganizationPersonnelFilesDTO data, Long organizationId,
             Map<String, Organization> deptMap, Map<String, Organization> jobPositionMap,
             Map<String, Organization> jobLevelMap, Organization org,
             int namespaceId) {
-        AddOrganizationPersonnelCommand memberCommand = new AddOrganizationPersonnelCommand();
+        AddOrganizationPersonnelV2Command memberCommand = new AddOrganizationPersonnelV2Command();
 
         //  公司
         memberCommand.setOrganizationId(organizationId);
@@ -11264,14 +11285,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  员工类型
         Byte employeeType;
         if(!StringUtils.isEmpty(data.getEmployeeType())){
-            if(data.getEmployeeType().equals("全职")){
-                employeeType = 0;
-            }else if(data.getEmployeeType().equals("兼职")){
+            if(data.getEmployeeType().equals("兼职")){
                 employeeType = 1;
             }else if(data.getEmployeeType().equals("实习")){
                 employeeType = 2;
-            }else{
+            }else if(data.getEmployeeType().equals("劳动派遣")){
                 employeeType = 3;
+            }else{
+                employeeType = 0;
             }
             memberCommand.setEmployeeType(employeeType);
         }
@@ -11292,7 +11313,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //  新增人员并返回detailId
-        OrganizationMemberDTO member = this.addOrganizationPersonnel(memberCommand);
+        OrganizationMemberDTO member = this.addOrganizationPersonnelV2(memberCommand);
         return member.getDetailId();
     }
 
@@ -11351,14 +11372,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         //  工作类型
         Byte jobType;
         if(!StringUtils.isEmpty(data.getJobType())){
-            if(data.getEmployeeType().equals("全职")){
-                jobType = 0;
-            }else if(data.getEmployeeType().equals("兼职")){
+            if(data.getEmployeeType().equals("兼职")){
                 jobType = 1;
             }else if(data.getEmployeeType().equals("实习")){
                 jobType = 2;
-            }else{
+            }else if(data.getEmployeeType().equals("劳动派遣")){
                 jobType = 3;
+            }else{
+                jobType = 0;
             }
             workExperiences.setJobType(jobType);
         }
