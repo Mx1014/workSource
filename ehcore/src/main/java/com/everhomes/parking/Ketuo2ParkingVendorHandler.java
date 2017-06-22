@@ -67,10 +67,7 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO2")
 public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Ketuo2ParkingVendorHandler.class);
-	
-	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-	
+
 	private static final String RECHARGE = "/api/pay/CardRecharge";
 	private static final String GET_CARD = "/api/pay/GetCarCardInfo";
 	private static final String GET_TYPES = "/api/pay/GetCarTypeList";
@@ -342,6 +339,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 
 		long ts;
 		try {
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			ts = sdf1.parse(str).getTime();
 		} catch (ParseException e) {
 			LOGGER.error("data format is not yyyyMMddHHmmss, str={}", str);
@@ -489,11 +487,18 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			String oldValidEnd = card.getValidTo();
 			Long time = strToLong(oldValidEnd);
 			long now = System.currentTimeMillis();
-			
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 			if(time < now) {
-				time = now;
+				SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+				String date = sdf2.format(new Date(now)) + " 00:00:00";
+				try {
+					time = sdf1.parse(date).getTime();
+				} catch (ParseException e) {
+					LOGGER.info("date={}, time={}", date, time, e);
+				}
 			}
-			
+
 			String validStart = sdf1.format(addDays(time, 1));
 			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 			
@@ -662,7 +667,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		StringBuilder result = new StringBuilder();
 		
         String key = configProvider.getValue("parking.kexing.key", "");
-        String iv = sdf2.format(new Date());
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+
+		String iv = sdf2.format(new Date());
         String user = configProvider.getValue("parking.kexing.user", "");
         String pwd = configProvider.getValue("parking.kexing.pwd", "");
         String data = null;
