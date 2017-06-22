@@ -164,7 +164,6 @@ CREATE TABLE `eh_portal_item_categry_scopes` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `scope_type` varchar(64) DEFAULT NULL,
   `scope_id` bigint(20) NOT NULL,
-  `item_categry_id` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) NOT NULL,
