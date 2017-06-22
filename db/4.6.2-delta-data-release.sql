@@ -84,3 +84,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
 	VALUES ('expansion', '6', 'zh_CN', '已下线不能修改为已招租！');
+
+UPDATE eh_buildings set default_order = id;
+UPDATE eh_lease_promotions set default_order = unix_timestamp(create_time) * 1000;
+UPDATE eh_enterprise_op_requests set source_type = 'renew' where apply_type = 3;
