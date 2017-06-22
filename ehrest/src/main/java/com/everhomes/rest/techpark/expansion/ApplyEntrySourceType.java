@@ -5,11 +5,12 @@ package com.everhomes.rest.techpark.expansion;
  * MARKET_ZONE("market_zone") 来自创客空间申请入住
  * FOR_RENT("for_rent") 来自招租信息申请入住
  * OFFICE_CUBICLE("office_cubicle") 来自工位预定申请入住
+ * RENEW("renew", "续租申请")
  */
 public enum ApplyEntrySourceType {
 	
 	BUILDING("building", "园区介绍"), MARKET_ZONE("market_zone", "创客入驻"), FOR_RENT("for_rent", "虚位以待"),
-    OFFICE_CUBICLE("office_cubicle", "工位预定");
+    OFFICE_CUBICLE("office_cubicle", "工位预定"), RENEW("renew", "续租申请");
     
     private String code;
     private String description;
