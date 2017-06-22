@@ -3820,6 +3820,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 				dto.setPrice(dto.getOrgMemberPrice());
 				dto.setOriginalPrice(dto.getOrgMemberOriginalPrice());
+			}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+				dto.setPrice(dto.getApprovingUserPrice());
+				dto.setOriginalPrice(dto.getApprovingUserOriginalPrice());
 			}
 		}
 	}
