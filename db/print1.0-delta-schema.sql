@@ -28,8 +28,8 @@ CREATE TABLE `eh_siyin_print_settings` (
 CREATE TABLE `eh_siyin_print_printers` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace id',
-  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community',
-  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(64),
+  `owner_id` BIGINT,
   `reader_name` VARCHAR(128) COMMENT 'printer reader name',
   `module_port` VARCHAR(16) COMMENT 'port of the mfpModuleManager interface return',
   `login_context` VARCHAR(128) COMMENT 'siyin login url location',
@@ -61,6 +61,7 @@ CREATE TABLE `eh_siyin_print_orders` (
   `order_body` VARCHAR(128) COMMENT 'order body: print(1)',
   `order_subject` VARCHAR(256) COMMENT 'print order',
   `order_status` TINYINT COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
+  `lock_flag` TINYINT COMMENT 'lock the order, and can not merge order 0(unlocked),1(locked)',
   `creator_phone` VARCHAR(128) COMMENT '',
   `creator_uid` BIGINT COMMENT 'creator/initiator id',
   `create_time` DATETIME,
