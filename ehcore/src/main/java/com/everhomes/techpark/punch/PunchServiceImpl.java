@@ -4671,10 +4671,13 @@ public class PunchServiceImpl implements PunchService {
 			if(null!= r.getPunchDate())
 				dto.setPunchDate(r.getPunchDate().getTime());
 			dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
-			if (null != member) {
-				dto.setUserName(member.getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());
+			// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
+
+			List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
+			if (null != organizationMembers && organizationMembers.size() >0) {
+				dto.setUserName(organizationMembers.get(0).getContactName());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), organizationMembers.get(0).getOrganizationId());
 				if(null != dept){
 					dto.setDeptName(dept.getName());
 				}
@@ -5053,8 +5056,8 @@ public class PunchServiceImpl implements PunchService {
 			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
 				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
-					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
-					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
 				}
 				else{
  
