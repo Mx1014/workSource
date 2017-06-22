@@ -9923,6 +9923,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                             "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName(),null);
             }
         }
+
+        //  计算档案完整度
+        GetProfileIntegrityCommand integrity = new GetProfileIntegrityCommand();
+        integrity.setDetailId(memberDTO.getDetailId());
+        this.getProfileIntegrity(integrity);
         return memberDTO;
 
     }
