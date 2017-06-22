@@ -62,6 +62,7 @@ CREATE TABLE `eh_siyin_print_orders` (
   `order_subject` VARCHAR(256) COMMENT 'print order',
   `order_status` TINYINT COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
   `lock_flag` TINYINT COMMENT 'lock the order, and can not merge order 0(unlocked),1(locked)',
+  `paid_time` DATETIME,
   `creator_phone` VARCHAR(128) COMMENT '',
   `creator_uid` BIGINT COMMENT 'creator/initiator id',
   `create_time` DATETIME,
