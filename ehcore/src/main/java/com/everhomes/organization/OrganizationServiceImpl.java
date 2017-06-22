@@ -9909,18 +9909,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if(StringUtils.isEmpty(cmd.getDetailId())){
             this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.ENTRY.getCode(),
-                    "eh_organization_member_details","");
+                    "eh_organization_member_details","",DateUtil.parseTimestamp(cmd.getCheckInTime()));
         }else{
             if(!StringUtils.isEmpty(cmd.getUpdateLogs())){
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getDepartment()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.DEPCHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().getDepartment());
+                            "eh_organization_member_details",cmd.getUpdateLogs().getDepartment(),null);
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobPosition()))
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.POICHANGE.getCode(),
-                            "eh_organization_member_details",cmd.getUpdateLogs().getJobPosition());
+                            "eh_organization_member_details",cmd.getUpdateLogs().getJobPosition(),null);
                 if(!StringUtils.isEmpty(cmd.getUpdateLogs().getJobLevelIds()) && memberDTO.getJobLevels().size() > 0)
                     this.addProfileJobChangeLogs(memberDTO.getDetailId(),PersonChangeType.LEVCHANGE.getCode(),
-                            "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName());
+                            "eh_organization_member_details",memberDTO.getJobLevels().get(0).getName(),null);
             }
         }
         return memberDTO;
@@ -10348,11 +10348,11 @@ public class OrganizationServiceImpl implements OrganizationService {
             this.organizationProvider.updateOrganizationEmploymentTime(cmd.getDetailId(), java.sql.Date.valueOf(cmd.getRemarks()));
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.ONTHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.POSITIVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
 
         } else if (cmd.getEmployeeStatus().equals(EmployeeStatus.LEAVETHEJOB.getCode())) {
             this.organizationProvider.updateOrganizationEmployeeStatus(cmd.getDetailId(), cmd.getEmployeeStatus());
-            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks());
+            this.addProfileJobChangeLogs(cmd.getDetailId(),PersonChangeType.LEAVE.getCode(),"eh_organization_member_details",cmd.getRemarks(),null);
         }
     }
 
@@ -10518,7 +10518,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return detail;
     }
 
-    private void addProfileJobChangeLogs(Long detailId, String personChangeType,String tableName, String personChangeReason){
+    private void addProfileJobChangeLogs(Long detailId, String personChangeType,String tableName, String personChangeReason, Timestamp operationTime){
         User user = UserContext.current().getUser();
         OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
         log.setDetailId(detailId);
@@ -10527,6 +10527,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setPersonChangeType(personChangeType);
         log.setPersonChangeReason(personChangeReason);
         log.setResourceType(tableName);
+        if(StringUtils.isEmpty(operationTime))
+            log.setOperationTime(operationTime);
         log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.organizationProvider.createProfileLogs(log);
     }
