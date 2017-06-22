@@ -10518,7 +10518,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return detail;
     }
 
-    private void addProfileJobChangeLogs(Long detailId, String personChangeType,String tableName, String personChangeReason, Timestamp operationTime){
+    private void addProfileJobChangeLogs(Long detailId, String personChangeType, String tableName, String personChangeReason, Timestamp operationTime) {
         User user = UserContext.current().getUser();
         OrganizationMemberProfileLogs log = new OrganizationMemberProfileLogs();
         log.setDetailId(detailId);
@@ -10527,9 +10527,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         log.setPersonChangeType(personChangeType);
         log.setPersonChangeReason(personChangeReason);
         log.setResourceType(tableName);
-        if(!StringUtils.isEmpty(operationTime))
+
+        //  若新增的时候根据入职日期来设置入职时间
+        if (!StringUtils.isEmpty(operationTime))
             log.setOperationTime(operationTime);
-        log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        else
+            log.setOperationTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.organizationProvider.createProfileLogs(log);
     }
 
