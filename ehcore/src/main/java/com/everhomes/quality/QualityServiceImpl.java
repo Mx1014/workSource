@@ -3547,6 +3547,7 @@ public class QualityServiceImpl implements QualityService {
 			stat.setSampleId(cmd.getSampleId());
 			stat.setTaskCount(0);
 			stat.setCorrectionCount(0);
+			stat.setCorrectionQualifiedCount(0);
 			stat.setDeductScore(0.0);
 			stat.setHighestScore(100.0);
 			stat.setLowestScore(100.0);
@@ -3554,10 +3555,10 @@ public class QualityServiceImpl implements QualityService {
 			getNewestScoreStat(stat);
 		}
 		CountSampleTasksResponse response = ConvertHelper.convert(stat, CountSampleTasksResponse.class);
-		if(stat.getTaskCount() == 0) {
+		if(stat.getCorrectionCount() == 0) {
 			response.setCorrectionRate(0.0);
 		} else {
-			Double correctionRate = 1.00*stat.getCorrectionCount()/stat.getTaskCount();
+			Double correctionRate = 1.00*stat.getCorrectionQualifiedCount()/stat.getCorrectionCount();
 			response.setCorrectionRate(correctionRate);
 		}
 		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
@@ -3596,14 +3597,19 @@ public class QualityServiceImpl implements QualityService {
 		if(tasks != null) {
 			scoreStat.setTaskCount(scoreStat.getTaskCount() + tasks.size());
 			Integer correctionCount = 0;
+			Integer correctionQualifiedCount = 0;
 			for(QualityInspectionTasks task : tasks) {
 				if(QualityInspectionTaskResult.CORRECT.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
 						|| QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))
 						|| QualityInspectionTaskResult.CORRECT_DELAY.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
 					correctionCount ++;
 				}
+				if(QualityInspectionTaskResult.CORRECT_COMPLETE.equals(QualityInspectionTaskResult.fromStatus(task.getStatus()))) {
+					correctionQualifiedCount ++;
+				}
 			}
 			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
+			scoreStat.setCorrectionQualifiedCount(correctionQualifiedCount + scoreStat.getCorrectionQualifiedCount());
 		}
 
 		return scoreStat;
