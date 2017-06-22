@@ -31,9 +31,8 @@ CREATE TABLE `eh_portal_navigation_bars` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `label` varchar(64) DEFAULT NULL,
-  `name` varchar(64) DEFAULT NULL,
   `action_type` varchar(64) NOT NULL,
-  `a_data` text ,
+  `action_data` text ,
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
@@ -66,12 +65,12 @@ CREATE TABLE `eh_portal_item_groups` (
   `layout_id` bigint(20) NOT NULL,
   `label` varchar(64) DEFAULT NULL,
   `name` varchar(64) DEFAULT NULL  COMMENT 'item_group_${id}，对应eh_launch_pad_layouts里面的layout_json里面item_group的 groups[x].instanceConfig.itemGroup 和 eh_launch_pad_items里的item_group',
-  `separatorFlag` tinyint(4) DEFAULT 0,
-  `separatorHeight` decimal(10,2) DEFAULT NULL,
+  `separator_flag` tinyint(4) DEFAULT 0,
+  `separator_height` decimal(10,2) DEFAULT NULL,
   `widget` varchar(64) DEFAULT NULL,
   `style` varchar(64) DEFAULT NULL,
   `instance_config` text COMMENT '参数配置',
-  `defaultOrder` int(11) NOT NULL DEFAULT '0',
+  `default_order` int(11) NOT NULL DEFAULT '0',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
@@ -93,6 +92,7 @@ CREATE TABLE `eh_portal_items` (
   `icon_uri` varchar(64) DEFAULT NULL,
   `item_width` int(11) NOT NULL DEFAULT '1',
   `item_height` int(11) NOT NULL DEFAULT '1',
+  `bgcolor` int(11) NOT NULL DEFAULT '0',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '',
   `action_type` varchar(64) DEFAULT NULL,
   `action_data` text,
@@ -102,7 +102,8 @@ CREATE TABLE `eh_portal_items` (
   `more_order` int(11) NOT NULL DEFAULT '0',
   `target_type` varchar(32) DEFAULT NULL,
   `target_id` varchar(64) DEFAULT NULL COMMENT 'the entity id linked back to the orginal resource',
-  `item_categry_id` bigint(20) NOT NULL,
+  `item_category_id` bigint(20) NOT NULL,
+  `description` varchar(1024),
   `create_time` datetime DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `operator_uid` bigint(20) NOT NULL,
@@ -128,7 +129,7 @@ CREATE TABLE `eh_portal_layout_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 门户item的分类
-CREATE TABLE `eh_portal_item_categries` (
+CREATE TABLE `eh_portal_item_categories` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` int(11) DEFAULT NULL,
   `name` varchar(64) NOT NULL COMMENT 'item categry name',
