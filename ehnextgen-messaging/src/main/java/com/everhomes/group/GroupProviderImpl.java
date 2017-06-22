@@ -868,15 +868,12 @@ public class GroupProviderImpl implements GroupProvider {
 				.from(EH_GROUP_MEMBERS)
 				.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId));
 				
-		
 		if (status != null) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(status));
 		}
-
         if (keyword != null) {
             step = step.and(EH_GROUP_MEMBERS.MEMBER_NICK_NAME.like(DSL.concat("%", keyword, "%")));
         }
-		
 		if (!includeCreator) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_ID.ne(creatorId));
 		}
@@ -888,8 +885,7 @@ public class GroupProviderImpl implements GroupProvider {
 		if (result != null) {
 			return result.map(r->ConvertHelper.convert(r, GroupMember.class));
 		}
-		
-		return new ArrayList<GroupMember>();
+		return new ArrayList<>();
 	}
 
     @Override
