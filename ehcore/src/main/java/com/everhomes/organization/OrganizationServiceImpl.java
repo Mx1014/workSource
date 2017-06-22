@@ -5014,8 +5014,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndContactToken(String path, String contactToken){
 		return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
 	}
-
-	private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
 	}

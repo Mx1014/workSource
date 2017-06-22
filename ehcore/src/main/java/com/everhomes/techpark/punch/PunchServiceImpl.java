@@ -191,6 +191,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -770,6 +771,8 @@ public class PunchServiceImpl implements PunchService {
 	/***
 	 * 计算每一天的打卡状态，返回值PDL
 	 * @param punchDayLog 
+	 * @param companyId 永远为总公司id
+	 * 
 	 * */
 	private PunchLogsDay calculateDayLog(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
@@ -800,9 +803,9 @@ public class PunchServiceImpl implements PunchService {
 			return pdl;
 		}
 		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
-		//对于已离职和未入职的判断
-		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
-		if(organizationMember == null ){
+		//对于已离职和未入职的判断 
+		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+companyId,userId );
+		if(organizationMembers == null || organizationMembers.size() == 0){
 			//找不到就是已离职
 			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
 			punchDayLog.setStatus(ApprovalStatus.RESIGNED.getCode());
@@ -812,7 +815,11 @@ public class PunchServiceImpl implements PunchService {
 			return pdl;
 		}else{
 			//查找是否未入职 --通过log的时间
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,companyId, OperationType.JOIN.getCode()) ;
+			List<Long> orgIds = new ArrayList<>();
+			for(OrganizationMember member : organizationMembers){
+				orgIds.add(member.getOrganizationId());
+			}
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
 			if (null != memberLogs ){
 				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
 
@@ -2285,7 +2292,9 @@ public class PunchServiceImpl implements PunchService {
 			statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
 		}else{
 			//查找是否未入职 --通过log的时间
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),member.getOrganizationId(), OperationType.JOIN.getCode()) ;
+			List<Long> orgIds = new ArrayList<>();
+			orgIds.add(member.getOrganizationId()); 
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),orgIds, OperationType.JOIN.getCode()) ;
 			if (null != memberLogs ){
 				if(memberLogs.get(0).getOperateTime().after( endCalendar.getTime())){
 
