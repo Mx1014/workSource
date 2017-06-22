@@ -37,7 +37,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import javafx.scene.control.Tab;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultRecordMapper;
@@ -161,34 +160,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<OrganizationMember> result = new ArrayList<OrganizationMember>();
-        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
-        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
-        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
-        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
-        Condition condition = (t1.field("organization_id").eq(id)).and(t2.field("contact_token").eq(phone))
-                .and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
-                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
-        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
-        records.stream().map((r) -> {
-            result.add(ConvertHelper.convert(r, OrganizationMember.class));
-            return null;
-        }).collect(Collectors.toList());
-
-        if (null != result && 0 != result.size()) {
-            return result.get(0);
-        }
-        return null;
-//        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS).;
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.CONTACT_TOKEN.eq(phone));
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-//        //added by wh 2016-10-13 把被拒绝的过滤掉
-//        query.addConditions(Tables.EH_ORGANIZATION_MEMBER_DETAILS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
-//        List<EhOrganizationMembersRecord> records = query.fetch().map(new OrganizationMemberRecordMapper());
+//        /**modify by lei lv,增加了detail表，部分信息挪到detail表里去取**/
+//        TableLike t1 = Tables.EH_ORGANIZATION_MEMBERS.as("t1");
+//        TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
+//        SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
+//        Condition condition = (t1.field("organization_id").eq(id)).and(t2.field("contact_token").eq(phone))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.INACTIVE.getCode()))
+//                .and(t1.field("status").ne(OrganizationMemberStatus.REJECT.getCode()));
+//        List<OrganizationMember> records = step.where(condition).fetch().map(new OrganizationMemberRecordMapper());
 //        records.stream().map((r) -> {
 //            result.add(ConvertHelper.convert(r, OrganizationMember.class));
 //            return null;
-//        });
+//        }).collect(Collectors.toList());
+//
+//        if (null != result && 0 != result.size()) {
+//            return result.get(0);
+//        }
+//        return null;
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        //added by wh 2016-10-13 把被拒绝的过滤掉
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        EhOrganizationMembersRecord record = query.fetchOne();
+        if(record != null){
+            return ConvertHelper.convert(record, OrganizationMember.class);
+        }
+        return null;
     }
 
     @Override
@@ -416,8 +415,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
                 return null;
             }).collect(Collectors.toList());
         }
-        return result;
-
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
 
 //        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
 //        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
@@ -4643,4 +4644,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return ConvertHelper.convert(query.fetchOne(), Organization.class);
     }
 
+    @Override
+    public List<OrganizationMember> listOrganizationMembersByPhoneAndNamespaceId(String phone, Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+        //added by wh 2016-10-13 把被拒绝的过滤掉
+        query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+        List<EhOrganizationMembersRecord> records = query.fetch();
+        List<OrganizationMember> result = new ArrayList<OrganizationMember>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, OrganizationMember.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
 }

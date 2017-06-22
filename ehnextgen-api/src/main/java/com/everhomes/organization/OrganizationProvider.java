@@ -384,5 +384,7 @@ public interface OrganizationProvider {
 
 	Organization findUnderOrganizationByParentOrgId(Long parentOrgId);
 
+	List<OrganizationMember> listOrganizationMembersByPhoneAndNamespaceId(String phone, Integer namespaceId);
+
 }
 
