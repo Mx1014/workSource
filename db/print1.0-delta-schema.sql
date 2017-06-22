@@ -85,6 +85,7 @@ CREATE TABLE `eh_siyin_print_records` (
   `job_id` VARCHAR(128) COMMENT 'siyin returned, uniqueness flag',
   `job_status` VARCHAR(128) COMMENT 'siyin returned, siyin job status',
   `group_name` VARCHAR(128) COMMENT 'siyin returned, user group name',
+  `user_name` VARCHAR(128) COMMENT 'siyin returned, user display name',
   `user_display_name` VARCHAR(128) COMMENT 'siyin returned, user display name',
   `client_ip` VARCHAR(128) COMMENT 'siyin returned, documents sended source commputer ip',
   `client_name` VARCHAR(128) COMMENT 'siyin returned, documents sended source commputer name',
