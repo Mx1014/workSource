@@ -22,5 +22,5 @@ CREATE TABLE `eh_rentalv2_price_rules` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 非认证用户是否可见，add by tt, 20170623
-ALTER TABLE `eh_rentalv2_resource_types` ADD COLUMN `unauthVisible` TINYINT DEFAULT '0';
+ALTER TABLE `eh_rentalv2_resource_types` ADD COLUMN `unauth_visible` TINYINT DEFAULT '0';
 
