@@ -1,4 +1,4 @@
--- 自寄服务地址表，add by tt, 20170613
+-- 资源预约价格规则表，add by tt, 20170613
 -- DROP TABLE IF EXISTS `eh_rentalv2_price_rules`;
 CREATE TABLE `eh_rentalv2_price_rules` (
   `id` BIGINT NOT NULL,
@@ -20,3 +20,7 @@ CREATE TABLE `eh_rentalv2_price_rules` (
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 非认证用户是否可见，add by tt, 20170623
+ALTER TABLE `eh_rentalv2_resource_types` ADD COLUMN `unauthVisible` TINYINT DEFAULT '0';
+

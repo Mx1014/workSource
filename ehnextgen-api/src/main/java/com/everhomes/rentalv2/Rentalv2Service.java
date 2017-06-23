@@ -189,6 +189,6 @@ public interface Rentalv2Service {
 	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
 
 
-	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteYearStatus(
+	FindAutoAssignRentalSiteYearStatusResponse findAutoAssignRentalSiteYearStatus(
 			FindAutoAssignRentalSiteYearStatusCommand cmd);
 }

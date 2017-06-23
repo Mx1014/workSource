@@ -158,7 +158,7 @@ public class Rentalv2Controller extends ControllerBase {
 	@RequestMapping("findAutoAssignRentalSiteYearStatus")
 	@RestReturn(value = FindAutoAssignRentalSiteYearStatusResponse.class)
 	public RestResponse findAutoAssignRentalSiteYearStatus(@Valid FindAutoAssignRentalSiteYearStatusCommand cmd) {
-		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
+		FindAutoAssignRentalSiteYearStatusResponse resp = rentalService
 				.findAutoAssignRentalSiteYearStatus(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
