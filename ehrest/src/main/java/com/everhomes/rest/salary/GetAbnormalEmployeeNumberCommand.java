@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
+ * <li>period: 查哪一期薪酬批次:现在都是按月发放所以传YYYYMM如201702</li>
  * </ul>
  */
 public class GetAbnormalEmployeeNumberCommand {
@@ -15,6 +16,8 @@ public class GetAbnormalEmployeeNumberCommand {
 	private String ownerType;
 
 	private Long ownerId;
+
+	private String period;
 
 	public GetAbnormalEmployeeNumberCommand() {
 
@@ -45,6 +48,14 @@ public class GetAbnormalEmployeeNumberCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(String period) {
+		this.period = period;
 	}
 
 }

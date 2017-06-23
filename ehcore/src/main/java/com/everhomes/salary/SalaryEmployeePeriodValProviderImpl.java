@@ -87,4 +87,11 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public Integer countSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
+			String period, Long entityIdShifa) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
