@@ -184,4 +184,11 @@ public interface Rentalv2Service {
 	RentalSiteDTO findRentalSiteById(FindRentalSiteByIdCommand cmd);
 
 	CommonOrderDTO getRentalBillPayInfo(GetRentalBillPayInfoCommand cmd);
+
+
+	FindRentalSiteYearStatusCommandResponse findRentalSiteYearStatus(FindRentalSiteYearStatusCommand cmd);
+
+
+	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteYearStatus(
+			FindAutoAssignRentalSiteYearStatusCommand cmd);
 }

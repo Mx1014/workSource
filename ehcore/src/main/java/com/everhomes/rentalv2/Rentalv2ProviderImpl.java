@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import javax.persistence.criteria.CriteriaBuilder.Case;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.rentalv2.DateLength;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
+import com.everhomes.rest.rentalv2.RentalTimeIntervalOwnerType;
 import com.everhomes.rest.rentalv2.RentalType;
 import com.everhomes.rest.rentalv2.ResourceOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
@@ -433,6 +436,156 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return result;
 	}
+		
+	@Override
+	public Double countRentalSiteBillBySiteRuleId(Long cellId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record1<BigDecimal> result = context.select(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT))
+			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+			.join(Tables.EH_RENTALV2_ORDERS)
+			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+			.where(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(cellId))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
+			.fetchOne();
+
+		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
+	}
+
+	@Override
+	public Double countRentalSiteBillOfAllScene(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
+		List<Byte> rentalTypes = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList());
+		Field<BigDecimal> rentalCount = null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectConditionStep<?> step = context.select(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE, Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM, 
+				Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME, Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME,
+				rentalCount = DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT).as("rental_count"))
+			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+			.join(Tables.EH_RENTALV2_ORDERS)
+			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+			.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.APPROVING.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.PAYINGFINAL.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()));
+		
+		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HOUR) {
+			// 如果这个资源可以使用半天预约，要判断当前时间段在上午还是下午或者晚上
+			if (rentalTypes.contains(RentalType.HALFDAY) || rentalTypes.contains(RentalType.THREETIMEADAY)) {
+				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
+				if (amorpm != null) {
+					step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
+											.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM.eq(amorpm))))
+							.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate())))));
+				}
+			}else {
+				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
+								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate())))));
+			}
+		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
+			if (rentalTypes.contains(RentalType.HOUR)) {
+				Timestamp[] beginEndTime = calculateBeginEndTime(rentalResource, rentalCell);
+				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
+								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME.ge(beginEndTime[0]).and(Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME.le(beginEndTime[1])))
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate())))));
+			}else {
+				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
+								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
+						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
+									.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate())))));
+			}
+		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.DAY) {
+			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())
+							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.in(Arrays.asList(RentalType.HOUR, RentalType.HALFDAY, RentalType.THREETIMEADAY))))
+					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.MONTH.getCode())
+							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(rentalCell.getResourceRentalDate())))));
+		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.MONTH) {
+			step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
+					.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.ge(initToMonthFirstDay(rentalCell.getResourceRentalDate()))
+							.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.le(initToMonthLastDay(rentalCell.getResourceRentalDate())))));
+		}
+		
+		Table<?> innerTable = step.groupBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE, Tables.EH_RENTALV2_RESOURCE_ORDERS.AMORPM, 
+				Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME, Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME).asTable("inner_table");
+		
+		Field<BigDecimal> maxRentalCount = null;
+		Table<?> middleTable = context.select(innerTable.field("rental_type"), maxRentalCount = DSL.max(rentalCount)).from(innerTable).groupBy(innerTable.field("rental_type")).asTable("middle_table");
+		
+		SelectJoinStep<Record1<BigDecimal>> outer = context.select(DSL.sum(maxRentalCount)).from(middleTable);
+		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug(outer.getSQL());
+		}
+		
+		Record1<BigDecimal> record = outer.fetchOne();
+		
+		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
+	}
+
+	private Date initToMonthLastDay(Date date) {
+		Calendar temp = Calendar.getInstance();
+		temp.setTime(date);
+		temp.set(Calendar.DAY_OF_MONTH, temp.getActualMaximum(Calendar.DAY_OF_MONTH));
+		temp.set(Calendar.HOUR_OF_DAY, 0);
+		temp.set(Calendar.MINUTE, 0);
+		temp.set(Calendar.SECOND, 0);
+		temp.set(Calendar.MILLISECOND, 0);
+		return new Date(temp.getTimeInMillis());
+	}
+
+	private Date initToMonthFirstDay(Date date) {
+		Calendar temp = Calendar.getInstance();
+		temp.setTime(date);
+		temp.set(Calendar.DAY_OF_MONTH, 1);
+		temp.set(Calendar.HOUR_OF_DAY, 0);
+		temp.set(Calendar.MINUTE, 0);
+		temp.set(Calendar.SECOND, 0);
+		temp.set(Calendar.MILLISECOND, 0);
+		return new Date(temp.getTimeInMillis());
+	}
+
+	private Timestamp[] calculateBeginEndTime(RentalResource rentalResource, RentalCell rentalCell) {
+		return null;
+	}
+
+	@SuppressWarnings("deprecation")
+	private Byte calculateAmorpm(RentalResource rentalResource, RentalCell rentalCell) {
+		if (rentalCell.getBeginTime() == null || rentalCell.getEndTime() == null) {
+			return null;
+		}
+		List<RentalTimeInterval> halfTimeIntervals = queryRentalTimeIntervalByOwner(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
+		if (halfTimeIntervals == null || halfTimeIntervals.isEmpty()) {
+			return null;
+		}
+		
+		for (int i = 0; i < halfTimeIntervals.size(); i++) {
+			RentalTimeInterval rentalTimeInterval = halfTimeIntervals.get(i);
+			if (rentalTimeInterval.getBeginTime() <= (rentalCell.getBeginTime().getHours()+rentalCell.getBeginTime().getMinutes()/60) 
+					&& rentalTimeInterval.getEndTime() >= (rentalCell.getEndTime().getHours()+rentalCell.getEndTime().getMinutes()/60)) {
+				// 麻蛋的，这个表里没有标识是上午下午还是晚上，只能根据这个i来返回了，0上午1下午2晚上
+				return (byte) i;
+			}
+		}
+		// TODO,这里有个问题，不支持一个时间段跨越了上下午的
+		return null;
+	}
+
 	@Override
 	public List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

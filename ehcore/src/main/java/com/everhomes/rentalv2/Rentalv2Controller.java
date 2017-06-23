@@ -111,6 +111,24 @@ public class Rentalv2Controller extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /rental/findRentalSiteYearStatus</b>
+	 * <p>
+	 * 查询某服务预约某年的状态
+	 * </p>
+	 */
+	
+	@RequestMapping("findRentalSiteYearStatus")
+	@RestReturn(value = FindRentalSiteYearStatusCommandResponse.class)	
+	public RestResponse findRentalSiteYearStatus(@Valid FindRentalSiteYearStatusCommand cmd) {
+		FindRentalSiteYearStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findRentalSiteYearStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /rental/findAutoAssignRentalSiteMonthStatus</b>
@@ -124,6 +142,24 @@ public class Rentalv2Controller extends ControllerBase {
 	public RestResponse findAutoAssignRentalSiteMonthStatus(@Valid FindAutoAssignRentalSiteMonthStatusCommand cmd) {
 		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
 				.findAutoAssignRentalSiteMonthStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteYearStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一年的单元格
+	 * </p>
+	 */
+	
+	@RequestMapping("findAutoAssignRentalSiteYearStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteYearStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteYearStatus(@Valid FindAutoAssignRentalSiteYearStatusCommand cmd) {
+		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
+				.findAutoAssignRentalSiteYearStatus(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
