@@ -138,6 +138,7 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -964,7 +965,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		long time2 = System.currentTimeMillis();
 		LOGGER.info("proccessCells time={}", time2 - time1);
 
-		RentalSiteDTO rSiteDTO = convertToDTO(rentalSite, sceneTokenDTO);
+		RentalSiteDTO rSiteDTO = convertToDTO(rentalSite, resourceType, sceneTokenDTO);
 
 		String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
 		String detailUrl = configurationProvider.getValue(ConfigConstants.RENTAL_RESOURCE_DETAIL_URL, "");
@@ -1037,7 +1038,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		long time3 = System.currentTimeMillis();
 		LOGGER.info("populate time={}", time3 - time2);
 		//计算显示价格
-		calculatePrice(rentalSite, rSiteDTO, sceneTokenDTO);
+//		calculatePrice(rentalSite, rSiteDTO, sceneTokenDTO);
+		setShowPrice(rSiteDTO, sceneTokenDTO);
 
 		long time4 = System.currentTimeMillis();
 		LOGGER.info("calculatePrice time={}", time4 - time3);
@@ -1051,7 +1053,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return rSiteDTO;
 	}
 
-	private RentalSiteDTO convertToDTO(RentalResource rentalSite, SceneTokenDTO sceneTokenDTO) {
+	private void setShowPrice(RentalSiteDTO rSiteDTO, SceneTokenDTO sceneTokenDTO) {
+		List<SitePriceRuleDTO> sitePriceRuleDTOs = rSiteDTO.getSitePriceRules();
+		if (sitePriceRuleDTOs.size() == 1) {
+			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
+		}else {
+			BigDecimal minPrice = sitePriceRuleDTOs.get(0).getMinPrice();
+			for(int i = 1; i < sitePriceRuleDTOs.size(); i++) {
+				SitePriceRuleDTO sitePriceRuleDTO = sitePriceRuleDTOs.get(i);
+				if (sitePriceRuleDTO.getMinPrice().compareTo(minPrice) < 0) {
+					minPrice = sitePriceRuleDTO.getMinPrice();
+				}
+			}
+			if(minPrice.compareTo(new BigDecimal(0)) == 0) {
+				rSiteDTO.setAvgPriceStr("免费");
+			}else {
+				String priceString = isInteger(minPrice)? String.valueOf(minPrice.intValue()): minPrice.toString();
+				rSiteDTO.setAvgPriceStr(priceString + " 起");
+			}
+		}
+	}
+
+	private RentalSiteDTO convertToDTO(RentalResource rentalSite, RentalResourceType resourceType, SceneTokenDTO sceneTokenDTO) {
 		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalSite.getId());
 		if (priceRules.size() > 0) {
 			Rentalv2PriceRule priceRule = priceRules.get(0);
@@ -1068,28 +1091,55 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setCutPrice(priceRule.getCutPrice());
 		}
 		RentalSiteDTO rentalSiteDTO = ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
-		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p->convertToSitePriceRuleDTO(p, sceneTokenDTO)).collect(Collectors.toList()));
+		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p->convertToSitePriceRuleDTO(rentalSite, p, resourceType, sceneTokenDTO)).collect(Collectors.toList()));
 		return rentalSiteDTO;
 	}
 
-	private SitePriceRuleDTO convertToSitePriceRuleDTO(Rentalv2PriceRule priceRule, SceneTokenDTO sceneTokenDTO) {
-		SitePriceRuleDTO sitePriceRuleDTO = ConvertHelper.convert(priceRule, SitePriceRuleDTO.class);
+	private SitePriceRuleDTO convertToSitePriceRuleDTO(RentalResource rentalSite, Rentalv2PriceRule priceRule, RentalResourceType resourceType, SceneTokenDTO sceneTokenDTO) {
+		SitePriceRuleDTO sitePriceRuleDTO = new SitePriceRuleDTO();
 		sitePriceRuleDTO.setRentalType(priceRule.getRentalType());
-		sitePriceRuleDTO.setMaxPrice(getMaxPrice(priceRule));
-		sitePriceRuleDTO.setMinPrice(getMinPrice(priceRule));
+		
+		MaxMinPrice maxMinPrice = rentalv2Provider.findMaxMinPrice(priceRule.getOwnerId(), priceRule.getRentalType());
+		
+		if (sceneTokenDTO != null) {
+			BigDecimal maxPrice = null;
+			BigDecimal minPrice = null;
+			String scene = sceneTokenDTO.getScene();
+			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
+				maxPrice = max(maxMinPrice.getMaxOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice(), priceRule.getOrgMemberWeekendPrice());
+				minPrice = min(maxMinPrice.getMinOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice(), priceRule.getOrgMemberWeekendPrice());
+				sitePriceRuleDTO.setMaxPrice(maxPrice);
+				sitePriceRuleDTO.setMinPrice(minPrice);
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+			}else if (SceneType.ENTERPRISE.getCode().equals(scene)) {
+				maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+				minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+				sitePriceRuleDTO.setMaxPrice(maxPrice);
+				sitePriceRuleDTO.setMinPrice(minPrice);
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+			}else if (TrueOrFalseFlag.fromCode(resourceType.getUnauthVisible()) == TrueOrFalseFlag.TRUE) {
+				maxPrice = max(maxMinPrice.getMaxApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+				minPrice = min(maxMinPrice.getMinApprovingUserPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+				sitePriceRuleDTO.setMaxPrice(maxPrice);
+				sitePriceRuleDTO.setMinPrice(minPrice);
+				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
+			}else {
+				sitePriceRuleDTO.setPriceStr("价格认证可见");
+			}
+		}
+		
 		return sitePriceRuleDTO;
 	}
-	
-	private BigDecimal getMaxPrice(Rentalv2PriceRule priceRule) {
-		return max(priceRule.getWorkdayPrice(), priceRule.getWeekendPrice(), priceRule.getOrgMemberWorkdayPrice(), 
-				priceRule.getOrgMemberWeekendPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
+
+	private String getPriceStr(BigDecimal maxPrice, BigDecimal minPrice, Byte rentalType, Double timeStep) {
+		if( minPrice.compareTo(maxPrice) == 0){
+			return priceToString(minPrice,rentalType,timeStep);
+		}else{
+			return priceToString(minPrice,rentalType,timeStep)
+					+ "~" + priceToString(maxPrice,rentalType,timeStep);
+		}
 	}
-	
-	private BigDecimal getMinPrice(Rentalv2PriceRule priceRule) {
-		return min(priceRule.getWorkdayPrice(), priceRule.getWeekendPrice(), priceRule.getOrgMemberWorkdayPrice(), 
-				priceRule.getOrgMemberWeekendPrice(), priceRule.getApprovingUserWorkdayPrice(), priceRule.getApprovingUserWeekendPrice());
-	}
-	
+
 	private BigDecimal max(BigDecimal ... b) {
 		BigDecimal max = new BigDecimal(0);
 		for (BigDecimal bigDecimal : b) {

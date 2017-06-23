@@ -32,6 +32,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.rentalv2.DateLength;
+import com.everhomes.rest.rentalv2.MaxMinPrice;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalTimeIntervalOwnerType;
 import com.everhomes.rest.rentalv2.RentalType;
@@ -88,6 +89,8 @@ import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
+
+import freemarker.core.ArithmeticEngine.BigDecimalEngine;
 
 @Component
 public class Rentalv2ProviderImpl implements Rentalv2Provider {
@@ -2252,6 +2255,86 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return new ArrayList<RentalOrder>();
 	}
- 
+
+	@Override
+	public MaxMinPrice findMaxMinPrice(Long resourceId, Byte rentalType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE),
+				DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE), DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)
+				)
+			.from(Tables.EH_RENTALV2_CELLS)
+			.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+			.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+			.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
+			.fetchOne();
+		if (record != null) {
+			BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE)));
+			BigDecimal minPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORIGINAL_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALFRESOURCE_ORIGINAL_PRICE)));
+			BigDecimal maxOrgMemberPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE)));
+			BigDecimal minOrgMemberPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.ORG_MEMBER_ORIGINAL_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_ORG_MEMBER_ORIGINAL_PRICE)));
+			BigDecimal maxApprovingUserPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE)),
+					record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)));
+			BigDecimal minApprovingUserPrice = min(record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.APPROVING_USER_ORIGINAL_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_PRICE)),
+					record.getValue(DSL.min(Tables.EH_RENTALV2_CELLS.HALF_APPROVING_USER_ORIGINAL_PRICE)));
+			return new MaxMinPrice(maxPrice, minPrice, maxOrgMemberPrice, minOrgMemberPrice, maxApprovingUserPrice, minApprovingUserPrice);
+		}
+		return null;
+	}
+	
+	private BigDecimal max(BigDecimal ... b) {
+		BigDecimal max = new BigDecimal(0);
+		for (BigDecimal bigDecimal : b) {
+			max = maxBig(max, bigDecimal);
+		}
+		return max;
+	}
+	
+	private BigDecimal maxBig(BigDecimal b1, BigDecimal b2) {
+		if (b2 != null && b2.compareTo(b1) > 0) {
+			return b2;
+		}
+		return b1;
+	}
+
+	private BigDecimal min(BigDecimal ... b) {
+		BigDecimal min = new BigDecimal(0);
+		for (BigDecimal bigDecimal : b) {
+			min = minBig(min, bigDecimal);
+		}
+		return min;
+	}
+	
+	private BigDecimal minBig(BigDecimal b1, BigDecimal b2) {
+		if (b2 != null && b2.compareTo(b1) < 0) {
+			return b2;
+		}
+		return b1;
+	}
 	
 }

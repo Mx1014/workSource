@@ -21,19 +21,16 @@ import com.everhomes.util.StringHelper;
  */
 public class SitePriceRuleDTO {
 	private Byte rentalType;
-	private BigDecimal minPrice;
 	private BigDecimal maxPrice;
-	private Byte discountType;
-	private BigDecimal fullPrice;
-	private BigDecimal cutPrice;
-	private Double discountRatio;
+	private BigDecimal minPrice;
+	private String priceStr;
 
-	public Byte getRentalType() {
-		return rentalType;
+	public BigDecimal getMaxPrice() {
+		return maxPrice;
 	}
 
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
+	public void setMaxPrice(BigDecimal maxPrice) {
+		this.maxPrice = maxPrice;
 	}
 
 	public BigDecimal getMinPrice() {
@@ -44,44 +41,20 @@ public class SitePriceRuleDTO {
 		this.minPrice = minPrice;
 	}
 
-	public BigDecimal getMaxPrice() {
-		return maxPrice;
+	public Byte getRentalType() {
+		return rentalType;
 	}
 
-	public void setMaxPrice(BigDecimal maxPrice) {
-		this.maxPrice = maxPrice;
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
 	}
 
-	public Byte getDiscountType() {
-		return discountType;
+	public String getPriceStr() {
+		return priceStr;
 	}
 
-	public void setDiscountType(Byte discountType) {
-		this.discountType = discountType;
-	}
-
-	public BigDecimal getFullPrice() {
-		return fullPrice;
-	}
-
-	public void setFullPrice(BigDecimal fullPrice) {
-		this.fullPrice = fullPrice;
-	}
-
-	public BigDecimal getCutPrice() {
-		return cutPrice;
-	}
-
-	public void setCutPrice(BigDecimal cutPrice) {
-		this.cutPrice = cutPrice;
-	}
-
-	public Double getDiscountRatio() {
-		return discountRatio;
-	}
-
-	public void setDiscountRatio(Double discountRatio) {
-		this.discountRatio = discountRatio;
+	public void setPriceStr(String priceStr) {
+		this.priceStr = priceStr;
 	}
 
 	@Override
