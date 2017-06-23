@@ -2,12 +2,16 @@
 package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
+ 
 
-import org.jooq.types.UInteger;
+import org.jooq.types.UInteger; 
+import com.everhomes.util.ConvertHelper; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class SalaryServiceImpl implements SalaryService {
@@ -36,9 +40,12 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
         ListSalaryDefaultEntitiesResponse response = new ListSalaryDefaultEntitiesResponse();
-        List<SalaryDefaultEntityDTO> entity = null;
-	
-		return new ListSalaryDefaultEntitiesResponse();
+        List<SalaryDefaultEntity> result = this.salaryDefaultEntityProvider.listSalaryDefaultEntity();
+        response.setSalaryDefaultEntities(result.stream().map(r ->{
+            SalaryDefaultEntityDTO dto = ConvertHelper.convert(r,SalaryDefaultEntityDTO.class);
+            return dto;
+        }).collect(Collectors.toList()));
+		return response;
 	}
 
 	@Override
