@@ -106,7 +106,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         GeneralFormFieldDTO customField = new GeneralFormFieldDTO();
         customField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
         customField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        customField.setRequiredFlag(NormalFlag.NEED.getCode());
+        customField.setRequiredFlag(NormalFlag.NONEED.getCode());
         customField.setDynamicFlag(NormalFlag.NONEED.getCode());
         customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
         customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());

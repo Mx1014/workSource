@@ -1648,3 +1648,189 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60000,'', 'EhNamespaces', 999979,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60100,'', 'EhNamespaces', 999979,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60200,'', 'EhNamespaces', 999979,2);
+
+
+INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
+	VALUES(194146, 240111044331056800, '光大We谷A3栋', '光大We谷A3栋', 0, '0769-22992838', '东莞市松山湖总部二路2号', 5206.73, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264301,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-304','光大We谷A3栋','A3-304','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264302,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-305','光大We谷A3栋','A3-305','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264303,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-306','光大We谷A3栋','A3-306','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264304,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-307','光大We谷A3栋','A3-307','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264305,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-308','光大We谷A3栋','A3-308','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264306,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-309','光大We谷A3栋','A3-309','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264307,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-310','光大We谷A3栋','A3-310','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264308,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-311','光大We谷A3栋','A3-311','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264309,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-312','光大We谷A3栋','A3-312','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264310,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-313','光大We谷A3栋','A3-313','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264311,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-314','光大We谷A3栋','A3-314','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264312,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-315','光大We谷A3栋','A3-315','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264313,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-316','光大We谷A3栋','A3-316','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264314,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-317','光大We谷A3栋','A3-317','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264315,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-318','光大We谷A3栋','A3-318','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264316,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-319','光大We谷A3栋','A3-319','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264317,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-320','光大We谷A3栋','A3-320','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264318,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-321','光大We谷A3栋','A3-321','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264319,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-322','光大We谷A3栋','A3-322','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264320,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-323','光大We谷A3栋','A3-323','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264321,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-324','光大We谷A3栋','A3-324','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264322,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-325','光大We谷A3栋','A3-325','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264323,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-326','光大We谷A3栋','A3-326','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264324,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-327','光大We谷A3栋','A3-327','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264325,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-328','光大We谷A3栋','A3-328','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264326,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-329','光大We谷A3栋','A3-329','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264327,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-330','光大We谷A3栋','A3-330','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264328,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-331','光大We谷A3栋','A3-331','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264329,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-332','光大We谷A3栋','A3-332','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264330,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-333','光大We谷A3栋','A3-333','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264331,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-334','光大We谷A3栋','A3-334','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264332,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-401','光大We谷A3栋','A3-401','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264333,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-402','光大We谷A3栋','A3-402','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264334,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-403','光大We谷A3栋','A3-403','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264335,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-404','光大We谷A3栋','A3-404','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264336,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-405','光大We谷A3栋','A3-405','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264337,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-406','光大We谷A3栋','A3-406','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264338,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-407','光大We谷A3栋','A3-407','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264339,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-408','光大We谷A3栋','A3-408','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264340,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-409','光大We谷A3栋','A3-409','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264341,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-410','光大We谷A3栋','A3-410','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264342,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-411','光大We谷A3栋','A3-411','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264343,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-412','光大We谷A3栋','A3-412','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264344,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-413','光大We谷A3栋','A3-413','2','0',UTC_TIMESTAMP(), 999979);
+INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
+	VALUES(239825274387264345,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-414','光大We谷A3栋','A3-414','2','0',UTC_TIMESTAMP(), 999979);
+
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264301, '光大We谷A3栋-A3-304', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264302, '光大We谷A3栋-A3-305', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264303, '光大We谷A3栋-A3-306', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264304, '光大We谷A3栋-A3-307', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264305, '光大We谷A3栋-A3-308', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264306, '光大We谷A3栋-A3-309', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264307, '光大We谷A3栋-A3-310', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264308, '光大We谷A3栋-A3-311', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264309, '光大We谷A3栋-A3-312', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264310, '光大We谷A3栋-A3-313', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264311, '光大We谷A3栋-A3-314', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264312, '光大We谷A3栋-A3-315', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264313, '光大We谷A3栋-A3-316', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264314, '光大We谷A3栋-A3-317', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264315, '光大We谷A3栋-A3-318', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264316, '光大We谷A3栋-A3-319', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264317, '光大We谷A3栋-A3-320', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264318, '光大We谷A3栋-A3-321', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264319, '光大We谷A3栋-A3-322', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264320, '光大We谷A3栋-A3-323', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264321, '光大We谷A3栋-A3-324', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264322, '光大We谷A3栋-A3-325', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264323, '光大We谷A3栋-A3-326', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264324, '光大We谷A3栋-A3-327', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264325, '光大We谷A3栋-A3-328', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264326, '光大We谷A3栋-A3-329', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264327, '光大We谷A3栋-A3-330', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264328, '光大We谷A3栋-A3-331', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264329, '光大We谷A3栋-A3-332', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264330, '光大We谷A3栋-A3-333', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264331, '光大We谷A3栋-A3-334', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264332, '光大We谷A3栋-A3-401', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264333, '光大We谷A3栋-A3-402', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264334, '光大We谷A3栋-A3-403', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264335, '光大We谷A3栋-A3-404', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264336, '光大We谷A3栋-A3-405', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264337, '光大We谷A3栋-A3-406', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264338, '光大We谷A3栋-A3-407', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264339, '光大We谷A3栋-A3-408', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264340, '光大We谷A3栋-A3-409', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264341, '光大We谷A3栋-A3-410', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264342, '光大We谷A3栋-A3-411', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264343, '光大We谷A3栋-A3-412', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264344, '光大We谷A3栋-A3-413', '0');
+INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
+	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264345, '光大We谷A3栋-A3-414', '0');
+	
