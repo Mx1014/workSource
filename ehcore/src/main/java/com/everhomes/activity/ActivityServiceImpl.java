@@ -61,10 +61,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.RouterMetaObject;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.order.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
@@ -657,7 +654,93 @@ public class ActivityServiceImpl implements ActivityService {
 		
 		return dto;
 	}
-    
+
+	@Override
+	public CreateWechatJsPayOrderResp createWechatJsSignupOrder(CreateWechatJsSignupOrderCommand cmd) {
+//		ActivityRoster roster = activityProvider.findRosterById(cmd.getActivityRosterId());
+
+		ActivityRoster roster  = activityProvider.findRosterByUidAndActivityId(cmd.getActivityId(), UserContext.current().getUser().getId(), ActivityRosterStatus.NORMAL.getCode());
+		if(roster == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_NO_ROSTER,
+					"no roster.");
+		}
+		Activity activity = activityProvider.findActivityById(roster.getActivityId());
+		if(activity == null){
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID,
+					"no activity.");
+		}
+
+		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
+
+		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
+		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmd, PayZuolinCreateWechatJsPayOrderResp.class);
+
+		if(response.getResult()){
+			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			return response.getBody();
+		}
+		else{
+			LOGGER.error("CreateWechatJsPayOrder fail, orderNo={}, userId={}, activityId={}, response={}",
+					roster.getOrderNo(), roster.getUid(), activity.getId(), response);
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					ActivityServiceErrorCode.ERROR_CREATE_WXJS_ORDER_ERROR,
+					"CreateWechatJsPayOrder error");
+		}
+	}
+
+
+	private CreateWechatJsPayOrderCmd newWechatOrderCmd(Activity activity, ActivityRoster roster){
+
+		//调用统一处理订单接口，返回统一订单格式
+		CreateWechatJsPayOrderCmd orderCmd = new CreateWechatJsPayOrderCmd();
+		String temple = localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+				String.valueOf(ActivityLocalStringCode.ACTIVITY_PAY_FEE),
+				UserContext.current().getUser().getLocale(),
+				"activity roster pay");
+
+		//与微信认证登录时候一致，查找当前域空间的公众号，没有就选择默认的。
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		orderCmd.setRealm("wechat_" + namespaceId);
+		String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+		//增加默认公众号   add by yanjun 20170620
+		if(StringUtils.isEmpty(appId)){
+			orderCmd.setRealm("wechat_0");
+		}
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDERWECHAT.getPycode());
+		orderCmd.setOnlinePayStyleNo(VendorType.WEI_XIN.getStyleNo());
+		orderCmd.setOrderNo(roster.getOrderNo().toString());
+		orderCmd.setOrderAmount(activity.getChargePrice().toString());
+		User user = UserContext.current().getUser();
+		orderCmd.setUserId(user.getNamespaceUserToken());
+		orderCmd.setSubject(temple);
+
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		orderCmd.setAppKey(appKey);
+		orderCmd.setTimestamp(timestamp);
+		orderCmd.setRandomNum(randomNum);
+
+		App app = appProvider.findAppByKey(appKey);
+
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("realm", orderCmd.getRealm());
+		map.put("orderType",orderCmd.getOrderType());
+		map.put("onlinePayStyleNo",orderCmd.getOnlinePayStyleNo());
+		map.put("orderNo",orderCmd.getOrderNo());
+		map.put("orderAmount",orderCmd.getOrderAmount());
+		map.put("userId", orderCmd.getUserId());
+		map.put("subject",orderCmd.getSubject());
+		map.put("appKey",orderCmd.getAppKey());
+		map.put("timestamp",orderCmd.getTimestamp() + "");
+		map.put("randomNum",orderCmd.getRandomNum() + "");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		orderCmd.setSignature(signature);
+		return orderCmd;
+	}
+
+
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
     	Activity outActivity = checkActivityExist(cmd.getActivityId());
