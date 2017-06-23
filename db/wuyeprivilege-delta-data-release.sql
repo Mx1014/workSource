@@ -118,11 +118,11 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 分数统计查看权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.stat.score', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20661','0',@privilege_id,'品质核查 分数统计查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20660','0',@privilege_id,'品质核查 分数统计查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 任务数统计查看权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.stat.task', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20662','0',@privilege_id,'品质核查 任务数统计查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20660','0',@privilege_id,'品质核查 任务数统计查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 修改记录查看权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.updatelog.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
@@ -130,23 +130,23 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 绩效考核查看权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.sample.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20655','0',@privilege_id,'品质核查 绩效考核查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20650','0',@privilege_id,'品质核查 绩效考核查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 绩效考核新增权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.sample.create', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20655','0',@privilege_id,'品质核查 绩效考核新增权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20650','0',@privilege_id,'品质核查 绩效考核新增权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 绩效考核修改权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.sample.update', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20655','0',@privilege_id,'品质核查 绩效考核修改权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20650','0',@privilege_id,'品质核查 绩效考核修改权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 绩效考核删除权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.sample.delete', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20655','0',@privilege_id,'品质核查 绩效考核删除权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20650','0',@privilege_id,'品质核查 绩效考核删除权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '品质核查 检查统计查看权限', '品质核查 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'quality.stat.sample', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20663','0',@privilege_id,'品质核查 检查统计查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20660','0',@privilege_id,'品质核查 检查统计查看权限','0',NOW());
 
   
   
@@ -155,67 +155,67 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 标准新增修改权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.standard.update', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20811','0',@privilege_id,'设备巡检 标准新增修改权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 标准新增修改权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 标准查看权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.standard.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20811','0',@privilege_id,'设备巡检 标准查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 标准查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 标准删除权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.standard.delete', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20811','0',@privilege_id,'设备巡检 标准删除权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 标准删除权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检关联审批查看权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.relation.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20812','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检关联审批审核权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.relation.review', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20812','0',@privilege_id,'设备巡检 巡检关联审批审核权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批审核权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检关联审批删除失效关联权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.relation.delete', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20812','0',@privilege_id,'设备巡检 巡检关联审批删除失效关联权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20810','0',@privilege_id,'设备巡检 巡检关联审批删除失效关联权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检对象查看权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20821','0',@privilege_id,'设备巡检 巡检对象查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20820','0',@privilege_id,'设备巡检 巡检对象查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检对象新增修改权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.update', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20821','0',@privilege_id,'设备巡检 巡检对象新增修改权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20820','0',@privilege_id,'设备巡检 巡检对象新增修改权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检对象删除权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.delete', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20821','0',@privilege_id,'设备巡检 巡检对象删除权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20820','0',@privilege_id,'设备巡检 巡检对象删除权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 任务查询权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.task.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20831','0',@privilege_id,'设备巡检 任务查询权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20830','0',@privilege_id,'设备巡检 任务查询权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检项查看权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.item.list', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20841','0',@privilege_id,'设备巡检 巡检项查看权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20840','0',@privilege_id,'设备巡检 巡检项查看权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检项新增权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.item.create', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20841','0',@privilege_id,'设备巡检 巡检项新增权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20840','0',@privilege_id,'设备巡检 巡检项新增权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检项删除权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.item.delete', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20841','0',@privilege_id,'设备巡检 巡检项删除权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20840','0',@privilege_id,'设备巡检 巡检项删除权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 巡检项修改权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.item.update', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20841','0',@privilege_id,'设备巡检 巡检项修改权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20840','0',@privilege_id,'设备巡检 巡检项修改权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 统计总览权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.stat.pandect', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20851','0',@privilege_id,'设备巡检 统计总览权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20850','0',@privilege_id,'设备巡检 统计总览权限','0',NOW());
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES ((@privilege_id := @privilege_id + 1), '0', '设备巡检 统计查看所有任务权限', '设备巡检 业务模块权限', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ((@configuration_id := @configuration_id + 1), 'equipment.stat.alltask', @privilege_id, '', '0', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
-    VALUES((@module_privilege_id := @module_privilege_id + 1),'20852','0',@privilege_id,'设备巡检 统计查看所有任务权限','0',NOW());
+    VALUES((@module_privilege_id := @module_privilege_id + 1),'20850','0',@privilege_id,'设备巡检 统计查看所有任务权限','0',NOW());
 
 insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) values((@module_privilege_id := @module_privilege_id + 1),'20600','1','10010','品质核查管理权限','0',NOW());   -- 定义模块的管理权限， 其中privilege_type 代表权限类型，1管理权限，直接管理模块id
 insert into `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) values((@module_privilege_id := @module_privilege_id + 1),'20600','2','10010','品质核查全部权限','0',NOW());   -- 定义模块的全部权限， 其中privilege_type 代表权限类型，2模块全部权限，直接管理模块id
