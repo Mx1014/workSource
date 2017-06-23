@@ -1743,6 +1743,7 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`)
 	VALUES(239825274387264345,UUID(),240111044331056800, 16078, '东莞市',  16079, '松山湖' ,'光大We谷A3栋-A3-414','光大We谷A3栋','A3-414','2','0',UTC_TIMESTAMP(), 999979);
 
+SET @eh_organization_address_mappings = (SELECT MAX(id) FROM `eh_organization_address_mappings`);
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES ((@eh_organization_address_mappings := @eh_organization_address_mappings + 1), 1012516, 240111044331056800, 239825274387264301, '光大We谷A3栋-A3-304', '0');
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
