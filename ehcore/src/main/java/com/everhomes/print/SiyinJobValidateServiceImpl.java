@@ -47,9 +47,8 @@ import sun.misc.BASE64Decoder;
  *  @author:dengs 2017年6月23日
  */
 @Component
-public class SiyinJobValidateObject {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinJobValidateObject.class);
-	private static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
+public class SiyinJobValidateServiceImpl {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinJobValidateServiceImpl.class);
 	
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
@@ -80,7 +79,8 @@ public class SiyinJobValidateObject {
 	 */
 	public void jobLogNotification(String jobData) {
 		//转记录对象
-		SiyinPrintRecord record = convertMapToRecordObject(jobData);
+		Map<?,?> jobMap = getJobMap(jobData);
+		SiyinPrintRecord record = convertMapToRecordObject(jobMap);
 		if(record==null)
 			return ;
 		//记录重复通知
@@ -88,6 +88,14 @@ public class SiyinJobValidateObject {
 		if(oldrecord!=null){
 			return ;
 		}
+		//根据记录创建订单
+		createOrder(record);
+		//正在打印的任务，减少一个
+		String key = SiyinPrintServiceImpl.REDIS_PRINTING_TASK_COUNT + record.getCreatorUid();
+		reducePrintingJobCount(key);
+	}
+	
+	public void createOrder(SiyinPrintRecord record){
 		//支付和合并订单，必须上锁。
 		coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(()->{
 			// 记得上锁 PRINT_ORDER_LOCK_FLAG
@@ -109,9 +117,6 @@ public class SiyinJobValidateObject {
    			});
           return null;
 		});
-		//正在打印的任务，减少一个
-		String key = REDIS_PRINTING_TASK_COUNT + record.getCreatorUid();
-		reducePrintingJobCount(key);
 	}
 	
 	/*
@@ -131,7 +136,7 @@ public class SiyinJobValidateObject {
 	/**
 	 * 获取key在redis操作的valueOperations
 	 */
-	private ValueOperations<String, String> getValueOperations(String key) {
+	public ValueOperations<String, String> getValueOperations(String key) {
 		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
 		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
@@ -139,7 +144,7 @@ public class SiyinJobValidateObject {
 		return valueOperations;
 	}
 	
-	private SiyinPrintRecord convertMapToRecordObject(String jobData) {
+	private Map<?,?> getJobMap(String jobData){
 		String copyJobData = jobData;
 		BASE64Decoder decoder = new BASE64Decoder();
 		try {
@@ -153,7 +158,10 @@ public class SiyinJobValidateObject {
         Map<String, Object> object = XMLToJSON.convertOriginalMap(copyJobData);
         Map<?, ?> data = (Map)object.get("data");
         Map<?, ?> job = (Map<?, ?>)data.get("job");
-        
+        return job;
+	}
+	
+	public SiyinPrintRecord convertMapToRecordObject(Map<?,?> job) {
 		SiyinPrintRecord record = new SiyinPrintRecord();
 		record.setJobId(job.get("job_id").toString());
 		record.setJobStatus(job.get("job_status").toString());

@@ -1,56 +1,60 @@
 package com.everhomes.print;
 
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.http.HttpUtils;
-import com.everhomes.sms.DateUtil;
-import com.everhomes.util.xml.XMLToJSON;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import sun.misc.BASE64Decoder;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.http.HttpUtils;
+import com.everhomes.rest.print.PrintErrorCode;
+import com.everhomes.util.xml.XMLToJSON;
+
+import sun.misc.BASE64Decoder;
 
 /**
  * Created by sfyan on 2017/3/23.
  */
-public class SiyinTaskLogScheduleJob  extends QuartzJobBean {
+public class SiyinTaskLogScheduleJob extends QuartzJobBean {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinTaskLogScheduleJob.class);
 
-    private String siyinUrl = "http://siyin.zuolin.com:8119";
+	@Autowired
+	private SiyinJobValidateServiceImpl siyinJobValidateServiceImpl;
+	
+	@Autowired
+	private SiyinPrintRecordProvider siyinPrintRecordProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SiyinTaskLogScheduleJob.class);
-
-    @Autowired
-    private BigCollectionProvider bigCollectionProvider;
-
-    @Override
+	@Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         try{
-            final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-            String key = "startTime";
             // 需要把查询的开始时间持久化 ，暂存储在redis
-            Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-            String startTime = valueOperations.get(key);
-            if(null == startTime){
-                startTime = "2017-03-22 00:00:00";
+            ValueOperations<String, String> valueOperations = siyinJobValidateServiceImpl.getValueOperations(SiyinPrintServiceImpl.REDIS_PRINT_JOB_CHECK_TIME);
+            String timeStr = valueOperations.get(SiyinPrintServiceImpl.REDIS_PRINT_JOB_CHECK_TIME);
+            Long time = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            if(timeStr == null){
+            	time = sdf.parse(timeStr).getTime();
             }
-
-            String endTime = DateUtil.dateToStr(new Date(), DateUtil.DATE_TIME_LINE);
+            Long startLong = time-30*60*1000;
+            Long endLong = time+30*60*1000;
 
             Map<String, String> params = new HashMap<>();
-            params.put("start_time", startTime);
-            params.put("end_time", endTime);
+            params.put("start_time", sdf.format(new Date(startLong)));
+            params.put("end_time", sdf.format(new Date(endLong)));
+            String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
+
             String result = HttpUtils.post(siyinUrl + "/console/queryServlet", params, 30);
             String siyinCode = getSiyinCode(result);
             if(siyinCode.equals("OK")){
@@ -64,23 +68,35 @@ public class SiyinTaskLogScheduleJob  extends QuartzJobBean {
                 LOGGER.warn("siyin api:/console/queryServlet siyinCode:{}", siyinCode);
             }
             String taskData = getSiyinData(result);
-            taskData = XMLToJSON.convertStandardJson(taskData);
-            valueOperations.set(key, endTime);
-            LOGGER.info("api:/console/queryServlet, response:{}", taskData);
+            Map<String, Object> originalMap= XMLToJSON.convertOriginalMap(taskData);
+            Map<?, ?> dataMap = (Map)originalMap.get("data");
+            List<Map<?,?>> jobList = (List<Map<?,?>>)dataMap.get("job_list");
+            for (Map<?, ?> job : jobList) {
+            	SiyinPrintRecord record = siyinJobValidateServiceImpl.convertMapToRecordObject(job);
+            	if(record != null){//记录是左邻用户打印产生的。
+            		//记录已存数据库
+            		SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
+            		if(oldrecord!=null){
+            			continue ;
+            		}
+            		//丢掉了记录,则补单上去
+            		siyinJobValidateServiceImpl.createOrder(record);
+            	}
+			}
 
         }catch (Exception e){
-
+        	 LOGGER.warn("SiyinTaskLogScheduleJob:"+e.getMessage());
         }
     }
 
-    public String getSiyinCode(String result){
-        if(result.indexOf(":") > 0){
-            return result.substring(0, result.indexOf(":"));
-        }
-        return "";
-    }
+	public String getSiyinCode(String result) {
+		if (result.indexOf(":") > 0) {
+			return result.substring(0, result.indexOf(":"));
+		}
+		return "";
+	}
 
-    public String getSiyinData(String result){
-        return result.substring(result.indexOf(":") + 1);
-    }
+	public String getSiyinData(String result) {
+		return result.substring(result.indexOf(":") + 1);
+	}
 }

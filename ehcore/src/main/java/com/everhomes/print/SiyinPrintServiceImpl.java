@@ -4,6 +4,7 @@ package com.everhomes.print;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,7 +115,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
 	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
 	private static final String REDIS_PRINT_IDENTIFIER_TOKEN = "print-uid";
-	private static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
+	public static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
+	public static final String REDIS_PRINT_JOB_CHECK_TIME = "redis_print_job_check_time";
 	private static final String PRINT_SUBJECT = "print";
 	
 	@Autowired
@@ -284,37 +286,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         return response;
 	}
 
-	/**
-	 * 单位转秒
-	 */
-	private int getScale(TimeUnit unit) {
-		switch (unit) {
-		case SECONDS:
-			return 1;
-		case MINUTES:
-			return 60;
-		case HOURS:
-			return 3600;
-		}
-		return 60;
-	}
-
-
-	private TimeUnit getTimeUnit(String timeunit) {
-		//秒 SECONDS/分 MINUTES/小时 HOURS
-		timeunit = timeunit.toUpperCase();
-		switch (timeunit) {
-		case "SECONDS":
-			return TimeUnit.SECONDS;
-		case "MINUTES":
-			return TimeUnit.MINUTES;
-		case "HOURS":
-			return TimeUnit.HOURS;
-		}
-		return TimeUnit.MINUTES;
-	}
-
-
 	@Override
 	public DeferredResult<RestResponse> logonPrint(LogonPrintCommand cmd) {
 		// TODO 
@@ -386,28 +357,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         return new InformPrintResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
     
 	}
-
-	/**
-	 * 获取key在redis操作的valueOperations
-	 */
-	private ValueOperations<String, String> getValueOperations(String key) {
-		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-		return valueOperations;
-	}
-	
-	/**
-	 * 清除redis中key的缓存
-	 */
-	private void deleteValueOperations(String key) {
-		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-		redisTemplate.delete(key);
-	}
-
 
 	@Override
 	public void printImmediately(PrintImmediatelyCommand cmd) {
@@ -502,36 +451,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 	}
 
-	private SiyinPrintOrder lockOrder(Long orderId) {
-		//这里必须锁定，因为存在同时去合并打印记录到订单的情况，参考 /siyinprint/jobLogNotification ，
-		//此处需要合并打印记录到订单。也需要用到此 CoordinationLocks.PRINT_ORDER_LOCK_FLAG 锁。
-		Tuple<SiyinPrintOrder,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(new Callable<SiyinPrintOrder>() {
-			public SiyinPrintOrder call() throws Exception {
-				siyinPrintOrderProvider.updateSiyinPrintOrderLockFlag(orderId,PrintOrderLockType.LOCKED.getCode());
-				return siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
-			}
-		});
-		if(!tuple.second()){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_LOCK_FAILED,
-					"paid error, can not lock order, id = "+orderId);
-		}
-		return tuple.first();
-	}
-
-
-	private SiyinPrintOrder checkPrintOrder(Long orderId) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
-		if(order == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown orderId = "+orderId);
-		}
-		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
-		if(orderStatus == PrintOrderStatusType.PAID){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have paid orderId = "+orderId);
-		}
-		return order;
-	}
-
-
 	@Override
 	public ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
 		Long id = UserContext.current().getUser().getId();
@@ -596,8 +515,97 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		//正在打印的任务，减少一个
 		String key = REDIS_PRINTING_TASK_COUNT + record.getCreatorUid();
 		reducePrintingJobCount(key);
+		//设置一个检查的时间点，方便后台job去司印服务器验证
+		ValueOperations<String, String> valueOperations = getValueOperations(key);
+		String keytime = REDIS_PRINT_JOB_CHECK_TIME;
+	
+		valueOperations.set(keytime, record.getEndTime(),1,TimeUnit.HOURS);
 	}
 	
+	private TimeUnit getTimeUnit(String timeunit) {
+		//秒 SECONDS/分 MINUTES/小时 HOURS
+		timeunit = timeunit.toUpperCase();
+		switch (timeunit) {
+		case "SECONDS":
+			return TimeUnit.SECONDS;
+		case "MINUTES":
+			return TimeUnit.MINUTES;
+		case "HOURS":
+			return TimeUnit.HOURS;
+		}
+		return TimeUnit.MINUTES;
+	}
+
+
+	/**
+	 * 单位转秒
+	 */
+	private int getScale(TimeUnit unit) {
+		switch (unit) {
+		case SECONDS:
+			return 1;
+		case MINUTES:
+			return 60;
+		case HOURS:
+			return 3600;
+		}
+		return 60;
+	}
+
+
+	/**
+	 * 获取key在redis操作的valueOperations
+	 */
+	private ValueOperations<String, String> getValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+		return valueOperations;
+	}
+
+
+	/**
+	 * 清除redis中key的缓存
+	 */
+	private void deleteValueOperations(String key) {
+		final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		redisTemplate.delete(key);
+	}
+
+
+	private SiyinPrintOrder checkPrintOrder(Long orderId) {
+		SiyinPrintOrder order = siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
+		if(order == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Unknown orderId = "+orderId);
+		}
+		PrintOrderStatusType orderStatus = PrintOrderStatusType.fromCode(order.getOrderStatus());
+		if(orderStatus == PrintOrderStatusType.PAID){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have paid orderId = "+orderId);
+		}
+		return order;
+	}
+
+
+	private SiyinPrintOrder lockOrder(Long orderId) {
+		//这里必须锁定，因为存在同时去合并打印记录到订单的情况，参考 /siyinprint/jobLogNotification ，
+		//此处需要合并打印记录到订单。也需要用到此 CoordinationLocks.PRINT_ORDER_LOCK_FLAG 锁。
+		Tuple<SiyinPrintOrder,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(new Callable<SiyinPrintOrder>() {
+			public SiyinPrintOrder call() throws Exception {
+				siyinPrintOrderProvider.updateSiyinPrintOrderLockFlag(orderId,PrintOrderLockType.LOCKED.getCode());
+				return siyinPrintOrderProvider.findSiyinPrintOrderById(orderId);
+			}
+		});
+		if(!tuple.second()){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_LOCK_FAILED,
+					"paid error, can not lock order, id = "+orderId);
+		}
+		return tuple.first();
+	}
+
+
 	/*
 	 *减少用户下正在打印的任务的数量 
 	 */
@@ -909,7 +917,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 
 
-	public void unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
+	private void unlockPrinter(UnlockPrinterCommand cmd, boolean isDirectPrint) {
         String siyinUrl =  configurationProvider.getValue(PrintErrorCode.PRINT_SIYIN_SERVER_URL, "http://siyin.zuolin.com:8119");
         String moduleIp = getSiyinModuleIp(siyinUrl, cmd.getReaderName());
         String loginData = getLoginData(siyinUrl,cmd);
@@ -1361,11 +1369,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		siyinPrintEmail.setStatus(CommonStatus.ACTIVE.getCode());
 		return siyinPrintEmail;
 	}
-	public String getSiyinCode(String result){
+	private String getSiyinCode(String result){
         return result.substring(0, result.indexOf(":"));
     }
 
-    public String getSiyinData(String result){
+	private String getSiyinData(String result){
         return result.substring(result.indexOf(":") + 1);
     }
 }
