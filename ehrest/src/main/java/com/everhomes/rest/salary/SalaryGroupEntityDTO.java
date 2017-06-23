@@ -14,7 +14,8 @@ package com.everhomes.rest.salary;
  * <li>defaultValue: 默认值/默认数值/计算公式</li>
  * <li>needCheck: 是否需要核算:0-否 1-是</li>
  * <li>defaultOrder: 排序</li>
- * <li>visibleFlag: 是否展示到工资条:0-否 1-是</li> 
+ * <li>visibleFlag: 是否展示到工资条:0-否 1-是</li>
+ * <li>templateName: 模板名称</li>
  * </ul>
  * */
 public class SalaryGroupEntityDTO {
