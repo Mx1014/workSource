@@ -89,6 +89,7 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
         sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
         sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
         sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
         fieldDTOs.add(sourceIdField);
 
@@ -98,19 +99,20 @@ public class GeneralApprovalFormHandler implements GeneralFormModuleHandler {
         organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
         organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
         organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
         organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
         fieldDTOs.add(organizationIdField);
 
-        organizationIdField = new GeneralFormFieldDTO();
-        organizationIdField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
-        organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
-        organizationIdField.setDynamicFlag(NormalFlag.NONEED.getCode());
-        organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
-        organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
-        organizationIdField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
-        organizationIdField.setFieldValue(JSONObject.toJSONString(ga));
-        fieldDTOs.add(organizationIdField);
+        GeneralFormFieldDTO customField = new GeneralFormFieldDTO();
+        customField.setFieldName(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        customField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+        customField.setRequiredFlag(NormalFlag.NEED.getCode());
+        customField.setDynamicFlag(NormalFlag.NONEED.getCode());
+        customField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+        customField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
+        customField.setDataSourceType(GeneralFormDataSourceType.CUSTOM_DATA.getCode());
+        customField.setFieldValue(JSONObject.toJSONString(ga));
+        fieldDTOs.add(customField);
 
         GeneralFormDTO dto = ConvertHelper.convert(form, GeneralFormDTO.class);
         dto.setFormFields(fieldDTOs);
