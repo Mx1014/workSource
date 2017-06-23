@@ -22,7 +22,9 @@ public enum PrintSettingType {
 		return code;
 	}
 
-	public static PrintSettingType fromCode(byte code) {
+	public static PrintSettingType fromCode(Byte code) {
+		if(code == null)
+			return null;
 		for (PrintSettingType t : PrintSettingType.values()) {
 			if (t.code == code) {
 				return t;

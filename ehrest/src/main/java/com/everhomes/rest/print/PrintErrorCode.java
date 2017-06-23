@@ -9,6 +9,7 @@ public class PrintErrorCode {
 	public static final String PRINT_COURSE_LIST= "print_course_list";//打印教程 ‘|’做分割
 	public static final String SCAN_COPY_COURSE_LIST= "scan_copy_course_list";//扫描复印教程 ‘|’做分割
 	public static final String PRINT_SUBJECT= "print_subject";//打印订单
+	public static final String PRINT_SURFACE= "print_surface";//*面
 	
 	//eh_configurations
 	public static final String PRINT_SIYIN_SERVER_URL= "print.siyin.server.url";//司印服务器地址 : http://siyin.zuolin.com:8119

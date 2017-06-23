@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.print;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -47,8 +48,8 @@ import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.xml.XMLToJSON;
 
 import sun.misc.BASE64Decoder;
 
@@ -60,6 +61,15 @@ public class SiYinPrintController extends ControllerBase {
 	
 	@Autowired
 	private SiyinPrintService siyinPrintService;
+	
+	@Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @PostConstruct
+    public void setup(){
+        //启动定时任务
+        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */1 * * * ?",SiyinTaskLogScheduleJob.class , null);
+    }
 
 	 /**
 	  * <b>URL: /siyinprint/getPrintSetting</b>
@@ -345,16 +355,6 @@ public class SiYinPrintController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData){
         RestResponse restResponse = new RestResponse();
-        try{
-            LOGGER.info("siyin mfpLogNotification request:{}", jobData);
-            BASE64Decoder decoder = new BASE64Decoder();
-            jobData = new String(decoder.decodeBuffer(jobData));
-            jobData = XMLToJSON.convertStandardJson(jobData);
-            LOGGER.info("task log json:{}", jobData);
-        }catch (Exception e){
-
-        }
-
         return restResponse;
     }
 }

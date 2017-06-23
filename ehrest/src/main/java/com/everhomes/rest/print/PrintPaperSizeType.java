@@ -14,19 +14,27 @@ package com.everhomes.rest.print;
 *  @author:dengs 2017年6月16日
 */
 public enum PrintPaperSizeType {
-	A3((byte)3),A4((byte)4),A5((byte)5),A6((byte)6),OTHER_PAPER_SIZE((byte)0);
+	A3((byte)3,"A3"),A4((byte)4,"A4"),A5((byte)5,"A5"),A6((byte)6,"A6"),OTHER_PAPER_SIZE((byte)0,"OTHER");
 	
 	private byte code;
+	private String desc;
 
-	private PrintPaperSizeType(byte code){
+	private PrintPaperSizeType(byte code,String desc){
 		this.code = code;
+		this.desc = desc;
 	}
 
 	public byte getCode() {
 		return code;
 	}
+	
+	public String getDesc() {
+		return desc;
+	}
 
-	public static PrintPaperSizeType fromCode(byte code) {
+	public static PrintPaperSizeType fromCode(Byte code) {
+		if(code == null)
+			return null;
 		for (PrintPaperSizeType t : PrintPaperSizeType.values()) {
 			if (t.code == code) {
 				return t;

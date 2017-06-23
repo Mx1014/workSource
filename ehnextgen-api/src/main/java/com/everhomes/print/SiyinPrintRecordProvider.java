@@ -15,4 +15,6 @@ public interface SiyinPrintRecordProvider {
 
 	SiyinPrintRecord findSiyinPrintRecordByJobId(String jobId);
 
+	List<SiyinPrintRecord> listSiyinPrintRecordByOrderId(Long creatorUid, Long orderId, String ownerType, Long ownerId);
+
 }

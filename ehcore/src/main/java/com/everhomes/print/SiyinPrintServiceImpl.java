@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.print;
 
-import java.awt.PrintJob;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,8 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.tools.ant.taskdefs.Recorder;
-import org.jooq.util.derby.sys.Sys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +35,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -52,7 +50,6 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
@@ -79,7 +76,7 @@ import com.everhomes.rest.print.ListPrintingJobsCommand;
 import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.LogonPrintCommand;
 import com.everhomes.rest.print.PayPrintOrderCommand;
-import com.everhomes.rest.print.PayPrintOrderResponse;
+import com.everhomes.rest.print.PrintColorType;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
 import com.everhomes.rest.print.PrintJobTypeType;
@@ -99,6 +96,8 @@ import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.RuntimeErrorException;
@@ -154,6 +153,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	
 	@Autowired
 	private CoordinationProvider coordinationProvider;
+	
+	@Autowired
+	private DbProvider dbProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
 
 	@Override
 	public GetPrintSettingResponse getPrintSetting(GetPrintSettingCommand cmd) {
@@ -357,9 +362,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         User user = UserContext.current().getUser();
         if(null != valueOperations.get(key)){
         	User logonUser  = new User();
-        	//这里设置accoutname 为用户id-园区-拥有者id，因为在jobLogNotification
-        	//中计算价格的时候，不知道用户所在的园区，所以只能依靠
-        	logonUser.setAccountName(user.getId()+"-"+cmd.getOwnerType()+"-"+cmd.getOwnerId());
+        	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
+        	//中计算价格的时候，不知道用户,所在域,所在的园区，所以只能依靠
+        	logonUser.setAccountName(user.getId()+"-"+UserContext.getCurrentNamespaceId()+"-"+cmd.getOwnerId());
             printResponse.setResponseObject(logonUser);
             printResponse.setErrorCode(ErrorCodes.SUCCESS);
         }else{
@@ -378,7 +383,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         });
 
         // TODO 逻辑，通知app
-        return new InformPrintResponse(checkUnpaidOrder());
+        return new InformPrintResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
     
 	}
 
@@ -406,15 +411,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public void printImmediately(PrintImmediatelyCommand cmd) {
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		Long id = UserContext.current().getUser().getId();
 		
-		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder());
+		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
 		if(statusType == PrintLogonStatusType.HAVE_UNPAID_ORDER){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "have unpaid orders");
 		}
 		
 		//做计数
-        String key = REDIS_PRINTING_TASK_COUNT + id;
+        String key = REDIS_PRINTING_TASK_COUNT + id+"-"+cmd.getOwnerId();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
@@ -422,20 +428,21 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	value = "0";
         }
         
-        //计算值
-        valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), 30, TimeUnit.MINUTES);
-//        unlockPrinter(cmd.);
+        //计算值,一分钟有效
+        valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), 1, TimeUnit.MINUTES);
 
 	}
 
 	@Override
 	public ListPrintOrdersResponse listPrintOrders(ListPrintOrdersCommand cmd) {
 		
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		
 		Long userId = UserContext.current().getUser().getId();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
-		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByUserId(userId,pageSize+1,cmd.getPageAnchor());
+		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByUserId(userId,pageSize+1,cmd.getPageAnchor(),cmd.getOwnerType(), cmd.getOwnerId());
 		
 		ListPrintOrdersResponse response = new ListPrintOrdersResponse();
 		if(printOrdersList == null)
@@ -450,7 +457,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd) {
-		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder());
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		return new GetPrintUnpaidOrderResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
 	}
 
 	@Override
@@ -529,7 +537,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Long id = UserContext.current().getUser().getId();
 		
 		//做计数
-        String key = REDIS_PRINTING_TASK_COUNT + id;
+        String key = REDIS_PRINTING_TASK_COUNT + id+"-"+cmd.getOwnerId();;
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
@@ -544,79 +552,258 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		//解锁打印机之前检查是否存在未支付订单。
 		//前端必须先调用接口 /siyinprint/getPrintUnpaidOrder,如此处存在未支付订单，那么抛出异常
-		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder()){
+		if(PrintLogonStatusType.HAVE_UNPAID_ORDER.getCode() == checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId())){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "Have unpaid order");
 		}
 		unlockPrinter(cmd,false);
 	}
 	
+	/**
+	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
+	 */
 	@Override
 	public void jobLogNotification(String jobData) {
-		try{
-			// TODO 记得上锁 PRINT_ORDER_LOCK_FLAG
-			//转记录对象
-           SiyinPrintRecord record = convertMapToRecordObject(jobData);
-           
+		//转记录对象
+		SiyinPrintRecord record = convertMapToRecordObject(jobData);
+		if(record==null)
+			return ;
+		//记录重复通知
+		SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
+		if(oldrecord!=null){
+			return ;
+		}
+		//支付和合并订单，必须上锁。
+		coordinationProvider.getNamedLock(CoordinationLocks.PRINT_ORDER_LOCK_FLAG.getCode()).enter(()->{
+			// 记得上锁 PRINT_ORDER_LOCK_FLAG
            //存在记录，不做重复计算
-           if(!record.getJobStatus().equals("FinishJob")){
-        	   return ;
-           }
-           SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
-           if(oldrecord!=null){
-        	   return ;
-           }
-           
            //获取未支付/未锁定的订单，如没有获取到则创建一个新订单
            SiyinPrintOrder order = getPrintOrder(record);
            
            //将记录合并到订单上,并更新到数据库
            mergeRecordToOrder(record,order);
-           
-           
-		}catch (IOException e){
-			LOGGER.error("analysis jobData IOException = {}",e);
-		}
+           dbProvider.execute(r->{
+	   			if(order.getId() == null){
+	   				siyinPrintOrderProvider.createSiyinPrintOrder(order);
+	   			}else{
+	   				siyinPrintOrderProvider.updateSiyinPrintOrder(order);
+	   			}
+	   			record.setOrderId(order.getId());
+	   			siyinPrintRecordProvider.createSiyinPrintRecord(record);
+	   			return null;
+   			});
+          return null;
+		});
+		//正在打印的任务，减少一个
+		String key = REDIS_PRINTING_TASK_COUNT + record.getCreatorUid();
+		reducePrintingJobCount(key);
 	}
 	
+	/*
+	 *减少用户下正在打印的任务的数量 
+	 */
+	private void reducePrintingJobCount(String key) {
+		 ValueOperations<String, String> valueOperations = getValueOperations(key);
+         String value = valueOperations.get(key);
+         if(value == null){
+         	value = "0";
+         }
+         int taskCount = Integer.valueOf(value)-1;
+         taskCount = taskCount<0?0:taskCount;
+         valueOperations.set(key, String.valueOf(taskCount),1,TimeUnit.MINUTES);
+	}
+
+
 	private void mergeRecordToOrder(SiyinPrintRecord record, SiyinPrintOrder order) {
-		Map<String, BigDecimal> priceMap = new HashMap<>();
-		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
-		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, UserContext.current().getUser());
-		List<SiyinPrintSetting> settings = null;
-		if(list!=null &&list.size()>0){
-			OrganizationSimpleDTO dto = list.get(0);
-			settings = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(PrintOwnerType.COMMUNITY.getCode(), dto.getCommunityId());
-		}
+		List<SiyinPrintSetting> settings = siyinPrintSettingProvider.listSiyinPrintSettingByOwner(PrintOwnerType.COMMUNITY.getCode(), record.getOwnerId());
+		//获取价格map
+		Map<String, BigDecimal> priceMap = getPriceMap(settings);
 		
-//		priceMap.put(key, value);
-		
-		if(settings == null)
 		//订单为新创建的情况
+		List<SiyinPrintRecord> list = null;
 		if(order.getId() == null){
-			
+			list = new ArrayList<SiyinPrintRecord>();
+		}else{
+			list = siyinPrintRecordProvider.listSiyinPrintRecordByOrderId(record.getCreatorUid(),order.getId(),PrintOwnerType.COMMUNITY.getCode(), record.getOwnerId());
 		}
-		
+		list.add(record);
+		order.setOrderTotalAmount(calculateOrderTotalAmount(list,priceMap));
+		order.setDetail(processDetail(list, PrintJobTypeType.fromCode(record.getJobType())));
+	}
+	
+	/**
+	 * 生成订单描述
+	 */
+	private String processDetail(List<SiyinPrintRecord> list, PrintJobTypeType jobType) {
+		Map<PrintPaperSizeType,Integer> colorSurfaceCounts = new HashMap<PrintPaperSizeType,Integer>(); //依次是 a3,a4,a5,a6,other
+		Map<PrintPaperSizeType,Integer> blackWhiteSurfaceCounts = new HashMap<PrintPaperSizeType,Integer>(); //依次是 a3,a4,a5,a6,other
+		Integer colorSurfaceCount = 0; //
+		Integer blackWhiteSurfaceCount = 0; //
+		for (SiyinPrintRecord record : list) {
+			if(jobType == PrintJobTypeType.SCAN){
+				colorSurfaceCount+=record.getSurfaceCount();
+				blackWhiteSurfaceCount+=record.getMonoSurfaceCount();
+			}else{
+				PrintPaperSizeType paperSizeType = PrintPaperSizeType.fromCode(record.getPaperSize());
+				Integer colorcount = colorSurfaceCounts.get(paperSizeType);
+				colorcount = colorcount==null?0:colorcount;
+				colorcount += record.getColorSurfaceCount();
+				colorSurfaceCounts.put(paperSizeType, colorcount);
+				
+				Integer bwcount = blackWhiteSurfaceCounts.get(paperSizeType);
+				bwcount = bwcount==null?0:bwcount;
+				bwcount += record.getMonoSurfaceCount();
+				blackWhiteSurfaceCounts.put(paperSizeType, bwcount);
+				
+			}
+		}
+		String detail = "";
+		String surface = getLocalActivityString(PrintErrorCode.PRINT_SURFACE,"面");
+		if(jobType == PrintJobTypeType.SCAN){
+			detail += blackWhiteSurfaceCount+"*"+surface+ PrintColorType.BLACK_WHITE.getDesc()+"\n";
+			detail += colorSurfaceCount+"*"+surface+ PrintColorType.COLOR.getDesc()+"\n";
+		}else{
+			for (int i = 0; i < PrintPaperSizeType.values().length; i++) {
+				PrintPaperSizeType paperSizeType = PrintPaperSizeType.values()[i];
+				Integer bwprice = blackWhiteSurfaceCounts.get(paperSizeType);
+				Integer colorprice = colorSurfaceCounts.get(paperSizeType);
+				if(bwprice != null && bwprice!=0)
+					detail += bwprice+surface+"*"+paperSizeType.getDesc()+"*"+PrintColorType.BLACK_WHITE.getDesc()+"\n";
+				if(colorprice != null && colorprice!=0)
+					detail += colorprice+surface+"*"+paperSizeType.getDesc()+"*"+PrintColorType.COLOR.getDesc()+"\n";
+				
+			}
+		}
+		return detail;
+	}
+
+
+	/**
+	 *计算订单价格 
+	 */
+	private BigDecimal calculateOrderTotalAmount(List<SiyinPrintRecord> list, Map<String, BigDecimal> priceMap) {
+		BigDecimal defaultdecimal = new BigDecimal(configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE,"0.1"));
+		BigDecimal totolamount = new BigDecimal(0);
+		for (SiyinPrintRecord record : list) {
+			String key = "";
+			PrintJobTypeType jobType = PrintJobTypeType.fromCode(record.getJobType());
+			if(jobType == PrintJobTypeType.SCAN){//如果是扫描
+				if(record.getColorSurfaceCount() != 0){//彩色扫描面数不为空,计算 值
+					key = record.getJobType()+"--"+PrintColorType.COLOR.getCode();
+					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getColorSurfaceCount()));
+				}
+				
+				if(record.getMonoSurfaceCount() != 0){//黑白计算
+					key = record.getJobType()+"--"+PrintColorType.BLACK_WHITE.getCode();
+					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getMonoSurfaceCount()));
+				}
+			}else{//打印和复印
+				if(record.getColorSurfaceCount() != 0){//彩色扫描面数不为空,计算 值
+					key = record.getJobType()+"-"+record.getPaperSize()+"-"+PrintColorType.COLOR.getCode();
+					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getColorSurfaceCount()));
+				}
+				
+				if(record.getMonoSurfaceCount() != 0){//黑白计算
+					key = record.getJobType()+"-"+record.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode();
+					totolamount = totolamount.add(getPrice(priceMap, key, defaultdecimal,record.getMonoSurfaceCount()));
+				}
+			}
+		}
+		return totolamount;
+	}
+	
+	/**
+	 * 获取在map中获取key对应的value，如果为空那么返回 defaultdecimal
+	 */
+	@SuppressWarnings("unused")
+	private BigDecimal getPrice(final Map<String, BigDecimal> priceMap, final String key, final BigDecimal defaultdecimal, final int surfaceCount){
+		BigDecimal price = priceMap.get(key);
+		if(price == null){
+			price = defaultdecimal;
+		}
+		return price.multiply(new BigDecimal(surfaceCount));
 	}
 
 
 	private SiyinPrintOrder getPrintOrder(SiyinPrintRecord record) {
-		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(UserContext.current().getUser().getId(),record.getJobType());
+		SiyinPrintOrder order = siyinPrintOrderProvider.findUnpaidUnlockedOrderByUserId(record.getCreatorUid(),record.getJobType(),record.getOwnerType(),record.getOwnerId());
         if(order == null){
         	order = new SiyinPrintOrder();
-        	order.setCreatorPhone(UserContext.current().getUser().getIdentifierToken());
+        	order.setNamespaceId(record.getNamespaceId());
+        	order.setOwnerType(record.getOwnerType());
+        	order.setOwnerId(record.getOwnerId());
+        	List<UserIdentifier> userIdentifier = userProvider.listUserIdentifiersOfUser(record.getCreatorUid());
+        	order.setCreatorPhone(userIdentifier==null||userIdentifier.size()==0?"":userIdentifier.get(0).getIdentifierToken());
         	order.setDetail("");
-        	SiyinPrintEmail email = siyinPrintEmailProvider.findSiyinPrintEmailByUserId(UserContext.current().getUser().getId());
+        	SiyinPrintEmail email = siyinPrintEmailProvider.findSiyinPrintEmailByUserId(record.getCreatorUid());
         	order.setEmail(email==null?"":email.getEmail());
         	order.setJobType(record.getJobType());
+        	order.setPrintDocumentName(record.getDocumentName());
         	order.setLockFlag(PrintOrderLockType.UNLOCKED.getCode());
-        	order.setNamespaceId(UserContext.getCurrentNamespaceId());
         	order.setOrderNo(createOrderNo(System.currentTimeMillis()));
         	order.setOrderStatus(PrintOrderStatusType.UNPAID.getCode());
         	order.setOrderTotalAmount(new BigDecimal("0"));
+        	order.setCreatorUid(record.getCreatorUid());
+        	order.setOperatorUid(record.getOperatorUid());
         }
 		return order;
 	}
-	
+
+
+	/**
+	 * 获取价格map，key为 （jobType-papersize-colortype）
+	 */
+	private Map<String, BigDecimal> getPriceMap(List<SiyinPrintSetting> settings) {
+		Map<String, BigDecimal> priceMap = getDefaultPriceMap();
+		if(settings != null && settings.size()>0){
+			for (SiyinPrintSetting setting : settings) {
+				PrintSettingType settingType = PrintSettingType.fromCode(setting.getSettingType());
+				PrintJobTypeType jobType = PrintJobTypeType.fromCode(setting.getJobType());
+				if(settingType == PrintSettingType.PRINT_COPY_SCAN){
+					//产品要求复印扫描作为统一价格，目前后台存的打印价格，也是复印价格。
+					if(jobType == PrintJobTypeType.PRINT){
+						priceMap.put(setting.getJobType()+"-"+setting.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
+						priceMap.put(setting.getJobType()+"-"+setting.getPaperSize()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());
+						priceMap.put(PrintJobTypeType.COPY.getCode()+"-"+setting.getPaperSize()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
+						priceMap.put(PrintJobTypeType.COPY.getCode()+"-"+setting.getPaperSize()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());
+					}else{
+						priceMap.put(setting.getJobType()+"-"+PrintColorType.BLACK_WHITE.getCode(), setting.getBlackWhitePrice());
+						priceMap.put(setting.getJobType()+"-"+PrintColorType.COLOR.getCode(), setting.getColorPrice());
+					}
+				}
+			}
+		}
+		return priceMap;
+	}
+
+
+	/**
+	 * 如果没有设置价格，则获取默认价格map
+	 */
+	private Map<String, BigDecimal> getDefaultPriceMap() {
+		Map<String, BigDecimal> priceMap = new HashMap<String, BigDecimal>();
+		BigDecimal defaultdecimal = new BigDecimal(configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE,"0.1"));
+		for (int i = 0; i < PrintJobTypeType.values().length; i++) {
+			PrintJobTypeType jobType = PrintJobTypeType.values()[i];
+			if(jobType != PrintJobTypeType.SCAN){//扫描不计算paperSize
+				for (int j = 0; j < PrintPaperSizeType.values().length; j++) {
+					PrintPaperSizeType paperSizeType =  PrintPaperSizeType.values()[j];
+					priceMap.put(jobType.getCode()+"-"+paperSizeType.getCode()+"-"+PrintColorType.BLACK_WHITE.getCode(), defaultdecimal);
+					priceMap.put(jobType.getCode()+"-"+paperSizeType.getCode()+"-"+PrintColorType.COLOR.getCode(), defaultdecimal);
+				}
+			}
+			else{
+				priceMap.put(jobType.getCode()+"-"+PrintColorType.BLACK_WHITE.getCode(), defaultdecimal);
+				priceMap.put(jobType.getCode()+"-"+PrintColorType.COLOR.getCode(), defaultdecimal);
+			
+			}
+		}
+		return priceMap;
+	}
+
+
+	/**
+	 * 创建订单编号
+	 */
 	private Long createOrderNo(Long time) {
 		String suffix = String.valueOf(generateRandomNumber(3));
 		return Long.valueOf(String.valueOf(time) + suffix);
@@ -631,10 +818,16 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		return (long)((Math.random() * 9 + 1) * Math.pow(10, n-1));
 	}
 
-	private SiyinPrintRecord convertMapToRecordObject(String jobData) throws IOException {
+	private SiyinPrintRecord convertMapToRecordObject(String jobData) {
 		String copyJobData = jobData;
 		BASE64Decoder decoder = new BASE64Decoder();
-		copyJobData = new String(decoder.decodeBuffer(copyJobData));
+		try {
+			copyJobData = new String(decoder.decodeBuffer(copyJobData));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			LOGGER.error("copyJobData:"+copyJobData);
+			return null;
+		}
 		
         Map<String, Object> object = XMLToJSON.convertOriginalMap(copyJobData);
         Map<?, ?> data = (Map)object.get("data");
@@ -644,9 +837,31 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		record.setJobId(job.get("job_id").toString());
 		record.setJobStatus(job.get("job_status").toString());
 		record.setGroupName(job.get("group_name").toString());
+		
+		//只有 "___OAUTH___" 才做处理
+		if(!record.getJobStatus().equals("FinishJob") || !record.getGroupName().equals("___OAUTH___")){
+			LOGGER.info("Invaild record = {}" , record);
+			return null;
+		}
+		
+		//user_name发送给司印方的时候，包括了用户id和小区id
 		String userIdcommuntiyID = job.get("user_name").toString();
 		String[] ids = userIdcommuntiyID.split("-");
+		if(ids.length!=3){//user_name不符合格式
+			LOGGER.info("Unknown user_name = {}" , userIdcommuntiyID);
+			return null;
+		}
+		
+		// TODO 校验用户是否正确
+		User user = userProvider.findUserById(Long.valueOf(ids[0]));
+		if(user == null || user.getId() != Long.valueOf(ids[0])){
+			LOGGER.info("Unknown userId = {}" , Long.valueOf(ids[0]));
+			return null;
+		}
+		
 		record.setCreatorUid(Long.valueOf(ids[0]));
+		record.setOperatorUid(Long.valueOf(ids[0]));
+		record.setNamespaceId(Integer.valueOf(ids[1]));
 		record.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
 		record.setOwnerId(Long.valueOf(ids[2]));
 		record.setUserDisplayName(job.get("user_display_name").toString());
@@ -668,33 +883,27 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		record.setPageCount(Integer.valueOf(job.get("page_count").toString()));
 		record.setColorPageCount(Integer.valueOf(job.get("color_page_count").toString()));
 		record.setMonoPageCount(Integer.valueOf(job.get("mono_page_count").toString()));
-		record.setNamespaceId(UserContext.getCurrentNamespaceId());
 		record.setStatus(CommonStatus.ACTIVE.getCode());
 		return record;
 	}
 
 
 	private Byte getPaperSizeCode(String string) {
-		switch (string) {
-		case "PRINT":
-			return PrintJobTypeType.PRINT.getCode();
-		case "COPY":
-			return PrintJobTypeType.COPY.getCode();
-		case "SCAN":
-			return PrintJobTypeType.SCAN.getCode();
+		for (PrintPaperSizeType t : PrintPaperSizeType.values()) {
+			if (0 == t.getDesc().compareTo(string.toUpperCase())) {
+				return t.getCode();
+			}
 		}
-		return null;
+		return PrintPaperSizeType.OTHER_PAPER_SIZE.getCode();
+
 	}
 
 
 	private Byte getPrintTypeCode(String string) {
-		switch (string) {
-		case "PRINT":
-			return PrintJobTypeType.PRINT.getCode();
-		case "COPY":
-			return PrintJobTypeType.COPY.getCode();
-		case "SCAN":
-			return PrintJobTypeType.SCAN.getCode();
+		for (PrintJobTypeType t : PrintJobTypeType.values()) {
+			if (0 == t.getDesc().compareTo(string.toUpperCase())) {
+				return t.getCode();
+			}
 		}
 		return null;
 	}
@@ -760,7 +969,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		 Map<String, String> params = new HashMap<>();
 		//这里设置accoutname 为用户id-园区-拥有者id，因为在jobLogNotification
      	//中计算价格的时候，不知道用户所在的园区，所以只能依靠
-	     params.put("login_account", user.getId().toString()+"-"+cmd.getOwnerType()+"-"+cmd.getOwnerId());
+	     params.put("login_account", user.getId().toString()+"-"+UserContext.getCurrentNamespaceId()+"-"+cmd.getOwnerId());
 //	     params.put("login_password", user.getPasswordHash());
 	     params.put("reader_name", cmd.getReaderName());
 	     params.put("login_domain", "Sysprint_OAuth");
@@ -808,7 +1017,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 
 	private PrintOwnerType checkOwner(String ownerType, Long ownerId) {
-		// TODO Auto-generated method stub
 		if(ownerId == null || StringUtils.isEmpty(ownerType)){
 			Long userId = UserContext.current().getUser().getId();
 			StringBuffer stringBuffer = new StringBuffer();
@@ -881,7 +1089,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	}
 	
 	 private String getLocalActivityString(String code,String defaultText){
-		LocaleString localeString = localeStringProvider.find(PrintErrorCode.SCOPE, code, UserContext.current().getUser().getLocale());
+		LocaleString localeString = localeStringProvider.find(PrintErrorCode.SCOPE, code, "zh_CN");
 		if (localeString != null) {
 			return localeString.getText();
 		}
@@ -1123,11 +1331,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	/**
 	 * 检查用户存在未支付的订单
+	 * @param ownerId 
+	 * @param ownerType 
 	 */
-	private Byte checkUnpaidOrder() {
+	private Byte checkUnpaidOrder(String ownerType, Long ownerId) {
 		User user = UserContext.current().getUser();
 		
-		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId());
+		List<SiyinPrintOrder> list = siyinPrintOrderProvider.listSiyinPrintUnpaidOrderByUserId(user.getId(),ownerType,ownerId);
 		
 		if(list == null || list.size() == 0){
 			return PrintLogonStatusType.LOGON_SUCCESS.getCode();

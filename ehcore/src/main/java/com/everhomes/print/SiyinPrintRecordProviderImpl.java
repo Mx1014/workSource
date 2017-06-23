@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintRecordsDao;
@@ -35,9 +36,7 @@ public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintRecords.class));
 		siyinPrintRecord.setId(id);
 		siyinPrintRecord.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintRecord.setCreatorUid(UserContext.current().getUser().getId());
-//		siyinPrintRecord.setUpdateTime(siyinPrintRecord.getCreateTime());
-		siyinPrintRecord.setOperatorUid(siyinPrintRecord.getCreatorUid());
+		siyinPrintRecord.setOperateTime(siyinPrintRecord.getCreateTime());
 		getReadWriteDao().insert(siyinPrintRecord);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintRecords.class, null);
 	}
@@ -95,5 +94,17 @@ public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
 		if(list!=null && list.size() > 0)
 			return list.get(0);
 		return null;
+	}
+
+	@Override
+	public List<SiyinPrintRecord> listSiyinPrintRecordByOrderId(Long creatorUid, Long orderId,String ownerType, Long ownerId) {
+		List<SiyinPrintRecord> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
+				.where(Tables.EH_SIYIN_PRINT_RECORDS.CREATOR_UID.eq(creatorUid))
+				.and(Tables.EH_SIYIN_PRINT_RECORDS.ORDER_ID.eq(orderId))
+				.and(Tables.EH_SIYIN_PRINT_RECORDS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SIYIN_PRINT_RECORDS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SIYIN_PRINT_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
+		return list;
 	}
 }

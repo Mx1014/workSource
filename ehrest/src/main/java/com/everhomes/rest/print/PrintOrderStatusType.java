@@ -25,7 +25,9 @@ public enum PrintOrderStatusType {
 		return code;
 	}
 
-	public static PrintOrderStatusType fromCode(byte code) {
+	public static PrintOrderStatusType fromCode(Byte code) {
+		if(code == null)
+			return null;
 		for (PrintOrderStatusType t : PrintOrderStatusType.values()) {
 			if (t.code == code) {
 				return t;

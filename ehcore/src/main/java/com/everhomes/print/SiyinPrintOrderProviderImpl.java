@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Query;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,10 +38,9 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	public void createSiyinPrintOrder(SiyinPrintOrder siyinPrintOrder) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSiyinPrintOrders.class));
 		siyinPrintOrder.setId(id);
+		//司印回调，这里没有用户登录，所有订单创建者在订单对象里面已经设置好。
 		siyinPrintOrder.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintOrder.setCreatorUid(UserContext.current().getUser().getId());
-//		siyinPrintOrder.setUpdateTime(siyinPrintOrder.getCreateTime());
-		siyinPrintOrder.setOperatorUid(siyinPrintOrder.getCreatorUid());
+		siyinPrintOrder.setOperateTime(siyinPrintOrder.getCreateTime());
 		getReadWriteDao().insert(siyinPrintOrder);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSiyinPrintOrders.class, null);
 	}
@@ -50,8 +48,8 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	@Override
 	public void updateSiyinPrintOrder(SiyinPrintOrder siyinPrintOrder) {
 		assert (siyinPrintOrder.getId() != null);
+		//司印回调，这里没有用户登录，所有订单创建者在订单对象里面已经设置好。
 		siyinPrintOrder.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		siyinPrintOrder.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(siyinPrintOrder);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSiyinPrintOrders.class, siyinPrintOrder.getId());
 	}
@@ -106,9 +104,11 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId) {
+	public List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId,String ownerType, Long ownerId) {
 		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
@@ -116,9 +116,11 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor) {
+	public List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor,String ownerType, Long ownerId) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
-				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId));
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
 		if(pageAnchor!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
 		}
@@ -143,12 +145,14 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType) {
+	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId) {
 		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG.eq(PrintOrderLockType.UNLOCKED.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId))
 			.fetch()
 			.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 		if(list!=null && list.size()>0)

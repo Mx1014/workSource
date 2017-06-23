@@ -15,14 +15,14 @@ public interface SiyinPrintOrderProvider {
 	List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
 			List<Long> ownerIdList);
 	
-	List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId);
+	List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId, String ownerType, Long ownerId);
 	
-	List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor);
+	List<SiyinPrintOrder> listSiyinPrintOrderByUserId(Long userId, Integer pageSize, Long pageAnchor, String ownerType, Long ownerId);
 
 	void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag);
 
 	SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo);
 
-	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType);
+	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 
 }

@@ -22,7 +22,9 @@ public enum PrintOrderLockType {
 		return code;
 	}
 
-	public static PrintOrderLockType fromCode(byte code) {
+	public static PrintOrderLockType fromCode(Byte code) {
+		if(null == code)
+			return null;
 		for (PrintOrderLockType t : PrintOrderLockType.values()) {
 			if (t.code == code) {
 				return t;

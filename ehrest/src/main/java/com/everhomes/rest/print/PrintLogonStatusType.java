@@ -22,7 +22,9 @@ public enum PrintLogonStatusType {
 		return code;
 	}
 
-	public static PrintLogonStatusType fromCode(byte code) {
+	public static PrintLogonStatusType fromCode(Byte code) {
+		if(code == null)
+			return null;
 		for (PrintLogonStatusType t : PrintLogonStatusType.values()) {
 			if (t.code == code) {
 				return t;
