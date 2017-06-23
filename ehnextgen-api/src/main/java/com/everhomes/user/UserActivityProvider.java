@@ -115,5 +115,5 @@ public interface UserActivityProvider {
 
 	void createStatActiveUser(StatActiveUser stat);
 
-    List<UserActivity> listUserActivetys(Long userId);
+    List<UserActivity> listUserActivetys(Long userId, Integer pageSize);
 }
