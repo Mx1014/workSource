@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.salary;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  */
 public class UpdateSalaryEmployeesCommand {
 
+    @ItemType(SalaryEmployeeOriginValDTO.class)
 	private List<SalaryEmployeeOriginValDTO> employeeOriginVal;
 
 
