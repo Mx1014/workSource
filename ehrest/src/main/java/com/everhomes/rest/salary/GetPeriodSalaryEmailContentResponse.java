@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>emailContent: 邮件内容</li>
- * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salarySalaryGroupEntityDTO}</li>
+ * <li>salaryGroupEntitys: 字段项列表 参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * </ul>
  */
 public class GetPeriodSalaryEmailContentResponse {
