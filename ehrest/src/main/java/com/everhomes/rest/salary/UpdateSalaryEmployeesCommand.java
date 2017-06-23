@@ -1,40 +1,33 @@
 // @formatter:off
 package com.everhomes.rest.salary;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * 
  * <ul>参数:
- * <li>userId: 用户id</li>
- * <li>salaryGroupId: 批次id</li>
+ * <li>employeeOriginVal: 个人批次设定</li>
  * </ul>
  */
 public class UpdateSalaryEmployeesCommand {
 
-	private Long userId;
-
-	private Long salaryGroupId;
+    @ItemType(SalaryEmployeeOriginValDTO.class)
+	private List<SalaryEmployeeOriginValDTO> employeeOriginVal;
 
 
 	public UpdateSalaryEmployeesCommand() {
 
 	}
 
-	public Long getUserId() {
-		return userId;
+	public List<SalaryEmployeeOriginValDTO> getEmployeeOriginVal() {
+		return employeeOriginVal;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
-
-	public Long getSalaryGroupId() {
-		return salaryGroupId;
-	}
-
-	public void setSalaryGroupId(Long salaryGroupId) {
-		this.salaryGroupId = salaryGroupId;
+	public void setEmployeeOriginVal(List<SalaryEmployeeOriginValDTO> employeeOriginVal) {
+		this.employeeOriginVal = employeeOriginVal;
 	}
 
 	@Override

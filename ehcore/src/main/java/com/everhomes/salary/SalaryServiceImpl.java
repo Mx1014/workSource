@@ -75,6 +75,12 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	@Override
+    public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd){
+
+	    return new GetSalaryGroupResponse();
+    }
+
+    @Override
     public ListSalaryGroupResponse listSalaryGroup(){
 
 	    return new ListSalaryGroupResponse();
@@ -83,13 +89,23 @@ public class SalaryServiceImpl implements SalaryService {
 
     @Override
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd) {
-	
+
+        ListSalaryEmployeesResponse response = new ListSalaryEmployeesResponse();
+
+
 		return new ListSalaryEmployeesResponse();
 	}
 
+	@Override
+    public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd){
+        List<SalaryEmployeeOriginValDTO> result = new ArrayList<>();
+//        List<SalaryEmployeeOriginVal> employeeOriginVal = this.getSalaryEmployees();
+        return null;
+    }
+
     @Override
-    public SalaryEmployeeOriginValDTO updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
-        return new SalaryEmployeeOriginValDTO();
+    public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
+
     }
 
     @Override
