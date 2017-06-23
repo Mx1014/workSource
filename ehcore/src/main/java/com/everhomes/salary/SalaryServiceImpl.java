@@ -2,7 +2,10 @@
 package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
-import com.everhomes.util.ConvertHelper;
+ 
+
+import org.jooq.types.UInteger; 
+import com.everhomes.util.ConvertHelper; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +19,24 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired
     private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
 
+    @Autowired 
+    private SalaryEmployeeOriginValProvider salaryEmployeeOriginValProvider;
+
+    @Autowired 
+    private SalaryEmployeePeriodValProvider  salaryEmployeePeriodValProvider;
+    
+    @Autowired 
+    private SalaryEmployeeProvider  salaryEmployeeProvider;
+    
+    @Autowired 
+    private SalaryEntityCategoryProvider  salaryEntityCategoryProvider;
+    
+    @Autowired 
+    private SalaryGroupEntityProvider  salaryGroupEntityProvider;
+    
+    @Autowired 
+    private SalaryGroupProvider  salaryGroupProvider;
+    
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
         ListSalaryDefaultEntitiesResponse response = new ListSalaryDefaultEntitiesResponse();
@@ -103,8 +124,17 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public GetAbnormalEmployeeNumberResponse getAbnormalEmployeeNumber(GetAbnormalEmployeeNumberCommand cmd) {
-	
-		return new GetAbnormalEmployeeNumberResponse();
+		Integer abnormalNumber = 0;
+		//查询异常员工人数
+		//异常员工判断1:未关联批次
+		//TODO:
+		Integer unLinkNumber = null;
+		abnormalNumber += unLinkNumber;
+		//判断2:关联了批次,但是实发工资为"-"
+		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
+		Integer nullSalaryNumber = salaryEmployeePeriodValProvider.countSalaryEmployeePeriodsByPeriodAndEntity(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(),SalaryConstants.ENTITY_ID_SHIFA);
+		abnormalNumber += nullSalaryNumber;
+		return new GetAbnormalEmployeeNumberResponse(abnormalNumber);
 	}
 
 	@Override
