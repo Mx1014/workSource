@@ -16,4 +16,6 @@ public interface SalaryEmployeePeriodValProvider {
 	Integer countSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
 			String period, Long entityIdShifa);
 
+	List<SalaryEmployeePeriodVal>  listSalaryEmployeePeriodVals(Long salaryEmployeeId);
+
 }

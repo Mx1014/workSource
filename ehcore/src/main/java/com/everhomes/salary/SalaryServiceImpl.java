@@ -2,10 +2,11 @@
 package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
- 
 
 import org.jooq.types.UInteger; 
+
 import com.everhomes.util.ConvertHelper; 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -155,14 +156,59 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public ListPeriodSalaryResponse listPeriodSalary(ListPeriodSalaryCommand cmd) {
-	
-		return new ListPeriodSalaryResponse();
+		if(null == cmd.getStatus()){
+			cmd.setStatus(new ArrayList<>());
+			cmd.getStatus().add(SalaryGroupStatus.CHECKED.getCode());
+			cmd.getStatus().add(SalaryGroupStatus.SENDED.getCode());
+			cmd.getStatus().add(SalaryGroupStatus.UNCHECK.getCode());
+			cmd.getStatus().add(SalaryGroupStatus.WAIT_FOR_SEND.getCode());
+		}
+		ListPeriodSalaryResponse response = new ListPeriodSalaryResponse();
+        List<SalaryGroup> result = this.salaryGroupProvider.listSalaryGroup(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(),cmd.getStatus());
+        response.setSalaryPeriodGroups(result.stream().map(r ->{
+        	SalaryPeriodGroupDTO dto = processSalaryPeriodGroupDTO(r);
+            return dto;
+        }).collect(Collectors.toList()));
+		return response;
+	}
+
+	private SalaryPeriodGroupDTO processSalaryPeriodGroupDTO(SalaryGroup r) {
+		SalaryPeriodGroupDTO dto = ConvertHelper.convert(r, SalaryPeriodGroupDTO.class); 
+		return dto;
 	}
 
 	@Override
 	public ListPeriodSalaryEmployeesResponse listPeriodSalaryEmployees(ListPeriodSalaryEmployeesCommand cmd) {
-	
-		return new ListPeriodSalaryEmployeesResponse();
+		//1.查entities
+		
+		//2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
+		List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(cmd.getSalaryPeriodGroupId());
+		ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
+		
+        response.setSalaryPeriodEmployees(result.stream().map(r ->{	
+        	SalaryPeriodEmployeeDTO dto = processSalaryPeriodEmployeeDTO(r);
+            return dto;
+        }).collect(Collectors.toList()));
+		return response; 
+	}
+
+	private SalaryPeriodEmployeeDTO processSalaryPeriodEmployeeDTO(SalaryEmployee r) {
+		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
+		//TODO: 列表一些字段值
+		
+		//3.查人员的vals
+		List<SalaryEmployeePeriodVal> result = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(r.getId());
+		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
+			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
+            return dto2;
+        }).collect(Collectors.toList()));
+		return dto;
+	}
+
+	private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(
+			SalaryEmployeePeriodVal r) {
+		SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeEntityDTO.class);
+		return dto;
 	}
 
 	@Override

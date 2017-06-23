@@ -13,4 +13,7 @@ public interface SalaryGroupProvider {
 
 	List<SalaryGroup> listSalaryGroup();
 
+	List<SalaryGroup> listSalaryGroup(String ownerType, Long ownerId, String period,
+			List<Byte> status);
+
 }

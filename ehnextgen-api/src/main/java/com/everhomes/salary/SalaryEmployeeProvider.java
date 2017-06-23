@@ -13,4 +13,6 @@ public interface SalaryEmployeeProvider {
 
 	List<SalaryEmployee> listSalaryEmployee();
 
+	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
+
 }
