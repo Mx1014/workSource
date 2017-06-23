@@ -1427,10 +1427,10 @@ public class QualityServiceImpl implements QualityService {
 			List<OrganizationMember> targets = organizationProvider.listOrganizationMembersByUId(cmd.getOperatorId());
 //			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
-		    map.put("operator", operators.get(0).getContactName());
-		    map.put("target", targets.get(0).getContactName());
-		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
+			msgMap.put("operator", operators.get(0).getContactName());
+			msgMap.put("target", targets.get(0).getContactName());
+			msgMap.put("taskName", task.getTaskName());
+			msgMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
