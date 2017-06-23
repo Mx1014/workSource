@@ -1083,6 +1083,7 @@ public class QualityServiceImpl implements QualityService {
 						}
 
 					});
+					dto.setExecutiveGroupName(dto.getGroupName());
 				}
 
 				//兼容之前specification没进到task里面的情况
@@ -3213,14 +3214,14 @@ public class QualityServiceImpl implements QualityService {
 
 		if(isAdmin) {
 			//管理员查询所有检查
-			samples = qualityProvider.listQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, null, communityId);
+			samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, null, communityId);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			List<QualityInspectionSampleGroupMap> maps = qualityProvider.listQualityInspectionSampleGroupMapByOrgAndPosition(groupDtos);
 			if(maps != null && maps.size() > 0) {
 				List<Long> sampleIds = maps.stream().map(QualityInspectionSampleGroupMap::getSampleId).collect(Collectors.toList());
 
-				samples = qualityProvider.listQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, sampleIds, communityId);
+				samples = qualityProvider.listActiveQualityInspectionSamples(locator, pageSize+1, ownerType, ownerId, sampleIds, communityId);
 			}
 		}
 

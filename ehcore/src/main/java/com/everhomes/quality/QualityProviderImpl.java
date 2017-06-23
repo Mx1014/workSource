@@ -419,8 +419,9 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionSamples> listQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId) {
+	public List<QualityInspectionSamples> listActiveQualityInspectionSamples(ListingLocator locator, int count, String ownerType, Long ownerId, List<Long> sampleIds, Long communityId) {
 		assert(locator.getEntityId() != 0);
+		Timestamp now = new Timestamp(System.currentTimeMillis());
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
 		List<QualityInspectionSamples> samples  = new ArrayList<>();
@@ -441,6 +442,8 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.OWNER_TYPE.eq(ownerType));
 		}
 
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.START_TIME.le(now));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLES.END_TIME.ge(now));
 		query.addJoin(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP, Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.SAMPLE_ID.eq(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.desc());
