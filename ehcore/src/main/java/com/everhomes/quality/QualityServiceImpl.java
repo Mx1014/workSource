@@ -1673,7 +1673,7 @@ public class QualityServiceImpl implements QualityService {
 		Long taskId = task.getId();
 		Long recordId = record.getId();
 
-		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, taskId, recordId);
+		processSpecificationItemResults(itemResults, ownerId, ownerType, targetId, targetType, task, recordId);
 		
 		QualityInspectionTaskRecords lastRecord = qualityProvider.listLastRecordByTaskId(task.getId());
 		this.qualityProvider.populateRecordAttachment(lastRecord);
@@ -1760,7 +1760,7 @@ public class QualityServiceImpl implements QualityService {
 	 }
 	 
 	 private void processSpecificationItemResults(List<ReportSpecificationItemResultsDTO> itemResults, Long ownerId, String ownerType, 
-			 Long targetId, String targetType, Long taskId, Long recordId) {
+			 Long targetId, String targetType, QualityInspectionTasks task, Long recordId) {
 		 
 		 if(itemResults != null && itemResults.size() > 0) {
 			 Long uid = UserContext.current().getUser().getId();
@@ -1772,7 +1772,8 @@ public class QualityServiceImpl implements QualityService {
 				 result.setOwnerId(ownerId);
 				 result.setTargetId(targetId);
 				 result.setTargetType(targetType);
-				 result.setTaskId(taskId);
+				 result.setTaskId(task.getId());
+				 result.setSampleId(task.getParentId());
 				 result.setTaskRecordId(recordId);
 				 result.setTotalScore(result.getItemScore() * result.getQuantity());
 				 result.setCreatorUid(uid);
