@@ -57,12 +57,9 @@ CREATE TABLE `eh_salary_default_entities` (
 -- 薪酬批次可用的选项的标签类型 基础数据
 CREATE TABLE `eh_salary_entity_categories` (
   `id` BIGINT,
-  `namespace_id` INT COMMENT '并不用,现在是所有域空间通用',
-  `owner_type` VARCHAR(32),
-  `owner_id` BIGINT,
-  `entity_type` TINYINT COMMENT '1. ask for leave, 2. forget to punch',
+  `namespace_id` INT COMMENT '并不用,现在是所有域空间通用', 
   `category_name` VARCHAR(64)  COMMENT 'name of category',
-  `status` TINYINT COMMENT '0. inactive, 1. waitingForConfirmation, 2. active',
+  `status` TINYINT ,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   `update_time` DATETIME,
@@ -102,7 +99,6 @@ CREATE TABLE `eh_salary_employee_origin_vals` (
   `user_id` BIGINT ,
   `group_entity_id` BIGINT COMMENT '标签(统计分类) salary group entity表pk', 
   `origin_entity_id` BIGINT,
-  `entity_name` VARCHAR(64) COMMENT '项目字段名称',
   `salary_value` TEXT , 
   `creator_uid` BIGINT,
   `create_time` DATETIME, 
