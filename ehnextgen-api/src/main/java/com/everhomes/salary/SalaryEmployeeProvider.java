@@ -15,4 +15,6 @@ public interface SalaryEmployeeProvider {
 
 	List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId);
 
+	int countUnCheckEmployee(Long salaryPeriodGroupId);
+
 }

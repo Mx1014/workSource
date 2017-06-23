@@ -87,4 +87,18 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployeeByPeriodGroupId(Long salaryPeriodGroupId) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+	}
+
+	@Override
+	public int countUnCheckEmployee(Long salaryPeriodGroupId) { 
+		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId)).execute();
+	}
 }

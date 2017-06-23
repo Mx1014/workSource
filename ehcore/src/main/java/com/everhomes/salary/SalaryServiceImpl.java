@@ -1,14 +1,22 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.rest.salary.*;
 
 import org.jooq.types.UInteger; 
 
+import com.everhomes.techpark.punch.PunchServiceImpl;
 import com.everhomes.util.ConvertHelper; 
+import com.everhomes.util.RuntimeErrorException;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +25,10 @@ import java.util.stream.Collectors;
 @Component
 public class SalaryServiceImpl implements SalaryService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
+	@Autowired
+	private DbProvider dbProvider;
+	
     @Autowired
     private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
 
@@ -165,6 +177,8 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 		ListPeriodSalaryResponse response = new ListPeriodSalaryResponse();
         List<SalaryGroup> result = this.salaryGroupProvider.listSalaryGroup(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getPeriod(),cmd.getStatus());
+		if(null == result )
+			return response;
         response.setSalaryPeriodGroups(result.stream().map(r ->{
         	SalaryPeriodGroupDTO dto = processSalaryPeriodGroupDTO(r);
             return dto;
@@ -184,7 +198,8 @@ public class SalaryServiceImpl implements SalaryService {
 		//2.查人员 periodGroupId 可以确定:公司,薪酬组和期数
 		List<SalaryEmployee> result = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(cmd.getSalaryPeriodGroupId());
 		ListPeriodSalaryEmployeesResponse response = new ListPeriodSalaryEmployeesResponse();
-		
+		if(null == result )
+			return response;
         response.setSalaryPeriodEmployees(result.stream().map(r ->{	
         	SalaryPeriodEmployeeDTO dto = processSalaryPeriodEmployeeDTO(r);
             return dto;
@@ -198,6 +213,8 @@ public class SalaryServiceImpl implements SalaryService {
 		
 		//3.查人员的vals
 		List<SalaryEmployeePeriodVal> result = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(r.getId());
+		if(null == result)
+			return null;
 		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
             return dto2;
@@ -208,24 +225,40 @@ public class SalaryServiceImpl implements SalaryService {
 	private SalaryPeriodEmployeeEntityDTO processSalaryPeriodEmployeeEntityDTO(
 			SalaryEmployeePeriodVal r) {
 		SalaryPeriodEmployeeEntityDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeEntityDTO.class);
+		 
 		return dto;
 	}
 
 	@Override
 	public void updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd) {
-	
-
+		this.dbProvider.execute((TransactionStatus status) -> {
+			cmd.getPeriodEmployeeEntitys().stream().map(r ->{	
+				salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
+				return null;
+			});
+			SalaryEmployee salaryEmployee = salaryEmployeeProvider.findSalaryEmployeeById(cmd.getSalaryEmployeeId());
+			salaryEmployee.setStatus(cmd.getCheckFlag());
+			salaryEmployeeProvider.updateSalaryEmployee(salaryEmployee);
+			return null;
+		});
 	}
 
 	@Override
 	public void checkPeriodSalary(CheckPeriodSalaryCommand cmd) {
-	
-
+		//检验是否合算完成
+		if(salaryEmployeeProvider.countUnCheckEmployee(cmd.getSalaryPeriodGroupId())>0)
+			throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,SalaryConstants.ERROR_HAS_EMPLOYEE_UNCHECK,"there are some employee uncheck");
+		
+		//将本期group置为已核算
+		SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+		salaryGroup.setStatus(SalaryGroupStatus.CHECKED.getCode());
+		salaryGroupProvider.updateSalaryGroup(salaryGroup);
+		
 	}
 
 	@Override
 	public GetPeriodSalaryEmailContentResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd) {
-	
+		
 		return new GetPeriodSalaryEmailContentResponse();
 	}
 

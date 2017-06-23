@@ -18,4 +18,6 @@ public interface SalaryEmployeePeriodValProvider {
 
 	List<SalaryEmployeePeriodVal>  listSalaryEmployeePeriodVals(Long salaryEmployeeId);
 
+	void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId, String salaryValue);
+
 }

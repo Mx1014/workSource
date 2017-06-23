@@ -87,4 +87,16 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public List<SalaryGroup> listSalaryGroup(String ownerType, Long ownerId, String period,
+			List<Byte> status) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS.SALARY_PERIOD.eq(period))
+				.and(Tables.EH_SALARY_GROUPS.STATUS.in(status))
+				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
+	}
 }

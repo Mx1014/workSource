@@ -90,8 +90,7 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 
 	@Override
 	public Integer countSalaryEmployeePeriodsByPeriodAndEntity(String ownerType, Long ownerId,
-			String period, Long entityIdShifa) {
-		// TODO Auto-generated method stub
+			String period, Long entityIdShifa) { 
 		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).join(Tables.EH_SALARY_EMPLOYEES)
 				.on(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(Tables.EH_SALARY_EMPLOYEES.ID))
 				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.OWNER_TYPE.eq(ownerType))
@@ -100,5 +99,22 @@ public class SalaryEmployeePeriodValProviderImpl implements SalaryEmployeePeriod
 				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.eq(period))
 				.execute();
 //				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class)); 
+	}
+
+	@Override
+	public List<SalaryEmployeePeriodVal> listSalaryEmployeePeriodVals(Long salaryEmployeeId) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
+				.orderBy(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeePeriodVal.class));
+	}
+
+	@Override
+	public void updateSalaryEmployeePeriodVal(Long salaryEmployeeId, Long groupEntryId,
+			String salaryValue) { 
+		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS).set(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_VALUE,salaryValue)
+		.where(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.SALARY_EMPLOYEE_ID.eq(salaryEmployeeId))
+		.and(Tables.EH_SALARY_EMPLOYEE_PERIOD_VALS.GROUP_ENTITY_ID.eq(groupEntryId)).execute();
+		
 	}
 }
