@@ -65,7 +65,7 @@ public class PrintDemoController extends ControllerBase {
     @PostConstruct
     public void setup(){
         //启动定时任务
-        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */1 * * * ?",SiyinTaskLogScheduleJob.class , null);
+        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */10 * * * ?",SiyinTaskLogScheduleJob.class , null);
     }
 
     @RequestMapping("printLogon")

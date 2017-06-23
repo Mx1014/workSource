@@ -44,7 +44,7 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
             String timeStr = valueOperations.get(SiyinPrintServiceImpl.REDIS_PRINT_JOB_CHECK_TIME);
             Long time = System.currentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            if(timeStr == null){
+            if(timeStr != null){
             	time = sdf.parse(timeStr).getTime();
             }
             Long startLong = time-30*60*1000;
@@ -85,7 +85,7 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
 			}
 
         }catch (Exception e){
-        	 LOGGER.warn("SiyinTaskLogScheduleJob:"+e.getMessage());
+        	 LOGGER.warn("SiyinTaskLogScheduleJob:"+e);
         }
     }
 

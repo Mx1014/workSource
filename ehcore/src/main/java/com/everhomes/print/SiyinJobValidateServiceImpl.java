@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -74,6 +76,8 @@ public class SiyinJobValidateServiceImpl {
 	
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -176,7 +180,7 @@ public class SiyinJobValidateServiceImpl {
 		//user_name发送给司印方的时候，包括了用户id和小区id
 		String userIdcommuntiyID = job.get("user_name").toString();
 		String[] ids = userIdcommuntiyID.split("-");
-		if(ids.length!=3){//user_name不符合格式
+		if(ids.length!=2){//user_name不符合格式
 			LOGGER.info("Unknown user_name = {}" , userIdcommuntiyID);
 			return null;
 		}
@@ -190,9 +194,11 @@ public class SiyinJobValidateServiceImpl {
 		
 		record.setCreatorUid(Long.valueOf(ids[0]));
 		record.setOperatorUid(Long.valueOf(ids[0]));
-		record.setNamespaceId(Integer.valueOf(ids[1]));
 		record.setOwnerType(PrintOwnerType.COMMUNITY.getCode());
-		record.setOwnerId(Long.valueOf(ids[2]));
+		record.setOwnerId(Long.valueOf(ids[1]));
+		Community community = communityProvider.findCommunityById(record.getOwnerId());
+		if(community != null)
+			record.setNamespaceId(community.getNamespaceId());
 		record.setUserDisplayName(job.get("user_display_name").toString());
 		record.setClientIp(job.get("client_ip").toString());
 		record.setClientName(job.get("client_name").toString());
