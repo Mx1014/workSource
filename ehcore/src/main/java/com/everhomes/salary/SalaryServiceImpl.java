@@ -29,6 +29,8 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
+	    if(!cmd.getSalaryGroupEntity().isEmpty()){
+        }
 	
 		return new AddSalaryGroupResponse();
 	}
