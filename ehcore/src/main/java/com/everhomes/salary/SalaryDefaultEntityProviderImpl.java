@@ -4,7 +4,9 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.server.schema.tables.records.EhSalaryDefaultEntitiesRecord;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,9 +61,19 @@ public class SalaryDefaultEntityProviderImpl implements SalaryDefaultEntityProvi
 	
 	@Override
 	public List<SalaryDefaultEntity> listSalaryDefaultEntity() {
-		return getReadOnlyContext().select().from(Tables.EH_SALARY_DEFAULT_ENTITIES)
-				.orderBy(Tables.EH_SALARY_DEFAULT_ENTITIES.ID.asc())
-				.fetch().map(r -> ConvertHelper.convert(r, SalaryDefaultEntity.class));
+	    /*
+	    * DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ORGANIZATIONS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();*/
+	    DSLContext context = getReadOnlyContext();
+	    List<SalaryDefaultEntity> entities = context.select().from(Tables.EH_SALARY_DEFAULT_ENTITIES)
+                .orderBy(Tables.EH_SALARY_DEFAULT_ENTITIES.DEFAULT_ORDER.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SalaryDefaultEntity.class));
+		return entities;
 	}
 	
 	private EhSalaryDefaultEntitiesDao getReadWriteDao() {
