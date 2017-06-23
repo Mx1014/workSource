@@ -878,7 +878,6 @@ public class QualityServiceImpl implements QualityService {
         		task.setRecord(record);
             	records.add(task.getRecord());
         	}
-        	
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
@@ -891,10 +890,29 @@ public class QualityServiceImpl implements QualityService {
 //			populateRecordAttachements(r, r.getAttachments());
 //			return r;
 //		});
-        
+
+		//查找当日已执行任务数
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(DateHelper.currentGMTTime());
+		Timestamp todayBegin = getDayBegin(cal);
+		Set<Long> taskIds =  qualityProvider.listRecordsTaskIdByOperatorId(user.getId(), todayBegin);
+
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
-        
-        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+		response.setTodayExecutedCount(0);
+		if(taskIds != null) {
+			response.setTodayExecutedCount(taskIds.size());
+		}
+
+        return response;
+	}
+
+	private Timestamp getDayBegin(Calendar cal) {
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.MILLISECOND, 001);
+		return new Timestamp(cal.getTimeInMillis());
 	}
 	
 	private List<ExecuteGroupAndPosition> listUserRelateGroups() {
@@ -1022,6 +1040,9 @@ public class QualityServiceImpl implements QualityService {
         	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
 
+			//塞执行组名
+			String executiveGroupName = getGroupName(r.getExecutiveGroupId(), r.getExecutivePositionId());
+			dto.setExecutiveGroupName(executiveGroupName);
 			Community community = communityProvider.findCommunityById(r.getTargetId());
 			if(community != null) {
 				dto.setTargetName(community.getName());
@@ -1870,6 +1891,29 @@ public class QualityServiceImpl implements QualityService {
 		}
 		
 	}
+
+	private String getGroupName(Long groupId, Long positionId) {
+		StringBuilder sb = new StringBuilder();
+		Organization group = organizationProvider.findOrganizationById(groupId);
+		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(positionId);
+		if(group != null) {
+			sb.append(group.getName());
+
+		}
+
+		if(position != null) {
+			if(sb.length() > 0) {
+				sb.append("-");
+				sb.append(position.getName());
+
+			} else {
+				sb.append(position.getName());
+
+			}
+		}
+
+		return sb.toString();
+	}
 	
 	private QualityStandardsDTO converStandardToDto(QualityInspectionStandards standard) {
 		processRepeatSetting(standard);
@@ -1886,59 +1930,21 @@ public class QualityServiceImpl implements QualityService {
 		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-//			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-//			
-//			if(group != null) {
-//				dto.setGroupName(group.getName());
-//				if(r.getPositionId() != null) {
-//					//岗位名+组名共同组成groupname
-//					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-//					if(position != null) {
-//						dto.setGroupName(group.getName() + "-" + position.getName());
-//					}
-//				}
-//			}
-				
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-			if(group != null) {
-				dto.setGroupName(group.getName());
-				
-			} 
-			
-			if(position != null) {
-				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-				} else {
-					dto.setGroupName(position.getName());
 
-				}
-			}
-			
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			dto.setGroupName(groupName);
         	return dto;
         }).collect(Collectors.toList());
 
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
         	
-			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
-			if(group != null) {
-				dto.setGroupName(group.getName());
-				
-			} 
-			
-			if(position != null) {
-				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
-				} else {
-					dto.setGroupName(position.getName());
-
-				}
-			}
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);
+			String groupName = getGroupName(r.getGroupId(), r.getPositionId());
+			dto.setGroupName(groupName);
 			
         	return dto;
         }).collect(Collectors.toList());
+
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
