@@ -1289,7 +1289,7 @@ public class QualityServiceImpl implements QualityService {
 					UserContext.current().getUser().getLocale(),
 					"text:");
 			if(record.getProcessMessage() != null) {
-				String msg = record.getProcessMessage()  + "/n" + attText+cmd.getMessage();
+				String msg = record.getProcessMessage()  + "\n" + attText+cmd.getMessage();
 				record.setProcessMessage(msg);
 			} else {
 				String msg = attText+cmd.getMessage();
@@ -1438,7 +1438,7 @@ public class QualityServiceImpl implements QualityService {
 		if(cmd.getMessage() != null) {
 			
 			if(record.getProcessMessage() != null) {
-				String msg = record.getProcessMessage() + "/n" + cmd.getMessage();
+				String msg = record.getProcessMessage() + "\n" + cmd.getMessage();
 				record.setProcessMessage(msg);
 			} else {
 				String msg = cmd.getMessage();
