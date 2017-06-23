@@ -14,6 +14,7 @@ import com.everhomes.rest.RestResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/salary")
@@ -82,8 +83,22 @@ public class SalaryController extends ControllerBase {
 		return new RestResponse();
 	}
 
+    /**
+     * <p>2-5.展示薪酬组详细批次</p>
+     * <b>URL: /salary/getSalaryGroup</b>
+     */
+    @RequestMapping("getSalaryGroup")
+    @RestReturn(GetSalaryGroupResponse.class)
+    public RestResponse getSalaryGroup(GetSalaryGroupCommand cmd){
+        GetSalaryGroupResponse res = this.salaryService.getSalaryGroup(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 	/**
-	 * <p>2-5.展示薪酬组</p>
+	 * <p>2-6.展示所有薪酬组</p>
 	 * <b>URL: /salary/listSalaryGroup</b>
 	 */
 	@RequestMapping("listSalaryGroup")
@@ -111,13 +126,31 @@ public class SalaryController extends ControllerBase {
 	}
 
     /**
-     * <p>3-2.编辑人员批次详情</p>
+     * <p>3-2.查询人员批次详情</p>
+     * <b>URL: /salary/listSalaryEmployees</b>
+     */
+    @RequestMapping("getSalaryEmployees")
+    @RestReturn(value = SalaryEmployeeOriginValDTO.class, collection = true)
+    public RestResponse getSalaryEmployees(GetSalaryEmployeesCommand cmd){
+        List<SalaryEmployeeOriginValDTO> res = this.salaryService.getSalaryEmployees(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>3-3.编辑人员批次详情</p>
      * <b>URL: /salary/updateSalaryEmployees</b>
      */
     @RequestMapping("updateSalaryEmployees")
-    @RestReturn(SalaryEmployeeOriginValDTO.class)
+    @RestReturn(value = String.class)
     public RestResponse updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd){
-        return new RestResponse(salaryService.updateSalaryEmployees(cmd));
+        this.salaryService.updateSalaryEmployees(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 	/**

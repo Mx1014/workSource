@@ -3,6 +3,8 @@ package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
 
+import java.util.List;
+
 public interface SalaryService {
 
 
@@ -21,13 +23,19 @@ public interface SalaryService {
 	public void copySalaryGroup(CopySalaryGroupCommand cmd);
 
 
-	public ListSalaryGroupResponse listSalaryGroup();
+    public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd);
+
+
+    public ListSalaryGroupResponse listSalaryGroup();
 
 
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);
 
 
-	public SalaryEmployeeOriginValDTO updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
+	public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd);
+
+
+	public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
 
 
 	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd);
