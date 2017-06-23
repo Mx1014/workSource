@@ -327,7 +327,7 @@ public class ForumServiceImpl implements ForumService {
      * @param post
      */
     private void feedDocTopicTag(Post post){
-        if(post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
+        if(post.getEmbeddedAppId()!=null && post.getEmbeddedAppId() == 0L && !StringUtils.isEmpty(post.getTag())){
             try{
                 HotTags tag = new HotTags();
                 tag.setName(post.getTag());
