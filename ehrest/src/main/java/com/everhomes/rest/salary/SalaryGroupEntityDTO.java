@@ -30,6 +30,7 @@ public class SalaryGroupEntityDTO {
     private Byte needCheck;
     private Integer defaultOrder;
     private Byte visibleFlag;
+    private String templateName;
     
 	public Long getGroupId() {
 		return groupId;

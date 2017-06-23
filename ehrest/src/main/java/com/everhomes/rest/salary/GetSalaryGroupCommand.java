@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  *
  * <ul>参数:
- * <li>salaryGroupId: 薪酬批次id</li>
+ * <li>salaryGroupId: 批次（薪酬组）id</li>
  * </ul>
  */
 public class GetSalaryGroupCommand {

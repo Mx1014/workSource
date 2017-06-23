@@ -58,9 +58,10 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 	}
 	
 	@Override
-	public List<SalaryGroupEntity> listSalaryGroupEntity() {
+	public List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryId) {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
-				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.ID.asc())
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryId))
+				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
 	

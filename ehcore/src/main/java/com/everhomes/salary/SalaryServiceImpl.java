@@ -1,22 +1,18 @@
 // @formatter:off
 package com.everhomes.salary;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.salary.*;
 
-import org.jooq.types.UInteger; 
-
-import com.everhomes.techpark.punch.PunchServiceImpl;
-import com.everhomes.util.ConvertHelper; 
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,8 +85,16 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
     public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd){
-
-	    return new GetSalaryGroupResponse();
+        if(StringUtils.isEmpty(cmd.getSalaryGroupId()))
+            return null;
+        GetSalaryGroupResponse response = new GetSalaryGroupResponse();
+        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+	    response.setSalaryGroupEntity(salaryGroupEntities.stream().map(r -> {
+            SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
+            return dto;
+        }).collect(Collectors.toList()));
+//		System.out.println("12315646584584564156158486484844444444444444444444444444444444444444444444444444");
+		return response;
     }
 
     @Override
