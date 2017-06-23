@@ -150,4 +150,10 @@ public interface ScheduleProvider {
      * @return job信息列表 
      */
     List<ScheduleJobInfoDTO> listScheduleJobs();
+
+    Byte getRunningFlag();
+
+    void setRunningFlag(Byte runningFlag);
+
+    void scheduleCronRunningJob(String triggerName, String jobName, String cronExpression, Class jobClass, Map<String, Object> parameters);
 }
