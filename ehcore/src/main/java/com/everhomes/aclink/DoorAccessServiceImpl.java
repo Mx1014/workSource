@@ -2640,9 +2640,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        auth.setValidFromMs(System.currentTimeMillis());
-        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        if(cmd.getValidEndMs() != null) {
+        	auth.setKeyValidTime(cmd.getValidEndMs());
+        	auth.setValidEndMs(cmd.getValidEndMs());
+        } else {
+        	auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        	auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        }
+        
+        if(cmd.getValidFromMs() != null) {
+        	auth.setValidFromMs(cmd.getValidFromMs());
+        } else {
+        	auth.setValidFromMs(System.currentTimeMillis());	
+        }
+        
         auth.setUserId(0l);
         auth.setOwnerType(doorAccess.getOwnerType());
         auth.setOwnerId(doorAccess.getOwnerId());
@@ -2883,6 +2894,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
@@ -2935,6 +2947,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
