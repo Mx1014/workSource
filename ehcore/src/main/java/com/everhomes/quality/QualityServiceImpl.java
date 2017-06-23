@@ -3635,15 +3635,26 @@ public class QualityServiceImpl implements QualityService {
 	private List<QualityInspectionSpecificationItemResults> getNewestScoreStat(QualityInspectionSampleScoreStat scoreStat) {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		calculateTasks(scoreStat, now);
-		Map<Long, Double> communitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		Map<Long, Double> querycommunitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		if(querycommunitySpecificationStats.size() == 0) {
+			QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(scoreStat.getSampleId(), scoreStat.getOwnerType(), scoreStat.getOwnerId());
+			List<QualityInspectionSampleCommunityMap> communityMaps = qualityProvider.findQualityInspectionSampleCommunityMapBySample(scoreStat.getSampleId());
+			if(communityMaps != null && communityMaps.size() > 0) {
+				communityMaps.forEach(map -> {
+					createQualityInspectionSampleCommunitySpecificationStat(map.getCommunityId(), sample);
+				});
+			}
+			querycommunitySpecificationStats = qualityProvider.listCommunityScore(scoreStat.getSampleId());
+		}
+		Map<Long, Double> communitySpecificationStats = querycommunitySpecificationStats;
 		//时间段内的扣分项
 		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
 		if(results != null) {
 			results.forEach(result -> {
-				scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
 				Double statScore = communitySpecificationStats.get(result.getTargetId());
 				if(statScore != null) {
+					scoreStat.setDeductScore(scoreStat.getDeductScore() + result.getTotalScore());
 					statScore = statScore + result.getTotalScore();
 					communitySpecificationStats.put(result.getTargetId(), statScore);
 				}
@@ -3677,6 +3688,27 @@ public class QualityServiceImpl implements QualityService {
 //		return result;
 //	}
 
+	private void createQualityInspectionSampleCommunitySpecificationStat(Long communityId, QualityInspectionSamples sample) {
+		//查每个项目的第一级类型
+		List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
+		List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), communityId, 0L, SpecificationInspectionType.CATEGORY.getCode());
+		List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+		if(dtos != null && dtos.size() > 0) {
+			dtos.forEach(dto -> {
+				QualityInspectionSampleCommunitySpecificationStat scss = new QualityInspectionSampleCommunitySpecificationStat();
+				scss.setNamespaceId(sample.getNamespaceId());
+				scss.setOwnerId(sample.getOwnerId());
+				scss.setOwnerType(sample.getOwnerType());
+				scss.setSampleId(sample.getId());
+				scss.setCommunityId(communityId);
+				scss.setSpecificationId(dto.getId());
+				scss.setSpecificationPath(dto.getPath());
+				scss.setDeductScore(0.0);
+				qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(scss);
+			});
+		}
+	}
+
 	//定时任务 扫上次到现在的task和itemresult表新建或者更新eh_quality_inspection_sample_score_stat
 	@Override
 	public void updateSampleScoreStat() {
@@ -3702,24 +3734,7 @@ public class QualityServiceImpl implements QualityService {
 					if(scms != null && scms.size() > 0) {
 						scms.forEach(scm -> {
 							QualityInspectionSamples sample = unStatSample.getValue();
-//							查每个项目的第一级类型
-							List<QualityInspectionSpecifications> specifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.ALL.getCode(), 0L, 0L, SpecificationInspectionType.CATEGORY.getCode());
-							List<QualityInspectionSpecifications> scopeSpecifications = qualityProvider.listChildrenSpecifications(sample.getOwnerType(), sample.getOwnerId(), SpecificationScopeCode.COMMUNITY.getCode(), scm.getCommunityId(), 0L, SpecificationInspectionType.CATEGORY.getCode());
-							List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
-							if(dtos != null && dtos.size() > 0) {
-								dtos.forEach(dto -> {
-									QualityInspectionSampleCommunitySpecificationStat scss = new QualityInspectionSampleCommunitySpecificationStat();
-									scss.setNamespaceId(sample.getNamespaceId());
-									scss.setOwnerId(sample.getOwnerId());
-									scss.setOwnerType(sample.getOwnerType());
-									scss.setSampleId(sample.getId());
-									scss.setCommunityId(scm.getCommunityId());
-									scss.setSpecificationId(dto.getId());
-									scss.setSpecificationPath(dto.getPath());
-									scss.setDeductScore(0.0);
-									qualityProvider.createQualityInspectionSampleCommunitySpecificationStat(scss);
-								});
-							}
+							createQualityInspectionSampleCommunitySpecificationStat(scm.getCommunityId(), sample);
 						});
 					}
 				});
