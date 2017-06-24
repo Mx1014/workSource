@@ -86,7 +86,7 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=PostDTO.class)
     public RestResponse getTopic(GetTopicCommand cmd) {
         PostDTO postDto = this.forumService.getTopic(cmd);
-        
+		
         RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -102,7 +102,7 @@ public class ForumController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse listTopics(ListTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listTopics(cmd);
-        
+		
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

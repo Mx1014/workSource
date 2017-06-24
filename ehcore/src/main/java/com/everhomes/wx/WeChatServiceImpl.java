@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -94,6 +95,11 @@ public class WeChatServiceImpl implements WeChatService {
 		resp.setNonceStr(ret.get("nonceStr"));
 		resp.setSignature(ret.get("signature"));
 		resp.setTimestamp(ret.get("timestamp"));
+		// 增加appId，add by yanjun 20170624
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        String appId = this.getAppIdByNamespaceId(namespaceId);
+        resp.setAppId(appId);
+
 		resp.setTicket(ticket);
 		return resp;
 	}
@@ -361,4 +367,14 @@ public class WeChatServiceImpl implements WeChatService {
         return Long.toString(System.currentTimeMillis() / 1000);
     }
 
+    @Override
+    public String getAppIdByNamespaceId(Integer namespaceId) {
+        String appId = configProvider.getValue(namespaceId, "wx.offical.account.appid", "");
+
+        //增加默认公众号   add by yanjun 20170620
+        if(org.springframework.util.StringUtils.isEmpty(appId)){
+            appId = configProvider.getValue("wx.offical.account.default.appid", "");
+        }
+        return appId;
+    }
 }
