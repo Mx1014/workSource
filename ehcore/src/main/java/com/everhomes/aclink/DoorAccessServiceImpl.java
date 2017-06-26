@@ -2696,7 +2696,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        
+        //smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+        		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+        	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
