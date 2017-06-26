@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.util.RequireAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +149,7 @@ public class ScheduleAdminController extends ControllerBase {
      */
     @RequestMapping("getRunningFlag")
     @RestReturn(value=Byte.class)
+    @RequireAuthentication(false)
     public RestResponse getRunningFlag() {
         Map<String, Byte> result = new HashMap<>();
         result.put("runningFlag", scheduleProvider.getRunningFlag());
