@@ -3,7 +3,9 @@ package com.everhomes.rest.print;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>detail : 详情</li>
  * <li>orderNo : 订单编号</li>
  * <li>email : 发件邮件</li>
- * <li>creatorCompany : 所在企业</li>
+ * <li>creatorCompanys : 所在企业列表（String）</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -39,12 +41,13 @@ public class PrintRecordDTO {
 	private String detail;
 	private Long orderNo;
 	private String email;
-	private String creatorCompany;
-	public String getCreatorCompany() {
-		return creatorCompany;
+	@ItemType(String.class)
+	private List<String> creatorCompanys;
+	public List<String> getCreatorCompanys() {
+		return creatorCompanys;
 	}
-	public void setCreatorCompany(String creatorCompany) {
-		this.creatorCompany = creatorCompany;
+	public void setCreatorCompanys(List<String> creatorCompany) {
+		this.creatorCompanys = creatorCompany;
 	}
 	public String getEmail() {
 		return email;

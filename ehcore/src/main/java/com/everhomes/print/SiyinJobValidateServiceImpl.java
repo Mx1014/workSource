@@ -275,7 +275,7 @@ public class SiyinJobValidateServiceImpl {
     		String company = "";
     		if(list!=null)
 	    		for (OrganizationSimpleDTO org : list) {
-	    			company+=org.getName()+"\n";
+	    			company+=org.getName()+SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT;
 				}
     		order.setCreatorCompany(company);
         }
@@ -327,7 +327,7 @@ public class SiyinJobValidateServiceImpl {
 			String company = "";
 			if(listdtos!=null)
 				for (OrganizationSimpleDTO org : listdtos) {
-					company+=org.getName()+"\n";
+					company+=org.getName()+SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT;
 				}
 			order.setCreatorCompany(company);
 		}

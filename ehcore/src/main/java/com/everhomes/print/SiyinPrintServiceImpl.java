@@ -232,7 +232,11 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			response.setNextPageAnchor(printOrdersList.get(printOrdersList.size()-1).getId());
 			printOrdersList.remove(printOrdersList.size()-1);
 		}
-		response.setPrintRecordsList(printOrdersList.stream().map(r->ConvertHelper.convert(r, PrintRecordDTO.class)).collect(Collectors.toList()));
+		response.setPrintRecordsList(printOrdersList.stream().map(r->{
+			PrintRecordDTO dto = ConvertHelper.convert(r, PrintRecordDTO.class);
+			dto.setCreatorCompanys(new ArrayList<String>(Arrays.asList(r.getCreatorCompany().split(PRINT_LOGON_ACCOUNT_SPLIT))));
+			return dto;
+		}).collect(Collectors.toList()));
 		return response;
 	}
 
