@@ -63,11 +63,11 @@ public class PrintDemoController extends ControllerBase {
     @Autowired
     private ScheduleProvider scheduleProvider;
 
-    @PostConstruct
-    public void setup(){
-        //启动定时任务
-        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */10 * * * ?",SiyinTaskLogScheduleJob.class , null);
-    }
+//    @PostConstruct
+//    public void setup(){
+//        //启动定时任务
+//        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */10 * * * ?",SiyinTaskLogScheduleJob.class , null);
+//    }
 
     @RequestMapping("printLogon")
     @RestReturn(String.class)
