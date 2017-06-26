@@ -154,6 +154,4 @@ public interface ScheduleProvider {
     Byte getRunningFlag();
 
     void setRunningFlag(Byte runningFlag);
-
-    void scheduleCronRunningJob(String triggerName, String jobName, String cronExpression, Class jobClass, Map<String, Object> parameters);
 }
