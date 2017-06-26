@@ -1397,7 +1397,7 @@ public class PunchServiceImpl implements PunchService {
 			} 
 		 
 		}
-		if(null == pr.getWifiRuleId())
+		if(null == punchGeopoints || punchGeopoints.size() == 0)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
 		else
