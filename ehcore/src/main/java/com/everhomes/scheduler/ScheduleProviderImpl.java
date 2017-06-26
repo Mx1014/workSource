@@ -62,7 +62,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
     private volatile byte runningFlag;
 
-    private Thread t = null;
+    private volatile long latestTime;
 
 	/** 调度器
 	 * @return */
@@ -433,24 +433,28 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     }
 
     private void setLocalRuningFlag(){
-        if(t == null){
-            String delayTime = configurationProvider.getValue("schedule.running.delay.time", "10000");
-            t = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        Thread.sleep(Long.valueOf(delayTime));
-                    }catch (Exception e){
-                        LOGGER.error("thread sleep error", e);
-                    }
+        latestTime = System.currentTimeMillis();
+        String delayTimeStr = configurationProvider.getValue("schedule.running.delay.time", "10000");
+        Long delayTime = Long.valueOf(delayTimeStr);
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Thread.sleep(delayTime);
+                }catch (Exception e){
+                    LOGGER.error("thread sleep error", e);
+                }
+                if(System.currentTimeMillis() - latestTime >= delayTime){
                     LOGGER.debug("set local runningFlag...");
                     if(RunningFlag.fromCode(runningFlag) == RunningFlag.fromCode(localRunningFlag)){
                         localRunningFlag = runningFlag;
                     }
+                }else{
+                    LOGGER.debug("Hosts are frequently switched.Not set local runningFlag..");
                 }
-            });
-        }
-        t.start();
+            }
+        });
+
     }
 }
  
