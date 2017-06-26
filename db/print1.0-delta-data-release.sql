@@ -19,6 +19,7 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单
 set @menu_id = 41400;
+set @namespace_id = 1000000;
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES (@menu_id, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', @menu_id);
 
@@ -56,13 +57,13 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @web_menu_privi
 -- 菜单的范围
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), @menu_id, '', 'EhNamespaces', 1000000, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @menu_id, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', 1000000, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41410, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', 1000000, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41420, '', 'EhNamespaces', @namespace_id, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', 1000000, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41430, '', 'EhNamespaces', @namespace_id, 2);
 
 -- 模块
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
@@ -76,6 +77,6 @@ VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 
 -- 模块权限范围
 SET @eh_service_module_scopes_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`)
-VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 1000000, @eh_acl_privileges_id, '云打印', 'EhNamespaces', 1000000, NULL, 2);
+VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), @namespace_id, @eh_acl_privileges_id, '云打印', 'EhNamespaces', @namespace_id, NULL, 2);
 
 --by dengs 添加菜单 end

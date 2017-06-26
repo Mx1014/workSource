@@ -193,7 +193,7 @@ public class SiyinJobValidateServiceImpl {
 		
 		// TODO 校验用户是否正确
 		User user = userProvider.findUserById(Long.valueOf(ids[0]));
-		if(user == null || user.getId() != Long.valueOf(ids[0])){
+		if(user == null || user.getId().longValue() != Long.valueOf(ids[0]).longValue()){
 			LOGGER.info("Unknown userId = {}" , Long.valueOf(ids[0]));
 			return null;
 		}
