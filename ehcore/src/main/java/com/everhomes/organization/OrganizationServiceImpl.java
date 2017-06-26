@@ -11471,6 +11471,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.createXSSFPersonnelFileTitle(row1);
 
         for (OrganizationMemberV2DTO member : members) {
+
+            //	若无 detailId 说明为非法数据
+            if(StringUtils.isEmpty(member.getDetailId()))
+                continue;
+
             XSSFRow row = sheet.createRow(rowNum++);
 
             //  写入基本信息
