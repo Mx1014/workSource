@@ -101,3 +101,6 @@ update `eh_launch_pad_items` set `action_type` = 13 where `action_data` like '%b
 update `eh_launch_pad_items` set `action_type` = 13 where `target_type` = 'biz' and `action_type` = 14;
 update `eh_launch_pad_items` set `action_data` = REPLACE(`action_data`,'}', ',"declareFlag":"1"}') where `action_type` = 14 and `action_data` not like '%dudubashi%';
 
+-- 增加报错类型  add by yanjun 20170626
+SET @id := (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES(@id:=@id+1,'activity','10027','zh_CN','此活动为收费类活动，必须升级APP才能报名哟！');
