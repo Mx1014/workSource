@@ -10758,6 +10758,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             detail.setEmploymentTime(member.getEmploymentTime() != null ? member.getEmploymentTime() : now);
             detail.setProfileIntegrity(member.getProfileIntegrity() != null ? member.getProfileIntegrity() : 0);
             detail.setEmployeeType(member.getEmployeeType());
+            detail.setTargetType(member.getTargetType());
+            detail.setTargetId(member.getTargetId());
         } else {
             detail = find_detail;
             detail.setContactName(member.getContactName());
@@ -12092,6 +12094,7 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param organizationId
      */
     private void createOrganiztionMemberWithDetailAndUserOrganization(OrganizationMember _organizationMember, Long organizationId) {
+        User user = UserContext.current().getUser();
         //深拷贝
         OrganizationMember organizationMember = ConvertHelper.convert(_organizationMember, OrganizationMember.class);
         /**创建/更新detail,并获取detailId**/
@@ -12103,6 +12106,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (null == desOrgMember) {
             /**创建belongTo的记录**/
             organizationMember.setOrganizationId(organizationId);
+            organizationMember.setOperatorUid(user.getId());
             //绑定member表的detail_id
             organizationMember.setDetailId(new_detail_id);
             organizationProvider.createOrganizationMember(organizationMember);
