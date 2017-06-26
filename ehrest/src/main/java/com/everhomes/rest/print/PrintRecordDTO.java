@@ -20,6 +20,8 @@ import com.everhomes.util.StringHelper;
  * <li>printDocumentName : 打印文档名称</li>
  * <li>detail : 详情</li>
  * <li>orderNo : 订单编号</li>
+ * <li>email : 发件邮件</li>
+ * <li>creatorCompany : 所在企业</li>
  * </ul>
  *
  *  @author:dengs 2017年6月16日
@@ -36,6 +38,20 @@ public class PrintRecordDTO {
 	private String printDocumentName;
 	private String detail;
 	private Long orderNo;
+	private String email;
+	private String creatorCompany;
+	public String getCreatorCompany() {
+		return creatorCompany;
+	}
+	public void setCreatorCompany(String creatorCompany) {
+		this.creatorCompany = creatorCompany;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 	public Long getId() {
 		return id;
 	}

@@ -183,7 +183,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		
 		if(keywords!=null){
-			Condition condition = Tables.EH_SIYIN_PRINT_ORDERS.NICE_NAME.like("%"+keywords+"%");
+			Condition condition = Tables.EH_SIYIN_PRINT_ORDERS.NICK_NAME.like("%"+keywords+"%");
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_COMPANY.like("%"+keywords+"%"));
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_PHONE.like("%"+keywords+"%"));
 			query = query.and(condition);

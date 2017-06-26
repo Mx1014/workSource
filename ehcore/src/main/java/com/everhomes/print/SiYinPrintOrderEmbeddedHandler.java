@@ -103,7 +103,7 @@ public class SiYinPrintOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		//加一个开关，方便在beta环境测试
 		boolean flag = configProvider.getBooleanValue("beta.print.order.amount", false);
 		if (!flag) {
-			if (0 != order.getOrderTotalAmount().compareTo(payAmount)) {
+			if (0 != order.getOrderTotalFee().compareTo(payAmount)) {
 				LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"Order amount is not equal to payAmount.");

@@ -264,11 +264,11 @@ public class SiyinJobValidateServiceImpl {
         	order.setLockFlag(PrintOrderLockType.UNLOCKED.getCode());
         	order.setOrderNo(createOrderNo(System.currentTimeMillis()));
         	order.setOrderStatus(PrintOrderStatusType.UNPAID.getCode());
-        	order.setOrderTotalAmount(new BigDecimal("0"));
+        	order.setOrderTotalFee(new BigDecimal("0"));
         	order.setCreatorUid(record.getCreatorUid());
         	order.setOperatorUid(record.getOperatorUid());
         	User user = userProvider.findUserById(record.getCreatorUid());
-    		order.setNiceName(user == null?"":user.getNickName());
+    		order.setNickName(user == null?"":user.getNickName());
     		
     		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
     		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, user);
@@ -312,8 +312,25 @@ public class SiyinJobValidateServiceImpl {
 			list = siyinPrintRecordProvider.listSiyinPrintRecordByOrderId(record.getCreatorUid(),order.getId(),PrintOwnerType.COMMUNITY.getCode(), record.getOwnerId());
 		}
 		list.add(record);
-		order.setOrderTotalAmount(calculateOrderTotalAmount(list,priceMap));
+		order.setOrderTotalFee(calculateOrderTotalAmount(list,priceMap));
 		order.setDetail(processDetail(list, PrintJobTypeType.fromCode(record.getJobType())));
+		if(order.getNickName()==null){
+			User user = userProvider.findUserById(record.getCreatorUid());
+    		order.setNickName(user == null?"":user.getNickName());
+    		
+		}
+		if(order.getCreatorCompany() == null || order.getCreatorCompany().trim().length()==0){
+			ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
+			User user = new User();
+			user.setId(record.getCreatorUid());
+			List<OrganizationSimpleDTO> listdtos = organizationService.listUserRelateOrgs(relatedCmd, user);
+			String company = "";
+			if(listdtos!=null)
+				for (OrganizationSimpleDTO org : listdtos) {
+					company+=org.getName()+"\n";
+				}
+			order.setCreatorCompany(company);
+		}
 	}
 	
 	/**

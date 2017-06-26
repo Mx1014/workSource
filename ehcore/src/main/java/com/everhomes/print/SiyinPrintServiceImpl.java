@@ -452,7 +452,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		if(flag) {
 			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
 		} else {
-			orderCmd.setTotalFee(order.getOrderTotalAmount());
+			orderCmd.setTotalFee(order.getOrderTotalFee());
 		}
     	
 
@@ -960,17 +960,17 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 			PrintJobTypeType jobType = PrintJobTypeType.fromCode(siyinPrintOrder.getJobType());
 			PrintOrderStatusType orderStatusType = PrintOrderStatusType.fromCode(siyinPrintOrder.getOrderStatus());
 			//总体统计
-			addOrderTotalAmountToStat(allStat,siyinPrintOrder.getOrderTotalAmount(),orderStatusType);
+			addOrderTotalAmountToStat(allStat,siyinPrintOrder.getOrderTotalFee(),orderStatusType);
 			
 			switch (jobType) {
 			case PRINT:
-				addOrderTotalAmountToStat(printStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				addOrderTotalAmountToStat(printStat, siyinPrintOrder.getOrderTotalFee(), orderStatusType);
 				break;
 			case COPY:
-				addOrderTotalAmountToStat(copyStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				addOrderTotalAmountToStat(copyStat, siyinPrintOrder.getOrderTotalFee(), orderStatusType);
 				break;
 			case SCAN:
-				addOrderTotalAmountToStat(scanStat, siyinPrintOrder.getOrderTotalAmount(), orderStatusType);
+				addOrderTotalAmountToStat(scanStat, siyinPrintOrder.getOrderTotalFee(), orderStatusType);
 				break;
 
 			default:
