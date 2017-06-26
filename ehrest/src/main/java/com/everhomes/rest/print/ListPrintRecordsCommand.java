@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.print;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -24,8 +22,8 @@ import com.everhomes.util.StringHelper;
 public class ListPrintRecordsCommand {
 	private String ownerType;
 	private Long ownerId;
-	private Timestamp startTime;
-	private Timestamp endTime;
+	private Long startTime;
+	private Long endTime;
 	private Byte orderStatus;
 	private Byte jobType;
 	private String keywords;
@@ -43,16 +41,16 @@ public class ListPrintRecordsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Timestamp getStartTime() {
+	public Long getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(Timestamp startTime) {
+	public void setStartTime(Long startTime) {
 		this.startTime = startTime;
 	}
-	public Timestamp getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
 	public Byte getOrderStatus() {

@@ -206,7 +206,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		//查询订单
-		List<SiyinPrintOrder> orders = siyinPrintOrderProvider.listSiyinPrintOrder(cmd.getStartTime(), cmd.getEndTime(), ownerTypeList, ownerIdList);
+		Timestamp startTime = cmd.getStartTime() == null?null:new Timestamp(cmd.getStartTime());
+		Timestamp endTime = cmd.getEndTime() == null?null:new Timestamp(cmd.getEndTime());
+		List<SiyinPrintOrder> orders = siyinPrintOrderProvider.listSiyinPrintOrder(startTime, endTime, ownerTypeList, ownerIdList);
 		
 		//计算订单
 		return processGetPrintStatResponse(orders);
@@ -218,8 +220,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
-		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getStartTime()
-				,cmd.getEndTime(),cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
+		Timestamp starttime =cmd.getStartTime() == null?null:new Timestamp(cmd.getStartTime());
+		
+		Timestamp endtime = cmd.getEndTime() == null?null:new Timestamp(cmd.getEndTime());
+		
+		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(cmd.getOwnerType(),cmd.getOwnerId(),starttime
+				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
 		
 		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
 		if(printOrdersList!=null && printOrdersList.size()>pageSize){
@@ -837,7 +843,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	/**
 	 * 检查打印/复印扫描教程并产生实体
 	 */
-	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String string, Long long1,String hotline) {
+	private SiyinPrintSetting checkCourseList(List<String> printCourseList,List<String> scancopyCourseList, String ownerType, Long ownerId,String hotline) {
 		if(printCourseList == null || printCourseList.size() == 0)
 		{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, printCourseList = " + printCourseList);
@@ -849,8 +855,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		SiyinPrintSetting setting = new SiyinPrintSetting();
 		setting.setScanCopyCourse("");
 		setting.setPrintCourse("");
-		setting.setOwnerType(string);
-		setting.setOwnerId(long1);
+		setting.setOwnerType(ownerType);
+		setting.setOwnerId(ownerId);
 		setting.setSettingType(PrintSettingType.COURSE_HOTLINE.getCode());
 		setting.setNamespaceId(UserContext.getCurrentNamespaceId());
 		for (String string2 : scancopyCourseList) {

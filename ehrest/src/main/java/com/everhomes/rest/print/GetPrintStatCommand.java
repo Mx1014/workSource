@@ -19,8 +19,8 @@ import com.everhomes.util.StringHelper;
 public class GetPrintStatCommand {
 	private String ownerType;
 	private Long ownerId;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private Long startTime;
+    private Long endTime;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -33,16 +33,16 @@ public class GetPrintStatCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Timestamp getStartTime() {
+	public Long getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(Timestamp startTime) {
+	public void setStartTime(Long startTime) {
 		this.startTime = startTime;
 	}
-	public Timestamp getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
     
