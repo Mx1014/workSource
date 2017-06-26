@@ -1,4 +1,4 @@
-package com.everhomes.print;
+package com.everhomes.print.demo;
 
 /**
  * Created by zl on 2017/3/22.

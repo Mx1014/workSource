@@ -22,7 +22,8 @@ import com.everhomes.util.xml.XMLToJSON;
 import sun.misc.BASE64Decoder;
 
 /**
- * Created by sfyan on 2017/3/23.
+ *  司印打印记录主动查询，并做校验。
+ *  @author:dengs 2017年6月26日
  */
 public class SiyinTaskLogScheduleJob extends QuartzJobBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinTaskLogScheduleJob.class);
@@ -69,20 +70,26 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
             }
             String taskData = getSiyinData(result);
             Map<String, Object> originalMap= XMLToJSON.convertOriginalMap(taskData);
-            Map<?, ?> dataMap = (Map)originalMap.get("data");
-            List<Map<?,?>> jobList = (List<Map<?,?>>)dataMap.get("job_list");
-            for (Map<?, ?> job : jobList) {
-            	SiyinPrintRecord record = siyinJobValidateServiceImpl.convertMapToRecordObject(job);
-            	if(record != null){//记录是左邻用户打印产生的。
-            		//记录已存数据库
-            		SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
-            		if(oldrecord!=null){
-            			continue ;
-            		}
-            		//丢掉了记录,则补单上去
-            		siyinJobValidateServiceImpl.createOrder(record);
-            	}
-			}
+            Object data = originalMap.get("data");
+            if(data instanceof Map){
+	            Map<?, ?> dataMap = (Map<?, ?>)data;
+	            Object joblistObj = dataMap.get("job_list");
+	            if(joblistObj instanceof List){
+		            List<Map<?,?>> jobList = (List<Map<?,?>>)joblistObj;
+		            for (Map<?, ?> job : jobList) {
+		            	SiyinPrintRecord record = siyinJobValidateServiceImpl.convertMapToRecordObject(job);
+		            	if(record != null){//记录是左邻用户打印产生的。
+		            		//记录已存数据库
+		            		SiyinPrintRecord oldrecord = siyinPrintRecordProvider.findSiyinPrintRecordByJobId(record.getJobId());
+		            		if(oldrecord!=null){
+		            			continue ;
+		            		}
+		            		//丢掉了记录,则补单上去
+		            		siyinJobValidateServiceImpl.createOrder(record);
+		            	}
+					}
+	            }
+            }
 
         }catch (Exception e){
         	 LOGGER.warn("SiyinTaskLogScheduleJob:"+e);
