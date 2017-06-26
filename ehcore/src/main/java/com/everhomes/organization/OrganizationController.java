@@ -66,19 +66,20 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <b>URL: /org/listOrgMembers</b>
-     * <p>查询政府机构成员列表</p>
-     */
-    //checked
-    @RequestMapping("listOrgMembers")
-    @RestReturn(value = ListOrganizationMemberCommandResponse.class)
-    public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
-        ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
-        RestResponse response = new RestResponse(commandResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");        return response;
-    }
+	/**
+	 * <b>URL: /org/listOrgMembers</b>
+	 * <p>查询政府机构成员列表</p>
+	 */
+	//checked
+	@RequestMapping("listOrgMembers")
+	@RestReturn(value=ListOrganizationMemberCommandResponse.class)
+	public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
+		ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
+		RestResponse response = new RestResponse(commandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
     /**
      * <b>URL: /org/applyOrganizationMember</b>
@@ -286,37 +287,36 @@ public class OrganizationController extends ControllerBase {
 		return response;
 	}*/
 
-    /**
-     * <b>URL: /org/deleteOrgComment</b>
-     * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
-     */
-    /*@RequestMapping("deleteOrgComment")
-    @RestReturn(value=String.class)
-	public RestResponse deleteOrgComment(DeleteCommentCommand cmd) {
+	/**
+	 * <b>URL: /org/deleteOrgComment</b>
+	 * <p>删除指定论坛里的指定评论（需要有删评论权限）</p>
+	 */
+	/*@RequestMapping("deleteOrgComment")
+	@RestReturn(value=String.class)
+	public RestResponse deleteOrgComment(DeleteCommonCommentCommand cmd) {
 
 		// ???
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
-	}*/
+	}*/    
 
-    //行政热线
-
-    /**
-     * <b>URL: /org/createOrgContact</b>
-     * <p>添加组织联系电话</p>
-     */
-    //checked
-    @RequestMapping("createOrgContact")
-    @RestReturn(value = String.class)
-    public RestResponse createOrgContact(@Valid CreateOrganizationContactCommand cmd) {
-        organizationService.createOrgContact(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+	//行政热线
+	/**
+	 * <b>URL: /org/createOrgContact</b>
+	 * <p>添加组织联系电话</p>
+	 */
+	//checked
+	@RequestMapping("createOrgContact")
+	@RestReturn(value=String.class)
+	public RestResponse createOrgContact(@Valid CreateOrganizationContactCommand cmd) {
+		organizationService.createOrgContact(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
     /**
      * <b>URL: /org/updateOrgContact</b>

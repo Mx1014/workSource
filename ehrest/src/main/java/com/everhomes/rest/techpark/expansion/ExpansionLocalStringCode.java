@@ -1,8 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
-/**
- * Created by xq.tian on 2016/12/20.
- */
+
 public interface ExpansionLocalStringCode {
 
     String SCOPE = "expansion";
@@ -13,4 +11,6 @@ public interface ExpansionLocalStringCode {
 //    int FLOW_DETAIL_CONTENT_NOAREA_CODE = 3;// 工作流详情
 
     int LEASE_ISSUER_EXIST = 5; //已存在
+
+    int ERROR_UPDATE_STATUS = 6; //状态不可修改
 }

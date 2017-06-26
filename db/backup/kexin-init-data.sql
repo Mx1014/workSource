@@ -1555,3 +1555,15 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwallqaGpNREE1WW1JeE1qaG1ZelprT0dZNU1tWTRZbVZsTWpNMU5qTXpNUQ' where namespace_id = 999983 and item_label = '农村电商';
 update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaU9XRTVORFEzTW1Fd09ETXhOek0yTURrek9HWTVZbVZoTnpNMVlqRmpaQQ' where namespace_id = 999983 and item_label = '卖货郎';
+
+
+-- 更新资源预约模式 add by sw 20170616
+UPDATE eh_rentalv2_resource_types set pay_mode = 2 where id = 10507 AND namespace_id = 999983;
+UPDATE eh_rentalv2_resource_types set pay_mode = 2 where id = 10506 AND namespace_id = 999983;
+
+UPDATE eh_launch_pad_items set action_data = '{"resourceTypeId":10506,"pageType":0,"payMode":2}' where item_label = '电子屏预订' and namespace_id = 999983;
+UPDATE eh_launch_pad_items set action_data = '{"resourceTypeId":10507,"pageType":0,"payMode":2}' where item_label = '场地预约' and namespace_id = 999983;
+
+-- 修改现网正中会海外电商、农村电商两个icon，不可删除 add by sw 20170622
+UPDATE eh_launch_pad_items set delete_flag = 0 where namespace_id = 999983 and item_label in ('农村电商', '海外电商');
+

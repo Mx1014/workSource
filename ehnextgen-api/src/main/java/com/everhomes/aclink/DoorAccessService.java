@@ -127,4 +127,6 @@ public interface DoorAccessService {
 
 	public QueryDoorMessageResponse syncTimerMessage(AclinkSyncTimerCommand cmd);
 
+	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
+
 }

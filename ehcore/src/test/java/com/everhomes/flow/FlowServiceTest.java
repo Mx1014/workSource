@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.flow.action.FlowGraphScriptAction;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.*;
@@ -552,7 +553,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ft.setTimeoutType(FlowTimeoutType.MESSAGE_TIMEOUT.getCode());
     	ft.setStatus(FlowStatusType.VALID.getCode());
         FlowCaseState ctx = new FlowCaseState();
-    	flowTimeoutService.pushTimeout(ft, ctx);
+    	flowTimeoutService.pushTimeout(ft);
     	
     	try {
 			Thread.currentThread().sleep(100000l);

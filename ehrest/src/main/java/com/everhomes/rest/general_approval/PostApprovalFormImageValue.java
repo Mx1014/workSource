@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class PostApprovalFormImageValue {
+public class  PostApprovalFormImageValue {
 	@ItemType(String.class)
 	private List<String> uris;
 	

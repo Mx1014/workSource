@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.general_approval.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,16 +17,11 @@ import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
 import com.everhomes.general_approval.GeneralApprovalVal;
-import com.everhomes.general_approval.GeneralForm;
+import com.everhomes.general_form.GeneralForm;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
-import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
-import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -111,6 +107,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			contentBuffer.append("申请来源");
 			contentBuffer.append(" : ");
 			contentBuffer.append(parentPage.getName());
+			flowCase.setTitle(parentPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
 			
@@ -236,8 +233,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			e.setValue(yellowPage.getName());
 		entities.add(e);
 		
-		//后面跟自定义模块--通用父类方法
-		entities.addAll(super.onFlowCaseDetailRender(flowCase, flowUserType));
+		//后面跟自定义模块-- 
+		entities.addAll(onFlowCaseCustomDetailRender(flowCase, flowUserType));
 		return entities;
 	}
 

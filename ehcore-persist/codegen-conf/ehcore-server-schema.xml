@@ -159,7 +159,10 @@
 		eh_roster_order_settings |
         eh_energy_meter_price_config |
         eh_user_notification_settings | eh_group_member_logs | 
+        eh_general_form_vals | eh_lease_configs2 | eh_lease_form_requests | eh_general_form_mappings |
         eh_warehouses | eh_warehouse_materials | eh_warehouse_material_categories | eh_warehouse_stocks | eh_warehouse_stock_logs | eh_warehouse_requests | eh_warehouse_request_materials | eh_warehouse_units | 
+        eh_talents | eh_talent_categories | eh_talent_query_histories |
+
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
         eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organization |
         </includes>

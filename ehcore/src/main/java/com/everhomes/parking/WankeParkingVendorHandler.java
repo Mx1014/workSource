@@ -504,4 +504,10 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	public void lockParkingCar(LockParkingCarCommand cmd) {
 
 	}
+
+	@Override
+	public GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

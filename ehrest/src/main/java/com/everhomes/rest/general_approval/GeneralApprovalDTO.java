@@ -20,6 +20,7 @@ import com.everhomes.discover.ItemType;
  * <li>projectId : </li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>approvalName : 审批名称</li> 
+ * <li>status: 查询approval的状态 默认是包括禁用和启用的 1-禁用 2-启用{@link com.everhomes.rest.general_approval.GeneralApprovalStatus}</li>
  * </ul>
  * @author janson
  *

@@ -80,4 +80,6 @@ public interface ParkingService {
     ParkingCarLockInfoDTO getParkingCarLockInfo(GetParkingCarLockInfoCommand cmd);
 
     void lockParkingCar(LockParkingCarCommand cmd);
+
+	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
 }

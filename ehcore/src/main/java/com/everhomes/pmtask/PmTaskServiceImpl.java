@@ -787,15 +787,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 				Cell cell4 = tempRow.createCell(4);
 				cell4.setCellStyle(style);
 				PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
-				if(pmTask.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
-					Address address = addressProvider.findAddressById(pmTask.getAddressId());
-					if(null != address)
-						cell4.setCellValue(address.getAddress());
-				}else {
-					Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
-					if(null != organization)
-						cell4.setCellValue(organization.getName());
+				if(pmTask != null) {
+					if(PmTaskAddressType.FAMILY.equals(PmTaskAddressType.fromCode(pmTask.getAddressType()))) {
+						Address address = addressProvider.findAddressById(pmTask.getAddressId());
+						if(null != address)
+							cell4.setCellValue(address.getAddress());
+					}else {
+						Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
+						if(null != organization)
+							cell4.setCellValue(organization.getName());
+					}
 				}
+
 
 				Cell cell5 = tempRow.createCell(5);
 				cell5.setCellStyle(style);
@@ -1902,9 +1905,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
 						Address address = addressProvider.findAddressById(r.getAddressId());
 						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
-						dto.setOrganizationId(o.getId());
-						dto.setDisplayName(o.getName());
-						dto.setAddressId(address.getId());
+						if(dto != null) {
+							dto.setOrganizationId(o.getId());
+							dto.setDisplayName(o.getName());
+							dto.setAddressId(address.getId());
+						}
 						return dto;
 					}).collect(Collectors.toList());
 

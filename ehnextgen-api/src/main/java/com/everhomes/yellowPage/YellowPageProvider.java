@@ -114,4 +114,22 @@ public interface YellowPageProvider {
 
 	ServiceAllianceGolfRequest findGolfRequest(Long id);
 
+
+	/**
+	 * 获取顺序
+	 */
+	List<ServiceAlliances> listServiceAllianceSortOrders(List<Long> idList);
+
+
+	/**
+	 * 更新顺序
+	 */
+	void updateOrderServiceAllianceDefaultOrder(List<ServiceAlliances> ServiceAllianceList);
+
+
+	/**
+	 * 更新是否在app显示的字段 
+	 */
+	void updateServiceAlliancesDisplayFlag(Long id, Byte showFlag);
+
 }

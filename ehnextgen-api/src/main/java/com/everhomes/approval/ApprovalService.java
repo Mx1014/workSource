@@ -162,4 +162,8 @@ public interface ApprovalService {
 
 	List<OrganizationMemberDTO> listTargetUsers(ListTargetUsersCommand cmd);
 
+	ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType);
+
+	void finishApproveApprovalRequest(ApprovalRequest approvalRequest);
+
 }

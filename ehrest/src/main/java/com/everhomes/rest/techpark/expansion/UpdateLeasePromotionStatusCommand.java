@@ -1,7 +1,15 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>id：id</li>
+ * <li>status：状态</li>
+ * </ul>
+ */
 public class UpdateLeasePromotionStatusCommand {
 	@NotNull
 	private Long id;
@@ -23,5 +31,10 @@ public class UpdateLeasePromotionStatusCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

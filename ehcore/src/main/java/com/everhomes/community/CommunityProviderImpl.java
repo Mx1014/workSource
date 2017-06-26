@@ -690,13 +690,13 @@ public class CommunityProviderImpl implements CommunityProvider {
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_BUILDINGS.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_BUILDINGS.DEFAULT_ORDER.lt(locator.getAnchor()));
         }
         
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
-        query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
+        query.addOrderBy(Tables.EH_BUILDINGS.DEFAULT_ORDER.desc());
         query.addLimit(count);
         
         if(LOGGER.isDebugEnabled()) {
@@ -710,7 +710,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         });
         
         if(buildings.size() > 0) {
-            locator.setAnchor(buildings.get(buildings.size() -1).getId());
+            locator.setAnchor(buildings.get(buildings.size() -1).getDefaultOrder());
         }
         
         
@@ -785,6 +785,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildings.class));
         
 		building.setId(id);
+        building.setDefaultOrder(id);
 		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		building.setCreatorUid(creatorId);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhBuildings.class, id));

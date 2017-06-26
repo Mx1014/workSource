@@ -27,6 +27,8 @@ public class DoorAccessQRKeyDTO {
     private String qrDriver;
     private Long     creatorUid;
     
+    private Long     currentTime;
+    private Long 		qrImageTimeout;
     private Long     createTimeMs;
     private Long     expireTimeMs;
     
@@ -124,8 +126,24 @@ public class DoorAccessQRKeyDTO {
     public void setExtra(String extra) {
         this.extra = extra;
     }
-    
-    @Override
+
+    public Long getCurrentTime() {
+		return currentTime;
+	}
+
+	public void setCurrentTime(Long currentTime) {
+		this.currentTime = currentTime;
+	}
+
+	public Long getQrImageTimeout() {
+		return qrImageTimeout;
+	}
+
+	public void setQrImageTimeout(Long qrImageTimeout) {
+		this.qrImageTimeout = qrImageTimeout;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

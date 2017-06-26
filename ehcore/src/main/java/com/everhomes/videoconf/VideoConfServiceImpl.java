@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -54,9 +56,12 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
+import com.everhomes.rest.asset.FindAssetBillCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.park.RechargeOrderDTO;
@@ -68,7 +73,10 @@ import com.everhomes.rest.videoconf.BizConfDTO;
 import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.BizConfStatus;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountCommand;
+import com.everhomes.rest.videoconf.CheckVideoConfTrialAccountResponse;
 import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
+import com.everhomes.rest.videoconf.ConfAccountStatus;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfEnterprisesBuyChannel;
@@ -92,6 +100,9 @@ import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.GetBizConfHolder;
+import com.everhomes.rest.videoconf.GetVideoConfHelpUrlResponse;
+import com.everhomes.rest.videoconf.GetVideoConfTrialAccountCommand;
+import com.everhomes.rest.videoconf.TrialFlag;
 import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
@@ -171,6 +182,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VideoConfServiceImpl.class);
 	
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
+ 
 	
 	@Autowired
 	private VideoConfProvider vcProvider;
@@ -1000,7 +1012,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
-		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1);
+		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1,(byte)1);
 		List<ConfAccounts> accounts = order.stream().map(r -> {
 			ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
 			return account;
@@ -2247,10 +2259,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 					account.setExpiredDate(order.getExpiredDate());
 				} else {
 					account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
-				}
+				} 
 				
 				account.setAccountCategoryId(order.getAccountCategoryId());
 				if(null != category && null != category.getConfType() && category.getConfType() == 4) {
+					//对于新增测试账号:如果之前该用户之前有有效账号,则不分配;没有有效账号,则给他分配
+					ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), order.getOwnerId(), ConfAccountStatus.ACTIVE.getCode());
+					if(null == activeAccounts)
+						account.setOwnerId(UserContext.current().getUser().getId());
 					account.setAccountType((byte) 1);
 				} else {
 					account.setAccountType((byte) 2);
@@ -2287,7 +2303,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE);
+			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE,(byte)1);
 			if(maps != null && maps.size() > 0) {
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 				int toActive = 0;
@@ -2889,5 +2905,148 @@ public class VideoConfServiceImpl implements VideoConfService {
 		vcProvider.updateConfEnterprises(enterprise);
 		confEnterpriseSearcher.feedDoc(enterprise);
 	}
+
+	@Override
+	public CheckVideoConfTrialAccountResponse checkVideoConfTrialAccount(
+			CheckVideoConfTrialAccountCommand cmd) { 
+		CheckVideoConfTrialAccountResponse response = new CheckVideoConfTrialAccountResponse();
+		response.setTrialFlag(TrialFlag.OK.getCode());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		if(enterprise != null && enterprise.getTrialAccountAmount() >0) {
+			response.setTrialFlag(TrialFlag.REJECT.getCode());
+		}
+		return response;
+	}
+
+	@Override
+	public void getVideoTrialConfAccount(GetVideoConfTrialAccountCommand cmd) {
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		ConfAccounts activeAccounts = vcProvider.findAccountByUserIdAndEnterpriseIdAndStatus(UserContext.current().getUser().getId(), cmd.getEnterpriseId(), ConfAccountStatus.ACTIVE.getCode());
+		
+		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
+		if (null == categories || categories.size() == 0){
+			//没有初始化categories表,没有添加6方账号
+			LOGGER.error("didnt found data in database : sql [ select * from eh_conf_account_categories where  conf_type=4;]");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_CATEGORY_NOT_FOUND,  "HAVE NO CATEGORY");
+		}
+		if(enterprise != null && enterprise.getTrialAccountAmount() >0) {
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_CAN_NOT_TRIAL_MORE,  "you can only have one chance to trial");
+		}
+		//创建一个试用账号
+		CreateConfAccountOrderCommand cmd2 = new CreateConfAccountOrderCommand(); 
+		cmd2.setEnterpriseId(cmd.getEnterpriseId());
+		cmd2.setAmount(new BigDecimal(0));
+		cmd2.setBuyChannel((byte) 0);
+		//到期日期手动设置为15天
+		Calendar expiredDate = Calendar.getInstance();
+		expiredDate.add(Calendar.DAY_OF_MONTH, 15);
+		cmd2.setExpiredDate(expiredDate.getTimeInMillis());
+		cmd2.setAccountCategoryId(categories.get(0));
+		cmd2.setQuantity(1);
+		cmd2.setPeriod(0);
+		cmd2.setInvoiceFlag((byte) 0);
+		cmd2.setMakeOutFlag((byte) 0);
+		Long orderId = createConfAccountOrder(cmd2);  
+		//之前是否有活跃账号
+		if(activeAccounts != null ) {
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_ENTERPRISE_HAS_ACTIVE_ACCOUNT,  "has active account");
+		}
+	}
+
+	
+
+	@Scheduled(cron = "0 20 11 * * ?") 
+	private void scheduledExpirationReminder(){
+		//提前三天提醒试用的
+		
+		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, 3);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+		for(ConfOrders order : orders){
+			LOGGER.debug("send trial remainder to order "+ order);
+			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_TRIAL_EXPIRATION_REMINDER);
+		}
+		//提前7天提醒正式的
+		categories = vcProvider.findAccountCategoriesByNotInConfType((byte) 4); 
+		calendar.add(Calendar.DAY_OF_MONTH, 4); 
+		orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+		for(ConfOrders order : orders){
+			LOGGER.debug("send  remainder to order "+ order);
+			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_EXPIRATION_REMINDER);
+		}
+	} 
+
+	private void sendExpirationRemi1derPhoneMsg(ConfOrders order ,Calendar calendar , int templateId) {
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		String phoneNum = findContactNumber(order);
+		if(null == phoneNum)
+			return; 
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    int pageSize =Integer.MAX_VALUE;
+		List<ConfOrderAccountMap> orderMap = vcProvider.findOrderAccountByOrderId(order.getId(), locator, pageSize,null);
+		if(orderMap == null || orderMap.size() == 0){
+			LOGGER.error("order cannot found order map "+ order );
+			return;
+		}
+		StringBuilder accountName = new StringBuilder();
+	
+		orderMap.stream().map(r -> {
+			processAccountName(accountName,r,phoneNum);
+			return null;
+		}).collect(Collectors.toList()); 
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("accountName", accountName);
+		smsProvider.addToTupleList(variables, "date", dateSF.format(calendar.getTime())); 
+		String templateLocale = RentalNotificationTemplateCode.locale; 
+		
+		smsProvider.sendSms(orderMap.get(0).getConfAccountNamespaceId(), phoneNum, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
+		
+	} 
+	@Override
+	public void testSendPhoneMsg(String phoneNum,int templateId,int namespaceId){
+		scheduledExpirationReminder();
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("accountName", "账号1");
+		smsProvider.addToTupleList(variables, "date", "2017年5月22日"); 
+		String templateLocale = RentalNotificationTemplateCode.locale; 
+		smsProvider.sendSms(namespaceId, phoneNum, SmsTemplateCode.SCOPE, templateId, templateLocale, variables);
+	}
+	private void processAccountName(StringBuilder accountName, ConfOrderAccountMap r,String phoneNum) {
+		ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
+		if(!accountName.equals(""))
+			accountName.append("，");
+
+		if(null != account.getOwnerId()){
+
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(account.getOwnerId(), IdentifierType.MOBILE.getCode()) ;
+			if(null != userIdentifier)
+				accountName.append(userIdentifier.getIdentifierToken());
+		}else{
+			accountName.append(phoneNum);
+		}
+		
+	}
+
+	private String findContactNumber(ConfOrders order) {
+		if(null != order.getBuyerContact())
+			return order.getBuyerContact();
+
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+		if(null != userIdentifier)
+			return userIdentifier.getIdentifierToken();
+		return null;
+	}
+
+	@Override
+	public GetVideoConfHelpUrlResponse getVideoConfHelpUrl() { 
+		String url = configurationProvider.getValue("video.help", "");
+		GetVideoConfHelpUrlResponse response = new GetVideoConfHelpUrlResponse();
+		response.setHelpUrl(url);
+		return response;
+	}
+	
 	
 }
