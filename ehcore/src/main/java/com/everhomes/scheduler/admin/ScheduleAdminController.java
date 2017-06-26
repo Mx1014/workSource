@@ -149,7 +149,9 @@ public class ScheduleAdminController extends ControllerBase {
     @RequestMapping("getRunningFlag")
     @RestReturn(value=Byte.class)
     public RestResponse getRunningFlag() {
-        return new RestResponse(scheduleProvider.getRunningFlag());
+        Map<String, Byte> result = new HashMap<>();
+        result.put("runningFlag", scheduleProvider.getRunningFlag());
+        return new RestResponse(result);
     }
 
     /**
