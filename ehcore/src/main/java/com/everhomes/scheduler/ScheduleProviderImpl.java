@@ -434,7 +434,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
     private void setLocalRuningFlag(){
         if(t == null){
-            String delayTime = configurationProvider.getValue("schedule.delay.time", "10000");
+            String delayTime = configurationProvider.getValue("schedule.running.delay.time", "10000");
             t = new Thread(new Runnable() {
                 @Override
                 public void run() {
