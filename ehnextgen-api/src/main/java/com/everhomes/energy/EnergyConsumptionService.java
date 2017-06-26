@@ -239,4 +239,8 @@ public interface EnergyConsumptionService {
     List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
 
     ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
+
+    EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd);
+
+    String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd);
 }

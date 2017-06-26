@@ -26,16 +26,14 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
@@ -2530,4 +2528,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return expressionDTO;
     }
 
+    @Override
+    public EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
+        EnergyMeterCodeDTO meterCodeDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getMeterQRCode(), EnergyMeterCodeDTO.class);
+        EnergyMeter meter = meterProvider.findById(meterCodeDTO.getNamespaceId(), meterCodeDTO.getMeterId());
+        if (meter == null) {
+            LOGGER.error("EnergyMeter not exist, id = {}", meterCodeDTO.getMeterId());
+            throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", meterCodeDTO.getMeterId());
+        }
+
+        return toEnergyMeterDTO(meter);
+    }
+
+    @Override
+    public String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
+        EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
+        dto.setNamespaceId(cmd.getNamespaceId());
+        dto.setMeterId(cmd.getMeterId());
+        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
+        return qrCode;
+    }
 }
