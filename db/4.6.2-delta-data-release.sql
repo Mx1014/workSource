@@ -101,3 +101,6 @@ update `eh_launch_pad_items` set `action_type` = 13 where `action_data` like '%b
 update `eh_launch_pad_items` set `action_type` = 13 where `target_type` = 'biz' and `action_type` = 14;
 update `eh_launch_pad_items` set `action_data` = REPLACE(`action_data`,'}', ',"declareFlag":"1"}') where `action_type` = 14 and `action_data` not like '%dudubashi%';
 
+-- 更新园区入驻配置参数 add by sw 20170626
+UPDATE eh_lease_configs set issuing_lease_flag = 0,issuer_manage_flag = 0 where namespace_id != 999985;
+UPDATE eh_lease_configs set display_name_str = '项目介绍,待租物业', display_order_str = '1,2' WHERE namespace_id = 999975;
