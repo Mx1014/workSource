@@ -137,3 +137,5 @@ equipment.ip: 127.0.0.1
 #A1234567890Z为测试账号
 ems.sys.account: A1234567890Z
 ems.sys.password: e10adc3949ba59abbe56e057f20f883e
+
+schedule.running.flag: 10000
