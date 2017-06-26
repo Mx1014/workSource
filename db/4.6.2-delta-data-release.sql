@@ -91,3 +91,13 @@ UPDATE eh_enterprise_op_requests set source_type = 'renew' where apply_type = 3;
 
 --  use phone_visit for techpark added by janson
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');
+
+
+-- item 配置声明 add sfyan 20170626 alpha环境已经执行过了
+update `eh_launch_pad_items` set `action_type` = 14 where `action_data` like '%i.eqxiu.com/%' and `action_type` = 13;
+update `eh_launch_pad_items` set `action_type` = 13 where `action_data` like '%zuolin.%' and `action_type` = 14;
+update `eh_launch_pad_items` set `action_type` = 13 where `action_data` like '%lab.everhomes.com%' and `action_type` = 14;
+update `eh_launch_pad_items` set `action_type` = 13 where `action_data` like '%beta.zuolin.com%' and `action_type` = 14;
+update `eh_launch_pad_items` set `action_type` = 13 where `target_type` = 'biz' and `action_type` = 14;
+update `eh_launch_pad_items` set `action_data` = REPLACE(`action_data`,'}', ',"declareFlag":"1"}') where `action_type` = 14 and `action_data` not like '%dudubashi%';
+
