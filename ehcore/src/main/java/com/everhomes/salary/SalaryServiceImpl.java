@@ -4,7 +4,10 @@ package com.everhomes.salary;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.salary.*;
 
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -112,41 +116,119 @@ public class SalaryServiceImpl implements SalaryService {
 		return new ListSalaryEmployeesResponse();
 	}
 
-	@Override
-	public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
-		List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
-		//  获取对应批次的项目字段
-		List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-		//  获取个人的项目字段
-		List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
+    @Override
+    public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
 
-		if (!salaryGroupEntities.isEmpty()) {
-			salaryGroupEntities.stream().forEach(r -> {
-				SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
-				dto.setSalaryGroupId(r.getGroupId());
-				dto.setUserId(cmd.getUserId());
-				dto.setGroupEntityId(r.getId());
-				dto.setOriginEntityId(r.getOriginEntityId());
-				dto.setEntityName(r.getName());
+        List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
+        //  获取对应批次的项目字段
+        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+        //  获取个人的项目字段
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
 
-				//  为对应字段赋值
-				if (!salaryEmployeeOriginVals.isEmpty()) {
-					salaryEmployeeOriginVals.stream().forEach(s -> {
-						if (r.getName().equals(s.getGroupEntityName()))
-							dto.setSalaryValue(s.getSalaryValue());
-					});
-				}
+        if (!salaryGroupEntities.isEmpty()) {
+            salaryGroupEntities.stream().forEach(r -> {
+                SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
+                dto.setSalaryGroupId(r.getGroupId());
+                dto.setUserId(cmd.getUserId());
+                dto.setGroupEntityId(r.getId());
+                dto.setOriginEntityId(r.getOriginEntityId());
+                dto.setEntityName(r.getName());
 
-				results.add(dto);
-			});
-			return results;
-		} else
-			return null;
-	}
+                //  为对应字段赋值
+                if (!salaryEmployeeOriginVals.isEmpty()) {
+                    salaryEmployeeOriginVals.stream().forEach(s -> {
+                        if (r.getName().equals(s.getGroupEntityName())) {
+                            dto.setSalaryValue(s.getSalaryValue());
+                            dto.setId(s.getId());
+                        }
+                    });
+                }
+
+                results.add(dto);
+            });
+            return results;
+        } else
+            return null;
+    }
 
     @Override
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
+        User user = UserContext.current().getUser();
+
+        if (!cmd.getEmployeeOriginVal().isEmpty()) {
+            //  获取用户id
+            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+/*            //  获取字段id
+            List<Long> groupEntitiesId = new ArrayList<>();
+            cmd.getEmployeeOriginVal().stream().forEach(r -> {
+                Long groupEntityId = r.getGroupEntityId();
+                groupEntitiesId.add(groupEntityId);
+            });*/
+
+
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
+
+            //  若用户没有个人薪酬设定时直接添加
+            if (originVals.isEmpty()) {
+                cmd.getEmployeeOriginVal().stream().forEach(s -> {
+                    this.createSalaryEmployeeOriginVal(s, cmd);
+                });
+            } else {
+                cmd.getEmployeeOriginVal().stream().forEach(t -> {
+                    boolean isCreate = true;
+                    for (SalaryEmployeeOriginVal originVal : originVals) {
+                        if (t.getGroupEntityId().equals(originVal.getGroupEntityId())) {
+                            originVal.setSalaryValue(t.getSalaryValue());
+                            originVal.setCreatorUid(user.getId());
+                            originVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            this.salaryEmployeeOriginValProvider.updateSalaryEmployeeOriginVal(originVal);
+                            isCreate = false;
+                        }
+                    }
+                    if(isCreate)
+                        this.createSalaryEmployeeOriginVal(t,cmd);
+//                    this.createSalaryEmployeeOriginVal(p, cmd);
+                });
+/*                cmd.getEmployeeOriginVal().stream().forEach(p -> {
+                    boolean isCreate = true;
+                    originVals.stream().forEach(q -> {
+
+                        //  已存在的做修改
+                        if (p.getGroupEntityId().equals(q.getGroupEntityId())) {
+                            q.setGroupEntityName(p.getEntityName());
+                            q.setSalaryValue(p.getSalaryValue());
+                            q.setCreatorUid(user.getId());
+                            q.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            this.salaryEmployeeOriginValProvider.updateSalaryEmployeeOriginVal(q);
+                            isCreate = false;
+                        }
+
+                    });
+                    if(isCreate)
+                    this.createSalaryEmployeeOriginVal(p, cmd);
+                });*/
+            }
+        }
+    }
+
+
+
+
+
+    private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, UpdateSalaryEmployeesCommand cmd){
+        SalaryEmployeeOriginVal originVal = new SalaryEmployeeOriginVal();
+        if (StringUtils.isEmpty(cmd.getOwnerType()))
+            originVal.setOwnerType(cmd.getOwnerType());
+        if (StringUtils.isEmpty(cmd.getOwnerId()))
+            originVal.setOwnerId(cmd.getOwnerId());
+        originVal.setGroupId(dto.getSalaryGroupId());
+        originVal.setUserId(dto.getUserId());
+        originVal.setGroupEntityId(dto.getGroupEntityId());
+        originVal.setGroupEntityName(dto.getEntityName());
+        originVal.setOriginEntityId(dto.getOriginEntityId());
+        originVal.setSalaryValue(dto.getSalaryValue());
+        this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
     }
 
     @Override

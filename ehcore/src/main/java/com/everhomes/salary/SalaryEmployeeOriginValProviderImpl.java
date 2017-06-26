@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.user.User;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,12 +33,12 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 
 	@Override
 	public void createSalaryEmployeeOriginVal(SalaryEmployeeOriginVal salaryEmployeeOriginVal) {
+		User user = UserContext.current().getUser();
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryEmployeeOriginVals.class));
 		salaryEmployeeOriginVal.setId(id);
 		salaryEmployeeOriginVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryEmployeeOriginVal.setCreatorUid(UserContext.current().getUser().getId());
-//		salaryEmployeeOriginVal.setUpdateTime(salaryEmployeeOriginVal.getCreateTime());
-//		salaryEmployeeOriginVal.setOperatorUid(salaryEmployeeOriginVal.getCreatorUid());
+		salaryEmployeeOriginVal.setCreatorUid(user.getId());
+		salaryEmployeeOriginVal.setNamespaceId(user.getNamespaceId());
 		getReadWriteDao().insert(salaryEmployeeOriginVal);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhSalaryEmployeeOriginVals.class, null);
 	}
@@ -70,7 +71,7 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID.eq(userId))
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
 	}
-	
+
 	private EhSalaryEmployeeOriginValsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
