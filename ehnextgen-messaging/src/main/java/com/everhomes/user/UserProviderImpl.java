@@ -835,6 +835,7 @@ public class UserProviderImpl implements UserProvider {
             SelectQuery orgQuery = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
             byte orgQueryFlag = 0;
 
+            //查询认证用户，用左连接
             if (null != isAuth && 0 != isAuth) {
                 if (1 == isAuth) {
                     orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
@@ -846,6 +847,7 @@ public class UserProviderImpl implements UserProvider {
                 orgQueryFlag = 1;
             }
 
+            //公司，用自然连接
             if (null != organizationId) {
 
                 orgQuery.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId));

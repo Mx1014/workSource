@@ -1204,7 +1204,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAvatar(cmd.getAvatar());
 				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
-					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
+					java.sql.Date checkinDate = DateUtil.parseDate(cmd.getCheckinDate());
+					if(null != checkinDate){
+						organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
+					}
+				}else {
+					organizationDetail.setCheckinDate(null);
 				}
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
@@ -1224,6 +1229,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					if(null != checkinDate){
 						organizationDetail.setCheckinDate(new Timestamp(checkinDate.getTime()));
 					}
+				}else {
+					organizationDetail.setCheckinDate(null);
 				}
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
@@ -5014,9 +5021,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndContactToken(String path, String contactToken){
 		return organizationProvider.listOrganizationMemberByPath(path, null, contactToken);
 	}
-
-	private List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		if(null == userIdentifier)
+			return null;
 		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
 	}
 

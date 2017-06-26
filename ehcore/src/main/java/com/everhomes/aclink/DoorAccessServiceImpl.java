@@ -617,10 +617,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
-
+    	User currUser = UserContext.current().getUser();
         if(cmd.getApproveUserId() == null) {
-            User user = UserContext.current().getUser();
-            cmd.setApproveUserId(user.getId());
+            cmd.setApproveUserId(currUser.getId());
         }
         
         if(cmd.getRightOpen() == null) {
@@ -756,10 +755,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
+        tmpUser.setNickName(currUser.getNickName());
+        List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
+        if(dtos != null && !dtos.isEmpty()) {
+        		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+            if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+            		tmpUser.setNickName(om.getContactName());
+            	}	
+        	}
+		
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
-        tmpUser.setNickName(user.getNickName());
-        
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
@@ -2634,9 +2640,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        auth.setValidFromMs(System.currentTimeMillis());
-        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        if(cmd.getValidEndMs() != null) {
+        	auth.setKeyValidTime(cmd.getValidEndMs());
+        	auth.setValidEndMs(cmd.getValidEndMs());
+        } else {
+        	auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        	auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        }
+        
+        if(cmd.getValidFromMs() != null) {
+        	auth.setValidFromMs(cmd.getValidFromMs());
+        } else {
+        	auth.setValidFromMs(System.currentTimeMillis());	
+        }
+        
         auth.setUserId(0l);
         auth.setOwnerType(doorAccess.getOwnerType());
         auth.setOwnerId(doorAccess.getOwnerId());
@@ -2877,6 +2894,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
@@ -2929,6 +2947,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {

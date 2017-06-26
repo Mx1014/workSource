@@ -29,6 +29,7 @@ public class GetVisitorResponse {
     String description;
     String approveName;
     Byte permissionDeny;
+    Long validEndMs;
     
     public String getUserName() {
         return userName;
@@ -97,7 +98,14 @@ public class GetVisitorResponse {
     public void setPermissionDeny(Byte permissionDeny) {
         this.permissionDeny = permissionDeny;
     }
-    @Override
+
+    public Long getValidEndMs() {
+		return validEndMs;
+	}
+	public void setValidEndMs(Long validEndMs) {
+		this.validEndMs = validEndMs;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

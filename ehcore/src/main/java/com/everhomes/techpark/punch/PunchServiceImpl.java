@@ -191,10 +191,11 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
-	final String downloadDir ="\\download\\";
+	final String downloadDir ="download/";
  
 	private MessagingService messagingService;
 	private static final Logger LOGGER = LoggerFactory
@@ -770,6 +771,8 @@ public class PunchServiceImpl implements PunchService {
 	/***
 	 * 计算每一天的打卡状态，返回值PDL
 	 * @param punchDayLog 
+	 * @param companyId 永远为总公司id
+	 * 
 	 * */
 	private PunchLogsDay calculateDayLog(Long userId, Long companyId,
 			Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
@@ -800,9 +803,9 @@ public class PunchServiceImpl implements PunchService {
 			return pdl;
 		}
 		pdl.setPunchTimesPerDay(punchTimeRule.getPunchTimesPerDay());
-		//对于已离职和未入职的判断
-		OrganizationMember organizationMember = organizationProvider.findActiveOrganizationMemberByOrgIdAndUId(userId, companyId);
-		if(organizationMember == null ){
+		//对于已离职和未入职的判断 
+		List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+companyId,userId );
+		if(organizationMembers == null || organizationMembers.size() == 0){
 			//找不到就是已离职
 			pdl.setPunchTimesPerDay(PunchTimesPerDay.TWICE.getCode());
 			punchDayLog.setStatus(ApprovalStatus.RESIGNED.getCode());
@@ -812,7 +815,11 @@ public class PunchServiceImpl implements PunchService {
 			return pdl;
 		}else{
 			//查找是否未入职 --通过log的时间
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,companyId, OperationType.JOIN.getCode()) ;
+			List<Long> orgIds = new ArrayList<>();
+			for(OrganizationMember member : organizationMembers){
+				orgIds.add(member.getOrganizationId());
+			}
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(userId,orgIds, OperationType.JOIN.getCode()) ;
 			if (null != memberLogs ){
 				if(memberLogs.get(0).getOperateTime().after(logDay.getTime())){
 
@@ -1354,17 +1361,20 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		//是否有wifi打卡,如果是判断wifi是否符合
-		if(pr.getWifiRuleId() != null && cmd.getWifiMac() != null){
-			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
-			if(null != wifis){
-				for(PunchWifi wifi : wifis){
-					if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
-						return ClockCode.SUCESS;
-				}
-				
+		
+		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+		if(null != wifis){
+			for(PunchWifi wifi : wifis){
+				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
+					return ClockCode.SUCESS;
 			}
+			
 		}
-		if(null == pr.getLocationRuleId()){
+		
+		//参数有地址规则看地址范围是否正确,不正确则报错
+		List<PunchGeopoint> punchGeopoints = punchProvider
+				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+		if(null == punchGeopoints || punchGeopoints.size() == 0){
 			//wifi不符合看是否有地址规则,没有地址规则直接报错
 			if(null == cmd.getWifiMac())
 				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -1377,13 +1387,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == cmd.getLatitude() ||null == cmd.getLongitude() )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_GEOPOINT_NULL,"user location is null");
-		//参数有地址规则看地址范围是否正确,不正确则报错
-		List<PunchGeopoint> punchGeopoints = punchProvider
-				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
-		if (null == punchGeopoints || punchGeopoints.size() == 0)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+		 
 		for (PunchGeopoint punchGeopoint : punchGeopoints) {
 			if (calculateDistance(cmd.getLongitude(), cmd.getLatitude(),
 					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
@@ -1393,7 +1397,7 @@ public class PunchServiceImpl implements PunchService {
 			} 
 		 
 		}
-		if(null == pr.getWifiRuleId())
+		if(null == wifis || wifis.size() == 0)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
 		else
@@ -2285,7 +2289,9 @@ public class PunchServiceImpl implements PunchService {
 			statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
 		}else{
 			//查找是否未入职 --通过log的时间
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),member.getOrganizationId(), OperationType.JOIN.getCode()) ;
+			List<Long> orgIds = new ArrayList<>();
+			orgIds.add(member.getOrganizationId()); 
+			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),orgIds, OperationType.JOIN.getCode()) ;
 			if (null != memberLogs ){
 				if(memberLogs.get(0).getOperateTime().after( endCalendar.getTime())){
 
@@ -4662,10 +4668,13 @@ public class PunchServiceImpl implements PunchService {
 			if(null!= r.getPunchDate())
 				dto.setPunchDate(r.getPunchDate().getTime());
 			dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
-			if (null != member) {
-				dto.setUserName(member.getContactName());
-				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), member.getOrganizationId());
+			// modify by wh 2017年6月22日 现在都是挂总公司下,用户未必都能通过这种方式查到
+//			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), r.getEnterpriseId() );
+
+			List<OrganizationMember> organizationMembers = organizationService.listOrganizationMemberByOrganizationPathAndUserId("/"+r.getEnterpriseId(),dto.getUserId() );
+			if (null != organizationMembers && organizationMembers.size() >0) {
+				dto.setUserName(organizationMembers.get(0).getContactName());
+				OrganizationDTO dept = this.findUserDepartment(dto.getUserId(), organizationMembers.get(0).getOrganizationId());
 				if(null != dept){
 					dto.setDeptName(dept.getName());
 				}
@@ -5040,23 +5049,24 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid   Id parameter in the command");
 		}
 		PunchRuleOwnerMap obj = this.punchProvider.getPunchRuleOwnerMapById(cmd.getId());
-		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType()))
-			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
-				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
+		if(obj.getOwnerId().equals(cmd.getOwnerId())&&obj.getOwnerType().equals(cmd.getOwnerType())){
+//			if(null != cmd.getTargetId() && null != cmd.getTargetType()){
+//				if(cmd.getTargetId().equals(obj.getTargetId())&& cmd.getTargetType().equals(obj.getTargetType())){
 					this.punchProvider.deletePunchRuleOwnerMap(obj);
-					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
-					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getTargetType(),cmd.getTargetId());
-				}
-				else{
- 
-					LOGGER.error("Invalid target type or  Id parameter in the command");
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Invalid   target type or  Id parameter in the command");
-				 
-				}
-			}
-			else
-				this.punchProvider.deletePunchRuleOwnerMap(obj);
+					this.punchSchedulingProvider.deletePunchSchedulingByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+					this.punchProvider.deletePunchTimeRulesByOwnerAndTarget(obj.getOwnerType(),obj.getOwnerId(),obj.getTargetType(),obj.getTargetId());
+//				}
+//				else{
+// 
+//					LOGGER.error("Invalid target type or  Id parameter in the command");
+//					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+//							"Invalid   target type or  Id parameter in the command");
+//				 
+//				}
+//			}
+//			else
+//				this.punchProvider.deletePunchRuleOwnerMap(obj);
+		}
 		else{
 
 			LOGGER.error("Invalid owner type or  Id parameter in the command");
@@ -5633,7 +5643,8 @@ public class PunchServiceImpl implements PunchService {
 
 		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_EXCEL_SCOPE, PunchConstants.EXCEL_SCHEDULE,
 				UserContext.current().getUser().getLocale());
-		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ scheduleLocaleString==null?"排班表":scheduleLocaleString.getText()+".xlsx";
+		filePath = filePath +monthSF.get().format(new Date(cmd.getQueryTime()))+ (scheduleLocaleString==null?"排班表":scheduleLocaleString.getText())+".xlsx";
+		LOGGER.debug("filePath = "+ filePath);
 		//新建了一个文件
 		
 		createPunchSchedulingsBook(filePath,listPunchScheduling(cmd));

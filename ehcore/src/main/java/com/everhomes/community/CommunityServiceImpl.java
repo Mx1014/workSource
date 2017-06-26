@@ -1983,9 +1983,11 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPosition(user.getPositionTag());
 
 			Set<OrganizationDetailDTO> organizationDTOs = new HashSet<>();
-			if(null != members){
+			if(null != members && !members.isEmpty()){
 
 //				Set<OrganizationDTO> set = new HashSet<>();
+
+				dto.setOrganizationMemberName(members.get(0).getContactName());
 
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
@@ -2033,7 +2035,7 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		res.setUserCommunities(dtos.stream().map(r->{
 			//最新活跃时间 add by sfyan 20170620
-			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId());
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId(), 1);
 			if(userActivities.size() > 0){
 				r.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}

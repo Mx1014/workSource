@@ -25,6 +25,8 @@ public class CommunityUserDto {
 	private String     userName;
 	
 	private String     nikeName;
+
+	private String organizationMemberName;
 	
 	private Long     communityId;
 	
@@ -204,5 +206,13 @@ public class CommunityUserDto {
 
 	public void setRecentlyActiveTime(Long recentlyActiveTime) {
 		this.recentlyActiveTime = recentlyActiveTime;
+	}
+
+	public String getOrganizationMemberName() {
+		return organizationMemberName;
+	}
+
+	public void setOrganizationMemberName(String organizationMemberName) {
+		this.organizationMemberName = organizationMemberName;
 	}
 }
