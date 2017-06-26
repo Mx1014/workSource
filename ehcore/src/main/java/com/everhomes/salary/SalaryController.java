@@ -140,7 +140,7 @@ public class SalaryController extends ControllerBase {
     }
 
     /**
-     * <p>3-3.编辑人员批次详情</p>
+     * <p>3-3.编辑人员批次详情,有增加没有更新</p>
      * <b>URL: /salary/updateSalaryEmployees</b>
      */
     @RequestMapping("updateSalaryEmployees")
@@ -152,20 +152,20 @@ public class SalaryController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-
-	/**
-	 * <p>4.设置人员薪酬字段值 有增加没有更新</p>
+/*
+	*//**
+	 * <p>3-4.设置人员薪酬字段值 有增加没有更新</p>
 	 * <b>URL: /salary/saveSalaryEmployeeOriginVals</b>
-	 */
+	 *//*
 	@RequestMapping("saveSalaryEmployeeOriginVals")
 	@RestReturn(String.class)
 	public RestResponse saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd){
 		salaryService.saveSalaryEmployeeOriginVals(cmd);
 		return new RestResponse();
-	}
+	}*/
 
 	/**
-	 * <p>5-1.导出某个薪酬组excel</p>
+	 * <p>4-1.导出某个薪酬组excel</p>
 	 * <b>URL: /salary/exportSalaryGroup</b>
 	 */
 	@RequestMapping("exportSalaryGroup")
@@ -176,7 +176,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>5-2.导入某个薪酬组excel</p>
+	 * <p>4-2.导入某个薪酬组excel</p>
 	 * <b>URL: /salary/importSalaryGroup</b>
 	 */
 	@RequestMapping("importSalaryGroup")
@@ -187,7 +187,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>6-1.根据批次导出核算表</p>
+	 * <p>5-1.根据批次导出核算表</p>
 	 * <b>URL: /salary/exportPeriodSalary</b>
 	 */
 	@RequestMapping("exportPeriodSalary")
@@ -198,7 +198,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>6-2.根据批次导入核算表</p>
+	 * <p>5-2.根据批次导入核算表</p>
 	 * <b>URL: /salary/importPeriodSalary</b>
 	 */
 	@RequestMapping("importPeriodSalary")
