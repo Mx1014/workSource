@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Query;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -158,5 +159,42 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		if(list!=null && list.size()>0)
 			return list.get(0);
 		return null;
+	}
+
+	@Override
+	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(String ownerType, Long ownerId, Timestamp startTime,
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize) {
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+			.where(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
+		if(startTime!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.ge(startTime));
+		}
+		if(endTime!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.le(endTime));
+			
+		}
+		if(jobType!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType));
+		}
+		
+		if(orderStatus!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(orderStatus));
+		}
+		
+		if(keywords!=null){
+			Condition condition = Tables.EH_SIYIN_PRINT_ORDERS.NICE_NAME.like("%"+keywords+"%");
+			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_COMPANY.like("%"+keywords+"%"));
+			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_PHONE.like("%"+keywords+"%"));
+			query = query.and(condition);
+		}
+		
+		if(pageAnchor!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
+		}
+		
+		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
+				.fetch()
+				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 	}
 }

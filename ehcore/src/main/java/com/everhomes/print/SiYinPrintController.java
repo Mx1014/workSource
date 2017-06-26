@@ -68,7 +68,11 @@ public class SiYinPrintController extends ControllerBase {
     @PostConstruct
     public void setup(){
         //启动定时任务
-        scheduleProvider.scheduleCronJob("siyin", "siyin", "0 */1 * * * ?",SiyinTaskLogScheduleJob.class , null);
+    	String triggerName = "SiyinQueryRecord";
+    	String jobName= "SiyinQueryRecord"+System.currentTimeMillis();
+    	//每30分钟查询向司印查询一下日志。
+    	String cronExpression = "0 */30 * * * ?";
+        scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,SiyinTaskLogScheduleJob.class , null);
     }
 
 	 /**
@@ -121,7 +125,7 @@ public class SiYinPrintController extends ControllerBase {
 	 @RestReturn(value=ListPrintRecordsResponse.class)
 	 public RestResponse listPrintRecords(ListPrintRecordsCommand cmd) {
 		
-	     RestResponse response = new RestResponse();
+	     RestResponse response = new RestResponse(siyinPrintService.listPrintRecords(cmd));
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");
 	     return response;

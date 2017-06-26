@@ -25,4 +25,7 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 
+	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(String ownerType, Long ownerId, Timestamp startTime,
+			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
+
 }

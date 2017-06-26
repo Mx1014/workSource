@@ -4,6 +4,8 @@ package com.everhomes.rest.print;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -34,5 +36,76 @@ public class PrintRecordDTO {
 	private String printDocumentName;
 	private String detail;
 	private Long orderNo;
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Byte getJobType() {
+		return jobType;
+	}
+	public void setJobType(Byte jobType) {
+		this.jobType = jobType;
+	}
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+	public String getNickName() {
+		return nickName;
+	}
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+	public String getCreatorPhone() {
+		return creatorPhone;
+	}
+	public void setCreatorPhone(String creatorPhone) {
+		this.creatorPhone = creatorPhone;
+	}
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+	public BigDecimal getOrderTotalFee() {
+		return orderTotalFee;
+	}
+	public void setOrderTotalFee(BigDecimal orderTotalFee) {
+		this.orderTotalFee = orderTotalFee;
+	}
+	public Byte getOrderStatus() {
+		return orderStatus;
+	}
+	public void setOrderStatus(Byte orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+	public String getPrintDocumentName() {
+		return printDocumentName;
+	}
+	public void setPrintDocumentName(String printDocumentName) {
+		this.printDocumentName = printDocumentName;
+	}
+	public String getDetail() {
+		return detail;
+	}
+	public void setDetail(String detail) {
+		this.detail = detail;
+	}
+	public Long getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(Long orderNo) {
+		this.orderNo = orderNo;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 
 }

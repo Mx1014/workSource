@@ -4,6 +4,7 @@ package com.everhomes.print;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -85,6 +86,7 @@ import com.everhomes.rest.print.PrintOrderLockType;
 import com.everhomes.rest.print.PrintOrderStatusType;
 import com.everhomes.rest.print.PrintOwnerType;
 import com.everhomes.rest.print.PrintPaperSizeType;
+import com.everhomes.rest.print.PrintRecordDTO;
 import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.PrintSettingPaperSizePriceDTO;
 import com.everhomes.rest.print.PrintSettingType;
@@ -112,9 +114,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintServiceImpl.class);
 	private static final Pattern emailregex = Pattern.compile("^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$");    
 	private static final String REDIS_PRINT_IDENTIFIER_TOKEN = "print-uid";
+	//redis记录用户打印任务的数量
 	public static final String REDIS_PRINTING_TASK_COUNT = "print-task-count";
+	//redis中存储的验证打印记录的时间点，
 	public static final String REDIS_PRINT_JOB_CHECK_TIME = "redis_print_job_check_time";
 	private static final String PRINT_SUBJECT = "print";
+	//用户登录司印使用的用户id-园区id的分割字符串。
+	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
 	
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
@@ -208,8 +214,20 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintRecordsResponse listPrintRecords(ListPrintRecordsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getStartTime()
+				,cmd.getEndTime(),cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
+		
+		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
+		if(printOrdersList!=null && printOrdersList.size()>pageSize){
+			response.setNextPageAnchor(printOrdersList.get(printOrdersList.size()-1).getId());
+			printOrdersList.remove(printOrdersList.size()-1);
+		}
+		response.setPrintRecordsList(printOrdersList.stream().map(r->ConvertHelper.convert(r, PrintRecordDTO.class)).collect(Collectors.toList()));
+		return response;
 	}
 
 	@Override
@@ -329,7 +347,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	User logonUser  = new User();
         	//这里设置accoutname 为用户id-namespaceid-拥有者id，因为在jobLogNotification
         	//中计算价格的时候，不知道所在的园区，所以只能依靠
-        	logonUser.setAccountName(user.getId()+"-"+cmd.getOwnerId());
+        	logonUser.setAccountName(user.getId()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
             printResponse.setResponseObject(logonUser);
             printResponse.setErrorCode(ErrorCodes.SUCCESS);
         }else{
@@ -363,7 +381,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		
 		//做计数
-        String key = REDIS_PRINTING_TASK_COUNT + id+"-"+cmd.getOwnerId();
+        String key = REDIS_PRINTING_TASK_COUNT + id+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
@@ -450,7 +468,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		Long id = UserContext.current().getUser().getId();
 		
 		//做计数
-        String key = REDIS_PRINTING_TASK_COUNT + id+"-"+cmd.getOwnerId();;
+        String key = REDIS_PRINTING_TASK_COUNT + id+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();;
         ValueOperations<String, String> valueOperations = getValueOperations(key);
         
         String value = valueOperations.get(key);
@@ -623,7 +641,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		//这里设置accoutname 为用户id-园区-拥有者id，因为在jobLogNotification
      	//中计算价格的时候，不知道用户所在的园区，所以只能依靠
 		 //信息超长,压缩
-		 String loginAccount = user.getId().toString()+"-"+cmd.getOwnerId();
+		 String loginAccount = user.getId().toString()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId();
 	     params.put("login_account", loginAccount);
 //	     params.put("login_password", user.getPasswordHash());
 	     params.put("reader_name", cmd.getReaderName());

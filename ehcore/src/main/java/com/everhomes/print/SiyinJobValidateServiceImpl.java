@@ -27,7 +27,10 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.print.PrintColorType;
 import com.everhomes.rest.print.PrintErrorCode;
 import com.everhomes.rest.print.PrintJobTypeType;
@@ -78,6 +81,9 @@ public class SiyinJobValidateServiceImpl {
 	private UserProvider userProvider;
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	/**
 	 * 整个回调可能频繁发生，由于是非用户登录接口，完全可以放到后台任务中去做。
 	 */
@@ -179,7 +185,7 @@ public class SiyinJobValidateServiceImpl {
 		
 		//user_name发送给司印方的时候，包括了用户id和小区id
 		String userIdcommuntiyID = job.get("user_name").toString();
-		String[] ids = userIdcommuntiyID.split("-");
+		String[] ids = userIdcommuntiyID.split(SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT);
 		if(ids.length!=2){//user_name不符合格式
 			LOGGER.info("Unknown user_name = {}" , userIdcommuntiyID);
 			return null;
@@ -261,6 +267,17 @@ public class SiyinJobValidateServiceImpl {
         	order.setOrderTotalAmount(new BigDecimal("0"));
         	order.setCreatorUid(record.getCreatorUid());
         	order.setOperatorUid(record.getOperatorUid());
+        	User user = userProvider.findUserById(record.getCreatorUid());
+    		order.setNiceName(user == null?"":user.getNickName());
+    		
+    		ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
+    		List<OrganizationSimpleDTO> list = organizationService.listUserRelateOrgs(relatedCmd, user);
+    		String company = "";
+    		if(list!=null)
+	    		for (OrganizationSimpleDTO org : list) {
+	    			company+=org.getName()+"\n";
+				}
+    		order.setCreatorCompany(company);
         }
 		return order;
 	}

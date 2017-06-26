@@ -47,8 +47,8 @@ public class SiyinTaskLogScheduleJob extends QuartzJobBean {
             if(timeStr != null){
             	time = sdf.parse(timeStr).getTime();
             }
-            Long startLong = time-30*60*1000;
-            Long endLong = time+30*60*1000;
+            Long startLong = time-35*60*1000;
+            Long endLong = time+35*60*1000;
 
             Map<String, String> params = new HashMap<>();
             params.put("start_time", sdf.format(new Date(startLong)));
