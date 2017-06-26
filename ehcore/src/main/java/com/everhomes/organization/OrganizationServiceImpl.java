@@ -9841,9 +9841,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         ListPersonnelsV2CommandResponse response = new ListPersonnelsV2CommandResponse();
         ListOrganizationMemberCommandResponse res = this.listOrganizationPersonnels(ConvertHelper.convert(cmd, ListOrganizationContactCommand.class), false);
 
-        if(res.getMembers() == null || res.getMembers().isEmpty()){
+        if (res.getMembers() == null || res.getMembers().isEmpty()) {
             return response;
-        }else{
+        } else {
             //  查找合同到期时间
             List<Long> detailIds = new ArrayList<>();
             res.getMembers().forEach(r -> {
@@ -9852,18 +9852,22 @@ public class OrganizationServiceImpl implements OrganizationService {
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
             response.setMembers(res.getMembers().stream().map(r -> {
-                OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+                if (StringUtils.isEmpty(r.getDetailId()))
+                    return null;
+                else {
+                    OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
+                    //  设置合同到期时间
+                    if (endTimeList != null) {
+                        endTimeList.forEach(rr -> {
 
-                //  设置合同到期时间
-                if (endTimeList != null) {
-                    endTimeList.forEach(rr -> {
+                            if (rr[0].equals(dto.getDetailId())) {
+                                dto.setEndTime((java.sql.Date) rr[1]);
+                            }
+                        });
+                    }
 
-                        if (rr[0].equals(dto.getDetailId())) {
-                            dto.setEndTime((java.sql.Date) rr[1]);
-                        }
-                    });
+                    return dto;
                 }
-                return dto;
             }).collect(Collectors.toList()));
 
             response.setNextPageOffset(res.getNextPageOffset());
