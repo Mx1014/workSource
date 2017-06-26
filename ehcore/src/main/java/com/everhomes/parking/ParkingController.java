@@ -392,53 +392,6 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-       
-//    /**
-//     * <b>URL: /parking/setParkingCardIssueFlag</b>
-//     * <p>在线下发卡后，在后台管理中更新月卡领取状态</p>
-//     */
-//    @RequestMapping("setParkingCardIssueFlag")
-//    @RestReturn(value=String.class)
-//    public RestResponse setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd) {
-//        //设置eh_parking_card_requests表的issue_flag字段
-//        
-//    	parkingService.setParkingCardIssueFlag(cmd);
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-    
-    /**
-     * <b>URL: /parking/setParkingActivity</b>
-     * <p>设置活动规则</p>
-     */
-    @RequestMapping("setParkingActivity")
-    @RestReturn(value=ParkingActivityDTO.class)
-    public RestResponse setParkingActivity(SetParkingActivityCommand cmd) {
-        ParkingActivityDTO activity = null;
-        
-        activity = parkingService.setParkingActivity(cmd);
-        RestResponse response = new RestResponse(activity);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /parking/setParkingActivity</b>
-     * <p>获取活动规则</p>
-     */
-    @RequestMapping("getParkingActivity")
-    @RestReturn(value=ParkingActivityDTO.class)
-    public RestResponse getParkingActivity(GetParkingActivityCommand cmd) {
-
-        ParkingActivityDTO activity = parkingService.getParkingActivity(cmd);
-        RestResponse response = new RestResponse(activity);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
     /**
      * <b>URL: /parking/notifyParkingRechargeOrderPayment</b>

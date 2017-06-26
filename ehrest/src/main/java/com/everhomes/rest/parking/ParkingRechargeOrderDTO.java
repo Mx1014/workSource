@@ -59,7 +59,19 @@ public class ParkingRechargeOrderDTO {
     private Timestamp rechargeTime;
     private Timestamp createTime;
     private Byte rechargeType;
-    
+    private String parkingLotName;
+    private Timestamp startPeriod;
+    private Timestamp endPeriod;
+    private Integer parkingTime;
+
+    public String getParkingLotName() {
+        return parkingLotName;
+    }
+
+    public void setParkingLotName(String parkingLotName) {
+        this.parkingLotName = parkingLotName;
+    }
+
     public ParkingRechargeOrderDTO() {
     }
 

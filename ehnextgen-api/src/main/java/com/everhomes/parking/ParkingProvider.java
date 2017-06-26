@@ -68,10 +68,6 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor);
     
-    ParkingActivity setParkingActivity(ParkingActivity parkingActivity);
-    
-    ParkingActivity getParkingActivity(String ownerType,Long ownerId,Long parkingLotId);
-    
     List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
 			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 			CrossShardListingLocator locator);

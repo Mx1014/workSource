@@ -134,8 +134,8 @@ public class ParkingServiceImpl implements ParkingService {
 		Long parkingLotId = cmd.getParkingLotId();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-		String venderName = parkingLot.getVendorName();
-		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 		GetParkingCardsResponse response = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
 
@@ -165,8 +165,8 @@ public class ParkingServiceImpl implements ParkingService {
     	Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-        String venderName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        String vendorName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         
         ListCardTypeResponse response = handler.listCardType(cmd);
         
@@ -179,8 +179,8 @@ public class ParkingServiceImpl implements ParkingService {
     	Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
         
-        String venderName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        String vendorName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         
         List<ParkingRechargeRateDTO> parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(),
         		parkingLotId, cmd.getPlateNumber(), cmd.getCardNo());
@@ -204,9 +204,9 @@ public class ParkingServiceImpl implements ParkingService {
     public List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd){
     	
     	if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
-    		LOGGER.error("OwnerId or ownertype cannot be null.");
+    		LOGGER.error("OwnerId or ownerType cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"OwnerId or ownertype cannot be null.");
+					"OwnerId or ownerType cannot be null.");
     	}
     	User user = UserContext.current().getUser();
     	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
@@ -326,24 +326,24 @@ public class ParkingServiceImpl implements ParkingService {
         	ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingLot.getOwnerType(), 
         			parkingLot.getOwnerId(), parkingLot.getId(), flowId);
         	
-        	List<ParkingCardRequest> requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        	List<ParkingCardRequest> requestList = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(),
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
         	
-        	int requestlistSize = requestlist.size();
+        	int requestListSize = requestList.size();
         	if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()
-        			&& requestlistSize >= parkingFlow.getMaxRequestNum()){
+        			&& requestListSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
         	}
-        	
-        	requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+
+			requestList = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(),
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
-        	
-        	requestlistSize = requestlist.size();
-        	if(requestlistSize > 0){
+
+			requestListSize = requestList.size();
+        	if(requestListSize > 0){
         		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
     					"plateNumber is already applied.");
@@ -667,8 +667,8 @@ public class ParkingServiceImpl implements ParkingService {
     public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
  
-        String venderName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        String vendorName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         
         return handler.createParkingRechargeRate(cmd);
     }
@@ -677,8 +677,8 @@ public class ParkingServiceImpl implements ParkingService {
 	public boolean deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
  
-        String venderName = parkingLot.getVendorName();
-        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        String vendorName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
         handler.deleteParkingRechargeRate(cmd);
 		return true;
 	}
@@ -687,7 +687,7 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
-		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(null != cmd.getStartDate())
@@ -702,12 +702,16 @@ public class ParkingServiceImpl implements ParkingService {
 				cmd.getPageAnchor(), pageSize);
     	int size = list.size(); 				
     	if(size > 0){
-    		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
-    				.collect(Collectors.toList()));
-    		if(pageSize != null && size != pageSize){
+    		response.setOrders(list.stream().map(r -> {
+				ParkingRechargeOrderDTO d = ConvertHelper.convert(r, ParkingRechargeOrderDTO.class);
+    			d.setVendorName(parkingLot.getName());
+
+    			return d;
+			}).collect(Collectors.toList()));
+    		if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+        		response.setNextPageAnchor(list.get(size - 1).getCreateTime().getTime());
         	}
     	}
     	
@@ -766,10 +770,8 @@ public class ParkingServiceImpl implements ParkingService {
     		response.setRequests(list.stream().map(r -> {
     			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
     			
-    			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId()
-                		, userId
-                		, FlowUserType.PROCESSOR
-                		, false);
+    			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId(),
+						userId, FlowUserType.PROCESSOR, false);
     			
     			dto.setButtons(flowCaseDetailDTO.getButtons());
     			return dto;
@@ -957,7 +959,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	private void setParkingCardRequestsStatus(List<ParkingCardRequest> list, StringBuilder strBuilder, Byte status) {
 		if(ParkingCardRequestStatus.PROCESSING.getCode() == status) {
-			list.stream().forEach(r -> {
+			list.forEach(r -> {
 				r.setIssueTime(new Timestamp(System.currentTimeMillis()));
 				r.setStatus(status);
 				if(strBuilder.length() > 0) {
@@ -966,7 +968,7 @@ public class ParkingServiceImpl implements ParkingService {
 				strBuilder.append(r.getId());
 			});
 		}else {
-			list.stream().forEach(r -> {
+			list.forEach(r -> {
 				r.setProcessSucceedTime(new Timestamp(System.currentTimeMillis()));
 				r.setStatus(status);
 				if(strBuilder.length() > 0) {
@@ -1018,36 +1020,6 @@ public class ParkingServiceImpl implements ParkingService {
 		
 	}
 	
-	@Override
-	public ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd){
-		ParkingActivity parkingActivity = new ParkingActivity();
-		
-		User user = UserContext.current().getUser();
-		
-		parkingActivity.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		parkingActivity.setStartTime(new Timestamp(cmd.getStartTime()));
-		parkingActivity.setEndTime(new Timestamp(cmd.getEndTime()));
-		parkingActivity.setOwnerId(cmd.getOwnerId());
-		parkingActivity.setOwnerType(cmd.getOwnerType());
-		parkingActivity.setParkingLotId(cmd.getParkingLotId());
-		parkingActivity.setTopCount(cmd.getTopCount());
-		parkingActivity.setCreatorUid(user.getId());
-		parkingProvider.setParkingActivity(parkingActivity);
-		
-		return ConvertHelper.convert(parkingActivity, ParkingActivityDTO.class);
-	}
-	
-	@Override
-	public ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd) {
-		ParkingActivityDTO dto = null;
-		
-		ParkingActivity activity = parkingProvider.getParkingActivity(cmd.getOwnerType(),
-				cmd.getOwnerId(), cmd.getParkingLotId());
-		if(null != activity)
-			dto = ConvertHelper.convert(activity, ParkingActivityDTO.class);
-		return dto;
-	}
-	
     private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
     	if(null == ownerId) {
         	LOGGER.error("OwnerId cannot be null.");
@@ -1074,15 +1046,15 @@ public class ParkingServiceImpl implements ParkingService {
     			"ParkingLot not found");
         }
         // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(null != ownerId && ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
+        if(ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
         	LOGGER.error("OwnerId is not match with parkingLot ownerId, ownerId={}", ownerId);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
     				"OwnerId is not match with parkingLot ownerId.");
         }
         if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
-            LOGGER.error("Ownertype is not match with parkingLot ownertype, ownerType={}", ownerType);
+            LOGGER.error("OwnerType is not match with parkingLot OwnerType, ownerType={}", ownerType);
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"Ownertype is not match with parkingLot ownertype.");
+    				"OwnerType is not match with parkingLot OwnerType.");
         }
         return parkingLot;
     }
@@ -1201,7 +1173,7 @@ public class ParkingServiceImpl implements ParkingService {
  					ErrorCodes.ERROR_GENERAL_EXCEPTION,
  					"Order not found");
 		}
-		order.setIsDelete(IsOrderDelete.DELETED.getCode());
+		order.setIsDelete(ParkingOrderDeleteFlag.DELETED.getCode());
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
 	
@@ -1283,15 +1255,7 @@ public class ParkingServiceImpl implements ParkingService {
 		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
 		if(null != parkingFlow) {
-//			GetSignatureCommandResponse result = userService.getSignature();
-//			StringBuilder sb = new StringBuilder();
-//			sb.append("&id=").append(result.getId());
-//			sb.append("&signature=").append(result.getSignature());
-//			sb.append("&appKey=").append(result.getAppKey());
-//			sb.append("&timeStamp=").append(result.getTimeStamp());
-//			sb.append("&randomNum=").append(result.getRandomNum());
 			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
-
 		}
 		return dto;
 	}
@@ -1523,8 +1487,8 @@ public class ParkingServiceImpl implements ParkingService {
 		Long parkingLotId = cmd.getParkingLotId();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-		String venderName = parkingLot.getVendorName();
-		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 		ParkingCarLockInfoDTO dto = handler.getParkingCarLockInfo(cmd);
 
@@ -1560,8 +1524,8 @@ public class ParkingServiceImpl implements ParkingService {
 		Long parkingLotId = cmd.getParkingLotId();
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
-		String venderName = parkingLot.getVendorName();
-		ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+		String vendorName = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 		handler.lockParkingCar(cmd);
 	}

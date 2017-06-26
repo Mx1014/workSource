@@ -8,6 +8,7 @@ package com.everhomes.rest.parking;
  * <li>RECHARGED(2): 已充值</li>
  * </ul>
  */
+@Deprecated
 public enum ParkingRechargeOrderRechargeStatus {
     NONE((byte)0, "无效"), UNRECHARGED((byte)1, "未充值"), RECHARGED((byte)2, "已充值");
     

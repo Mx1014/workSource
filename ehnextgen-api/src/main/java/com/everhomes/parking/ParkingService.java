@@ -40,10 +40,6 @@ public interface ParkingService {
     
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
     
-    ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd);
-    
-    ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd);
-    
     HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
     		HttpServletResponse response);
     
