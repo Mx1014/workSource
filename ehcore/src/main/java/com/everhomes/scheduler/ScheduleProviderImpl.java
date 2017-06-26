@@ -62,8 +62,6 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
     private volatile byte runningFlag;
 
-    private final String delayTime = configurationProvider.getValue("schedule.delay.time", "10000");
-
     private Thread t = null;
 
 	/** 调度器
@@ -436,6 +434,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
     private void setLocalRuningFlag(){
         if(t == null){
+            String delayTime = configurationProvider.getValue("schedule.delay.time", "10000");
             t = new Thread(new Runnable() {
                 @Override
                 public void run() {
