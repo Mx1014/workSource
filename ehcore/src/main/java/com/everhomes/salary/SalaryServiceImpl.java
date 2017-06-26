@@ -188,33 +188,10 @@ public class SalaryServiceImpl implements SalaryService {
                     }
                     if(isCreate)
                         this.createSalaryEmployeeOriginVal(t,cmd);
-//                    this.createSalaryEmployeeOriginVal(p, cmd);
                 });
-/*                cmd.getEmployeeOriginVal().stream().forEach(p -> {
-                    boolean isCreate = true;
-                    originVals.stream().forEach(q -> {
-
-                        //  已存在的做修改
-                        if (p.getGroupEntityId().equals(q.getGroupEntityId())) {
-                            q.setGroupEntityName(p.getEntityName());
-                            q.setSalaryValue(p.getSalaryValue());
-                            q.setCreatorUid(user.getId());
-                            q.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-                            this.salaryEmployeeOriginValProvider.updateSalaryEmployeeOriginVal(q);
-                            isCreate = false;
-                        }
-
-                    });
-                    if(isCreate)
-                    this.createSalaryEmployeeOriginVal(p, cmd);
-                });*/
             }
         }
     }
-
-
-
-
 
     private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, UpdateSalaryEmployeesCommand cmd){
         SalaryEmployeeOriginVal originVal = new SalaryEmployeeOriginVal();
@@ -230,12 +207,6 @@ public class SalaryServiceImpl implements SalaryService {
         originVal.setSalaryValue(dto.getSalaryValue());
         this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
     }
-
-    @Override
-	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd) {
-	
-
-	}
 
 	@Override
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd) {
