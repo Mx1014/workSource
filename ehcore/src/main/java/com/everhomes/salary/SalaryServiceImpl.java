@@ -93,7 +93,6 @@ public class SalaryServiceImpl implements SalaryService {
             SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
             return dto;
         }).collect(Collectors.toList()));
-//		System.out.println("12315646584584564156158486484844444444444444444444444444444444444444444444444444");
 		return response;
     }
 
@@ -114,11 +113,36 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 
 	@Override
-    public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd){
-        List<SalaryEmployeeOriginValDTO> result = new ArrayList<>();
-//        List<SalaryEmployeeOriginVal> employeeOriginVal = this.getSalaryEmployees();
-        return null;
-    }
+	public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
+		List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
+		//  获取对应批次的项目字段
+		List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+		//  获取个人的项目字段
+		List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
+
+		if (!salaryGroupEntities.isEmpty()) {
+			salaryGroupEntities.stream().forEach(r -> {
+				SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
+				dto.setSalaryGroupId(r.getGroupId());
+				dto.setUserId(cmd.getUserId());
+				dto.setGroupEntityId(r.getId());
+				dto.setOriginEntityId(r.getOriginEntityId());
+				dto.setEntityName(r.getName());
+
+				//  为对应字段赋值
+				if (!salaryEmployeeOriginVals.isEmpty()) {
+					salaryEmployeeOriginVals.stream().forEach(s -> {
+						if (r.getName().equals(s.getGroupEntityName()))
+							dto.setSalaryValue(s.getSalaryValue());
+					});
+				}
+
+				results.add(dto);
+			});
+			return results;
+		} else
+			return null;
+	}
 
     @Override
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {

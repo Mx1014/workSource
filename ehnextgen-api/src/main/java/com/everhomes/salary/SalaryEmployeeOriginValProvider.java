@@ -13,4 +13,6 @@ public interface SalaryEmployeeOriginValProvider {
 
 	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginVal();
 
+	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId);
+
 }

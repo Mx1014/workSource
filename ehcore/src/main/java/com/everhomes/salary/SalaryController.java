@@ -127,7 +127,7 @@ public class SalaryController extends ControllerBase {
 
     /**
      * <p>3-2.查询人员批次详情</p>
-     * <b>URL: /salary/listSalaryEmployees</b>
+     * <b>URL: /salary/getSalaryEmployees</b>
      */
     @RequestMapping("getSalaryEmployees")
     @RestReturn(value = SalaryEmployeeOriginValDTO.class, collection = true)

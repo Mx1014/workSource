@@ -64,6 +64,13 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
+
+	@Override
+	public List<SalaryGroupEntity> listSalaryGroupEntity() {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+	}
 	
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
