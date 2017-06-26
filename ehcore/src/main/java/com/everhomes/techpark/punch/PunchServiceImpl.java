@@ -1371,7 +1371,10 @@ public class PunchServiceImpl implements PunchService {
 				
 			}
 		}
-		if(null == pr.getLocationRuleId()){
+		//参数有地址规则看地址范围是否正确,不正确则报错
+		List<PunchGeopoint> punchGeopoints = punchProvider
+				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+		if(null == punchGeopoints || punchGeopoints.size() == 0){
 			//wifi不符合看是否有地址规则,没有地址规则直接报错
 			if(null == cmd.getWifiMac())
 				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -1384,13 +1387,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == cmd.getLatitude() ||null == cmd.getLongitude() )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_GEOPOINT_NULL,"user location is null");
-		//参数有地址规则看地址范围是否正确,不正确则报错
-		List<PunchGeopoint> punchGeopoints = punchProvider
-				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
-		if (null == punchGeopoints || punchGeopoints.size() == 0)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+		 
 		for (PunchGeopoint punchGeopoint : punchGeopoints) {
 			if (calculateDistance(cmd.getLongitude(), cmd.getLatitude(),
 					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
