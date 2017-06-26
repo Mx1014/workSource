@@ -176,10 +176,10 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         msg.setSenderTag(message.getSenderTag());
         msg.setMetaAppId(message.getMetaAppId());
         msg.setMeta(message.getMeta());
-        
+
         if(message.getBodyType() != null && !message.getBodyType().isEmpty()) {
             if(null == message.getMeta()) {
-                message.setMeta(new HashMap<String, String>());
+                message.setMeta(new HashMap<>());
             }
             message.getMeta().put("bodyType", message.getBodyType());    
         }
@@ -197,7 +197,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         boolean onlineDelivered = false;
         //If not push only, send it by border server
         if((MessagingConstants.MSG_FLAG_PUSH_ENABLED.getCode() != deliveryOption) && (destLogin.getLoginBorderId() != null)) {
-            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
             if(borderConnection != null) {
                 StoredMessageIndicationPdu clientPdu = new StoredMessageIndicationPdu();
                 ClientForwardPdu forwardPdu = buildForwardPdu(destLogin, appId, clientPdu);
@@ -227,7 +227,7 @@ public class UserMessageRoutingHandler implements MessageRoutingHandler {
         
         // push notification is not available in realtime message
         if(destLogin.getLoginBorderId() != null) {
-            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId().intValue());
+            BorderConnection borderConnection = this.borderConnectionProvider.getBorderConnection(destLogin.getLoginBorderId());
             if(borderConnection != null) {
                 RealtimeMessageIndicationPdu clientPdu = new RealtimeMessageIndicationPdu();
                 clientPdu.setAppId(appId);
