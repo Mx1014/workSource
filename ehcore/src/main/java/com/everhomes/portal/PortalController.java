@@ -1,0 +1,354 @@
+// @formatter:off
+package com.everhomes.portal;
+
+import com.everhomes.rest.portal.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+
+@RestController
+@RequestMapping("/portal")
+public class PortalController extends ControllerBase {
+	
+	@Autowired
+	private PortalService portalService;
+	
+	/**
+	 * <p>1.模块应用列表</p>
+	 * <b>URL: /portal/listServiceModuleApps</b>
+	 */
+	@RequestMapping("listServiceModuleApps")
+	@RestReturn(ListServiceModuleAppsResponse.class)
+	public RestResponse listServiceModuleApps(ListServiceModuleAppsCommand cmd){
+		return new RestResponse(portalService.listServiceModuleApps(cmd));
+	}
+
+	/**
+	 * <p>2.创建模块应用</p>
+	 * <b>URL: /portal/createServiceModuleApp</b>
+	 */
+	@RequestMapping("createServiceModuleApp")
+	@RestReturn(String.class)
+	public RestResponse createServiceModuleApp(CreateServiceModuleAppCommand cmd){
+		portalService.createServiceModuleApp(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>3.修改模块应用</p>
+	 * <b>URL: /portal/updateServiceModuleApp</b>
+	 */
+	@RequestMapping("updateServiceModuleApp")
+	@RestReturn(String.class)
+	public RestResponse updateServiceModuleApp(UpdateServiceModuleAppCommand cmd){
+		portalService.updateServiceModuleApp(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>4.删除模块应用</p>
+	 * <b>URL: /portal/deleteServiceModuleApp</b>
+	 */
+	@RequestMapping("deleteServiceModuleApp")
+	@RestReturn(String.class)
+	public RestResponse deleteServiceModuleApp(DeleteServiceModuleAppCommand cmd){
+		portalService.deleteServiceModuleApp(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>5.门户layout列表</p>
+	 * <b>URL: /portal/listPortalLayouts</b>
+	 */
+	@RequestMapping("listPortalLayouts")
+	@RestReturn(ListPortalLayoutsResponse.class)
+	public RestResponse listPortalLayouts(ListPortalLayoutsCommand cmd){
+		return new RestResponse(portalService.listPortalLayouts(cmd));
+	}
+
+	/**
+	 * <p>6.创建门户layout</p>
+	 * <b>URL: /portal/createPortalLayout</b>
+	 */
+	@RequestMapping("createPortalLayout")
+	@RestReturn(String.class)
+	public RestResponse createPortalLayout(CreatePortalLayoutCommand cmd){
+		portalService.createPortalLayout(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>7.修改门户layout</p>
+	 * <b>URL: /portal/updatePortalLayout</b>
+	 */
+	@RequestMapping("updatePortalLayout")
+	@RestReturn(String.class)
+	public RestResponse updatePortalLayout(UpdatePortalLayoutCommand cmd){
+		portalService.updatePortalLayout(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>8.删除门户layout</p>
+	 * <b>URL: /portal/deletePortalLayout</b>
+	 */
+	@RequestMapping("deletePortalLayout")
+	@RestReturn(String.class)
+	public RestResponse deletePortalLayout(DeletePortalLayoutCommand cmd){
+		portalService.deletePortalLayout(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>9.门户itemGroup列表</p>
+	 * <b>URL: /portal/listPortalItemGroups</b>
+	 */
+	@RequestMapping("listPortalItemGroups")
+	@RestReturn(ListPortalItemGroupsResponse.class)
+	public RestResponse listPortalItemGroups(ListPortalItemGroupsCommand cmd){
+		return new RestResponse(portalService.listPortalItemGroups(cmd));
+	}
+
+	/**
+	 * <p>10.创建门户itemGroup</p>
+	 * <b>URL: /portal/createPortalItemGroup</b>
+	 */
+	@RequestMapping("createPortalItemGroup")
+	@RestReturn(String.class)
+	public RestResponse createPortalItemGroup(CreatePortalItemGroupCommand cmd){
+		portalService.createPortalItemGroup(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>11.修改门户itemGroup</p>
+	 * <b>URL: /portal/updatePortalItemGroup</b>
+	 */
+	@RequestMapping("updatePortalItemGroup")
+	@RestReturn(String.class)
+	public RestResponse updatePortalItemGroup(UpdatePortalItemGroupCommand cmd){
+		portalService.updatePortalItemGroup(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>12.删除门户itemGroup</p>
+	 * <b>URL: /portal/deletePortalItemGroup</b>
+	 */
+	@RequestMapping("deletePortalItemGroup")
+	@RestReturn(String.class)
+	public RestResponse deletePortalItemGroup(DeletePortalItemGroupCommand cmd){
+		portalService.deletePortalItemGroup(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>13.门户itemGroup里面的item列表</p>
+	 * <b>URL: /portal/listPortalItems</b>
+	 */
+	@RequestMapping("listPortalItems")
+	@RestReturn(ListPortalItemsResponse.class)
+	public RestResponse listPortalItems(ListPortalItemsCommand cmd){
+		return new RestResponse(portalService.listPortalItems(cmd));
+	}
+
+	/**
+	 * <p>14.创建门户item</p>
+	 * <b>URL: /portal/createPortalItem</b>
+	 */
+	@RequestMapping("createPortalItem")
+	@RestReturn(String.class)
+	public RestResponse createPortalItem(CreatePortalItemCommand cmd){
+		portalService.createPortalItem(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>15.修改门户item</p>
+	 * <b>URL: /portal/updatePortalItem</b>
+	 */
+	@RequestMapping("updatePortalItem")
+	@RestReturn(String.class)
+	public RestResponse updatePortalItem(UpdatePortalItemCommand cmd){
+		portalService.updatePortalItem(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>16.删除门户item</p>
+	 * <b>URL: /portal/deletePortalItem</b>
+	 */
+	@RequestMapping("deletePortalItem")
+	@RestReturn(String.class)
+	public RestResponse deletePortalItem(DeletePortalItemCommand cmd){
+		portalService.deletePortalItem(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>17.重新排序item</p>
+	 * <b>URL: /portal/reorderPortalItem</b>
+	 */
+	@RequestMapping("reorderPortalItem")
+	@RestReturn(String.class)
+	public RestResponse reorderPortalItem(ReorderPortalItemCommand cmd){
+		portalService.reorderPortalItem(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>18.重新排序itemGroup</p>
+	 * <b>URL: /portal/reorderPortalItemGroup</b>
+	 */
+	@RequestMapping("reorderPortalItemGroup")
+	@RestReturn(String.class)
+	public RestResponse reorderPortalItemGroup(ReorderPortalItemGroupCommand cmd){
+		portalService.reorderPortalItemGroup(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>19.删除门户item</p>
+	 * <b>URL: /portal/getPortalItemById</b>
+	 */
+	@RequestMapping("getPortalItemById")
+	@RestReturn(GetPortalItemByIdResponse.class)
+	public RestResponse getPortalItemById(GetPortalItemByIdCommand cmd){
+		return new RestResponse(portalService.getPortalItemById(cmd));
+	}
+
+	/**
+	 * <p>20.门户item分类列表</p>
+	 * <b>URL: /portal/listPortalItemCategories</b>
+	 */
+	@RequestMapping("listPortalItemCategories")
+	@RestReturn(ListPortalItemCategoriesResponse.class)
+	public RestResponse listPortalItemCategories(ListPortalItemCategoriesCommand cmd){
+		return new RestResponse(portalService.listPortalItemCategories(cmd));
+	}
+
+	/**
+	 * <p>21.创建item分类</p>
+	 * <b>URL: /portal/createPortalItemCategory</b>
+	 */
+	@RequestMapping("createPortalItemCategory")
+	@RestReturn(String.class)
+	public RestResponse createPortalItemCategory(CreatePortalItemCategoryCommand cmd){
+		portalService.createPortalItemCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>22.修改item分类</p>
+	 * <b>URL: /portal/updatePortalItemCategory</b>
+	 */
+	@RequestMapping("updatePortalItemCategory")
+	@RestReturn(String.class)
+	public RestResponse updatePortalItemCategory(UpdatePortalItemCategoryCommand cmd){
+		portalService.updatePortalItemCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>23.删除item分类</p>
+	 * <b>URL: /portal/deletePortalItemCategory</b>
+	 */
+	@RequestMapping("deletePortalItemCategory")
+	@RestReturn(String.class)
+	public RestResponse deletePortalItemCategory(DeletePortalItemCategoryCommand cmd){
+		portalService.deletePortalItemCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>24.重新排序item分类</p>
+	 * <b>URL: /portal/reorderPortalItemCategory</b>
+	 */
+	@RequestMapping("reorderPortalItemCategory")
+	@RestReturn(String.class)
+	public RestResponse reorderPortalItemCategory(ReorderPortalItemCategoryCommand cmd){
+		portalService.reorderPortalItemCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>25.调整item的分类</p>
+	 * <b>URL: /portal/rankPortalItemCategory</b>
+	 */
+	@RequestMapping("rankPortalItemCategory")
+	@RestReturn(String.class)
+	public RestResponse rankPortalItemCategory(RankPortalItemCategoryCommand cmd){
+		portalService.rankPortalItemCategory(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>26.删除门户itemGroup</p>
+	 * <b>URL: /portal/getPortalItemGroupById</b>
+	 */
+	@RequestMapping("getPortalItemGroupById")
+	@RestReturn(GetPortalItemGroupByIdResponse.class)
+	public RestResponse getPortalItemGroupById(GetPortalItemGroupByIdCommand cmd){
+		return new RestResponse(portalService.getPortalItemGroupById(cmd));
+	}
+
+	/**
+	 * <p>27.门户导航栏列表</p>
+	 * <b>URL: /portal/listPortalNavigationBars</b>
+	 */
+	@RequestMapping("listPortalNavigationBars")
+	@RestReturn(ListPortalNavigationBarsResponse.class)
+	public RestResponse listPortalNavigationBars(ListPortalNavigationBarsCommand cmd){
+		return new RestResponse(portalService.listPortalNavigationBars(cmd));
+	}
+
+	/**
+	 * <p>28.创建门户导航栏</p>
+	 * <b>URL: /portal/createPortalNavigationBar</b>
+	 */
+	@RequestMapping("createPortalNavigationBar")
+	@RestReturn(String.class)
+	public RestResponse createPortalNavigationBar(CreatePortalNavigationBarCommand cmd){
+		portalService.createPortalNavigationBar(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>29.修改门户导航栏</p>
+	 * <b>URL: /portal/updatePortalNavigationBar</b>
+	 */
+	@RequestMapping("updatePortalNavigationBar")
+	@RestReturn(String.class)
+	public RestResponse updatePortalNavigationBar(UpdatePortalNavigationBarCommand cmd){
+		portalService.updatePortalNavigationBar(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>30.删除门户导航栏</p>
+	 * <b>URL: /portal/deletePortalNavigationBar</b>
+	 */
+	@RequestMapping("deletePortalNavigationBar")
+	@RestReturn(String.class)
+	public RestResponse deletePortalNavigationBar(DeletePortalNavigationBarCommand cmd){
+		portalService.deletePortalNavigationBar(cmd);
+		return new RestResponse();
+	}
+
+	/**
+	 * <p>31.发布</p>
+	 * <b>URL: /portal/publish</b>
+	 */
+	@RequestMapping("publish")
+	@RestReturn(String.class)
+	public RestResponse publish(PublishCommand cmd){
+		portalService.publish(cmd);
+		return new RestResponse();
+	}
+
+}
