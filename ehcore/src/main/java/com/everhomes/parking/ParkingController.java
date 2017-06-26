@@ -507,4 +507,19 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /parking/lockParkingCar</b>
+     * <p>根据指定车牌锁车</p>
+     */
+    @RequestMapping("lockParkingCar")
+    @RestReturn(value=UpdateParkingOrderDTO.class)
+    public RestResponse updateParkingOrder(UpdateParkingOrderCommand cmd) {
+
+        UpdateParkingOrderDTO dto = parkingService.updateParkingOrder(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

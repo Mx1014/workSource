@@ -78,4 +78,6 @@ public interface ParkingService {
     void lockParkingCar(LockParkingCarCommand cmd);
 
 	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
+
+    UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
 }

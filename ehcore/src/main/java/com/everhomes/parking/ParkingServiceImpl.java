@@ -1542,4 +1542,8 @@ public class ParkingServiceImpl implements ParkingService {
 		return response;
 	}
 
+	@Override
+	public UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd) {
+		return null;
+	}
 }

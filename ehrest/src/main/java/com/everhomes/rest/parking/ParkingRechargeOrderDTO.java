@@ -63,6 +63,39 @@ public class ParkingRechargeOrderDTO {
     private Timestamp startPeriod;
     private Timestamp endPeriod;
     private Integer parkingTime;
+    private String errorDescription;
+
+    public Timestamp getStartPeriod() {
+        return startPeriod;
+    }
+
+    public void setStartPeriod(Timestamp startPeriod) {
+        this.startPeriod = startPeriod;
+    }
+
+    public Timestamp getEndPeriod() {
+        return endPeriod;
+    }
+
+    public void setEndPeriod(Timestamp endPeriod) {
+        this.endPeriod = endPeriod;
+    }
+
+    public Integer getParkingTime() {
+        return parkingTime;
+    }
+
+    public void setParkingTime(Integer parkingTime) {
+        this.parkingTime = parkingTime;
+    }
+
+    public String getErrorDescription() {
+        return errorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription) {
+        this.errorDescription = errorDescription;
+    }
 
     public String getParkingLotName() {
         return parkingLotName;

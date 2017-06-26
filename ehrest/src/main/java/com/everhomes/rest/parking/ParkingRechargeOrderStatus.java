@@ -10,7 +10,7 @@ package com.everhomes.rest.parking;
  */
 public enum ParkingRechargeOrderStatus {
     INACTIVE((byte)0, "无效"), UNPAID((byte)1, "待付款"), PAID((byte)2, "已付款"), RECHARGED((byte)3, "已充值"),
-    FAILED((byte)4, "订单异常"), REFUNDED((byte)5, "已退款");
+    FAILED((byte)4, "订单异常"), REFUNDING((byte)5, "退款中"), REFUNDED((byte)6, "已退款");
     
     private byte code;
     private String description;
