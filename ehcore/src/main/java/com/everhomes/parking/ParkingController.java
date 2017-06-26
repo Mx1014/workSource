@@ -509,10 +509,10 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /parking/lockParkingCar</b>
-     * <p>根据指定车牌锁车</p>
+     * <b>URL: /parking/updateParkingOrder</b>
+     * <p>更新订单</p>
      */
-    @RequestMapping("lockParkingCar")
+    @RequestMapping("updateParkingOrder")
     @RestReturn(value=UpdateParkingOrderDTO.class)
     public RestResponse updateParkingOrder(UpdateParkingOrderCommand cmd) {
 
