@@ -488,6 +488,20 @@ public class EnergyConsumptionController extends ControllerBase {
         return resp;
     }
 
+    /**
+     * <b>URL: /energy/exportSearchEnergyMeterQRCode</b>
+     * <p>导出全部表记二维码</p>
+     */
+    @RequestMapping("exportSearchEnergyMeterQRCode")
+    @RestReturn(value = String.class)
+    public RestResponse exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
 
+        energyConsumptionService.exportSearchEnergyMeterQRCode(cmd, response);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
 
 }
