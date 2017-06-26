@@ -2702,6 +2702,9 @@ public class QualityProviderImpl implements QualityProvider {
 
 		Map<Long, Double> result = new HashMap<>();
 		query.fetch().map((r) -> {
+//			CommunitySpecification cs = new CommunitySpecification();
+//			cs.setCommunityId(r.getCommunityId());
+//			cs.setSpecificationId(r.getSpecificationId());
 			if(result.get(r.getCommunityId()) == null) {
 				result.put(r.getCommunityId(), r.getDeductScore());
 			} else {

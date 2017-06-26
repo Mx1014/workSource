@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.quality.CommunitySpecification;
 import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.TaskCountDTO;

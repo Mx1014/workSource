@@ -3674,12 +3674,18 @@ public class QualityServiceImpl implements QualityService {
 
 		if(result != null && result.size() > 0) {
 			scoreStat.setHighestScore(100-result.entrySet().iterator().next().getValue());
+			if(scoreStat.getHighestScore() < 0) {
+				scoreStat.setHighestScore(0.0);
+			}
 			Iterator<Map.Entry<Long, Double>> iterator = result.entrySet().iterator();
 			Map.Entry<Long, Double> tail = null;
 			while (iterator.hasNext()) {
 				tail = iterator.next();
 			}
 			scoreStat.setLowestScore(100-tail.getValue());
+			if(scoreStat.getLowestScore() < 0) {
+				scoreStat.setLowestScore(0.0);
+			}
 		}
 
 		return results;
