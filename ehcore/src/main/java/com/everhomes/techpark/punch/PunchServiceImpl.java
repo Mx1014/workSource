@@ -1361,16 +1361,16 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		//是否有wifi打卡,如果是判断wifi是否符合
-		if(pr.getWifiRuleId() != null && cmd.getWifiMac() != null){
-			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
-			if(null != wifis){
-				for(PunchWifi wifi : wifis){
-					if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
-						return ClockCode.SUCESS;
-				}
-				
+		
+		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+		if(null != wifis){
+			for(PunchWifi wifi : wifis){
+				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
+					return ClockCode.SUCESS;
 			}
+			
 		}
+		
 		//参数有地址规则看地址范围是否正确,不正确则报错
 		List<PunchGeopoint> punchGeopoints = punchProvider
 				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
@@ -1397,7 +1397,7 @@ public class PunchServiceImpl implements PunchService {
 			} 
 		 
 		}
-		if(null == punchGeopoints || punchGeopoints.size() == 0)
+		if(null == wifis || wifis.size() == 0)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
 		else
