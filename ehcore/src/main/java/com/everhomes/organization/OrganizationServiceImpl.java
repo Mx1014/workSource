@@ -9851,10 +9851,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             });
             List<Object[]> endTimeList = this.organizationProvider.findContractEndTimeById(detailIds);
 
-            response.setMembers(res.getMembers().stream().map(r -> {
-                if (StringUtils.isEmpty(r.getDetailId()))
-                    return null;
-                else {
+            response.setMembers(res.getMembers().stream().filter(r ->{
+                return !StringUtils.isEmpty(r.getDetailId());
+            }).map(r -> {
                     OrganizationMemberV2DTO dto = ConvertHelper.convert(r, OrganizationMemberV2DTO.class);
                     //  设置合同到期时间
                     if (endTimeList != null) {
@@ -9865,9 +9864,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                             }
                         });
                     }
-
                     return dto;
-                }
             }).collect(Collectors.toList()));
 
             response.setNextPageOffset(res.getNextPageOffset());
