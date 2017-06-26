@@ -5011,10 +5011,13 @@ public class PunchServiceImpl implements PunchService {
 //						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
 //					}
 					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
-					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
-					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
-						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-							
+					try{
+						PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+						if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
+							refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+					}catch(Exception e ){
+						LOGGER.error("get punch rule failed ", e);
+					}
 				}
 			}
 			else{
