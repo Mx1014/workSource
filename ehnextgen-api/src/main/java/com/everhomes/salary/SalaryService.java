@@ -38,9 +38,6 @@ public interface SalaryService {
 	public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
 
 
-	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd);
-
-
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd);
 
 

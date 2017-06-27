@@ -15,5 +15,9 @@ public interface SalaryGroupEntityProvider {
 
 	List<SalaryGroupEntity> listSalaryGroupEntity();
 
+<<<<<<< HEAD
 	void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag);
+=======
+	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
+>>>>>>> 968e91b2538ba9e8b300ccaea880418a8b14ad98
 }

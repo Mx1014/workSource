@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.user.User;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,11 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 	@Override
 	public void createSalaryGroupEntity(SalaryGroupEntity salaryGroupEntity) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupEntities.class));
+		User user = UserContext.current().getUser();
 		salaryGroupEntity.setId(id);
 		salaryGroupEntity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupEntity.setCreatorUid(UserContext.current().getUser().getId());
+		salaryGroupEntity.setCreatorUid(user.getId());
+		salaryGroupEntity.setNamespaceId(user.getNamespaceId());
 //		salaryGroupEntity.setUpdateTime(salaryGroupEntity.getCreateTime());
 //		salaryGroupEntity.setOperatorUid(salaryGroupEntity.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupEntity);
@@ -71,6 +74,22 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
+
+	@Override
+	public void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag) {
+		getReadWriteContext().update(Tables.EH_SALARY_GROUP_ENTITIES).set(Tables.EH_SALARY_GROUP_ENTITIES.VISIBLE_FLAG, visibleFlag)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.ID.eq(id)).execute();
+	}
+
+	//  删除记录
+	@Override
+	public void deleteSalaryGroupEntity(SalaryGroupEntity entity){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhSalaryGroupEntitiesDao dao = new EhSalaryGroupEntitiesDao(context.configuration());
+        dao.deleteById(entity.getId());
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupEntities.class, entity.getId());
+    }
 	
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

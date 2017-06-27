@@ -8,6 +8,7 @@ package com.everhomes.rest.salary;
  * <li>type: 字段类型:0-文本类 1-数值类</li>
  * <li>categoryId: 项目标签(统计分类) id</li>
  * <li>categoryName: 项目标签(统计分类)名称 example:基础,应发,应收,合计</li>
+ * <li>originEntityId: 项目字段原始id</li>
  * <li>name: 项目字段名称</li>
  * <li>editableFlag: 是否可编辑(对文本类):0-否   1-是</li>
  * <li>numberType: 数值类型:0-普通数值 1-计算公式</li>
@@ -21,6 +22,7 @@ package com.everhomes.rest.salary;
 public class SalaryGroupEntityDTO {
 	private Long id;
 	private Long groupId;
+	private Long originEntityId;
     private Byte type;
     private Long categoryId;
     private String categoryName;
@@ -39,7 +41,16 @@ public class SalaryGroupEntityDTO {
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
-	public Byte getType() {
+
+    public Long getOriginEntityId() {
+        return originEntityId;
+    }
+
+    public void setOriginEntityId(Long originEntityId) {
+        this.originEntityId = originEntityId;
+    }
+
+    public Byte getType() {
 		return type;
 	}
 	public void setType(Byte type) {
@@ -105,5 +116,12 @@ public class SalaryGroupEntityDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-    
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
+	}
 }

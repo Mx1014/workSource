@@ -18,4 +18,6 @@ public interface SalaryGroupProvider {
 			List<Byte> status);
 
 	List<SalaryGroup> listSalaryGroup(Byte code, Timestamp date);
+
+	void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent);
 }

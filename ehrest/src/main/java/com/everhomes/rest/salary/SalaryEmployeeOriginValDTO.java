@@ -14,6 +14,8 @@ import java.sql.Timestamp;
  */
 public class SalaryEmployeeOriginValDTO {
 
+    private Long id;
+
     private Long salaryGroupId;
 
     private Long userId;
@@ -27,6 +29,14 @@ public class SalaryEmployeeOriginValDTO {
     private String salaryValue;
 
     public SalaryEmployeeOriginValDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getSalaryGroupId() {

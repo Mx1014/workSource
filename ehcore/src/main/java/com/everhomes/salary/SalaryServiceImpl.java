@@ -4,10 +4,16 @@ package com.everhomes.salary;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.salary.*;
 
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.salary.*;
+
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -22,9 +28,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -33,6 +37,9 @@ public class SalaryServiceImpl implements SalaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 
 	@Autowired
 	private ConfigurationProvider configProvider;
@@ -57,6 +64,7 @@ public class SalaryServiceImpl implements SalaryService {
     
     @Autowired 
     private SalaryGroupProvider  salaryGroupProvider;
+
     
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
@@ -69,13 +77,39 @@ public class SalaryServiceImpl implements SalaryService {
 		return response;
 	}
 
-	@Override
-	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
-	    if(!cmd.getSalaryGroupEntity().isEmpty()){
+    @Override
+    public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
+
+        AddSalaryGroupResponse response = new AddSalaryGroupResponse();
+        if (!cmd.getSalaryGroupEntity().isEmpty()) {
+            //	添加批次至组织结构
+            //	this.organizationService.xxxxx
+            response.setSalaryGroupEntry(cmd.getSalaryGroupEntity().stream().map(r -> {
+                SalaryGroupEntity entity = new SalaryGroupEntity();
+                if (!StringUtils.isEmpty(cmd.getOwnerType()))
+                    entity.setOwnerType(cmd.getOwnerType());
+                if (!StringUtils.isEmpty(cmd.getOwnerId()))
+                    entity.setOwnerId(cmd.getOwnerId());
+                entity.setGroupId(r.getGroupId());
+                entity.setOriginEntityId(r.getOriginEntityId());
+                entity.setType(r.getType());
+                entity.setCategoryId(r.getCategoryId());
+                entity.setCategoryName(r.getCategoryName());
+                entity.setName(r.getName());
+                entity.setEditableFlag(r.getEditableFlag());
+                entity.setTemplateName(r.getTemplateName());
+                entity.setNumberType(r.getNumberType());
+                if (!StringUtils.isEmpty(r.getDefaultValue()))
+                    entity.setDefaultValue(r.getDefaultValue());
+                entity.setNeedCheck(r.getNeedCheck());
+                entity.setDefaultOrder(r.getDefaultOrder());
+                entity.setVisibleFlag(r.getVisibleFlag());
+                this.salaryGroupEntityProvider.createSalaryGroupEntity(entity);
+                return r;
+            }).collect(Collectors.toList()));
         }
-	
-		return new AddSalaryGroupResponse();
-	}
+        return response;
+    }
 
 	@Override
 	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
@@ -83,14 +117,24 @@ public class SalaryServiceImpl implements SalaryService {
 		return new UpdateSalaryGroupResponse();
 	}
 
-	@Override
-	public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
-	
+    @Override
+    public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-	}
+            //  组织架构删除薪酬组
+//            this.organizationService.deletexxx;
+            List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+            //entity.setStatus();
+            for (SalaryGroupEntity entity : entities) {
+                //entity.setStatus();
+                this.salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
+            }
+        }
+    }
 
 	@Override
 	public void copySalaryGroup(CopySalaryGroupCommand cmd){
+        List<SalaryGroupEntity> origin = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
 
 
 	}
@@ -124,48 +168,97 @@ public class SalaryServiceImpl implements SalaryService {
 		return new ListSalaryEmployeesResponse();
 	}
 
-	@Override
-	public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
-		List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
-		//  获取对应批次的项目字段
-		List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-		//  获取个人的项目字段
-		List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
+    @Override
+    public List<SalaryEmployeeOriginValDTO> getSalaryEmployees(GetSalaryEmployeesCommand cmd) {
 
-		if (!salaryGroupEntities.isEmpty()) {
-			salaryGroupEntities.stream().forEach(r -> {
-				SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
-				dto.setSalaryGroupId(r.getGroupId());
-				dto.setUserId(cmd.getUserId());
-				dto.setGroupEntityId(r.getId());
-				dto.setOriginEntityId(r.getOriginEntityId());
-				dto.setEntityName(r.getName());
+        List<SalaryEmployeeOriginValDTO> results = new ArrayList<>();
+        //  获取对应批次的项目字段
+        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+        //  获取个人的项目字段
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
 
-				//  为对应字段赋值
-				if (!salaryEmployeeOriginVals.isEmpty()) {
-					salaryEmployeeOriginVals.stream().forEach(s -> {
-						if (r.getName().equals(s.getGroupEntityName()))
-							dto.setSalaryValue(s.getSalaryValue());
-					});
-				}
+        if (!salaryGroupEntities.isEmpty()) {
+            salaryGroupEntities.stream().forEach(r -> {
+                SalaryEmployeeOriginValDTO dto = new SalaryEmployeeOriginValDTO();
+                dto.setSalaryGroupId(r.getGroupId());
+                dto.setUserId(cmd.getUserId());
+                dto.setGroupEntityId(r.getId());
+                dto.setOriginEntityId(r.getOriginEntityId());
+                dto.setEntityName(r.getName());
 
-				results.add(dto);
-			});
-			return results;
-		} else
-			return null;
-	}
+                //  为对应字段赋值
+                if (!salaryEmployeeOriginVals.isEmpty()) {
+                    salaryEmployeeOriginVals.stream().forEach(s -> {
+                        if (r.getName().equals(s.getGroupEntityName())) {
+                            dto.setSalaryValue(s.getSalaryValue());
+                            dto.setId(s.getId());
+                        }
+                    });
+                }
+
+                results.add(dto);
+            });
+            return results;
+        } else
+            return null;
+    }
 
     @Override
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
+        User user = UserContext.current().getUser();
+
+        if (!cmd.getEmployeeOriginVal().isEmpty()) {
+            //  获取用户id
+            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+/*            //  获取字段id
+            List<Long> groupEntitiesId = new ArrayList<>();
+            cmd.getEmployeeOriginVal().stream().forEach(r -> {
+                Long groupEntityId = r.getGroupEntityId();
+                groupEntitiesId.add(groupEntityId);
+            });*/
+
+
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
+
+            //  若用户没有个人薪酬设定时直接添加
+            if (originVals.isEmpty()) {
+                cmd.getEmployeeOriginVal().stream().forEach(s -> {
+                    this.createSalaryEmployeeOriginVal(s, cmd);
+                });
+            } else {
+                cmd.getEmployeeOriginVal().stream().forEach(t -> {
+                    boolean isCreate = true;
+                    for (SalaryEmployeeOriginVal originVal : originVals) {
+                        if (t.getGroupEntityId().equals(originVal.getGroupEntityId())) {
+                            originVal.setSalaryValue(t.getSalaryValue());
+                            originVal.setCreatorUid(user.getId());
+                            originVal.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                            this.salaryEmployeeOriginValProvider.updateSalaryEmployeeOriginVal(originVal);
+                            isCreate = false;
+                        }
+                    }
+                    if(isCreate)
+                        this.createSalaryEmployeeOriginVal(t,cmd);
+                });
+            }
+        }
     }
 
-    @Override
-	public void saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd) {
-	
-
-	}
+    private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, UpdateSalaryEmployeesCommand cmd){
+        SalaryEmployeeOriginVal originVal = new SalaryEmployeeOriginVal();
+        if (StringUtils.isEmpty(cmd.getOwnerType()))
+            originVal.setOwnerType(cmd.getOwnerType());
+        if (StringUtils.isEmpty(cmd.getOwnerId()))
+            originVal.setOwnerId(cmd.getOwnerId());
+        originVal.setGroupId(dto.getSalaryGroupId());
+        originVal.setUserId(dto.getUserId());
+        originVal.setGroupEntityId(dto.getGroupEntityId());
+        originVal.setGroupEntityName(dto.getEntityName());
+        originVal.setOriginEntityId(dto.getOriginEntityId());
+        originVal.setSalaryValue(dto.getSalaryValue());
+        this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
+    }
 
 	@Override
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd) {
@@ -301,13 +394,23 @@ public class SalaryServiceImpl implements SalaryService {
 
 		SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
 		List<SalaryGroupEntity> results = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
-		return new GetPeriodSalaryEmailContentResponse();
+		List<SalaryGroupEntityDTO> entities = results.stream().map(r -> {
+			SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+		return new GetPeriodSalaryEmailContentResponse(periodGroup.getEmailContent(),entities);
 	}
 
 	@Override
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd) {
 		//TODO: email content 应该跟着批次走
-
+		if(cmd.getSalaryGroupId() == null){
+			salaryGroupProvider.updateSalaryGroupEmailContent(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getEmailContent());
+		}else {
+			SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryGroupId());
+			periodGroup.setEmailContent(cmd.getEmailContent());
+			salaryGroupProvider.updateSalaryGroup(periodGroup);
+		}
 	}
 
 	@Override
@@ -317,6 +420,7 @@ public class SalaryServiceImpl implements SalaryService {
 				salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
 				return null;
 			});
+			return null;
 		});
 	}
 
@@ -339,7 +443,7 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Scheduled(cron = "1 0/15 * * * ?")
 	private void sendSalaryScheduled(){
-		sendSalary((new Timestamp(DateHelper.currentGMTTime().getTime()));
+		sendSalary(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	}
 	/**找一个时间点之前的待发送批次,并发送*/
 	private void sendSalary(Timestamp date) {
@@ -352,21 +456,78 @@ public class SalaryServiceImpl implements SalaryService {
 	}
 	/**给某个批次某期发薪酬邮件*/
 	private void sendSalary(SalaryGroup salaryGroup) {
+		List<SalaryEmployee> employees = salaryEmployeeProvider.listSalaryEmployeeByPeriodGroupId(salaryGroup.getId());
+		for (SalaryEmployee employee : employees) {
+			List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryGroup.getOrganizationGroupId());
+			List<SalaryEmployeePeriodVal> employeeEntityVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(employee.getId());
+			String entityTable = processEntityTableString(groupEntities, employeeEntityVals);
+			//TODO: 人事档案给接口
+			String toAddress = "";
+			String emailSubject = "";
+			sendSalaryEmail(salaryGroup.getNamespaceId(),toAddress, emailSubject,salaryGroup.getEmailContent(), entityTable);
+		}
+	}
+
+	private void sendSalaryEmail(Integer namespaceId, String toAddress, String emailSubject, String emailContent, String entityTable) {
 
 		try{
-			String address = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.address", "smtp.mxhichina.com");
-			String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.passwod", "abc123!@#");
-			int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(),"mail.smtp.port", 25);
-//			new Mailer(address, port , account , passwod).sendMail(email);
+//			String address = configProvider.getValue(namespaceId,"mail.smtp.address", "smtp.mxhichina.com");
+//			String passwod = configProvider.getValue(namespaceId,"mail.smtp.passwod", "abc123!@#");
+//			int port = configProvider.getIntValue(namespaceId,"mail.smtp.port", 25);
+////			new Mailer(address, port , account , passwod).sendMail(email);
 			//另一种发送方式
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 			MailHandler handler = PlatformContext.getComponent(handlerName);
-
-			handler.sendMail(UserContext.getCurrentNamespaceId(), account,cmd.getEmail(), mailSubject, mailText);
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("emailContent", emailContent);
+			map.put("entityTable", entityTable);
+			String Content = localeTemplateService.getLocaleTemplateString(SalaryConstants.SEND_MAIL_SCOPE,
+					SalaryConstants.SEND_MAIL_CODE, "zh-CN", map, "");
+			handler.sendMail(namespaceId, null,toAddress, emailSubject,Content);
 
 		}catch (Exception e){
 			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++",e);
 		}
+	}
+
+	private String processEntityTableString(List<SalaryGroupEntity> groupEntities, List<SalaryEmployeePeriodVal> employeeEntityVals) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table>");
+		if(null != groupEntities){
+			sb.append("<tr>");
+			groupEntities.stream().map(r->{
+				sb.append("<th>");
+				sb.append(r.getName());
+				sb.append("</th>");
+				return null;
+			});
+			sb.append("</tr>");
+			sb.append("<tr>");
+			groupEntities.stream().map(r->{
+				sb.append("<tr>");
+				SalaryEmployeePeriodVal val = getSalaryEmployeePeriodVal(r.getId(),employeeEntityVals);
+				if(null != val)
+					sb.append(val.getSalaryValue());
+				sb.append("</tr>");
+				return null;
+			});
+			sb.append("</tr>");
+		}
+		sb.append("</table>");
+		return sb.toString();
+	}
+
+	private SalaryEmployeePeriodVal getSalaryEmployeePeriodVal(Long entityId, List<SalaryEmployeePeriodVal> employeeEntityVals) {
+		if (null == employeeEntityVals) {
+			return null;
+		}
+
+		for (SalaryEmployeePeriodVal val : employeeEntityVals) {
+			if (val.getGroupEntityId() == entityId) {
+				return val;
+			}
+		}
+		return null;
 	}
 
 	@Override

@@ -99,4 +99,20 @@ public class SalaryGroupProviderImpl implements SalaryGroupProvider {
 				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
 	}
+
+	@Override
+	public List<SalaryGroup> listSalaryGroup(Byte status, Timestamp date) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUPS)
+				.where(Tables.EH_SALARY_GROUPS.STATUS.eq(status))
+				.and(Tables.EH_SALARY_GROUPS.SEND_TIME.lessOrEqual(date))
+				.orderBy(Tables.EH_SALARY_GROUPS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroup.class));
+	}
+
+	@Override
+	public void updateSalaryGroupEmailContent(String ownerType, Long ownerId, String emailContent) {
+		getReadWriteContext().update(Tables.EH_SALARY_GROUPS).set(Tables.EH_SALARY_GROUPS.EMAIL_CONTENT, emailContent)
+				.where(Tables.EH_SALARY_GROUPS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_GROUPS.OWNER_TYPE.eq(ownerType)).execute();
+	}
 }
