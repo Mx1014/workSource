@@ -1246,7 +1246,10 @@ CREATE TABLE `eh_buildings` (
   `air_condition_description` TEXT,
   `security_description` TEXT,
   `fire_control_description` TEXT,
-
+  `general_form_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_general_form',
+  `custom_form_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not add custom field, 1: add custom field',
+  `default_order` BIGINT NOT NULL,
+  `manager_name` VARCHAR(128),
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -1855,15 +1858,16 @@ DROP TABLE IF EXISTS `eh_content_server_resources`;
 CREATE  TABLE  `eh_content_server_resources` (
   `id` BIGINT NOT NULL COMMENT 'the id of record',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `resource_id` TEXT NOT NULL,
+  `resource_id` VARCHAR(512),
   `resource_md5` VARCHAR(256) NOT NULL,
   `resource_type` INTEGER NOT NULL COMMENT 'current support audio,image and video',
   `resource_size` INTEGER NOT NULL,
   `resource_name` VARCHAR(128) NOT NULL,
   `metadata` TEXT,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  
+  PRIMARY KEY (`id`),
+  KEY `i_eh_resource_id` (`resource_id`(20))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_content_shard_map`;
@@ -4115,6 +4119,36 @@ CREATE TABLE `eh_general_approvals` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_general_form_vals`;
+CREATE TABLE `eh_general_form_vals` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT COMMENT 'the module id',
+  `module_type` VARCHAR(64),
+  `source_id` BIGINT NOT NULL,
+  `source_type` VARCHAR(64) NOT NULL,
+  `form_origin_id` BIGINT,
+  `form_version` BIGINT,
+  `field_name` VARCHAR(128),
+  `field_type` VARCHAR(128),
+  `field_value` TEXT,
+  `create_time` DATETIME COMMENT 'record create time',
+  `string_tag1` VARCHAR(128),
+  `string_tag2` VARCHAR(128),
+  `string_tag3` VARCHAR(128),
+  `string_tag4` VARCHAR(128),
+  `string_tag5` VARCHAR(128),
+  `integral_tag1` BIGINT DEFAULT 0,
+  `integral_tag2` BIGINT DEFAULT 0,
+  `integral_tag3` BIGINT DEFAULT 0,
+  `integral_tag4` BIGINT DEFAULT 0,
+  `integral_tag5` BIGINT DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- general forms support
 -- 表单
@@ -4559,9 +4593,39 @@ CREATE TABLE `eh_lease_configs` (
   `park_indroduce_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
   `renew_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled',
   `area_search_flag` TINYINT NOT NULL DEFAULT 0 COMMENT ' 1: support, 0: not ',
+  `display_name_str` VARCHAR(128),
+  `display_order_str` VARCHAR(128),
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_lease_configs2`;
+
+CREATE TABLE `eh_lease_configs2` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_type` VARCHAR(32) COMMENT 'owner type, e.g EhCommunities',
+  `owner_id` BIGINT COMMENT 'owner id, e.g eh_communities id',
+  `config_name` VARCHAR(128),
+  `config_value` VARCHAR(128),
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_lease_form_requests`;
+CREATE TABLE `eh_lease_form_requests` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `owner_id` BIGINT NOT NULL,
+  `owner_type` VARCHAR(64) NOT NULL,
+  `source_id` BIGINT NOT NULL,
+  `source_type` VARCHAR(64) NOT NULL,
+  `create_time` DATETIME COMMENT 'record create time',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_lease_issuer_addresses`;
@@ -4635,6 +4699,12 @@ CREATE TABLE `eh_lease_promotions` (
   `orientation` VARCHAR(128),
   `rent_amount` DECIMAL(10,2),
   `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user',
+  `longitude` DOUBLE,
+  `latitude` DOUBLE,
+  `address` VARCHAR(512),
+  `general_form_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'id of eh_general_form',
+  `custom_form_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not add custom field, 1: add custom field',
+  `default_order` BIGINT NOT NULL DEFAULT 0,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -9339,6 +9409,8 @@ CREATE TABLE `eh_suggestions` (
   CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
+DROP TABLE IF EXISTS `eh_talent_categories`;
 CREATE TABLE `eh_talent_categories` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -9370,7 +9442,6 @@ CREATE TABLE `eh_talent_query_histories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_talents`;
-
 CREATE TABLE `eh_talents` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,

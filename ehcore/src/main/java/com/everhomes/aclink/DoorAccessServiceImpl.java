@@ -2696,7 +2696,15 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        
+        //smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+        		SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+        	smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
@@ -2943,6 +2951,8 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         } else {
             resp.setIsValid((byte)0);
         }
+        resp.setId(auth.getId());
+        resp.setDoorId(auth.getDoorId());
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
@@ -3259,19 +3269,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
                 if(cmd.getUserId() == null) {
                     cmd.setUserId(doorAuth.getUserId());
+                } 
+                Long userId = cmd.getUserId();
+                if(userId == null || userId.equals(0l)) {
+                	//保安授权方式
+                	userId = UserContext.current().getUser().getId();
+                	aclinkLog.setUserName(doorAuth.getNickname());
+                	aclinkLog.setUserIdentifier(doorAuth.getPhone());
+                	aclinkLog.setUserId(userId);
+                } else {
+                	UserInfo user = userService.getUserInfo(cmd.getUserId());
+                	if(user.getPhones() != null && user.getPhones().size() > 0) {
+                           aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+                       }
+                	aclinkLog.setUserName(user.getNickName());
                 }
-                UserInfo user = userService.getUserInfo(cmd.getUserId());
+                
                 DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
                 
                 aclinkLog.setDoorName(door.getName());
-                aclinkLog.setUserName(user.getNickName());
+                
                 aclinkLog.setHardwareId(door.getHardwareId());
                 aclinkLog.setOwnerId(door.getOwnerId());
                 aclinkLog.setOwnerType(door.getOwnerType());
                 aclinkLog.setDoorType(door.getDoorType());
-                if(user.getPhones() != null && user.getPhones().size() > 0) {
-                    aclinkLog.setUserIdentifier(user.getPhones().get(0));    
-                }
+             
                 
                 aclinkLogProvider.createAclinkLog(aclinkLog);
                 AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
@@ -3295,7 +3317,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogs(locator, count, new ListingQueryBuilderCallback() {
+        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
