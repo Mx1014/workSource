@@ -2547,7 +2547,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public EnergyMeterDTO findEnergyMeterByQRCode(FindEnergyMeterByQRCodeCommand cmd) {
         EnergyMeterCodeDTO meterCodeDTO = WebTokenGenerator.getInstance().fromWebToken(cmd.getMeterQRCode(), EnergyMeterCodeDTO.class);
-        EnergyMeter meter = meterProvider.findById(meterCodeDTO.getNamespaceId(), meterCodeDTO.getMeterId());
+        EnergyMeter meter = meterProvider.findById(UserContext.getCurrentNamespaceId(), meterCodeDTO.getMeterId());
         if (meter == null) {
             LOGGER.error("EnergyMeter not exist, id = {}", meterCodeDTO.getMeterId());
             throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", meterCodeDTO.getMeterId());
@@ -2632,10 +2632,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private String generateQRString(Long id, Integer namespaceId) {
         EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
-        dto.setNamespaceId(namespaceId);
+//        dto.setNamespaceId(namespaceId);
         dto.setMeterId(id);
-//        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
-        return dto.toString();
+        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
+        return qrCode;
 
     }
 
