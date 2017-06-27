@@ -8,6 +8,8 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintOrderProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -192,6 +195,8 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		if(pageAnchor!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
 		}
+		
+		LOGGER.info("listSiyinPrintOrderByOwners sql = {},param = {}",query.getSQL(),query.getBindValues());
 		
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc()).limit(pageSize)
 				.fetch()
