@@ -4,6 +4,7 @@ package com.everhomes.salary;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.user.User;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,9 +34,11 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 	@Override
 	public void createSalaryGroupEntity(SalaryGroupEntity salaryGroupEntity) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhSalaryGroupEntities.class));
+		User user = UserContext.current().getUser();
 		salaryGroupEntity.setId(id);
 		salaryGroupEntity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		salaryGroupEntity.setCreatorUid(UserContext.current().getUser().getId());
+		salaryGroupEntity.setCreatorUid(user.getId());
+		salaryGroupEntity.setNamespaceId(user.getNamespaceId());
 //		salaryGroupEntity.setUpdateTime(salaryGroupEntity.getCreateTime());
 //		salaryGroupEntity.setOperatorUid(salaryGroupEntity.getCreatorUid());
 		getReadWriteDao().insert(salaryGroupEntity);

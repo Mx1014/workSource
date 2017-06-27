@@ -38,7 +38,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>2-1.新增薪酬组(新增包含的选项 + 更改组名)</p>
+	 * <p>2-1.新增、更改 薪酬组(包含的选项 + 更改组名)</p>
 	 * <b>URL: /salary/addSalaryGroup</b>
 	 */
 	@RequestMapping("addSalaryGroup")
@@ -152,7 +152,8 @@ public class SalaryController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-/*
+
+    /*
 	*//**
 	 * <p>3-4.设置人员薪酬字段值 有增加没有更新</p>
 	 * <b>URL: /salary/saveSalaryEmployeeOriginVals</b>

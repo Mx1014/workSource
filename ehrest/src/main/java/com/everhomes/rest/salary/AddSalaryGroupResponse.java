@@ -1,7 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.salary;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * 
@@ -11,22 +14,18 @@ import com.everhomes.util.StringHelper;
  */
 public class AddSalaryGroupResponse {
 
-	private SalaryGroupEntityDTO salaryGroupEntry;
+	@ItemType(SalaryGroupEntityDTO.class)
+	private List<SalaryGroupEntityDTO> salaryGroupEntry;
 
 	public AddSalaryGroupResponse() {
 
 	}
 
-	public AddSalaryGroupResponse(SalaryGroupEntityDTO salaryGroupEntry) {
-		super();
-		this.salaryGroupEntry = salaryGroupEntry;
-	}
-
-	public SalaryGroupEntityDTO getSalaryGroupEntry() {
+	public List<SalaryGroupEntityDTO> getSalaryGroupEntry() {
 		return salaryGroupEntry;
 	}
 
-	public void setSalaryGroupEntry(SalaryGroupEntityDTO salaryGroupEntry) {
+	public void setSalaryGroupEntry(List<SalaryGroupEntityDTO> salaryGroupEntry) {
 		this.salaryGroupEntry = salaryGroupEntry;
 	}
 

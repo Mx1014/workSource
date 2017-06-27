@@ -2,6 +2,7 @@
 package com.everhomes.salary;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.salary.*;
 
 import com.everhomes.user.User;
@@ -49,6 +50,7 @@ public class SalaryServiceImpl implements SalaryService {
     
     @Autowired 
     private SalaryGroupProvider  salaryGroupProvider;
+
     
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
@@ -61,13 +63,39 @@ public class SalaryServiceImpl implements SalaryService {
 		return response;
 	}
 
-	@Override
-	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
-	    if(!cmd.getSalaryGroupEntity().isEmpty()){
+    @Override
+    public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd) {
+
+        AddSalaryGroupResponse response = new AddSalaryGroupResponse();
+        if (!cmd.getSalaryGroupEntity().isEmpty()) {
+            //	添加至组织结构
+            //	this.organizationService.xxxxx
+            response.setSalaryGroupEntry(cmd.getSalaryGroupEntity().stream().map(r -> {
+                SalaryGroupEntity entity = new SalaryGroupEntity();
+                if (!StringUtils.isEmpty(cmd.getOwnerType()))
+                    entity.setOwnerType(cmd.getOwnerType());
+                if (!StringUtils.isEmpty(cmd.getOwnerId()))
+                    entity.setOwnerId(cmd.getOwnerId());
+                entity.setGroupId(r.getGroupId());
+                entity.setOriginEntityId(r.getOriginEntityId());
+                entity.setType(r.getType());
+                entity.setCategoryId(r.getCategoryId());
+                entity.setCategoryName(r.getCategoryName());
+                entity.setName(r.getName());
+                entity.setEditableFlag(r.getEditableFlag());
+                entity.setTemplateName(r.getTemplateName());
+                entity.setNumberType(r.getNumberType());
+                if (!StringUtils.isEmpty(r.getDefaultValue()))
+                    entity.setDefaultValue(r.getDefaultValue());
+                entity.setNeedCheck(r.getNeedCheck());
+                entity.setDefaultOrder(r.getDefaultOrder());
+                entity.setVisibleFlag(r.getVisibleFlag());
+                this.salaryGroupEntityProvider.createSalaryGroupEntity(entity);
+                return r;
+            }).collect(Collectors.toList()));
         }
-	
-		return new AddSalaryGroupResponse();
-	}
+        return response;
+    }
 
 	@Override
 	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
