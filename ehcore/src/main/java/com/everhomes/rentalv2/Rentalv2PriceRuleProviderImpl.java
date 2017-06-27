@@ -38,6 +38,12 @@ public class Rentalv2PriceRuleProviderImpl implements Rentalv2PriceRuleProvider 
 		rentalv2PriceRule.setId(id);
 		rentalv2PriceRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		rentalv2PriceRule.setCreatorUid(UserContext.current().getUser().getId());
+		if (rentalv2PriceRule.getCellBeginId() == null) {
+			rentalv2PriceRule.setCellBeginId(0L);
+		}
+		if (rentalv2PriceRule.getCellEndId() == null) {
+			rentalv2PriceRule.setCellEndId(0L);
+		}
 		getReadWriteDao().insert(rentalv2PriceRule);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalv2PriceRules.class, null);
 	}

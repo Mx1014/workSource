@@ -1054,6 +1054,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private void setShowPrice(RentalSiteDTO rSiteDTO, SceneTokenDTO sceneTokenDTO) {
+		if (sceneTokenDTO != null) {
+			String scene = sceneTokenDTO.getScene();
+			if (!SceneType.PM_ADMIN.getCode().equals(scene) && !SceneType.ENTERPRISE.getCode().equals(scene) && TrueOrFalseFlag.fromCode(rSiteDTO.getUnauthVisible()) != TrueOrFalseFlag.TRUE) {
+				rSiteDTO.setAvgPriceStr("价格认证可见");
+				return ;
+			}
+		}
+		
 		List<SitePriceRuleDTO> sitePriceRuleDTOs = rSiteDTO.getSitePriceRules();
 		if (sitePriceRuleDTOs.size() == 1) {
 			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
@@ -1069,7 +1077,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rSiteDTO.setAvgPriceStr("免费");
 			}else {
 				String priceString = isInteger(minPrice)? String.valueOf(minPrice.intValue()): minPrice.toString();
-				rSiteDTO.setAvgPriceStr(priceString + " 起");
+				rSiteDTO.setAvgPriceStr("￥"+priceString + " 起");
 			}
 		}
 	}
@@ -1089,8 +1097,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalSite.setDiscountRatio(priceRule.getDiscountRatio());
 			rentalSite.setFullPrice(priceRule.getFullPrice());
 			rentalSite.setCutPrice(priceRule.getCutPrice());
+			rentalSite.setCellBeginId(priceRule.getCellBeginId());
+			rentalSite.setCellEndId(priceRule.getCellEndId());
 		}
 		RentalSiteDTO rentalSiteDTO = ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
+		rentalSiteDTO.setUnauthVisible(resourceType.getUnauthVisible());
 		rentalSiteDTO.setSitePriceRules(priceRules.stream().map(p->convertToSitePriceRuleDTO(rentalSite, p, resourceType, sceneTokenDTO)).collect(Collectors.toList()));
 		return rentalSiteDTO;
 	}
@@ -1124,7 +1135,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				sitePriceRuleDTO.setMinPrice(minPrice);
 				sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
 			}else {
-				sitePriceRuleDTO.setPriceStr("价格认证可见");
+				sitePriceRuleDTO.setPriceStr("");
 			}
 		}
 		
@@ -2386,8 +2397,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//初始化 
 			//设置新规则的时候就删除之前的旧单元格
 			this.rentalv2Provider.deleteRentalCellsByResourceId(cmd.getRentalSiteId());
-			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
-			seqNum.set(0L);
 
 			RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
 
@@ -2502,6 +2511,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			rs.setApprovingUserWorkdayPrice(approvingUserWorkdayPrice);
 			
 			for (PriceRuleDTO priceRuleDTO : cmd.getPriceRules()) {
+				currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
+				seqNum.set(0L);
 				if (priceRuleDTO.getRentalType().byteValue() == RentalType.HOUR.getCode()) {
 					//删除rentalResource 对应的 timeInterval
 					rentalv2Provider.deleteTimeIntervalsByOwnerId(EhRentalv2Resources.class.getSimpleName(), rs.getId());
@@ -2565,23 +2576,28 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					singleCmd.setApprovingUserWorkdayPrice(priceRuleDTO.getApprovingUserWorkdayPrice());
 					addRentalSiteSingleSimpleRule(singleCmd);
 				}
+				
+				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
+				priceRuleDTO.setCellBeginId(cellBeginId);
+				priceRuleDTO.setCellEndId(cellBeginId + seqNum.get()-1);
 			}
 			
 			
-			Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper
-					.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
-			if(LOGGER.isDebugEnabled()) {
-	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
-	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
-						.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))); 
-	            LOGGER.debug("eh rental cells  , begin id=" + cellList.get().get(0).getId()+
-	            		",last id  = "+ cellList.get().get(cellList.get().size()-1).getId()); 
-	            
-	        }
+			
+//			if(LOGGER.isDebugEnabled()) {
+//	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
+//	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
+//						.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))); 
+//	            LOGGER.debug("eh rental cells  , begin id=" + cellList.get().get(0).getId()+
+//	            		",last id  = "+ cellList.get().get(cellList.get().size()-1).getId()); 
+//	            
+//	        }
 			//优化方案2.0 不插入数据库,每次需要时候进行计算,根据起始id
 //			this.rentalProvider.batchCreateRentalCells(cellList.get());
-			rs.setCellBeginId(cellBeginId);
-			rs.setCellEndId(cellBeginId+seqNum.get()-1);
+//			rs.setCellBeginId(cellBeginId);
+//			rs.setCellEndId(cellBeginId+seqNum.get()-1);
+			rs.setCellBeginId(0L);
+			rs.setCellEndId(0L);
 
 			rentalv2PriceRuleProvider.deletePriceRuleByOwnerId(PriceRuleType.RESOURCE.getCode(), rs.getId());
 			createPriceRules(PriceRuleType.RESOURCE, rs.getId(), cmd.getPriceRules());
@@ -5102,63 +5118,70 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			BigDecimal weekendPrice = defaultRule.getWeekendPrice() == null ? new BigDecimal(0) : defaultRule.getWeekendPrice(); 
 			BigDecimal workdayPrice = defaultRule.getWorkdayPrice() == null ? new BigDecimal(0) : defaultRule.getWorkdayPrice();
-			List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
-			if (defaultRule.getRentalType().equals(RentalType.HOUR.getCode()))  {
-				if(defaultRule.getTimeIntervals() != null){
-					Double beginTime = null;
-					Double endTime = null;
-					for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
-						 
-						if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-							continue;
-						if(beginTime==null||beginTime>timeInterval.getBeginTime())
-							beginTime=timeInterval.getBeginTime();
-						if(endTime==null||endTime<timeInterval.getEndTime())
-							endTime=timeInterval.getEndTime();
-						AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
-						signleCmd.setBeginTime(timeInterval.getBeginTime());
-						signleCmd.setEndTime(timeInterval.getEndTime()); 
-						if(null!=timeInterval.getTimeStep())
-							signleCmd.setTimeStep(timeInterval.getTimeStep());
-						signleCmd.setWeekendPrice(weekendPrice); 
-						signleCmd.setWorkdayPrice(workdayPrice);
-						addSingleRules.add(signleCmd);
+			
+			for (PriceRuleDTO priceRuleDTO : defaultRule.getPriceRules()) {
+				List<AddRentalSiteSingleSimpleRule> addSingleRules =new ArrayList<>();
+				if (priceRuleDTO.getRentalType().equals(RentalType.HOUR.getCode()))  {
+					if(defaultRule.getTimeIntervals() != null){
+						Double beginTime = null;
+						Double endTime = null;
+						for(TimeIntervalDTO timeInterval:defaultRule.getTimeIntervals()){
+							 
+							if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+								continue;
+							if(beginTime==null||beginTime>timeInterval.getBeginTime())
+								beginTime=timeInterval.getBeginTime();
+							if(endTime==null||endTime<timeInterval.getEndTime())
+								endTime=timeInterval.getEndTime();
+							AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+							signleCmd.setBeginTime(timeInterval.getBeginTime());
+							signleCmd.setEndTime(timeInterval.getEndTime()); 
+							if(null!=timeInterval.getTimeStep())
+								signleCmd.setTimeStep(timeInterval.getTimeStep());
+							signleCmd.setWeekendPrice(weekendPrice); 
+							signleCmd.setWorkdayPrice(workdayPrice);
+							addSingleRules.add(signleCmd);
+						}
+
+						if(endTime>24.0||beginTime<0.0)
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
+						resource.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
+						resource.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
 					}
-
-					if(endTime>24.0||beginTime<0.0)
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of timeInterval  >24 or <0"); 
-					resource.setDayBeginTime( convertTime((long) (beginTime*1000*60*60L)));
-					resource.setDayEndTime(convertTime((long) (endTime*1000*60*60L)));
+				}else {
+					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class ); 
+					signleCmd.setWeekendPrice(weekendPrice); 
+					signleCmd.setWorkdayPrice(workdayPrice);
+					addSingleRules.add(signleCmd);
 				}
-			}else {
-				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class ); 
-				signleCmd.setWeekendPrice(weekendPrice); 
-				signleCmd.setWorkdayPrice(workdayPrice);
-				addSingleRules.add(signleCmd);
-			}
 
-			seqNum.set(0L);
-			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
-			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
-				//在这里统一处理 
-				signleCmd.setRentalSiteId(resource.getId()); 
-				addRentalSiteSingleSimpleRule(signleCmd );
+				seqNum.set(0L);
+				currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
+				for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
+					//在这里统一处理 
+					signleCmd.setRentalSiteId(resource.getId()); 
+					addRentalSiteSingleSimpleRule(signleCmd );
+				}
+				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
+				priceRuleDTO.setCellBeginId(cellBeginId);
+				priceRuleDTO.setCellEndId(cellBeginId+seqNum.get());
+				updatePriceRule(priceRuleDTO);
 			}
 			
+			
 
-			Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper
-					.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
-			if(LOGGER.isDebugEnabled()) {
-	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
-	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
-						.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))); 
-	            LOGGER.debug("eh rental cells  , begin id=" + cellList.get().get(0).getId()+
-	            		",last id  = "+ cellList.get().get(cellList.get().size()-1).getId()); 
-	            
-	        } 
-			resource.setCellBeginId(cellBeginId);
-			resource.setCellEndId(cellBeginId+seqNum.get());
+			
+//			if(LOGGER.isDebugEnabled()) {
+//	            LOGGER.debug("eh rental cells get next sequence block, id=" + cellBeginId+",block count = "+ seqNum.get()); 
+//	            LOGGER.debug("eh rental cells current id =" +  sequenceProvider.getCurrentSequence(NameMapper
+//						.getSequenceDomainFromTablePojo(EhRentalv2Cells.class))); 
+//	            LOGGER.debug("eh rental cells  , begin id=" + cellList.get().get(0).getId()+
+//	            		",last id  = "+ cellList.get().get(cellList.get().size()-1).getId()); 
+//	            
+//	        } 
+			resource.setCellBeginId(0L);
+			resource.setCellEndId(0L);
 			
 			Long siteId = rentalv2Provider.createRentalSite(resource);
 
@@ -5214,6 +5237,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 			return null;
 		});
+	}
+
+	private void updatePriceRule(PriceRuleDTO priceRuleDTO) {
+		Rentalv2PriceRule rentalv2PriceRule = rentalv2PriceRuleProvider.findRentalv2PriceRuleById(priceRuleDTO.getId());
+		rentalv2PriceRule.setCellBeginId(priceRuleDTO.getCellBeginId());
+		rentalv2PriceRule.setCellEndId(priceRuleDTO.getCellEndId());
+		rentalv2PriceRuleProvider.updateRentalv2PriceRule(rentalv2PriceRule);
 	}
 
 	@Override
@@ -5503,6 +5533,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setFullPrice(priceRule.getFullPrice());
 			rs.setCutPrice(priceRule.getCutPrice());
 			rs.setDiscountRatio(priceRule.getDiscountRatio());
+			rs.setCellBeginId(priceRule.getCellBeginId());
+			rs.setCellEndId(priceRule.getCellEndId());
 		}
 	}
 

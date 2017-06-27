@@ -65,6 +65,7 @@ import com.everhomes.util.StringHelper;
  * <li>resourceTypeId: 资源类型id</li>
  * <li>payMode: 支付模式</li>
  * <li>sitePriceRules: 价格策略，参考{@link com.everhomes.rest.rentalv2.SitePriceRuleDTO}</li>
+ * <li>unauthVisible: 非认证用户是否可见，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -127,6 +128,8 @@ public class RentalSiteDTO {
     private Long resourceTypeId;
     private Byte payMode;
 
+    private Byte unauthVisible;
+    
     @ItemType(SitePriceRuleDTO.class)
     private List<SitePriceRuleDTO> sitePriceRules;
     
@@ -141,6 +144,14 @@ public class RentalSiteDTO {
     @Deprecated
 	private java.lang.Byte       rentalType;
     
+	public Byte getUnauthVisible() {
+		return unauthVisible;
+	}
+
+	public void setUnauthVisible(Byte unauthVisible) {
+		this.unauthVisible = unauthVisible;
+	}
+
 	public List<SitePriceRuleDTO> getSitePriceRules() {
 		return sitePriceRules;
 	}

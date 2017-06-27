@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class PriceRuleDTO {
+	private Long id;
 	private Byte rentalType;
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
@@ -34,6 +35,32 @@ public class PriceRuleDTO {
 	private BigDecimal fullPrice;
 	private BigDecimal cutPrice;
 	private Double discountRatio;
+	private Long cellBeginId;
+	private Long cellEndId;
+	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Long getCellBeginId() {
+		return cellBeginId;
+	}
+
+	public void setCellBeginId(Long cellBeginId) {
+		this.cellBeginId = cellBeginId;
+	}
+
+	public Long getCellEndId() {
+		return cellEndId;
+	}
+
+	public void setCellEndId(Long cellEndId) {
+		this.cellEndId = cellEndId;
+	}
 
 	public Byte getRentalType() {
 		return rentalType;
