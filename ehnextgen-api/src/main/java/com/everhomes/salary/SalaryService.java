@@ -14,7 +14,7 @@ public interface SalaryService {
 	public AddSalaryGroupResponse addSalaryGroup(AddSalaryGroupCommand cmd);
 
 
-	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd);
+	public AddSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd);
 
 
 	public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd);

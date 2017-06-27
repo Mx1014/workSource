@@ -58,7 +58,11 @@ public class SalaryController extends ControllerBase {
 	@RequestMapping("updateSalaryGroup")
 	@RestReturn(UpdateSalaryGroupResponse.class)
 	public RestResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd){
-		return new RestResponse(salaryService.updateSalaryGroup(cmd));
+        AddSalaryGroupResponse res = this.salaryService.updateSalaryGroup(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
 	}
 
     /**
