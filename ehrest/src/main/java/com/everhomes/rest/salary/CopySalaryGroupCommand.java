@@ -6,11 +6,14 @@ import com.everhomes.util.StringHelper;
  *
  * <ul>参数:
  * <li>salaryGroupId: 薪酬批次id</li>
+ * <li>salaryGroupName: 薪酬组名称</li>
  * </ul>
  */
 public class CopySalaryGroupCommand {
 
     private Long salaryGroupId;
+
+    private String salaryGroupName;
 
     public CopySalaryGroupCommand() {
 
@@ -27,6 +30,14 @@ public class CopySalaryGroupCommand {
 
     public void setSalaryGroupId(Long salaryGroupId) {
         this.salaryGroupId = salaryGroupId;
+    }
+
+    public String getSalaryGroupName() {
+        return salaryGroupName;
+    }
+
+    public void setSalaryGroupName(String salaryGroupName) {
+        this.salaryGroupName = salaryGroupName;
     }
 
     @Override

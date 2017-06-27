@@ -83,12 +83,11 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 
 	//  删除记录
 	@Override
-	public void deleteSalaryGroupEntity(SalaryGroupEntity entity){
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhSalaryGroupEntitiesDao dao = new EhSalaryGroupEntitiesDao(context.configuration());
-        dao.deleteById(entity.getId());
-
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupEntities.class, entity.getId());
+	public void deleteSalaryGroupEntityByGroupId(Long groupId){
+        DSLContext context = this.getContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_SALARY_GROUP_ENTITIES)
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
+                .execute();
     }
 	
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {

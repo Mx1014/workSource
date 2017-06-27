@@ -1,14 +1,12 @@
 package com.everhomes.rest.salary;
 
-import java.sql.Timestamp;
-
 /**
  * <ul>
  * <li>salaryGroupId: 批次id</li>
  * <li>userId: 用户id</li>
  * <li>groupEntityId: 项目字段id</li>
  * <li>originEntityId: 项目字段原始id</li>
- * <li>entityName: 项目字段名称</li>
+ * <li>groupEntityName: 项目字段名称</li>
  * <li>salaryValue: 项目字段对应值</li>
  * </ul>
  */
@@ -24,7 +22,7 @@ public class SalaryEmployeeOriginValDTO {
 
     private Long originEntityId;
 
-    private String entityName;
+    private String groupEntityName;
 
     private String salaryValue;
 
@@ -71,12 +69,12 @@ public class SalaryEmployeeOriginValDTO {
         this.originEntityId = originEntityId;
     }
 
-    public String getEntityName() {
-        return entityName;
+    public String getGroupEntityName() {
+        return groupEntityName;
     }
 
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    public void setGroupEntityName(String groupEntityName) {
+        this.groupEntityName = groupEntityName;
     }
 
     public String getSalaryValue() {

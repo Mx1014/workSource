@@ -11,6 +11,7 @@ import java.util.List;
  * <ul>参数:
  * <li>salaryGroupId: 薪酬批次id</li>
  * <li>salaryGroupEntity: 批次项目，参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
+ * <li>salaryGroupName: 批次名称</li>
  * </ul>
  */
 public class UpdateSalaryGroupCommand {
@@ -19,6 +20,8 @@ public class UpdateSalaryGroupCommand {
 
 	@ItemType(SalaryGroupEntityDTO.class)
 	private List<SalaryGroupEntityDTO> salaryGroupEntity;
+
+	private String salaryGroupName;
 
 	public UpdateSalaryGroupCommand() {
 
@@ -38,6 +41,14 @@ public class UpdateSalaryGroupCommand {
 
 	public void setSalaryGroupEntity(List<SalaryGroupEntityDTO> salaryGroupEntity) {
 		this.salaryGroupEntity = salaryGroupEntity;
+	}
+
+	public String getSalaryGroupName() {
+		return salaryGroupName;
+	}
+
+	public void setSalaryGroupName(String salaryGroupName) {
+		this.salaryGroupName = salaryGroupName;
 	}
 
 	@Override

@@ -6,13 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.salary.*;
-
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.salary.*;
-
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -113,7 +107,13 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
-	
+//        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+        if(!StringUtils.isEmpty(cmd.getSalaryGroupId())){
+            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+            AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
+            addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
+        }
+
 		return new UpdateSalaryGroupResponse();
 	}
 
@@ -122,21 +122,35 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
             //  组织架构删除薪酬组
-//            this.organizationService.deletexxx;
-            List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-            //entity.setStatus();
-            for (SalaryGroupEntity entity : entities) {
-                //entity.setStatus();
-                this.salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
-            }
+//            this.organizationService.deletexxx(cmd.getSalaryGroupId());
+
+            //  删除薪酬组定义的字段
+            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+
+            //  删除个人设定中与薪酬组相关的字段
+            this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
         }
     }
 
 	@Override
 	public void copySalaryGroup(CopySalaryGroupCommand cmd){
         List<SalaryGroupEntity> origin = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-
-
+        AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
+        addCommand.setSalaryGroupEntity(origin.stream().map(r ->{
+            SalaryGroupEntityDTO dto = ConvertHelper.convert(r,SalaryGroupEntityDTO.class);
+/*            dto.setGroupId(r.getGroupId());
+            dto.setOriginEntityId(r.getOriginEntityId());
+            dto.setType(r.getType());
+            dto.setCategoryId(r.getCategoryId());
+            dto.setCategoryName(r.getCategoryName());
+            dto.setN*/
+            return dto;
+        }).collect(Collectors.toList()));
+        addCommand.setOwnerId(origin.get(0).getOwnerId());
+        addCommand.setOwnerType(origin.get(0).getOwnerType());
+        int i = 1;
+        addCommand.setSalaryGroupName(cmd.getSalaryGroupName() + " (" + i + ")");
+        this.addSalaryGroup(addCommand);
 	}
 
 	@Override
@@ -184,7 +198,7 @@ public class SalaryServiceImpl implements SalaryService {
                 dto.setUserId(cmd.getUserId());
                 dto.setGroupEntityId(r.getId());
                 dto.setOriginEntityId(r.getOriginEntityId());
-                dto.setEntityName(r.getName());
+                dto.setGroupEntityName(r.getName());
 
                 //  为对应字段赋值
                 if (!salaryEmployeeOriginVals.isEmpty()) {
@@ -207,17 +221,23 @@ public class SalaryServiceImpl implements SalaryService {
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
         User user = UserContext.current().getUser();
-
-        if (!cmd.getEmployeeOriginVal().isEmpty()) {
+        if(!cmd.getEmployeeOriginVal().isEmpty()){
+            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
+            if(originVals.isEmpty()){
+                cmd.getEmployeeOriginVal().stream().forEach(r -> {
+                    this.createSalaryEmployeeOriginVal(r, cmd);
+                });
+            }else{
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByUserId(userId);
+                cmd.getEmployeeOriginVal().stream().forEach(s ->{
+                    this.createSalaryEmployeeOriginVal(s,cmd);
+                });
+            }
+        }
+/*        if (!cmd.getEmployeeOriginVal().isEmpty()) {
             //  获取用户id
             Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
-/*            //  获取字段id
-            List<Long> groupEntitiesId = new ArrayList<>();
-            cmd.getEmployeeOriginVal().stream().forEach(r -> {
-                Long groupEntityId = r.getGroupEntityId();
-                groupEntitiesId.add(groupEntityId);
-            });*/
-
 
             List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
 
@@ -242,7 +262,7 @@ public class SalaryServiceImpl implements SalaryService {
                         this.createSalaryEmployeeOriginVal(t,cmd);
                 });
             }
-        }
+        }*/
     }
 
     private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, UpdateSalaryEmployeesCommand cmd){
@@ -254,7 +274,7 @@ public class SalaryServiceImpl implements SalaryService {
         originVal.setGroupId(dto.getSalaryGroupId());
         originVal.setUserId(dto.getUserId());
         originVal.setGroupEntityId(dto.getGroupEntityId());
-        originVal.setGroupEntityName(dto.getEntityName());
+        originVal.setGroupEntityName(dto.getGroupEntityName());
         originVal.setOriginEntityId(dto.getOriginEntityId());
         originVal.setSalaryValue(dto.getSalaryValue());
         this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
