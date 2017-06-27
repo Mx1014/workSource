@@ -3,8 +3,12 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.everhomes.rest.general_approval.*;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -253,5 +257,27 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	private void sendEmailAsynchronizedTask(String contents,Long userId) {
 		ServiceAllianceAsynchronizedServiceImpl handler = PlatformContext.getComponent("serviceAllianceAsynchronizedServiceImpl");
 		handler.pushToQueque(contents,userId);
+	}
+	
+	@Override
+	public void onFlowMessageSend(FlowCaseState ctx, MessageDTO messageDto) {
+		Map<String, String> metaMap = messageDto.getMeta();
+		
+		FlowCase flowCase = ctx.getFlowCase();
+		PostApprovalFormCommand cmd = JSONObject.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
+		List<PostApprovalFormItem> values = cmd.getValues();
+		
+		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
+		if(null != sourceVal){
+			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+			ServiceAlliances yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
+			if(yellowPage != null ){
+				ServiceAllianceCategories parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
+				if(parentPage !=null ){
+					//服务联盟的消息提示，标题搞成了服务联盟大分类的名称-也就是功能入口的名称。
+					metaMap.put(MessageMetaConstant.MESSAGE_SUBJECT, parentPage.getName());
+				}
+			}
+		}
 	}
 }
