@@ -2237,17 +2237,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
     public void calculateEnergyMonthStat() {
-        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("calculate energy month stat start...");
-                calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
-                LOGGER.info("calculate energy month stat end...");
-            } catch (Exception e) {
-                LOGGER.error("calculate energy month stat error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
-            }
-        });
+    	if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+	        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+	            try {
+	                LOGGER.info("calculate energy month stat start...");
+	                calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+	                LOGGER.info("calculate energy month stat end...");
+	            } catch (Exception e) {
+	                LOGGER.error("calculate energy month stat error...", e);
+	                sendErrorMessage(e);
+	                e.printStackTrace();
+	            }
+	        });
+    	}
     }
 
     @Override

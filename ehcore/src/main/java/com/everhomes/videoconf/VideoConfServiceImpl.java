@@ -157,6 +157,8 @@ import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
 import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.ConfOrderSearcher;
@@ -183,6 +185,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	private final String BIZCONFPATH = "http://api.bizvideo.cn/openapi";
  
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	
 	@Autowired
 	private VideoConfProvider vcProvider;
@@ -1424,21 +1429,22 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Scheduled(cron="0 0 2 * * ? ")
 	@Override
 	public void invalidConf() {
-		LOGGER.info("update invalid conference which longer than 24 hours.");
-		Timestamp oneDayBefore = addHours(new Timestamp(DateHelper.currentGMTTime().getTime()), -24);
-		List<ConfAccounts> occupiedAccounts = vcProvider.listOccupiedConfAccounts(oneDayBefore);
-		if(occupiedAccounts != null && occupiedAccounts.size() > 0) {
-			for(ConfAccounts account : occupiedAccounts) {
-				if(account.getAssignedConfId() != null && account.getAssignedSourceId() != null) {
-					CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
-					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-					if(conf != null)
-						cancelCmd.setConfId(conf.getMeetingNo());
-					cancelVideoConf(cancelCmd);
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			LOGGER.info("update invalid conference which longer than 24 hours.");
+			Timestamp oneDayBefore = addHours(new Timestamp(DateHelper.currentGMTTime().getTime()), -24);
+			List<ConfAccounts> occupiedAccounts = vcProvider.listOccupiedConfAccounts(oneDayBefore);
+			if(occupiedAccounts != null && occupiedAccounts.size() > 0) {
+				for(ConfAccounts account : occupiedAccounts) {
+					if(account.getAssignedConfId() != null && account.getAssignedSourceId() != null) {
+						CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+						ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+						if(conf != null)
+							cancelCmd.setConfId(conf.getMeetingNo());
+						cancelVideoConf(cancelCmd);
+					}
 				}
 			}
 		}
-		
 	}
 	
 	private Timestamp addHours(Timestamp begin, int hours) {
@@ -2585,9 +2591,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Scheduled(cron="0 0 2 * * ? ")
 	@Override
 	public void invalidAccount() {
-		LOGGER.info("update invalid appliers.");
-		vcProvider.updateInvaildAccount();
-		vcProvider.updateEnterpriseAccounts();
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			LOGGER.info("update invalid appliers.");
+			vcProvider.updateInvaildAccount();
+			vcProvider.updateEnterpriseAccounts();
+		}
 	}
 
 	@Override
@@ -2958,26 +2967,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Scheduled(cron = "0 20 11 * * ?") 
 	private void scheduledExpirationReminder(){
 		//提前三天提醒试用的
-		
-		List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, 3);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
-		for(ConfOrders order : orders){
-			LOGGER.debug("send trial remainder to order "+ order);
-			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_TRIAL_EXPIRATION_REMINDER);
-		}
-		//提前7天提醒正式的
-		categories = vcProvider.findAccountCategoriesByNotInConfType((byte) 4); 
-		calendar.add(Calendar.DAY_OF_MONTH, 4); 
-		orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
-		for(ConfOrders order : orders){
-			LOGGER.debug("send  remainder to order "+ order);
-			sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_EXPIRATION_REMINDER);
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			List<Long> categories = vcProvider.findAccountCategoriesByConfType((byte) 4);
+			Calendar calendar = Calendar.getInstance();
+			calendar.add(Calendar.DAY_OF_MONTH, 3);
+			calendar.set(Calendar.HOUR_OF_DAY, 0);
+			calendar.set(Calendar.MINUTE, 0);
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			List<ConfOrders> orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+			for(ConfOrders order : orders){
+				LOGGER.debug("send trial remainder to order "+ order);
+				sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_TRIAL_EXPIRATION_REMINDER);
+			}
+			//提前7天提醒正式的
+			categories = vcProvider.findAccountCategoriesByNotInConfType((byte) 4); 
+			calendar.add(Calendar.DAY_OF_MONTH, 4); 
+			orders = vcProvider.findConfOrdersByCategoriesAndDate(categories,calendar);
+			for(ConfOrders order : orders){
+				LOGGER.debug("send  remainder to order "+ order);
+				sendExpirationRemi1derPhoneMsg(order,calendar,SmsTemplateCode.VIDEO_EXPIRATION_REMINDER);
+			}
 		}
 	} 
 
