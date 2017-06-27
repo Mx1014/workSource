@@ -10,13 +10,13 @@ import com.everhomes.util.StringHelper;
  */
 public class FindEnergyMeterByQRCodeCommand {
 
-    private String meterQRCode;
+    private Long meterQRCode;
 
-    public String getMeterQRCode() {
+    public Long getMeterQRCode() {
         return meterQRCode;
     }
 
-    public void setMeterQRCode(String meterQRCode) {
+    public void setMeterQRCode(Long meterQRCode) {
         this.meterQRCode = meterQRCode;
     }
 
