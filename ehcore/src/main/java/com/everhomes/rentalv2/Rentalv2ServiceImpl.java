@@ -5078,7 +5078,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setNeedPay(defaultRule.getNeedPay());
 
 			resource.setMultiTimeInterval(defaultRule.getMultiTimeInterval());
-			resource.setRentalType(defaultRule.getRentalType());
 			resource.setRentalEndTimeFlag(defaultRule.getRentalEndTimeFlag());
 			resource.setRentalStartTimeFlag(defaultRule.getRentalStartTimeFlag());
 			resource.setRentalEndTime(defaultRule.getRentalEndTime());
@@ -5092,6 +5091,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setEndDate(new Date(defaultRule.getEndDate()));
 
 			resource.setOpenWeekday(convertOpenWeekday(defaultRule.getOpenWeekday()));
+
+			resource.setRentalType(defaultRule.getRentalType());
 			resource.setWorkdayPrice(defaultRule.getWorkdayPrice());
 			resource.setWeekendPrice(defaultRule.getWeekendPrice());
 			resource.setApprovingUserWeekendPrice(defaultRule.getApprovingUserWeekendPrice());
