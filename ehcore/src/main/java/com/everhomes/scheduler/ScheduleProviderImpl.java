@@ -423,7 +423,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 
     @Override
     public Byte getRunningFlag() {
-        return runningFlag;
+        return localRunningFlag;
     }
 
     @Override
