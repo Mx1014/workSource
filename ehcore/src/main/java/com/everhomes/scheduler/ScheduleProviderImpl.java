@@ -436,6 +436,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         latestTime = System.currentTimeMillis();
         String delayTimeStr = configurationProvider.getValue("schedule.running.delay.time", "10000");
         Long delayTime = Long.valueOf(delayTimeStr);
+        LOGGER.debug("set runningFlag. runningFlag = {}", runningFlag);
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
@@ -445,8 +446,8 @@ public class ScheduleProviderImpl implements ScheduleProvider {
                     LOGGER.error("thread sleep error", e);
                 }
                 if(System.currentTimeMillis() - latestTime >= delayTime){
-                    LOGGER.debug("set local runningFlag...");
-                    if(RunningFlag.fromCode(runningFlag) == RunningFlag.fromCode(localRunningFlag)){
+                    LOGGER.debug("reset local runningFlag. runningFlag = {}, localRunningFlag = {}", runningFlag, localRunningFlag);
+                    if(RunningFlag.fromCode(runningFlag) != RunningFlag.fromCode(localRunningFlag)){
                         localRunningFlag = runningFlag;
                     }
                 }else{
