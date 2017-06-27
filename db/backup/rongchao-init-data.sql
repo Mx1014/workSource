@@ -7944,3 +7944,4 @@ VALUES ((@id := @id + 1), '37000', '', 'EhNamespaces', '999975', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@id := @id + 1), '40900', '', 'EhNamespaces', '999975', '2');
 
+delete from eh_web_menu_scopes where owner_id = 999975 and menu_id = 40900;
