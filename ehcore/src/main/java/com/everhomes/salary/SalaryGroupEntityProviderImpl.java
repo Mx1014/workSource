@@ -75,6 +75,12 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
 
+	@Override
+	public void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag) {
+		getReadWriteContext().update(Tables.EH_SALARY_GROUP_ENTITIES).set(Tables.EH_SALARY_GROUP_ENTITIES.VISIBLE_FLAG, visibleFlag)
+				.where(Tables.EH_SALARY_GROUP_ENTITIES.ID.eq(id)).execute();
+	}
+
 	//  删除记录
 	@Override
 	public void deleteSalaryGroupEntityByGroupId(Long groupId){
