@@ -1066,10 +1066,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (sitePriceRuleDTOs.size() == 1) {
 			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
 		}else {
-			BigDecimal minPrice = sitePriceRuleDTOs.get(0).getMinPrice();
-			for(int i = 1; i < sitePriceRuleDTOs.size(); i++) {
+			BigDecimal minPrice = new BigDecimal("0");
+			for(int i = 0; i < sitePriceRuleDTOs.size(); i++) {
 				SitePriceRuleDTO sitePriceRuleDTO = sitePriceRuleDTOs.get(i);
-				if (sitePriceRuleDTO.getMinPrice().compareTo(minPrice) < 0) {
+				if (sitePriceRuleDTO.getMinPrice() != null && sitePriceRuleDTO.getMinPrice().compareTo(minPrice) < 0) {
 					minPrice = sitePriceRuleDTO.getMinPrice();
 				}
 			}
