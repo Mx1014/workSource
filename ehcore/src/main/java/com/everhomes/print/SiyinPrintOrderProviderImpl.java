@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.pojos.EhSiyinPrintOrders;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy.PascalCaseStrategy;
 
 @Component
 public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
@@ -129,6 +130,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
 		}
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc())
+				.limit(pageSize)
 				.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 	}

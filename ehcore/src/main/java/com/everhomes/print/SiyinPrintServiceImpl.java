@@ -447,7 +447,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		//调用统一处理订单接口，返回统一订单格式
 		CommonOrderCommand orderCmd = new CommonOrderCommand();
-		orderCmd.setBody(PrintJobTypeType.fromCode(order.getJobType()).toString());
+		orderCmd.setBody(PrintJobTypeType.fromCode(order.getJobType()).getDescribe());
 		orderCmd.setOrderNo(order.getOrderNo().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PRINT_ORDER.getPycode());
 		orderCmd.setSubject(getLocalActivityString(PrintErrorCode.PRINT_SUBJECT,"打印订单"));
