@@ -17,3 +17,26 @@ CREATE TABLE `eh_user_organization` (
   `update_time` datetime,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_uniongroup_configure`;
+CREATE TABLE `eh_uniongroup_configure` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
+  `groupId` bigint(20) NOT NULL COMMENT 'id of group',
+  `targetId` bigint(20) DEFAULT NULL COMMENT 'id of target, organization or memberDetail',
+  `target_type` varchar(32) COMMENT 'organziation,memberDetail',
+  `operator_uid` bigint(20),
+  `update_time` datetime,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--  DROP TABLE IF EXISTS `eh_uniongroup_member_details`;
+CREATE TABLE `eh_uniongroup_member_details` (
+  `id` bigint(20) NOT NULL,
+  `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
+  `groupId` bigint(20) NOT NULL COMMENT 'id of group',
+  `detailId` bigint(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
+  `update_time` datetime,
+  `operator_uid` bigint(20),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
