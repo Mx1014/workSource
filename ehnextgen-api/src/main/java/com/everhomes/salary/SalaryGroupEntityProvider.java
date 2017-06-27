@@ -14,4 +14,6 @@ public interface SalaryGroupEntityProvider {
 	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryGroupId);
 
 	List<SalaryGroupEntity> listSalaryGroupEntity();
+
+	void deleteSalaryGroupEntity(SalaryGroupEntity entity);
 }

@@ -74,6 +74,16 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 				.orderBy(Tables.EH_SALARY_GROUP_ENTITIES.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
+
+	//  删除记录
+	@Override
+	public void deleteSalaryGroupEntity(SalaryGroupEntity entity){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhSalaryGroupEntitiesDao dao = new EhSalaryGroupEntitiesDao(context.configuration());
+        dao.deleteById(entity.getId());
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhSalaryGroupEntities.class, entity.getId());
+    }
 	
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

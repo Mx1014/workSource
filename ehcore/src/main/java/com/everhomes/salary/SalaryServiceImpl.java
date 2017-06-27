@@ -68,7 +68,7 @@ public class SalaryServiceImpl implements SalaryService {
 
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
         if (!cmd.getSalaryGroupEntity().isEmpty()) {
-            //	添加至组织结构
+            //	添加批次至组织结构
             //	this.organizationService.xxxxx
             response.setSalaryGroupEntry(cmd.getSalaryGroupEntity().stream().map(r -> {
                 SalaryGroupEntity entity = new SalaryGroupEntity();
@@ -103,14 +103,24 @@ public class SalaryServiceImpl implements SalaryService {
 		return new UpdateSalaryGroupResponse();
 	}
 
-	@Override
-	public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
-	
+    @Override
+    public void deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-	}
+            //  组织架构删除薪酬组
+//            this.organizationService.deletexxx;
+            List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+            //entity.setStatus();
+            for (SalaryGroupEntity entity : entities) {
+                //entity.setStatus();
+                this.salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
+            }
+        }
+    }
 
 	@Override
 	public void copySalaryGroup(CopySalaryGroupCommand cmd){
+        List<SalaryGroupEntity> origin = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
 
 
 	}
