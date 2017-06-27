@@ -1419,6 +1419,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rules");
 		Long userId = UserContext.current().getUser().getId(); 
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
+		correctRetalResource(rs, cmd.getRentalType());
 		RentalBillDTO billDTO = ConvertHelper.convert(rs , RentalBillDTO.class);
 		proccessCells(rs);
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
@@ -1509,6 +1510,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
 					reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
 					endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 24*60*60*1000L);
+				}else if(rentalSiteRule.getRentalType().equals(RentalType.MONTH.getCode())){
+					// 按月的在前一天下午四点提醒，月底第二天结束
+					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() );
+					reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
+					
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(rentalSiteRule.getResourceRentalDate());
+					calendar.add(Calendar.MONTH, 1);
+					endTime = new Timestamp(calendar.getTimeInMillis());
 				}else  {
 					if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.AM.getCode())){
 						reminderTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000L);
@@ -1549,6 +1559,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 							amount = null == rentalSiteRule.getOrgMemberPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getOrgMemberPrice();
 							halfPrice = null == rentalSiteRule.getHalfOrgMemberPrice()?new java.math.BigDecimal(0):rentalSiteRule.getHalfOrgMemberPrice();
+						}else if (!SceneType.ENTERPRISE.getCode().equals(scene)) {
+							amount = null == rentalSiteRule.getApprovingUserPrice() ? new java.math.BigDecimal(0) : rentalSiteRule.getApprovingUserPrice();
+							halfPrice = null == rentalSiteRule.getHalfApprovingUserPrice()?new java.math.BigDecimal(0):rentalSiteRule.getHalfApprovingUserPrice();
 						}
 					}
 
@@ -1672,6 +1685,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if(rsr.getRentalType().equals(RentalType.DAY.getCode())){
 //					useDetailSB.append("使用时间:");
 						useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
+					}else if(rsr.getRentalType().equals(RentalType.MONTH.getCode())){
+//						useDetailSB.append("使用时间:");
+							useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 					}else if (rsr.getRentalType().equals(RentalType.HALFDAY.getCode())
 							|| rsr.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
 //					useDetailSB.append("使用时间:");
@@ -1769,6 +1785,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 									.getTime()));
 							rsbDisploy.setCreatorUid(userId);
 							rsbDisploy.setStatus(ResourceOrderStatus.DISPLOY.getCode());
+							
 						}
 					}
 				}
@@ -1922,6 +1939,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			RentalType rentalType = RentalType.fromCode(cell.getRentalType());
 			switch(rentalType){
 				case DAY: 
+					if(cell.getRentalType().equals(rsr.getRentalType()) && cell.getResourceRentalDate().equals(rsr.getResourceRentalDate()))
+						result.add(cell);
+					break;
+				case MONTH: 
 					if(cell.getRentalType().equals(rsr.getRentalType()) && cell.getResourceRentalDate().equals(rsr.getResourceRentalDate()))
 						result.add(cell);
 					break;
@@ -3261,6 +3282,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				.getRentalBillId());
 
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		correctRetalResource(rs, cmd.getRentalType());
 		proccessCells(rs);
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
