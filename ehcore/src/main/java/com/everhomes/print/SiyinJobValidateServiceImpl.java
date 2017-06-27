@@ -100,9 +100,12 @@ public class SiyinJobValidateServiceImpl {
 		}
 		//根据记录创建订单
 		createOrder(record);
+		
 		//正在打印的任务，减少一个
-		String key = SiyinPrintServiceImpl.REDIS_PRINTING_TASK_COUNT + record.getCreatorUid();
-		reducePrintingJobCount(key);
+		if(record.getJobType().byteValue() == PrintJobTypeType.PRINT.getCode()){
+			String key = SiyinPrintServiceImpl.REDIS_PRINTING_TASK_COUNT + record.getCreatorUid() + SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT + record.getOwnerId();
+			reducePrintingJobCount(key);
+		}
 	}
 	
 	public void createOrder(SiyinPrintRecord record){
