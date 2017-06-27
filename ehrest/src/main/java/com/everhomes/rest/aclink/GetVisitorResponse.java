@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class GetVisitorResponse {
+	Long id;
+	Long doorId;
     String userName;
     String doorName;
     String phone;
@@ -104,6 +106,18 @@ public class GetVisitorResponse {
 	}
 	public void setValidEndMs(Long validEndMs) {
 		this.validEndMs = validEndMs;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Long getDoorId() {
+		return doorId;
+	}
+	public void setDoorId(Long doorId) {
+		this.doorId = doorId;
 	}
 	@Override
     public String toString() {
