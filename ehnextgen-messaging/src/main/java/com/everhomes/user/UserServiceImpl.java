@@ -1665,7 +1665,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
-
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
         if(userIdentifier==null){
@@ -1673,22 +1672,21 @@ public class UserServiceImpl implements UserService {
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
                     UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
         }
-        userIdentifier.setRegionCode(cmd.getRegionCode());
-
-		String verificationCode = RandomGenerator.getRandomDigitalString(6);
-		userIdentifier.setVerificationCode(verificationCode);
-		this.userProvider.updateIdentifier(userIdentifier);
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
-		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
-		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
 
         this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
 
-		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
-		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		this.userProvider.updateIdentifier(userIdentifier);
+        String verificationCode = RandomGenerator.getRandomDigitalString(6);
+        userIdentifier.setVerificationCode(verificationCode);
+        userIdentifier.setRegionCode(cmd.getRegionCode());
+        userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()), verificationCode);
+
+        this.userProvider.updateIdentifier(userIdentifier);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
+        }
 	}
 
 	@Override
@@ -3787,6 +3785,22 @@ public class UserServiceImpl implements UserService {
                 LOGGER.warn("targetType are not found, cmd={}", cmd.toString());
         }
         return dto;
+    }
+
+    @Override
+    public void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request) {
+
+    }
+
+    @Override
+    public void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd) {
+
+    }
+
+    @Override
+    public UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd) {
+
+        return null;
     }
 
     private String parseUri(String uri, String ownerType, Long ownerId) {

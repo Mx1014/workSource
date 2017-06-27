@@ -165,4 +165,24 @@ public interface UserService {
      * @return
      */
     MessageSessionInfoDTO getMessageSessionInfo(GetMessageSessionInfoCommand cmd);
+
+    /**
+     * 用户修改手机号时发送短信验证码，两步短信验证码都是这个接口
+     * @param cmd
+     * @param request
+     */
+    void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request);
+
+    /**
+     * 核实修改手机号的验证码
+     * @param cmd
+     */
+    void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd);
+
+    /**
+     * 申诉修改手机号
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd);
 }
