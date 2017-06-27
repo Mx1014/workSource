@@ -344,7 +344,6 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
             return;
         }
 
-        
         String beanName = PushMessageResolver.PUSH_MESSAGE_RESOLVER_PREFIX + msg.getAppId();
         PushMessageResolver messageResolver = PlatformContext.getComponent(beanName);
         if(null == messageResolver) {
@@ -434,7 +433,7 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
         
 //        ApnsService service = getApnsService("namespace:1000000");
         
-        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Double.valueOf(Math.random()) ).build();
+        String payload = APNS.newPayload().alertBody(cmd.getMessage() + Math.random()).build();
         String token = cmd.getDeviceId();
         service.push(token, payload);
         
@@ -469,10 +468,8 @@ public class PusherServiceImpl implements PusherService, ApnsServiceFactory {
     
     @Override
     public Map<String, Long> requestDevices(Map<String, Long> deviceMap) {
-        List<String> devs = new ArrayList<String>();
-        deviceMap.forEach((dev, t) -> {
-            devs.add(dev);
-        });
+        List<String> devs = new ArrayList<>();
+        deviceMap.forEach((dev, t) -> devs.add(dev));
         
         List<Border> borders = this.borderProvider.listAllBorders();
         if(borders != null) {
