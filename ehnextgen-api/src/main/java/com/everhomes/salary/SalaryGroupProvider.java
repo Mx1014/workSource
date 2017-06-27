@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface SalaryGroupProvider {
@@ -16,4 +17,5 @@ public interface SalaryGroupProvider {
 	List<SalaryGroup> listSalaryGroup(String ownerType, Long ownerId, String period,
 			List<Byte> status);
 
+	List<SalaryGroup> listSalaryGroup(Byte code, Timestamp date);
 }

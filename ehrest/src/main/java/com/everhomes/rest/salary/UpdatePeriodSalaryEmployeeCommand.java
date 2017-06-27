@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型:Organization</li>
  * <li>ownerId: 所属id</li>
  * <li>salaryEmployeeId: 所属id</li>
- * <li>periodEmployeeEntitys: 批次档期的字段列表  参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
+ * <li>periodEmployeeEntities: 批次档期的字段列表  参考{@link com.everhomes.rest.salary.SalaryPeriodEmployeeEntityDTO}</li>
  * <li>checkFlag: 核算标准0-未核算 1-核算</li>
  * </ul>
  */
@@ -25,7 +25,7 @@ public class UpdatePeriodSalaryEmployeeCommand {
 	private Long salaryEmployeeId;
 
 	@ItemType(SalaryPeriodEmployeeEntityDTO.class)
-	private List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys;
+	private List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntities;
 
 	private Byte checkFlag;
 
@@ -33,12 +33,12 @@ public class UpdatePeriodSalaryEmployeeCommand {
 
 	}
 
-	public UpdatePeriodSalaryEmployeeCommand(String ownerType, Long ownerId, Long salaryEmployeeId, List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys, Byte checkFlag) {
+	public UpdatePeriodSalaryEmployeeCommand(String ownerType, Long ownerId, Long salaryEmployeeId, List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntities, Byte checkFlag) {
 		super();
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.salaryEmployeeId = salaryEmployeeId;
-		this.periodEmployeeEntitys = periodEmployeeEntitys;
+		this.periodEmployeeEntities = periodEmployeeEntities;
 		this.checkFlag = checkFlag;
 	}
 
@@ -66,12 +66,12 @@ public class UpdatePeriodSalaryEmployeeCommand {
 		this.salaryEmployeeId = salaryEmployeeId;
 	}
 
-	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntitys() {
-		return periodEmployeeEntitys;
+	public List<SalaryPeriodEmployeeEntityDTO> getPeriodEmployeeEntities() {
+		return periodEmployeeEntities;
 	}
 
-	public void setPeriodEmployeeEntitys(List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntitys) {
-		this.periodEmployeeEntitys = periodEmployeeEntitys;
+	public void setPeriodEmployeeEntities(List<SalaryPeriodEmployeeEntityDTO> periodEmployeeEntities) {
+		this.periodEmployeeEntities = periodEmployeeEntities;
 	}
 
 	public Byte getCheckFlag() {

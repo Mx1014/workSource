@@ -1,20 +1,29 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.mail.MailHandler;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.salary.*;
 
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +33,10 @@ public class SalaryServiceImpl implements SalaryService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
-	
+
+	@Autowired
+	private ConfigurationProvider configProvider;
+
     @Autowired
     private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
 
@@ -185,7 +197,7 @@ public class SalaryServiceImpl implements SalaryService {
 		//查询异常员工人数
 		//异常员工判断1:未关联批次
 		//TODO:
-		Integer unLinkNumber = null;
+		Integer unLinkNumber = 0;
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
 		//查询eh_salary_employee_period_vals 本期 的 实发工资(entity_id=98)数据为null的记录数
@@ -260,7 +272,7 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public void updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
-			cmd.getPeriodEmployeeEntitys().stream().map(r ->{	
+			cmd.getPeriodEmployeeEntities().stream().map(r ->{
 				salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
 				return null;
 			});
@@ -286,26 +298,75 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public GetPeriodSalaryEmailContentResponse getPeriodSalaryEmailContent(GetPeriodSalaryEmailContentCommand cmd) {
-		
+
+		SalaryGroup periodGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+		List<SalaryGroupEntity> results = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(periodGroup.getOrganizationGroupId());
 		return new GetPeriodSalaryEmailContentResponse();
 	}
 
 	@Override
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd) {
-	
+		//TODO: email content 应该跟着批次走
 
 	}
 
 	@Override
 	public void updateSalaryGroupEntitiesVisable(UpdateSalaryGroupEntitiesVisableCommand cmd) {
-	
-
+		this.dbProvider.execute((TransactionStatus status) -> {
+			cmd.getSalaryGroupEntities().stream().map(r ->{
+				salaryGroupEntityProvider.updateSalaryGroupEntityVisible(r.getId(),r.getVisibleFlag());
+				return null;
+			});
+		});
 	}
 
 	@Override
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd) {
-	
+		//将本期group置为已核算
+		SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+		if(cmd.getSendTime() == null){
+			salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
+			sendSalary(salaryGroup);
+		}else {
+			salaryGroup.setSendTime(new Timestamp(cmd.getSendTime()));
+			salaryGroup.setStatus(SalaryGroupStatus.WAIT_FOR_SEND.getCode());
+		}
+		salaryGroupProvider.updateSalaryGroup(salaryGroup);
 
+	}
+
+
+	@Scheduled(cron = "1 0/15 * * * ?")
+	private void sendSalaryScheduled(){
+		sendSalary((new Timestamp(DateHelper.currentGMTTime().getTime()));
+	}
+	/**找一个时间点之前的待发送批次,并发送*/
+	private void sendSalary(Timestamp date) {
+		List<SalaryGroup> groups = salaryGroupProvider.listSalaryGroup(SalaryGroupStatus.WAIT_FOR_SEND.getCode(),date);
+		for (SalaryGroup group : groups) {
+			sendSalary(group);
+			group.setStatus(SalaryGroupStatus.SENDED.getCode());
+			salaryGroupProvider.updateSalaryGroup(group);
+		}
+	}
+	/**给某个批次某期发薪酬邮件*/
+	private void sendSalary(SalaryGroup salaryGroup) {
+
+		try{
+			String address = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.address", "smtp.mxhichina.com");
+			String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.passwod", "abc123!@#");
+			int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(),"mail.smtp.port", 25);
+//			new Mailer(address, port , account , passwod).sendMail(email);
+			//另一种发送方式
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+			MailHandler handler = PlatformContext.getComponent(handlerName);
+
+			handler.sendMail(UserContext.getCurrentNamespaceId(), account,cmd.getEmail(), mailSubject, mailText);
+
+		}catch (Exception e){
+			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++",e);
+		}
 	}
 
 	@Override
