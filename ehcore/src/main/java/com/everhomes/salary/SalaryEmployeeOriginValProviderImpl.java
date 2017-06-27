@@ -72,12 +72,21 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
 	}
 
+	@Override
 	public void deleteSalaryEmployeeOriginValByGroupId(Long groupId){
 		DSLContext context = this.getContext(AccessSpec.readWrite());
 		context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
                 .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
                 .execute();
 	}
+
+	@Override
+    public void deleteSalaryEmployeeOriginValByUserId(Long userId){
+        DSLContext context = this.getContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID.eq(userId))
+                .execute();
+    }
 /*	@Override
 	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId){
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)

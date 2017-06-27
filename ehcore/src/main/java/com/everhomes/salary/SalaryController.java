@@ -61,16 +61,19 @@ public class SalaryController extends ControllerBase {
 		return new RestResponse(salaryService.updateSalaryGroup(cmd));
 	}
 
-	/**
-	 * <p>2-3.删除薪酬组</p>
-	 * <b>URL: /salary/deleteSalaryGroup</b>
-	 */
-	@RequestMapping("deleteSalaryGroup")
-	@RestReturn(String.class)
-	public RestResponse deleteSalaryGroup(DeleteSalaryGroupCommand cmd){
-		salaryService.deleteSalaryGroup(cmd);
-		return new RestResponse();
-	}
+    /**
+     * <p>2-3.删除薪酬组</p>
+     * <b>URL: /salary/deleteSalaryGroup</b>
+     */
+    @RequestMapping("deleteSalaryGroup")
+    @RestReturn(String.class)
+    public RestResponse deleteSalaryGroup(DeleteSalaryGroupCommand cmd) {
+        this.salaryService.deleteSalaryGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
 	 * <p>2-4.复制薪酬组</p>

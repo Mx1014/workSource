@@ -98,7 +98,9 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
-	
+        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+
+
 		return new UpdateSalaryGroupResponse();
 	}
 
@@ -209,8 +211,21 @@ public class SalaryServiceImpl implements SalaryService {
     public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd) {
 
         User user = UserContext.current().getUser();
-
-        if (!cmd.getEmployeeOriginVal().isEmpty()) {
+        if(!cmd.getEmployeeOriginVal().isEmpty()){
+            Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
+            if(originVals.isEmpty()){
+                cmd.getEmployeeOriginVal().stream().forEach(r -> {
+                    this.createSalaryEmployeeOriginVal(r, cmd);
+                });
+            }else{
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(userId);
+                cmd.getEmployeeOriginVal().stream().forEach(s ->{
+                    this.createSalaryEmployeeOriginVal(s,cmd);
+                });
+            }
+        }
+/*        if (!cmd.getEmployeeOriginVal().isEmpty()) {
             //  获取用户id
             Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
 
@@ -237,7 +252,7 @@ public class SalaryServiceImpl implements SalaryService {
                         this.createSalaryEmployeeOriginVal(t,cmd);
                 });
             }
-        }
+        }*/
     }
 
     private void createSalaryEmployeeOriginVal(SalaryEmployeeOriginValDTO dto, UpdateSalaryEmployeesCommand cmd){

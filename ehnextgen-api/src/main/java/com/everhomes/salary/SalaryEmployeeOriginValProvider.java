@@ -16,4 +16,5 @@ public interface SalaryEmployeeOriginValProvider {
 	List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId);
 
 	void deleteSalaryEmployeeOriginValByGroupId(Long groupId);
+    void deleteSalaryEmployeeOriginValByUserId(Long userId);
 }
