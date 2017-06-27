@@ -899,7 +899,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
                     throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
                 }
-                meterCategoryProvider.deleteEnergyMeterCategory(category);
+                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                meterCategoryProvider.updateEnergyMeterCategory(category);
+//                meterCategoryProvider.deleteEnergyMeterCategory(category);
             }
         });
     }
@@ -1181,8 +1183,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(null == billDTO) {
                 billDTO = new BillStatDTO();
                 EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
-                billDTO.setBillCategoryId(billCategory.getId());
-                billDTO.setBillCategoryName(billCategory.getName());
+                if(billCategory != null) {
+                    billDTO.setBillCategoryId(billCategory.getId());
+                    billDTO.setBillCategoryName(billCategory.getName());
+                } else {
+                    billDTO.setBillCategoryId(dayStat.getBillCategoryId());
+                    billDTO.setBillCategoryName("");
+                }
+
                 billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
                 billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
                 result.getBillDayStats().add(billDTO);
@@ -1196,8 +1204,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(null == serviceDTO) {
                 serviceDTO = new ServiceStatDTO();
                 EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
-                serviceDTO.setServiceCategoryId(serviceCategory.getId());
-                serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                if(serviceCategory != null) {
+                    serviceDTO.setServiceCategoryId(serviceCategory.getId());
+                    serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                } else {
+                    serviceDTO.setServiceCategoryId(dayStat.getServiceCategoryId());
+                    serviceDTO.setServiceCategoryName("");
+                }
+
                 serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
                 serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
                 billDTO.getServiceDayStats().add(serviceDTO);
