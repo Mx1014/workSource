@@ -7,15 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class userOrganizationServiceImpl implements UserOrganizationService {
+public class UserOrganizationServiceImpl implements UserOrganizationService {
     @Autowired
     private UserOrganizationProvider userOrganizationProvider;
 
     @Override
-    public UserOrganization createUserOrganization(CreateUserOrganizationCommand cmd) {
-        UserOrganization userOrganization = ConvertHelper.convert(cmd, UserOrganization.class);
-        this.userOrganizationProvider.createUserOrganization(userOrganization);
-        return userOrganization;
+    public UserOrganizations createUserOrganizations(CreateUserOrganizationCommand cmd) {
+        UserOrganizations userOrganizations = ConvertHelper.convert(cmd, UserOrganizations.class);
+        this.userOrganizationProvider.createUserOrganizations(userOrganizations);
+        return userOrganizations;
     }
 
 }

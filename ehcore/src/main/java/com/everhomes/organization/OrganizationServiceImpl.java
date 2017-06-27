@@ -106,8 +106,8 @@ import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.userOrganization.UserOrganization;
 import com.everhomes.userOrganization.UserOrganizationProvider;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
@@ -11986,36 +11986,36 @@ public class OrganizationServiceImpl implements OrganizationService {
      * @param organizationMember
      * @return
      */
-    private UserOrganization createOrUpdateUserOrganization(OrganizationMember organizationMember){
+    private UserOrganizations createOrUpdateUserOrganization(OrganizationMember organizationMember){
         //根据namespaceId、organizationId、userId（userIdentifier.getOwnerUid()）来判断唯一记录
-        UserOrganization userOrganization = userOrganizationProvider.findUserOrganization(organizationMember.getNamespaceId(), organizationMember.getOrganizationId(), organizationMember.getTargetId());
+        UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(organizationMember.getNamespaceId(), organizationMember.getOrganizationId(), organizationMember.getTargetId());
 
-        if(userOrganization == null){
-            userOrganization = new UserOrganization();
-            userOrganization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            commonSetUserOrganization(userOrganization,organizationMember);
-            this.userOrganizationProvider.createUserOrganization(userOrganization);
+        if(userOrganizations == null){
+            userOrganizations = new UserOrganizations();
+            userOrganizations.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            commonSetUserOrganization(userOrganizations,organizationMember);
+            this.userOrganizationProvider.createUserOrganizations(userOrganizations);
         }else{
-            userOrganization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            commonSetUserOrganization(userOrganization,organizationMember);
-            this.userOrganizationProvider.updateUserOrganization(userOrganization);
+            userOrganizations.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            commonSetUserOrganization(userOrganizations,organizationMember);
+            this.userOrganizationProvider.updateUserOrganizations(userOrganizations);
         }
-        return userOrganization;
+        return userOrganizations;
     }
 
     /**
      * userOrganiztion批量赋值方法
-     * @param userOrganization
+     * @param userOrganizations
      * @param organizationMember
      */
-    private void commonSetUserOrganization(UserOrganization userOrganization, OrganizationMember organizationMember){
-        userOrganization.setUserId(organizationMember.getTargetId());
-        userOrganization.setOrganizationId(organizationMember.getOrganizationId());
-        userOrganization.setGroupPath(organizationMember.getGroupPath());
-        userOrganization.setGroupType(organizationMember.getGroupType());
-        userOrganization.setStatus(UserOrganizationStatus.ACTIVE.getCode());
-        userOrganization.setNamespaceId(organizationMember.getNamespaceId());
-        userOrganization.setVisibleFlag(organizationMember.getVisibleFlag());
+    private void commonSetUserOrganization(UserOrganizations userOrganizations, OrganizationMember organizationMember){
+        userOrganizations.setUserId(organizationMember.getTargetId());
+        userOrganizations.setOrganizationId(organizationMember.getOrganizationId());
+        userOrganizations.setGroupPath(organizationMember.getGroupPath());
+        userOrganizations.setGroupType(organizationMember.getGroupType());
+        userOrganizations.setStatus(UserOrganizationStatus.ACTIVE.getCode());
+        userOrganizations.setNamespaceId(organizationMember.getNamespaceId());
+        userOrganizations.setVisibleFlag(organizationMember.getVisibleFlag());
     }
 
     /**
@@ -12026,9 +12026,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private void deleteUserOrganizationWithMembers(List<OrganizationMember> members) {
         dbProvider.execute((TransactionStatus status) -> {
             for (OrganizationMember member : members) {
-                UserOrganization userOrganization = userOrganizationProvider.findUserOrganization(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                UserOrganizations userOrganization = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
                 if (userOrganization != null) {
-                    this.userOrganizationProvider.deleteUserOrganization(userOrganization);
+                    this.userOrganizationProvider.deleteUserOrganizations(userOrganization);
                 }
             }
             return null;
@@ -12043,9 +12043,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     private void inactiveUserOrganizationWithMembers(List<OrganizationMember> members) {
         dbProvider.execute((TransactionStatus status) -> {
             for (OrganizationMember member : members) {
-                UserOrganization userOrganization = userOrganizationProvider.findUserOrganization(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
-                if (userOrganization != null) {
-                    this.userOrganizationProvider.inactiveUserOrganization(userOrganization);
+                UserOrganizations userOrganizations = userOrganizationProvider.findUserOrganizations(member.getNamespaceId(), member.getOrganizationId(), member.getTargetId());
+                if (userOrganizations != null) {
+                    this.userOrganizationProvider.inactiveUserOrganizations(userOrganizations);
                 }
             }
             return null;

@@ -8,9 +8,8 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.organization.UserOrganizationStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhOrganizationMemberEducationsDao;
-import com.everhomes.server.schema.tables.daos.EhUserOrganizationDao;
-import com.everhomes.server.schema.tables.pojos.EhUserOrganization;
+import com.everhomes.server.schema.tables.daos.EhUserOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhUserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
@@ -27,8 +26,8 @@ import java.sql.Timestamp;
  * Created by Administrator on 2017/6/19.
  */
 @Component
-public class userOrganizationProviderImpl implements UserOrganizationProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserOrganization.class);
+public class UserOrganizationProviderImpl implements UserOrganizationProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserOrganizations.class);
 
     @Autowired
     private DbProvider dbProvider;
@@ -37,53 +36,53 @@ public class userOrganizationProviderImpl implements UserOrganizationProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    public void createUserOrganization(UserOrganization userOrganization) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserOrganization.class));
-        userOrganization.setId(id);
-        userOrganization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    public void createUserOrganizations(UserOrganizations userOrganizations) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhUserOrganizations.class));
+        userOrganizations.setId(id);
+        userOrganizations.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUserOrganizationDao dao = new EhUserOrganizationDao(context.configuration());
-        dao.insert(userOrganization);
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserOrganization.class, null);
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+        dao.insert(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserOrganizationsDao.class, null);
     }
 
     @Override
-    public void updateUserOrganization(UserOrganization userOrganization) {
-        assert (userOrganization.getId() == null);
+    public void updateUserOrganizations(UserOrganizations userOrganizations) {
+        assert (userOrganizations.getId() == null);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUserOrganizationDao dao = new EhUserOrganizationDao(context.configuration());
-        dao.update(userOrganization);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganization.class, userOrganization.getId());
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+        dao.update(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
     }
 
     @Override
-    public UserOrganization findUserOrganization(Integer namespaceId, Long organizationId, Long userId) {
+    public UserOrganizations findUserOrganizations(Integer namespaceId, Long organizationId, Long userId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-        Condition condition = Tables.EH_USER_ORGANIZATION.NAMESPACE_ID.eq(namespaceId);
-        condition = condition.and(Tables.EH_USER_ORGANIZATION.ORGANIZATION_ID.eq(organizationId));
-        condition = condition.and(Tables.EH_USER_ORGANIZATION.USER_ID.eq(userId));
-        Record r = context.select().from(Tables.EH_USER_ORGANIZATION).where(condition).fetchAny();
+        Condition condition = Tables.EH_USER_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId);
+        condition = condition.and(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(organizationId));
+        condition = condition.and(Tables.EH_USER_ORGANIZATIONS.USER_ID.eq(userId));
+        Record r = context.select().from(Tables.EH_USER_ORGANIZATIONS).where(condition).fetchAny();
         if (r != null)
-            return ConvertHelper.convert(r, UserOrganization.class);
+            return ConvertHelper.convert(r, UserOrganizations.class);
         return null;
     }
 
     @Override
-    public void deleteUserOrganization(UserOrganization userOrganization) {
+    public void deleteUserOrganizations(UserOrganizations userOrganizations) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUserOrganizationDao dao = new EhUserOrganizationDao(context.configuration());
-        dao.delete(userOrganization);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganization.class, userOrganization.getId());
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao(context.configuration());
+        dao.delete(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
     }
 
     @Override
-    public UserOrganization inactiveUserOrganization(UserOrganization userOrganization) {
-        assert (userOrganization.getId() == null);
-        userOrganization.setStatus(UserOrganizationStatus.INACTIVE.getCode());
+    public UserOrganizations inactiveUserOrganizations(UserOrganizations userOrganizations) {
+        assert (userOrganizations.getId() == null);
+        userOrganizations.setStatus(UserOrganizationStatus.INACTIVE.getCode());
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        EhUserOrganizationDao dao = new EhUserOrganizationDao();
-        dao.update(userOrganization);
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganization.class, userOrganization.getId());
-        return userOrganization;
+        EhUserOrganizationsDao dao = new EhUserOrganizationsDao();
+        dao.update(userOrganizations);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserOrganizations.class, userOrganizations.getId());
+        return userOrganizations;
     }
 }
