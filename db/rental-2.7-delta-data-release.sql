@@ -15,6 +15,8 @@ insert into eh_rentalv2_price_rules
     `full_price`,
     `cut_price`,
     `discount_ratio`,
+    `cell_begin_id`,
+    `cell_end_id`,
     `creator_uid`,
     `create_time`
 )
@@ -32,6 +34,8 @@ select @id:=@id+1,
          null,
          null,
          null,
+         0,
+         0,
          0,
          now()
 from eh_rentalv2_default_rules t
@@ -51,6 +55,8 @@ select @id:=@id+1,
          t2.full_price,
          t2.cut_price,
          t2.discount_ratio,
+         t2.cell_begin_id,
+         t2.cell_end_id,
          0,
          now()
 from eh_rentalv2_resources t2
