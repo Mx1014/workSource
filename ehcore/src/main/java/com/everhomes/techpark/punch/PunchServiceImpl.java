@@ -1361,17 +1361,20 @@ public class PunchServiceImpl implements PunchService {
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
  				"公司没有设置打卡规则");
 		//是否有wifi打卡,如果是判断wifi是否符合
-		if(pr.getWifiRuleId() != null && cmd.getWifiMac() != null){
-			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
-			if(null != wifis){
-				for(PunchWifi wifi : wifis){
-					if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
-						return ClockCode.SUCESS;
-				}
-				
+		
+		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
+		if(null != wifis && null != cmd.getWifiMac()){
+			for(PunchWifi wifi : wifis){
+				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
+					return ClockCode.SUCESS;
 			}
+			
 		}
-		if(null == pr.getLocationRuleId()){
+		
+		//参数有地址规则看地址范围是否正确,不正确则报错
+		List<PunchGeopoint> punchGeopoints = punchProvider
+				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
+		if(null == punchGeopoints || punchGeopoints.size() == 0){
 			//wifi不符合看是否有地址规则,没有地址规则直接报错
 			if(null == cmd.getWifiMac())
 				throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
@@ -1384,13 +1387,7 @@ public class PunchServiceImpl implements PunchService {
 		if(null == cmd.getLatitude() ||null == cmd.getLongitude() )
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_GEOPOINT_NULL,"user location is null");
-		//参数有地址规则看地址范围是否正确,不正确则报错
-		List<PunchGeopoint> punchGeopoints = punchProvider
-				.listPunchGeopointsByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(),pr.getLocationRuleId());
-		if (null == punchGeopoints || punchGeopoints.size() == 0)
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
- 				"公司没有设置打卡规则");
+		 
 		for (PunchGeopoint punchGeopoint : punchGeopoints) {
 			if (calculateDistance(cmd.getLongitude(), cmd.getLatitude(),
 					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
@@ -1400,7 +1397,7 @@ public class PunchServiceImpl implements PunchService {
 			} 
 		 
 		}
-		if(null == pr.getWifiRuleId())
+		if(null == wifis || wifis.size() == 0)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_USER_NOT_IN_PUNCHAREA,"not in punch area");
 		else
@@ -2284,80 +2281,86 @@ public class PunchServiceImpl implements PunchService {
 //		PunchTimeRule timeRule = getPunchTimeRuleByRuleIdAndDate(pr.getId(), startCalendar.getTime());
 //		PunchScheduling punchScheduling = this.punchSchedulingProvider.getPunchSchedulingByRuleDateAndTarget(member.getTargetId(), startCalendar.getTime());
 		PunchStatistic statistic = new PunchStatistic();
+		try { 
 
-		//对于已离职和未入职的判断
-		statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
-		if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
-			//找不到就是已离职
-			statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
-		}else{
-			//查找是否未入职 --通过log的时间
-			List<Long> orgIds = new ArrayList<>();
-			orgIds.add(member.getOrganizationId()); 
-			List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),orgIds, OperationType.JOIN.getCode()) ;
-			if (null != memberLogs ){
-				if(memberLogs.get(0).getOperateTime().after( endCalendar.getTime())){
+			//对于已离职和未入职的判断
+			statistic.setUserStatus(PunchUserStatus.NORMAL.getCode());
+			if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
+				//找不到就是已离职
+				statistic.setUserStatus(PunchUserStatus.RESIGNED.getCode());
+			}else{
+				//查找是否未入职 --通过log的时间
+				List<Long> orgIds = new ArrayList<>();
+				orgIds.add(member.getOrganizationId()); 
+				List<OrganizationMemberLog> memberLogs = organizationProvider.listOrganizationMemberLogs(member.getTargetId(),orgIds, OperationType.JOIN.getCode()) ;
+				if (null != memberLogs ){
+					if(memberLogs.get(0).getOperateTime().after( endCalendar.getTime())){
 
-					statistic.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+						statistic.setUserStatus(PunchUserStatus.NONENTRY.getCode());
+					}
 				}
-			}
-			
-		}
- 
-		statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
-		statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
-		statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
-        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
-		statistic.setOwnerId(ownerId);
-		statistic.setUserId(member.getTargetId());
-		Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
-		
-		statistic.setUserName(member.getContactName());
-		OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());   
-		statistic.setDeptId(dept.getId());
-		statistic.setDeptName(dept.getName());
-		statistic.setWorkDayCount(workDayCount);
-
- 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
-						dateSF.get().format(endCalendar.getTime()) );
-		List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
-		for(PunchDayLog dayLog : dayLogList){
-			statistic.setPunchTimesPerDay(dayLog.getPunchTimesPerDay());
-			PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
-					PunchStatisticsDTO.class);
-			list.add(dto);
-			processPunchStatisticsDTOTime(dto, dayLog);
-			PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(),
-							dto.getEnterpriseId(),new java.sql.Date(dto.getPunchDate()));
-			if (approval != null) {
-				dto.setApprovalStatus(approval
-						.getApprovalStatus());
-				dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
-				dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus()); 
 				
-			} else {
-				//do nothing
-//				dto.setApprovalStatus((byte) 0);
 			}
+	 
+			statistic.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			statistic.setPunchMonth(monthSF.get().format(startCalendar.getTime()));
+			statistic.setOwnerType(PunchOwnerType.ORGANIZATION.getCode());
+	        Long ownerId = getTopEnterpriseId(member.getOrganizationId());
+			statistic.setOwnerId(ownerId);
+			statistic.setUserId(member.getTargetId());
+			Integer workDayCount = countWorkDayCount(startCalendar,endCalendar, statistic );
 			
+			statistic.setUserName(member.getContactName());
+			OrganizationDTO dept = this.findUserDepartment(member.getTargetId(), member.getOrganizationId());   
+			statistic.setDeptId(dept.getId());
+			statistic.setDeptName(dept.getName());
+			statistic.setWorkDayCount(workDayCount);
+
+	 		List<PunchDayLog> dayLogList = this.punchProvider.listPunchDayLogsExcludeEndDay(member.getTargetId(), ownerId, dateSF.get().format(startCalendar.getTime()),
+							dateSF.get().format(endCalendar.getTime()) );
+			List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
+			for(PunchDayLog dayLog : dayLogList){
+				statistic.setPunchTimesPerDay(dayLog.getPunchTimesPerDay());
+				PunchStatisticsDTO dto = ConvertHelper.convert(dayLog,
+						PunchStatisticsDTO.class);
+				list.add(dto);
+				processPunchStatisticsDTOTime(dto, dayLog);
+				PunchExceptionApproval approval = punchProvider.getExceptionApproval(dto.getUserId(),
+								dto.getEnterpriseId(),new java.sql.Date(dto.getPunchDate()));
+				if (approval != null) {
+					dto.setApprovalStatus(approval
+							.getApprovalStatus());
+					dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
+					dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus()); 
+					
+				} else {
+					//do nothing
+//					dto.setApprovalStatus((byte) 0);
+				}
+				
+			}
+//			if(statistic.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
+//				processTwicePunchListCount(list, statistic);
+//			}
+//			else{
+//				processForthPunchListCount(list, statistic);
+//			}
+			processPunchListCount(list, statistic);
+
+	        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
+	        List<Long> orgIds = new ArrayList();
+	        if(null!=organizations)
+	            for(Organization org1 : organizations)
+	                orgIds.add(org1.getId());
+	        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),orgIds,statistic.getPunchMonth(),statistic.getUserId());
+
+		} catch (Exception e) {
+			LOGGER.error("#####refresh month log error!! userid:["+member.getTargetId()
+					+"] organization id :["+orgId+"] ",e); 
+		}finally{
+			this.punchProvider.createPunchStatistic(statistic);
 		}
-//		if(statistic.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
-//			processTwicePunchListCount(list, statistic);
-//		}
-//		else{
-//			processForthPunchListCount(list, statistic);
-//		}
-		processPunchListCount(list, statistic);
-
-        List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes("/"+ownerId + "%", null);
-        List<Long> orgIds = new ArrayList();
-        if(null!=organizations)
-            for(Organization org1 : organizations)
-                orgIds.add(org1.getId());
-        this.punchProvider.deletePunchStatisticByUser(statistic.getOwnerType(),orgIds,statistic.getPunchMonth(),statistic.getUserId());
-
-		this.punchProvider.createPunchStatistic(statistic);
 
 	}
 	private void processPunchListCount(List<PunchStatisticsDTO> list,
@@ -5008,10 +5011,13 @@ public class PunchServiceImpl implements PunchService {
 //						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
 //					}
 					//如果这个人通过ownerid 取出来的规则,和排班表规则一样可以判定他用的是排班表规则,于是进行刷新
-					PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
-					if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
-						refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
-							
+					try{
+						PunchRule punchRule = getPunchRule(punchScheduling.getOwnerType(), punchScheduling.getOwnerId(), member.getTargetId());
+						if(null != punchRule && punchRule.getId().equals(punchScheduling.getPunchRuleId()))
+							refreshDayLogAndMonthStat(member, orgId, punCalendar,startCalendar);
+					}catch(Exception e ){
+						LOGGER.error("get punch rule failed ", e);
+					}
 				}
 			}
 			else{
@@ -5027,16 +5033,17 @@ public class PunchServiceImpl implements PunchService {
 	private void refreshDayLogAndMonthStat(OrganizationMemberDTO member, Long orgId,
 			Calendar punCalendar, Calendar startCalendar) { 
 		try {
-			LOGGER.debug("refresh day log and month stat "+ member.toString());
+			LOGGER.debug("refresh day log stat "+ member.toString());
 			//刷新 daylog
 			this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
 			//刷月报 
 			
-			addPunchStatistics(member, orgId, startCalendar, punCalendar);
+			
 		} catch (Exception e) {
 			LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
 					+"] organization id :["+orgId+"] ",e); 
 		}
+		addPunchStatistics(member, orgId, startCalendar, punCalendar);
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {

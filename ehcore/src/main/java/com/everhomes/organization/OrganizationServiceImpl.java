@@ -5025,6 +5025,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationMember> listOrganizationMemberByOrganizationPathAndUserId(String path, Long userId){
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		if(null == userIdentifier)
+			return null;
 		return listOrganizationMemberByOrganizationPathAndContactToken(path, userIdentifier.getIdentifierToken());
 	}
 

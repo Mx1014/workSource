@@ -68,6 +68,10 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 
 -- 园区入驻 add by sw 20170620
 SET @eh_general_forms := (SELECT MAX(id) FROM `eh_general_forms`) + 1;
-INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `form_origin_id`, `form_version`, `template_type`, `template_text`, `status`, `update_time`, `create_time`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`) 
+INSERT INTO `eh_general_forms` (`id`, `namespace_id`, `organization_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `form_name`, `form_origin_id`, `form_version`, `template_type`, `template_text`, `status`, `update_time`, `create_time`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`)
 	VALUES (@eh_general_forms, 0, 0, 0, 'EhLeasePromotions', NULL, NULL, '招租管理', @eh_general_forms, '0', 'DEFAULT_JSON', '[]', '2', '2017-06-10 18:46:36', '2017-06-10 18:45:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 UPDATE eh_lease_configs set display_name_str = '园区介绍, 虚位以待', display_order_str = '1,2';
+
+--  use phone_visit for techpark added by janson
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.qr_driver_ext', 'phone_visit', 'the driver extend of this namespace.(zuolin/phone_visit)');
+
