@@ -166,7 +166,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	    	OrganizationDTO organization = organizationService.getOrganizationById(approvalRequest.getOwnerId());
 	    	cmd.setProjectId(organization.getCommunityId());
 	    	cmd.setProjectType(EntityType.COMMUNITY.getCode());
- 
+	    	cmd.setCurrentOrganizationId(organization.getId());
 			String title = localeStringService.getLocalizedString(PunchConstants.PUNCH_FLOW_TITLE_SCOPE, approvalRequest.getApprovalType().toString(), "zh_CN", "");
 			cmd.setTitle(title);
 	    	cmd.setContent(contentString); 
