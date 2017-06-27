@@ -45,6 +45,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
@@ -73,6 +74,7 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.ShopDTO;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
@@ -108,6 +110,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -119,6 +122,11 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -134,6 +142,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * 
@@ -153,7 +162,9 @@ public class UserServiceImpl implements UserService {
 
 	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
 
-	@Autowired
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    @Autowired
 	private DbProvider dbProvider;
 
 	@Autowired
@@ -272,6 +283,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GroupProvider groupProvider;
+
+    @Autowired
+    private UserIdentifierLogProvider userIdentifierLogProvider;
+
+    @Autowired
+    private UserAppealLogProvider userAppealLogProvider;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -3789,18 +3809,241 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendVerificationCodeByResetIdentifier(SendVerificationCodeByResetIdentifierCommand cmd, HttpServletRequest request) {
+        User currUser = UserContext.current().getUser();
+        if (currUser == null) return;
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(currUser.getId(), IdentifierType.MOBILE.getCode());
 
+        final Long    halfAnHour = 30 * 60 * 1000L;
+        final Long    currUserId = currUser.getId();
+        final Integer regionCode = cmd.getRegionCode();
+        final String  newIdentifier = cmd.getIdentifier();
+        final String  oldIdentifier = userIdentifier.getIdentifierToken();
+        final Integer namespaceId = UserContext.getCurrentNamespaceId();
+        final String  verificationCode = RandomGenerator.getRandomDigitalString(6);
+
+        // 给原来手机号发送短信验证码
+        if (newIdentifier == null) {
+            // this.verifySmsTimes("resetIdentifier", oldIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
+
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldIdentifier);
+            // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+            if (log != null && log.notExpire(halfAnHour) && log.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode()) {
+                log.setVerificationCode(verificationCode);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                userIdentifierLogProvider.updateUserIdentifierLog(log);
+            } else {
+                log = new UserIdentifierLog();
+                log.setClaimStatus(IdentifierClaimStatus.CLAIMING.getCode());
+                log.setVerificationCode(verificationCode);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                log.setRegionCode(regionCode);
+                log.setNamespaceId(namespaceId);
+                log.setIdentifierToken(oldIdentifier);
+                log.setOwnerUid(currUserId);
+                userIdentifierLogProvider.createUserIdentifierLog(log);
+            }
+            this.sendVerificationCodeSms(namespaceId, oldIdentifier, verificationCode);
+        }
+        // 给新手机号发送短信验证码
+        else {
+            // this.verifySmsTimes("resetIdentifier", newIdentifier, request.getHeader(X_EVERHOMES_DEVICE));
+
+            UserIdentifierLog log = userIdentifierLogProvider.findByUserIdAndIdentifier(currUserId, oldIdentifier);
+            // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+            if (log != null && log.notExpire(halfAnHour)
+                    && (log.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()
+                        || log.getClaimStatus() == IdentifierClaimStatus.CLAIMED.getCode())) {
+                log.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+                log.setVerificationCode(verificationCode);
+                log.setIdentifierToken(newIdentifier);
+                log.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                userIdentifierLogProvider.updateUserIdentifierLog(log);
+            } else {
+                LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, newIdentifier={}",
+                        currUser.getId(), newIdentifier);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                        "please try again to the first step");
+            }
+
+            this.sendVerificationCodeSms(namespaceId, newIdentifier, verificationCode);
+        }
     }
 
     @Override
     public void verifyResetIdentifierCode(VerifyResetIdentifierCodeCommand cmd) {
+        User currUser = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        if (currUser == null) return;
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(currUser.getId(), IdentifierType.MOBILE.getCode());
+        UserIdentifierLog log = userIdentifierLogProvider.findByUserId(currUser.getId());
 
+        // 如果半个小时没有完成整个过程，需要从头开始执行整个流程
+        final Long halfAnHour = 30 * 60 * 1000L;
+        if (log != null && log.notExpire(halfAnHour)) {
+            IdentifierClaimStatus claimStatus = IdentifierClaimStatus.fromCode(log.getClaimStatus());
+            switch (claimStatus) {
+                case CLAIMING:
+                    if (log.checkVerificationCode(cmd.getVerificationCode())) {
+                        log.setClaimStatus(IdentifierClaimStatus.VERIFYING.getCode());
+                        userIdentifierLogProvider.updateUserIdentifierLog(log);
+                    } else {
+                        LOGGER.error("verification code incorrect or expired {}", cmd.getVerificationCode());
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED,
+                                "verification code incorrect or expired %s", cmd.getVerificationCode());
+                    }
+                    break;
+                case CLAIMED:
+                    // 检查新手机号是否已经是注册用户
+                    UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, log.getIdentifierToken());
+                    if (newIdentifier != null) {
+                        LOGGER.error("the new identifier are already exist {}", log.getIdentifierToken());
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
+                                "the new identifier are already exist {}", log.getIdentifierToken());
+                    }
+                    if (log.checkVerificationCode(cmd.getVerificationCode())) {
+                        log.setClaimStatus(IdentifierClaimStatus.TAKEN_OVER.getCode());
+                        // 加个事务
+                        dbProvider.execute(r -> {
+                            userIdentifierLogProvider.updateUserIdentifierLog(log);
+                            UserResetIdentifierVo vo = new UserResetIdentifierVo(
+                                    log.getOwnerUid(), userIdentifier.getIdentifierToken(),
+                                    userIdentifier.getRegionCode(), log.getIdentifierToken(), log.getRegionCode());
+                            resetUserIdentifier(currUser, vo);
+                            return true;
+                        });
+                    } else {
+                        LOGGER.error("verification code incorrect or expired {}", cmd.getVerificationCode());
+                        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_VERIFICATION_CODE_INCORRECT_OR_EXPIRED,
+                                "verification code incorrect or expired {}", cmd.getVerificationCode());
+                    }
+                    break;
+                default:
+                    LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, newIdentifier={}",
+                            currUser.getId(), log.getIdentifierToken());
+                    throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                            "please try again to the first step");
+            }
+        } else {
+            LOGGER.error("it is not atomic to reset newIdentifier, userId = {}, log = {}",
+                    currUser.getId(), log);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_PLEASE_TRY_AGAIN_TO_FIRST_STEP,
+                    "please try again to the first step");
+        }
+    }
+
+    private void resetUserIdentifier(User user, UserResetIdentifierVo vo) {
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        userIdentifier.setIdentifierToken(vo.getNewIdentifier());
+        userIdentifier.setRegionCode(vo.getNewRegionCode());
+        userProvider.updateIdentifier(userIdentifier);
+        // 发布修改手机号事件
+        applicationEventPublisher.publishEvent(new ResetUserIdentifierEvent(vo));
     }
 
     @Override
     public UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd) {
+        validate(cmd);
+        UserAppealLog log = new UserAppealLog();
+        log.setNamespaceId(UserContext.getCurrentNamespaceId());
+        log.setName(cmd.getName());
+        log.setEmail(cmd.getEmail());
+        log.setNewIdentifier(cmd.getNewIdentifier());
+        log.setNewRegionCode(cmd.getNewRegionCode());
+        log.setOldIdentifier(cmd.getOldIdentifier());
+        log.setOldRegionCode(cmd.getOldRegionCode());
+        log.setOwnerUid(UserContext.current().getUser().getId());
+        log.setRemarks(cmd.getRemarks());
+        log.setStatus(UserAppealLogStatus.WAITING_FOR_APPROVAL.getCode());
 
-        return null;
+        userAppealLogProvider.createUserAppealLog(log);
+        return toUserAppealLogDTO(log);
+    }
+
+    @Override
+    public ListUserAppealLogsResponse listUserAppealLogs(ListUserAppealLogsCommand cmd) {
+	    validate(cmd);
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getAnchor());
+
+        List<UserAppealLog> logList = userAppealLogProvider.listUserAppealLog(locator, cmd.getStatus(), pageSize);
+
+        List<UserAppealLogDTO> dtoList = logList.stream().map(this::toUserAppealLogDTO).collect(Collectors.toList());
+
+        ListUserAppealLogsResponse response = new ListUserAppealLogsResponse();
+        response.setAppealLogs(dtoList);
+        response.setNextPageAnchor(locator.getAnchor());
+        return response;
+    }
+
+    @Override
+    public UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd) {
+        validate(cmd);
+        UserAppealLogStatus status = UserAppealLogStatus.fromCode(cmd.getStatus());
+        if (status != null) {
+            Tuple<UserAppealLog, Boolean> tuple = coordinationProvider.getNamedLock(
+                    CoordinationLocks.USER_APPEAL_LOG.getCode() + cmd.getId()).enter(() -> {
+                UserAppealLog log = userAppealLogProvider.findUserAppealLogById(cmd.getId());
+                if (log != null && !Objects.equals(log.getStatus(), cmd.getStatus())) {
+                    log.setStatus(status.getCode());
+                    userAppealLogProvider.updateUserAppealLog(log);
+
+                    // 如果是通过，则重置用户手机号
+                    if (status == UserAppealLogStatus.ACTIVE) {
+                        Integer namespaceId = UserContext.getCurrentNamespaceId();
+                        // 检查申诉新手机号是否已经是注册用户
+                        UserIdentifier newIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, log.getNewIdentifier());
+                        if (newIdentifier != null) {
+                            LOGGER.error("the new identifier are already exist {}", log.getNewIdentifier());
+                            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_NEW_IDENTIFIER_USER_EXIST,
+                                    "the new identifier are already exist {}", log.getNewIdentifier());
+                        }
+                        User user = userProvider.findUserById(log.getOwnerUid());
+                        UserResetIdentifierVo vo = new UserResetIdentifierVo(
+                                log.getOwnerUid(), log.getOldIdentifier(),
+                                log.getOldRegionCode(), log.getNewIdentifier(), log.getNewRegionCode());
+                        resetUserIdentifier(user, vo);
+                        // 把当前用户退出登录
+                        List<UserLogin> userLogins = listUserLogins(user.getId());
+                        userLogins.forEach(this::logoff);
+                    }
+                }
+                return log;
+            });
+            if (tuple.second() && tuple.first() != null) {
+                // 发消息或者发短信
+                sendMessageOrSmsByResetIdentifier(status, tuple.first());
+                return toUserAppealLogDTO(tuple.first());
+            }
+        }
+        LOGGER.error("update user appeal log failed, cmd = {}", cmd);
+        throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_UPDATE_USER_APPEAL_LOG,
+                "update user appeal log failed");
+    }
+
+    private void sendMessageOrSmsByResetIdentifier(UserAppealLogStatus status, UserAppealLog log) {
+        User user = UserContext.current().getUser();
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if (user != null) {
+            locale = user.getLocale();
+        }
+        switch (status) {
+            case ACTIVE:
+                List<Tuple<String, Object>> variables = smsProvider.toTupleList("newIdentifier", log.getNewIdentifier());
+                String templateScope = SmsTemplateCode.SCOPE;
+                int templateId = SmsTemplateCode.RESET_IDENTIFIER_APPEAL_SUCCESS_CODE;
+                smsProvider.sendSms(log.getNamespaceId(), log.getNewIdentifier(), templateScope, templateId, locale, variables);
+                break;
+            case INACTIVE:
+                String messageBody = localeStringService.getLocalizedString(UserLocalStringCode.SCOPE, UserLocalStringCode.REJECT_APPEAL_IDENTIFIER_CODE, locale, "");
+                sendMessageToUser(log.getOwnerUid(), messageBody, MessagingConstants.MSG_FLAG_STORED_PUSH);
+                break;
+        }
+    }
+
+    private UserAppealLogDTO toUserAppealLogDTO(UserAppealLog log) {
+        return ConvertHelper.convert(log, UserAppealLogDTO.class);
     }
 
     private String parseUri(String uri, String ownerType, Long ownerId) {
@@ -3868,4 +4111,33 @@ public class UserServiceImpl implements UserService {
 	    
 	    return resp;
 	}
+
+    // 参数校验方法
+    // 可以校验带bean validation 注解的对象
+    // 校验失败, 抛出异常, 异常信息附带参数值信息
+    private void validate(Object o) {
+        Set<ConstraintViolation<Object>> result = validator.validate(o);
+
+        for (ConstraintViolation<Object> v : result) {
+            ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();
+            String constraintAnnotationClassName = constraintDescriptor.getAnnotation().annotationType().getName();
+            switch (constraintAnnotationClassName) {
+                // 参数长度检查
+                case "javax.validation.constraints.Size":
+                    Size size = (Size) constraintDescriptor.getAnnotation();
+                    int max = size.max();
+                    if (max > 0) {
+                        LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                        throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH,
+                                "Parameter over length: [ %s ]", v.getPropertyPath());
+                    }
+                    break;
+                // 其他参数检查
+                default:
+                    LOGGER.error("Invalid parameter {} [ {} ]", v.getPropertyPath(), v.getInvalidValue());
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "Invalid parameter %s [ %s ]", v.getPropertyPath(), v.getInvalidValue());
+            }
+        }
+    }
 }

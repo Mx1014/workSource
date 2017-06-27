@@ -3,34 +3,33 @@ package com.everhomes.rest.user;
 
 import com.everhomes.util.StringHelper;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * <ul>
+ *     <li>uid: user id</li>
  *     <li>oldIdentifier: 旧手机号</li>
  *     <li>oldRegionCode: oldRegionCode</li>
  *     <li>newIdentifier: 新手机号</li>
  *     <li>newRegionCode: newRegionCode</li>
- *     <li>name: 名称</li>
- *     <li>email: 邮箱</li>
- *     <li>remarks: 备注</li>
  * </ul>
  */
-public class CreateResetIdentifierAppealCommand {
+public class UserResetIdentifierVo {
 
-    @NotNull
+    private Long uid;
     private String oldIdentifier;
-    @NotNull
     private Integer oldRegionCode;
-    @NotNull
     private String newIdentifier;
-    @NotNull
     private Integer newRegionCode;
-    @NotNull
-    private String name;
-    @NotNull
-    private String email;
-    private String remarks;
+
+    public UserResetIdentifierVo(Long uid, String oldIdentifier, Integer oldRegionCode, String newIdentifier, Integer newRegionCode) {
+        this.uid = uid;
+        this.oldIdentifier = oldIdentifier;
+        this.oldRegionCode = oldRegionCode;
+        this.newIdentifier = newIdentifier;
+        this.newRegionCode = newRegionCode;
+    }
+
+    public UserResetIdentifierVo() {
+    }
 
     public String getOldIdentifier() {
         return oldIdentifier;
@@ -64,28 +63,12 @@ public class CreateResetIdentifierAppealCommand {
         this.newRegionCode = newRegionCode;
     }
 
-    public String getEmail() {
-        return email;
+    public Long getUid() {
+        return uid;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 
     @Override

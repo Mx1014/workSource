@@ -185,4 +185,18 @@ public interface UserService {
      * @return
      */
     UserAppealLogDTO createResetIdentifierAppeal(CreateResetIdentifierAppealCommand cmd);
+
+    /**
+     * 申诉列表
+     * @param cmd
+     * @return
+     */
+    ListUserAppealLogsResponse listUserAppealLogs(ListUserAppealLogsCommand cmd);
+
+    /**
+     * 修改申诉状态
+     * @param cmd
+     * @return
+     */
+    UserAppealLogDTO updateUserAppealLog(UpdateUserAppealLogCommand cmd);
 }

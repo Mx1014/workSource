@@ -473,12 +473,12 @@ public class UserAdminController extends ControllerBase {
     @RestReturn(ListUserAppealLogsResponse.class)
     public RestResponse listUserAppealLogs(@Valid ListUserAppealLogsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
-        RestResponse response = new RestResponse();
+        ListUserAppealLogsResponse resp = userService.listUserAppealLogs(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-
         return response;
     }
 
@@ -490,12 +490,12 @@ public class UserAdminController extends ControllerBase {
     @RestReturn(UserAppealLogDTO.class)
     public RestResponse listUserAppealLogs(@Valid UpdateUserAppealLogCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
-        RestResponse response = new RestResponse();
+        UserAppealLogDTO dto = userService.updateUserAppealLog(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-
         return response;
     }
 }

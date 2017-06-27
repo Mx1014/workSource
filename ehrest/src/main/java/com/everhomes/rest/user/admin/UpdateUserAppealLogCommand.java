@@ -3,6 +3,8 @@ package com.everhomes.rest.user.admin;
 
 import com.everhomes.util.StringHelper;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -11,7 +13,9 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateUserAppealLogCommand {
 
+    @NotNull
     private Long id;
+    @NotNull
     private Byte status;
 
     public Long getId() {
