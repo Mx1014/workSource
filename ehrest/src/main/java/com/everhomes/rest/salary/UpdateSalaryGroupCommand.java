@@ -43,6 +43,14 @@ public class UpdateSalaryGroupCommand {
 		this.salaryGroupEntity = salaryGroupEntity;
 	}
 
+	public String getSalaryGroupName() {
+		return salaryGroupName;
+	}
+
+	public void setSalaryGroupName(String salaryGroupName) {
+		this.salaryGroupName = salaryGroupName;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

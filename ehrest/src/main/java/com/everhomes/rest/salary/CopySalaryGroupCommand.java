@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  *
  * <ul>参数:
- * <li>gitsalaryGroupId: 薪酬批次id</li>
+ * <li>salaryGroupId: 薪酬批次id</li>
  * <li>salaryGroupName: 薪酬组名称</li>
  * </ul>
  */

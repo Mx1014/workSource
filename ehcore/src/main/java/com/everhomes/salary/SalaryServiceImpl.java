@@ -98,8 +98,12 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public UpdateSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
-        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-
+//        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+        if(!StringUtils.isEmpty(cmd.getSalaryGroupId())){
+            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+            AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
+            addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
+        }
 
 		return new UpdateSalaryGroupResponse();
 	}
@@ -109,14 +113,11 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
             //  组织架构删除薪酬组
-//            this.organizationService.deletexxx;
-            List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-            //entity.setStatus();
-            for (SalaryGroupEntity entity : entities) {
-                //entity.setStatus();
-                //  删除薪酬组定义的字段
-                this.salaryGroupEntityProvider.deleteSalaryGroupEntity(entity);
-            }
+//            this.organizationService.deletexxx(cmd.getSalaryGroupId());
+
+            //  删除薪酬组定义的字段
+            this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+
             //  删除个人设定中与薪酬组相关的字段
             this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(cmd.getSalaryGroupId());
         }
@@ -219,7 +220,7 @@ public class SalaryServiceImpl implements SalaryService {
                     this.createSalaryEmployeeOriginVal(r, cmd);
                 });
             }else{
-                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByGroupId(userId);
+                this.salaryEmployeeOriginValProvider.deleteSalaryEmployeeOriginValByUserId(userId);
                 cmd.getEmployeeOriginVal().stream().forEach(s ->{
                     this.createSalaryEmployeeOriginVal(s,cmd);
                 });
