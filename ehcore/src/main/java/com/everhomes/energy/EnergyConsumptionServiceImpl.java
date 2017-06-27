@@ -2634,8 +2634,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
         dto.setNamespaceId(namespaceId);
         dto.setMeterId(id);
-        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
-        return qrCode;
+//        String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
+        return dto.toString();
 
     }
 
