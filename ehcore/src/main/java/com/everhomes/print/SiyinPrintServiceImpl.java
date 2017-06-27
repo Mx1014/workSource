@@ -121,6 +121,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	private static final String PRINT_SUBJECT = "print";
 	//用户登录司印使用的用户id-园区id的分割字符串。
 	public static final String PRINT_LOGON_ACCOUNT_SPLIT = "-";
+	public static final String PRINT_COMPANY_SPLIT = ",";
 	
 	@Autowired
 	private SiyinPrintEmailProvider siyinPrintEmailProvider;
@@ -234,7 +235,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}
 		response.setPrintRecordsList(printOrdersList.stream().map(r->{
 			PrintRecordDTO dto = ConvertHelper.convert(r, PrintRecordDTO.class);
-			dto.setCreatorCompanys(new ArrayList<String>(Arrays.asList(r.getCreatorCompany().split(PRINT_LOGON_ACCOUNT_SPLIT))));
+			dto.setCreatorCompanys(new ArrayList<String>(Arrays.asList(r.getCreatorCompany().split(PRINT_COMPANY_SPLIT))));
 			return dto;
 		}).collect(Collectors.toList()));
 		return response;

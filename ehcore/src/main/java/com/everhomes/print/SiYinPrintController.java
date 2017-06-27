@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.print;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
@@ -45,6 +48,7 @@ import com.everhomes.rest.print.ListPrintingJobsResponse;
 import com.everhomes.rest.print.LogonPrintCommand;
 import com.everhomes.rest.print.PayPrintOrderCommand;
 import com.everhomes.rest.print.PrintImmediatelyCommand;
+import com.everhomes.rest.print.PrintSettingColorTypeDTO;
 import com.everhomes.rest.print.UnlockPrinterCommand;
 import com.everhomes.rest.print.UpdatePrintSettingCommand;
 import com.everhomes.rest.print.UpdatePrintUserEmailCommand;
@@ -358,7 +362,11 @@ public class SiYinPrintController extends ControllerBase {
     @RestReturn(String.class)
     @RequireAuthentication(false)
     public RestResponse mfpLogNotification(@RequestParam(value="jobData", required=true) String jobData){
-        RestResponse restResponse = new RestResponse();
+    	Map<String, PrintSettingColorTypeDTO> map = new HashMap<String, PrintSettingColorTypeDTO>();
+    	map.put("athree", new PrintSettingColorTypeDTO());
+    	map.put("afour", new PrintSettingColorTypeDTO());
+    	map.put("afive", new PrintSettingColorTypeDTO());
+        RestResponse restResponse = new RestResponse(map);
         return restResponse;
     }
 }

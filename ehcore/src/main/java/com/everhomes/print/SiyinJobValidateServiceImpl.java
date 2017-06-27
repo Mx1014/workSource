@@ -275,7 +275,7 @@ public class SiyinJobValidateServiceImpl {
     		String company = "";
     		if(list!=null)
 	    		for (OrganizationSimpleDTO org : list) {
-	    			company+=org.getName()+SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT;
+	    			company+=org.getName()+SiyinPrintServiceImpl.PRINT_COMPANY_SPLIT;
 				}
     		order.setCreatorCompany(company);
         }
@@ -313,12 +313,15 @@ public class SiyinJobValidateServiceImpl {
 		}
 		list.add(record);
 		order.setOrderTotalFee(calculateOrderTotalAmount(list,priceMap));
+		//详情
 		order.setDetail(processDetail(list, PrintJobTypeType.fromCode(record.getJobType())));
+		//用户名称冗余存储。
 		if(order.getNickName()==null){
 			User user = userProvider.findUserById(record.getCreatorUid());
     		order.setNickName(user == null?"":user.getNickName());
     		
 		}
+		//创建者所在公司，冗余存储。
 		if(order.getCreatorCompany() == null || order.getCreatorCompany().trim().length()==0){
 			ListUserRelatedOrganizationsCommand relatedCmd = new ListUserRelatedOrganizationsCommand();
 			User user = new User();
@@ -327,7 +330,7 @@ public class SiyinJobValidateServiceImpl {
 			String company = "";
 			if(listdtos!=null)
 				for (OrganizationSimpleDTO org : listdtos) {
-					company+=org.getName()+SiyinPrintServiceImpl.PRINT_LOGON_ACCOUNT_SPLIT;
+					company+=org.getName()+SiyinPrintServiceImpl.PRINT_COMPANY_SPLIT;
 				}
 			order.setCreatorCompany(company);
 		}

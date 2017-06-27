@@ -19,7 +19,8 @@ INSERT INTO `eh_siyin_print_printers` (`id`, `namespace_id`, `owner_type`, `owne
 -- by dengs,云打印菜单配置 20170626
 -- 添加菜单
 set @menu_id = 41400;
-set @namespace_id = 1000000;
+-- 按照产品要求，添加菜单到左邻域
+set @namespace_id = 0;
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES (@menu_id, '云打印', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '499', @menu_id);
 
