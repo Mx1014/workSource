@@ -1363,7 +1363,7 @@ public class PunchServiceImpl implements PunchService {
 		//是否有wifi打卡,如果是判断wifi是否符合
 		
 		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
-		if(null != wifis){
+		if(null != wifis && null != cmd.getWifiMac()){
 			for(PunchWifi wifi : wifis){
 				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
 					return ClockCode.SUCESS;
