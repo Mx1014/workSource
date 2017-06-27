@@ -3598,8 +3598,15 @@ public class ForumServiceImpl implements ForumService {
 //                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
 //                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
 
-                        //改用直接传输的方式，因为只要用户请求一次就可以看到数据了。并且增加微信报名活动后，涉及到报名取消支付等操作，这些参数总会暴露的。并添加namespaceId   add by yanjun 20170620
-                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                        //改用直接传输的方式。因为增加微信报名活动后，涉及到报名取消支付等操作，这些操作都要编码的话，工作量会巨大。
+                        //添加命名空间ns
+                        // 增加是否支持微信报名wechatSignup  add by yanjun 20170620
+                        ActivityDTO activity = activityService.findSnapshotByPostId(post.getId());
+                        Byte wechatSignup = 0;
+                        if(activity != null && activity.getWechatSignup() != null){
+                            wechatSignup = activity.getWechatSignup();
+                        }
+                        post.setShareUrl(homeUrl + relativeUrl + "?ns=" + post.getNamespaceId()+"&forumId=" + post.getForumId() + "&topicId=" + post.getId() + "&wechatSignup=" + wechatSignup);
                 	} else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}

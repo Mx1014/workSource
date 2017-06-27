@@ -6,6 +6,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.everhomes.rest.activity.*;
+import com.everhomes.user.User;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +24,6 @@ import com.everhomes.hotTag.HotTags;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityLocalStringCode;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.forum.PostContentType;
@@ -333,6 +329,20 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         } catch (ParseException e) {
         	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         }
+
+        //发布活动的时候没有选择是否支持微信，则选择改与空间默认的， add by yanjun 20170627
+        if(cmd.getWechatSignup() == null){
+			GetRosterOrderSettingCommand getRosterOrderSettingCommand = new GetRosterOrderSettingCommand();
+			getRosterOrderSettingCommand.setNamespaceId(UserContext.getCurrentNamespaceId());
+			RosterOrderSettingDTO rosterOrderSettingDTO = activityService.getRosterOrderSetting(getRosterOrderSettingCommand);
+
+			if(rosterOrderSettingDTO != null){
+				cmd.setWechatSignup(rosterOrderSettingDTO.getWechatSignup());
+			}else{
+				cmd.setWechatSignup(WechatSignupFlag.NO.getCode());
+			}
+
+		}
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         

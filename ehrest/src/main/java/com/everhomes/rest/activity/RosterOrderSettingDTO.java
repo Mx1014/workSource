@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>days: 天数</li>
  * <li>hours: 小时数</li>
  * <li>time: 转换后的time</li>
+ * <li>wechatSignup: 是否支持微信报名，0-不支持，1-支持 参考  参考{@link com.everhomes.rest.activity.WechatSignupFlag }</li>
  * </ul>
  */
 public class RosterOrderSettingDTO {
@@ -17,6 +18,7 @@ public class RosterOrderSettingDTO {
 	private Integer days;
 	private Integer hours;
 	private Long time;
+	private Byte wechatSignup;
 	
 	public RosterOrderSettingDTO() {
 		super();
@@ -28,6 +30,15 @@ public class RosterOrderSettingDTO {
 		this.days = days;
 		this.hours = hours;
 		this.time = time;
+	}
+
+	public RosterOrderSettingDTO(Integer namespaceId, Integer days, Integer hours, Long time, Byte wechatSignup) {
+		super();
+		this.namespaceId = namespaceId;
+		this.days = days;
+		this.hours = hours;
+		this.time = time;
+		this.wechatSignup = wechatSignup;
 	}
 
 	public Long getTime() {
@@ -56,7 +67,15 @@ public class RosterOrderSettingDTO {
 	public void setHours(Integer hours) {
 		this.hours = hours;
 	}
-	
+
+	public Byte getWechatSignup() {
+		return wechatSignup;
+	}
+
+	public void setWechatSignup(Byte wechatSignup) {
+		this.wechatSignup = wechatSignup;
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

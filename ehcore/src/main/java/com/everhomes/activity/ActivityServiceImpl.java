@@ -4506,6 +4506,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setTime(((long)( cmd.getDays()*24+cmd.getHours()))*3600*1000);
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.updateRosterOrderSetting(rosterOrderSetting);
 		}else {
@@ -4516,6 +4517,7 @@ public class ActivityServiceImpl implements ActivityService {
 			rosterOrderSetting.setCreatorUid(UserContext.current().getUser().getId());
 			rosterOrderSetting.setUpdateTime(rosterOrderSetting.getCreateTime());
 			rosterOrderSetting.setOperatorUid(rosterOrderSetting.getCreatorUid());
+			rosterOrderSetting.setWechatSignup(cmd.getWechatSignup());
 			
 			rosterOrderSettingProvider.createRosterOrderSetting(rosterOrderSetting);
 		}
@@ -4537,10 +4539,11 @@ public class ActivityServiceImpl implements ActivityService {
 		if (rosterOrderSetting != null) {
 			Integer days = (int) (rosterOrderSetting.getTime() / 1000 / 3600 / 24);
 			Integer hours  = (int) (rosterOrderSetting.getTime() / 1000 / 3600 % 24);
-			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours, rosterOrderSetting.getTime());
+			return new RosterOrderSettingDTO(rosterOrderSetting.getNamespaceId(), days, hours,
+					rosterOrderSetting.getTime(), rosterOrderSetting.getWechatSignup());
 		}
 		
-		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L);
+		return new RosterOrderSettingDTO(cmd.getNamespaceId(), 1, 0, (1*24)*3600*1000L, WechatSignupFlag.NO.getCode());
 	}
 	
 
@@ -4562,10 +4565,12 @@ public class ActivityServiceImpl implements ActivityService {
 		orderCommand.setNamespaceId(cmd.getNamespaceId());
 		orderCommand.setDays(cmd.getOrderDays());
 		orderCommand.setHours(cmd.getOrderHours());
+		orderCommand.setWechatSignup(cmd.getWechatSignup());
 		RosterOrderSettingDTO orderResponse = this.setRosterOrderSetting(orderCommand);
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}
@@ -4588,6 +4593,7 @@ public class ActivityServiceImpl implements ActivityService {
 		timeResponse.setOrderDays(orderResponse.getDays());
 		timeResponse.setOrderHours(orderResponse.getHours());
 		timeResponse.setOrderTime(orderResponse.getTime());
+		timeResponse.setWechatSignup(orderResponse.getWechatSignup());
 		
 		return timeResponse;
 	}  
