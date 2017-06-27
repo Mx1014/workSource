@@ -1351,7 +1351,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                                 UserContext.current().getUser().getLocale(),"Enable request flow not found."));
             }
             CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-
+            createFlowCaseCommand.setCurrentOrganizationId(request.getOwnerId());
             createFlowCaseCommand.setTitle("领用申请");
             createFlowCaseCommand.setApplyUserId(request.getCreatorUid());
             createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
