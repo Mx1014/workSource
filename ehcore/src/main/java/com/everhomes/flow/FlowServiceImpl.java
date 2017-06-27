@@ -1741,6 +1741,7 @@ public class FlowServiceImpl implements FlowService {
 
             messageDto.setMeta(meta);
 
+            flowListenerManager.onFlowMessageSend(ctx, messageDto);
             messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
                     userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
         }
@@ -1753,7 +1754,7 @@ public class FlowServiceImpl implements FlowService {
             ft.setJson(dto.toString());
             Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60 * 1000L;
             ft.setTimeoutTick(new Timestamp(timeoutTick));
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         } else {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("flowMessageTimeout remindTick did not run, ftId={}, dto={}", ft.getId(), dto);
@@ -2835,7 +2836,7 @@ public class FlowServiceImpl implements FlowService {
                 if (sel.getSourceIdB() != null) {
                     if (FlowUserSourceType.SOURCE_DUTY_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
                         FlowCase flowCase = ctx.getFlowCase();
-                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId());
+                        List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId(), sel.getSourceIdA());
                         users.addAll(tmp);
                         continue;
                     }
@@ -2871,10 +2872,12 @@ public class FlowServiceImpl implements FlowService {
 
                     List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId, ctx.getFlowGraph().getFlow());
                     users.addAll(tmp);
+                } else if (FlowUserSourceType.SOURCE_DUTY_MANAGER.getCode().equals(sel.getSourceTypeA())) {
+                    List<Long> idList = flowUserSelectionService.findModuleDutyManagers(departmentId, flow.getModuleId(), flow.getProjectType(), flow.getProjectId());
+                    users.addAll(idList);
                 } else {
                     LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
                 }
-
             } else if (FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
                 if (sel.getSourceIdA() != null) {
                     FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
@@ -3026,7 +3029,7 @@ public class FlowServiceImpl implements FlowService {
 
         //flush timeouts
         for (FlowTimeout ft : ctx.getTimeouts()) {
-            flowTimeoutService.pushTimeout(ft, ctx);
+            flowTimeoutService.pushTimeout(ft);
         }
     }
 

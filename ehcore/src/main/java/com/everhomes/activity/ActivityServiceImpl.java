@@ -367,6 +367,9 @@ public class ActivityServiceImpl implements ActivityService {
     //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
+
+    	//检查版本  add by yanjun 20170626
+    	checkPayVersion(cmd);
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
@@ -537,6 +540,31 @@ public class ActivityServiceImpl implements ActivityService {
 	            return dto;
 	        });
         }).first();
+	 }
+
+
+	 private void checkPayVersion(ActivitySignupCommand cmd){
+		 Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		 String version = UserContext.current().getVersion();
+
+		 if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() ){
+		 	return;
+		 }
+
+		 if(version == null){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
+
+		 VersionRange versionRange = new VersionRange("["+version+","+version+")");
+		 VersionRange versionRangeMin = new VersionRange("[4.5.4,4.5.4)");
+
+		 if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
 	 }
     
     /**

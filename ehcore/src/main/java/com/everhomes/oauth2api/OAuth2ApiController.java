@@ -34,16 +34,28 @@ public class OAuth2ApiController extends ControllerBase {
     @Autowired
     private UserService userService;
 
+    /**
+     * <b>URL: /oauth2api/trd/getUserInfo</b>
+     * <p>给电商用的获取用户信息的接口</p>
+     */
     @RequestMapping("getUserInfo")
     @RestReturn(value=UserInfo.class)
     public RestResponse getUserInfo(HttpServletRequest request, HttpServletResponse response) {
         AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
-
-        //UserInfo info = this.userService.getUserInfo(accessToken.getGrantorUid());
         UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
+        return new RestResponse(info);
+    }
 
+    /**
+     * <b>URL: /oauth2api/trd/userInfo</b>
+     * <p>给第三方的获取用户信息，把一些敏感信息去掉了</p>
+     */
+    @RequestMapping("trd/userInfo")
+    @RestReturn(value=UserInfo.class)
+    public RestResponse userInfo() {
+        AccessToken accessToken = OAuth2UserContext.current().getAccessToken();
+        UserInfo info = this.userService.getUserSnapshotInfoWithPhone(accessToken.getGrantorUid());
         sensitiveClean(info);
-
         return new RestResponse(info);
     }
 

@@ -1,5 +1,9 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
+
 /**
  * <ul>
  * <li>id: 任务log Id</li>
@@ -10,6 +14,9 @@ package com.everhomes.rest.techpark.expansion;
  * <li>parkIndroduceFlag: 园区介绍是否显示</li>
  * <li>renewFlag: 续租是否显示</li>
  * <li>areaSearchFlag: 是否支持面积搜索</li>
+ * <li>consultFlag: 是否支持面积搜索</li>
+ * <li>displayNames: 显示名称字符串</li>
+ * <li>displayOrders: 显示排序，与名称对应</li>
  * </ul>
  */
 public class LeasePromotionConfigDTO {
@@ -21,6 +28,37 @@ public class LeasePromotionConfigDTO {
     private Byte parkIndroduceFlag;
     private Byte renewFlag;
     private Byte areaSearchFlag;
+    private Byte consultFlag;
+//    private String displayNameStr;
+//    private String displayOrderStr;
+    @ItemType(String.class)
+    private List<String> displayNames;
+    @ItemType(Integer.class)
+    private List<Integer> displayOrders;
+
+    public Byte getConsultFlag() {
+        return consultFlag;
+    }
+
+    public void setConsultFlag(Byte consultFlag) {
+        this.consultFlag = consultFlag;
+    }
+
+    public List<String> getDisplayNames() {
+        return displayNames;
+    }
+
+    public void setDisplayNames(List<String> displayNames) {
+        this.displayNames = displayNames;
+    }
+
+    public List<Integer> getDisplayOrders() {
+        return displayOrders;
+    }
+
+    public void setDisplayOrders(List<Integer> displayOrders) {
+        this.displayOrders = displayOrders;
+    }
 
     public Byte getAreaSearchFlag() {
         return areaSearchFlag;

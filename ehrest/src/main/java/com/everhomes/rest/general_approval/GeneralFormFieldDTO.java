@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
+ * <li>fieldType: 字段类型 {@link GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字，对应的 form 表单里面的名字</li>
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
@@ -15,14 +15,14 @@ import com.everhomes.util.StringHelper;
  * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO}
  * 日期类型：{@link com.everhomes.rest.general_approval.GeneralFormDateDTO}
  * 下拉框类型：{@link com.everhomes.rest.general_approval.GeneralFormDropBoxDTO}
- * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO} 
- * </li>
+ * 子表单类型：{@link com.everhomes.rest.general_approval.GeneralFormSubformDTO}</li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
- * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
- * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
- * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
- * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
+ * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link GeneralFormDataVisibleType}</li>
+ * <li>validatorType: 校验方式 {@link GeneralFormValidatorType}</li>
+ * <li>dataSourceType: 数据源类型 {@link GeneralFormDataSourceType}</li>
+ * <li>renderType: 渲染类型，{@link GeneralFormRenderType}</li>
+ * <li>fieldValue: 字段值（查询详情时才会有值）</li>
  * </ul>
  * @author janson
  *
@@ -40,6 +40,8 @@ public class GeneralFormFieldDTO {
 	private String dataSourceType;
 	private String validatorType;
 	private String fieldExtra;
+
+	private String fieldValue;
 
 	public String getFieldName() {
 		return fieldName;
@@ -135,6 +137,14 @@ public class GeneralFormFieldDTO {
 
 	public void setRenderType(String renderType) {
 		this.renderType = renderType;
+	}
+
+	public String getFieldValue() {
+		return fieldValue;
+	}
+
+	public void setFieldValue(String fieldValue) {
+		this.fieldValue = fieldValue;
 	}
 
 	@Override

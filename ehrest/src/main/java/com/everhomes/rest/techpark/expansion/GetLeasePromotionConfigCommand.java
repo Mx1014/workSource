@@ -1,7 +1,11 @@
 package com.everhomes.rest.techpark.expansion;
 
+import com.everhomes.util.StringHelper;
+
 /**
- * Created by Administrator on 2017/3/15.
+ * <ul>
+ * <li>namespaceId：域空间id</li>
+ * </ul>
  */
 public class GetLeasePromotionConfigCommand {
     private Integer namespaceId;
@@ -12,5 +16,10 @@ public class GetLeasePromotionConfigCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

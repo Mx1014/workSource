@@ -1,8 +1,7 @@
 package com.everhomes.rest.general_approval;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * <ul>
@@ -11,14 +10,24 @@ import com.everhomes.util.StringHelper;
  * <li>USER_COMPANY: 用户所在公司</li>
  * <li>SOURCE_ID: 来源id</li>
  * <li>USER_ADDRESS: 楼栋门牌</li>
+ * <li>ORGANIZATION_ID: 公司id</li>
+ * <li>CUSTOM_DATA: 自定义data，定义成一个json串，可以传对接业务额外的一些数据，比如园区入驻提交表单需要传来源类型 {"sourceType": "for_rent"}</li>
+ * <li>LEASE_PROMOTION_BUILDING: 楼栋名称（园区入驻专用）</li>
+ * <li>LEASE_PROMOTION_APARTMENT: 门牌号（园区入驻专用）</li>
+ * <li>LEASE_PROMOTION_DESCRIPTION: 备注（园区入驻专用）</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormDataSourceType {
- 	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), 
-	SOURCE_ID("SOURCE_ID"), ORGANIZATION_ID("ORGANIZATION_ID"), USER_ADDRESS("USER_ADDRESS");
-	
+	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), SOURCE_ID("SOURCE_ID"),
+	ORGANIZATION_ID("ORGANIZATION_ID"), USER_ADDRESS("USER_ADDRESS"), CUSTOM_DATA("CUSTOM_DATA"),
+	/*----- 园区入驻 ----*/
+	LEASE_PROMOTION_BUILDING("LEASE_PROMOTION_BUILDING"), LEASE_PROMOTION_APARTMENT("LEASE_PROMOTION_APARTMENT"),
+	LEASE_PROMOTION_DESCRIPTION("LEASE_PROMOTION_DESCRIPTION")
+	/*----- 园区入驻 ----*/
+	;
+
 	private String code;
 	
 	private GeneralFormDataSourceType(String code){

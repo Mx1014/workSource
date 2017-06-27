@@ -44,19 +44,11 @@ public class FlowTimeoutJob extends QuartzJobBean {
             if (flowTimeoutProvider.deleteIfValid(ftId)) {
                 FlowTimeout ft = flowTimeoutProvider.getFlowTimeoutById(ftId);
 
-                // FlowVersionVO flowVersionVO = (FlowVersionVO) StringHelper.fromJsonString(ft.getJson(), FlowVersionVO.class);
-                // Integer ftFlowVersion = flowVersionVO.flowVersion;
-                // Integer currFlowVersion = ctx.getFlowCase().getFlowVersion();
-
-                // 当前的flowVersion和ft的flowVersion一致时才执行
-                // if (currFlowVersion.equals(ftFlowVersion)) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("FlowTimeoutAction.run success ft = {}", ft);
-                    }
-
-                    //delete ok, means we take it's owner
-                    flowTimeoutService.processTimeout(ft);
-                // }
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("FlowTimeoutAction.run success ft = {}", ft);
+                }
+                //delete ok, means we take it's owner
+                flowTimeoutService.processTimeout(ft);
             } else {
                 LOGGER.warn("FlowTimeoutAction.run failure timeoutId = {}", ftId);
             }

@@ -1398,6 +1398,11 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_WAREHOUSE_UNITS.ID.max()).from(Tables.EH_WAREHOUSE_UNITS).fetchOne().value1();
 
         });
+
+        syncTableSequence(null, EhSmsLogs.class, Tables.EH_SMS_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SMS_LOGS.ID.max()).from(Tables.EH_SMS_LOGS).fetchOne().value1();
+
+        });
     }
 
     @SuppressWarnings("rawtypes")

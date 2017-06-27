@@ -7,6 +7,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationOwnerDTO;
 import com.everhomes.rest.organization.pm.*;
@@ -1981,6 +1982,15 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
     }
 
     @Override
+	public OrganizationOwner findOrganizationOwnerById(Long organizationOwnerId) {
+    	  DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+          return context.select().from(Tables.EH_ORGANIZATION_OWNERS)
+                  .where(Tables.EH_ORGANIZATION_OWNERS.ID.eq(organizationOwnerId))
+                  .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
+                  .fetchOneInto(OrganizationOwner.class);
+	}
+
+	@Override
     public List<EhParkingCardCategories> listParkingCardCategories() {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhParkingCardCategoriesDao dao = new EhParkingCardCategoriesDao(context.configuration());

@@ -1,0 +1,38 @@
+package com.everhomes.rest.general_approval;
+
+import com.everhomes.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+
+/**
+ * <ul>
+ * <li>LEASE_PROMOTION: 招租管理</li>
+ * </ul>
+ * @author janson
+ *
+ */
+public enum GeneralFormSourceType {
+	LEASE_PROMOTION("EhLeasePromotions"), GENERAL_APPROVE("GENERAL_APPROVE"), BUILDING("EhBuildings");
+
+	private String code;
+
+	private GeneralFormSourceType(String code){
+		this.code = code;
+	}
+	
+	public String getCode() {
+		return code;
+	}
+	
+	public static GeneralFormSourceType fromCode(String code) {
+		for(GeneralFormSourceType v : GeneralFormSourceType.values()) {
+			if(StringUtils.equals(v.getCode(), code))
+				return v;
+		}
+		return null;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+}

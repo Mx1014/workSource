@@ -1,24 +1,18 @@
 package com.everhomes.general_approval;
 
+import com.everhomes.rest.general_approval.*;
 import java.util.Map;
 
-import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
-import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
 import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
-import com.everhomes.rest.general_approval.PostFormCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
 public interface GeneralApprovalService {

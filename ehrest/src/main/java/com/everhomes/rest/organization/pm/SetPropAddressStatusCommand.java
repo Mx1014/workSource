@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>organizationId: 组织id</li>
  * <li>addressId: 地址id</li>
- * <li>status: 该地址的居住状态,{@link com.everhomes.rest.organization.pm.PmAddressMappingStatus}</li>
+ * <li>status: 该地址的居住状态,{@link com.everhomes.rest.organization.pm.AddressMappingStatus}</li>
  * </ul>
  */
 public class SetPropAddressStatusCommand {

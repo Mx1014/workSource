@@ -1,14 +1,21 @@
 package com.everhomes.general_approval;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.general_form.GeneralForm;
+import com.everhomes.general_form.GeneralFormProvider;
+import com.everhomes.rest.general_approval.*;
+import com.everhomes.util.DateHelper;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -21,9 +28,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
@@ -31,16 +36,11 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rentalv2.Rentalv2Controller;
-import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
-import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
-import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
+import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
@@ -55,30 +55,21 @@ import com.everhomes.rest.general_approval.GeneralFormNumDTO;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormSubformDTO;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
-import com.everhomes.rest.general_approval.GetActiveGeneralFormByOriginIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
 import com.everhomes.rest.general_approval.ListActiveGeneralApprovalCommand;
-import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
-import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
-import com.everhomes.rest.general_approval.PostFormCommand;
-import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.yellowPage.ServiceAllianceBelongType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
@@ -93,7 +84,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
-    
     private StringTemplateLoader templateLoader;
     
     private Configuration templateConfig;
@@ -126,6 +116,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
 		sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
 		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+		sourceIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
 		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
 		fieldDTOs.add(sourceIdField);
 
@@ -135,6 +126,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
 		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
 		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+		organizationIdField.setRenderType(GeneralFormRenderType.DEFAULT.getCode());
 		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
 		fieldDTOs.add(organizationIdField);
 
@@ -415,58 +407,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		return matcher.matches();
 	}
 	@Override
-	public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
-		return this.dbProvider.execute((TransactionStatus status) -> {
-			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-					.getFormOriginId());
-			if (null == form || form.getStatus().equals(GeneralFormStatus.INVALID.getCode()))
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-						ErrorCodes.ERROR_INVALID_PARAMETER, "form not found");
-			form.setFormName(cmd.getFormName());
-			form.setTemplateText(JSON.toJSONString(cmd.getFormFields()));
-			form.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			if (form.getStatus().equals(GeneralFormStatus.CONFIG.getCode())) {
-				// 如果是config状态的直接改
-				this.generalFormProvider.updateGeneralForm(form);
-			} else if (form.getStatus().equals(GeneralFormStatus.RUNNING.getCode())) {
-				// 如果是RUNNING状态的,置原form为失效,重新create一个版本+1的config状态的form
-				form.setStatus(GeneralFormStatus.INVALID.getCode());
-				this.generalFormProvider.updateGeneralForm(form);
-				form.setFormVersion(form.getFormVersion() + 1);
-				form.setStatus(GeneralFormStatus.CONFIG.getCode());
-				this.generalFormProvider.createGeneralForm(form);
-			}
-			return processGeneralFormDTO(form);
-		});
-	}
-
-	/**
-	 * 取状态不为失效的form
-	 * */
-	@Override
-	public ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd) {
-
-		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
-				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
-					@Override
-					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
-								.getOwnerType()));
-						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
-								.ne(GeneralFormStatus.INVALID.getCode()));
-						return query;
-					}
-				});
-		ListGeneralFormResponse resp = new ListGeneralFormResponse();
-		resp.setForms(forms.stream().map((r) -> {
-			return processGeneralFormDTO(r);
-		}).collect(Collectors.toList()));
-		return resp;
-	}
-
-	@Override
 	public void deleteApprovalFormById(ApprovalFormIdCommand cmd) {
 		// 删除是状态置为invalid
 		this.generalFormProvider.invalidForms(cmd.getFormOriginId());
@@ -633,6 +573,37 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		this.generalApprovalProvider.updateGeneralApproval(ga);
 	}
 
+	/**
+	 * 取状态不为失效的form
+	 * */
+	@Override
+	public ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd) {
+
+		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
+				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+					@Override
+					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+																		SelectQuery<? extends Record> query) {
+						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_ID.eq(cmd.getOwnerId()));
+						query.addConditions(Tables.EH_GENERAL_FORMS.OWNER_TYPE.eq(cmd
+								.getOwnerType()));
+						query.addConditions(Tables.EH_GENERAL_FORMS.STATUS
+								.ne(GeneralFormStatus.INVALID.getCode()));
+						return query;
+					}
+				});
+		ListGeneralFormResponse resp = new ListGeneralFormResponse();
+		resp.setForms(forms.stream().map((r) -> {
+			return processGeneralFormDTO(r);
+		}).collect(Collectors.toList()));
+		return resp;
+	}
+
+	@Override
+	public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
+		return null;
+	}
+
 	@Override
 	public ListGeneralApprovalResponse listActiveGeneralApproval(
 			ListActiveGeneralApprovalCommand cmd) {
@@ -659,5 +630,6 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 //		// TODO Auto-generated method stub
 //		return null;
 //	} 
+
 
 }

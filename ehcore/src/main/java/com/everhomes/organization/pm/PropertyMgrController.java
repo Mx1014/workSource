@@ -9,8 +9,14 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CreateApartmentCommand;
+import com.everhomes.rest.address.DeleteApartmentCommand;
+import com.everhomes.rest.address.GetApartmentDetailCommand;
+import com.everhomes.rest.address.GetApartmentDetailResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsResponse;
+import com.everhomes.rest.address.UpdateApartmentCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -1022,6 +1028,76 @@ public class PropertyMgrController extends ControllerBase {
 		List<PropFamilyDTO> results =  propertyMgrService.listPropApartmentsByKeyword(cmd);
 		RestResponse response = new RestResponse(results);
 
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/listPropApartments</b>
+	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+	 */
+	@RequestMapping("listPropApartments")
+	@RestReturn(value=ListPropApartmentsResponse.class)
+	public RestResponse listPropApartments(@Valid ListPropApartmentsByKeywordCommand cmd) {
+		ListPropApartmentsResponse results =  propertyMgrService.listNewPropApartmentsByKeyword(cmd);
+		RestResponse response = new RestResponse(results);
+		
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/createApartment</b>
+	 * <p>创建一个门牌</p>
+	 */
+	@RequestMapping("createApartment")
+	@RestReturn(value=String.class)
+	public RestResponse createApartment(CreateApartmentCommand cmd) {
+		propertyMgrService.createApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/updateApartment</b>
+	 * <p>更新一个门牌</p>
+	 */
+	@RequestMapping("updateApartment")
+	@RestReturn(value=String.class)
+	public RestResponse updateApartment(UpdateApartmentCommand cmd) {
+		propertyMgrService.updateApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/deleteApartment</b>
+	 * <p>删除一个门牌</p>
+	 */
+	@RequestMapping("deleteApartment")
+	@RestReturn(value=String.class)
+	public RestResponse deleteApartment(DeleteApartmentCommand cmd) {
+		propertyMgrService.deleteApartment(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pm/getApartmentDetail</b>
+	 * <p>获取门牌详情</p>
+	 */
+	@RequestMapping("getApartmentDetail")
+	@RestReturn(value=GetApartmentDetailResponse.class)
+	public RestResponse getApartmentDetail(GetApartmentDetailCommand cmd) {
+		RestResponse response = new RestResponse(propertyMgrService.getApartmentDetail(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

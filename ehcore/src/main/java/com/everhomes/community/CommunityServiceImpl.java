@@ -10,12 +10,22 @@ import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
 import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.general_form.GeneralFormService;
+import com.everhomes.general_form.GeneralFormValProvider;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
+import com.everhomes.rest.general_approval.GetGeneralFormValuesCommand;
+import com.everhomes.rest.general_approval.PostApprovalFormItem;
+import com.everhomes.rest.general_approval.addGeneralFormValuesCommand;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
+import com.everhomes.techpark.expansion.LeaseFormRequest;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -57,6 +67,9 @@ import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.organization.ExecuteImportTaskCallback;
+import com.everhomes.organization.ImportFileService;
+import com.everhomes.organization.ImportFileTask;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
@@ -74,6 +87,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
@@ -139,14 +153,6 @@ import com.everhomes.search.CommunitySearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserGroupHistory;
-import com.everhomes.user.UserGroupHistoryProvider;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
@@ -225,6 +231,18 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private  RolePrivilegeService rolePrivilegeService;
+	@Autowired
+	private GeneralFormService generalFormService;
+	@Autowired
+	private GeneralFormValProvider generalFormValProvider;
+	@Autowired
+	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+
+	@Autowired
+	private  ImportFileService importFileService;
+
+	@Autowired
+	private  UserActivityProvider userActivityProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -696,7 +714,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	}
 
-    private void populateBuildingDTO( BuildingDTO building) {
+    private void populateBuildingDTO(BuildingDTO building) {
         if(building == null) {
             return;
         }
@@ -710,6 +728,22 @@ public class CommunityServiceImpl implements CommunityService {
                 LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
             }
         }
+
+		GetGeneralFormValuesCommand cmd = new GetGeneralFormValuesCommand();
+		cmd.setSourceType(EntityType.BUILDING.getCode());
+		cmd.setSourceId(building.getId());
+		cmd.setOriginFieldFlag(NormalFlag.NEED.getCode());
+
+		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmd);
+		building.setFormValues(formValues);
+
+		if (LeasePromotionFlag.ENABLED.getCode() == building.getCustomFormFlag()) {
+			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(building.getNamespaceId(),
+					building.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+			if (null != request) {
+				building.setRequestFormId(request.getSourceId());
+			}
+		}
     }
 	@Override
 	public BuildingDTO getBuilding(GetBuildingCommand cmd) {
@@ -724,7 +758,11 @@ public class CommunityServiceImpl implements CommunityService {
             }
 			this.communityProvider.populateBuildingAttachments(building);
 	        populateBuilding(building);
-	        return ConvertHelper.convert(building, BuildingDTO.class);
+
+			BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+			populateFormInfo(dto);
+
+			return dto;
 		}else {
             LOGGER.error("Building not found");
             throw RuntimeErrorException.errorWith(BuildingServiceErrorCode.SCOPE, 
@@ -906,30 +944,68 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		if(cmd.getId() == null) {
-			
-			LOGGER.info("add building");
-			this.communityProvider.createBuilding(userId, building);
-		} else {
-			LOGGER.info("update building");
-			building.setId(cmd.getId());
-			Building b = this.communityProvider.findBuildingById(cmd.getId());
-			building.setCreatorUid(b.getCreatorUid());
-			building.setCreateTime(b.getCreateTime());
-			building.setNamespaceId(b.getNamespaceId());
-			this.communityProvider.updateBuilding(building);
-		}
-		
+
+		dbProvider.execute((TransactionStatus status) -> {
+			if (cmd.getId() == null) {
+
+				LOGGER.info("add building");
+				this.communityProvider.createBuilding(userId, building);
+				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+						building.getId(), cmd.getCustomFormFlag());
+			} else {
+				LOGGER.info("update building");
+				building.setId(cmd.getId());
+				Building b = this.communityProvider.findBuildingById(cmd.getId());
+				building.setCreatorUid(b.getCreatorUid());
+				building.setCreateTime(b.getCreateTime());
+				building.setNamespaceId(b.getNamespaceId());
+				this.communityProvider.updateBuilding(building);
+
+				generalFormValProvider.deleteGeneralFormVals(EntityType.BUILDING.getCode(), building.getId());
+				addGeneralFormInfo(cmd.getGeneralFormId(), cmd.getFormValues(), EntityType.BUILDING.getCode(),
+						building.getId(), cmd.getCustomFormFlag());
+			}
+			return null;
+		});
 		processBuildingAttachments(userId, cmd.getAttachments(), building);
 		
 		populateBuilding(building);
-		
+
 		BuildingDTO dto = ConvertHelper.convert(building, BuildingDTO.class);
+
+		populateFormInfo(dto);
 		return dto;
 		
 	}
 
+	private void populateFormInfo(BuildingDTO dto) {
+		GetGeneralFormValuesCommand cmdValues = new GetGeneralFormValuesCommand();
+		cmdValues.setSourceType(EntityType.BUILDING.getCode());
+		cmdValues.setSourceId(dto.getId());
+		cmdValues.setOriginFieldFlag(NormalFlag.NEED.getCode());
+		List<PostApprovalFormItem> formValues = generalFormService.getGeneralFormValues(cmdValues);
+		dto.setFormValues(formValues);
 
+		if (LeasePromotionFlag.ENABLED.getCode() == dto.getCustomFormFlag()) {
+			LeaseFormRequest request = enterpriseApplyEntryProvider.findLeaseRequestForm(dto.getNamespaceId(),
+					dto.getCommunityId(), EntityType.COMMUNITY.getCode(), EntityType.BUILDING.getCode());
+			if (null != request) {
+				dto.setRequestFormId(request.getSourceId());
+			}
+		}
+	}
+
+	private void addGeneralFormInfo(Long generalFormId, List<PostApprovalFormItem> formValues, String sourceType,
+		Long sourceId, Byte customFormFlag) {
+		if (LeasePromotionFlag.ENABLED.getCode() == customFormFlag) {
+			addGeneralFormValuesCommand cmd = new addGeneralFormValuesCommand();
+			cmd.setGeneralFormId(generalFormId);
+			cmd.setValues(formValues);
+			cmd.setSourceId(sourceId);
+			cmd.setSourceType(sourceType);
+			generalFormService.addGeneralFormValues(cmd);
+		}
+	}
 	@Override
 	public void deleteBuilding(DeleteBuildingAdminCommand cmd) {
 		
@@ -1107,6 +1183,210 @@ public class CommunityServiceImpl implements CommunityService {
 
 		response.setBuildings(buildingDTOs);
 		return response;
+	}
+
+
+	@Override
+	public ImportFileTaskDTO importBuildingData(Long communityId, MultipartFile file) {
+		Long userId = UserContext.current().getUser().getId();
+		ImportFileTask task = new ImportFileTask();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(file.getInputStream());
+
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			task.setOwnerType(EntityType.COMMUNITY.getCode());
+			task.setOwnerId(communityId);
+			task.setType(ImportFileTaskType.BUILDING.getCode());
+			task.setCreatorUid(userId);
+			task = importFileService.executeTask(() -> {
+					ImportFileResponse response = new ImportFileResponse();
+					List<ImportBuildingDataDTO> datas = handleImportBuildingData(resultList);
+					if(datas.size() > 0){
+						//设置导出报错的结果excel的标题
+						response.setTitle(datas.get(0));
+						datas.remove(0);
+					}
+					List<ImportFileResultLog<ImportBuildingDataDTO>> results = importBuildingData(datas, userId, communityId);
+					response.setTotalCount((long)datas.size());
+					response.setFailCount((long)results.size());
+					response.setLogs(results);
+					return response;
+			}, task);
+
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return ConvertHelper.convert(task, ImportFileTaskDTO.class);
+	}
+
+	private List<ImportFileResultLog<ImportBuildingDataDTO>> importBuildingData(List<ImportBuildingDataDTO> datas,
+			Long userId, Long communityId) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		List<OrganizationMember> orgMem = this.organizationProvider.listOrganizationMembersByOrgId(org.getId());
+		Map<String, OrganizationMember> ct = new HashMap<String, OrganizationMember>();
+		if(orgMem != null) {
+			orgMem.stream().map(r -> {
+				ct.put(r.getContactToken(), r);
+				return null;
+			});
+		}
+		List<ImportFileResultLog<ImportBuildingDataDTO>> list = new ArrayList<>();
+		for (ImportBuildingDataDTO data : datas) {
+			ImportFileResultLog<ImportBuildingDataDTO> log = checkData(data);
+			if (log != null) {
+				list.add(log);
+				continue;
+			}
+			
+			
+			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, data.getName());
+			if (building == null) {
+				building = new Building();
+				building.setName(data.getName());
+				building.setAliasName(data.getAliasName());
+				building.setAddress(data.getAddress());
+				building.setContact(data.getPhone());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				String contactToken = data.getPhone();
+				if(ct.get(contactToken) != null) {
+					OrganizationMember om = ct.get(contactToken);
+					building.setManagerUid(om.getTargetId());
+				}else {
+					///////////////////////////////////
+				}
+				building.setCommunityId(communityId);
+				building.setDescription(data.getDescription());
+				building.setTrafficDescription(data.getTrafficDescription());
+				
+				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
+					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
+					building.setLongitude(Double.parseDouble(temp[0]));
+					building.setLatitude(Double.parseDouble(temp[1]));
+				}
+				
+				building.setNamespaceId(org.getNamespaceId());
+				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				communityProvider.createBuilding(userId, building);
+			}else {
+				building.setAliasName(data.getAliasName());
+				building.setAddress(data.getAddress());
+				building.setContact(data.getPhone());
+				if (StringUtils.isNotBlank(data.getAreaSize())) {
+					building.setAreaSize(Double.valueOf(data.getAreaSize()));
+				}
+				String contactToken = data.getPhone();
+				if(ct.get(contactToken) != null) {
+					OrganizationMember om = ct.get(contactToken);
+					building.setManagerUid(om.getTargetId());
+				}else {
+					///////////////////////////////////
+				}
+				building.setDescription(data.getDescription());
+				building.setTrafficDescription(data.getTrafficDescription());
+				
+				if (StringUtils.isNotEmpty(data.getLongitudeLatitude())) {
+					String[] temp = data.getLongitudeLatitude().replace("，", ",").replace("、", ",").split(",");
+					building.setLongitude(Double.parseDouble(temp[0]));
+					building.setLatitude(Double.parseDouble(temp[1]));
+				}
+				
+				building.setNamespaceId(org.getNamespaceId());
+				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+				
+				communityProvider.updateBuilding(building);
+			}
+			
+		}
+		return list;
+	}
+
+
+	private ImportFileResultLog<ImportBuildingDataDTO> checkData(ImportBuildingDataDTO data) {
+		ImportFileResultLog<ImportBuildingDataDTO> log = new ImportFileResultLog<>(CommunityServiceErrorCode.SCOPE);
+		if (StringUtils.isEmpty(data.getName())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_BUILDING_NAME_EMPTY);
+			log.setData(data);
+			log.setErrorLog("building name cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getAddress())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_ADDRESS_EMPTY);
+			log.setData(data);
+			log.setErrorLog("address cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getContactor())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_CONTACTOR_EMPTY);
+			log.setData(data);
+			log.setErrorLog("contactor cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isEmpty(data.getPhone())) {
+			log.setCode(CommunityServiceErrorCode.ERROR_PHONE_EMPTY);
+			log.setData(data);
+			log.setErrorLog("phone cannot be empty");
+			return log;
+		}
+		
+		if (StringUtils.isNotEmpty(data.getLongitudeLatitude()) && !data.getLongitudeLatitude().replace("，", ",").replace("、", ",").contains(",")) {
+			log.setCode(CommunityServiceErrorCode.ERROR_LATITUDE_LONGITUDE);
+			log.setData(data);
+			log.setErrorLog("latitude longitude error");
+			return log;
+		}
+		
+		return null;
+	}
+
+
+	private List<ImportBuildingDataDTO> handleImportBuildingData(List resultList) {
+		List<ImportBuildingDataDTO> list = new ArrayList<>();
+		for(int i = 1; i < resultList.size(); i++) {
+			RowResult r = (RowResult) resultList.get(i);
+			if (StringUtils.isNotBlank(r.getA()) || StringUtils.isNotBlank(r.getB()) || StringUtils.isNotBlank(r.getC()) || StringUtils.isNotBlank(r.getD()) || 
+					StringUtils.isNotBlank(r.getE()) || StringUtils.isNotBlank(r.getF()) || StringUtils.isNotBlank(r.getG()) || StringUtils.isNotBlank(r.getH()) || 
+					StringUtils.isNotBlank(r.getI())) {
+				ImportBuildingDataDTO data = new ImportBuildingDataDTO();
+				data.setName(trim(r.getA()));
+				data.setAliasName(trim(r.getB()));
+				data.setAddress(trim(r.getC()));
+				data.setLongitudeLatitude(trim(r.getD()));
+				data.setTrafficDescription(trim(r.getE()));
+				data.setAreaSize(trim(r.getF()));
+				data.setContactor(trim(r.getG()));
+				data.setPhone(trim(r.getH()));
+				data.setDescription(trim(r.getI()));
+				list.add(data);
+			}
+		}
+		return list;
+	}
+	
+	private String trim(String string) {
+		if (string != null) {
+			return string.trim();
+		}
+		return "";
+	}
+	
+	private Long getCurrentCommunityId(Long userId) {
+		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
+		if (org != null) {
+			return org.getCommunityId();
+		}
+		return null;
 	}
 
 
@@ -1703,9 +1983,11 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setPosition(user.getPositionTag());
 
 			Set<OrganizationDetailDTO> organizationDTOs = new HashSet<>();
-			if(null != members){
+			if(null != members && !members.isEmpty()){
 
 //				Set<OrganizationDTO> set = new HashSet<>();
+
+				dto.setOrganizationMemberName(members.get(0).getContactName());
 
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
@@ -1751,7 +2033,14 @@ public class CommunityServiceImpl implements CommunityService {
 			dtos = dtos.subList(0, pageSize);
 			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
 		}
-		res.setUserCommunities(dtos);
+		res.setUserCommunities(dtos.stream().map(r->{
+			//最新活跃时间 add by sfyan 20170620
+			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId(), 1);
+			if(userActivities.size() > 0){
+				r.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+			}
+			return r;
+		}).collect(Collectors.toList()));
 		return res;
 	}
 
@@ -3071,5 +3360,45 @@ public class CommunityServiceImpl implements CommunityService {
 			projects.add(project);
 		}
 		return rolePrivilegeService.getTreeProjectCategories(namespaceId, projects);
+	}
+
+	@Override
+	public void updateBuildingOrder(UpdateBuildingOrderCommand cmd) {
+		if (null == cmd.getId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter in the command");
+		}
+		if (null == cmd.getExchangeId()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid exchangeId parameter in the command");
+		}
+		Building building = communityProvider.findBuildingById(cmd.getId());
+		Building exchangeBuilding = communityProvider.findBuildingById(cmd.getExchangeId());
+
+		if (null == building) {
+			LOGGER.error("Building not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Building not found");
+		}
+		if (null == exchangeBuilding) {
+			LOGGER.error("Building not found, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Building not found");
+		}
+
+		Long order = building.getDefaultOrder();
+		Long exchangeOrder = exchangeBuilding.getDefaultOrder();
+
+		dbProvider.execute((TransactionStatus status) -> {
+			building.setDefaultOrder(exchangeOrder);
+			exchangeBuilding.setDefaultOrder(order);
+			communityProvider.updateBuilding(building);
+			communityProvider.updateBuilding(exchangeBuilding);
+			return null;
+		});
 	}
 }

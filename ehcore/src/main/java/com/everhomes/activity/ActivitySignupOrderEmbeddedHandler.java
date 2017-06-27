@@ -80,7 +80,7 @@ public class ActivitySignupOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	
 	private void checkPayAmount(String payAmount, BigDecimal chargePrice) {
-		if(StringUtils.isBlank(payAmount) || chargePrice == null || !chargePrice.equals(new BigDecimal(payAmount))){
+		if(StringUtils.isBlank(payAmount) || chargePrice == null || !chargePrice.equals(new BigDecimal(payAmount).setScale(2))){
 			LOGGER.error("payAmount and chargePrice is not equal.");
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_PAYAMOUNT_ERROR,
 					"payAmount and chargePrice is not equal.");

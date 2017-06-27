@@ -4,6 +4,7 @@ package com.everhomes.entity;
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.techpark.expansion.LeasePromotion;
 
 /**
  * <p>实体类型:</p>
@@ -52,6 +53,7 @@ public enum EntityType {
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName()),
+    LEASEPROMOTION(EhLeasePromotions.class.getSimpleName()),
     WAREHOUSE_REQUEST(EhWarehouseRequests.class.getSimpleName()),
     ORGANIZATION_FILE("EhOrganizationFiles");
 

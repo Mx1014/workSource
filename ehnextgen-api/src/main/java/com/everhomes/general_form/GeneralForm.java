@@ -1,4 +1,4 @@
-package com.everhomes.general_approval;
+package com.everhomes.general_form;
 
 import com.everhomes.server.schema.tables.pojos.EhGeneralForms;
 import com.everhomes.util.StringHelper;

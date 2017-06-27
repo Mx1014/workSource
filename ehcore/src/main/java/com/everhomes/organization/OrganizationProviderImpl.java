@@ -3028,12 +3028,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId,Long organizationId,Byte operationType) {
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId,List<Long> organizationIds,Byte operationType) {
 		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(userId)); 
-		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.eq(organizationId)); 
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.ORGANIZATION_ID.in(organizationIds)); 
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.OPERATION_TYPE.eq(operationType)); 
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.desc());
 		query.fetch().map(r -> {
