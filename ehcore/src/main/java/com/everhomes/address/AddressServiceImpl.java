@@ -1120,6 +1120,24 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return response;
     }
 
+    @Override
+    public ListApartmentByBuildingNameCommandResponse listCommunityApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        if (cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId, buildingName parameter");
+
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size",
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, (long) pageSize);
+        ListApartmentByBuildingNameCommandResponse response = new ListApartmentByBuildingNameCommandResponse();
+
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(),
+                cmd.getBuildingName(), offset, pageSize);
+        response.setApartmentList(list);
+        return response;
+    }
+
     private static void sortApartment(List<ApartmentDTO> results) {
         if (results == null || results.isEmpty())
             return;
