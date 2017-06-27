@@ -504,4 +504,19 @@ public class EnergyConsumptionController extends ControllerBase {
         return resp;
     }
 
+    /**
+     * <p>批量抄表</p>
+     * <b>URL: /energy/batchReadEnergyMeter</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("batchReadEnergyMeter")
+    public RestResponse batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
+        energyConsumptionService.batchReadEnergyMeter(cmd);
+
+        RestResponse resp = new RestResponse();
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+
 }

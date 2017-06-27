@@ -22,5 +22,6 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_METER_SETTING_START_TIME_ERROR = 10013;// 开始时间不能小于现在
     int ERR_METER_SETTING_END_TIME_ERROR = 10014;// 结束时间不能小于开始时间
     int ERR_PRICE_CONFIG_HAS_BEEN_REFERENCE = 10015;// 单价方案已被引用，不可删除
+    int ERROR_DOWNLOAD_FILE = 10016;// 文件导出错误
 
 }

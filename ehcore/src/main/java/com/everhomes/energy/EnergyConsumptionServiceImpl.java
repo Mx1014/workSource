@@ -10,6 +10,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
@@ -21,7 +22,11 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.equipment.EquipmentsDTO;
+import com.everhomes.rest.equipment.QRCodeFlag;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
@@ -29,18 +34,22 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
+import com.everhomes.util.doc.DocUtil;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.zxing.WriterException;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
+import org.apache.commons.codec.binary.*;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
@@ -50,18 +59,22 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.BASE64Encoder;
 
+import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -69,6 +82,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -83,6 +97,8 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  */
 @Service
 public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
+
+    final String downloadDir ="\\download\\";
 
     private final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -2542,10 +2558,147 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public String getEnergyMeterQRCode(GetEnergyMeterQRCodeCommand cmd) {
+        return generateQRString(cmd.getMeterId(), cmd.getNamespaceId());
+    }
+
+    @Override
+    public void batchReadEnergyMeter(BatchReadEnergyMeterCommand cmd) {
+        if(cmd.getReadList() != null && cmd.getReadList().size() > 0) {
+            cmd.getReadList().forEach(read -> {
+                readEnergyMeter(read);
+            });
+        }
+    }
+
+    @Override
+    public void exportEnergyMeterQRCode(ExportEnergyMeterQRCodeCommand cmd, HttpServletResponse response) {
+        List<Long> meterIds = new ArrayList<>();
+        if(!StringUtils.isEmpty(cmd.getIds())) {
+            String[] ids = cmd.getIds().split(",");
+            for(String id : ids) {
+                meterIds.add(Long.valueOf(id));
+            }
+        }
+        LOGGER.info("meterIds: {}", meterIds);
+        List<EnergyMeter> meterList = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), meterIds);
+
+        String filePath = cmd.getFilePath();
+        if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
+            URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
+            filePath = rootPath.getPath() + this.downloadDir ;
+            File file = new File(filePath);
+            if(!file.exists())
+                file.mkdirs();
+
+        }
+
+        DocUtil docUtil=new DocUtil();
+        List<String> files = new ArrayList<>();
+//        for(EnergyMeter meter : meterList) {
+//            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
+//            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
+//            docUtil.createDoc(dataMap, "energyMeter", savePath);
+//
+//            if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
+//                files.add(savePath);
+//            }
+//        }
+
+        if(StringUtils.isEmpty(cmd.getFilePath())) {
+            if(files.size() > 1) {
+                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+                LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+                DownloadUtils.writeZip(files, zipPath);
+                download(zipPath,response);
+            } else if(files.size() == 1) {
+                download(files.get(0),response);
+            }
+
+        }
+    }
+
+    private Map<String, Object> createEnergyMeterQRCodeDoc(EnergyMeter meter) {
+        Map<String, Object> dataMap=new HashMap<String, Object>();
+        dataMap.put("meterNumber", meter.getMeterNumber());
+        dataMap.put("name", meter.getName());
+        String qrCode = generateQRString(meter.getId(), meter.getNamespaceId());
+        ByteArrayOutputStream out = generateQRCode(org.apache.commons.codec.binary.Base64.encodeBase64String(qrCode.getBytes()));
+        byte[] data=out.toByteArray();
+        BASE64Encoder encoder=new BASE64Encoder();
+        dataMap.put("qrCode", encoder.encode(data));
+
+        return dataMap;
+    }
+
+    private String generateQRString(Long id, Integer namespaceId) {
         EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
-        dto.setNamespaceId(cmd.getNamespaceId());
-        dto.setMeterId(cmd.getMeterId());
+        dto.setNamespaceId(namespaceId);
+        dto.setMeterId(id);
         String qrCode = WebTokenGenerator.getInstance().toWebToken(dto);
         return qrCode;
+
+    }
+
+    private ByteArrayOutputStream generateQRCode(String qrToken) {
+        ByteArrayOutputStream out = null;
+        try {
+            BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 20, 20, null);
+            out = new ByteArrayOutputStream();
+            ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+
+        return out;
+    }
+
+    @Override
+    public void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
+
+    }
+
+    public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            if ( !file.isFile() ) {
+                LOGGER.info("filename:{} is not a file", path);
+            }
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {
+                file.delete();
+            }
+
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+            throw RuntimeErrorException.errorWith(EnergyConsumptionServiceErrorCode.SCOPE,
+                    EnergyConsumptionServiceErrorCode.ERROR_DOWNLOAD_FILE,
+                    ex.getLocalizedMessage());
+
+        }
+        return response;
     }
 }
