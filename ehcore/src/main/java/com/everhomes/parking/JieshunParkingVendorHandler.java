@@ -203,31 +203,9 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+
+    	return recharge(order);
     }
     
     @Override
@@ -264,23 +242,7 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return ts;
 	}
-    
-	
-//	@Scheduled(cron="0 0 0/2 * * ? ")
-//	@Override
-//	public void refreshParkingRechargeOrderStatus() {
-//		LOGGER.info("refresh recharge status.");
-//		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.KETUO);
-//		orderList.stream().map(order -> {
-//			
-//			if(recharge(order)){
-//				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//				parkingProvider.updateParkingRechargeOrder(order);
-//			}
-//			return null;
-//		});
-//	}
+
 	
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -360,8 +322,8 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long time = strToLong(oldValidEnd);
-		String validStart = sdf1.format(addDays(time, 1));
-		String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
+		String validStart = sdf1.format(Utils.addSeconds(time, 1));
+		String validEnd = sdf1.format(Utils.getLongByAddNatureMonth(time, order.getMonthCount().intValue()));
 		
 		param.put("cardId", Integer.parseInt(order.getCardNumber()));
 		//修改科托ruleType 固定为1 表示月卡车
@@ -489,37 +451,6 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 			LOGGER.debug("Data from ketuo, json={}", json);
 		
 		return json;
-	}
-	
-	//储能月卡充值开始时间 只加一秒
-	private Timestamp addDays(Long oldPeriod, int seconds) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.SECOND, seconds);
-		Timestamp time = new Timestamp(calendar.getTimeInMillis());
-		
-		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month);
-//			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-//			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
 	}
 
 	@Override

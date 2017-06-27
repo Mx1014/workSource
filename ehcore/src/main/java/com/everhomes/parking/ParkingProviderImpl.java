@@ -21,12 +21,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.parking.ParkingOrderDeleteFlag;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.ParkingLotVendor;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhParkingActivities;
 import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
@@ -36,7 +33,6 @@ import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
-import com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCarSeriesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
@@ -139,27 +135,6 @@ public class ParkingProviderImpl implements ParkingProvider {
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCardRequests.class, null);
     	
     }
-    
-    @Override
-	public boolean isApplied(String plateNumber,Long parkingLotId) {
-		
-		final Integer[] count = new Integer[1];
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingCardRequests.class), null, 
-                (DSLContext context, Object reducingContext)-> {
-                	Condition condition = Tables.EH_PARKING_CARD_REQUESTS.STATUS.notEqual(ParkingCardRequestStatus.INACTIVE.getCode());
-                	//condition = condition.or(Tables.EH_PARKING_CARD_REQUESTS.STATUS.equal(ApplyParkingCardStatus.NOTIFIED.getCode()));
-                    count[0] = context.selectCount().from(Tables.EH_PARKING_CARD_REQUESTS)
-                            .where(condition)
-                            .and(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.equal(plateNumber))
-                            .and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId))
-                    .fetchOneInto(Integer.class);
-                    return true;
-                });
-		if(count[0] > 0) {
-			return true;
-		}
-		return false;
-	}
     
     @Override
     public List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
@@ -287,23 +262,6 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor){
-
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
-        SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
-		
-        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.VENDOR_NAME.eq(vendor.getCode()));
-
-		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.notEqual(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
-		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(ParkingRechargeOrderStatus.PAID.getCode()));
-        
-		List<ParkingRechargeOrder> resultList = query.fetch().map(r -> ConvertHelper.convert(r, ParkingRechargeOrder.class));
-        
-    	return resultList;
-    	
-    }
-    
-    @Override
     public List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, Long userId, Long pageAnchor, Integer pageSize) {
     	
@@ -315,7 +273,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATOR_UID.eq(userId));
-        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.eq(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.ge(ParkingRechargeOrderStatus.PAID.getCode()));
         
         if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
@@ -334,7 +292,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte rechargeType, String paidType, String cardNumber, Long pageAnchor, Integer pageSize) {
+    		Byte rechargeType, String paidType, String cardNumber, Byte status, Long pageAnchor, Integer pageSize) {
     	
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -343,8 +301,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
-        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.eq(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
-        
+
         if (null != pageAnchor && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(plateNumber))
@@ -363,7 +320,12 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
-        
+        if (null != status) {
+            query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(status));
+        }else {
+            query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.ge(ParkingRechargeOrderStatus.PAID.getCode()));
+        }
+
         query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.desc());
         if(null != pageSize)
         	query.addLimit(pageSize);
@@ -387,7 +349,7 @@ public class ParkingProviderImpl implements ParkingProvider {
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
                     condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(ParkingOrderDeleteFlag.NORMAL.getCode()));
-                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.eq(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
+                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(ParkingRechargeOrderStatus.RECHARGED.getCode()));
                     
                     if(StringUtils.isNotBlank(plateNumber))
                     	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
@@ -541,7 +503,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize, Timestamp startDate, Timestamp endDate, 
     		List<Byte> statuses, CrossShardListingLocator locator){
     	
- 	    List<ParkingRechargeOrder> results = new ArrayList<ParkingRechargeOrder>();
+ 	    List<ParkingRechargeOrder> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
 		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
 	        //带上逻辑删除条件
@@ -671,30 +633,6 @@ public class ParkingProviderImpl implements ParkingProvider {
 	    	query.addConditions(Tables.EH_PARKING_STATISTICS.DATE_STR.eq(dateStr));
 
 	    return query.fetch().map(r -> ConvertHelper.convert(r, ParkingStatistic.class));
-	}
-	
-	@Override
-	public BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp startDate, Timestamp endDate) {
-        //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
-        final BigDecimal[] count = new BigDecimal[1];
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingStatistics.class), null, 
-                (DSLContext context, Object reducingContext)-> {
-                	
-                	SelectJoinStep<Record1<BigDecimal>> query = context.select(Tables.EH_PARKING_STATISTICS.AMOUNT.sum()).from(Tables.EH_PARKING_STATISTICS);
-                	
-                	Condition condition = Tables.EH_PARKING_STATISTICS.OWNER_TYPE.equal(ownerType);
-                	condition = condition.and(Tables.EH_PARKING_STATISTICS.OWNER_ID.equal(ownerId));
-                	if(null != parkingLotId)
-                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.PARKING_LOT_ID.eq(parkingLotId));
-                	if(null != startDate)
-                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.DATE_STR.ge(startDate));
-                	if(null != endDate)
-                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.DATE_STR.le(endDate));
-                	
-                    count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
-                    return true;
-                });
-		return count[0];
 	}
 	
 	@Override

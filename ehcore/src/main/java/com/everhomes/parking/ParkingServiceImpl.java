@@ -246,11 +246,12 @@ public class ParkingServiceImpl implements ParkingService {
 	    	List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
 	    	
 	    	lots.forEach(l -> {
-	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(), 
-	    				null, null, null, startDate, endDate, null, null, null, null, null);
+	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(),
+						l.getOwnerId(), l.getId(), null, null, null, startDate,
+						endDate, null, null, null, null, null, null);
 	    		BigDecimal totalAmount = new BigDecimal(0);
 	    		for(ParkingRechargeOrder o: orders) {
-	    			if(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
+	    			if(ParkingRechargeOrderStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
 	    				totalAmount = totalAmount.add(o.getPrice());
 	    			}
 	    		}
@@ -555,9 +556,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 		String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
-    	
+
     	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
-		
+
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
@@ -586,26 +587,31 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
 		
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
-		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
-		
+
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
 		
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
-			if(null != dto && null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
-				LOGGER.error("Overdue fees, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
-						"Overdue fees");
+    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getParkingLotId(), cmd.getPlateNumber());
+
+    		if (null != dto ) {
+				if(null != dto.getPrice() && 0 != dto.getPrice().compareTo(cmd.getPrice())) {
+					LOGGER.error("Overdue fees, cmd={}", cmd);
+					throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+							"Overdue fees");
+				}
+				parkingRechargeOrder.setOrderToken(dto.getOrderToken());
+				parkingRechargeOrder.setParkingTime(dto.getParkingTime());
+				parkingRechargeOrder.setStartPeriod(new Timestamp(dto.getEntryTime()));
+				parkingRechargeOrder.setEndPeriod(new Timestamp(dto.getPayTime()));
 			}
-			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
-		}
-    	//查询rate
-    	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
-    		parkingRechargeOrder.setRateToken(cmd.getRateToken());
+		}else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+			//查询rate
+			parkingRechargeOrder.setRateToken(cmd.getRateToken());
     		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
     		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
-    		
+
     	}
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
@@ -699,7 +705,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getPageAnchor(), pageSize);
+				cmd.getStatus(), cmd.getPageAnchor(), pageSize);
     	int size = list.size(); 				
     	if(size > 0){
     		response.setOrders(list.stream().map(r -> {
@@ -1102,18 +1108,18 @@ public class ParkingServiceImpl implements ParkingService {
 		return String.valueOf(code);
 	}
 	@Override
-	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd, HttpServletResponse response){
+	public HttpServletResponse exportParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd, HttpServletResponse response){
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
-			new Timestamp(cmd.getEndDate());
+			endDate = new Timestamp(cmd.getEndDate());
 
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType(), cmd.getCardNumber(),
-				cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStatus(), cmd.getPageAnchor(), cmd.getPageSize());
 		Workbook wb = new XSSFWorkbook();
 		
 		Font font = wb.createFont();   
@@ -1379,7 +1385,7 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		
 		Byte orderStatus = order.getRechargeStatus();
-		if(orderStatus == ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+		if(orderStatus == ParkingRechargeOrderStatus.RECHARGED.getCode()) {
 			ListParkingCardsCommand listParkingCardsCommand = new ListParkingCardsCommand(); 
 			listParkingCardsCommand.setOwnerId(cmd.getOwnerId());
 			listParkingCardsCommand.setOwnerType(cmd.getOwnerType());
@@ -1408,7 +1414,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 			LOGGER.error("wait order notify, cmd={}, startTime={}", cmd, eTime);
 
-    		while(orderStatus == ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode() 
+    		while(orderStatus == ParkingRechargeOrderStatus.PAID.getCode()
     				&& null != valueOperations.get(key) && eTime >= sTime) {
     			
     			try {

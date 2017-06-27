@@ -3,40 +3,21 @@ package com.everhomes.parking;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.parking.innospring.InnoSpringCardRate;
 import com.everhomes.parking.innospring.InnoSpringCardType;
 import com.everhomes.parking.innospring.InnoSpringTempFee;
 import com.everhomes.rest.parking.*;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -61,10 +42,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
-	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	@Autowired
-    private DbProvider dbProvider;
 
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -161,33 +138,9 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		}
 	}
 
-    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+    	return recharge(order);
     }
 
     @Override
@@ -225,22 +178,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return ts;
 	}
-
-//	@Scheduled(cron="0 0 0/2 * * ? ")
-//	@Override
-//	public void refreshParkingRechargeOrderStatus() {
-//		LOGGER.info("refresh recharge status.");
-//		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.KETUO);
-//		orderList.stream().map(order -> {
-//
-//			if(recharge(order)){
-//				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//				parkingProvider.updateParkingRechargeOrder(order);
-//			}
-//			return null;
-//		});
-//	}
 
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -286,9 +223,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 		String json = post(createRequestParam(GET_RATES, param));
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-
 		String entityJson = parseJson(json);
 
 		if(null != entityJson) {
@@ -328,9 +262,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		param.put("car_id", plateNumber);
 
 		String json = post(createRequestParam(GET_CARD, param));
-
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
 
 		String entityJson = parseJson(json);
 
@@ -396,8 +327,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 		String json = post(requestParam);
 
-		LOGGER.info("Result={}, param={}", json, requestParam);
-
 		String entityJson = parseJson(json);
 
 		if(null != entityJson) {
@@ -432,9 +361,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject newParam = createRequestParam(PAY_TEMP_FEE, param);
 		String json = post(newParam);
 
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, newParam);
-
 		String entityJson = parseJson(json);
 
 		if(null != entityJson) {
@@ -454,48 +380,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	public String post(JSONObject param) {
-//		CloseableHttpClient httpclient = HttpClients.createDefault();
+
+		LOGGER.info("Parking info, namespace={}", this.getClass().getName());
 
 		String serverUrl = configProvider.getValue("parking.innospring.serverUrl", "");
-		return HttpUtils.post(serverUrl, param);
-//		HttpPost httpPost = new HttpPost(serverUrl);
-//
-//		CloseableHttpResponse response = null;
-//		String json = null;
-//		try {
-//			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
-//			httpPost.setEntity(stringEntity);
-//			response = httpclient.execute(httpPost);
-//			StatusLine statusLine = response.getStatusLine();
-//			LOGGER.info("Parking responseCode={}, responseProtocol={}", statusLine.getStatusCode(), statusLine.getProtocolVersion().toString());
-//			int status = statusLine.getStatusCode();
-//
-//			if (status == HttpStatus.SC_OK) {
-//				HttpEntity entity = response.getEntity();
-//				if (null != entity) {
-//					json = EntityUtils.toString(entity, "utf8");
-//				}
-//			}
-//		} catch (IOException e) {
-//			LOGGER.error("Parking request error, param={}", param, e);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//					"Parking request error.");
-//		}finally {
-//			try {
-//				if (null != response) {
-//					response.close();
-//				}
-//				if (null != httpclient) {
-//					httpclient.close();
-//				}
-//			} catch (IOException e) {
-//				LOGGER.error("close httpclient error", e);
-//			}
-//
-//		}
-//		LOGGER.info("Result={}, param={}", json, param);
-//
-//		return json;
+		return Utils.post(serverUrl, param);
 	}
 
 	@Override
@@ -516,9 +405,6 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 		JSONObject newParam = createRequestParam(GET_TEMP_FEE, param);
 		String json = post(newParam);
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, newParam);
 
 		String entityJson = parseJson(json);
 

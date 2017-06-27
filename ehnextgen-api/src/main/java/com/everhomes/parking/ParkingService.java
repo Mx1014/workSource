@@ -40,7 +40,7 @@ public interface ParkingService {
     
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
     
-    HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
+    HttpServletResponse exportParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd,
     		HttpServletResponse response);
     
     void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd);

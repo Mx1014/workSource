@@ -45,15 +45,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	@Autowired
 	private ParkingProvider parkingProvider;
-	
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
-	
-	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	
-	@Autowired
-    private DbProvider dbProvider;
 
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -194,32 +187,11 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 
-		if (order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if (payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("Parking pay failed, order={}", order);
-			} else {
-				ResultHolder resultHolder = recharge(order);
-				if (resultHolder.isSuccess()) {
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
+		ResultHolder resultHolder = recharge(order);
+		return resultHolder.isSuccess();
 
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-						Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-						RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-
-						LOGGER.error("Delete parking order key, key={}", key);
-						redisTemplate.delete(key);
-
-						return null;
-					});
-				}
-			}
-		}
     }
     
     
@@ -296,7 +268,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		Long time = strToLong(oldValidEnd);
 		
 		String validStart = timestampToStr(addDays(time, 1));
-		String validEnd = timestampToStr(addMonth(time, order.getMonthCount().intValue()));
+		String validEnd = timestampToStr(new Timestamp(Utils.getLongByAddNatureMonth(time, order.getMonthCount().intValue())));
 		
 		URL wsdlURL = Service1.WSDL_LOCATION;
 		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
@@ -356,27 +328,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month-1);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
 	}
 
 	@Override

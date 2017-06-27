@@ -84,24 +84,15 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
-	private LocaleStringService localeStringService;
-	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
-	@Autowired
-    private UserProvider userProvider;
-	@Autowired
-	private OrderUtil commonOrderUtil;
 	@Autowired
 	private FlowService flowService;
     @Autowired
 	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
-    @Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	
 	@Autowired
     private DbProvider dbProvider;
     
@@ -283,48 +274,23 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+    	return recharge(order);
     }
     
     @Override
     public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support create parkingRechageRate.");
+    	LOGGER.error("Not support create parkingRechargeRate.");
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support create parkingRechageRate.");
+				"Not support create parkingRechargeRate.");
     }
     
     @Override
     public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support delete parkingRechageRate.");
+    	LOGGER.error("Not support delete parkingRechargeRate.");
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support delete parkingRechageRate.");
+				"Not support delete parkingRechargeRate.");
     }
     
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -348,23 +314,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return ts;
 	}
-    
-	
-//	@Scheduled(cron="0 0 0/2 * * ? ")
-//	@Override
-//	public void refreshParkingRechargeOrderStatus() {
-//		LOGGER.info("refresh recharge status.");
-//		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.KETUO);
-//		orderList.stream().map(order -> {
-//			
-//			if(recharge(order)){
-//				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//				parkingProvider.updateParkingRechargeOrder(order);
-//			}
-//			return null;
-//		});
-//	}
 	
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -444,7 +393,18 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		String plateNumber = order.getPlateNumber();
 
 		KetuoCard card = getCard(plateNumber);
-		
+
+//		long expireTime = strToLong(card.getValidTo());
+//		long cardReserveTime = 0;
+//
+//		ParkingLot parkingLot = parkingProvider.findParkingLotById(order1.getParkingLotId());
+//		Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
+//		if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
+//			Integer cardReserveDay = parkingLot.getCardReserveDays();
+//			cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+//			expireTime + cardReserveTime < now
+//		}
+
 		if(null == card) {
 			String cardType = "2";
 			KetuoCardRate ketuoCardRate = null;
@@ -458,10 +418,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"Rate not found.");
 			}
-//			order.setRateName(ketuoCardRate.getRuleName());
-//			order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
-//			order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
-			
+
 			Integer payMoney = order.getPrice().intValue()*100 - Integer.parseInt(ketuoCardRate.getRuleMoney()) 
 					* (order.getMonthCount().intValue() - 1);
 
@@ -499,8 +456,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 
-			String validStart = sdf1.format(addDays(time, 1));
-			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
+			String validStart = sdf1.format(Utils.addSeconds(time, 1));
+			String validEnd = sdf1.format(Utils.getTimestampByAddNatureMonth(time, order.getMonthCount().intValue()));
 			
 			param.put("cardId", card.getCardId());
 //			param.put("ruleType", CUSTOM.equals(order.getRateToken())?"2":order.getRateToken());
@@ -725,36 +682,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		
 		return json;
 	}
-	
-	private Timestamp addDays(Long oldPeriod, int days) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.SECOND, days);
-		Timestamp time = new Timestamp(calendar.getTimeInMillis());
-		
-		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month - 1);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
-	}
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
@@ -860,6 +787,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		
 //		List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), 
 //				cmd.getParkingLotId(), "B5720Z", null);
+		//月租车
 		List<KetuoCardRate> rates = getCardRule("2");
 		if(rates.size() !=0) {
 			
@@ -901,10 +829,10 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		dto.setPlateNumber(cmd.getPlateNumber());
 		Long now = System.currentTimeMillis();
 		dto.setOpenDate(now);
-		dto.setExpireDate(addMonth2(now, requestMonthCount));
-		if(requestRechargeType == ParkingLotRechargeType.ALL.getCode())
+		dto.setExpireDate(Utils.getLongByAddNatureMonth(now, requestMonthCount));
+		if(requestRechargeType == ParkingLotRechargeType.ALL.getCode()) {
 			dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
-		else {
+		}else {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTimeInMillis(now);
 			int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -915,26 +843,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		}
 
 		return dto;
-	}
-	
-	private Long addMonth2(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month-1);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		
-		return calendar.getTimeInMillis();
 	}
 
 	@Override

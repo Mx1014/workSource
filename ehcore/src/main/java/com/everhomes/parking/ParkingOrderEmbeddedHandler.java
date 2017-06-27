@@ -1,7 +1,6 @@
 package com.everhomes.parking;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -19,7 +18,6 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -38,35 +36,55 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
-		
-    	ParkingRechargeOrder order = onlinePayBillSuccess(cmd);
-    	String venderName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+
+		LOGGER.info("Parking pay info, cmd={}", cmd);
+
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		this.checkVendorTypeIsNull(cmd.getVendorType());
+		this.checkPayAmountIsNull(cmd.getPayAmount());
+		this.checkVendorTypeFormat(cmd.getVendorType());
+
+		Long orderId = Long.parseLong(cmd.getOrderNo());
+		ParkingRechargeOrder order = checkOrder(orderId);
+		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
+
+		//加一个开关，方便在beta环境测试
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (!flag) {
+			if (0 != order.getPrice().compareTo(payAmount)) {
+				LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"Order amount is not equal to payAmount.");
+			}
+		}
+
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+
+		String vendorName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
-
-			handler.notifyParkingRechargeOrderPayment(order,cmd.getPayStatus());
+			//先将状态置为已付款
+			if(order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
+				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
+				order.setPaidTime(payTimeStamp);
+				order.setPaidType(cmd.getVendorType());
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {
+				handler.notifyParkingRechargeOrderPayment(order);
+			}
 			return null;
 		});
+
 	}
 
 	@Override
 	public void payFail(PayCallbackCommand cmd) {
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("onlinePayBillFail");
-		this.checkOrderNoIsNull(cmd.getOrderNo());
-		Long orderId = Long.parseLong(cmd.getOrderNo());
-		
-		ParkingRechargeOrder order = checkOrder(orderId);
-				
-		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-		order.setStatus(ParkingRechargeOrderStatus.INACTIVE.getCode());
-		order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
-		order.setPaidTime(payTimeStamp);
-		order.setPaidType(cmd.getVendorType());
-		//order.setPaidTime(cmd.getPayTime());
-		parkingProvider.updateParkingRechargeOrder(order);
+		//TODO: 失败
+		LOGGER.error("Parking pay failed, cmd={}", cmd);
 	}
 	
 	private void checkOrderNoIsNull(String orderNo) {
@@ -121,44 +139,5 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		}
 		return handler;
 	}
-	
-	private ParkingRechargeOrder onlinePayBillSuccess(PayCallbackCommand cmd) {
-		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("onlinePayBillSuccess");
-		this.checkOrderNoIsNull(cmd.getOrderNo());
-		this.checkVendorTypeIsNull(cmd.getVendorType());
-		this.checkPayAmountIsNull(cmd.getPayAmount());
-		
-		Long orderId = Long.parseLong(cmd.getOrderNo());
-		ParkingRechargeOrder order = checkOrder(orderId);
-		
-		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
 
-		//加一个开关，方便在beta环境测试
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (!flag) {
-			if (0 != order.getPrice().compareTo(payAmount)) {
-				LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"Order amount is not equal to payAmount.");
-			}
-		}
-
-		Long payTime = System.currentTimeMillis();
-		Timestamp payTimeStamp = new Timestamp(payTime);
-		
-		this.checkVendorTypeFormat(cmd.getVendorType());
-		
-		if(order.getStatus().byteValue() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
-//			order.setPrice(payAmount);
-			order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
-			order.setPaidTime(payTimeStamp);
-			order.setPaidType(cmd.getVendorType());
-			//order.setPaidTime(cmd.getPayTime());
-			parkingProvider.updateParkingRechargeOrder(order);
-		}
-		
-		return order;
-	}
 }

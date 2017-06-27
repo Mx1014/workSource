@@ -439,14 +439,14 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
-	 * <b>URL: /parking/exportParkingRechageOrders</b>
+	 * <b>URL: /parking/exportParkingRechargeOrders</b>
 	 * <p>
 	 * 导出停车充值订单列表
 	 * </p>
 	 */
-	@RequestMapping("exportParkingRechageOrders")
-	public void exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,HttpServletResponse response ) {
-		parkingService.exportParkingRechageOrders(cmd, response );
+	@RequestMapping("exportParkingRechargeOrders")
+	public void exportParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd,HttpServletResponse response ) {
+		parkingService.exportParkingRechargeOrders(cmd, response );
 	}
 	
 	/**
