@@ -1374,6 +1374,9 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
+
+
+
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());

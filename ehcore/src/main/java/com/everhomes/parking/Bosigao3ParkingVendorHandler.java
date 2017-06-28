@@ -136,7 +136,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
     	return card;
     }
 
-	private boolean recharge(ParkingRechargeOrder order){
+	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);

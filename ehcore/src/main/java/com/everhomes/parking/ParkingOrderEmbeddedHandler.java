@@ -2,10 +2,13 @@ package com.everhomes.parking;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.bus.LocalBus;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +21,6 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX + OrderType.PARKING_CODE )
@@ -33,6 +35,8 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	private CoordinationProvider coordinationProvider;
 	@Autowired
 	private ConfigurationProvider configProvider;
+	@Autowired
+	private LocalBus localBus;
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -45,27 +49,28 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		this.checkVendorTypeFormat(cmd.getVendorType());
 
 		Long orderId = Long.parseLong(cmd.getOrderNo());
-		ParkingRechargeOrder order = checkOrder(orderId);
 		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
-
-		//加一个开关，方便在beta环境测试
-		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
-		if (!flag) {
-			if (0 != order.getPrice().compareTo(payAmount)) {
-				LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-						"Order amount is not equal to payAmount.");
-			}
-		}
-
-		Long payTime = System.currentTimeMillis();
-		Timestamp payTimeStamp = new Timestamp(payTime);
-
-		String vendorName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
-		ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
 
 		//支付宝回调时，可能会同时回调多次，
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_UPDATE_ORDER_STATUS.getCode()).enter(()-> {
+
+			ParkingRechargeOrder order = checkOrder(orderId);
+			//加一个开关，方便在beta环境测试
+			boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+			if (!flag) {
+				if (0 != order.getPrice().compareTo(payAmount)) {
+					LOGGER.error("Order amount is not equal to payAmount, cmd={}, order={}", cmd, order);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"Order amount is not equal to payAmount.");
+				}
+			}
+
+			Long payTime = System.currentTimeMillis();
+			Timestamp payTimeStamp = new Timestamp(payTime);
+
+			String vendorName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
+			ParkingVendorHandler handler = getParkingVendorHandler(vendorName);
+
 			//先将状态置为已付款
 			if(order.getStatus() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
 				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
@@ -74,7 +79,19 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 				parkingProvider.updateParkingRechargeOrder(order);
 			}
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {
-				handler.notifyParkingRechargeOrderPayment(order);
+				try{
+					if (handler.notifyParkingRechargeOrderPayment(order)) {
+						GetParkingCardsResponse response = handler.getParkingCardsByPlate(order.getOwnerType(),
+								order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber());
+
+						localBus.publish(null, "Parking-Recharge" + order.getId(), response.getCards().get(0));
+					}else {
+						localBus.publish(null, "Parking-Recharge" + order.getId(), null);
+					}
+				}catch (Exception e) {
+					localBus.publish(null, "Parking-Recharge" + order.getId(), null);
+				}
+
 			}
 			return null;
 		});
