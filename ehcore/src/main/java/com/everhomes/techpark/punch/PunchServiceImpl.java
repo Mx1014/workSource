@@ -4581,6 +4581,31 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/**
+	 * 刷新某公司某一段时间的所有打卡day logs
+	 *
+	 * */
+	@Override
+	public void refreshPunchDayLogs(ListPunchDetailsCommand cmd){
+
+		Organization org = this.checkOrganization(cmd.getOwnerId());
+		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),(byte) 1);
+		for(Long userId : userIds){ 
+			Calendar start = Calendar.getInstance();
+			Calendar end = Calendar.getInstance();
+			start.setTimeInMillis(cmd.getStartDay());
+			end.setTimeInMillis(cmd.getEndDay());
+			while (start.before(end)) {
+				try {
+					refreshPunchDayLog(userId, getTopEnterpriseId(cmd.getOwnerId()), start);
+				} catch (ParseException e) {
+					LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
+				}
+	
+				start.add(Calendar.DAY_OF_MONTH, 1);
+			}
+		}
+	}
+	/**
 	 * 打卡2.0 的考勤详情
 	 * */
 	@Override
