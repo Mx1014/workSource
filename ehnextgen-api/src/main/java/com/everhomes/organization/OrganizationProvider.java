@@ -12,6 +12,7 @@ import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.organization.*;
 
+import com.everhomes.userOrganization.UserOrganization;
 import org.jooq.Condition;
 
 import java.math.BigDecimal;
@@ -396,5 +397,7 @@ public interface OrganizationProvider {
 			Long organizationId, Long buildId);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long userId, List<Long> organizationIds,
 			Byte operationType);
+
+	List<UserOrganization> listUserOrganizations(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback);
 }
 
