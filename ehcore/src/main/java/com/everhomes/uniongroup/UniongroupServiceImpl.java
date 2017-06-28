@@ -80,7 +80,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 
         //2.组装uniongroupMemberDetail对象
         List<EhUniongroupMemberDetails> unionDetailsList = new ArrayList<>();
-        orgIds.stream().map(r -> {
+        detailIds.stream().map(r -> {
             EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
             uniongroupMemberDetails.setGroupid(cmd.getGroupId());
             uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
