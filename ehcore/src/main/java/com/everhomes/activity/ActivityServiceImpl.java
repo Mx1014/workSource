@@ -712,6 +712,14 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
+		        
+		        ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(cmd.getActivityId(), cmd.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+		        if(oldRoster != null){
+		        	LOGGER.error("Roster already exist. activityId={}, phone={}", cmd.getActivityId(), cmd.getPhone());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_ROSTER_ALREADY_EXIST, "Roster already exist. activityId=" + cmd.getActivityId() + " phone=" + cmd.getPhone());
+		        }
+		        
 		        ActivityRoster roster = newRoster(cmd, user, activity);
 		        
 	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
@@ -728,7 +736,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
 	            
-	            createActivityRoster(roster);
+	            //createActivityRoster(roster);
+	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
 	        });
@@ -883,7 +892,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
+			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
+			
+			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 			//检查是否超过报名人数限制, add by tt, 20161012
 	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
 	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -952,6 +963,35 @@ public class ActivityServiceImpl implements ActivityService {
 	        rosters.add(roster);
 		}
 		return rosters;
+	}
+	
+	private List<ActivityRoster> filterExistRoster(Long activityId, List<ActivityRoster> rosters){
+		List<ActivityRoster> newRosters = new ArrayList<ActivityRoster>();
+		if(rosters == null){
+			return newRosters;
+		}
+		
+		//筛选重复数据，1、数据库不能有重复的，2、自己不能有重复的。
+		for(int i= 0; i< rosters.size(); i++){
+			ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, rosters.get(i).getPhone(), ActivityRosterStatus.NORMAL.getCode());
+			if(oldRoster != null){
+				continue;
+			}
+			
+			boolean oldFlag = false;
+			for(int j =0; j<newRosters.size(); j++){
+				if(rosters.get(i).getPhone().equals(newRosters.get(j).getPhone())){
+					oldFlag = true;
+					break;
+				}
+			}
+			
+			if(oldFlag){
+				continue;
+			}
+			newRosters.add(rosters.get(i));
+		}
+		return newRosters;
 	}
 	
 	/**

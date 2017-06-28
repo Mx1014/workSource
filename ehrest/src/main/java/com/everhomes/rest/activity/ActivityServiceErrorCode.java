@@ -31,5 +31,6 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_INVALID_REALNAME = 10028;
     static final int ERROR_PHONE=10029;
 	static final int ERROR_NO_ROSTER = 10030;
+	static final int ERROR_ROSTER_ALREADY_EXIST = 10031;
 
 }
