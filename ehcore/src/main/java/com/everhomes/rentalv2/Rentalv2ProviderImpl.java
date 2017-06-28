@@ -2277,6 +2277,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 			.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
 			.and(Tables.EH_RENTALV2_CELLS.STATUS.eq(RentalSiteStatus.NORMAL.getCode()))
+			.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(new Date(new java.util.Date().getTime())))
 			.fetchOne();
 		if (record != null) {
 			BigDecimal maxPrice = max(record.getValue(DSL.max(Tables.EH_RENTALV2_CELLS.PRICE)),
@@ -2309,7 +2310,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 	
 	private BigDecimal max(BigDecimal ... b) {
-		BigDecimal max = new BigDecimal(0);
+		BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
 		for (BigDecimal bigDecimal : b) {
 			max = maxBig(max, bigDecimal);
 		}
@@ -2324,7 +2325,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 	}
 
 	private BigDecimal min(BigDecimal ... b) {
-		BigDecimal min = new BigDecimal(0);
+		BigDecimal min = new BigDecimal(Integer.MAX_VALUE);
 		for (BigDecimal bigDecimal : b) {
 			min = minBig(min, bigDecimal);
 		}

@@ -1066,14 +1066,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if (sitePriceRuleDTOs.size() == 1) {
 			rSiteDTO.setAvgPriceStr(sitePriceRuleDTOs.get(0).getPriceStr());
 		}else {
-			BigDecimal minPrice = new BigDecimal("0");
+			BigDecimal minPrice = new BigDecimal(Integer.MAX_VALUE);
 			for(int i = 0; i < sitePriceRuleDTOs.size(); i++) {
 				SitePriceRuleDTO sitePriceRuleDTO = sitePriceRuleDTOs.get(i);
 				if (sitePriceRuleDTO.getMinPrice() != null && sitePriceRuleDTO.getMinPrice().compareTo(minPrice) < 0) {
 					minPrice = sitePriceRuleDTO.getMinPrice();
 				}
 			}
-			if(minPrice.compareTo(new BigDecimal(0)) == 0) {
+			if(minPrice.compareTo(new BigDecimal(0)) == 0 || minPrice.intValue() == Integer.MAX_VALUE) {
 				rSiteDTO.setAvgPriceStr("免费");
 			}else {
 				String priceString = isInteger(minPrice)? String.valueOf(minPrice.intValue()): minPrice.toString();
@@ -1111,10 +1111,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		sitePriceRuleDTO.setRentalType(priceRule.getRentalType());
 		
 		MaxMinPrice maxMinPrice = rentalv2Provider.findMaxMinPrice(priceRule.getOwnerId(), priceRule.getRentalType());
-		
+
+		BigDecimal maxPrice = null;
+		BigDecimal minPrice = null;
 		if (sceneTokenDTO != null) {
-			BigDecimal maxPrice = null;
-			BigDecimal minPrice = null;
 			String scene = sceneTokenDTO.getScene();
 			if (SceneType.PM_ADMIN.getCode().equals(scene)) {
 				maxPrice = max(maxMinPrice.getMaxOrgMemberPrice(), priceRule.getOrgMemberWorkdayPrice(), priceRule.getOrgMemberWeekendPrice());
@@ -1137,6 +1137,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}else {
 				sitePriceRuleDTO.setPriceStr("");
 			}
+		}else {
+			maxPrice = max(maxMinPrice.getMaxPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+			minPrice = min(maxMinPrice.getMinPrice(), priceRule.getWorkdayPrice(), priceRule.getWeekendPrice());
+			sitePriceRuleDTO.setMaxPrice(maxPrice);
+			sitePriceRuleDTO.setMinPrice(minPrice);
+			sitePriceRuleDTO.setPriceStr(getPriceStr(maxPrice, minPrice, priceRule.getRentalType(), rentalSite.getTimeStep()));
 		}
 		
 		return sitePriceRuleDTO;
@@ -1152,11 +1158,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private BigDecimal max(BigDecimal ... b) {
-		BigDecimal max = new BigDecimal(0);
+		BigDecimal max = new BigDecimal(Integer.MIN_VALUE);
 		for (BigDecimal bigDecimal : b) {
 			max = maxBig(max, bigDecimal);
 		}
-		return max;
+		return max.intValue() == Integer.MIN_VALUE ? new BigDecimal(0) : max;
 	}
 	
 	private BigDecimal maxBig(BigDecimal b1, BigDecimal b2) {
@@ -1167,11 +1173,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	}
 
 	private BigDecimal min(BigDecimal ... b) {
-		BigDecimal min = new BigDecimal(0);
+		BigDecimal min = new BigDecimal(Integer.MAX_VALUE);
 		for (BigDecimal bigDecimal : b) {
 			min = minBig(min, bigDecimal);
 		}
-		return min;
+		return min.intValue() == Integer.MAX_VALUE ? new BigDecimal(0) : min;
 	}
 	
 	private BigDecimal minBig(BigDecimal b1, BigDecimal b2) {
@@ -1311,6 +1317,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return "免费";
 		if(rentalType.equals(RentalType.DAY.getCode()))
 			return "￥"+ priceString +"/天";
+		if(rentalType.equals(RentalType.MONTH.getCode()))
+			return "￥"+ priceString +"/月";
 		if(rentalType.equals(RentalType.HALFDAY.getCode()))
 			return "￥"+ priceString +"/半天";
 		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
