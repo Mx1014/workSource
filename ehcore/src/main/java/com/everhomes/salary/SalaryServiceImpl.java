@@ -15,6 +15,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -333,6 +334,7 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
         XSSFSheet sheet = wb.createSheet(sheetName);
+        sheet.addMergedRegion(new CellRangeAddress(1, 12, 0, 0));
         XSSFCellStyle style = wb.createCellStyle();
         Font font = wb.createFont();
         font.setFontHeightInPoints((short) 20);
@@ -349,6 +351,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  创建标题
         XSSFRow rowTitle = sheet.createRow(rowNum++);
         rowTitle.createCell(0).setCellValue("对应批次");
+        rowTitle.setRowStyle(titleStyle);
 
         XSSFRow row = sheet.createRow(rowNum++);
         row.setRowStyle(style);
