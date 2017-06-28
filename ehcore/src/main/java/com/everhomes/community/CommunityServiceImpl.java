@@ -12,6 +12,7 @@ import com.everhomes.acl.*;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.general_form.GeneralFormService;
 import com.everhomes.general_form.GeneralFormValProvider;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
@@ -26,12 +27,15 @@ import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.*;
+import com.everhomes.userOrganization.UserOrganization;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1946,101 +1950,92 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		CommunityUserResponse res = new CommunityUserResponse();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		//当是左邻域下的某个园区查询
-		if(namespaceId == Namespace.DEFAULT_NAMESPACE){
-			res = this.listUserByOrganizationIdOrCommunityId(cmd);
-			return res;
-		}
-		List<User> users = null;
-		
-		int index = 100;
-		
-		if(cmd.getIsAuth() == 1){
-			index = 10000;
-		}
-		
-		users = userProvider.listUserByKeyword(cmd.getIsAuth(), cmd.getGender(), cmd.getOrganizationId(), cmd.getKeywords(),
-				cmd.getExecutiveFlag(), namespaceId, locator, index);
-		
-		if(null == users) 
-			return res;
-		
-		for (User user : users) {
-			CommunityUserDto dto = new CommunityUserDto();
-			dto.setUserId(user.getId());
-			dto.setGender(user.getGender());
-			dto.setUserName(user.getNickName());
-			dto.setPhone(user.getIdentifierToken());
-			List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
-			dto.setApplyTime(user.getCreateTime());
-			dto.setIsAuth(2);
-			dto.setExecutiveFlag(user.getExecutiveTag());
-			dto.setIdentityNumber(user.getIdentityNumberTag());
-			dto.setPosition(user.getPositionTag());
 
-			Set<OrganizationDetailDTO> organizationDTOs = new HashSet<>();
-			if(null != members && !members.isEmpty()){
+		List<UserOrganization> users = organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
+				query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+				query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
 
-//				Set<OrganizationDTO> set = new HashSet<>();
-
-				dto.setOrganizationMemberName(members.get(0).getContactName());
-
-				for (OrganizationMember member : members) {
-					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
-						dto.setIsAuth(1);
-					}
-//					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
-//					if (null != org && org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())
-//							&& org.getStatus().equals(OrganizationStatus.ACTIVE.getCode())) {
-//						set.add(ConvertHelper.convert(org, OrganizationDTO.class));
-//					}
+				if(null != cmd.getOrganizationId()){
+					query.addConditions(Tables.EH_USER_ORGANIZATION.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
-				organizationDTOs.addAll(populateOrganizationDetails(members));
 
-//				if(null != m){
-//					Organization org = organizationProvider.findOrganizationById(m.getCommunityId());
-//					if(null != org)
-//						dto.setEnterpriseName(org.getName());
-//					
-//					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(m.getCommunityId());
-//					if(null != addresses && addresses.size() > 0){
-//						Address address = addressProvider.findAddressById(addresses.get(0).getApartmentId());
-//						dto.setAddressName(address.getAddress());
-//						dto.setApartmentId(address.getId());
-//						dto.setBuildingName(address.getBuildingName());
-//					}
-//				}
-			}
-			List<OrganizationDetailDTO> Organizations = new ArrayList<>();
-			Organizations.addAll(organizationDTOs);
-			dto.setOrganizations(Organizations);
-
-			if(0 != cmd.getIsAuth()){
-				if(cmd.getIsAuth().equals(dto.getIsAuth())){
-					dtos.add(dto);
+				if(null != cmd.getCommunityId()){
+					query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(cmd.getCommunityId()));
 				}
-			}else{
-				dtos.add(dto);
+
+				if(!StringUtils.isEmpty(cmd.getKeywords())){
+					Condition cond = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(cmd.getKeywords());
+					cond = cond.or(Tables.EH_USERS.NICK_NAME.like("%" + cmd.getKeywords() + "%"));
+					query.addConditions(cond);
+				}
+
+				if(null != UserGender.fromCode(cmd.getGender())){
+					query.addConditions(Tables.EH_USERS.GENDER.eq(cmd.getGender()));
+				}
+
+				if(null != cmd.getExecutiveFlag()){
+					query.addConditions(Tables.EH_USERS.EXECUTIVE_TAG.eq(cmd.getExecutiveFlag()));
+				}
+
+				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+				}
+
+				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
+					query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
+				}
+				query.addConditions();
+
+				query.addGroupBy(Tables.EH_USERS.ID);
+				return query;
 			}
-		}
-		
-		res.setNextPageAnchor(null);
-		if(dtos.size() > pageSize){
-			dtos = dtos.subList(0, pageSize);
-			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
-		}
-		res.setUserCommunities(dtos.stream().map(r->{
+		});
+		List<CommunityUserDto> userCommunities = new ArrayList<>();
+		users.stream().map(r ->{
+			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
+			dto.setUserName(r.getNickName());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getUserId(), IdentifierType.MOBILE.getCode());
+			if(null != userIdentifier){
+				dto.setPhone(userIdentifier.getIdentifierToken());
+			}
+			dto.setApplyTime(r.getRegisterTime());
+			dto.setIdentityNumber(r.getIdentityNumberTag());
+
 			//最新活跃时间 add by sfyan 20170620
 			List<UserActivity> userActivities = userActivityProvider.listUserActivetys(r.getUserId(), 1);
 			if(userActivities.size() > 0){
-				r.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
+				dto.setRecentlyActiveTime(userActivities.get(0).getCreateTime().getTime());
 			}
-			return r;
-		}).collect(Collectors.toList()));
+
+			if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(r.getStatus())){
+				dto.setIsAuth(AuthFlag.YES.getCode());
+			}else{
+				dto.setIsAuth(AuthFlag.NO.getCode());
+			}
+
+			if(null != r.getOrganizationId()){
+				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
+				for (OrganizationMember member: members) {
+					if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
+						dto.setOrganizationMemberName(member.getContactName());
+					}
+				}
+				List<OrganizationDetailDTO> organizations = new ArrayList<>();
+				organizations.addAll(populateOrganizationDetails(members));
+				dto.setOrganizations(organizations);
+			}
+			userCommunities.add(dto);
+			return null;
+		});
+		res.setNextPageAnchor(locator.getAnchor());
+		res.setUserCommunities(userCommunities);
 		return res;
 	}
 
