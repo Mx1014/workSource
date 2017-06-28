@@ -36,6 +36,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ParkingRechargeOrderDTO {
     private Long id;
+    private Long orderNo;
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
@@ -66,6 +67,14 @@ public class ParkingRechargeOrderDTO {
     private String errorDescription;
     private String contact;
     private Timestamp refundTime;
+
+    public Long getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(Long orderNo) {
+        this.orderNo = orderNo;
+    }
 
     public Timestamp getRefundTime() {
         return refundTime;

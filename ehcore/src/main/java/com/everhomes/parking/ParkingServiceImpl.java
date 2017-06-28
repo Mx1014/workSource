@@ -16,13 +16,14 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
 import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.util.DownloadUtils;
-import com.everhomes.util.StringHelper;
+import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -91,8 +92,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -133,7 +132,9 @@ public class ParkingServiceImpl implements ParkingService {
     private BigCollectionProvider bigCollectionProvider;
     @Autowired
     private OrganizationProvider organizationProvider;
-    
+    @Autowired
+    private AppProvider appProvider;
+
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -1609,20 +1610,18 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setTimestamp(timestamp);
 		Integer randomNum = (int) (Math.random()*1000);
 		refundCmd.setNonce(randomNum);
-//		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
-//				.currentGMTTime().getTime());
-//		refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+
+		refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
+
+		refundCmd.setOrderNo(String.valueOf(order.getOrderNo()));
+
+		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
+
+		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+		refundCmd.setRefundAmount(order.getPrice());
 //
-//		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
-//
-//		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo());
-//
-//		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
-//
-//		refundCmd.setRefundAmount(roster.getPayAmount());
-//
-//		refundCmd.setRefundMsg("报名取消退款");
-//		this.setSignatureParam(refundCmd);
+		refundCmd.setRefundMsg("报名取消退款");
+		this.setSignatureParam(refundCmd);
 
 		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
 		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
@@ -1635,6 +1634,26 @@ public class ParkingServiceImpl implements ParkingService {
 					"bill refund error");
 		}
 		long endTime = System.currentTimeMillis();
+	}
+
+	/***给支付相关的参数签名*/
+	private void setSignatureParam(PayZuolinRefundCommand cmd) {
+		App app = appProvider.findAppByKey(cmd.getAppKey());
+
+		Map<String,String> map = new HashMap<>();
+		map.put("appKey",cmd.getAppKey());
+		map.put("timestamp",cmd.getTimestamp()+"");
+		map.put("nonce",cmd.getNonce()+"");
+		map.put("refundOrderNo",cmd.getRefundOrderNo());
+		map.put("orderNo", cmd.getOrderNo());
+		map.put("onlinePayStyleNo",cmd.getOnlinePayStyleNo() );
+		map.put("orderType",cmd.getOrderType() );
+		//modify by wh 2016-10-24 退款使用toString,下订单的时候使用doubleValue,两边用的不一样,为了和电商保持一致,要修改成toString
+//		map.put("refundAmount", cmd.getRefundAmount().doubleValue()+"");
+		map.put("refundAmount", cmd.getRefundAmount().toString());
+		map.put("refundMsg", cmd.getRefundMsg());
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		cmd.setSignature(signature);
 	}
 
 	private Object restCall(String api, Object command, Class<?> responseType) {
