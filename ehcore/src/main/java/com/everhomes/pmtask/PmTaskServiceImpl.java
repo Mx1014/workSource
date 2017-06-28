@@ -1829,7 +1829,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 		User user = UserContext.current().getUser();
-		response.setUserName(user.getNickName());
 		if (StringUtils.isNotBlank(cmd.getKeyword())) {
 			LOGGER.info("findClaimedIdentifierByToken: {}", cmd.getKeyword());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), cmd.getKeyword());
@@ -1839,7 +1838,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			user = userProvider.findUserById(userIdentifier.getOwnerUid());
 			LOGGER.info("findClaimedIdentifierByToken userid: {}, userIdentifier: {}", user.getId(), userIdentifier);
 		}
-
+		response.setUserName(user.getNickName());
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
