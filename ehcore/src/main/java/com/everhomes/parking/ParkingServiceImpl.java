@@ -402,6 +402,7 @@ public class ParkingServiceImpl implements ParkingService {
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
     		createFlowCaseCommand.setContent("车牌号码：" + parkingCardRequest.getPlateNumber() + "\n"
     				+ "车主电话：" + parkingCardRequest.getPlateOwnerPhone());
+			createFlowCaseCommand.setCurrentOrganizationId(cmd.getRequestorEnterpriseId());
 
 			if (UserContext.getCurrentNamespaceId().equals(999983)) {
 				createFlowCaseCommand.setTitle("停车月卡申请");
