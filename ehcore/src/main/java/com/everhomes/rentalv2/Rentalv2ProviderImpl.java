@@ -456,7 +456,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.INACTIVE.getCode()))
 			.fetchOne();
 
-		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
+		return result == null ? 0D : result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)) == null ? 0D: result.getValue(DSL.sum(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_COUNT)).doubleValue();
 	}
 
 	@Override
@@ -528,17 +528,18 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				Tables.EH_RENTALV2_RESOURCE_ORDERS.BEGIN_TIME, Tables.EH_RENTALV2_RESOURCE_ORDERS.END_TIME).asTable("inner_table");
 		
 		Field<BigDecimal> maxRentalCount = null;
-		Table<?> middleTable = context.select(innerTable.field("rental_type"), maxRentalCount = DSL.max(rentalCount)).from(innerTable).groupBy(innerTable.field("rental_type")).asTable("middle_table");
+		Table<?> middleTable = context.select(innerTable.field("rental_type"), maxRentalCount = DSL.max(rentalCount).as("max_rental_count")).from(innerTable).groupBy(innerTable.field("rental_type")).asTable("middle_table");
 		
 		SelectJoinStep<Record1<BigDecimal>> outer = context.select(DSL.sum(maxRentalCount)).from(middleTable);
 		
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug(outer.getSQL());
+			LOGGER.debug(outer.getBindValues().toString());
 		}
 		
 		Record1<BigDecimal> record = outer.fetchOne();
 		
-		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
+		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)) == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
 	}
 
 	private Date initToMonthLastDay(Date date) {
