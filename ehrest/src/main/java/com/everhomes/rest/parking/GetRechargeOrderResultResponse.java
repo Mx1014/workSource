@@ -8,7 +8,7 @@ public class GetRechargeOrderResultResponse {
     private String description;
     private Byte rechargeType;
 
-    private ParkingTempFeeDTO dto;
+    private ParkingTempFeeDTO tempFee;
 
     private ParkingCardDTO card;
 
@@ -44,12 +44,12 @@ public class GetRechargeOrderResultResponse {
         this.rechargeType = rechargeType;
     }
 
-    public ParkingTempFeeDTO getDto() {
-        return dto;
+    public ParkingTempFeeDTO getTempFee() {
+        return tempFee;
     }
 
-    public void setDto(ParkingTempFeeDTO dto) {
-        this.dto = dto;
+    public void setTempFee(ParkingTempFeeDTO tempFee) {
+        this.tempFee = tempFee;
     }
 
     @Override
