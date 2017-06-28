@@ -27,10 +27,14 @@ public class RosterPayTimeoutAction implements Runnable {
 
 	@Override
 	public void run() {
-
+		log.info("RosterPayTimeoutAction start ! rosterId=" + rosterId);
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			
+			log.info("RosterPayTimeoutAction run ! rosterId=" + rosterId);
 			rosterPayTimeoutService.cancelTimeoutOrder(rosterId);
 		}
+		
+		log.info("RosterPayTimeoutAction end ! rosterId=" + rosterId);
 	}
 
 	public RosterPayTimeoutAction(final String rosterId) {

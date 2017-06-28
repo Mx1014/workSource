@@ -63,7 +63,9 @@ public class WarnActivityBeginningAction implements Runnable {
 
 	@Override
 	public void run() {
+		LOGGER.info("WarnActivityBeginningAction start ! activityId=" + activityId);
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			LOGGER.info("WarnActivityBeginningAction start ! activityId=" + activityId);
 			LOGGER.debug("活动提醒开始：" + activityId);
 
 			Activity activity = activityProivider.findActivityById(activityId);
@@ -101,6 +103,7 @@ public class WarnActivityBeginningAction implements Runnable {
 
 			LOGGER.debug("活动提醒结束：" + activityId);
 		}
+		LOGGER.info("WarnActivityBeginningAction end ! activityId=" + activityId);
 	}
 	
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
