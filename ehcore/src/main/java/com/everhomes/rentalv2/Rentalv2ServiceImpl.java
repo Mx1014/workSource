@@ -3258,7 +3258,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	    	cmd.setProjectId(order.getCommunityId());
 	    	cmd.setProjectType(EntityType.COMMUNITY.getCode());
 	    	
-	
+	    	
 	    	Map<String, String> map = new HashMap<>();
 	        map.put("resourceName", order.getResourceName());
 	        String useDetail = order.getUseDetail();
