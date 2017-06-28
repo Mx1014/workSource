@@ -13,9 +13,11 @@ public interface UniongroupConfigureProvider {
 
     UniongroupConfigures findUniongroupConfiguresById(Long id);
 
-    List<UniongroupConfigures> listUniongroupConfigures();
+    UniongroupConfigures findUniongroupConfiguresByTargetId(Integer namespaceId, Long TargetId);
 
-    List<UniongroupConfigures> listUniongroupConfiguresByGroupId(Long groupId);
+    List<UniongroupConfigures> listUniongroupConfigures(Integer namespaceId);
+
+    List<UniongroupConfigures> listUniongroupConfiguresByGroupId(Integer namespaceId, Long groupId);
 
     void deleteUniongroupConfigres(UniongroupConfigures uniongroupConfigure);
 

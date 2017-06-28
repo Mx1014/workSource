@@ -9,7 +9,9 @@ import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
 import com.everhomes.rest.uniongroup.UniongroupType;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jca.cci.core.InteractionCallback;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
@@ -36,11 +38,17 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
         List<UniongroupConfigures> configureList = new ArrayList<>();
         List<UniongroupTarget> targets = cmd.getTargets();
         if (targets != null) {
             targets.stream().map(r -> {
+                /**重复项过滤规则：后更新的规则覆盖先更新的规则**/
+                UniongroupConfigures old_uc = this.uniongroupConfigureProvider.findUniongroupConfiguresByTargetId(namespaceId, r.getId());
+                if(old_uc != null){
+                    this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
+                }
                 UniongroupConfigures uc = new UniongroupConfigures();
                 uc.setGroupType(uniongroupType.getCode());
                 uc.setGroupid(cmd.getGroupId());
@@ -50,11 +58,6 @@ public class UniongroupServiceImpl implements UniongroupService {
                 return null;
             }).collect(Collectors.toList());
         }
-
-        /**重复项过滤规则：后更新的规则覆盖先更新的规则**/
-
-        /**包含关系过滤规则：小范围规则覆盖大范围规则**/
-
 
         /**保存配置表**/
         if (configureList.size() > 0) {
@@ -74,12 +77,16 @@ public class UniongroupServiceImpl implements UniongroupService {
         }).map((r) -> {
             return r.getId();
         }).collect(Collectors.toList());
+        /**包含关系过滤规则：小范围规则覆盖大范围规则**/
+
         List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationMemberByOrganizationIds(new CrossShardListingLocator(), 1000000, null, orgIds);
         Set<Long> detailIds = new HashSet<>();
         organizationMembers.stream().map(r -> {
             detailIds.add(r.getDetailId());
             return null;
         }).collect(Collectors.toList());
+
+
         //2.查询本次保存中所有勾选个人加入集合detailIds
         cmd.getTargets().stream().filter((r) -> {
             return r.getType().equals(UniongroupTargetType.fromCode("MEMBERDETAIL").getCode());
@@ -118,7 +125,8 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List getConfiguresListByGroupId(Long groupId) {
-        return this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(groupId);
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        return this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, groupId);
     }
 
     @Override

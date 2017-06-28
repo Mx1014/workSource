@@ -6,6 +6,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 
@@ -13,10 +14,12 @@ import com.everhomes.server.schema.tables.daos.EhUniongroupConfiguresDao;
 import com.everhomes.server.schema.tables.daos.EhUniongroupMemberDetailsDao;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupConfigures;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
+import com.everhomes.server.schema.tables.records.EhUniongroupConfiguresRecord;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,17 +66,55 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
     }
 
     @Override
-    public List<UniongroupConfigures> listUniongroupConfigures() {
-        return getReadOnlyContext().select().from(Tables.EH_UNIONGROUP_CONFIGURES)
-                .orderBy(Tables.EH_UNIONGROUP_CONFIGURES.ID.asc())
-                .fetch().map(r -> ConvertHelper.convert(r, UniongroupConfigures.class));
+    public UniongroupConfigures findUniongroupConfiguresByTargetId(Integer namespaceId, Long TargetId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.TARGETID.eq(TargetId));
+        EhUniongroupConfiguresRecord record = query.fetchOne();
+        if(record != null){
+            return ConvertHelper.convert(record,UniongroupConfigures.class);
+        }
+        return null;
     }
 
     @Override
-    public List<UniongroupConfigures> listUniongroupConfiguresByGroupId(Long groupId) {
-        return getReadOnlyContext().select().from(Tables.EH_UNIONGROUP_CONFIGURES).where(Tables.EH_UNIONGROUP_CONFIGURES.GROUPID.eq(groupId))
-                .orderBy(Tables.EH_UNIONGROUP_CONFIGURES.ID.asc())
-                .fetch().map(r -> ConvertHelper.convert(r, UniongroupConfigures.class));
+    public List<UniongroupConfigures> listUniongroupConfigures(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
+        List<EhUniongroupConfiguresRecord> records = query.fetch();
+        List<UniongroupConfigures> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupConfigures.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
+
+    @Override
+    public List<UniongroupConfigures> listUniongroupConfiguresByGroupId(Integer namespaceId, Long groupId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUPID.eq(groupId));
+        List<EhUniongroupConfiguresRecord> records = query.fetch();
+        List<UniongroupConfigures> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupConfigures.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
     }
 
     @Override
