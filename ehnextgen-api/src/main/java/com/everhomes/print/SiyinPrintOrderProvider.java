@@ -12,8 +12,8 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findSiyinPrintOrderById(Long id);
 
-	List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
-			List<Long> ownerIdList);
+	List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<Object> ownerTypeList,
+			List<Object> ownerIdList);
 	
 	List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId, String ownerType, Long ownerId);
 	
@@ -25,7 +25,8 @@ public interface SiyinPrintOrderProvider {
 
 	SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long id, Byte jobType, String ownerType, Long ownerId);
 
-	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(String ownerType, Long ownerId, Timestamp startTime,
+	List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
+			List<Object> ownerIdList, Timestamp startTime,
 			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize);
 
 }

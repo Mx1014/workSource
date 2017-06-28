@@ -9,6 +9,7 @@ import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.SelectConditionStep;
 import org.jooq.UpdateConditionStep;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,18 +68,24 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 	
 	@Override
-	public List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<String> ownerTypeList,
-			List<Long> ownerIdList) {
+	public List<SiyinPrintOrder> listSiyinPrintOrder(Timestamp startTime, Timestamp endTime, List<Object> ownerTypeList,
+			List<Object> ownerIdList) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
-				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.between(startTime, endTime));
+				.where(DSL.trueCondition());
+		if(startTime!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.ge(startTime));
+		}
+		if(endTime!=null){
+			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.le(endTime));
+		}
 		Condition condition = null;
 		for (int i = 0; i < ownerTypeList.size(); i++) {
 			if(condition == null)
-				condition = Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i))
-					.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerIdList.get(i)));
+				condition = Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i).toString())
+					.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(Long.valueOf(ownerIdList.get(i).toString())));
 			else
-				condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i))
-				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerIdList.get(i))));
+				condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i).toString())
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(Long.valueOf(ownerIdList.get(i).toString()))));
 		}
 		query = query.and(condition);
 		LOGGER.info("listSiyinPrintOrder sql = {}, param = {}.",query.getSQL(),query.getBindValues());
@@ -176,11 +183,21 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 	}
 
 	@Override
-	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(String ownerType, Long ownerId, Timestamp startTime,
+	public List<SiyinPrintOrder> listSiyinPrintOrderByOwners(List<Object> ownerTypeList,
+			List<Object> ownerIdList, Timestamp startTime,
 			Timestamp endTime, Byte jobType, Byte orderStatus, String keywords, Long pageAnchor, Integer pageSize) {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
-			.where(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
-			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
+			.where(DSL.trueCondition());
+		Condition condition = null;
+		for (int i = 0; i < ownerTypeList.size(); i++) {
+			if(condition == null)
+				condition = Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i).toString())
+					.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(Long.valueOf(ownerIdList.get(i).toString())));
+			else
+				condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i).toString())
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(Long.valueOf(ownerIdList.get(i).toString()))));
+		}
+		query = query.and(condition);
 		if(startTime!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.CREATE_TIME.ge(startTime));
 		}
@@ -197,7 +214,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		}
 		
 		if(keywords!=null){
-			Condition condition = Tables.EH_SIYIN_PRINT_ORDERS.NICK_NAME.like("%"+keywords+"%");
+			condition = Tables.EH_SIYIN_PRINT_ORDERS.NICK_NAME.like("%"+keywords+"%");
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_COMPANY.like("%"+keywords+"%"));
 			condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_PHONE.like("%"+keywords+"%"));
 			query = query.and(condition);

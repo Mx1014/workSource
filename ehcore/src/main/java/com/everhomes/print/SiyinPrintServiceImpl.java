@@ -189,27 +189,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	public GetPrintStatResponse getPrintStat(GetPrintStatCommand cmd) {
 		PrintOwnerType printOwnerType = checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
 		
-		List<String> ownerTypeList = new ArrayList<String>();
-		List<Long> ownerIdList = new ArrayList<Long>();
-		
-		if(printOwnerType == PrintOwnerType.ENTERPRISE){
-			List<OrganizationCommunity> list = organizationProvider.listOrganizationCommunities(cmd.getOwnerId());
-			if(list == null || list.size() == 0){
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, organizationId = {}, have empty community",cmd.getOwnerId());
-			}
-			list.forEach(r -> {
-				ownerIdList.add(r.getCommunityId());
-				ownerTypeList.add(PrintOwnerType.COMMUNITY.getCode());
-			});
-		}else{
-			ownerTypeList.add(cmd.getOwnerType());
-			ownerIdList.add(cmd.getOwnerId());
-		}
+		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		//查询订单
 		Timestamp startTime = cmd.getStartTime() == null?null:new Timestamp(cmd.getStartTime());
 		Timestamp endTime = cmd.getEndTime() == null?null:new Timestamp(cmd.getEndTime());
-		List<SiyinPrintOrder> orders = siyinPrintOrderProvider.listSiyinPrintOrder(startTime, endTime, ownerTypeList, ownerIdList);
+		List<SiyinPrintOrder> orders = siyinPrintOrderProvider.listSiyinPrintOrder(startTime, endTime, map.get("ownerTypeList"), map.get("ownerIdList"));
 		
 		//计算订单
 		return processGetPrintStatResponse(orders);
@@ -225,7 +210,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		
 		Timestamp endtime = cmd.getEndTime() == null?null:new Timestamp(cmd.getEndTime());
 		
-		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(cmd.getOwnerType(),cmd.getOwnerId(),starttime
+		Map<String,List<Object>> map = getCommunitiesByOrg(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<SiyinPrintOrder> printOrdersList = siyinPrintOrderProvider.listSiyinPrintOrderByOwners(map.get("ownerTypeList"),map.get("ownerIdList"),starttime
 				,endtime,cmd.getJobType(),cmd.getOrderStatus(),cmd.getKeywords(),cmd.getPageAnchor(),pageSize+1);
 		
 		ListPrintRecordsResponse response = new ListPrintRecordsResponse();
@@ -240,6 +227,32 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		}).collect(Collectors.toList()));
 		return response;
 	}
+
+	//根据管理公司，获取到园区
+	private Map<String, List<Object>> getCommunitiesByOrg(String ownerType,Long ownerId) {
+		PrintOwnerType printOwnerType = checkOwner(ownerType, ownerId);
+		List<Object> ownerTypeList = new ArrayList<Object>();
+		List<Object> ownerIdList = new ArrayList<Object>();
+		
+		if(printOwnerType == PrintOwnerType.ENTERPRISE){
+			List<OrganizationCommunity> list = organizationProvider.listOrganizationCommunities(ownerId);
+			if(list == null || list.size() == 0){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, organizationId = {}, have empty community",ownerType);
+			}
+			list.forEach(r -> {
+				ownerIdList.add(r.getCommunityId());
+				ownerTypeList.add(PrintOwnerType.COMMUNITY.getCode());
+			});
+		}else{
+			ownerTypeList.add(ownerType);
+			ownerIdList.add(ownerId);
+		}
+		Map<String, List<Object>> map = new HashMap<>();
+		map.put("ownerIdList", ownerIdList);
+		map.put("ownerTypeList", ownerTypeList);
+		return map;
+	}
+
 
 	@Override
 	public ListPrintJobTypesResponse listPrintJobTypes(ListPrintJobTypesCommand cmd) {
@@ -882,6 +895,9 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	 */
 	private List<SiyinPrintSetting> checkPaperSizePriceDTO(PrintSettingPaperSizePriceDTO paperSizePriceDTO, String string, Long long1) {
 		// TODO Auto-generated method stub
+		if(paperSizePriceDTO == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameters, paperSizePriceDTO = " +paperSizePriceDTO);
+		}
 		checkPrice(paperSizePriceDTO.getAthreePrice());
 		checkPrice(paperSizePriceDTO.getAfourPrice());
 		checkPrice(paperSizePriceDTO.getAfivePrice());
