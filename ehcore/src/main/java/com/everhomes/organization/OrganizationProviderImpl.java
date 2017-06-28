@@ -4583,15 +4583,16 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
 					query.addFrom(Tables.EH_USERS);
+					query.addJoin(Tables.EH_USER_IDENTIFIERS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_IDENTIFIERS.OWNER_UID));
 					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
-					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
 					if(null != callback){
 						callback.buildCondition(locator, query);
 					}
 					if (null != locator && null != locator.getAnchor())
 						query.addConditions(Tables.EH_USERS.ID.lt(locator.getAnchor()));
 
-					query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+					query.addOrderBy(Tables.EH_USERS.ID.desc());
 					query.addLimit(size);
 					query.fetch().map((r) -> {
 						UserOrganizations userOrganizations = new UserOrganizations();
@@ -4604,6 +4605,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						userOrganizations.setCommunityId(r.getValue(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID));
 						userOrganizations.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
 						userOrganizations.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));
+						userOrganizations.setPhoneNumber(r.getValue(Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN));
 						result.add(userOrganizations);
 						return null;
 					});
@@ -4611,9 +4613,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
 
 		locator.setAnchor(null);
-		if (result.size() > size) {
+		if (result.size() > pageSize) {
 			result.remove(result.size() - 1);
-			locator.setAnchor(result.get(result.size() - 1).getId());
+			locator.setAnchor(result.get(result.size() - 1).getUserId());
 		}
 
 		return result;
