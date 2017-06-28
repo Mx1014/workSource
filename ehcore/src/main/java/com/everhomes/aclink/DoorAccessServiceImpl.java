@@ -1,40 +1,58 @@
 package com.everhomes.aclink;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.Security;
-import java.text.Format;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletResponse;
-
+import com.atomikos.util.FastDateFormat;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.huarun.*;
+import com.everhomes.aclink.lingling.*;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.promotion.OpPromotionActivity;
-import com.everhomes.promotion.OpPromotionActivityContext;
-import com.everhomes.promotion.OpPromotionCondition;
-import com.everhomes.promotion.OpPromotionUtils;
-import com.everhomes.redis.JsonStringRedisSerializer;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.*;
-import com.everhomes.rest.organization.*;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.sequence.LocalSequenceGenerator;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.*;
-
+import com.everhomes.util.excel.ExcelUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -52,80 +70,24 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-
-import com.atomikos.util.FastDateFormat;
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
-import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
-import com.everhomes.aclink.huarun.AclinkHuarunService;
-import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
-import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
-import com.everhomes.aclink.huarun.AclinkSimpleQRCodeInvitation;
-import com.everhomes.aclink.lingling.AclinkLinglingDevice;
-import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
-import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
-import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
-import com.everhomes.aclink.lingling.AclinkLinglingService;
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.border.Border;
-import com.everhomes.border.BorderConnectionProvider;
-import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.bus.LocalBusSubscriber.Action;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.locale.LocaleTemplateProvider;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.rpc.server.AclinkRemotePdu;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.sequence.LocalSequenceGenerator;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhOpPromotionActivities;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.Security;
+import java.text.Format;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -3682,4 +3644,124 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			createDoorAuth(cmd);			
 		}
 	}
+
+    @Override
+    public void exportVisitorDoorAuth(ExportDoorAuthCommand cmd, HttpServletResponse httpResponse) {
+        int pageSize = 200;
+        if (cmd.getPageSize() != null) {
+            pageSize = cmd.getPageSize();
+        }
+
+        List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(
+                cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), pageSize, cmd.getStartTime(), cmd.getEndTime());
+
+        List<DoorAuthExportVo> voList = auths.stream().map(r -> {
+            DoorAuthExportVo vo = new DoorAuthExportVo();
+            vo.setNickName(r.getNickname());
+            vo.setPhone(r.getPhone());
+            vo.setOrganization(r.getOrganization());
+            vo.setGoDoor(String.valueOf(r.getCurrStorey()));
+            vo.setDescription(r.getDescription());
+
+            Instant i1 = Instant.ofEpochMilli(r.getValidEndMs());
+            LocalDateTime dateTime1 = LocalDateTime.ofInstant(i1, ZoneId.systemDefault());
+            vo.setAvailableTime(dateTime1.toString());
+
+            Instant i2 = Instant.ofEpochMilli(r.getValidFromMs());
+            LocalDateTime dateTime2 = LocalDateTime.ofInstant(i2, ZoneId.systemDefault());
+            vo.setAuthTime(dateTime2.toString());
+
+            User u = userProvider.findUserById(r.getApproveUserId());
+            if(u != null) {
+                if(u.getNickName() != null) {
+                    vo.setApproveUserName(u.getNickName());
+                } else {
+                    vo.setApproveUserName(u.getAccountName());
+                }
+            }
+            return vo;
+        }).collect(Collectors.toList());
+
+        String[] propertyNames = {"nickName", "phone", "organization", "goDoor", "description", "availableTime", "approveUserName", "authTime"};
+        String[] titleNames = {"姓名", "手机号", "来访单位", "所去楼层", "来访事由", "有效期", "授权人", "授权时间"};
+        int[] columnSizes = {20, 20, 20, 20, 20, 20, 20, 20};
+        String fileName = String.format("访客授权_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+        ExcelUtils excelUtils = new ExcelUtils(httpResponse, fileName, "访客授权");
+        excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
+    }
+
+    private static class DoorAuthExportVo {
+        private String nickName;
+        private String phone;
+        private String organization;
+        private String goDoor;
+        private String description;
+        private String availableTime;
+        private String approveUserName;
+        private String authTime;
+
+        public String getNickName() {
+            return nickName;
+        }
+
+        public void setNickName(String nickName) {
+            this.nickName = nickName;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
+        }
+
+        public String getOrganization() {
+            return organization;
+        }
+
+        public void setOrganization(String organization) {
+            this.organization = organization;
+        }
+
+        public String getGoDoor() {
+            return goDoor;
+        }
+
+        public void setGoDoor(String goDoor) {
+            this.goDoor = goDoor;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getAvailableTime() {
+            return availableTime;
+        }
+
+        public void setAvailableTime(String availableTime) {
+            this.availableTime = availableTime;
+        }
+
+        public String getApproveUserName() {
+            return approveUserName;
+        }
+
+        public void setApproveUserName(String approveUserName) {
+            this.approveUserName = approveUserName;
+        }
+
+        public String getAuthTime() {
+            return authTime;
+        }
+
+        public void setAuthTime(String authTime) {
+            this.authTime = authTime;
+        }
+    }
 }

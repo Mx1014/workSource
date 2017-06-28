@@ -11,8 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.everhomes.rest.activity.SignupInfoDTO;
-
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -107,14 +105,14 @@ public class ExcelUtils {
     /**
      * 写excel.
      *
-     * @param titleColumn 对应bean的属性名
+     * @param propertyNames 对应bean的属性名
      * @param titleName   列名
-     * @param titleSize   列宽
+     * @param columnSizes   列宽
      * @param dataList    数据
      */
-    public void writeExcel(String[] titleColumn, String[] titleName, int[] titleSize, List<?> dataList) {
+    public void writeExcel(String[] propertyNames, String[] titleName, int[] columnSizes, List<?> dataList) {
         try (OutputStream out = getOutputStream();) {
-            ByteArrayOutputStream excelStream = buildExcel(titleColumn, titleName, titleSize, dataList);
+            ByteArrayOutputStream excelStream = buildExcel(propertyNames, titleName, columnSizes, dataList);
             out.write(excelStream.toByteArray());
             out.flush();
         } catch (Exception ex) {
@@ -122,9 +120,9 @@ public class ExcelUtils {
         }
     }
 
-	public void writeExcel(List<String> titleColumn, List<String> titleName, List<Integer> titleSize,
+	public void writeExcel(List<String> propertyNames, List<String> titleName, List<Integer> columnSizes,
 			List<?> dataList) {
-		writeExcel(titleColumn.toArray(new String[titleColumn.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(titleSize.toArray(new Integer[titleSize.size()])), dataList);
+		writeExcel(propertyNames.toArray(new String[propertyNames.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(columnSizes.toArray(new Integer[columnSizes.size()])), dataList);
 	}
 
     private OutputStream getOutputStream() throws IOException {
