@@ -47,8 +47,6 @@ import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.apache.commons.codec.binary.*;
@@ -2749,8 +2747,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         try {
             FileOutputStream fos = new FileOutputStream(fileLocation);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
-            encoder.encode(image);
+//            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
+//            encoder.encode(image);
+            ImageIO.write(image, "JPEG", bos);
             bos.close();
         } catch (Exception e) {
             e.printStackTrace();
