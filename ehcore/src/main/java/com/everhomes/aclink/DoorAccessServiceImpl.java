@@ -80,9 +80,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.Security;
 import java.text.Format;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -3663,13 +3660,11 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             vo.setGoDoor(String.valueOf(r.getCurrStorey()));
             vo.setDescription(r.getDescription());
 
-            Instant i1 = Instant.ofEpochMilli(r.getValidEndMs());
-            LocalDateTime dateTime1 = LocalDateTime.ofInstant(i1, ZoneId.systemDefault());
-            vo.setAvailableTime(dateTime1.toString());
+            Date d1 = new Date(r.getValidEndMs());
+            vo.setAvailableTime(DateUtil.dateToStr(d1, DateUtil.DATE_HM));
 
-            Instant i2 = Instant.ofEpochMilli(r.getValidFromMs());
-            LocalDateTime dateTime2 = LocalDateTime.ofInstant(i2, ZoneId.systemDefault());
-            vo.setAuthTime(dateTime2.toString());
+            Date d2 = new Date(r.getValidFromMs());
+            vo.setAuthTime(DateUtil.dateToStr(d2, DateUtil.DATE_HM));
 
             User u = userProvider.findUserById(r.getApproveUserId());
             if(u != null) {
