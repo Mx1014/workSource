@@ -5134,6 +5134,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							if(endTime==null||endTime<timeInterval.getEndTime())
 								endTime=timeInterval.getEndTime();
 							AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class );
+							signleCmd.setRentalType(priceRuleDTO.getRentalType());
 							signleCmd.setBeginTime(timeInterval.getBeginTime());
 							signleCmd.setEndTime(timeInterval.getEndTime()); 
 							if(null!=timeInterval.getTimeStep())
@@ -5151,6 +5152,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 				}else {
 					AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(defaultRule, AddRentalSiteSingleSimpleRule.class ); 
+					signleCmd.setRentalType(priceRuleDTO.getRentalType());
 					signleCmd.setWeekendPrice(weekendPrice); 
 					signleCmd.setWorkdayPrice(workdayPrice);
 					addSingleRules.add(signleCmd);
