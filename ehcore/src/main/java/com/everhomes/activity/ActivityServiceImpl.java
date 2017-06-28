@@ -82,6 +82,7 @@ import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -4545,36 +4546,39 @@ public class ActivityServiceImpl implements ActivityService {
     @Scheduled(cron="0 0 * * * ?")
     @Override
 	public void activityWarningSchedule() {
-    	//使用tryEnter方法可以防止分布式部署时重复执行
-    	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
-        	
-        	final Date now = DateUtils.getCurrentHour();
-        	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
-        	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
-        	
-        	//遍历每个域空间
-        	namespaces.forEach(n->{
-        		WarningSetting warningSetting = findWarningSetting(n.getId());
-        		Timestamp queryStartTime = new Timestamp(now.getTime()+warningSetting.getTime());
-        		Timestamp queryEndTime = new Timestamp(now.getTime()+warningSetting.getTime()+3600*1000);
-        		
-        		// 对于这个域空间时间范围内的活动，再单独设置定时任务
-        		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
-        		activities.forEach(a->{
-        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
-        				final Job job1 = new Job(
-        						WarnActivityBeginningAction.class.getName(),
-        						new Object[] { String.valueOf(a.getId()) });
-        				
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//使用tryEnter方法可以防止分布式部署时重复执行
+			coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(() -> {
+
+				final Date now = DateUtils.getCurrentHour();
+				List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+				namespaces.add(new NamespaceInfoDTO(0, "zuolin", ""));
+
+				//遍历每个域空间
+				namespaces.forEach(n -> {
+					WarningSetting warningSetting = findWarningSetting(n.getId());
+					Timestamp queryStartTime = new Timestamp(now.getTime() + warningSetting.getTime());
+					Timestamp queryEndTime = new Timestamp(now.getTime() + warningSetting.getTime() + 3600 * 1000);
+
+					// 对于这个域空间时间范围内的活动，再单独设置定时任务
+					List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
+					activities.forEach(a -> {
+						if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
+							final Job job1 = new Job(
+									WarnActivityBeginningAction.class.getName(),
+									new Object[]{String.valueOf(a.getId())});
+
 //        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 //        						new Date().getTime()+10000);
-        				jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
-        						a.getStartTime().getTime() - warningSetting.getTime());
-        				LOGGER.debug("设置了一个活动提醒："+a.getId());
-					}
-        		});
-        	});
-    	});
+							jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+									a.getStartTime().getTime() - warningSetting.getTime());
+							LOGGER.debug("设置了一个活动提醒：" + a.getId());
+						}
+					});
+				});
+			});
+		}
 	}
 
 	@Override

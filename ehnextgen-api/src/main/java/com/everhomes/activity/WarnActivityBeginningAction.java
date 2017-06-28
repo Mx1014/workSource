@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,9 @@ public class WarnActivityBeginningAction implements Runnable {
 	
 	@Autowired
 	private UserProvider userProvider;
+
+	@Autowired
+	ScheduleProvider scheduleProvider;
 	
 	public WarnActivityBeginningAction(String id) {
 		super();
@@ -58,42 +63,44 @@ public class WarnActivityBeginningAction implements Runnable {
 
 	@Override
 	public void run() {
-		LOGGER.debug("活动提醒开始："+activityId);
-		
-		Activity activity = activityProivider.findActivityById(activityId);
-		if (activity == null) {
-			return;
-		}
-		
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			LOGGER.debug("活动提醒开始：" + activityId);
+
+			Activity activity = activityProivider.findActivityById(activityId);
+			if (activity == null) {
+				return;
+			}
+
 //		Integer namespaceId = activity.getNamespaceId();
 //		WarningSetting warningSetting = warningSettingProvider.findWarningSettingByNamespaceAndType(namespaceId, EhActivities.class.getSimpleName());
 //		Long time = 3600*1000L;
 //		if (warningSetting != null) {
 //			time = warningSetting.getTime();
 //		}
-		ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
-		String time = (queryActivityWarningResponse.getDays()==null||queryActivityWarningResponse.getDays().intValue()==0?"":queryActivityWarningResponse.getDays()+"天") + queryActivityWarningResponse.getHours()+"小时";
-    	List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
-    	String scope = ActivityNotificationTemplateCode.SCOPE;
-		int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;
-		String locale = "zh_CN";
-		User user = userProvider.findUserById(activity.getCreatorUid());
-		if (user != null) {
-			locale = user.getLocale();
-		}
-		Map<String, Object> map = new HashMap<>();
-		map.put("tag", activity.getTag());
-		map.put("title", activity.getSubject());
-		map.put("time", time);
-		final String content = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-    	activityRosters.forEach(r->{
-    		if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
-    			sendMessageToUser(r.getUid().longValue(), content, null);
-    			LOGGER.debug("活动提醒——给用户发了消息，userId："+r.getUid());
+			ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+			String time = (queryActivityWarningResponse.getDays() == null || queryActivityWarningResponse.getDays().intValue() == 0 ? "" : queryActivityWarningResponse.getDays() + "天") + queryActivityWarningResponse.getHours() + "小时";
+			List<ActivityRoster> activityRosters = activityProivider.listRosters(activityId);
+			String scope = ActivityNotificationTemplateCode.SCOPE;
+			int code = ActivityNotificationTemplateCode.ACTIVITY_WARNING_PARTICIPANT;
+			String locale = "zh_CN";
+			User user = userProvider.findUserById(activity.getCreatorUid());
+			if (user != null) {
+				locale = user.getLocale();
 			}
-    	});
+			Map<String, Object> map = new HashMap<>();
+			map.put("tag", activity.getTag());
+			map.put("title", activity.getSubject());
+			map.put("time", time);
+			final String content = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			activityRosters.forEach(r -> {
+				if (r.getUid().longValue() != activity.getCreatorUid().longValue()) {
+					sendMessageToUser(r.getUid().longValue(), content, null);
+					LOGGER.debug("活动提醒——给用户发了消息，userId：" + r.getUid());
+				}
+			});
 
-		LOGGER.debug("活动提醒结束："+activityId);
+			LOGGER.debug("活动提醒结束：" + activityId);
+		}
 	}
 	
     private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {

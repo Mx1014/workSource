@@ -1,5 +1,7 @@
 package com.everhomes.activity;
 
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +18,19 @@ public class RosterPayTimeoutAction implements Runnable {
 	
 	@Autowired
 	RosterPayTimeoutService rosterPayTimeoutService;
+
+	@Autowired
+	ScheduleProvider scheduleProvider;
+
 	
 	private Long rosterId;
 
 	@Override
 	public void run() {
-		rosterPayTimeoutService.cancelTimeoutOrder(rosterId);
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			rosterPayTimeoutService.cancelTimeoutOrder(rosterId);
+		}
 	}
 
 	public RosterPayTimeoutAction(final String rosterId) {
