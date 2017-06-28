@@ -4854,30 +4854,30 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 0/15 * * * ?") 
 	public void scheduledSendPushToUsers(){
 		 
-		
-		Date runDate = DateHelper.currentGMTTime();
-		long runDateLong = convertTimeToGMTMillisecond(new Time(runDate.getTime()));
-		Calendar anchorCalendar = Calendar.getInstance();
-		anchorCalendar.setTime(runDate);
-		List<Long> sendPunsUserList = new ArrayList<>();
-		
-		//今天的
-		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
-		
-		//昨天的
-		runDateLong = runDateLong + 86400000L;
-		anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
-		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
-
-		//推送消息 
-		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
-		if(null == scheduleLocaleString ){
-			return;
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			Date runDate = DateHelper.currentGMTTime();
+			long runDateLong = convertTimeToGMTMillisecond(new Time(runDate.getTime()));
+			Calendar anchorCalendar = Calendar.getInstance();
+			anchorCalendar.setTime(runDate);
+			List<Long> sendPunsUserList = new ArrayList<>();
+			
+			//今天的
+			findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
+			
+			//昨天的
+			runDateLong = runDateLong + 86400000L;
+			anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
+			findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
+	
+			//推送消息 
+			LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
+			if(null == scheduleLocaleString ){
+				return;
+			}
+			for(Long userId : sendPunsUserList){
+				sendMessageToUser(userId, scheduleLocaleString.getText());
+			}
 		}
-		for(Long userId : sendPunsUserList){
-			sendMessageToUser(userId, scheduleLocaleString.getText());
-		}
-		
 	}
 	/** 
 	 * @param runDateLong : 打卡结束时间的时间点 
