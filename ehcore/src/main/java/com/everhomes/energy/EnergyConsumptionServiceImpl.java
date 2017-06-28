@@ -47,6 +47,8 @@ import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.WriterException;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.apache.commons.codec.binary.*;
@@ -70,6 +72,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
@@ -83,6 +86,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -2594,15 +2598,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         DocUtil docUtil=new DocUtil();
         List<String> files = new ArrayList<>();
-//        for(EnergyMeter meter : meterList) {
+        for(EnergyMeter meter : meterList) {
+            String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
+            String savePath = filePath + meter.getName() + ".jpg";
+            graphicsGeneration(meter.getName(), meter.getMeterNumber(), qrcode, savePath);
 //            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
 //            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
 //            docUtil.createDoc(dataMap, "energyMeter", savePath);
 //
-//            if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
-//                files.add(savePath);
-//            }
-//        }
+            if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
+                files.add(savePath);
+            }
+        }
 
         if(StringUtils.isEmpty(cmd.getFilePath())) {
             if(files.size() > 1) {
@@ -2617,18 +2624,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
     }
 
-    private Map<String, Object> createEnergyMeterQRCodeDoc(EnergyMeter meter) {
-        Map<String, Object> dataMap=new HashMap<String, Object>();
-        dataMap.put("meterNumber", meter.getMeterNumber());
-        dataMap.put("name", meter.getName());
-        String qrCode = generateQRString(meter.getId(), meter.getNamespaceId());
-        ByteArrayOutputStream out = generateQRCode(org.apache.commons.codec.binary.Base64.encodeBase64String(qrCode.getBytes()));
-        byte[] data=out.toByteArray();
-        BASE64Encoder encoder=new BASE64Encoder();
-        dataMap.put("qrCode", encoder.encode(data));
-
-        return dataMap;
-    }
+//    private Map<String, Object> createEnergyMeterQRCodeDoc(EnergyMeter meter) {
+//        Map<String, Object> dataMap=new HashMap<String, Object>();
+//        dataMap.put("meterNumber", meter.getMeterNumber());
+//        dataMap.put("name", meter.getName());
+//        String qrCode = generateQRString(meter.getId(), meter.getNamespaceId());
+//        ByteArrayOutputStream out = generateQRCode(org.apache.commons.codec.binary.Base64.encodeBase64String(qrCode.getBytes()));
+//        byte[] data=out.toByteArray();
+//        BASE64Encoder encoder=new BASE64Encoder();
+//        dataMap.put("qrCode", encoder.encode(data));
+//
+//        return dataMap;
+//    }
 
     private String generateQRString(Long id, Integer namespaceId) {
 //        EnergyMeterCodeDTO dto = new EnergyMeterCodeDTO();
@@ -2642,7 +2649,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private ByteArrayOutputStream generateQRCode(String qrToken) {
         ByteArrayOutputStream out = null;
         try {
-            BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 20, 20, null);
+            BufferedImage image = QRCodeEncoder.createQrCode(qrToken, 200, 200, null);
             out = new ByteArrayOutputStream();
             ImageIO.write(image, QRCodeConfig.FORMAT_PNG, out);
         } catch (IOException e) {
@@ -2656,6 +2663,40 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void exportSearchEnergyMeterQRCode(SearchEnergyMeterCommand cmd, HttpServletResponse response) {
+        cmd.setPageSize(Integer.MAX_VALUE-1);
+        List<Long> meterIds = meterSearcher.getMeterIds(cmd);
+
+        LOGGER.info("meterIds: {}", meterIds);
+        List<EnergyMeter> meterList = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), meterIds);
+
+        URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
+        String filePath = rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
+
+
+        DocUtil docUtil=new DocUtil();
+        List<String> files = new ArrayList<>();
+        for(EnergyMeter meter : meterList) {
+            String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
+            String savePath = filePath + meter.getName() + ".jpg";
+            graphicsGeneration(meter.getName(), meter.getMeterNumber(), qrcode, savePath);
+//            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
+//            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
+//            docUtil.createDoc(dataMap, "energyMeter", savePath);
+//
+            files.add(savePath);
+        }
+
+        if(files.size() > 1) {
+            String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+            LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+            DownloadUtils.writeZip(files, zipPath);
+            download(zipPath,response);
+        } else if(files.size() == 1) {
+            download(files.get(0),response);
+        }
 
     }
 
@@ -2700,5 +2741,46 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         }
         return response;
+    }
+
+    BufferedImage image;
+
+    public void createImage(String fileLocation) {
+        try {
+            FileOutputStream fos = new FileOutputStream(fileLocation);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
+            encoder.encode(image);
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void graphicsGeneration(String name, String number, String qrcode, String savePath) {
+        int imageWidth = 250;//图片的宽度
+        int imageHeight = 300; //图片的高度
+        image = new BufferedImage(imageWidth, imageHeight,
+                BufferedImage.TYPE_INT_RGB);
+
+        Graphics graphics = image.getGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, imageWidth, imageHeight);
+        graphics.setColor(Color.BLACK);
+        graphics.drawString(name, 25, 250);
+        graphics.drawString(number, 25, 275);
+        BufferedImage bimg = null;
+
+        try {
+            bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
+        } catch (Exception e) {
+        }
+
+        if (bimg != null) {
+            graphics.drawImage(bimg, 25, 25, null);
+        }
+
+        graphics.dispose();
+        createImage(savePath);
     }
 }
