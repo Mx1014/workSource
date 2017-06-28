@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors; 
 import java.util.concurrent.ThreadFactory;
@@ -40,6 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 
 
  
+
+
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.parking.innospring.InnoSpringCardInfo;
@@ -51,7 +52,9 @@ import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.user.*; 
+
 import net.greghaines.jesque.Job;  
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -93,6 +96,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
 
@@ -107,6 +112,8 @@ import ch.qos.logback.core.joran.conditional.ElseAction;
 
 
  
+
+
 import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
@@ -153,6 +160,8 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
@@ -170,6 +179,8 @@ import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
   
+
+
 
 import freemarker.core.ReturnInstruction.Return;
  
@@ -238,6 +249,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	private Rentalv2Provider rentalv2Provider;
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	@Autowired
 	private LocaleStringService localeStringService;
 	@Autowired
@@ -1752,38 +1765,40 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	 * */
 	@Scheduled(cron = "50 0/30 * * * ?")
 	public void rentalSchedule(){
-		//把所有状态为success-已预约的捞出来 
-		Long currTime = DateHelper.currentGMTTime().getTime();
-		List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
-		for(RentalOrder order : orders ){
-			Long orderReminderTimeLong = order.getReminderTime().getTime();
-			Long orderEndTimeLong = order.getEndTime().getTime();
-			//时间快到发推送
-			if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
-				Map<String, String> map = new HashMap<String, String>();  
-		        map.put("resourceName", order.getResourceName());
-		        map.put("startTime", order.getUseDetail()); 
-				String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE, 
-						RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
-				final Job job3 = new Job(
-						SendMessageAction.class.getName(),
-						new Object[] {order.getRentalUid(),notifyTextForOther});
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-						orderReminderTimeLong);
-			}
-			
-			//订单过期,置状态
-			if(orderEndTimeLong <= currTime){
-				order.setStatus(SiteBillStatus.OVERTIME.getCode());
-				rentalv2Provider.updateRentalBill(order);
-			}else if(currTime + 30*60*1000l >= orderReminderTimeLong){
-				//超期未确认的置为超时
-				final Job job1 = new Job(
-						IncompleteUnsuccessRentalBillAction.class.getName(),
-						new Object[] { String.valueOf(order.getId()) });
-	
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-						orderEndTimeLong); 
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			//把所有状态为success-已预约的捞出来 
+			Long currTime = DateHelper.currentGMTTime().getTime();
+			List<RentalOrder>  orders = rentalv2Provider.listSuccessRentalBills();
+			for(RentalOrder order : orders ){
+				Long orderReminderTimeLong = order.getReminderTime().getTime();
+				Long orderEndTimeLong = order.getEndTime().getTime();
+				//时间快到发推送
+				if(currTime<orderReminderTimeLong && currTime + 30*60*1000l >= orderReminderTimeLong){
+					Map<String, String> map = new HashMap<String, String>();  
+			        map.put("resourceName", order.getResourceName());
+			        map.put("startTime", order.getUseDetail()); 
+					String notifyTextForOther = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.SCOPE, 
+							RentalNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, RentalNotificationTemplateCode.locale, map, "");
+					final Job job3 = new Job(
+							SendMessageAction.class.getName(),
+							new Object[] {order.getRentalUid(),notifyTextForOther});
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+							orderReminderTimeLong);
+				}
+				
+				//订单过期,置状态
+				if(orderEndTimeLong <= currTime){
+					order.setStatus(SiteBillStatus.OVERTIME.getCode());
+					rentalv2Provider.updateRentalBill(order);
+				}else if(currTime + 30*60*1000l >= orderReminderTimeLong){
+					//超期未确认的置为超时
+					final Job job1 = new Job(
+							IncompleteUnsuccessRentalBillAction.class.getName(),
+							new Object[] { String.valueOf(order.getId()) });
+		
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+							orderEndTimeLong); 
+				}
 			}
 		}
 	}

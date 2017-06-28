@@ -2,8 +2,11 @@ package com.everhomes.statistics.terminal;
 
 import com.everhomes.rest.statistics.terminal.TerminalStatisticsTaskDTO;
 import com.everhomes.rest.statistics.transaction.StatTaskLogDTO;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.statistics.transaction.StatTransactionService;
+import com.everhomes.util.StringHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Calendar;
 import java.util.List;
@@ -30,6 +34,9 @@ public class StatTerminalScheduleJob extends QuartzJobBean{
 	
 	@Autowired
 	private StatTerminalService statTerminalService;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	
 	@Override
 	protected void executeInternal(JobExecutionContext context)
@@ -40,9 +47,10 @@ public class StatTerminalScheduleJob extends QuartzJobBean{
 		
 		LOGGER.debug("start schedele job, excute task date = {}", calendar.getTime());
 		
-		//执行任务
-		List<TerminalStatisticsTaskDTO> tasks =  statTerminalService.executeStatTask(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH),DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
-		
-		LOGGER.debug("schedele job result: {}", tasks);
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			//执行任务区
+			List<TerminalStatisticsTaskDTO> tasks =  statTerminalService.executeStatTask(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH),DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
+			LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(tasks));
+		}
 	}
 }

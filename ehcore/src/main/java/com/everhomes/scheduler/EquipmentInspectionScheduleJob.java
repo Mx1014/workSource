@@ -56,14 +56,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 
-		//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
-		scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
+		//双机判断
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
+			scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
 
-		closeDelayTasks();
-		createTask();
-		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
-		if(notifyFlag) {
-			sendTaskMsg();
+			closeDelayTasks();
+			createTask();
+			Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
+			if (notifyFlag) {
+				sendTaskMsg();
+			}
 		}
 
 	}
