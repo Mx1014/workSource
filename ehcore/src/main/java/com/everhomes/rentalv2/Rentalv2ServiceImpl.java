@@ -29,10 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors; 
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor; 
-import java.util.stream.Collectors; 
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;  
@@ -43,7 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.parking.innospring.InnoSpringCardInfo;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.rentalv2.*;
@@ -51,16 +48,15 @@ import com.everhomes.rest.rentalv2.admin.*;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.user.*; 
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.user.*;
 
 import net.greghaines.jesque.Job;  
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook; 
-import org.elasticsearch.common.util.concurrent.ThreadFactoryBuilder;
-import org.elasticsearch.threadpool.ThreadPool; 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -83,35 +79,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
-
-
-
-
-
-
-
-
-
-
-
-
- 
 
 
 import com.alibaba.fastjson.JSON;
@@ -160,7 +127,6 @@ import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
@@ -178,12 +144,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-  
 
-
-
-import freemarker.core.ReturnInstruction.Return;
- 
 @Component
 public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private static final String downloadDir ="\\download\\";
