@@ -47,8 +47,8 @@ public class StatTerminalScheduleJob extends QuartzJobBean{
 		
 		LOGGER.debug("start schedele job, excute task date = {}", calendar.getTime());
 		
-		//执行任务
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			//执行任务区
 			List<TerminalStatisticsTaskDTO> tasks =  statTerminalService.executeStatTask(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH),DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH));
 			LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(tasks));
 		}
