@@ -5,6 +5,6 @@ import com.everhomes.rest.userOrganization.CreateUserOrganizationCommand;
 
 public interface UserOrganizationService {
 
-    public UserOrganization createUserOrganization(CreateUserOrganizationCommand cmd);
+    public UserOrganizations createUserOrganizations(CreateUserOrganizationCommand cmd);
 
 }

@@ -164,7 +164,7 @@
         eh_talents | eh_talent_categories | eh_talent_query_histories |
 
         eh_organization_member_details | eh_organization_member_educations | eh_organization_member_work_experiences | eh_organization_member_insurances |
-        eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organization | eh_uniongroup_configure | eh_uniongroup_member_details |
+        eh_organization_member_contracts | eh_organization_member_profile_logs | eh_user_organizations | eh_uniongroup_configures | eh_uniongroup_member_details |
         </includes>
 
             <!-- All elements that are excluded from your schema

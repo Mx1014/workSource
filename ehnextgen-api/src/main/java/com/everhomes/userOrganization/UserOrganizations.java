@@ -1,13 +1,13 @@
 package com.everhomes.userOrganization;
 
-import com.everhomes.server.schema.tables.pojos.EhUserOrganization;
+import com.everhomes.server.schema.tables.pojos.EhUserOrganizations;
 
 import java.sql.Timestamp;
 
 /**
  * Created by Administrator on 2017/6/19.
  */
-public class UserOrganization extends EhUserOrganization {
+public class UserOrganizations extends EhUserOrganizations {
 
     private String userName;
 
@@ -99,6 +99,6 @@ public class UserOrganization extends EhUserOrganization {
         this.identityNumberTag = identityNumberTag;
     }
 
-    public UserOrganization() {
+    public UserOrganizations() {
     }
 }

@@ -4,7 +4,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- Table structure for eh_user_organization
 -- ----------------------------
 -- DROP TABLE IF EXISTS `eh_user_organization`;
-CREATE TABLE `eh_user_organization` (
+CREATE TABLE `eh_user_organizations` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `user_id` bigint(20) NOT NULL,
   `organization_id` bigint(20) DEFAULT 0,
@@ -19,7 +19,7 @@ CREATE TABLE `eh_user_organization` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_uniongroup_configure`;
-CREATE TABLE `eh_uniongroup_configure` (
+CREATE TABLE `eh_uniongroup_configures` (
   `id` bigint(20) NOT NULL COMMENT 'id of the record',
   `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
   `groupId` bigint(20) NOT NULL COMMENT 'id of group',
