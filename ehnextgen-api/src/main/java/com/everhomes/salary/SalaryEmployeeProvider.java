@@ -17,4 +17,7 @@ public interface SalaryEmployeeProvider {
 
 	int countUnCheckEmployee(Long salaryPeriodGroupId);
 
+	List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods);
+
+	void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag);
 }

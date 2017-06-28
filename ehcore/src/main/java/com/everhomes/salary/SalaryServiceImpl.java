@@ -3,18 +3,20 @@ package com.everhomes.salary;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.organization.ExecuteImportTaskCallback;
-import com.everhomes.organization.ImportFileService;
-import com.everhomes.organization.ImportFileTask;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.common.ImportFileResponse;
 import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.salary.*;
+import com.everhomes.rest.techpark.punch.NormalFlag;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -42,11 +44,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class SalaryServiceImpl implements SalaryService {
+
+	private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>(){
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat("yyyyMM");
+		}
+	};
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
 	@Autowired
@@ -58,7 +67,11 @@ public class SalaryServiceImpl implements SalaryService {
 	@Autowired
 	private ConfigurationProvider configProvider;
 
-    @Autowired
+
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+
+	@Autowired
     private SalaryDefaultEntityProvider salaryDefaultEntityProvider;
 
     @Autowired 
@@ -79,9 +92,18 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired 
     private SalaryGroupProvider  salaryGroupProvider;
 
-    @Autowired
+	@Autowired
+    private PunchService punchService;
+
+	@Autowired
+	private OrganizationService organizationService;
+
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
     private ImportFileService importFileService;
-    
+
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
         ListSalaryDefaultEntitiesResponse response = new ListSalaryDefaultEntitiesResponse();
@@ -582,17 +604,24 @@ public class SalaryServiceImpl implements SalaryService {
 	@Override
 	public void sendPeriodSalary(SendPeriodSalaryCommand cmd) {
 		//将本期group置为已核算
-		SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
-		if(cmd.getSendTime() == null){
-			salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
-			sendSalary(salaryGroup);
-		}else {
-			salaryGroup.setSendTime(new Timestamp(cmd.getSendTime()));
-			salaryGroup.setStatus(SalaryGroupStatus.WAIT_FOR_SEND.getCode());
-		}
-		salaryGroupProvider.updateSalaryGroup(salaryGroup);
+		coordinationProvider
+				.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+cmd.getSalaryPeriodGroupId())
+				.enter(() -> {
+					// this.groupProvider.updateGroup(group);
 
+			SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+			if(cmd.getSendTime() == null){
+				salaryGroup.setSendTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				salaryGroup.setStatus(SalaryGroupStatus.SENDED.getCode());
+				sendSalary(salaryGroup);
+			}else {
+				salaryGroup.setSendTime(new Timestamp(cmd.getSendTime()));
+				salaryGroup.setStatus(SalaryGroupStatus.WAIT_FOR_SEND.getCode());
+			}
+			salaryGroupProvider.updateSalaryGroup(salaryGroup);
+
+			return null;
+		});
 	}
 
 
@@ -604,9 +633,13 @@ public class SalaryServiceImpl implements SalaryService {
 	private void sendSalary(Timestamp date) {
 		List<SalaryGroup> groups = salaryGroupProvider.listSalaryGroup(SalaryGroupStatus.WAIT_FOR_SEND.getCode(),date);
 		for (SalaryGroup group : groups) {
-			sendSalary(group);
-			group.setStatus(SalaryGroupStatus.SENDED.getCode());
-			salaryGroupProvider.updateSalaryGroup(group);
+			coordinationProvider.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+group.getId())
+					.enter(() -> {
+				sendSalary(group);
+				group.setStatus(SalaryGroupStatus.SENDED.getCode());
+				salaryGroupProvider.updateSalaryGroup(group);
+				return null;
+			});
 		}
 	}
 	/**给某个批次某期发薪酬邮件*/
@@ -678,7 +711,7 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 
 		for (SalaryEmployeePeriodVal val : employeeEntityVals) {
-			if (val.getGroupEntityId() == entityId) {
+			if (val.getGroupEntityId().equals(entityId)) {
 				return val;
 			}
 		}
@@ -687,9 +720,31 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
-	
-		return new ListSalarySendHistoryResponse();
+		Organization org = organizationProvider.findOrganizationById(punchService.getTopEnterpriseId(cmd.getOrganizationId()));
+		List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWord(), NormalFlag.YES.getCode());
+		Calendar startClanedar = Calendar.getInstance();
+		startClanedar.setTimeInMillis(cmd.getBeginTime());
+		Calendar endClanedar = Calendar.getInstance();
+		endClanedar.setTimeInMillis(cmd.getEndTime());
+		List<String> periods = processPeriods(startClanedar,endClanedar);
+		List<SalaryEmployee> results = salaryEmployeeProvider.listSalaryEmployees(userIds, periods);
+		List<SalaryPeriodEmployeeDTO> employeeDtos = results.stream().map(r2 -> {
+			SalaryPeriodEmployeeDTO dto2 = processSalaryPeriodEmployeeDTO(r2);
+			return dto2;
+		}).collect(Collectors.toList());
+		return new ListSalarySendHistoryResponse(employeeDtos);
 	}
+
+	private List<String> processPeriods(Calendar startClanedar, Calendar endClanedar) {
+		List<String> result = new ArrayList<>();
+		while(startClanedar.before(endClanedar)){
+			result.add(this.monthSF.get().format(startClanedar.getTime()));
+			startClanedar.add(Calendar.MONTH,1);
+		}
+		result.add(this.monthSF.get().format(endClanedar.getTime()));
+		return result;
+	}
+
 
 	@Override
 	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd) {
@@ -699,13 +754,27 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd) {
-		// TODO Auto-generated method stub
-		
+		if(null == cmd.getCheckFlag())
+			cmd.setCheckFlag(NormalFlag.YES.getCode());
+		salaryEmployeeProvider.updateSalaryEmployeeCheckFlag(cmd.getSalaryEmployeeIds(), cmd.getCheckFlag());
 	}
 
     @Override
     public void revokeSendPeriodSalary(SendPeriodSalaryCommand cmd) {
 
+		coordinationProvider.getNamedLock(CoordinationLocks.SALARY_GROUP_LOCK.getCode()+cmd.getSalaryPeriodGroupId())
+				.enter(() -> {
+					SalaryGroup salaryGroup = salaryGroupProvider.findSalaryGroupById(cmd.getSalaryPeriodGroupId());
+					if (SalaryGroupStatus.WAIT_FOR_SEND.getCode().equals(salaryGroup.getStatus())){
+						salaryGroup.setSendTime(null);
+						salaryGroup.setStatus(SalaryGroupStatus.CHECKED.getCode());
+						salaryGroupProvider.updateSalaryGroup(salaryGroup);
+					}else{
+						throw RuntimeErrorException.errorWith( SalaryConstants.SCOPE,
+								SalaryConstants.ERROR_SALARY_GROUP_STATUS,"salary group status error");
+					}
+					return null;
+				});
     }
 
 }
