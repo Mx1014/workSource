@@ -32,7 +32,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.userOrganization.UserOrganization;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -4576,15 +4576,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<UserOrganization> listUserOrganizations( CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback){
+	public List<UserOrganizations> listUserOrganizations( CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback){
 		Integer size = pageSize + 1;
-		List<UserOrganization> result = new ArrayList<>();
+		List<UserOrganizations> result = new ArrayList<>();
 		dbProvider.mapReduce(AccessSpec.readOnly(), null,
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<Record> query = context.selectQuery();
 					query.addFrom(Tables.EH_USERS);
-					query.addJoin(Tables.EH_USER_ORGANIZATION, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATION.USER_ID));
-					query.addJoin(Tables.EH_USER_ORGANIZATION, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATION.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USERS.ID.eq(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+					query.addJoin(Tables.EH_USER_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID).and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
 					if(null != callback){
 						callback.buildCondition(locator, query);
 					}
@@ -4594,17 +4594,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 					query.addLimit(size);
 					query.fetch().map((r) -> {
-						UserOrganization userOrganization = new UserOrganization();
-						userOrganization.setUserId(r.getValue(Tables.EH_USER_ORGANIZATION.USER_ID));
-						userOrganization.setOrganizationId(r.getValue(Tables.EH_USER_ORGANIZATION.ORGANIZATION_ID));
-						userOrganization.setStatus(r.getValue(Tables.EH_USER_ORGANIZATION.STATUS));
-						userOrganization.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
-						userOrganization.setGender(r.getValue(Tables.EH_USERS.GENDER));
-						userOrganization.setRegisterTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
-						userOrganization.setCommunityId(r.getValue(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID));
-						userOrganization.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
-						userOrganization.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));
-						result.add(userOrganization);
+						UserOrganizations userOrganizations = new UserOrganizations();
+						userOrganizations.setUserId(r.getValue(Tables.EH_USER_ORGANIZATIONS.USER_ID));
+						userOrganizations.setOrganizationId(r.getValue(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID));
+						userOrganizations.setStatus(r.getValue(Tables.EH_USER_ORGANIZATIONS.STATUS));
+						userOrganizations.setNickName(r.getValue(Tables.EH_USERS.NICK_NAME));
+						userOrganizations.setGender(r.getValue(Tables.EH_USERS.GENDER));
+						userOrganizations.setRegisterTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
+						userOrganizations.setCommunityId(r.getValue(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID));
+						userOrganizations.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
+						userOrganizations.setPosition(r.getValue(Tables.EH_USERS.POSITION_TAG));
+						result.add(userOrganizations);
 						return null;
 					});
 					return true;

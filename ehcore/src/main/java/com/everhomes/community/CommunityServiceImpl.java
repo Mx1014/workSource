@@ -27,7 +27,7 @@ import com.everhomes.rest.techpark.expansion.LeasePromotionFlag;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeaseFormRequest;
 import com.everhomes.user.*;
-import com.everhomes.userOrganization.UserOrganization;
+import com.everhomes.userOrganization.UserOrganizations;
 import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -1954,16 +1954,16 @@ public class CommunityServiceImpl implements CommunityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 
-		List<UserOrganization> users = organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
+		List<UserOrganizations> users = organizationProvider.listUserOrganizations(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_USERS.STATUS.eq(UserStatus.ACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
-				query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+				query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
 
 				if(null != cmd.getOrganizationId()){
-					query.addConditions(Tables.EH_USER_ORGANIZATION.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.ORGANIZATION_ID.eq(cmd.getOrganizationId()));
 				}
 
 				if(null != cmd.getCommunityId()){
@@ -1985,11 +1985,11 @@ public class CommunityServiceImpl implements CommunityService {
 				}
 
 				if(AuthFlag.YES == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
 				}
 
 				if(AuthFlag.NO == AuthFlag.fromCode(cmd.getIsAuth())){
-					query.addConditions(Tables.EH_USER_ORGANIZATION.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addConditions(Tables.EH_USER_ORGANIZATIONS.STATUS.ne(OrganizationMemberStatus.ACTIVE.getCode()));
 				}
 				query.addConditions();
 

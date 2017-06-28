@@ -3,9 +3,7 @@ package com.everhomes.uniongroup;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
 import com.everhomes.rest.uniongroup.UniongroupTarget;
 import com.everhomes.rest.uniongroup.UniongroupTargetType;
@@ -53,6 +51,11 @@ public class UniongroupServiceImpl implements UniongroupService {
             }).collect(Collectors.toList());
         }
 
+        /**重复项过滤规则：后更新的规则覆盖先更新的规则**/
+
+        /**包含关系过滤规则：小范围规则覆盖大范围规则**/
+
+
         /**保存配置表**/
         if (configureList.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
@@ -77,18 +80,34 @@ public class UniongroupServiceImpl implements UniongroupService {
             detailIds.add(r.getDetailId());
             return null;
         }).collect(Collectors.toList());
-
-        //2.组装uniongroupMemberDetail对象
-        List<EhUniongroupMemberDetails> unionDetailsList = new ArrayList<>();
-        detailIds.stream().map(r -> {
-            EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
-            uniongroupMemberDetails.setGroupid(cmd.getGroupId());
-            uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
-            uniongroupMemberDetails.setDetailid(r);
-            unionDetailsList.add(uniongroupMemberDetails);
+        //2.查询本次保存中所有勾选个人加入集合detailIds
+        cmd.getTargets().stream().filter((r) -> {
+            return r.getType().equals(UniongroupTargetType.fromCode("MEMBERDETAIL").getCode());
+        }).map((r) -> {
+            detailIds.add(r.getId());
             return null;
         }).collect(Collectors.toList());
-        //3.保存关系表
+
+        //3.组装uniongroupMemberDetail对象
+        List<EhUniongroupMemberDetails> unionDetailsList = new ArrayList<>();
+        detailIds.stream().map(r -> {
+            OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r);
+            if(detail != null){
+                EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
+                uniongroupMemberDetails.setGroupid(cmd.getGroupId());
+                uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
+                uniongroupMemberDetails.setDetailid(r);
+                uniongroupMemberDetails.setOrganizationId(detail.getOrganizationId());
+                uniongroupMemberDetails.setTargetType(detail.getTargetType());
+                uniongroupMemberDetails.setTargetId(detail.getTargetId());
+                uniongroupMemberDetails.setNamespaceId(detail.getNamespaceId());
+                uniongroupMemberDetails.setContactName(detail.getContactName());
+                uniongroupMemberDetails.setContactToken(detail.getContactToken());
+                unionDetailsList.add(uniongroupMemberDetails);
+            }
+            return null;
+        }).collect(Collectors.toList());
+        //4.保存关系表
         if (unionDetailsList.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
                 this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
