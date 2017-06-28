@@ -1396,73 +1396,8 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
 
-
-
-		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
-		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 		
-		if(null == order) {
-			LOGGER.error("Order not found, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Order not found.");
-		}
-		
-		Byte orderStatus = order.getRechargeStatus();
-		if(orderStatus == ParkingRechargeOrderStatus.RECHARGED.getCode()) {
-			ListParkingCardsCommand listParkingCardsCommand = new ListParkingCardsCommand(); 
-			listParkingCardsCommand.setOwnerId(cmd.getOwnerId());
-			listParkingCardsCommand.setOwnerType(cmd.getOwnerType());
-			listParkingCardsCommand.setParkingLotId(order.getParkingLotId());
-			listParkingCardsCommand.setPlateNumber(order.getPlateNumber());
-			List<ParkingCardDTO> cards = listParkingCards(listParkingCardsCommand);
-			return cards.get(0);
-		}
-		
-		String key = "parking-recharge" + order.getId();
-		String value = String.valueOf(order.getId());
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-      
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        
-//        Object value = .get(key);
-        long now = System.currentTimeMillis();
-        long eTime = now + 5 * 1000;
-        long sTime = eTime;
-//        NamedLock lock =coordinationProvider.getNamedLock(CoordinationLocks.PARKING_RECHARGE.getCode() + "_" + order.getId());
-//        lock.enter(()-> {
-////			tempss.put(order.getId(), order);
-//        	lock.setLockAcquireTimeoutSeconds(5);
-			valueOperations.set(key, value);
-
-			LOGGER.error("wait order notify, cmd={}, startTime={}", cmd, eTime);
-
-    		while(orderStatus == ParkingRechargeOrderStatus.PAID.getCode()
-    				&& null != valueOperations.get(key) && eTime >= sTime) {
-    			
-    			try {
-//    				lock.wait(5000);
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-    			sTime = System.currentTimeMillis();
-    		}
-    		
-    		if(sTime >= eTime) {
-    			LOGGER.error("Get recharge result time out, cmd={}", cmd);
-        		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_REQUEST_SERVER,
-        				"Get recharge result time out.");
-    		}
-    		
-    		ListParkingCardsCommand listParkingCardsCommand = new ListParkingCardsCommand(); 
-			listParkingCardsCommand.setOwnerId(cmd.getOwnerId());
-			listParkingCardsCommand.setOwnerType(cmd.getOwnerType());
-			listParkingCardsCommand.setParkingLotId(order.getParkingLotId());
-			listParkingCardsCommand.setPlateNumber(order.getPlateNumber());
-			List<ParkingCardDTO> cards = listParkingCards(listParkingCardsCommand);
-			return cards.get(0);
+		return null;
 		
 	}
 
@@ -1582,8 +1517,11 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
 
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
-		if (handler.recharge(order)) {
-			return dto;
+
+		if (order.getStatus() == ParkingRechargeOrderStatus.FAILED.getCode()) {
+			if (handler.recharge(order)) {
+				return dto;
+			}
 		}
 
 		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

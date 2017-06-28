@@ -412,12 +412,12 @@ public class ParkingController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /parking/getRechargeResult</b>
+     * <b>URL: /parking/getRechargeOrderResult</b>
             * <p>支付后，获取支付结果</p>
             */
-    @RequestMapping("getRechargeResult")
+    @RequestMapping("getRechargeOrderResult")
     @RestReturn(value = ParkingCardDTO.class)
-    public DeferredResult getRechargeResult(GetRechargeResultCommand cmd) {
+    public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
         final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(5000L,
                 new RestResponse("time out"));
@@ -433,7 +433,7 @@ public class ParkingController extends ControllerBase {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
                                             Object pingResponse, String path) {
-                ParkingCardDTO dto = (ParkingCardDTO) pingResponse;
+                GetRechargeOrderResultResponse dto = (GetRechargeOrderResultResponse) pingResponse;
                 //    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
                 RestResponse response = new RestResponse(dto);
                 response.setErrorCode(ErrorCodes.SUCCESS);
@@ -456,10 +456,12 @@ public class ParkingController extends ControllerBase {
     /**
      * <b>URL: /parking/getRechargeResult</b>
      * <p>支付后，获取支付结果</p>
+     * 兼容老接口，新写一个getRechargeOrderResult 重新定义返回值，提供给app使用
      */
-    @RequestMapping("getRechargeResult2")
+    @RequestMapping("getRechargeResult")
     @RestReturn(value = ParkingCardDTO.class)
-    public RestResponse getRechargeResult2(GetRechargeResultCommand cmd) {
+    @Deprecated
+    public RestResponse getRechargeResult(GetRechargeResultCommand cmd) {
 
         ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
         RestResponse response = new RestResponse(dto);
