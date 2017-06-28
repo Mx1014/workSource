@@ -76,6 +76,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -2758,8 +2759,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     public void graphicsGeneration(String name, String number, String qrcode, String savePath) {
-        int imageWidth = 225;//图片的宽度
-        int imageHeight = 275; //图片的高度
+        int imageWidth = 200;//图片的宽度
+        int imageHeight = 250; //图片的高度
         image = new BufferedImage(imageWidth, imageHeight,
                 BufferedImage.TYPE_INT_RGB);
 
@@ -2769,8 +2770,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         graphics.setColor(Color.BLACK);
         BufferedImage bimg = null;
         try {
-            graphics.drawString(URLEncoder.encode(name,"UTF-8"), 25, 225);
-            graphics.drawString(URLEncoder.encode(number,"UTF-8"), 25, 250);
+            graphics.drawString(URLDecoder.decode(URLEncoder.encode(name,"UTF-8")), 25, 200);
+            graphics.drawString(URLDecoder.decode(URLEncoder.encode(number,"UTF-8")), 25, 225);
             bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
         } catch (Exception e) {
         }
