@@ -101,4 +101,19 @@ public class SalaryEmployeeProviderImpl implements SalaryEmployeeProvider {
 		return getReadOnlyContext().selectCount().from(Tables.EH_SALARY_EMPLOYEES)
 				.where(Tables.EH_SALARY_EMPLOYEES.SALARY_GROUP_ID.eq(salaryPeriodGroupId)).execute();
 	}
+
+	@Override
+	public List<SalaryEmployee> listSalaryEmployees(List<Long> userIds, List<String> periods) {
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEES)
+				.where(Tables.EH_SALARY_EMPLOYEES.USER_ID.in(userIds))
+				.and(Tables.EH_SALARY_EMPLOYEES.SALARY_PERIOD.in(periods))
+				.orderBy(Tables.EH_SALARY_EMPLOYEES.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployee.class));
+	}
+
+	@Override
+	public void updateSalaryEmployeeCheckFlag(List<Long> salaryEmployeeIds, Byte checkFlag) {
+		getReadWriteContext().update(Tables.EH_SALARY_EMPLOYEES).set(Tables.EH_SALARY_EMPLOYEES.STATUS, checkFlag)
+				.where(Tables.EH_SALARY_EMPLOYEES.ID.in(salaryEmployeeIds)).execute();
+	}
 }
