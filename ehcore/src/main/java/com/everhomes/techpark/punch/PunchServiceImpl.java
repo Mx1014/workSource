@@ -3926,9 +3926,11 @@ public class PunchServiceImpl implements PunchService {
 		else{
 			return Long.valueOf(organization.getPath().split("/")[1]);
 		}
-		
-		
 	}
+
+
+
+
 	/**找到用户的部门-多部门取最上级第一个*/
 	private OrganizationDTO findUserDepartment(Long userId, Long organizationId){
 //		// 多部门找顶级部门
@@ -4169,8 +4171,8 @@ public class PunchServiceImpl implements PunchService {
 		
 		return response;
 	}
-
-	private List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
+	@Override
+	public List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
 		//找到所有子部门 下面的用户
 		 
 		List<String> groupTypeList = new ArrayList<String>();

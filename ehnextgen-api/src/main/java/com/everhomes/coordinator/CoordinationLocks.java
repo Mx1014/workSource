@@ -75,6 +75,7 @@ public enum CoordinationLocks {
     UPDATE_WAREHOUSE_MATERIAL("warehouse.material.update"),
 
     FLOW_CASE_UPDATE("flowCase.update"),
+    SALARY_GROUP_LOCK("salary.group"),
     ;
 
     private String code;
