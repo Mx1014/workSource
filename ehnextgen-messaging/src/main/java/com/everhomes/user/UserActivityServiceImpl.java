@@ -41,6 +41,7 @@ import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.statistics.terminal.AppVersion;
@@ -1425,7 +1426,7 @@ public class UserActivityServiceImpl implements UserActivityService {
 	 * */
 	@Scheduled(cron = "0 10 3 * * ?") 
 	public void addAnyDayActive(){
-        if (Objects.equals(scheduleProvider.getRunningFlag(), Byte.valueOf("1")/*com.everhomes.scheduler.RunningFlag#TRUE*/)) {
+        if (Objects.equals(scheduleProvider.getRunningFlag(), RunningFlag.TRUE.getCode())) {
             Date statDate = new Date();
             List<NamespaceInfoDTO>  namespaces = namespacesService.listNamespace();
             for(NamespaceInfoDTO namespace : namespaces){
