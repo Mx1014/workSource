@@ -177,6 +177,8 @@ import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -223,7 +225,10 @@ public class PunchServiceImpl implements PunchService {
         }
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
-    
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
 	@Autowired
 	private PunchProvider punchProvider;
 	@Autowired
@@ -4923,11 +4928,12 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
-
-		coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
-	        Date runDate = DateHelper.currentGMTTime();
-	        dayRefreshLogScheduled(runDate);
-		});
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
+		        Date runDate = DateHelper.currentGMTTime();
+		        dayRefreshLogScheduled(runDate);
+			});
+		}
     }
     @Override
     public void testDayRefreshLogs(Long runDate){

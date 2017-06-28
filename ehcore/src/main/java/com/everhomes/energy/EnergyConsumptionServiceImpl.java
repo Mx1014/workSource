@@ -165,6 +165,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterFormulaVariableProvider meterFormulaVariableProvider;
 
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -173,9 +176,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
-
-    @Autowired
-    private ScheduleProvider scheduleProvider;
 
 //    @Override
 //    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
@@ -1919,6 +1919,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 1 * * ?")
     public void calculateEnergyDayStat(){
+
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
@@ -2238,6 +2239,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
     public void calculateEnergyMonthStat() {
+
         //双机判断
         if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
             coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
