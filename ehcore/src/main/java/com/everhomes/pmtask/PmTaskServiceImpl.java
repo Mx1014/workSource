@@ -1838,7 +1838,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			user = userProvider.findUserById(userIdentifier.getOwnerUid());
 			LOGGER.info("findClaimedIdentifierByToken userid: {}, userIdentifier: {}", user.getId(), userIdentifier);
 		}
-
+		response.setUserName(user.getNickName());
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
