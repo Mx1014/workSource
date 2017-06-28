@@ -5168,7 +5168,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				Long cellBeginId = sequenceProvider.getNextSequenceBlock(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class), seqNum.get());
 				priceRuleDTO.setCellBeginId(cellBeginId);
 				priceRuleDTO.setCellEndId(cellBeginId+seqNum.get());
-				updatePriceRule(priceRuleDTO);
+//				updatePriceRule(priceRuleDTO);
 			}
 			
 			
@@ -5228,6 +5228,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					this.rentalv2Provider.createRentalSitePic(detailPic);
 				}
 			}
+			
+			createPriceRules(PriceRuleType.RESOURCE, resource.getId(), defaultRule.getPriceRules());
 
 			createRentalConfigAttachment(defaultRule.getAttachments(), resource.getId(), EhRentalv2Resources.class.getSimpleName());
 
