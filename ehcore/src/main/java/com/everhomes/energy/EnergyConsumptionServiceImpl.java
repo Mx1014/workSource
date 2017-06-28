@@ -2765,13 +2765,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 BufferedImage.TYPE_INT_RGB);
 
         Graphics graphics = image.getGraphics();
+        graphics.setFont(new Font("宋体", Font.BOLD, 20));
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, imageWidth, imageHeight);
         graphics.setColor(Color.BLACK);
         BufferedImage bimg = null;
         try {
-            graphics.drawString(new String(URLEncoder.encode(name,"UTF-8").getBytes(), "GBK"), 30, 215);
-            graphics.drawString(new String(URLEncoder.encode(number,"UTF-8").getBytes(), "GBK"), 30, 240);
+            graphics.drawString(name, 30, 215);
+            graphics.drawString(number, 30, 240);
             bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
         } catch (Exception e) {
         }
