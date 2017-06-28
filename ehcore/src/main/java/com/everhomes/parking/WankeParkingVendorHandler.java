@@ -334,8 +334,8 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return entity.isSuccess();
 
     }
-
-	private boolean recharge(ParkingRechargeOrder order){
+	@Override
+	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);

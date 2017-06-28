@@ -391,7 +391,8 @@ public class JieshunParkingVendorHandler implements ParkingVendorHandler {
 //		return false;
 //		
 //	}
-	private boolean recharge(ParkingRechargeOrder order){
+	@Override
+	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);

@@ -189,8 +189,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     @Override
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
 
-		ResultHolder resultHolder = recharge(order);
-		return resultHolder.isSuccess();
+		return recharge(order);
 
     }
     
@@ -256,30 +255,31 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		}
 	}
 
-	private ResultHolder recharge(ParkingRechargeOrder order){
-		
+	@Override
+	public boolean recharge(ParkingRechargeOrder order){
+
 		String carNumber = order.getPlateNumber();
 		String cost = String.valueOf((order.getPrice().intValue() * 100));
 		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 		String payTime = order.getPaidTime().toString();
-		
+
 		BosigaoCardInfo card = getCardInfo(carNumber);
 		String oldValidEnd = card.getValidEnd();
 		Long time = strToLong(oldValidEnd);
-		
+
 		String validStart = timestampToStr(addDays(time, 1));
 		String validEnd = timestampToStr(new Timestamp(Utils.getLongByAddNatureMonth(time, order.getMonthCount().intValue())));
-		
+
 		URL wsdlURL = Service1.WSDL_LOCATION;
 		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
         Service1Soap port = ss.getService1Soap12();
-        
+
         String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-		
+
 		ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
 		checkResultHolderIsNull(resultHolder,carNumber);
-		
-		return resultHolder;
+
+		return resultHolder.isSuccess();
 	}
 	
     private Long strToLong(String str) {

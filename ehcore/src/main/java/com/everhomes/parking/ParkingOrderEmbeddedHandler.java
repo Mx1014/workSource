@@ -84,12 +84,12 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						GetParkingCardsResponse response = handler.getParkingCardsByPlate(order.getOwnerType(),
 								order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber());
 
-						localBus.publish(null, "Parking-Recharge" + order.getId(), response.getCards().get(0));
+						localBus.publish(this, "Parking-Recharge" + order.getId(), response.getCards().get(0));
 					}else {
-						localBus.publish(null, "Parking-Recharge" + order.getId(), null);
+						localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 					}
 				}catch (Exception e) {
-					localBus.publish(null, "Parking-Recharge" + order.getId(), null);
+					localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 				}
 
 			}

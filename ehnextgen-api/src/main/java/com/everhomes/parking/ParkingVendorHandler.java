@@ -32,4 +32,6 @@ public interface ParkingVendorHandler {
     void lockParkingCar(LockParkingCarCommand cmd);
 
 	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
+
+    boolean recharge(ParkingRechargeOrder order);
 }

@@ -211,8 +211,9 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
     public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
     	return recharge(order);
     }
-    
-    private boolean recharge(ParkingRechargeOrder order){
+
+	@Override
+    public boolean recharge(ParkingRechargeOrder order){
     	Bosigao2RechargeCommand cmd = new Bosigao2RechargeCommand();
 		cmd.setClientID(configProvider.getValue("parking.shenye.projectId", ""));
 		cmd.setCardCode("");
