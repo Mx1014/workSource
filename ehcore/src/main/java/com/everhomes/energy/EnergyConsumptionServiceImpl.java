@@ -2770,8 +2770,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         graphics.setColor(Color.BLACK);
         BufferedImage bimg = null;
         try {
-            graphics.drawString(URLDecoder.decode(URLEncoder.encode(name,"UTF-8")), 25, 200);
-            graphics.drawString(URLDecoder.decode(URLEncoder.encode(number,"UTF-8")), 25, 225);
+            graphics.drawString(new String(URLEncoder.encode(name,"UTF-8").getBytes(), "GBK"), 30, 215);
+            graphics.drawString(new String(URLEncoder.encode(number,"UTF-8").getBytes(), "GBK"), 30, 240);
             bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
         } catch (Exception e) {
         }
