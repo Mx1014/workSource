@@ -3852,11 +3852,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getRuleDate()));
 		end.setTime(new Date(cmd.getRuleDate()));
-		start.set(Calendar.DAY_OF_YEAR,
-				start.getActualMinimum(Calendar.DAY_OF_YEAR));
+		start.set(Calendar.MONTH,
+				start.getActualMinimum(Calendar.MONTH));
 		initToMonthFirstDay(start);
-		end.set(Calendar.DAY_OF_YEAR,
-				start.getActualMinimum(Calendar.DAY_OF_YEAR));
+		end.set(Calendar.MONTH,
+				start.getActualMinimum(Calendar.MONTH));
 		initToMonthFirstDay(end);
 		end.add(Calendar.YEAR, 1);
 		response.setSiteDays(new ArrayList<>());
@@ -4410,11 +4410,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Calendar end = Calendar.getInstance();
 		start.setTime(new Date(cmd.getRuleDate()));
 		end.setTime(new Date(cmd.getRuleDate()));
-		start.set(Calendar.DAY_OF_YEAR,
-				start.getActualMinimum(Calendar.DAY_OF_YEAR));
+		start.set(Calendar.MONTH,
+				start.getActualMinimum(Calendar.MONTH));
 		initToMonthFirstDay(start);
-		end.set(Calendar.DAY_OF_YEAR,
-				start.getActualMinimum(Calendar.DAY_OF_YEAR));
+		end.set(Calendar.MONTH,
+				start.getActualMinimum(Calendar.MONTH));
 		initToMonthFirstDay(end);
 		end.add(Calendar.YEAR, 1);
 		response.setSiteDays(new ArrayList<>());
