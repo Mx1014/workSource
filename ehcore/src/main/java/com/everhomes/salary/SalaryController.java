@@ -179,7 +179,7 @@ public class SalaryController extends ControllerBase {
 	@RequestMapping("exportSalaryGroup")
 	@RestReturn(String.class)
 	public RestResponse exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpResponse){
-		salaryService.exportSalaryGroup(cmd);
+		salaryService.exportSalaryGroup(cmd,httpResponse);
 		return new RestResponse();
 	}
 

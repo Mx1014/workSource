@@ -3,6 +3,7 @@ package com.everhomes.salary;
 
 import com.everhomes.rest.salary.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface SalaryService {
@@ -38,7 +39,7 @@ public interface SalaryService {
 	public void updateSalaryEmployees(UpdateSalaryEmployeesCommand cmd);
 
 
-	public void exportSalaryGroup(ExportSalaryGroupCommand cmd);
+	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 
 	public void importSalaryGroup(ImportSalaryGroupCommand cmd);

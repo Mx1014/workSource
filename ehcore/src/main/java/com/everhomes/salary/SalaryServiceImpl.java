@@ -6,6 +6,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.salary.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -13,6 +14,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,17 +166,20 @@ public class SalaryServiceImpl implements SalaryService {
         this.addSalaryGroup(addCommand);
 	}
 
-	@Override
-    public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd){
-        if(StringUtils.isEmpty(cmd.getSalaryGroupId()))
-            return null;
-        GetSalaryGroupResponse response = new GetSalaryGroupResponse();
-        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
-	    response.setSalaryGroupEntity(salaryGroupEntities.stream().map(r -> {
-            SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
-            return dto;
-        }).collect(Collectors.toList()));
-		return response;
+    @Override
+    public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd) {
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
+            GetSalaryGroupResponse response = new GetSalaryGroupResponse();
+            // 从组织架构获取名称
+//            response.setSalaryGroupName("");
+            List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
+            response.setSalaryGroupEntity(salaryGroupEntities.stream().map(r -> {
+                SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
+                return dto;
+            }).collect(Collectors.toList()));
+            return response;
+        }
+        return null;
     }
 
     @Override
@@ -288,11 +297,68 @@ public class SalaryServiceImpl implements SalaryService {
         this.salaryEmployeeOriginValProvider.createSalaryEmployeeOriginVal(originVal);
     }
 
-	@Override
-	public void exportSalaryGroup(ExportSalaryGroupCommand cmd) {
-	
+    @Override
+    public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
+        if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-	}
+            //  根据批次 id 查找批次具体内容
+            GetSalaryGroupCommand command = new GetSalaryGroupCommand();
+            command.setSalaryGroupId(cmd.getSalaryGroupId());
+            GetSalaryGroupResponse response = this.getSalaryGroup(command);
+
+            ByteArrayOutputStream out = null;
+            XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(response);
+            try {
+                out = new ByteArrayOutputStream();
+                workbook.write(out);
+                DownloadUtil.download(out, httpServletResponse);
+            } catch (Exception e) {
+                LOGGER.error("EXPORT ERROR, e = {}", e);
+            } finally {
+                try {
+                    workbook.close();
+                    out.close();
+                } catch (IOException e) {
+                    LOGGER.error("CLOSE ERROR", e);
+                }
+            }
+        }
+
+    }
+
+    private XSSFWorkbook creatXSSFSalaryGroupFile(GetSalaryGroupResponse response){
+
+        List<SalaryGroupEntityDTO> entityDTOs = response.getSalaryGroupEntity();
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName ="Module";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        //  创建标题
+        XSSFRow rowTitle = sheet.createRow(rowNum++);
+        rowTitle.createCell(0).setCellValue("对应批次");
+
+        XSSFRow row = sheet.createRow(rowNum++);
+        row.setRowStyle(style);
+
+        //  创建模板标题
+        for (int i = 0; i < entityDTOs.size(); i++) {
+            row.createCell(i).setCellValue(entityDTOs.get(i).getName());
+        }
+        return wb;
+    }
 
 	@Override
 	public void importSalaryGroup(ImportSalaryGroupCommand cmd) {
