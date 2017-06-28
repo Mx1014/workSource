@@ -76,6 +76,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -2599,7 +2600,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         for(EnergyMeter meter : meterList) {
             String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
             String savePath = filePath + meter.getName() + ".jpg";
-            graphicsGeneration(meter.getName(), meter.getMeterNumber(), qrcode, savePath);
+            graphicsGeneration("Name: "+meter.getName(), "No.: " + meter.getMeterNumber(), qrcode, savePath);
 //            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
 //            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
 //            docUtil.createDoc(dataMap, "energyMeter", savePath);
@@ -2757,8 +2758,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     public void graphicsGeneration(String name, String number, String qrcode, String savePath) {
-        int imageWidth = 250;//图片的宽度
-        int imageHeight = 300; //图片的高度
+        int imageWidth = 225;//图片的宽度
+        int imageHeight = 275; //图片的高度
         image = new BufferedImage(imageWidth, imageHeight,
                 BufferedImage.TYPE_INT_RGB);
 
@@ -2766,17 +2767,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, imageWidth, imageHeight);
         graphics.setColor(Color.BLACK);
-        graphics.drawString(name, 25, 250);
-        graphics.drawString(number, 25, 275);
         BufferedImage bimg = null;
-
         try {
+            graphics.drawString(URLEncoder.encode(name,"UTF-8"), 25, 225);
+            graphics.drawString(URLEncoder.encode(number,"UTF-8"), 25, 250);
             bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
         } catch (Exception e) {
         }
 
         if (bimg != null) {
-            graphics.drawImage(bimg, 25, 25, null);
+            graphics.drawImage(bimg, 0, 0, null);
         }
 
         graphics.dispose();
