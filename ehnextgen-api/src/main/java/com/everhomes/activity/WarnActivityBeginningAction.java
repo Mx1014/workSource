@@ -65,7 +65,7 @@ public class WarnActivityBeginningAction implements Runnable {
 	public void run() {
 		LOGGER.info("WarnActivityBeginningAction start ! activityId=" + activityId);
 		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
-			LOGGER.info("WarnActivityBeginningAction start ! activityId=" + activityId);
+			LOGGER.info("WarnActivityBeginningAction run ! activityId=" + activityId);
 			LOGGER.debug("活动提醒开始：" + activityId);
 
 			Activity activity = activityProivider.findActivityById(activityId);
