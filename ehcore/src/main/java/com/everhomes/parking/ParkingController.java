@@ -416,7 +416,7 @@ public class ParkingController extends ControllerBase {
             * <p>支付后，获取支付结果</p>
             */
     @RequestMapping("getRechargeOrderResult")
-    @RestReturn(value = ParkingCardDTO.class)
+    @RestReturn(value = GetRechargeOrderResultResponse.class)
     public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
         final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(5000L,
