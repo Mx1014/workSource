@@ -36,6 +36,12 @@ CREATE TABLE `eh_uniongroup_member_details` (
   `group_type` varchar(32) COMMENT 'SalaryGroup,PunchGroup',
   `groupId` bigint(20) NOT NULL COMMENT 'id of group',
   `detailId` bigint(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `target_type` VARCHAR(64),
+  `target_id` BIGINT NOT NULL,
+  `organization_id` BIGINT NOT NULL COMMENT 'reference for eh_organization_member organization_id' ,
+  `contact_name` VARCHAR(64) COMMENT 'the name of the member',
+  `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
   `update_time` datetime,
   `operator_uid` bigint(20),
   PRIMARY KEY (`id`)

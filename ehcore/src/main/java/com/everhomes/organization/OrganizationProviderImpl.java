@@ -3091,7 +3091,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         TableLike t2 = Tables.EH_ORGANIZATION_MEMBER_DETAILS.as("t2");
         SelectJoinStep step = context.select().from(t1).leftOuterJoin(t2).on(t1.field("detail_id").eq(t2.field("id")));
         Condition condition = t1.field("id").gt(0L);
-        condition = condition.and(t1.field("ORGANIZATION_ID").in(organizationIds));
+        condition = condition.and(t1.field("organization_id").in(organizationIds));
         if (null != locator.getAnchor()) {
             condition = condition.and(t1.field("create_time").lt(new Timestamp(locator.getAnchor())));
         }
