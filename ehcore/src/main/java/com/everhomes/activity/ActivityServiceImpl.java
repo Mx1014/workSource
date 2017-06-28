@@ -918,10 +918,17 @@ public class ActivityServiceImpl implements ActivityService {
 			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
 				continue;
 			}
-			if (row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+			if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
 				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
 			}
+			
+			//新增条件真实姓名必填  add by yanjun 20170628
+			if (row.getB() == null || row.getA().trim().length() == 0) {
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
+			}
+			
 			User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
@@ -934,17 +941,30 @@ public class ActivityServiceImpl implements ActivityService {
 	        roster.setLotteryFlag((byte) 0);
 	        roster.setPhone(row.getA().trim());
 	        roster.setRealName(row.getB().trim());
-	        roster.setGender(getGender(row.getC().trim()));
-	        roster.setCommunityName(row.getD().trim());
-	        roster.setOrganizationName(row.getE().trim());
-	        roster.setPosition(row.getF().trim());
-	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
-	        roster.setEmail(row.getH().trim());
+	        roster.setGender(getGender(getStrTrim(row.getC())));
+	        roster.setCommunityName(getStrTrim(row.getD()));
+	        roster.setOrganizationName(getStrTrim(row.getE()));
+	        roster.setPosition(getStrTrim(row.getF()));
+	        roster.setLeaderFlag(getLeaderFlag(getStrTrim(row.getG())));
+	        roster.setEmail(getStrTrim(row.getH()));
 	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
 	        
 	        rosters.add(roster);
 		}
 		return rosters;
+	}
+	
+	/**
+	 * 防止nullPointException
+	 * @param str
+	 * @return
+	 */
+	private String getStrTrim(String str){
+		if(str == null){
+			return null;
+		}else{
+			return str.trim();
+		}
 	}
 
 	private Byte getLeaderFlag(String leaderFlag) {
