@@ -935,9 +935,10 @@ public class ActivityServiceImpl implements ActivityService {
 			}
 			
 			//新增条件真实姓名必填  add by yanjun 20170628
-			if (row.getB() == null || row.getA().trim().length() == 0) {
-				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
+			if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
+				continue;
+//				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
 			}
 			
 			User user = getUserFromPhone(row.getA().trim());
