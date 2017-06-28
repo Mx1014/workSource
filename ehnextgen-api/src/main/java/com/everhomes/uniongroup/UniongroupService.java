@@ -18,6 +18,11 @@ public interface UniongroupService {
     public List getConfiguresListByGroupId(Long groupId);
 
     /**
+     * 根据组Id获取组内人员记录
+     **/
+    public List getUniongroupMemberDetailsByGroupId(Long groupId);
+
+    /**
      * 删除一条配置记录
      **/
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure);

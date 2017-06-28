@@ -19,7 +19,9 @@ public interface UniongroupConfigureProvider {
 
     List<UniongroupConfigures> listUniongroupConfiguresByGroupId(Integer namespaceId, Long groupId);
 
-    void deleteUniongroupConfigres(UniongroupConfigures uniongroupConfigure);
+    List<Long> listOrgTargetIdsOfUniongroupConfigures(Integer namespaceId);
+
+    void deleteUniongroupConfigres(UniongroupConfigures uniongroupConfigures);
 
     void createUniongroupMemberDetail(UniongroupMemberDetail uniongroupMemberDetail);
 
@@ -29,5 +31,7 @@ public interface UniongroupConfigureProvider {
 
     UniongroupMemberDetail findUniongroupMemberDetailById(Long id);
 
-    List<UniongroupMemberDetail> listUniongroupMemberDetail();
+    List<UniongroupMemberDetail> listUniongroupMemberDetail(Integer namespaceId, Long groupId);
+
+    void deleteUniongroupMemberDetailsByDetailIds(Integer namespaceId, List<Long> detailIds);
 }

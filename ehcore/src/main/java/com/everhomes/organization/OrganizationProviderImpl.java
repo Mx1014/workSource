@@ -1,5 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
+
 import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
@@ -4617,5 +4618,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		//added by wh 2016-10-13 把被拒绝的过滤掉
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path);
+		if (small_path != null) {
+			for (String p : small_path) {
+				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p));
+			}
+		}
+		query.addConditions(cond);
+		List<EhOrganizationMembersRecord> records = query.fetch();
+		Set<Long> result = new HashSet<>();
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(r.getDetailId());
+				return null;
+			}).collect(Collectors.toList());
+		}
+		if (result != null && result.size() != 0) {
+			return result;
+		}
+		return null;
 	}
 }
