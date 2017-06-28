@@ -176,9 +176,8 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("listParkingRechargeOrders")
     @RestReturn(value=ListParkingRechargeOrdersResponse.class)
     public RestResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd) {
-        ListParkingRechargeOrdersResponse cmdResponse = null;
-        
-        cmdResponse = parkingService.listParkingRechargeOrders(cmd);
+
+        ListParkingRechargeOrdersResponse cmdResponse = parkingService.listParkingRechargeOrders(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -564,6 +563,21 @@ public class ParkingController extends ControllerBase {
 
         UpdateParkingOrderDTO dto = parkingService.updateParkingOrder(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /parking/refundParkingOrder</b>
+     * <p>更新订单</p>
+     */
+    @RequestMapping("refundParkingOrder")
+    @RestReturn(value=String.class)
+    public RestResponse refundParkingOrder(UpdateParkingOrderCommand cmd) {
+
+        parkingService.refundParkingOrder(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

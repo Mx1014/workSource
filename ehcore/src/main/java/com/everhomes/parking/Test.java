@@ -9,17 +9,26 @@ import java.util.Random;
  */
 public class Test {
     public static void main(String[] args) {
+//        Thread a = new Thread();  a.start();a.start();
 
-        for (int i = 0; i < 20; i++) {
-//            double r = Math.random();
-//            System.out.println(r);
-//            System.out.println((int)(r *1000));
-//            System.out.println(generateRandomNumber(3));
-            System.out.println(createOrderNo3());;
+        Test t = new Test();
+        try {
+            t.wait(0);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-//        testDate();
-        System.out.println(Math.pow(10,2));
-        System.out.println(generateRandomNumber(3));
+
+        t.notify();
+//        for (int i = 0; i < 20; i++) {
+////            double r = Math.random();
+////            System.out.println(r);
+////            System.out.println((int)(r *1000));
+////            System.out.println(generateRandomNumber(3));
+//            System.out.println(createOrderNo3());;
+//        }
+////        testDate();
+//        System.out.println(Math.pow(10,2));
+//        System.out.println(generateRandomNumber(3));
     }
 
     private static Long createOrderNo3() {

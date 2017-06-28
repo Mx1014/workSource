@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
  * <li>status: 订单状态，{@link com.everhomes.rest.parking.ParkingRechargeOrderStatus}</li>
- * <li>rechargeStatus: 充值状态， {@link com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus}</li>
+ * <li>rechargeStatus: 充值状态</li>
  * <li>rechargeTime: 充值时间</li>
  * <li>createTime: 订单创建时间</li>
  * <li>rechargeType: 订单类型， {@link com.everhomes.rest.parking.ParkingRechargeType}}</li>
@@ -64,6 +64,24 @@ public class ParkingRechargeOrderDTO {
     private Timestamp endPeriod;
     private Integer parkingTime;
     private String errorDescription;
+    private String contact;
+    private Timestamp refundTime;
+
+    public Timestamp getRefundTime() {
+        return refundTime;
+    }
+
+    public void setRefundTime(Timestamp refundTime) {
+        this.refundTime = refundTime;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
 
     public Timestamp getStartPeriod() {
         return startPeriod;

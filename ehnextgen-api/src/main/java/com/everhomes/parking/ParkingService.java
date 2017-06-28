@@ -80,4 +80,6 @@ public interface ParkingService {
 	GetParkingCarNumsResponse getParkingCarNums(GetParkingCarNumsCommand cmd);
 
     UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
+
+    void refundParkingOrder(UpdateParkingOrderCommand cmd);
 }

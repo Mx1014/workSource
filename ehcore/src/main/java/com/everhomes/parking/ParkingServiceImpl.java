@@ -5,17 +5,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
+import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
+import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.DownloadUtils;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -31,6 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -83,6 +93,11 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class ParkingServiceImpl implements ParkingService {
@@ -645,7 +660,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
 		
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		//设置分页
@@ -657,8 +672,13 @@ public class ParkingServiceImpl implements ParkingService {
 
 		int size = list.size();
     	if(size > 0){
-    		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
-    				.collect(Collectors.toList()));
+    		response.setOrders(list.stream().map(r -> {
+				ParkingRechargeOrderDTO d = ConvertHelper.convert(r, ParkingRechargeOrderDTO.class);
+
+				d.setParkingLotName(parkingLot.getName());
+				d.setContact(parkingLot.getContact());
+				return d;
+			}).collect(Collectors.toList()));
     		if(size != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
@@ -1553,6 +1573,145 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd) {
+
+		UpdateParkingOrderDTO dto = ConvertHelper.convert(cmd, UpdateParkingOrderDTO.class);
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		String vendor = parkingLot.getVendorName();
+		ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+		if (handler.recharge(order)) {
+			return dto;
+		}
+
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				"Parking recharge failed.");
+	}
+
+	@Override
+	public void refundParkingOrder(UpdateParkingOrderCommand cmd){
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		long startTime = System.currentTimeMillis();
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+		//只有需要支付并已经支付的才需要退款
+		if(order.getStatus() < ParkingRechargeOrderStatus.PAID.getCode()){
+			return;
+		}
+
+		PayZuolinRefundCommand refundCmd = new PayZuolinRefundCommand();
+		String refundApi =  configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.refound", "POST /EDS_PAY/rest/pay_common/refund/save_refundInfo_record");
+		String appKey = configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.appKey", "");
+		refundCmd.setAppKey(appKey);
+		Long timestamp = System.currentTimeMillis();
+		refundCmd.setTimestamp(timestamp);
+		Integer randomNum = (int) (Math.random()*1000);
+		refundCmd.setNonce(randomNum);
+//		Long refoundOrderNo = this.onlinePayService.createBillId(DateHelper
+//				.currentGMTTime().getTime());
+//		refundCmd.setRefundOrderNo(String.valueOf(refoundOrderNo));
+//
+//		refundCmd.setOrderNo(String.valueOf(roster.getOrderNo()));
+//
+//		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(roster.getVendorType()).getStyleNo());
+//
+//		refundCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDER.getPycode());
+//
+//		refundCmd.setRefundAmount(roster.getPayAmount());
+//
+//		refundCmd.setRefundMsg("报名取消退款");
+//		this.setSignatureParam(refundCmd);
+
+		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
+		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
+
+		} else{
+			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
+					cmd, refundCmd, refundResponse);
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
+					"bill refund error");
+		}
+		long endTime = System.currentTimeMillis();
+	}
+
+	private Object restCall(String api, Object command, Class<?> responseType) {
+		String host = this.configProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.host", "https://pay.zuolin.com");
+		return restCall(api, command, responseType, host);
+	}
+
+	private Object restCall(String api, Object o, Class<?> responseType,String host) {
+		AsyncRestTemplate template = new AsyncRestTemplate();
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+		messageConverters.add(new StringHttpMessageConverter(Charset
+				.forName("UTF-8")));
+		template.setMessageConverters(messageConverters);
+		String[] apis = api.split(" ");
+		String method = apis[0];
+
+		String url = host
+				+ api.substring(method.length() + 1, api.length()).trim();
+
+		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
+		HttpEntity<String> requestEntity = null;
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Host", host);
+		headers.add("charset", "UTF-8");
+
+		ListenableFuture<ResponseEntity<String>> future = null;
+
+		if (method.equalsIgnoreCase("POST")) {
+			requestEntity = new HttpEntity<>(StringHelper.toJsonString(o),
+					headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.POST, requestEntity,
+					String.class);
+		} else {
+			Map<String, String> params = new HashMap<String, String>();
+			StringHelper.toStringMap("", o, params);
+			LOGGER.debug("params is :" + params.toString());
+
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				paramMap.add(entry.getKey().substring(1),
+						URLEncoder.encode(entry.getValue()));
+			}
+
+			url = UriComponentsBuilder.fromHttpUrl(url).queryParams(paramMap)
+					.build().toUriString();
+			requestEntity = new HttpEntity<>(null, headers);
+			LOGGER.debug("DEBUG: restCall headers: "+requestEntity.toString());
+			future = template.exchange(url, HttpMethod.GET, requestEntity,
+					String.class);
+		}
+
+		ResponseEntity<String> responseEntity = null;
+		try {
+			responseEntity = future.get();
+		} catch (InterruptedException | ExecutionException e) {
+			LOGGER.info("restCall error " + e.getMessage());
+			return null;
+		}
+
+		if (responseEntity != null
+				&& responseEntity.getStatusCode() == HttpStatus.OK) {
+
+			// String bodyString = new
+			// String(responseEntity.getBody().getBytes("ISO-8859-1"), "UTF-8")
+			// ;
+			String bodyString = responseEntity.getBody();
+			LOGGER.debug(bodyString);
+			LOGGER.debug("HEADER" + responseEntity.getHeaders());
+//			return bodyString;
+			return StringHelper.fromJsonString(bodyString, responseType);
+
+		}
+
+//		LOGGER.info("restCall error " + responseEntity.getStatusCode());
 		return null;
+
 	}
 }
