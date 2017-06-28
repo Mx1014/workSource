@@ -1,9 +1,24 @@
+-- 以下sql只在beta做测试使用
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('beta.print.order.amount', 'true', '用于支付测试', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.inform.url', 'http://printtest.zuolin.com/evh/siyinprint/informPrint?identifierToken=', '二维码url地址', '0', NULL);
+
+-- 服务广场 -- 添加到左邻域
+SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` 
+(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
+ `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
+`min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
+`scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
+VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
+'', 1, 1, 14, '{"url":"http://10.1.10.84/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
+ 1, 1, '', 0, NULL, NULL, NULL, 0,
+ 'default', 1, NULL, NULL, 0, NULL);
+ 
 -- by dengs,司印服务器ip地址,二维码时间，默认打印价格，生成打印二维码的url 20170615
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.server.url', 'http://siyin.zuolin.com:8119', '司印服务器ip地址', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.timeout', '10', '二维码的identifierToken在redis存在的时间', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.timeout.unit', 'MINUTES', '秒 SECONDS/分 MINUTES/小时 HOURS', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.default.price', '0.1', '打印默认价格', '0', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.inform.url', 'http://core.zuolin.com/evh/siyinprint/informPrint?identifierToken=', '二维码url地址', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.logon.scan.timout', '10000', '二维码是否被扫描检测的延迟时间,单位毫秒', '0', NULL);
 
 -- by dengs,默认打印教程、默认复印/扫描教程 20170615
@@ -80,15 +95,3 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 VALUES ((@eh_service_module_scopes_id := @eh_service_module_scopes_id + 1), 0, 41400, '云打印', 'EhNamespaces', 0, NULL, 2);
 
 -- by dengs 添加菜单 end
-
--- 服务广场 -- 添加到左邻域
-SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-INSERT INTO `eh_launch_pad_items` 
-(`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`,
- `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, 
-`min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, 
-`scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`, `more_order`, `alias_icon_uri`) 
-VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), 0, 0, 0, 0, '/home', 'Bizs', '云打印', '云打印', 
-'', 1, 1, 14, '{"url":"http://core.zuolin.com/cloud-print/build/index.html?hideNavigationBar=1#/home#sign_suffix"}', 3, 0,
- 1, 1, '', 0, NULL, NULL, NULL, 0,
- 'default', 1, NULL, NULL, 0, NULL);
