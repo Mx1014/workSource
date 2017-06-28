@@ -59,7 +59,9 @@ public interface ParkingProvider {
     Integer waitingCardCount(String ownerType, Long ownerId, Long parkingLotId, Timestamp createTime);
     
     ParkingRechargeOrder findParkingRechargeOrderById(Long id);
-    
+
+    ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo);
+
     void updateParkingRechargeOrder(ParkingRechargeOrder order);
 
     List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,

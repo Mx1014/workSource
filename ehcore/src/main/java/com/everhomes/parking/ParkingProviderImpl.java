@@ -72,6 +72,15 @@ public class ParkingProviderImpl implements ParkingProvider {
         
         return ConvertHelper.convert(dao.findById(id), ParkingRechargeOrder.class);
     }
+
+	@Override
+	public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
+		SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ORDER_NO.eq(orderNo));
+		return ConvertHelper.convert(query.fetchAny(), ParkingRechargeOrder.class);
+	}
     
     @Override
     public List<ParkingLot> listParkingLots(String ownerType, Long ownerId) {

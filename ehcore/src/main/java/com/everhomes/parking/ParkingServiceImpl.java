@@ -1620,7 +1620,7 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		refundCmd.setRefundAmount(order.getPrice());
 //
-		refundCmd.setRefundMsg("报名取消退款");
+		refundCmd.setRefundMsg("停车缴费退款");
 		this.setSignatureParam(refundCmd);
 
 		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
