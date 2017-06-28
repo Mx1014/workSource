@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +27,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintRecordProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -89,8 +93,10 @@ public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
 
 	@Override
 	public SiyinPrintRecord findSiyinPrintRecordByJobId(String jobId) {
-		List<SiyinPrintRecord> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
-			.where(Tables.EH_SIYIN_PRINT_RECORDS.JOB_ID.eq(jobId)).fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
+			.where(Tables.EH_SIYIN_PRINT_RECORDS.JOB_ID.eq(jobId));
+		LOGGER.info("findSiyinPrintRecordByJobId sql = {},param = {}",query.getSQL(),query.getBindValues());
+		List<SiyinPrintRecord> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
 		if(list!=null && list.size() > 0)
 			return list.get(0);
 		return null;
@@ -98,13 +104,14 @@ public class SiyinPrintRecordProviderImpl implements SiyinPrintRecordProvider {
 
 	@Override
 	public List<SiyinPrintRecord> listSiyinPrintRecordByOrderId(Long creatorUid, Long orderId,String ownerType, Long ownerId) {
-		List<SiyinPrintRecord> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
+		SelectConditionStep<?> query =  getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_RECORDS)
 				.where(Tables.EH_SIYIN_PRINT_RECORDS.CREATOR_UID.eq(creatorUid))
 				.and(Tables.EH_SIYIN_PRINT_RECORDS.ORDER_ID.eq(orderId))
 				.and(Tables.EH_SIYIN_PRINT_RECORDS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_SIYIN_PRINT_RECORDS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SIYIN_PRINT_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
+				.and(Tables.EH_SIYIN_PRINT_RECORDS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		LOGGER.info("listSiyinPrintRecordByOrderId sql = {},param = {}",query.getSQL(),query.getBindValues());
+		List<SiyinPrintRecord> list = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintRecord.class));
 		return list;
 	}
 }

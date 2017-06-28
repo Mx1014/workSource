@@ -368,8 +368,8 @@ public class SiyinJobValidateServiceImpl {
 		String detail = "";
 		String surface = getLocalActivityString(PrintErrorCode.PRINT_SURFACE,"面");
 		if(jobType == PrintJobTypeType.SCAN){
-			detail += blackWhiteSurfaceCount+"*"+surface+ PrintColorType.BLACK_WHITE.getDesc()+"\n";
-			detail += colorSurfaceCount+"*"+surface+ PrintColorType.COLOR.getDesc()+"\n";
+			detail += blackWhiteSurfaceCount+surface+"*"+ PrintColorType.BLACK_WHITE.getDesc()+"\n";
+			detail += colorSurfaceCount+surface+"*"+ PrintColorType.COLOR.getDesc()+"\n";
 		}else{
 			for (int i = 0; i < PrintPaperSizeType.values().length; i++) {
 				PrintPaperSizeType paperSizeType = PrintPaperSizeType.values()[i];

@@ -8,6 +8,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
 import org.jooq.SelectConditionStep;
+import org.jooq.UpdateConditionStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +80,9 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 				condition = condition.or(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerTypeList.get(i))
 				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerIdList.get(i))));
 		}
-		return query.and(condition)
-		.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.asc())
+		query = query.and(condition);
+		LOGGER.info("listSiyinPrintOrder sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.asc())
 		.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintOrder.class));
 	}
 	
@@ -110,12 +112,13 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 
 	@Override
 	public List<SiyinPrintOrder> listSiyinPrintUnpaidOrderByUserId(Long userId,String ownerType, Long ownerId) {
-		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 				.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
 				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
-				.fetch()
+				.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()));
+		LOGGER.info("listSiyinPrintUnpaidOrderByUserId sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		return query.fetch()
 				.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 	
 	}
@@ -129,6 +132,7 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 		if(pageAnchor!=null){
 			query = query.and(Tables.EH_SIYIN_PRINT_ORDERS.ID.le(pageAnchor));
 		}
+		LOGGER.info("listSiyinPrintOrderByUserId sql = {}, param = {}.",query.getSQL(),query.getBindValues());
 		return query.orderBy(Tables.EH_SIYIN_PRINT_ORDERS.ID.desc())
 				.limit(pageSize)
 				.fetch()
@@ -137,14 +141,18 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 
 	@Override
 	public void updateSiyinPrintOrderLockFlag(Long id, byte lockFlag) {
-		getReadWriteContext().update(Tables.EH_SIYIN_PRINT_ORDERS).set(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG,lockFlag)
-			.where(Tables.EH_SIYIN_PRINT_ORDERS.ID.eq(id)).execute();
+		UpdateConditionStep<?> query = getReadWriteContext().update(Tables.EH_SIYIN_PRINT_ORDERS).set(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG,lockFlag)
+			.where(Tables.EH_SIYIN_PRINT_ORDERS.ID.eq(id));
+		LOGGER.info("updateSiyinPrintOrderLockFlag sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		query.execute();
 	}
 
 	@Override
 	public SiyinPrintOrder findSiyinPrintOrderByOrderNo(Long orderNo) {
-		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
-		.where(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_NO.eq(orderNo)).fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+				.where(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_NO.eq(orderNo));
+		LOGGER.info("findSiyinPrintOrderByOrderNo sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		List<SiyinPrintOrder> list  = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 		if(list!=null && list.size()>0)
 			return list.get(0);
 		return null;
@@ -152,14 +160,15 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 
 	@Override
 	public SiyinPrintOrder findUnpaidUnlockedOrderByUserId(Long userId,Byte jobType,String ownerType, Long ownerId) {
-		List<SiyinPrintOrder> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
+		SelectConditionStep<?> query =  getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_ORDERS)
 			.where(Tables.EH_SIYIN_PRINT_ORDERS.CREATOR_UID.eq(userId))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.ORDER_STATUS.eq(PrintOrderStatusType.UNPAID.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.LOCK_FLAG.eq(PrintOrderLockType.UNLOCKED.getCode()))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.JOB_TYPE.eq(jobType))
 			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_TYPE.eq(ownerType))
-			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId))
-			.fetch()
+			.and(Tables.EH_SIYIN_PRINT_ORDERS.OWNER_ID.eq(ownerId));
+		LOGGER.info("findUnpaidUnlockedOrderByUserId sql = {}, param = {}.",query.getSQL(),query.getBindValues());
+		List<SiyinPrintOrder> list  = query.fetch()
 			.map(r->ConvertHelper.convert(r, SiyinPrintOrder.class));
 		if(list!=null && list.size()>0)
 			return list.get(0);

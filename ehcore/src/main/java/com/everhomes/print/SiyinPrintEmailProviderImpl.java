@@ -75,7 +75,7 @@ public class SiyinPrintEmailProviderImpl implements SiyinPrintEmailProvider {
 		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_EMAILS)
 			.where(Tables.EH_SIYIN_PRINT_EMAILS.USER_ID.eq(userId))
 			.and(Tables.EH_SIYIN_PRINT_EMAILS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-		LOGGER.debug("sql = {}, params = {}.",query.getSQL(),query.getParams());
+		LOGGER.debug("findSiyinPrintEmailByUserId sql = {}, params = {}.",query.getSQL(),query.getBindValues());
 		List<SiyinPrintEmail> list = query.fetch()
 			.map(r->ConvertHelper.convert(r, SiyinPrintEmail.class));
 		if(list!=null && list.size()>0){

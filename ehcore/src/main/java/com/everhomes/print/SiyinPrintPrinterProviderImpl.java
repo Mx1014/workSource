@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +27,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SiyinPrintPrinterProviderImpl implements SiyinPrintPrinterProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintPrinterProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -91,10 +95,11 @@ public class SiyinPrintPrinterProviderImpl implements SiyinPrintPrinterProvider 
 
 	@Override
 	public SiyinPrintPrinter findSiyinPrintPrinterByReadName(String readerName) {
-		List<SiyinPrintPrinter> list = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
+		SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_PRINTERS)
 				.where(Tables.EH_SIYIN_PRINT_PRINTERS.READER_NAME.eq(readerName))
-				.and(Tables.EH_SIYIN_PRINT_PRINTERS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.fetch().map(r->ConvertHelper.convert(r, SiyinPrintPrinter.class));
+				.and(Tables.EH_SIYIN_PRINT_PRINTERS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		LOGGER.info("findSiyinPrintPrinterByReadName sql = {},param = {}",query.getSQL(),query.getBindValues());
+		List<SiyinPrintPrinter> list = query.fetch().map(r->ConvertHelper.convert(r, SiyinPrintPrinter.class));
 		if(list!=null && list.size()>0){
 			return list.get(0);
 		}

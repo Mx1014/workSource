@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +27,7 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(SiyinPrintSettingProviderImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -34,11 +37,12 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 	
 	@Override
 	public List<SiyinPrintSetting> listSiyinPrintSettingByOwner(String ownerType, Long ownerId) {
-		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_SETTINGS)
+		 SelectConditionStep<?> query = getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_SETTINGS)
 				.where(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_SIYIN_PRINT_SETTINGS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_SIYIN_PRINT_SETTINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintSetting.class));
+				.and(Tables.EH_SIYIN_PRINT_SETTINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		 LOGGER.info("listSiyinPrintSettingByOwner sql = {},param = {}",query.getSQL(),query.getBindValues());
+		 return	query.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintSetting.class));
 	}
 	
 //	@Override
@@ -70,7 +74,7 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 	
 	@Override
 	public List<SiyinPrintSetting> listSiyinPrintSetting() {
-		return getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_SETTINGS)
+		return  getReadOnlyContext().select().from(Tables.EH_SIYIN_PRINT_SETTINGS)
 				.orderBy(Tables.EH_SIYIN_PRINT_SETTINGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, SiyinPrintSetting.class));
 	}
@@ -102,7 +106,6 @@ public class SiyinPrintSettingProviderImpl implements SiyinPrintSettingProvider 
 
 	@Override
 	public void createSiyinPrintSettings(List<SiyinPrintSetting> list,String ownerType, Long ownerId) {
-	    DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 	    dbProvider.execute(r -> {
 	    	//删除原来的设置
 	    	getReadWriteContext().delete(Tables.EH_SIYIN_PRINT_SETTINGS)
