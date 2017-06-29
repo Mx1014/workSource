@@ -3593,6 +3593,9 @@ public class QualityServiceImpl implements QualityService {
 			response.setCorrectionRate(correctionRate);
 		}
 		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
+		if(averageScore < 0) {
+			averageScore = 0.0;
+		}
 		response.setAverageScore(averageScore);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
@@ -3613,6 +3616,9 @@ public class QualityServiceImpl implements QualityService {
 				dto.setHighestScore(scoreStat.getHighestScore());
 				dto.setLowestScore(scoreStat.getLowestScore());
 				Double averageScore = (100*scoreStat.getCommunityCount() - scoreStat.getDeductScore())/scoreStat.getCommunityCount();
+				if(averageScore < 0) {
+					averageScore = 0.0;
+				}
 				dto.setAverageScore(averageScore);
 
 				return dto;

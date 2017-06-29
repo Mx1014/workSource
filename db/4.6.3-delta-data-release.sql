@@ -37,3 +37,10 @@ INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_ty
 VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @privilege_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
 
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('quality', '10017', 'zh_CN', '检查不存在或已过截止日期');
+
+-- 工作流添加按钮消息，节点消息的发起人企业管理员变量  add by xq.tian  2017/06/29
+SET @max_flow_var_id = (SELECT max(id) FROM `eh_flow_variables`);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@max_flow_var_id := @max_flow_var_id + 1), 0, 0, '', 0, '', 'user_applier_organization_manager', '发起人的企业管理员', 'node_user_button_msg', 'bean_id', 'flow-variable-applier-organization-manager', 1);
+INSERT INTO `eh_flow_variables` (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ((@max_flow_var_id := @max_flow_var_id + 1), 0, 0, '', 0, '', 'user_applier_organization_manager', '发起人的企业管理员', 'node_user_remind', 'bean_id', 'flow-variable-applier-organization-manager', 1);
