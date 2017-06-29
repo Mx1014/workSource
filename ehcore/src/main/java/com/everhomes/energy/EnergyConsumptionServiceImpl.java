@@ -2806,6 +2806,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         BufferedImage.TYPE_INT_RGB);
                 Graphics graphics = imageMosaic.getGraphics();
                 graphics.setColor(Color.WHITE);
+                graphics.fillRect(0, 0, imageWidth, imageHeight);
                 //72张二维码
                 int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
                 for (int j = i * 72; j < max; j++) {
@@ -2814,8 +2815,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     for(int w = 0; w < 8; w++) {
                         LOGGER.info("drawn w : {}, j: {}, file size: {}" , w, j, files.size());
                         if(j+w < files.size()) {
-                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
-                            graphics.drawImage(small, w * 225, height, null);
+//                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
+                            graphics.drawImage(ImageIO.read(new File(files.get(j+w))), w * 225, height, null);
                         }
                     }
                     height = (height+1) * 275;
