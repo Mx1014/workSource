@@ -1,58 +1,40 @@
 package com.everhomes.aclink;
 
-import com.atomikos.util.FastDateFormat;
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.aclink.huarun.*;
-import com.everhomes.aclink.lingling.*;
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.border.Border;
-import com.everhomes.border.BorderConnectionProvider;
-import com.everhomes.border.BorderProvider;
-import com.everhomes.bus.LocalBus;
-import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.db.DaoAction;
-import com.everhomes.db.DaoHelper;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.locale.LocaleTemplate;
-import com.everhomes.locale.LocaleTemplateProvider;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.Security;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletResponse;
+
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.promotion.OpPromotionActivity;
+import com.everhomes.promotion.OpPromotionActivityContext;
+import com.everhomes.promotion.OpPromotionCondition;
+import com.everhomes.promotion.OpPromotionUtils;
+import com.everhomes.redis.JsonStringRedisSerializer;
 import com.everhomes.rest.aclink.*;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rpc.server.AclinkRemotePdu;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
+import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.sequence.LocalSequenceGenerator;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.*;
 import com.everhomes.util.*;
-import com.everhomes.util.excel.ExcelUtils;
-import org.apache.commons.codec.binary.Base64;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -70,21 +52,80 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.security.Security;
-import java.text.Format;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.atomikos.util.FastDateFormat;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCode;
+import com.everhomes.aclink.huarun.AclinkGetSimpleQRCodeResp;
+import com.everhomes.aclink.huarun.AclinkHuarunService;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUser;
+import com.everhomes.aclink.huarun.AclinkHuarunSyncUserResp;
+import com.everhomes.aclink.huarun.AclinkSimpleQRCodeInvitation;
+import com.everhomes.aclink.lingling.AclinkLinglingDevice;
+import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
+import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
+import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
+import com.everhomes.aclink.lingling.AclinkLinglingService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnectionProvider;
+import com.everhomes.border.BorderProvider;
+import com.everhomes.bus.LocalBus;
+import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.bus.LocalBusSubscriber.Action;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.sequence.LocalSequenceGenerator;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhOpPromotionActivities;
+import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.util.StringUtils;
 
 
 @Component
@@ -697,11 +738,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(user.getPhones() != null && user.getPhones().size() > 0) {
                 doorAuth.setPhone(user.getPhones().get(0));    
                 }
-            if(user.getNickName() != null) {
-                doorAuth.setNickname(user.getNickName());
-            } else {
-                doorAuth.setNickname(user.getAccountName());
-            }
+            
+            User tmpUser = ConvertHelper.convert(user, User.class);
+            doorAuth.setNickname(getRealName(tmpUser));
             
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
@@ -714,7 +753,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
-        tmpUser.setNickName(currUser.getNickName());
+        tmpUser.setNickName(getRealName(currUser));
         List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
         if(dtos != null && !dtos.isEmpty()) {
         		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
@@ -1587,11 +1626,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setDoorName(doorAccess.getName());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    dto.setApproveUserName(u.getNickName());
-                } else {
-                    dto.setApproveUserName(u.getAccountName());
-                }
+                dto.setApproveUserName(getRealName(u));
             }
             dtos.add(dto);
         }
@@ -1621,11 +1656,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    dto.setApproveUserName(u.getNickName());
-                } else {
-                    dto.setApproveUserName(u.getAccountName());
-                }
+                dto.setApproveUserName(getRealName(u));
             }
             
             if(auth.getValidEndMs() < now) {
@@ -2486,11 +2517,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
@@ -2560,15 +2587,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         doorAuthProvider.createDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+                SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
@@ -2647,11 +2677,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
@@ -2879,6 +2905,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
+    private String getRealName(User user) {
+        List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+      if (organizationDTOs != null && organizationDTOs.size() > 0 
+              && organizationDTOs.get(0).getContactName() != null 
+              && !organizationDTOs.get(0).getContactName().isEmpty()) {
+          return organizationDTOs.get(0).getContactName();
+      }
+      
+      if(user.getNickName() == null || user.getNickName().isEmpty()) {
+          return user.getAccountName();
+      }
+      
+      return user.getNickName();
+    }
+    
     @Override
     public GetVisitorResponse checkVisitor(GetVisitorCommand cmd) {
         GetVisitorResponse resp = new GetVisitorResponse();
@@ -2891,12 +2932,32 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(namespaceId == null) {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
+        
+        User user = userProvider.findUserById(auth.getApproveUserId());
+        if(user != null) {
+            List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+//          OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+          if (organizationDTOs != null && organizationDTOs.size() > 0 
+                  && organizationDTOs.get(0).getContactName() != null 
+                  && !organizationDTOs.get(0).getContactName().isEmpty()) {
+              String org = organizationDTOs.get(0).getName();
+              String fmt = String.format("%s-%s", org, organizationDTOs.get(0).getContactName());
+              user.setNickName(fmt);
+              if(LOGGER.isInfoEnabled()) {
+                  LOGGER.info("visitor nickname=", fmt);    
+              }
+              
+          } 
+          
+          resp.setApproveName(user.getNickName());
+        }
+
         DoorUserPermission dp = doorUserPermissionProvider.checkPermission(namespaceId, UserContext.current().getUser().getId()
                 , auth.getOwnerId(), auth.getOwnerType());
         if(dp == null) {
             resp.setPermissionDeny((byte)1);
         } else {
-            resp.setPermissionDeny((byte)0);
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "no permission");
         }
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
@@ -2917,11 +2978,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
-        
-        User user = userProvider.findUserById(auth.getApproveUserId());
-        if(user != null) {
-            resp.setApproveName(user.getNickName());
-        }
         
         resp.setCreateTime(auth.getCreateTime().getTime());
       
