@@ -4,6 +4,8 @@ package com.everhomes.print;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Query;
@@ -22,6 +24,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.print.PrintOrderLockType;
 import com.everhomes.rest.print.PrintOrderStatusType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSiyinPrintOrdersDao;
@@ -40,6 +43,19 @@ public class SiyinPrintOrderProviderImpl implements SiyinPrintOrderProvider {
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+    private ScheduleProvider scheduleProvider;
+
+    @PostConstruct
+    public void setup(){
+        //启动定时任务
+    	String triggerName = "SiyinQueryRecord";
+    	String jobName= "SiyinQueryRecord"+System.currentTimeMillis();
+    	//每30分钟查询向司印查询一下日志。
+    	String cronExpression = "0 */30 * * * ?";
+        scheduleProvider.scheduleCronJob(triggerName,jobName,cronExpression,SiyinTaskLogScheduleJob.class , null);
+    }
 
 	@Override
 	public void createSiyinPrintOrder(SiyinPrintOrder siyinPrintOrder) {
