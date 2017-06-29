@@ -61,8 +61,6 @@ public interface SiyinPrintService {
 
 	InformPrintResponse informPrint(InformPrintCommand cmd);
 
-	void printImmediately(PrintImmediatelyCommand cmd);
-
 	ListPrintOrdersResponse listPrintOrders(ListPrintOrdersCommand cmd);
 
 	GetPrintUnpaidOrderResponse getPrintUnpaidOrder(GetPrintUnpaidOrderCommand cmd);

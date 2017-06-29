@@ -242,12 +242,12 @@ public class SiYinPrintController extends ControllerBase {
 	 
 	 /**
 	  * <b>URL: /siyinprint/printImmediately</b>
-	  * <p>立即打印,增加任务数量</p>
+	  * <p>立即打印,增加任务数量,废弃</p>
 	  */
 	 @RequestMapping("printImmediately")
 	 @RestReturn(value=String.class)
+	 @Deprecated
 	 public RestResponse printImmediately(PrintImmediatelyCommand cmd) {
-		 siyinPrintService.printImmediately(cmd);
 	     RestResponse response = new RestResponse();
 	     response.setErrorCode(ErrorCodes.SUCCESS);
 	     response.setErrorDescription("OK");

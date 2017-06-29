@@ -361,6 +361,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 	@Override
 	public InformPrintResponse informPrint(InformPrintCommand cmd) {
 		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+		
 		//验证redis中存的identifierToken
         String key = REDIS_PRINT_IDENTIFIER_TOKEN + cmd.getIdentifierToken();
         ValueOperations<String, String> valueOperations = getValueOperations(key);
@@ -374,8 +375,10 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	logonUser.setAccountName(user.getId()+PRINT_LOGON_ACCOUNT_SPLIT+cmd.getOwnerId());
             printResponse.setResponseObject(logonUser);
             printResponse.setErrorCode(ErrorCodes.SUCCESS);
+            //
+            addPrintingTaskCount(cmd);
         }else{
-            printResponse.setResponseObject("identifierToken "+cmd.getIdentifierToken()+" time out");
+            printResponse.setResponseObject("identifierToken "+cmd.getIdentifierToken()+" out of date");
             printResponse.setErrorCode(409);
         }
 
@@ -388,15 +391,13 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
                 localBus.publish(null, subject + "." + cmd.getIdentifierToken(), printResponse);
             }
         });
-
-        // TODO 逻辑，通知app
+       
         return new InformPrintResponse(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
     
 	}
 
-	@Override
-	public void printImmediately(PrintImmediatelyCommand cmd) {
-		checkOwner(cmd.getOwnerType(), cmd.getOwnerId());
+	//正在进行的任务计数
+	public void addPrintingTaskCount(InformPrintCommand cmd) {
 		Long id = UserContext.current().getUser().getId();
 		
 		PrintLogonStatusType statusType = PrintLogonStatusType.fromCode(checkUnpaidOrder(cmd.getOwnerType(), cmd.getOwnerId()));
@@ -414,7 +415,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         }
         
         //计算值,一分钟有效
-        valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), 1, TimeUnit.MINUTES);
+        int timeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_SIYIN_JOB_COUNT_TIMEOUT, 10);
+        valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), timeout, TimeUnit.MINUTES);
 
 	}
 

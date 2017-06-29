@@ -40,6 +40,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.timeout.unit', 'MINUTES', '秒 SECONDS/分 MINUTES/小时 HOURS', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.default.price', '0.1', '打印默认价格', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.logon.scan.timout', '10000', '二维码是否被扫描检测的延迟时间,单位毫秒', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.pattern', '1', '1:司印方配置成不解锁打印机，直接打印的模式，2:司印方配置成发送文档到打印机，需要解锁再打印的模式。', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('print.siyin.job.count.timeout', '10', '用户正在打印任务数量放到redis中的，设置一个默认超时时间 10 单位分钟', '0', NULL);
 
 -- by dengs,默认打印教程、默认复印/扫描教程 20170615
 INSERT INTO `ehcore`.`eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('print', 'print_course_list', 'zh_CN', '在电脑上打开需要打印的文档，点击打印，\n 设置好打印参数，点击确定，电脑上出现二维码 | 打开APP，点击右上角扫一扫按钮，或者进入云打印界面，\n 点击右上角扫一扫按钮，扫描电脑出现的二维码 | APP上出现提示，询问是否立即打印，点击立即打印，\n 打印任务将发送给打印机，等待打印完成即可去打印机上\n 取回打印资料（为了确保打印的资料不被他人取走，您可以\n 走到打印机前再点击“立即打印”） | 打印完成后，APP端生成一个待付款的订单，您可以立即\n 支付，也可以等待下次打印时再进行支付（注意每次打印\n 必须保证上次的订单已付款，否则无法进行打印）\n ');
