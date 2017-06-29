@@ -2829,6 +2829,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(max/8 != 0) {
                     maxRow = maxRow + 1;
                 }
+                LOGGER.info("draw max : {}, maxRow: {}, size: {}" , max, maxRow, size);
                 for(int row = 0; row < maxRow; row++) {
                     //每行8个
                     for(int w = 0; w < 8; w++) {
