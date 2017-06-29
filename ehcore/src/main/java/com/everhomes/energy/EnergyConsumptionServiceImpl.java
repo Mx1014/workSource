@@ -2809,17 +2809,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 graphics.fillRect(0, 0, imageWidth, imageHeight);
                 //72张二维码
                 int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
+                int height = 0;
+                int row = 0;
                 for (int j = i * 72; j < max; j++) {
-                    int height = 0;
-                    //每行8个
-                    for(int w = 0; w < 8; w++) {
-                        LOGGER.info("drawn w : {}, j: {}, file size: {}" , w, j, files.size());
-                        if(j+w < files.size()) {
+                    if(row * 8 < max%72) {
+                        //每行8个
+                        for(int w = 0; w < 8; w++) {
+                            LOGGER.info("draw w : {}, j: {}, file size: {}" , w, j, files.size());
+                            if(j+w < files.size()) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
-                            graphics.drawImage(ImageIO.read(new File(files.get(j+w))), w * 225, height, null);
+                                LOGGER.info("draw Width : {}, Height: {}" , w * 225, height);
+                                graphics.drawImage(ImageIO.read(new File(files.get(j+w))), w * 225, height, null);
+                            }
                         }
+                        height = (height+1) * 275;
+                        row ++;
                     }
-                    height = (height+1) * 275;
+
+
                 }
                 graphics.dispose();
                 String imagePath = filePath + System.currentTimeMillis() + "EnergyMeterCard.jpg";
