@@ -50,6 +50,7 @@ import com.google.zxing.WriterException;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.apache.commons.codec.binary.*;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
@@ -59,7 +60,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Encoder;
 
 import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
@@ -84,8 +84,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.Base64;
+import java.util.*
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2784,7 +2783,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         try {
             graphics.drawString(name, 30, 215);
             graphics.drawString(number, 30, 240);
-            bimg = QRCodeEncoder.createQrCode(qrcode, 200, 200, null);
+            bimg = QRCodeEncoder.createQrCode(Base64.encodeBase64String(qrcode.getBytes()), 200, 200, null);
         } catch (Exception e) {
         }
 
