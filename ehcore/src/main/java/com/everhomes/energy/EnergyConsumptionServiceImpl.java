@@ -2826,7 +2826,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 int height = 0;
 
                 int maxRow = max/8;
-                if(max/8 != 0) {
+                if(max%8 != 0) {
                     maxRow = maxRow + 1;
                 }
                 LOGGER.info("draw max : {}, maxRow: {}, size: {}" , max, maxRow, size);
