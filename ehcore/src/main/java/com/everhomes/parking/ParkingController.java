@@ -416,7 +416,7 @@ public class ParkingController extends ControllerBase {
             * <p>支付后，获取支付结果</p>
             */
     @RequestMapping("getRechargeOrderResult")
-    @RestReturn(value = GetRechargeOrderResultResponse.class)
+    @RestReturn(value = ParkingRechargeOrderDTO.class)
     public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
         final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(5000L,
@@ -433,7 +433,7 @@ public class ParkingController extends ControllerBase {
             @Override
             public Action onLocalBusMessage(Object sender, String subject,
                                             Object pingResponse, String path) {
-                GetRechargeOrderResultResponse dto = (GetRechargeOrderResultResponse) pingResponse;
+                ParkingRechargeOrderDTO dto = (ParkingRechargeOrderDTO) pingResponse;
                 //    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
                 RestResponse response = new RestResponse(dto);
                 response.setErrorCode(ErrorCodes.SUCCESS);

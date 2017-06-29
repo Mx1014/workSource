@@ -67,6 +67,15 @@ public class ParkingRechargeOrderDTO {
     private String errorDescription;
     private String contact;
     private Timestamp refundTime;
+    private Integer delayTime;
+
+    public Integer getDelayTime() {
+        return delayTime;
+    }
+
+    public void setDelayTime(Integer delayTime) {
+        this.delayTime = delayTime;
+    }
 
     public Long getOrderNo() {
         return orderNo;
