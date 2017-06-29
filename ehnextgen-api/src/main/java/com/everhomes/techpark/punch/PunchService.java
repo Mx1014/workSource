@@ -239,4 +239,6 @@ public interface PunchService {
 
 	void importPunchLogs(MultipartFile[] files);
 
+	void refreshPunchDayLogs(ListPunchDetailsCommand cmd);
+
 }
