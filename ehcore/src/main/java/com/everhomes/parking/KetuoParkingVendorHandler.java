@@ -323,28 +323,25 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		//将充值信息存入订单
 		order.setErrorDescriptionJson(json);
 		order.setStartPeriod(tempStart);
-		order.setStartPeriod(tempEnd);
+		order.setEndPeriod(tempEnd);
 
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
-		Object resMsg = jsonObject.get("resMsg");
 
-		String locale = Locale.SIMPLIFIED_CHINESE.toString();
-		String scope = ParkingErrorCode.SCOPE;
-		String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
-		String defaultText = localeService.getLocalizedString(scope, code, locale, "");
-		if (null != resMsg) {
-			String msg = (String) resMsg;
-			order.setErrorDescription(StringUtils.isNotBlank(msg)? msg : defaultText);
-		}else {
-			order.setErrorDescription(defaultText);
-		}
 		if(null != obj) {
 			int resCode = (int) obj;
 			if(resCode == 0) {
 				return true;
 			}
 		}
+		//充值失败时，将返回的错误信息记录下来
+		Object resMsg = jsonObject.get("resMsg");
+
+		if (null != resMsg) {
+			String msg = (String) resMsg;
+			order.setErrorDescription(msg);
+		}
+
 		return false;
     }
 	

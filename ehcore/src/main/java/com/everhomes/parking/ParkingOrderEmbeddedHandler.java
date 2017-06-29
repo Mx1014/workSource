@@ -3,11 +3,13 @@ package com.everhomes.parking;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Locale;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,13 +32,14 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
     @Autowired
     private ParkingProvider parkingProvider;
-
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	@Autowired
 	private ConfigurationProvider configProvider;
 	@Autowired
 	private LocalBus localBus;
+	@Autowired
+	private LocaleStringService localeService;
 
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -89,6 +92,18 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 
 						localBus.publish(this, "Parking-Recharge" + order.getId(), order);
 					}else {
+						//充值失败
+						order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
+						//充值失败时，将返回的错误信息记录下来
+						if (StringUtils.isBlank(order.getErrorDescription())) {
+							String locale = Locale.SIMPLIFIED_CHINESE.toString();
+							String scope = ParkingErrorCode.SCOPE;
+							String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
+							String defaultText = localeService.getLocalizedString(scope, code, locale, "");
+							order.setErrorDescription(defaultText);
+						}
+						parkingProvider.updateParkingRechargeOrder(order);
+
 						localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 					}
 				}catch (Exception e) {

@@ -5,10 +5,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.TypeReference;
@@ -165,6 +162,15 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 		BosigaoJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<BosigaoJsonEntity<Object>>(){});
 
+		Long startPeriod = strToLong2(card.getLimitEnd());
+
+		BosigaoCardInfo newCard = getCardInfo(order.getPlateNumber());
+		Long endPeriod = strToLong2(newCard.getLimitEnd());
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(new Timestamp(startPeriod));
+		order.setEndPeriod(new Timestamp(endPeriod));
+
 		if(entity.isSuccess()) {
 			JSONObject obj = (JSONObject) entity.getData();
 			Integer result = obj.getInteger("Result");
@@ -172,6 +178,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
