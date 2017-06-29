@@ -2611,6 +2611,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         if(files.size() > 1) {
             List<String> images = imageMosaic(files, filePath);
+            // 读取完成删除文件
+            for ( String filename : files ) {
+                File newfile = new File(filename);
+                if (newfile.isFile() && newfile.exists()) {
+                    file.delete();
+                }
+            }
             if(images.size() == 1) {
                 download(images.get(0),response);
             } else {
@@ -2693,6 +2700,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         if(files.size() > 1) {
             List<String> images = imageMosaic(files, filePath);
+
+            // 读取完成删除文件
+            for ( String filename : files ) {
+                File newfile = new File(filename);
+                if (newfile.isFile() && newfile.exists()) {
+                    file.delete();
+                }
+            }
             if(images.size() == 1) {
                 download(images.get(0),response);
             } else {
