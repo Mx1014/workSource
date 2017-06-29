@@ -148,7 +148,13 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 		String cost = String.valueOf((order.getPrice().intValue() * 100));
 
 		JSONObject jsonParam = new JSONObject();
-		jsonParam.put("CardID", card.getCardID());
+
+		//ceshi TODO:记得删掉
+		if (order.getId() % 2 ==0) {
+			jsonParam.put("CardID", card.getCardID());
+
+		}
+
 		jsonParam.put("ParkingID", card.getParkingID());
 		jsonParam.put("MonthNum", String.valueOf(order.getMonthCount().intValue()));
 		jsonParam.put("Amount", cost);
