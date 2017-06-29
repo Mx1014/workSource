@@ -2812,8 +2812,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     int height = 0;
                     //每行8个
                     for(int w = 0; w < 8; w++) {
-                        BufferedImage small = ImageIO.read(new File(files.get(j)));
-                        graphics.drawImage(small, w * 225, height, null);
+                        if(files.get(j+w) != null) {
+                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
+                            graphics.drawImage(small, w * 225, height, null);
+                        }
                     }
                     height = (height+1) * 275;
                 }
