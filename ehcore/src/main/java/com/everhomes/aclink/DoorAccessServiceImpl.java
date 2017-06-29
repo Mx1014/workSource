@@ -2948,9 +2948,10 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         DoorUserPermission dp = doorUserPermissionProvider.checkPermission(namespaceId, UserContext.current().getUser().getId()
                 , auth.getOwnerId(), auth.getOwnerType());
         if(dp == null) {
-            resp.setPermissionDeny((byte)1);
-        } else {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "no permission");
+//            resp.setPermissionDeny((byte)1);
+        } else {
+            resp.setPermissionDeny((byte)0);
         }
         
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
