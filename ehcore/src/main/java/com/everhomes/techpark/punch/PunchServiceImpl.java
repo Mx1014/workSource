@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.scheduler.RunningFlag;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
@@ -177,6 +178,7 @@ import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -191,7 +193,6 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -223,7 +224,10 @@ public class PunchServiceImpl implements PunchService {
         }
     };
     private static ThreadLocal<List<PunchTimeRule>> targetTimeRules = new ThreadLocal<List<PunchTimeRule>>() ;
-    
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
 	@Autowired
 	private PunchProvider punchProvider;
 	@Autowired
@@ -1363,7 +1367,7 @@ public class PunchServiceImpl implements PunchService {
 		//是否有wifi打卡,如果是判断wifi是否符合
 		
 		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(PunchOwnerType.ORGANIZATION.getCode(), cmd.getEnterpriseId(), pr.getWifiRuleId()) ;
-		if(null != wifis){
+		if(null != wifis && null != cmd.getWifiMac()){
 			for(PunchWifi wifi : wifis){
 				if(null != wifi.getMacAddress() && wifi.getMacAddress().toLowerCase().equals(cmd.getWifiMac().toLowerCase()))
 					return ClockCode.SUCESS;
@@ -4576,6 +4580,31 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	/**
+	 * 刷新某公司某一段时间的所有打卡day logs
+	 *
+	 * */
+	@Override
+	public void refreshPunchDayLogs(ListPunchDetailsCommand cmd){
+
+		Organization org = this.checkOrganization(cmd.getOwnerId());
+		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),(byte) 1);
+		for(Long userId : userIds){ 
+			Calendar start = Calendar.getInstance();
+			Calendar end = Calendar.getInstance();
+			start.setTimeInMillis(cmd.getStartDay());
+			end.setTimeInMillis(cmd.getEndDay());
+			while (start.before(end)) {
+				try {
+					refreshPunchDayLog(userId, getTopEnterpriseId(cmd.getOwnerId()), start);
+				} catch (ParseException e) {
+					LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
+				}
+	
+				start.add(Calendar.DAY_OF_MONTH, 1);
+			}
+		}
+	}
+	/**
 	 * 打卡2.0 的考勤详情
 	 * */
 	@Override
@@ -4825,30 +4854,30 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 0/15 * * * ?") 
 	public void scheduledSendPushToUsers(){
 		 
-		
-		Date runDate = DateHelper.currentGMTTime();
-		long runDateLong = convertTimeToGMTMillisecond(new Time(runDate.getTime()));
-		Calendar anchorCalendar = Calendar.getInstance();
-		anchorCalendar.setTime(runDate);
-		List<Long> sendPunsUserList = new ArrayList<>();
-		
-		//今天的
-		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
-		
-		//昨天的
-		runDateLong = runDateLong + 86400000L;
-		anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
-		findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
-
-		//推送消息 
-		LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
-		if(null == scheduleLocaleString ){
-			return;
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			Date runDate = DateHelper.currentGMTTime();
+			long runDateLong = convertTimeToGMTMillisecond(new Time(runDate.getTime()));
+			Calendar anchorCalendar = Calendar.getInstance();
+			anchorCalendar.setTime(runDate);
+			List<Long> sendPunsUserList = new ArrayList<>();
+			
+			//今天的
+			findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
+			
+			//昨天的
+			runDateLong = runDateLong + 86400000L;
+			anchorCalendar.add(Calendar.DAY_OF_MONTH, -1);
+			findPunsUser( runDateLong,anchorCalendar,sendPunsUserList);
+	
+			//推送消息 
+			LocaleString scheduleLocaleString = localeStringProvider.find( PunchConstants.PUNCH_PUSH_SCOPE, PunchConstants.PUNCH_REMINDER,"zh_CN"); 
+			if(null == scheduleLocaleString ){
+				return;
+			}
+			for(Long userId : sendPunsUserList){
+				sendMessageToUser(userId, scheduleLocaleString.getText());
+			}
 		}
-		for(Long userId : sendPunsUserList){
-			sendMessageToUser(userId, scheduleLocaleString.getText());
-		}
-		
 	}
 	/** 
 	 * @param runDateLong : 打卡结束时间的时间点 
@@ -4923,11 +4952,12 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "1 0/15 * * * ?")
 	@Override
 	public void dayRefreshLogScheduled() {
-
-		coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
-	        Date runDate = DateHelper.currentGMTTime();
-	        dayRefreshLogScheduled(runDate);
-		});
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			coordinationProvider.getNamedLock(CoordinationLocks.PUNCH_DAY_SCHEDULE.getCode()).tryEnter(() -> {
+		        Date runDate = DateHelper.currentGMTTime();
+		        dayRefreshLogScheduled(runDate);
+			});
+		}
     }
     @Override
     public void testDayRefreshLogs(Long runDate){
