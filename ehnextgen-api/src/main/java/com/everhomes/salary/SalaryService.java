@@ -1,7 +1,9 @@
 // @formatter:off
 package com.everhomes.salary;
 
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -42,7 +44,7 @@ public interface SalaryService {
 	public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse);
 
 
-	public void importSalaryGroup(ImportSalaryGroupCommand cmd);
+	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile, Long userId, ImportSalaryGroupCommand cmd);
 
 
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd);

@@ -11,8 +11,9 @@ public enum ImportFileTaskType {
 
     ORGANIZATION_CONTACT("organization_contact"), ENGERPRISE("enterprise"),
     WAREHOUSE_MATERIAL("warehouse_material"),
-    WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category");
+    WAREHOUSE_MATERIAL_CATEGORY("warehouse_material_category"),
 
+    SALARY_GROUP("salary_group");
 	private String code;
 
     private ImportFileTaskType(String code) {

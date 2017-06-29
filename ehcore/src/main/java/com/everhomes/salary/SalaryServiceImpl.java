@@ -6,12 +6,14 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.rest.common.ImportFileResponse;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
+import com.everhomes.rest.organization.ImportFileTaskType;
 import com.everhomes.rest.salary.*;
 import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.techpark.punch.PunchService;
@@ -21,9 +23,13 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.sun.xml.ws.wsdl.writer.document.Import;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.elasticsearch.common.recycler.Recycler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +37,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,6 +100,9 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+    private ImportFileService importFileService;
 
 	@Override
 	public ListSalaryDefaultEntitiesResponse listSalaryDefaultEntities() {
@@ -390,10 +401,53 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
 	@Override
-	public void importSalaryGroup(ImportSalaryGroupCommand cmd) {
-	
+	public ImportFileTaskDTO importSalaryGroup(MultipartFile mfile,
+                                               Long userId, ImportSalaryGroupCommand cmd) {
+        ImportFileTask task = new ImportFileTask();
+        try {
 
+            // 解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if(resultList.isEmpty()){
+                LOGGER.error("File content is empty");
+/*                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+                        "File content is empty");*/
+            }
+//            task.setOwnerType();
+//            task.setOwnerId();
+            task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
+            task.setCreatorUid(userId);
+            task = this.importFileService.executeTask(new ExecuteImportTaskCallback() {
+                @Override
+                public ImportFileResponse importFile() {
+                    ImportFileResponse response = new ImportFileResponse();
+                    List<SalaryEmployeeOriginValDTO> datas = handleImportSalaryGroup(resultList,cmd.getSalaryGroupId());
+                    return null;
+                }
+            },task);
+        }catch (Exception e){
+
+        }
+        return null;
 	}
+
+	private List<SalaryEmployeeOriginValDTO> handleImportSalaryGroup(List list, Long groupId){
+
+        List<SalaryEmployeeOriginValDTO> datas = new ArrayList<>();
+//        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(groupId);
+        int row = 1;
+        for(int i=2; i<datas.size(); i++){
+
+            RowResult r = (RowResult) list.get(i);
+            r.getCells().forEach((k, v) -> {
+
+            });
+            SalaryEmployeeOriginValDTO data = new SalaryEmployeeOriginValDTO();
+            data.setSalaryGroupId(groupId);
+        }
+        return null;
+    }
 
 	@Override
 	public void exportPeriodSalary(ExportPeriodSalaryCommand cmd) {

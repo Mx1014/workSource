@@ -2,7 +2,10 @@
 package com.everhomes.salary;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.organization.ImportFileTaskDTO;
 import com.everhomes.rest.salary.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -188,10 +191,19 @@ public class SalaryController extends ControllerBase {
 	 * <b>URL: /salary/importSalaryGroup</b>
 	 */
 	@RequestMapping("importSalaryGroup")
-	@RestReturn(String.class)
+	@RestReturn(ImportFileTaskDTO.class)
 	public RestResponse importSalaryGroup(ImportSalaryGroupCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
-		salaryService.importSalaryGroup(cmd);
-		return new RestResponse();
+        User user = UserContext.current().getUser();
+//        Long userId = manaUser.getId();
+/*        if (null == files || null == files[0]) {
+            LOGGER.error("files is null, userId=" + userId);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+                    "files is null");
+        }*/
+        RestResponse response = new RestResponse(this.salaryService.importSalaryGroup(files[0], user.getId(),cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
 	}
 
 	/**
