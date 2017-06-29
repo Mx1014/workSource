@@ -41,7 +41,7 @@ CREATE TABLE `eh_uniongroup_member_details` (
   `detail_id` bigint(20) DEFAULT NULL COMMENT 'id of target, only memberDetail',
   `target_type` VARCHAR(64),
   `target_id` BIGINT NOT NULL,
-  `organization_id` BIGINT NOT NULL COMMENT 'reference for eh_organization_member organization_id' ,
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id' ,
   `contact_name` VARCHAR(64) COMMENT 'the name of the member',
   `contact_token` VARCHAR(128) COMMENT 'phone number, reference for eh_organization_member contact_token',
   `update_time` datetime,

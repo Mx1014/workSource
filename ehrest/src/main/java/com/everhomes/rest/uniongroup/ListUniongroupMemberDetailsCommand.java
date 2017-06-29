@@ -5,15 +5,15 @@ import com.everhomes.util.StringHelper;
 /**
  * Created by Administrator on 2017/6/29.
  */
-public class GetUniongroupMemberDetailsCommand {
+public class ListUniongroupMemberDetailsCommand {
 
     private Long groupId;
 
-    public GetUniongroupMemberDetailsCommand() {
+    public ListUniongroupMemberDetailsCommand() {
 
     }
 
-    public GetUniongroupMemberDetailsCommand(Long groupId) {
+    public ListUniongroupMemberDetailsCommand(Long groupId) {
         super();
         this.groupId = groupId;
     }
