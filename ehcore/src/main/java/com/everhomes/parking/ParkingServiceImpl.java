@@ -1727,7 +1727,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(1000L,
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L,
 		 RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"time out."));
 //        System.out.println(Thread.currentThread().getName());
@@ -1743,6 +1743,10 @@ public class ParkingServiceImpl implements ParkingService {
 		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
 
 			ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
+			ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
+			dto.setParkingLotName(parkingLot.getName());
+			dto.setContact(parkingLot.getContact());
+
 			RestResponse response = new RestResponse(dto);
 			response.setErrorCode(ErrorCodes.SUCCESS);
 			response.setErrorDescription("OK");
@@ -1754,7 +1758,10 @@ public class ParkingServiceImpl implements ParkingService {
 			public Action onLocalBusMessage(Object sender, String subject,
 											Object pingResponse, String path) {
 				ParkingRechargeOrderDTO dto = (ParkingRechargeOrderDTO) pingResponse;
-				//    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
+				ParkingLot parkingLot = checkParkingLot(order.getOwnerType(), order.getOwnerId(), order.getParkingLotId());
+				dto.setParkingLotName(parkingLot.getName());
+				dto.setContact(parkingLot.getContact());
+
 				RestResponse response = new RestResponse(dto);
 				response.setErrorCode(ErrorCodes.SUCCESS);
 				response.setErrorDescription("OK");
