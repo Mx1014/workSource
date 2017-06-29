@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.acl.*;
 import com.everhomes.domain.Domain;
+import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModulePrivilege;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.module.ServiceModuleProvider;
@@ -110,7 +111,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
             //校验是否拥有模块管理权限
-            return checkModuleAdmin(ownerType, ownerId, userId, serviceModules.get(0).getModuleId());
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            return checkModuleAdmin(ownerType, ownerId, userId, module.getParentId());
         }
         //校验是否拥有全部模块的管理权限
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
@@ -126,7 +128,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, Long userId, Long privilegeId){
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
-            checkModuleAccess(ownerType, ownerId, userId, serviceModules.get(0).getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            checkModuleAccess(ownerType, ownerId, userId, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
         }
         return false;
     }
@@ -135,7 +138,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     public boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId){
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
-            checkModuleAccess(ownerType, ownerId, descriptors, serviceModules.get(0).getModuleId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+            ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
+            checkModuleAccess(ownerType, ownerId, descriptors, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
         }
         return false;
     }
@@ -297,6 +301,11 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId){
         checkUserAuthority(null, ownerType, ownerId, null, privilegeId);
+    }
+
+    @Override
+    public void checkCurrentUserAuthority(Long currentOrgId, Long privilegeId){
+        checkUserAuthority(null, null, null, currentOrgId, privilegeId);
     }
 
     @Override

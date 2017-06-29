@@ -4,8 +4,10 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.module.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -124,6 +126,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("assignmentServiceModule")
     @RestReturn(value = String.class)
     public RestResponse assignmentServiceModule(@Valid AssignmentServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.MODULE_CONF_RELATION_CREATE);
         this.serviceModuleService.assignmentServiceModule(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -140,6 +144,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("deleteServiceModuleAssignmentRelation")
     @RestReturn(value = String.class)
     public RestResponse deleteServiceModuleAssignmentRelation(@Valid DeleteServiceModuleAssignmentRelationCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.MODULE_CONF_RELATION_DELETE);
         this.serviceModuleService.deleteServiceModuleAssignmentRelation(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -156,6 +162,8 @@ public class ModuleController extends ControllerBase {
     @RequestMapping("listServiceModuleAssignmentRelations")
     @RestReturn(value = ServiceModuleAssignmentRelationDTO.class, collection = true)
     public RestResponse listServiceModuleAssignmentRelations(@Valid ListServiceModuleAssignmentRelationsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkCurrentUserAuthority(cmd.getOwnerId(), PrivilegeConstants.MODULE_CONF_RELATION_LIST);
         List<ServiceModuleAssignmentRelationDTO> relationList = this.serviceModuleService.listServiceModuleAssignmentRelations(cmd);
         RestResponse response = new RestResponse(relationList);
         response.setErrorCode(ErrorCodes.SUCCESS);
