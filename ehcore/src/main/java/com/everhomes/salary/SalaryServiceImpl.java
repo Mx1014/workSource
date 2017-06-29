@@ -705,6 +705,7 @@ public class SalaryServiceImpl implements SalaryService {
 		salaryEmployeeProvider.updateSalaryEmployeeCheckFlag(cmd.getSalaryEmployeeIds(), cmd.getCheckFlag());
 	}
 
+	
     @Override
     public void revokeSendPeriodSalary(SendPeriodSalaryCommand cmd) {
 
@@ -722,5 +723,6 @@ public class SalaryServiceImpl implements SalaryService {
 					return null;
 				});
     }
+
 
 }
