@@ -176,7 +176,7 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 		order.setErrorDescriptionJson(json);
 		//加一秒
 		order.setStartPeriod(new Timestamp(startPeriod + 1000));
-		order.setEndPeriod(new Timestamp(endPeriod));
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
 
 		if(entity.isSuccess()) {
 			JSONObject obj = (JSONObject) entity.getData();
