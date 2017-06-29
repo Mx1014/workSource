@@ -42,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -57,6 +58,21 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 	};
 
+//	private static List<SalaryDefaultEntity> salaryDefaultEntities = new ArrayList<SalaryDefaultEntity>();
+//
+//	public SalaryServiceImpl(){
+//		//构造函数初始化entities---这个是不变的
+//		List<SalaryDefaultEntity> result = salaryDefaultEntityProvider.listSalaryDefaultEntity();
+//		salaryDefaultEntities = result;
+//	}
+//	private SalaryDefaultEntity findEntity(Long id ){
+//		for (SalaryDefaultEntity entity : salaryDefaultEntities) {
+//			if (entity.getId().equals(id)) {
+//				return entity;
+//			}
+//		}
+//		return null;
+//	}
 	private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
@@ -520,14 +536,33 @@ public class SalaryServiceImpl implements SalaryService {
 	private SalaryPeriodEmployeeDTO processSalaryPeriodEmployeeDTO(SalaryEmployee r) {
 		SalaryPeriodEmployeeDTO dto = ConvertHelper.convert(r, SalaryPeriodEmployeeDTO.class);
 		//TODO: 列表一些字段值
-		
+		//岗位
+
+		//批次名
+		Organization org = organizationProvider.findOrganizationById(r.getOrganizationGroupId());
+		dto.setSalaryGroupId(r.getOrganizationGroupId());
+		if(null != org)
+			dto.setSalaryGroupName(org.getName());
 		//3.查人员的vals
 		List<SalaryEmployeePeriodVal> result = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(r.getId());
 		if(null == result)
 			return null;
 		dto.setPeriodEmployeeEntitys(result.stream().map(r2 ->{	
 			SalaryPeriodEmployeeEntityDTO dto2 = processSalaryPeriodEmployeeEntityDTO(r2);
-            return dto2;
+			if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_GONGHAO)) {
+				dto.setEmployeeNo(r2.getSalaryValue());
+			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_NAME)) {
+				dto.setContactName(r2.getSalaryValue());
+			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_BUMEN)) {
+				dto.setDepartments(r2.getSalaryValue());
+			}else if (r2.getGroupEntityId().equals(SalaryConstants.ENTITY_ID_SHIFA)) {
+				dto.setPaidMoney(new BigDecimal(r2.getSalaryValue()));
+			}
+			SalaryGroupEntity groupEntity = salaryGroupEntityProvider.findSalaryGroupEntityById(r2.getGroupEntityId());
+			if (null != groupEntity.getNumberType() && groupEntity.getNumberType().equals(NormalFlag.YES.getCode())) {
+				dto2.setSalaryValue(groupEntity.getDefaultValue());
+			}
+			return dto2;
         }).collect(Collectors.toList()));
 		return dto;
 	}
