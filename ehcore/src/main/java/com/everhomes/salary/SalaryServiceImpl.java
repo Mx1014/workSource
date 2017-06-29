@@ -415,9 +415,11 @@ public class SalaryServiceImpl implements SalaryService {
         XSSFRow row = sheet.createRow(rowNum++);
         row.setRowStyle(style);
 
+        row.createCell(0).setCellValue("姓名(必填项)");
+        row.createCell(1).setCellValue("手机号(必填项)");
         //  创建模板标题
         for (int i = 0; i < entityDTOs.size(); i++) {
-            row.createCell(i).setCellValue(entityDTOs.get(i).getName());
+            row.createCell(i+2).setCellValue(entityDTOs.get(i).getName());
         }
         return wb;
     }
