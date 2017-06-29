@@ -26,6 +26,8 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
@@ -41,10 +43,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,6 +163,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private EnergyMeterFormulaVariableProvider meterFormulaVariableProvider;
 
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -1928,18 +1931,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 1 * * ?")
     public void calculateEnergyDayStat(){
-        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("calculate energy day stat start...");
-                //刷今天的
-                calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
-                LOGGER.info("calculate energy day stat end...");
-            } catch (Exception e) {
-                LOGGER.error("calculate energy day stat error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
-            }
-        });
+
+        //双机判断
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+                try {
+                    LOGGER.info("calculate energy day stat start...");
+                    //刷今天的
+                    calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+                    LOGGER.info("calculate energy day stat end...");
+                } catch (Exception e) {
+                    LOGGER.error("calculate energy day stat error...", e);
+                    sendErrorMessage(e);
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     private void sendErrorMessage(Exception e) {
@@ -2244,17 +2251,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
     public void calculateEnergyMonthStat() {
-        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
-            try {
-                LOGGER.info("calculate energy month stat start...");
-                calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
-                LOGGER.info("calculate energy month stat end...");
-            } catch (Exception e) {
-                LOGGER.error("calculate energy month stat error...", e);
-                sendErrorMessage(e);
-                e.printStackTrace();
-            }
-        });
+
+        //双机判断
+        if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+            coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+                try {
+                    LOGGER.info("calculate energy month stat start...");
+                    calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+                    LOGGER.info("calculate energy month stat end...");
+                } catch (Exception e) {
+                    LOGGER.error("calculate energy month stat error...", e);
+                    sendErrorMessage(e);
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     @Override
