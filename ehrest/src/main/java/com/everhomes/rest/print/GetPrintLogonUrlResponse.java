@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>logonURL : 登录的地址</li>
  * <li>identifierToken : url后跟的唯一标识</li>
+ * <li>type : pc:驱动, printer，打印机</li>
  * <li>scanTimes : 扫描scanTimes次，二维码刷新</li>
  * </ul>
  *
@@ -16,6 +17,7 @@ import com.everhomes.util.StringHelper;
 public class GetPrintLogonUrlResponse {
 	private String logonURL;
 	private String identifierToken;
+	private String type;
 	private Integer scanTimes;
 	public String getLogonURL() {
 		return logonURL;
@@ -28,6 +30,12 @@ public class GetPrintLogonUrlResponse {
 	}
 	public void setIdentifierToken(String identifierToken) {
 		this.identifierToken = identifierToken;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	public Integer getScanTimes() {
 		return scanTimes;

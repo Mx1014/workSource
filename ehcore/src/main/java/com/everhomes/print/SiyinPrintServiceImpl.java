@@ -318,7 +318,8 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         GetPrintLogonUrlResponse response = new GetPrintLogonUrlResponse();
         response.setLogonURL(logonURL);
         response.setIdentifierToken(identifierToken);
-        response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);;
+        response.setScanTimes(timeout*1000*getScale(unit)/scanTimeout);
+        response.setType("pc");
         return response;
 	}
 
