@@ -54,7 +54,12 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
 
 	@Override
 	public SearchTagResponse query(SearchTagCommand cmd) {
-        
+
+	    //热门标签查询实限制10个字符  add by yanjun 20170629
+        if(cmd.getKeyword() != null && cmd.getKeyword().trim().length() > 10){
+            cmd.setKeyword(cmd.getKeyword().trim().substring(0, 10));
+        }
+
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
