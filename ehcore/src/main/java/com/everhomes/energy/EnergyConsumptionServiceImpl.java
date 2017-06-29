@@ -2587,14 +2587,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<EnergyMeter> meterList = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), meterIds);
 
         String filePath = cmd.getFilePath();
-        if(org.apache.commons.lang.StringUtils.isEmpty(cmd.getFilePath())) {
-            URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
-            filePath = rootPath.getPath() + this.downloadDir ;
-            File file = new File(filePath);
-            if(!file.exists())
-                file.mkdirs();
-
-        }
+        URL rootPath = EnergyConsumptionServiceImpl.class.getResource("/");
+        filePath = rootPath.getPath() + this.downloadDir ;
+        File file = new File(filePath);
+        if(!file.exists())
+            file.mkdirs();
 
         DocUtil docUtil=new DocUtil();
         List<String> files = new ArrayList<>();
@@ -2611,17 +2608,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
         }
 
-        if(StringUtils.isEmpty(cmd.getFilePath())) {
-            if(files.size() > 1) {
-                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
-                LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
-                DownloadUtils.writeZip(files, zipPath);
-                download(zipPath,response);
-            } else if(files.size() == 1) {
-                download(files.get(0),response);
-            }
 
+        if(files.size() > 1) {
+            List<String> images = imageMosaic(files, filePath);
+            if(images.size() == 1) {
+                download(images.get(0),response);
+            } else {
+                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+                LOGGER.info("download images filePath:{}, zipPath:{}",filePath,zipPath);
+                DownloadUtils.writeZip(images, zipPath);
+                download(zipPath,response);
+            }
+        } else if(files.size() == 1) {
+            download(files.get(0),response);
         }
+
+
     }
 
 //    private Map<String, Object> createEnergyMeterQRCodeDoc(EnergyMeter meter) {
@@ -2789,7 +2791,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private List<String> imageMosaic(List<String> files, String filePath) {
-        LOGGER.info("imageMosaic: file size: ", files.size());
         List<String> images = new ArrayList<>();
         //每张图包含72张二维码
         int size = files.size()/72;
@@ -2804,6 +2805,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 imageMosaic = new BufferedImage(imageWidth, imageHeight,
                         BufferedImage.TYPE_INT_RGB);
                 Graphics graphics = imageMosaic.getGraphics();
+                graphics.setColor(Color.WHITE);
                 //72张二维码
                 int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
                 for (int j = i * 72; j < max; j++) {
@@ -2826,7 +2828,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        LOGGER.info("after imageMosaic: file size: ", images.size());
         return images;
     }
 }
