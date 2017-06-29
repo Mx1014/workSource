@@ -311,7 +311,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		InnoSpringCardInfo card = getCard(plateNumber);
 		String oldValidEnd = card.getEnd_time();
 		Long time = strToLong(oldValidEnd + "235959");
-		String validStart = sdf1.format(addSecond(time, 1));
+		Timestamp newTime = addSecond(time, 1);
+		String validStart = sdf1.format(newTime);
 
 		String version = configProvider.getValue("parking.innospring.version", "");
 		String licensekey = configProvider.getValue("parking.innospring.licensekey", "");
@@ -326,6 +327,14 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject requestParam = createRequestParam(RECHARGE, param);
 
 		String json = post(requestParam);
+
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(newTime);
+		InnoSpringCardInfo newCard = getCard(plateNumber);
+		String newValidEnd = newCard.getEnd_time();
+		Timestamp endPeriod = new Timestamp(strToLong(newValidEnd + "235959"));
+		order.setEndPeriod(endPeriod);
 
 		String entityJson = parseJson(json);
 
