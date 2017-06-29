@@ -7,12 +7,10 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.UniongroupTarget;
-import com.everhomes.rest.uniongroup.UniongroupTargetType;
-import com.everhomes.rest.uniongroup.UniongroupType;
+import com.everhomes.rest.uniongroup.*;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public void saveUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
+        /**处理配置表**/
         UniongroupType uniongroupType = UniongroupType.fromCode(cmd.getGroupType());
         List<UniongroupConfigures> configureList = new ArrayList<>();
         List<UniongroupTarget> targets = cmd.getTargets();
@@ -58,26 +58,15 @@ public class UniongroupServiceImpl implements UniongroupService {
                 }
                 UniongroupConfigures uc = new UniongroupConfigures();
                 uc.setGroupType(uniongroupType.getCode());
-                uc.setGroupid(cmd.getGroupId());
+                uc.setGroupId(cmd.getGroupId());
                 uc.setTargetType(UniongroupTargetType.fromCode(r.getType()).getCode());
-                uc.setTargetid(r.getId());
+                uc.setTargetId(r.getId());
                 configureList.add(uc);
                 return null;
             }).collect(Collectors.toList());
         }
 
-        /**保存配置表**/
-        if (configureList.size() > 0) {
-            dbProvider.execute((TransactionStatus status) -> {
-                configureList.stream().map(r -> {
-                    this.uniongroupConfigureProvider.createUniongroupConfigures(r);
-                    return null;
-                }).collect(Collectors.toList());
-                return null;
-            });
-        }
-
-        /**保存关系表**/
+        /**处理关系表**/
         //1.查询本次保存中所有勾选部门的所有人员detailId集合detailIds
         List<Long> orgIds = cmd.getTargets().stream().filter((r) -> {
             return r.getType().equals(UniongroupTargetType.fromCode("ORGANIZATION").getCode());
@@ -95,8 +84,24 @@ public class UniongroupServiceImpl implements UniongroupService {
             Organization org = checkOrganization(r);
             if (org != null) {
                 List<String> underOrgPaths = checkUnderOrganizationsPathAsTargets(org.getPath(), old_orgs);
-                //如果之前的记录存在子部门,则排除掉子部门含有的member的detailId
-                detailIds.addAll(this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), underOrgPaths));
+                //如果存在子部门
+                if (underOrgPaths.size() > 0) {
+                    Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), underOrgPaths);
+                    if (memberIds == null) {
+                        LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
+                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+                                "memberIds is not found。");
+                    }
+                    detailIds.addAll(memberIds);
+                } else {//如果不存在子部门
+                    Set<Long> memberIds = this.organizationProvider.listMemberDetailIdWithExclude(namespaceId, org.getPath(), null);
+                    if (memberIds == null) {
+                        LOGGER.error("memberIds is not found。namespaceId = {}, orgPath = {}", namespaceId, org.getPath());
+                        throw RuntimeErrorException.errorWith(UniongroupErrorCode.SCOPE, UniongroupErrorCode.ERROR_INVALID_PARAMETER,
+                                "memberIds is not found。");
+                    }
+                    detailIds.addAll(memberIds);
+                }
             }
             return null;
         }).collect(Collectors.toList());
@@ -115,9 +120,9 @@ public class UniongroupServiceImpl implements UniongroupService {
             OrganizationMemberDetails detail = this.organizationProvider.findOrganizationMemberDetailsByDetailId(r);
             if (detail != null) {
                 EhUniongroupMemberDetails uniongroupMemberDetails = new EhUniongroupMemberDetails();
-                uniongroupMemberDetails.setGroupid(cmd.getGroupId());
+                uniongroupMemberDetails.setGroupId(cmd.getGroupId());
                 uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
-                uniongroupMemberDetails.setDetailid(r);
+                uniongroupMemberDetails.setDetailId(r);
                 uniongroupMemberDetails.setOrganizationId(detail.getOrganizationId());
                 uniongroupMemberDetails.setTargetType(detail.getTargetType());
                 uniongroupMemberDetails.setTargetId(detail.getTargetId());
@@ -128,10 +133,17 @@ public class UniongroupServiceImpl implements UniongroupService {
             }
             return null;
         }).collect(Collectors.toList());
-        //4.保存关系表
-        if (unionDetailsList.size() > 0) {
+
+        //4.保存
+        if (configureList.size() > 0 && unionDetailsList.size() > 0) {
             dbProvider.execute((TransactionStatus status) -> {
-                //先删除
+                //--------------------------1.保存配置表--------------------------
+                configureList.stream().map(r -> {
+                    this.uniongroupConfigureProvider.createUniongroupConfigures(r);
+                    //2保存关系表
+                    return null;
+                }).collect(Collectors.toList());
+                //--------------------------2.保存关系表--------------------------
                 this.uniongroupConfigureProvider.deleteUniongroupMemberDetailsByDetailIds(namespaceId, new ArrayList(detailIds));
                 //后保存
                 this.uniongroupConfigureProvider.batchCreateUniongroupMemberDetail(unionDetailsList);
@@ -141,15 +153,25 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List getConfiguresListByGroupId(Long groupId) {
+    public List<UniongroupConfiguresDTO> getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        return this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, groupId);
+        List<UniongroupConfigures> configures = this.uniongroupConfigureProvider.listUniongroupConfiguresByGroupId(namespaceId, cmd.getGroupId());
+        return configures.stream().map(r -> {
+            return ConvertHelper.convert(r, UniongroupConfiguresDTO.class);
+        }).collect(Collectors.toList());
     }
 
     @Override
-    public List getUniongroupMemberDetailsByGroupId(Long groupId) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        return this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId,groupId);
+    public List<UniongroupMemberDetailsDTO> getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd) {
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId());
+        if(details != null){
+            return details.stream().map(r -> {
+                return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
+            }).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override

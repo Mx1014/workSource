@@ -68,7 +68,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.TARGETID.eq(TargetId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.TARGET_ID.eq(TargetId));
         EhUniongroupConfiguresRecord record = query.fetchOne();
         if (record != null) {
             return ConvertHelper.convert(record, UniongroupConfigures.class);
@@ -100,7 +100,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhUniongroupConfiguresRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_CONFIGURES);
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUPID.eq(groupId));
+        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUP_ID.eq(groupId));
         List<EhUniongroupConfiguresRecord> records = query.fetch();
         List<UniongroupConfigures> result = new ArrayList<>();
         if (records != null) {
@@ -122,7 +122,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
         Result result = query.fetch();
         if (result != null) {
-            return result.getValues("targetId", Long.class);
+            return result.getValues("target_id", Long.class);
         }
         return null;
     }
@@ -193,8 +193,8 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_CONFIGURES.GROUPID.eq(groupId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
         List<EhUniongroupMemberDetailsRecord> records = query.fetch();
         List<UniongroupMemberDetail> result = new ArrayList<>();
         if (records != null) {
@@ -215,7 +215,7 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
         DeleteQuery<EhUniongroupMemberDetailsRecord> query = context.deleteQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
-        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAILID.in(detailIds));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.DETAIL_ID.in(detailIds));
         query.execute();
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
     }

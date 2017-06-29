@@ -5,7 +5,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +26,24 @@ public class UniongroupController extends ControllerBase {
     public RestResponse createUniongroupConfigures(SaveUniongroupConfiguresCommand cmd) {
         uniongroupService.saveUniongroupConfigures(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("getConfiguresListByGroupId")
+    @RestReturn(value = UniongroupConfiguresDTO.class, collection = true)
+    public RestResponse getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
+        RestResponse response = new RestResponse(uniongroupService.getConfiguresListByGroupId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    @RequestMapping("getUniongroupMemberDetailsByGroupId")
+    @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
+    public RestResponse getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd){
+        RestResponse response = new RestResponse(uniongroupService.getUniongroupMemberDetailsByGroupId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

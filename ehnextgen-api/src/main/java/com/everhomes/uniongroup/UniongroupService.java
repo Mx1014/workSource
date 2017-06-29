@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.uniongroup;
 
+import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
+import com.everhomes.rest.uniongroup.GetUniongroupMemberDetailsCommand;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
 
 import java.util.List;
@@ -15,12 +17,12 @@ public interface UniongroupService {
     /**
      * 根据组Id获取配置项记录
      **/
-    public List getConfiguresListByGroupId(Long groupId);
+    public List getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd);
 
     /**
      * 根据组Id获取组内人员记录
      **/
-    public List getUniongroupMemberDetailsByGroupId(Long groupId);
+    public List getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd);
 
     /**
      * 删除一条配置记录
