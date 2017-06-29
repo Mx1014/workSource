@@ -419,7 +419,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value = ParkingRechargeOrderDTO.class)
     public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-        final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(30000L,
+        final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L,
                 new RestResponse("time out"));
 //        System.out.println(Thread.currentThread().getName());
 //        map.put("test", deferredResult);
