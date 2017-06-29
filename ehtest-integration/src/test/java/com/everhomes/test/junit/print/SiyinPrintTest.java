@@ -2,6 +2,8 @@ package com.everhomes.test.junit.print;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.print.GetPrintLogonUrlCommand;
 import com.everhomes.rest.print.GetPrintLogonUrlRestResponse;
 import com.everhomes.rest.print.GetPrintSettingCommand;
+import com.everhomes.rest.print.GetPrintSettingResponse;
 import com.everhomes.rest.print.GetPrintSettingRestResponse;
 import com.everhomes.rest.print.GetPrintStatCommand;
 import com.everhomes.rest.print.GetPrintStatRestResponse;
@@ -144,15 +147,17 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		logon(null, userIdentifier, plainTexPassword);
 	}
 	
-	@Test
 	public void testGetPrintSetting(){
 		String url = SIYINPRINT_GETPRINTSETTING;
 		logon();
 
 		GetPrintSettingCommand cmd = new GetPrintSettingCommand();
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(1L);
 		GetPrintSettingRestResponse response = httpClientService.restPost(url,cmd,GetPrintSettingRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		GetPrintSettingResponse resp = response.getResponse();
+		assertEquals(resp.getHotline(),"12345");
 	}
 	@Test
 	public void testUpdatePrintSetting(){
@@ -163,8 +168,8 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		cmd.setOwnerType("community");
 		cmd.setOwnerId(1L);
 		cmd.setHotline("12345");
-		cmd.setColorTypeDTO(new PrintSettingColorTypeDTO());
 		PrintSettingColorTypeDTO dto = new PrintSettingColorTypeDTO();
+		cmd.setColorTypeDTO(dto);
 		dto.setBlackWhitePrice(new BigDecimal(1));
 		dto.setColorPrice(new BigDecimal(1));
 		PrintSettingPaperSizePriceDTO colorDtos = new PrintSettingPaperSizePriceDTO();
@@ -186,8 +191,13 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		dto.setColorPrice(new BigDecimal(1));
 		colorDtos.setAsixPrice(dto);
 		
+		List<String> printCourseList = new ArrayList<String>(Arrays.asList(new String[]{"1","2","3"}));
+		cmd.setPrintCourseList(printCourseList);
+		cmd.setScanCopyCourseList(printCourseList);
+		
 		StringRestResponse response = httpClientService.restPost(url,cmd,StringRestResponse.class);
 		assertNotNull(response);
+		testGetPrintSetting();
 	}
 	public void testGetPrintStat(){
 		String url = SIYINPRINT_GETPRINTSTAT;
@@ -217,9 +227,11 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListPrintJobTypesCommand cmd = new ListPrintJobTypesCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
 		ListPrintJobTypesRestResponse response = httpClientService.restPost(url,cmd,ListPrintJobTypesRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertEquals(response.getResponse().getJobTypeList().size(),3);
 	}
 	@Test
 	public void testListPrintOrderStatus(){
@@ -227,19 +239,11 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		logon();
 
 		ListPrintOrderStatusCommand cmd = new ListPrintOrderStatusCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
 		ListPrintOrderStatusRestResponse response = httpClientService.restPost(url,cmd,ListPrintOrderStatusRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-	}
-	@Test
-	public void testListPrintUserOrganizations(){
-		String url = SIYINPRINT_LISTPRINTUSERORGANIZATIONS;
-		logon();
-
-		ListPrintUserOrganizationsCommand cmd = new ListPrintUserOrganizationsCommand();
-		ListPrintUserOrganizationsRestResponse response = httpClientService.restPost(url,cmd,ListPrintUserOrganizationsRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertEquals(response.getResponse().getOrderStatusList().size(),2);
 	}
 	@Test
 	public void testUpdatePrintUserEmail(){
@@ -247,49 +251,22 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		logon();
 
 		UpdatePrintUserEmailCommand cmd = new UpdatePrintUserEmailCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
+		cmd.setEmail("864313905@qq.com");
 		StringRestResponse response = httpClientService.restPost(url,cmd,StringRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		testGetPrintUserEmail();
 	}
-	@Test
 	public void testGetPrintUserEmail(){
 		String url = SIYINPRINT_GETPRINTUSEREMAIL;
-		logon();
 
 		GetPrintUserEmailCommand cmd = new GetPrintUserEmailCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
 		GetPrintUserEmailRestResponse response = httpClientService.restPost(url,cmd,GetPrintUserEmailRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-	}
-	@Test
-	public void testGetPrintLogonUrl(){
-		String url = SIYINPRINT_GETPRINTLOGONURL;
-		logon();
-
-		GetPrintLogonUrlCommand cmd = new GetPrintLogonUrlCommand();
-		GetPrintLogonUrlRestResponse response = httpClientService.restPost(url,cmd,GetPrintLogonUrlRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-	}
-	@Test
-	public void testLogonPrint(){
-		String url = SIYINPRINT_LOGONPRINT;
-		logon();
-
-		LogonPrintCommand cmd = new LogonPrintCommand();
-		StringRestResponse response = httpClientService.restPost(url,cmd,StringRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-	}
-	@Test
-	public void testInformPrint(){
-		String url = SIYINPRINT_INFORMPRINT;
-		logon();
-
-		InformPrintCommand cmd = new InformPrintCommand();
-		InformPrintRestResponse response = httpClientService.restPost(url,cmd,InformPrintRestResponse.class);
-		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertEquals(response.getResponse().getEmail(),"864313905@qq.com");
 	}
 	@Test
 	public void testPrintImmediately(){
@@ -297,9 +274,11 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		logon();
 
 		PrintImmediatelyCommand cmd = new PrintImmediatelyCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
 		StringRestResponse response = httpClientService.restPost(url,cmd,StringRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		testListPrintingJobs();
 	}
 	public List<PrintOrderDTO> testListPrintOrders(){
 		String url = SIYINPRINT_LISTPRINTORDERS;
@@ -326,8 +305,10 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 		String url = SIYINPRINT_PAYPRINTORDER;
 		logon();
 
-		while(true){
+		int count = 0;
+		while(count < 100){
 			try {
+				count ++;
 				Thread.sleep(10000);
 				List<PrintOrderDTO> dtos = testListPrintOrders();
 				if(dtos != null)
@@ -342,15 +323,15 @@ public class SiyinPrintTest extends BaseLoginAuthTestCase {
 			}
 		}
 	}
-	@Test
 	public void testListPrintingJobs(){
 		String url = SIYINPRINT_LISTPRINTINGJOBS;
-		logon();
-
+		
 		ListPrintingJobsCommand cmd = new ListPrintingJobsCommand();
+		cmd.setOwnerId(240111044331048623L);
+		cmd.setOwnerType("community");
 		ListPrintingJobsRestResponse response = httpClientService.restPost(url,cmd,ListPrintingJobsRestResponse.class);
 		assertNotNull(response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertEquals(response.getResponse().getJobsNumber().intValue(),1);
 	}
 	@Test
 	public void testUnlockPrinter(){

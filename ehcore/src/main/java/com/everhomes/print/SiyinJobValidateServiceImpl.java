@@ -175,6 +175,8 @@ public class SiyinJobValidateServiceImpl {
 	}
 	
 	public SiyinPrintRecord convertMapToRecordObject(Map<?,?> job) {
+		if(job == null)
+			return null;
 		SiyinPrintRecord record = new SiyinPrintRecord();
 		record.setJobId(job.get("job_id").toString());
 		record.setJobStatus(job.get("job_status").toString());
