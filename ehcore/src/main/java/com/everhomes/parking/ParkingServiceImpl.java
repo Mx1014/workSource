@@ -18,6 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bus.LocalBusOneshotSubscriber;
+import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.parking.*;
 import com.everhomes.rest.rentalv2.PayZuolinRefundCommand;
 import com.everhomes.rest.rentalv2.PayZuolinRefundResponse;
@@ -100,6 +103,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
@@ -140,6 +144,9 @@ public class ParkingServiceImpl implements ParkingService {
     private AppProvider appProvider;
 	@Autowired
 	private ScheduleProvider scheduleProvider;
+	@Autowired
+	private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
 
@@ -1715,5 +1722,54 @@ public class ParkingServiceImpl implements ParkingService {
 //		LOGGER.info("restCall error " + responseEntity.getStatusCode());
 		return null;
 
+	}
+
+	@Override
+	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
+
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(1000L,
+		 RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"time out."));
+//        System.out.println(Thread.currentThread().getName());
+//        map.put("test", deferredResult);
+
+//        new Thread(() -> {
+//            RestResponse response = new RestResponse("Received deferTest response");
+//
+//            deferredResult.setResult(response);
+//        });
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+
+		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
+
+			ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
+			RestResponse response = new RestResponse(dto);
+			response.setErrorCode(ErrorCodes.SUCCESS);
+			response.setErrorDescription("OK");
+			deferredResult.setResult(response);
+		}
+
+		localBusSubscriberBuilder.build("Parking-Recharge" + cmd.getOrderId(), new LocalBusOneshotSubscriber() {
+			@Override
+			public Action onLocalBusMessage(Object sender, String subject,
+											Object pingResponse, String path) {
+				ParkingRechargeOrderDTO dto = (ParkingRechargeOrderDTO) pingResponse;
+				//    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
+				RestResponse response = new RestResponse(dto);
+				response.setErrorCode(ErrorCodes.SUCCESS);
+				response.setErrorDescription("OK");
+				deferredResult.setResult(response);
+
+				return null;
+			}
+
+			@Override
+			public void onLocalBusListeningTimeout() {
+				RestResponse response = new RestResponse("Notify timed out");
+				deferredResult.setResult(response);
+			}
+		}).setTimeout(60000).create();
+
+		return deferredResult;
 	}
 }

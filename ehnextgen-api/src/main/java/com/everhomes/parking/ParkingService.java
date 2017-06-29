@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -82,4 +83,6 @@ public interface ParkingService {
     UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd);
 
     void refundParkingOrder(UpdateParkingOrderCommand cmd);
+
+    DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd);
 }

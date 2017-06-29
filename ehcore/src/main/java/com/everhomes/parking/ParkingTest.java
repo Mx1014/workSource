@@ -7,11 +7,11 @@ import java.util.Random;
 /**
  * Created by Administrator on 2017/5/3.
  */
-public class Test {
+public class ParkingTest {
     public static void main(String[] args) {
 //        Thread a = new Thread();  a.start();a.start();
 
-        Test t = new Test();
+        ParkingTest t = new ParkingTest();
         try {
             t.wait(0);
         } catch (InterruptedException e) {

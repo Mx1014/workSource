@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.rest.parking.*;
+import com.everhomes.util.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,8 +32,7 @@ public class ParkingController extends ControllerBase {
     
     @Autowired
     private ParkingService parkingService;
-    @Autowired
-    private LocalBusOneshotSubscriberBuilder localBusSubscriberBuilder;
+
     /**
      * <b>URL: /parking/listParkingLots</b>
      * <p>查询指定园区/小区的停车场列表</p>
@@ -419,38 +419,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value = ParkingRechargeOrderDTO.class)
     public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-        final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L,
-                new RestResponse("time out"));
-//        System.out.println(Thread.currentThread().getName());
-//        map.put("test", deferredResult);
-
-//        new Thread(() -> {
-//            RestResponse response = new RestResponse("Received deferTest response");
-//
-//            deferredResult.setResult(response);
-//        });
-        localBusSubscriberBuilder.build("Parking-Recharge" + cmd.getOrderId(), new LocalBusOneshotSubscriber() {
-            @Override
-            public Action onLocalBusMessage(Object sender, String subject,
-                                            Object pingResponse, String path) {
-                ParkingRechargeOrderDTO dto = (ParkingRechargeOrderDTO) pingResponse;
-                //    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
-                RestResponse response = new RestResponse(dto);
-                response.setErrorCode(ErrorCodes.SUCCESS);
-                response.setErrorDescription("OK");
-                deferredResult.setResult(response);
-
-                return null;
-            }
-
-            @Override
-            public void onLocalBusListeningTimeout() {
-                RestResponse response = new RestResponse("Notify timed out");
-                deferredResult.setResult(response);
-            }
-        }).setTimeout(60000).create();
-
-        return deferredResult;
+        return parkingService.getRechargeOrderResult(cmd);
     }
 
     /**
