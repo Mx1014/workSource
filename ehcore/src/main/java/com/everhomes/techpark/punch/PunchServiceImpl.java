@@ -4596,7 +4596,7 @@ public class PunchServiceImpl implements PunchService {
 			while (start.before(end)) {
 				try {
 					refreshPunchDayLog(userId, getTopEnterpriseId(cmd.getOwnerId()), start);
-				} catch (ParseException e) {
+				} catch (Exception e) {
 					LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
 				}
 	
