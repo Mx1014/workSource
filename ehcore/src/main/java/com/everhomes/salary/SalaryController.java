@@ -187,7 +187,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>4-2.导入某个薪酬组excel</p>
+	 * <p>4-2.导入员工薪酬表</p>
 	 * <b>URL: /salary/importSalaryGroup</b>
 	 */
 	@RequestMapping("importSalaryGroup")

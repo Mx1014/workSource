@@ -30,7 +30,7 @@ public class SalaryDefaultEntityDTO {
 
     private Byte editableFlag;
 
-    private String templeteName;
+    private String templateName;
 
     private Integer defaultOrder;
 
@@ -93,12 +93,12 @@ public class SalaryDefaultEntityDTO {
         this.editableFlag = editableFlag;
     }
 
-    public String getTempleteName() {
-        return templeteName;
+    public String getTemplateName() {
+        return templateName;
     }
 
-    public void setTempleteName(String templeteName) {
-        this.templeteName = templeteName;
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
     }
 
     public Integer getDefaultOrder() {

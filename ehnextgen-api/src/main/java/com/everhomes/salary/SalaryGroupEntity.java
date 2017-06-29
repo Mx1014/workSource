@@ -7,7 +7,15 @@ import com.everhomes.util.StringHelper;
 public class SalaryGroupEntity extends EhSalaryGroupEntities {
 	
 	private static final long serialVersionUID = -4759610341287325926L;
-	
+
+	public SalaryGroupEntity(){
+
+	}
+
+	public SalaryGroupEntity(String name){
+		this.setName(name);
+	}
+
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
