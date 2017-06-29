@@ -226,9 +226,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		try {
 			ts = sdf.parse(str).getTime();
 		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			LOGGER.error("validityPeriod data format is not yyyyMMddHHmmss.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
+					"validityPeriod data format is not yyyyMMddHHmmss.");
 		}
 		
 		return ts;
@@ -313,8 +313,18 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("chargePaidNo", order.getId());
 	    param.put("payTime", sdf1.format(new Date()));
 	    param.put("sign", "");
-	    
+
+		//将充值信息存入订单
+		WankeCardInfo card = getCard(order.getPlateNumber());
+		long startPeriod = strToLong2(card.getExpireDate());
+		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+
 		String json = post(RECHARGE, param);
+
+		order.setErrorDescriptionJson(json);
+		WankeCardInfo newCard = getCard(order.getPlateNumber());
+		long endPeriod = strToLong2(newCard.getExpireDate());
+		order.setEndPeriod(new Timestamp(endPeriod + 1000));
 
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();

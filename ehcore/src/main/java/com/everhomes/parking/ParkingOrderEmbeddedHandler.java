@@ -11,6 +11,8 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.parking.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +91,6 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						parkingProvider.updateParkingRechargeOrder(order);
 
 						LOGGER.info("Notify parking recharge failed, cmd={}, order={}", cmd, order);
-
-						localBus.publish(this, "Parking-Recharge" + order.getId(), order);
 					}else {
 						//充值失败
 						order.setStatus(ParkingRechargeOrderStatus.FAILED.getCode());
@@ -104,11 +104,18 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 						}
 						parkingProvider.updateParkingRechargeOrder(order);
 
-						localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 					}
 				}catch (Exception e) {
 					LOGGER.error("Notify parking recharge failed, cmd={}, order={}", cmd, order, e);
-					localBus.publish(this, "Parking-Recharge" + order.getId(), null);
+				}finally {
+					ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
+
+					ExecutorUtil.submit(new Runnable() {
+						@Override
+						public void run() {
+							localBus.publish(this, "Parking-Recharge" + order.getId(), dto);
+						}
+					});
 				}
 
 			}
