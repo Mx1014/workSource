@@ -3297,13 +3297,13 @@ public class FlowServiceImpl implements FlowService {
         Flow flow = flowProvider.getFlowById(flowId);
         FlowGraphDetailDTO graphDetail = ConvertHelper.convert(flow, FlowGraphDetailDTO.class);
 
-        List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+        List<FlowUserSelectionDTO> selections = new ArrayList<>();
         graphDetail.setSupervisors(selections);
 
         List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
                 , FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
         if (seles != null && seles.size() > 0) {
-            seles.stream().forEach((sel) -> {
+            seles.forEach((sel) -> {
                 selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
             });
         }
@@ -3311,9 +3311,8 @@ public class FlowServiceImpl implements FlowService {
         List<FlowNodeDetailDTO> nodes = new ArrayList<>();
         graphDetail.setNodes(nodes);
         List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
-        flowNodes.sort((n1, n2) -> {
-            return n1.getNodeLevel().compareTo(n2.getNodeLevel());
-        });
+
+        flowNodes.sort(Comparator.comparing(EhFlowNodes::getNodeLevel));
 
         for (FlowNode fn : flowNodes) {
             FlowNodeDetailDTO nodeDetail = this.getFlowNodeDetail(fn.getId());
@@ -3334,7 +3333,7 @@ public class FlowServiceImpl implements FlowService {
     @Override
     public void deleteSnapshotProcessUser(Long flowId, Long userId) {
         Flow flow = flowProvider.getFlowById(flowId);
-        if (!flow.getFlowMainId().equals(0l)) {
+        if (!flow.getFlowMainId().equals(0L)) {
             throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");
         }
 

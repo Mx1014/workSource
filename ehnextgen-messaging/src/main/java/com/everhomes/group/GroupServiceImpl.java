@@ -934,7 +934,13 @@ public class GroupServiceImpl implements GroupService {
                 member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 createPendingGroupMember(member, scope);
             }
-            
+
+            // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+            GroupPrivacy groupPrivacy = GroupPrivacy.fromCode(group.getPrivateFlag());
+            if (groupPrivacy == GroupPrivacy.PUBLIC) {
+                member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
+            }
+
             // send notifications to applicant and other members
             if (needNotify) {
             	if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
@@ -962,6 +968,8 @@ public class GroupServiceImpl implements GroupService {
             		&& GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
                 member.setRequestorComment(cmd.getRequestText());
             	member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());  //有可能被拒绝了重复加入
+                // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+                member.setPhonePrivateFlag(GroupMemberPhonePrivacy.PUBLIC.getCode());
             	groupProvider.updateGroupMember(member);
             	if (needNotify) {
             		sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
@@ -2375,9 +2383,12 @@ public class GroupServiceImpl implements GroupService {
         if(memberNickName == null && user != null) {
             groupMember.setMemberNickName(user.getNickName());
         }
-        
+
         GroupMemberPhonePrivacy phonePrivateFlag = GroupMemberPhonePrivacy.fromCode(groupMember.getPhonePrivateFlag());
-        if(phonePrivateFlag == GroupMemberPhonePrivacy.PUBLIC) {
+        GroupPrivacy groupPrivacy = GroupPrivacy.fromCode(group.getPrivateFlag());
+        if(phonePrivateFlag == GroupMemberPhonePrivacy.PUBLIC
+                // 在后台俱乐部成员要显示手机号 #11814 update by xq.tian  2017/06/28
+                || groupPrivacy == GroupPrivacy.PUBLIC) {
             UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(
                     groupMember.getMemberId(), IdentifierType.MOBILE.getCode());
             if(userIdentifier != null) {

@@ -829,4 +829,20 @@ public class PunchAdminController extends ControllerBase {
 	}
 
 
+	/**
+	 * <b>URL: punch/refreshPunchDayLogs</b>
+	 * <p>
+	 * 刷新打卡详情
+	 * </p>
+	 */
+	@RequestMapping("refreshPunchDayLogs")
+	@RestReturn(value = ListPunchDetailsResponse.class)
+	public RestResponse refreshPunchDayLogs(@Valid ListPunchDetailsCommand cmd) {
+		punchService.refreshPunchDayLogs(cmd);
+		RestResponse response = new RestResponse( );
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 }

@@ -3,6 +3,7 @@ package com.everhomes.approval;
 
 import java.util.List;
 
+import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApproveApprovalRequesBySceneCommand;
 import com.everhomes.rest.approval.ApproveApprovalRequestCommand;
 import com.everhomes.rest.approval.CancelApprovalRequestBySceneCommand;
@@ -165,5 +166,7 @@ public interface ApprovalService {
 	ApprovalRequestHandler getApprovalRequestHandler(Byte approvalType);
 
 	void finishApproveApprovalRequest(ApprovalRequest approvalRequest);
+
+	ApprovalOwnerInfo getOwnerInfoFromSceneToken(String sceneTokenString);
 
 }

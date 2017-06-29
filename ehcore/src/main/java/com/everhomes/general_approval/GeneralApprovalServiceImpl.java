@@ -166,6 +166,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 //				cmd21.setTitle("办事指南");
 //				// cmd21.setTitle(ga.getApprovalName());
 //			}
+			cmd21.setCurrentOrganizationId(cmd.getOrganizationId());
 			cmd21.setTitle(ga.getApprovalName());
 			FlowCase flowCase = null;
 			if (null == flow) {

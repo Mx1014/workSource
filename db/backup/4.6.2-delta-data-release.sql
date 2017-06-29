@@ -109,3 +109,7 @@ UPDATE eh_lease_configs set display_name_str = '项目介绍,待租物业', disp
 -- 增加报错类型  add by yanjun 20170626
 SET @id := (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES(@id:=@id+1,'activity','10027','zh_CN','此活动为收费类活动，必须升级APP才能报名哟！');
+
+-- 增加双击模式下设置是否执行定时任务的flag延迟时间
+SET @configuration_id := (SELECT MAX(id) FROM `eh_configurations`); 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@configuration_id:=@configuration_id+1,'schedule.running.delay.time',10000,'running flag delay time','0',NULL); 

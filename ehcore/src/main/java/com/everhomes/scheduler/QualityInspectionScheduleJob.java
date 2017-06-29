@@ -54,24 +54,27 @@ public class QualityInspectionScheduleJob  extends QuartzJobBean {
 			LOGGER.info("QualityInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 
-		//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
-		scheduleProvider.unscheduleJob("QualityInspectionNotify ");
+		//双机判断
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
+			scheduleProvider.unscheduleJob("QualityInspectionNotify ");
 
-		qualityProvider.closeDelayTasks();
-		
-		List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
-		
-		for(QualityInspectionStandards standard : activeStandards) {
-			boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
-			LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId() 
-					+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
-			if(isRepeat) {
-				qualityService.createTaskByStandardId(standard.getId());
+			qualityProvider.closeDelayTasks();
+
+			List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
+
+			for (QualityInspectionStandards standard : activeStandards) {
+				boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+				LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId()
+						+ "repeat setting id = " + standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
+				if (isRepeat) {
+					qualityService.createTaskByStandardId(standard.getId());
+				}
+
 			}
-				
-		}
 
-		sendTaskMsg();
+			sendTaskMsg();
+		}
 	}
 
 	private void sendTaskMsg() {

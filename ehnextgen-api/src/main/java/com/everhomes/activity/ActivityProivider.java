@@ -30,6 +30,8 @@ public interface ActivityProivider {
 
     ActivityRoster findRosterByUidAndActivityId(Long activityId, Long uid, Byte status);
     
+    ActivityRoster findRosterByPhoneAndActivityId(Long activityId, String phone, Byte status);
+    
     ActivityRoster findRosterByOrderNo(Long orderNo);
 
     List<ActivityRoster> listRosterPagination(CrossShardListingLocator locator, int count, Long activityId, boolean onlyConfirm);
