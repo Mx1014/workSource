@@ -4586,6 +4586,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void refreshPunchDayLogs(ListPunchDetailsCommand cmd){
 
+		Long companyId = getTopEnterpriseId(cmd.getOwnerId());
 		Organization org = this.checkOrganization(cmd.getOwnerId());
 		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),(byte) 1);
 		for(Long userId : userIds){ 
@@ -4597,7 +4598,6 @@ public class PunchServiceImpl implements PunchService {
 				try { 
 
 
-					Long companyId = getTopEnterpriseId(cmd.getOwnerId());
 					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 									companyId, dateSF.get().format(start.getTime()));
 					if (null == punchDayLog) {
