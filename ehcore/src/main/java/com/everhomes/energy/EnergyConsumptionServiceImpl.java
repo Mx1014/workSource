@@ -2690,10 +2690,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         if(files.size() > 1) {
-            String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
-            LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
-            DownloadUtils.writeZip(files, zipPath);
-            download(zipPath,response);
+            List<String> images = imageMosaic(files, filePath);
+            if(images.size() == 1) {
+                download(images.get(0),response);
+            } else {
+                String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+                LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+                DownloadUtils.writeZip(images, zipPath);
+                download(zipPath,response);
+            }
+//            String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
+//            LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+//            DownloadUtils.writeZip(files, zipPath);
+//            download(zipPath,response);
         } else if(files.size() == 1) {
             download(files.get(0),response);
         }
@@ -2743,29 +2752,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return response;
     }
 
-    BufferedImage image;
-
-    public void createImage(String fileLocation) {
-        try {
-            FileOutputStream fos = new FileOutputStream(fileLocation);
-            BufferedOutputStream bos = new BufferedOutputStream(fos);
-//            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
-//            encoder.encode(image);
-            ImageIO.write(image, "JPEG", bos);
-            bos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void graphicsGeneration(String name, String number, String qrcode, String savePath) {
+    private void graphicsGeneration(String name, String number, String qrcode, String savePath) {
         int imageWidth = 200;//图片的宽度
         int imageHeight = 250; //图片的高度
-        image = new BufferedImage(imageWidth, imageHeight,
+        BufferedImage image = new BufferedImage(imageWidth, imageHeight,
                 BufferedImage.TYPE_INT_RGB);
 
         Graphics graphics = image.getGraphics();
-        graphics.setFont(new Font("宋体", Font.BOLD, 20));
+        graphics.setFont(new Font("宋体", 0, 10));
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, imageWidth, imageHeight);
         graphics.setColor(Color.BLACK);
@@ -2780,8 +2774,58 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (bimg != null) {
             graphics.drawImage(bimg, 0, 0, null);
         }
-
         graphics.dispose();
-        createImage(savePath);
+
+        try {
+            FileOutputStream fos = new FileOutputStream(savePath);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+//            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(bos);
+//            encoder.encode(image);
+            ImageIO.write(image, "JPEG", bos);
+            bos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> imageMosaic(List<String> files, String filePath) {
+        List<String> images = new ArrayList<>();
+        //每张图包含72张二维码
+        int size = files.size()/72;
+        if(files.size()%72 != 0) {
+            size = size + 1;
+        }
+        int imageWidth = 1825;//图片的宽度
+        int imageHeight = 2500; //图片的高度
+        BufferedImage imageMosaic;
+        try {
+            for(int i =0; i < size; i++) {
+                imageMosaic = new BufferedImage(imageWidth, imageHeight,
+                        BufferedImage.TYPE_INT_RGB);
+                Graphics graphics = imageMosaic.getGraphics();
+                //72张二维码
+                int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
+                for (int j = i * 72; j < max; j++) {
+                    int height = 0;
+                    //每行8个
+                    for(int w = 0; w < 8; w++) {
+                        BufferedImage small = ImageIO.read(new File(files.get(j)));
+                        graphics.drawImage(small, w * 225, height, null);
+                    }
+                    height = (height+1) * 275;
+                }
+                graphics.dispose();
+                String imagePath = filePath + System.currentTimeMillis() + "EnergyMeterCard.jpg";
+                FileOutputStream fos = new FileOutputStream(imagePath);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+                ImageIO.write(imageMosaic, "JPEG", bos);
+                bos.close();
+                images.add(imagePath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return images;
     }
 }
