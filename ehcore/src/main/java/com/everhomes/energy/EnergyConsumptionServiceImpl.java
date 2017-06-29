@@ -2826,23 +2826,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
                 int height = 0;
 
-                for (int j = i * 72; j < max; j++) {
-                    for(int row = 0; row < max%8; row++) {
-                        //每行8个
-                        for(int w = 0; w < 8; w++) {
-                            LOGGER.info("draw w : {}, j: {}, file size: {}" , w, j, files.size());
-                            if(row * 8 +w < files.size()) {
+                for(int row = 0; row < max%8; row++) {
+                    //每行8个
+                    for(int w = 0; w < 8; w++) {
+                        LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
+                        if(row * 8 +w < files.size()) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
-                                LOGGER.info("draw Width : {}, Height: {}" , w * 225, height);
-                                graphics.drawImage(ImageIO.read(new File(files.get(j+w))), w * 225, height, null);
-                            }
+                            LOGGER.info("draw Width : {}, Height: {}" , w * 225, height);
+                            graphics.drawImage(ImageIO.read(new File(files.get(row * 8+w))), w * 225, height, null);
                         }
-                        height = (height+1) * 275;
-
                     }
-
+                    height = (height+1) * 275;
 
                 }
+
                 graphics.dispose();
                 String imagePath = filePath + System.currentTimeMillis() + "EnergyMeterCard.jpg";
                 FileOutputStream fos = new FileOutputStream(imagePath);
