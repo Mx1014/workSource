@@ -533,10 +533,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		
 		SelectJoinStep<Record1<BigDecimal>> outer = context.select(DSL.sum(maxRentalCount)).from(middleTable);
 		
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug(outer.getSQL());
-			LOGGER.debug(outer.getBindValues().toString());
-		}
+//		if (LOGGER.isDebugEnabled()) {
+//			LOGGER.debug(outer.getSQL());
+//			LOGGER.debug(outer.getBindValues().toString());
+//		}
 		
 		Record1<BigDecimal> record = outer.fetchOne();
 		
