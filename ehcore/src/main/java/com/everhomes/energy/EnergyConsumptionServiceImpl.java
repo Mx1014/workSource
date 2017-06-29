@@ -2695,7 +2695,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 download(images.get(0),response);
             } else {
                 String zipPath = filePath + System.currentTimeMillis() + "EnergyMeterCard.zip";
-                LOGGER.info("filePath:{}, zipPath:{}",filePath,zipPath);
+                LOGGER.info("download images filePath:{}, zipPath:{}",filePath,zipPath);
                 DownloadUtils.writeZip(images, zipPath);
                 download(zipPath,response);
             }
@@ -2789,6 +2789,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private List<String> imageMosaic(List<String> files, String filePath) {
+        LOGGER.info("imageMosaic: file size: ", files.size());
         List<String> images = new ArrayList<>();
         //每张图包含72张二维码
         int size = files.size()/72;
@@ -2825,7 +2826,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
+        LOGGER.info("after imageMosaic: file size: ", images.size());
         return images;
     }
 }
