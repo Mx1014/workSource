@@ -4587,9 +4587,14 @@ public class PunchServiceImpl implements PunchService {
 	public void refreshPunchDayLogs(ListPunchDetailsCommand cmd){
 
 		Long companyId = getTopEnterpriseId(cmd.getOwnerId());
+		
 		Organization org = this.checkOrganization(cmd.getOwnerId());
 		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),(byte) 1);
 		for(Long userId : userIds){ 
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+			if(null == userIdentifier){
+				continue;
+			}
 			Calendar start = Calendar.getInstance();
 			Calendar end = Calendar.getInstance();
 			start.setTimeInMillis(cmd.getStartDay());
