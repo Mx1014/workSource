@@ -2826,7 +2826,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
                 int height = 0;
 
-                for(int row = 0; row < max%8; row++) {
+                for(int row = 0; row < max%9; row++) {
                     //每行8个
                     for(int w = 0; w < 8; w++) {
                         LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
