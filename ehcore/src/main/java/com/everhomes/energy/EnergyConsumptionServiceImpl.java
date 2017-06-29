@@ -2823,10 +2823,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 graphics.setColor(Color.WHITE);
                 graphics.fillRect(0, 0, imageWidth, imageHeight);
                 //72张二维码
-                int max = (files.size() > (i+1) * 72) ? (i+1) * 72 : files.size();
+                int max = (files.size() > (i+1) * 72) ? 72 : files.size();
                 int height = 0;
 
-                for(int row = 0; row < max%9; row++) {
+                int maxRow = max/8;
+                if(max/8 != 0) {
+                    maxRow = maxRow + 1;
+                }
+                for(int row = 0; row < maxRow; row++) {
                     //每行8个
                     for(int w = 0; w < 8; w++) {
                         LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
