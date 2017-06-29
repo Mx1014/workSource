@@ -1998,13 +1998,10 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		});
 		List<CommunityUserDto> userCommunities = new ArrayList<>();
-		users.stream().map(r ->{
+		for(UserOrganizations r: users){
 			CommunityUserDto dto = ConvertHelper.convert(r, CommunityUserDto.class);
 			dto.setUserName(r.getNickName());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getUserId(), IdentifierType.MOBILE.getCode());
-			if(null != userIdentifier){
-				dto.setPhone(userIdentifier.getIdentifierToken());
-			}
+			dto.setPhone(r.getPhoneNumber());
 			dto.setApplyTime(r.getRegisterTime());
 			dto.setIdentityNumber(r.getIdentityNumberTag());
 
@@ -2021,19 +2018,20 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 
 			if(null != r.getOrganizationId()){
+				List<OrganizationMember> ms = new ArrayList<>();
 				List<OrganizationMember> members = organizationProvider.listOrganizationMembers(r.getUserId());
 				for (OrganizationMember member: members) {
 					if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
 						dto.setOrganizationMemberName(member.getContactName());
+						ms.add(member);
 					}
 				}
 				List<OrganizationDetailDTO> organizations = new ArrayList<>();
-				organizations.addAll(populateOrganizationDetails(members));
+				organizations.addAll(populateOrganizationDetails(ms));
 				dto.setOrganizations(organizations);
 			}
 			userCommunities.add(dto);
-			return null;
-		});
+		}
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(userCommunities);
 		return res;
