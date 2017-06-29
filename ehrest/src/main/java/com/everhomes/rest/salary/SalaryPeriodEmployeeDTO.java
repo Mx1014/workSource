@@ -12,8 +12,8 @@ import com.everhomes.rest.organization.OrganizationDTO;
  * <li>userId: 用户 id</li>
  * <li>employeeNo: 员工编号(可为空)</li>
  * <li>contactName: 员工姓名</li>
- * <li>departments: 员工部门 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
- * <li>jobPositions: 员工岗位 {@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>departments: 员工部门 </li>
+ * <li>jobPositions: 员工岗位 </li>
  * <li>salaryGroupId: 批次id</li>
  * <li>salaryGroupName: 批次名称</li>
  * <li>salaryPeriod: 所属类型:Organization</li>
@@ -32,11 +32,9 @@ public class SalaryPeriodEmployeeDTO {
 
     private String contactName;
 
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> departments;
+    private String departments;
 
-    @ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> jobPositions;
+    private String jobPositions;
 
     private Long salaryGroupId;
 
@@ -88,18 +86,6 @@ public class SalaryPeriodEmployeeDTO {
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	public List<OrganizationDTO> getDepartments() {
-		return departments;
-	}
-	public void setDepartments(List<OrganizationDTO> departments) {
-		this.departments = departments;
-	}
-	public List<OrganizationDTO> getJobPositions() {
-		return jobPositions;
-	}
-	public void setJobPositions(List<OrganizationDTO> jobPositions) {
-		this.jobPositions = jobPositions;
-	}
 	public Long getSalaryGroupId() {
 		return salaryGroupId;
 	}
@@ -118,5 +104,20 @@ public class SalaryPeriodEmployeeDTO {
 	public void setPaidMoney(BigDecimal paidMoney) {
 		this.paidMoney = paidMoney;
 	}
-	
+
+	public String getDepartments() {
+		return departments;
+	}
+
+	public void setDepartments(String departments) {
+		this.departments = departments;
+	}
+
+	public String getJobPositions() {
+		return jobPositions;
+	}
+
+	public void setJobPositions(String jobPositions) {
+		this.jobPositions = jobPositions;
+	}
 }

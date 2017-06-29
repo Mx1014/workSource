@@ -11,6 +11,11 @@ public class SalaryConstants {
 
 	/** 实发 = 98L */
 	public static final Long ENTITY_ID_SHIFA = 98L;
+	public static final Long ENTITY_ID_GONGHAO = 1L;
+	public static final Long ENTITY_ID_NAME = 4L;
+	public static final Long ENTITY_ID_BUMEN = 5L;
+	public static final Long ENTITY_ID_SHENFENZHENG = 7L;
+	public static final Long ENTITY_ID_BANKNO = 8L;
 
 
 }
