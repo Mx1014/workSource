@@ -470,6 +470,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
 			.join(Tables.EH_RENTALV2_ORDERS)
 			.on(Tables.EH_RENTALV2_ORDERS.ID.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID))
+			.and(Tables.EH_RENTALV2_ORDERS.RENTAL_RESOURCE_ID.eq(rentalResource.getId()))
 			.where(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.FAIL.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDED.getCode()))
 			.and(Tables.EH_RENTALV2_ORDERS.STATUS.ne(SiteBillStatus.REFUNDING.getCode()))
