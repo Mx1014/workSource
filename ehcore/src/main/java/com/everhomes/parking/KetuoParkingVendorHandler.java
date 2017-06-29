@@ -4,13 +4,10 @@ package com.everhomes.parking;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.parking.ketuo.*;
 import com.everhomes.rest.parking.*;
 import org.apache.commons.lang.StringUtils;
@@ -59,6 +56,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private LocaleStringService localeService;
 	
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -309,9 +308,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String validStart = timeFormat.get().format(tempStart);
 		String validEnd = timeFormat.get().format(tempEnd);
 
-		order.setStartPeriod(tempStart);
-		order.setStartPeriod(tempEnd);
-
 		param.put("cardId", card.getCardId());
 		//修改科托ruleType 固定为1 表示月卡车
 		param.put("ruleType", RULE_TYPE);
@@ -324,12 +320,30 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		param.put("endTime", validEnd);
 		String json = postToKetuo(param, RECHARGE);
 
+		//将充值信息存入订单
+		order.setErrorDescriptionJson(json);
+		order.setStartPeriod(tempStart);
+		order.setStartPeriod(tempEnd);
+
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
-		if(null != obj ) {
+		Object resMsg = jsonObject.get("resMsg");
+
+		String locale = Locale.SIMPLIFIED_CHINESE.toString();
+		String scope = ParkingErrorCode.SCOPE;
+		String code = String.valueOf(ParkingErrorCode.ERROR_RECHARGE_ORDER);
+		String defaultText = localeService.getLocalizedString(scope, code, locale, "");
+		if (null != resMsg) {
+			String msg = (String) resMsg;
+			order.setErrorDescription(StringUtils.isNotBlank(msg)? msg : defaultText);
+		}else {
+			order.setErrorDescription(defaultText);
+		}
+		if(null != obj) {
 			int resCode = (int) obj;
-			if(resCode == 0)
+			if(resCode == 0) {
 				return true;
+			}
 		}
 		return false;
     }

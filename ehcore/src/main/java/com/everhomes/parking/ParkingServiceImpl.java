@@ -621,6 +621,7 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingRechargeOrder.setParkingTime(dto.getParkingTime());
 				parkingRechargeOrder.setStartPeriod(new Timestamp(dto.getEntryTime()));
 				parkingRechargeOrder.setEndPeriod(new Timestamp(dto.getPayTime()));
+				parkingRechargeOrder.setDelayTime(dto.getDelayTime());
 			}
 		}else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
 			//查询rate

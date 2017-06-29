@@ -81,14 +81,18 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			if(order.getStatus() == ParkingRechargeOrderStatus.PAID.getCode()) {
 				try{
 					if (handler.notifyParkingRechargeOrderPayment(order)) {
-						GetParkingCardsResponse response = handler.getParkingCardsByPlate(order.getOwnerType(),
-								order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber());
+						order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						parkingProvider.updateParkingRechargeOrder(order);
 
-						localBus.publish(this, "Parking-Recharge" + order.getId(), response.getCards().get(0));
+						LOGGER.info("Notify parking recharge failed, cmd={}, order={}", cmd, order);
+
+						localBus.publish(this, "Parking-Recharge" + order.getId(), order);
 					}else {
 						localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 					}
 				}catch (Exception e) {
+					LOGGER.error("Notify parking recharge failed, cmd={}, order={}", cmd, order, e);
 					localBus.publish(this, "Parking-Recharge" + order.getId(), null);
 				}
 
