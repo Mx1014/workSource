@@ -31,6 +31,10 @@ public class UniongroupController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>获取组配置</p>
+     * <b>URL: /uniongroup/getConfiguresListByGroupId</b>
+     */
     @RequestMapping("getConfiguresListByGroupId")
     @RestReturn(value = UniongroupConfiguresDTO.class, collection = true)
     public RestResponse getConfiguresListByGroupId(GetUniongroupConfiguresCommand cmd) {
@@ -40,6 +44,10 @@ public class UniongroupController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <p>获取组关系</p>
+     * <b>URL: /uniongroup/getUniongroupMemberDetailsByGroupId</b>
+     */
     @RequestMapping("getUniongroupMemberDetailsByGroupId")
     @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
     public RestResponse getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd){
