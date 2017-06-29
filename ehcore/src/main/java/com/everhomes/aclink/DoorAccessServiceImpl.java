@@ -617,10 +617,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
-
+    	User currUser = UserContext.current().getUser();
         if(cmd.getApproveUserId() == null) {
-            User user = UserContext.current().getUser();
-            cmd.setApproveUserId(user.getId());
+            cmd.setApproveUserId(currUser.getId());
         }
         
         if(cmd.getRightOpen() == null) {
@@ -756,10 +755,17 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
+        tmpUser.setNickName(currUser.getNickName());
+        List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
+        if(dtos != null && !dtos.isEmpty()) {
+        		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
+            if(om != null && om.getContactName() != null && !om.getContactName().isEmpty()) {
+            		tmpUser.setNickName(om.getContactName());
+            	}	
+        	}
+		
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
-        tmpUser.setNickName(user.getNickName());
-        
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
@@ -2634,9 +2640,20 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setOrganization(cmd.getOrganization());
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
-        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-        auth.setValidFromMs(System.currentTimeMillis());
-        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        if(cmd.getValidEndMs() != null) {
+        	auth.setKeyValidTime(cmd.getValidEndMs());
+        	auth.setValidEndMs(cmd.getValidEndMs());
+        } else {
+        	auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        	auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        }
+        
+        if(cmd.getValidFromMs() != null) {
+        	auth.setValidFromMs(cmd.getValidFromMs());
+        } else {
+        	auth.setValidFromMs(System.currentTimeMillis());	
+        }
+        
         auth.setUserId(0l);
         auth.setOwnerType(doorAccess.getOwnerType());
         auth.setOwnerId(doorAccess.getOwnerId());
@@ -2877,6 +2894,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
@@ -2925,10 +2943,13 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         } else {
             resp.setIsValid((byte)0);
         }
+        resp.setId(auth.getId());
+        resp.setDoorId(auth.getDoorId());
         resp.setDescription(auth.getDescription());
         resp.setValidDay(1l);
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
+        resp.setValidEndMs(auth.getValidEndMs());
         
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
@@ -3240,19 +3261,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
                 DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
                 if(cmd.getUserId() == null) {
                     cmd.setUserId(doorAuth.getUserId());
+                } 
+                Long userId = cmd.getUserId();
+                if(userId == null || userId.equals(0l)) {
+                	//保安授权方式
+                	userId = UserContext.current().getUser().getId();
+                	aclinkLog.setUserName(doorAuth.getNickname());
+                	aclinkLog.setUserIdentifier(doorAuth.getPhone());
+                	aclinkLog.setUserId(userId);
+                } else {
+                	UserInfo user = userService.getUserInfo(cmd.getUserId());
+                	if(user.getPhones() != null && user.getPhones().size() > 0) {
+                           aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+                       }
+                	aclinkLog.setUserName(user.getNickName());
                 }
-                UserInfo user = userService.getUserInfo(cmd.getUserId());
+                
                 DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
                 
                 aclinkLog.setDoorName(door.getName());
-                aclinkLog.setUserName(user.getNickName());
+                
                 aclinkLog.setHardwareId(door.getHardwareId());
                 aclinkLog.setOwnerId(door.getOwnerId());
                 aclinkLog.setOwnerType(door.getOwnerType());
                 aclinkLog.setDoorType(door.getDoorType());
-                if(user.getPhones() != null && user.getPhones().size() > 0) {
-                    aclinkLog.setUserIdentifier(user.getPhones().get(0));    
-                }
+             
                 
                 aclinkLogProvider.createAclinkLog(aclinkLog);
                 AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
@@ -3276,7 +3309,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogs(locator, count, new ListingQueryBuilderCallback() {
+        List<AclinkLog> objs = aclinkLogProvider.queryAclinkLogsByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

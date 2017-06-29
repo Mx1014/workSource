@@ -124,12 +124,26 @@ public interface UserPrivilegeMgr {
     boolean checkModuleAllPrivileges(String ownerType, Long ownerId, List<AclRoleDescriptor> descriptors, Long privilegeId);
 
     /**
-     * 校验当前用户的权限
+     * 校验当前用户在项目范围内的权限
      * @param ownerType
      * @param ownerId
      * @param privilegeId
      */
     void checkCurrentUserAuthority(String ownerType, Long ownerId, Long privilegeId);
 
+    /**
+     * 校验当前用户在某一个项目范围以及当前公司内的权限
+     * @param ownerType
+     * @param ownerId
+     * @param currentOrgId
+     * @param privilegeId
+     */
     void checkCurrentUserAuthority(String ownerType, Long ownerId, Long currentOrgId, Long privilegeId);
+
+    /**
+     * 校验用户在部分范围内以及当前公司内的权限
+     * @param currentOrgId
+     * @param privilegeId
+     */
+    void checkCurrentUserAuthority(Long currentOrgId, Long privilegeId);
 }
