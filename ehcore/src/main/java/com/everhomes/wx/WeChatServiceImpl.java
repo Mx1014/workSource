@@ -82,7 +82,6 @@ public class WeChatServiceImpl implements WeChatService {
 	@Override
 	public String getJsapiTicket() {
 		Map<String, String> map = makeJsApiTicket();
-		LOGGER.info("makeJsApiTicket  map={}", map);
 		String jsapiTicket = map.get(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT);
 		return jsapiTicket;
 	}
@@ -247,8 +246,13 @@ public class WeChatServiceImpl implements WeChatService {
 		AccessTokenResponse resp = (AccessTokenResponse)StringHelper.fromJsonString(atBody, AccessTokenResponse.class);
     	String params = "access_token=" + resp.getAccess_token()
     					+ "&type=" + WeChatConstant.JSAPI_TYPE;
+
+        LOGGER.debug("cacheJsapiToken restCall getticket param body={}", params);
 		
 		String body = this.restCall(WeChatConstant.GET_JSAPI_TICKET, null, params);
+
+        LOGGER.debug("cacheJsapiToken restCall getticket return body={}", body);
+
 		if(body == "") {
             return null;
         }
@@ -280,6 +284,8 @@ public class WeChatServiceImpl implements WeChatService {
         Map<String, String> keys = new HashMap<String, String>();
             
         keys.put(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT, resp.getTicket());
+
+        LOGGER.debug("makeJsApiTicket return keys={}", keys);
         
         return keys;
 	}
