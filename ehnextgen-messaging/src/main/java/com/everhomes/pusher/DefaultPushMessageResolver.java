@@ -9,13 +9,10 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.PushMessageResolver;
 import com.everhomes.msgbox.Message;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.common.EntityType;
 import com.everhomes.rest.common.OpenMsgSessionActionData;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.*;
-import com.everhomes.rest.user.GetMessageSessionInfoCommand;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.MessageSessionInfoDTO;
 import com.everhomes.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +93,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         }
 
         // 安卓客户端需要知道这条推送消息的类型 {@link com.everhomes.rest.messaging.UserMessageType}
-        String messageType = this.getMessageType(senderLogin);
+        String messageType = getMessageType(senderLogin);
         msg.getMeta().put("messageType", messageType);
 
         String bodyType = msg.getMeta().get("bodyType");
@@ -166,11 +163,11 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
     }
 
     private String getMessageType(UserLogin senderLogin) {
-        GetMessageSessionInfoCommand cmd = new GetMessageSessionInfoCommand();
-        cmd.setTargetType(EntityType.USER.getCode());
-        cmd.setTargetId(senderLogin.getUserId());
-        MessageSessionInfoDTO messageSessionInfo = userService.getMessageSessionInfo(cmd);
-        return messageSessionInfo.getMessageType();
+        if (senderLogin.getUserId() < User.MAX_SYSTEM_USER_ID) {
+            return UserMessageType.NOTICE.getCode();
+        } else {
+            return UserMessageType.MESSAGE.getCode();
+        }
     }
 
     private String getSenderName(Message msg) {
