@@ -3534,4 +3534,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
 		return ea;
 	}
+
+	@Override
+	public List<Organization> listOrganizationsByGroupType(String groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(groupType))
+				.fetch().map(r -> ConvertHelper.convert(r, Organization.class));
+	}
 }

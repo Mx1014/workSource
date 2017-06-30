@@ -198,6 +198,8 @@ public class SalaryServiceImpl implements SalaryService {
 
             //  组织架构删除薪酬组
 //            this.organizationService.deletexxx(cmd.getSalaryGroupId());
+            Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+            this.organizationProvider.deleteOrganization(organization);
 
             //  删除薪酬组定义的字段
             this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
@@ -245,9 +247,37 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public ListSalaryGroupResponse listSalaryGroup(){
+    public ListSalaryGroupResponse listSalaryGroup(ListSalaryGroupCommand cmd){
 
-	    return new ListSalaryGroupResponse();
+	    ListSalaryGroupResponse response = new ListSalaryGroupResponse();
+
+        //  获取所有批次
+	    List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType("SALARYGROUP");
+
+	    //  查询相关人数
+	    List<Long> salaryGroupIds = new ArrayList<>();
+	    organizations.forEach(r ->{
+	        Long salaryGroupId = r.getId();
+            salaryGroupIds.add(salaryGroupId);
+        });
+	    List<Object[]> lists = this.salaryEmployeeOriginValProvider.getRelevantNumbersByGroupId(salaryGroupIds);
+
+	    //  设置批次信息
+	    response.setSalaryGroupList(organizations.stream().map(p ->{
+            SalaryGroupListDTO dto = new SalaryGroupListDTO();
+            dto.setSalaryGroupId(p.getId());
+            dto.setSalaryGroupName(p.getName());
+            //  设置相关人数
+            if(!lists.isEmpty()){
+                lists.forEach(q -> {
+                    if(q[0].equals(dto.getSalaryGroupId()))
+                        dto.setRelevantNum((Integer)q[1]);
+                });
+            }
+            return dto;
+        }).collect(Collectors.toList()));
+
+	    return response;
     }
 
 

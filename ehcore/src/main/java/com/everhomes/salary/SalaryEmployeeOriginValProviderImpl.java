@@ -6,6 +6,9 @@ import java.util.List;
 
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
+import org.jooq.Record2;
+import org.jooq.SelectSeekStep1;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -90,6 +93,18 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.eq(groupId))
                 .execute();
     }
+
+    //  查询批次对应的人数
+    @Override
+    public List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds){
+        return getReadWriteContext().select(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID,
+                DSL.countDistinct(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID))
+                .from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+                .where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID.in(salaryGroupIds))
+                .groupBy(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.GROUP_ID)
+                .fetchInto(Object[].class);
+    }
+
 /*	@Override
 	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId){
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)

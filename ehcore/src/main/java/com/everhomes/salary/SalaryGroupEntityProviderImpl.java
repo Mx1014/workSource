@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -99,7 +100,7 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
                 .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
                 .execute();
     }
-	
+
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

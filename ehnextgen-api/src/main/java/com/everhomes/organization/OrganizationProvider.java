@@ -337,4 +337,7 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembersByOrgIdWithAllStatus(Long organizaitonId);
 	List<OrganizationAddress> findOrganizationAddressByOrganizationIdAndBuildingId(
 			Long organizationId, Long buildId);
+
+	//	根据 group_type 查找薪酬组 added by R 20170630
+	List<Organization> listOrganizationsByGroupType(String groupType);
 } 
