@@ -3527,7 +3527,6 @@ public class QualityServiceImpl implements QualityService {
 							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, null, null, cmd.getSampleId());
 						}
 
-						LOGGER.info("score: {}, QualityInspectionSpecificationDTO: {}",score, dto);
 						if(score != null) {
 							score.setSpecificationId(dto.getId());
 							score.setSpecificationName(dto.getName());

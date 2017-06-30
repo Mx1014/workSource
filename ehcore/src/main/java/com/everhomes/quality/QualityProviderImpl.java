@@ -2042,9 +2042,9 @@ public class QualityProviderImpl implements QualityProvider {
             LOGGER.debug("countScores, sql=" + query.getSQL());
             LOGGER.debug("countScores, bindValues=" + query.getBindValues());
         }
-		
+		score.setScore(0.0);
 		query.fetch().map((r) -> {
-			Double totalScore = r.getValue("totalScore", Double.class);
+			Double totalScore = r.getValue("totalScore", Double.class) + score.getScore();
 			QualityInspectionSpecifications parentSpecification = getSpecificationById(r.getValue(
 					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID));
 			if(parentSpecification.getScore() < totalScore) {
