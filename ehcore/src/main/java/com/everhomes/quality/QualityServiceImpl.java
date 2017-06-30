@@ -3646,7 +3646,8 @@ public class QualityServiceImpl implements QualityService {
 				}
 			}
 			scoreStat.setCorrectionCount(scoreStat.getCorrectionCount() + correctionCount);
-			scoreStat.setCorrectionQualifiedCount(correctionQualifiedCount + scoreStat.getCorrectionQualifiedCount());
+			Integer scoreStatCorrectionQualifiedCount = scoreStat.getCorrectionQualifiedCount() == null ? 0:scoreStat.getCorrectionQualifiedCount();
+			scoreStat.setCorrectionQualifiedCount(correctionQualifiedCount + scoreStatCorrectionQualifiedCount);
 		}
 
 		return scoreStat;
@@ -3670,6 +3671,7 @@ public class QualityServiceImpl implements QualityService {
 		//时间段内的扣分项
 		List<QualityInspectionSpecificationItemResults> results = qualityProvider.listSpecifitionItemResultsBySampleId(scoreStat.getSampleId(), scoreStat.getUpdateTime(), now);
 
+		LOGGER.info("deduct sample id:{}, start time : {}, results: {}",scoreStat.getSampleId(), scoreStat.getUpdateTime(), results);
 		if(results != null) {
 			results.forEach(result -> {
 				Double statScore = communitySpecificationStats.get(result.getTargetId());
