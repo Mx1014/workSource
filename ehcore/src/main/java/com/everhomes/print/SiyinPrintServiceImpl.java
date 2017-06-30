@@ -415,7 +415,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
         	value = "0";
         }
         
-        //计算值,一分钟有效
+        //计算值,10分钟有效
         int timeout = configurationProvider.getIntValue(PrintErrorCode.PRINT_SIYIN_JOB_COUNT_TIMEOUT, 10);
         valueOperations.set(key, String.valueOf((Integer.parseInt(value)+1)), timeout, TimeUnit.MINUTES);
 
@@ -492,6 +492,12 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
+		try {
+			//延迟10秒，返回任务数量
+			Thread.sleep(10000L);
+		} catch (InterruptedException e) {
+			LOGGER.info("listPrintingJobs "+e);
+		}
 		Long id = UserContext.current().getUser().getId();
 		
 		//做计数
