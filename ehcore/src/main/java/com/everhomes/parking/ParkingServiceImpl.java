@@ -735,7 +735,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(size != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(size-1).getRechargeTime().getTime());
+        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
         	}
     	}
     	
