@@ -1,6 +1,5 @@
 -- 1.运行建表脚本
 --2.运行新增字段脚本
-ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
 --4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
 UPDATE eh_organizations set directly_enterprise_id = parent_id WHERE group_type = 'JOB_LEVEL';
