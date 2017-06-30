@@ -120,8 +120,12 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         return aclProvider.checkAccessEx(ownerType, ownerId, PrivilegeConstants.ALL_SERVICE_MODULE, descriptors);
     }
 
+    @Override
     public boolean checkModuleAdmin(String ownerType, Long ownerId, Long userId, Long moduleId){
-        return checkModuleAccess(ownerType, ownerId, userId, moduleId, ServiceModulePrivilegeType.SUPER);
+        if(checkModuleAccess(ownerType, ownerId, userId, moduleId, ServiceModulePrivilegeType.SUPER)){
+            return true;
+        }
+        return checkAllModuleAdmin(ownerType, ownerId,userId);
     }
 
     @Override
@@ -129,7 +133,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
-            checkModuleAccess(ownerType, ownerId, userId, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+            return checkModuleAccess(ownerType, ownerId, userId, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
         }
         return false;
     }
@@ -139,10 +143,21 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         if(0 < serviceModules.size()){
             ServiceModule module = serviceModuleProvider.findServiceModuleById(serviceModules.get(0).getModuleId());
-            checkModuleAccess(ownerType, ownerId, descriptors, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
+            return checkModuleAccess(ownerType, ownerId, descriptors, module.getParentId(), ServiceModulePrivilegeType.ORDINARY_ALL);
         }
         return false;
     }
+
+    @Override
+    public boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId){
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        if(aclProvider.checkAccessEx(ownerType, ownerId, PrivilegeConstants.ALL_SERVICE_MODULE, descriptors)){
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public boolean checkModuleAccess(String ownerType, Long ownerId, Long userId, Long moduleId, ServiceModulePrivilegeType type){

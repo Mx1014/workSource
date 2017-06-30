@@ -146,4 +146,13 @@ public interface UserPrivilegeMgr {
      * @param privilegeId
      */
     void checkCurrentUserAuthority(Long currentOrgId, Long privilegeId);
+
+    /**
+     * 全部模块管理员
+     * @param ownerType
+     * @param ownerId
+     * @param userId
+     * @return
+     */
+    boolean checkAllModuleAdmin(String ownerType, Long ownerId, Long userId);
 }
