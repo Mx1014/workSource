@@ -1571,6 +1571,8 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 
 		if (order.getStatus() == ParkingRechargeOrderStatus.FAILED.getCode()) {
+			//TODO:
+			order.setId(order.getId() + 1);
 			if (handler.recharge(order)) {
 				return dto;
 			}
@@ -1603,13 +1605,13 @@ public class ParkingServiceImpl implements ParkingService {
 
 		refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
 
-		refundCmd.setOrderNo(String.valueOf(order.getOrderNo()));
+		refundCmd.setOrderNo(String.valueOf(order.getId()));
 
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
 
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		refundCmd.setRefundAmount(order.getPrice());
-//
+
 		refundCmd.setRefundMsg("停车缴费退款");
 		this.setSignatureParam(refundCmd);
 
