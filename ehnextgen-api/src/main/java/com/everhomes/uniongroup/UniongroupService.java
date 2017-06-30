@@ -29,7 +29,7 @@ public interface UniongroupService {
      **/
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure);
 
-    /****/
-    public List listUniongroupMemberDetailsWithCondition();
+    /**根据条件查询记录**/
+    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, Boolean allGroupFlag);
 
 }

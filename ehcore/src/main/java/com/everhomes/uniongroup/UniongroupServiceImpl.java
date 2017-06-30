@@ -182,10 +182,10 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listUniongroupMemberDetailsWithCondition() {
-//        this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType();
+    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, Boolean allGroupFlag) {
         return null;
     }
+
 
 
     private Organization checkOrganization(Long orgId) {
