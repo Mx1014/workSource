@@ -3596,7 +3596,7 @@ public class QualityServiceImpl implements QualityService {
 		if(averageScore < 0) {
 			averageScore = 0.0;
 		}
-		response.setAverageScore(averageScore);
+		response.setAverageScore((double)Math.round(averageScore*100)/100);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
 			response.setName(sample.getName());
@@ -3619,7 +3619,7 @@ public class QualityServiceImpl implements QualityService {
 				if(averageScore < 0) {
 					averageScore = 0.0;
 				}
-				dto.setAverageScore(averageScore);
+				dto.setAverageScore((double)Math.round(averageScore*100)/100);
 
 				return dto;
 			}).collect(Collectors.toList()));
