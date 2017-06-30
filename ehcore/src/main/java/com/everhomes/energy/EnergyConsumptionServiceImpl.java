@@ -2610,13 +2610,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         if(files.size() > 1) {
             List<String> images = imageMosaic(files, filePath);
-            // 读取完成删除文件
-            for ( String filename : files ) {
-                File newfile = new File(filename);
-                if (newfile.isFile() && newfile.exists()) {
-                    file.delete();
-                }
-            }
+
             if(images.size() == 1) {
                 download(images.get(0),response);
             } else {
@@ -2700,13 +2694,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if(files.size() > 1) {
             List<String> images = imageMosaic(files, filePath);
 
-            // 读取完成删除文件
-            for ( String filename : files ) {
-                File newfile = new File(filename);
-                if (newfile.isFile() && newfile.exists()) {
-                    file.delete();
-                }
-            }
             if(images.size() == 1) {
                 download(images.get(0),response);
             } else {
@@ -2822,7 +2809,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 graphics.setColor(Color.WHITE);
                 graphics.fillRect(0, 0, imageWidth, imageHeight);
                 //72张二维码
-                int max = (files.size() > (i+1) * 72) ? 72 : files.size();
+                int max = (files.size() > (i+1) * 72) ? 72 : files.size()- i*72;
                 int height = 0;
 
                 int maxRow = max/8;
@@ -2837,7 +2824,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         if(row * 8 +w < files.size()) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
                             LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 225, height);
-                            graphics.drawImage(ImageIO.read(new File(files.get(i*72 + row * 8 + w))), w * 225, height, null);
+                            File file = new File(files.get(i*72 + row * 8 + w));
+                            if ( !file.isFile() ) {
+                                LOGGER.info("filename:{} is not a file", files.get(i*72 + row * 8 + w));
+                            }
+                            graphics.drawImage(ImageIO.read(file), w * 225, height, null);
+
+                            // 读取完成删除文件
+                            if (file.isFile() && file.exists()) {
+                                file.delete();
+                            }
                         }
                     }
                     height = (row+1) * 275;
