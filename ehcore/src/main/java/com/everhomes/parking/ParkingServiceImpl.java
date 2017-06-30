@@ -1574,6 +1574,9 @@ public class ParkingServiceImpl implements ParkingService {
 			//TODO:
 			order.setId(order.getId() + 1);
 			if (handler.recharge(order)) {
+				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
+				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+				parkingProvider.updateParkingRechargeOrder(order);
 				return dto;
 			}
 		}
