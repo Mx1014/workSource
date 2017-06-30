@@ -90,6 +90,7 @@ public class WeChatServiceImpl implements WeChatService {
 	public GetSignatureResponse getSignature(GetSignatureCommand cmd) {
 		
 		String ticket = getJsapiTicket();
+		LOGGER.debug("ticket from getJsapiTicket={}", ticket);
 		Map<String, String> ret = sign(ticket, cmd.getUrl());
 		GetSignatureResponse resp = new GetSignatureResponse();
 		resp.setNonceStr(ret.get("nonceStr"));
@@ -329,6 +330,8 @@ public class WeChatServiceImpl implements WeChatService {
                   "&timestamp=" + timestamp +
                   "&url=" + url;
         System.out.println(string1);
+        //TODO delete Log
+        LOGGER.debug(string1);
 
         try
         {
