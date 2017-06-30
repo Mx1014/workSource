@@ -359,8 +359,8 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("exportSalarySendHistory")
 	@RestReturn(String.class)
-	public RestResponse exportSalarySendHistory(ExportSalarySendHistoryCommand cmd){
-		salaryService.exportSalarySendHistory(cmd);
+	public RestResponse exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse){
+		salaryService.exportSalarySendHistory(cmd,httpResponse);
 		return new RestResponse();
 	}
 

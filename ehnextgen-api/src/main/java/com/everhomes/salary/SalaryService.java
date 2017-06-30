@@ -83,7 +83,7 @@ public interface SalaryService {
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd);
 
 
-	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd);
+	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse);
 
 
 	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd);
