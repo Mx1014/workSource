@@ -1,12 +1,9 @@
 -- 1.运行建表脚本
 --2.运行新增字段脚本
-ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records'
-
---3.备份eh_organization_members表为eh_organization_members_temp
-create table eh_organization_members_temp select * from eh_organization_members
+ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
 --4.修复organization表中group_type = 'JOB_LEVEL'的记录没有directly_enterprise_id的问题
-UPDATE eh_organizations set directly_enterprise_id = parent_id WHERE group_type = 'JOB_LEVEL'
+UPDATE eh_organizations set directly_enterprise_id = parent_id WHERE group_type = 'JOB_LEVEL';
 
 --5.运行数据迁移脚本
 
@@ -76,7 +73,7 @@ SET eom.detail_id = (
         AND eom.group_type = 'ENTERPRISE'
         AND eomd.contact_token = eom.contact_token
     )
-)
+);
 
 -- 初始化eh_user_organizations的数据
 
