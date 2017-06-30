@@ -697,11 +697,9 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             if(user.getPhones() != null && user.getPhones().size() > 0) {
                 doorAuth.setPhone(user.getPhones().get(0));    
                 }
-            if(user.getNickName() != null) {
-                doorAuth.setNickname(user.getNickName());
-            } else {
-                doorAuth.setNickname(user.getAccountName());
-            }
+            
+            User tmpUser = ConvertHelper.convert(user, User.class);
+            doorAuth.setNickname(getRealName(tmpUser));
             
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
@@ -714,7 +712,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         this.createDoorAuthLog(doorAuth);
 
         User tmpUser = new User();
-        tmpUser.setNickName(currUser.getNickName());
+        tmpUser.setNickName(getRealName(currUser));
         List<OrganizationDTO> dtos = organizationService.listUserRelateOrganizations(UserContext.getCurrentNamespaceId(), currUser.getId(), OrganizationGroupType.ENTERPRISE);
         if(dtos != null && !dtos.isEmpty()) {
         		OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), dtos.get(0).getId());
@@ -1587,11 +1585,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setDoorName(doorAccess.getName());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    dto.setApproveUserName(u.getNickName());
-                } else {
-                    dto.setApproveUserName(u.getAccountName());
-                }
+                dto.setApproveUserName(getRealName(u));
             }
             dtos.add(dto);
         }
@@ -1621,11 +1615,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
             dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
-                if(u.getNickName() != null) {
-                    dto.setApproveUserName(u.getNickName());
-                } else {
-                    dto.setApproveUserName(u.getAccountName());
-                }
+                dto.setApproveUserName(getRealName(u));
             }
             
             if(auth.getValidEndMs() < now) {
@@ -2486,11 +2476,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
@@ -2560,15 +2546,18 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         
         doorAuthProvider.createDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        
+        LocaleTemplate lt = localeTemplateProvider.findLocaleTemplateByScope(UserContext.getCurrentNamespaceId(cmd.getNamespaceId()), SmsTemplateCode.SCOPE,
+                SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, user.getLocale());
+        
+        if(lt != null && lt.getDescription().indexOf("{link}") >= 0) {
+            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        }
+        
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
@@ -2647,11 +2636,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         auth.setQrKey(resultStr);
         doorAuthProvider.updateDoorAuth(auth);
         
-        String nickName = user.getNickName();
-        if(nickName == null || nickName.isEmpty()) {
-            nickName = user.getAccountName();
-        }
-        
+        String nickName = getRealName(user);
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
@@ -2879,6 +2864,21 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         return resp;
     }
     
+    private String getRealName(User user) {
+        List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+      if (organizationDTOs != null && organizationDTOs.size() > 0 
+              && organizationDTOs.get(0).getContactName() != null 
+              && !organizationDTOs.get(0).getContactName().isEmpty()) {
+          return organizationDTOs.get(0).getContactName();
+      }
+      
+      if(user.getNickName() == null || user.getNickName().isEmpty()) {
+          return user.getAccountName();
+      }
+      
+      return user.getNickName();
+    }
+    
     @Override
     public GetVisitorResponse checkVisitor(GetVisitorCommand cmd) {
         GetVisitorResponse resp = new GetVisitorResponse();
@@ -2891,10 +2891,31 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         if(namespaceId == null) {
             namespaceId = UserContext.getCurrentNamespaceId();
         }
+        
+        User user = userProvider.findUserById(auth.getApproveUserId());
+        if(user != null) {
+            List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+//          OrganizationMember om = organizationProvider.findOrganizationMemberByOrgIdAndUId(ui.getId(), ctx.getFlowGraph().getFlow().getOrganizationId());
+          if (organizationDTOs != null && organizationDTOs.size() > 0 
+                  && organizationDTOs.get(0).getContactName() != null 
+                  && !organizationDTOs.get(0).getContactName().isEmpty()) {
+              String org = organizationDTOs.get(0).getName();
+              String fmt = String.format("%s-%s", org, organizationDTOs.get(0).getContactName());
+              user.setNickName(fmt);
+              if(LOGGER.isInfoEnabled()) {
+                  LOGGER.info("visitor nickname=", fmt);    
+              }
+              
+          } 
+          
+          resp.setApproveName(user.getNickName());
+        }
+
         DoorUserPermission dp = doorUserPermissionProvider.checkPermission(namespaceId, UserContext.current().getUser().getId()
                 , auth.getOwnerId(), auth.getOwnerType());
         if(dp == null) {
-            resp.setPermissionDeny((byte)1);
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "no permission");
+//            resp.setPermissionDeny((byte)1);
         } else {
             resp.setPermissionDeny((byte)0);
         }
@@ -2917,11 +2938,6 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         resp.setOrganization(auth.getOrganization());
         resp.setUserName(auth.getNickname());
         resp.setValidEndMs(auth.getValidEndMs());
-        
-        User user = userProvider.findUserById(auth.getApproveUserId());
-        if(user != null) {
-            resp.setApproveName(user.getNickName());
-        }
         
         resp.setCreateTime(auth.getCreateTime().getTime());
       
@@ -3685,7 +3701,7 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
         excelUtils.writeExcel(propertyNames, titleNames, columnSizes, voList);
     }
 
-    private static class DoorAuthExportVo {
+    public static class DoorAuthExportVo {
         private String nickName;
         private String phone;
         private String organization;
