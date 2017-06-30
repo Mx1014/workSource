@@ -3527,6 +3527,7 @@ public class QualityServiceImpl implements QualityService {
 							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, null, null, cmd.getSampleId());
 						}
 
+						LOGGER.info("score: {}, QualityInspectionSpecificationDTO: {}",score, dto);
 						if(score != null) {
 							score.setSpecificationId(dto.getId());
 							score.setSpecificationName(dto.getName());
@@ -3594,7 +3595,7 @@ public class QualityServiceImpl implements QualityService {
 		}
 		Double averageScore = (100*stat.getCommunityCount() - stat.getDeductScore())/stat.getCommunityCount();
 		if(averageScore < 0) {
-			averageScore = 0.0;
+			averageScore = 0.00;
 		}
 		response.setAverageScore((double)Math.round(1.00*averageScore*100)/100);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
