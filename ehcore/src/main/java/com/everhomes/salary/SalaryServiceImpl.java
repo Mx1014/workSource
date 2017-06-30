@@ -361,13 +361,15 @@ public class SalaryServiceImpl implements SalaryService {
     public void exportSalaryGroup(ExportSalaryGroupCommand cmd, HttpServletResponse httpServletResponse) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
-            //  根据批次 id 查找批次具体内容
+/*            //  根据批次 id 查找批次具体内容
             GetSalaryGroupCommand command = new GetSalaryGroupCommand();
             command.setSalaryGroupId(cmd.getSalaryGroupId());
-            GetSalaryGroupResponse response = this.getSalaryGroup(command);
+            GetSalaryGroupResponse response = this.getSalaryGroup(command);*/
+
+            List<SalaryGroupEntity> results = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(cmd.getSalaryGroupId());
 
             ByteArrayOutputStream out = null;
-            XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(response);
+            XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results);
             try {
                 out = new ByteArrayOutputStream();
                 workbook.write(out);
@@ -386,9 +388,11 @@ public class SalaryServiceImpl implements SalaryService {
 
     }
 
-    private XSSFWorkbook creatXSSFSalaryGroupFile(GetSalaryGroupResponse response){
+    private XSSFWorkbook creatXSSFSalaryGroupFile( List<SalaryGroupEntity> results){
 
-        List<SalaryGroupEntityDTO> entityDTOs = response.getSalaryGroupEntity();
+/*        List<SalaryGroupEntityDTO> entityDTOs = response.getSalaryGroupEntity();
+
+        List<SalaryGroupEntity>*/
 
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName ="Module";
@@ -418,8 +422,8 @@ public class SalaryServiceImpl implements SalaryService {
         row.createCell(0).setCellValue("姓名(必填项)");
         row.createCell(1).setCellValue("手机号(必填项)");
         //  创建模板标题
-        for (int i = 0; i < entityDTOs.size(); i++) {
-            row.createCell(i+2).setCellValue(entityDTOs.get(i).getName());
+        for (int i = 0; i < results.size(); i++) {
+            row.createCell(i+2).setCellValue(results.get(i).getName());
         }
         return wb;
     }
@@ -472,7 +476,7 @@ public class SalaryServiceImpl implements SalaryService {
 //        List<Map<String,String>> datas = new ArrayList<>();
 //        List<Map<String,String>> maps = new ArrayList<>();
         List<ImportSalaryEmployeeOriginValDTO> datas = new ArrayList<>();
-        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(groupId);
+        List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupWithExportRegular(groupId);
 
         salaryGroupEntities.add(0,new SalaryGroupEntity("姓名"));
         salaryGroupEntities.add(1,new SalaryGroupEntity("手机号"));

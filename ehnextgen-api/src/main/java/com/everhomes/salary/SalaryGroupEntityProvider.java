@@ -13,6 +13,8 @@ public interface SalaryGroupEntityProvider {
 
 	List<SalaryGroupEntity> listSalaryGroupEntityByGroupId(Long salaryGroupId);
 
+	List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId);
+
 	List<SalaryGroupEntity> listSalaryGroupEntity();
 
 	void updateSalaryGroupEntityVisible(Long id, Byte visibleFlag);
