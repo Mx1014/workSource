@@ -492,12 +492,6 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 
 	@Override
 	public ListPrintingJobsResponse listPrintingJobs(ListPrintingJobsCommand cmd) {
-		try {
-			//延迟10秒，返回任务数量
-			Thread.sleep(10000L);
-		} catch (InterruptedException e) {
-			LOGGER.info("listPrintingJobs "+e);
-		}
 		Long id = UserContext.current().getUser().getId();
 		
 		//做计数
