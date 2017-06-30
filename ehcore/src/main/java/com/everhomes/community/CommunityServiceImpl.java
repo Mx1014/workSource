@@ -2039,6 +2039,10 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void exportCommunityUsers(ListCommunityUsersCommand cmd, HttpServletResponse response) {
+		//暂时定成查询1000条记录，且总是从第一条开始导出 by 20170630
+		cmd.setPageSize(1000);
+		cmd.setPageAnchor(null);
+
 		CommunityUserResponse resp = listUserCommunities(cmd);
 		List<CommunityUserDto> dtos = resp.getUserCommunities();
 
