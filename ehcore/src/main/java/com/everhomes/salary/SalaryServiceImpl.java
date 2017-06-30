@@ -31,6 +31,7 @@ import com.sun.xml.ws.wsdl.writer.document.Import;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
+import org.aspectj.weaver.ast.Or;
 import org.elasticsearch.common.recycler.Recycler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,8 +176,13 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public AddSalaryGroupResponse updateSalaryGroup(UpdateSalaryGroupCommand cmd) {
-//        List<SalaryGroupEntity> entities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         if(!StringUtils.isEmpty(cmd.getSalaryGroupId())){
+
+            //  获取组织架构薪酬组名称
+            Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+            organization.setName(cmd.getSalaryGroupName());
+            this.organizationProvider.updateOrganization(organization);
+
             this.salaryGroupEntityProvider.deleteSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
             AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
             addCommand.setSalaryGroupName(cmd.getSalaryGroupName());
@@ -197,7 +203,6 @@ public class SalaryServiceImpl implements SalaryService {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
 
             //  组织架构删除薪酬组
-//            this.organizationService.deletexxx(cmd.getSalaryGroupId());
             Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
             this.organizationProvider.deleteOrganization(organization);
 
@@ -209,12 +214,12 @@ public class SalaryServiceImpl implements SalaryService {
         }
     }
 
-	@Override
-	public void copySalaryGroup(CopySalaryGroupCommand cmd){
+    @Override
+    public void copySalaryGroup(CopySalaryGroupCommand cmd) {
         List<SalaryGroupEntity> origin = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         AddSalaryGroupCommand addCommand = new AddSalaryGroupCommand();
-        addCommand.setSalaryGroupEntity(origin.stream().map(r ->{
-            SalaryGroupEntityDTO dto = ConvertHelper.convert(r,SalaryGroupEntityDTO.class);
+        addCommand.setSalaryGroupEntity(origin.stream().map(r -> {
+            SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
 /*            dto.setGroupId(r.getGroupId());
             dto.setOriginEntityId(r.getOriginEntityId());
             dto.setType(r.getType());
@@ -225,17 +230,35 @@ public class SalaryServiceImpl implements SalaryService {
         }).collect(Collectors.toList()));
         addCommand.setOwnerId(origin.get(0).getOwnerId());
         addCommand.setOwnerType(origin.get(0).getOwnerType());
+
+        //  判断名字
+        String salaryGroupName = cmd.getSalaryGroupName();
         int i = 1;
-        addCommand.setSalaryGroupName(cmd.getSalaryGroupName() + " (" + i + ")");
+        boolean flag = true;
+        //  从数据库获取已经存在的名字
+        Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+        while (flag) {
+
+//            addCommand.setSalaryGroupName(cmd.getSalaryGroupName() + " (" + i + ")");
+            salaryGroupName = salaryGroupName + " (" + i + ")";
+            if (!salaryGroupName.equals(organization.getName()))
+                flag = false;
+            i++;
+        }
+        addCommand.setSalaryGroupName(salaryGroupName);
         this.addSalaryGroup(addCommand);
-	}
+    }
 
     @Override
     public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd) {
         if (!StringUtils.isEmpty(cmd.getSalaryGroupId())) {
-            GetSalaryGroupResponse response = new GetSalaryGroupResponse();
+
+            Organization organization = this.organizationProvider.findOrganizationById(cmd.getSalaryGroupId());
+
             // 从组织架构获取名称
-//            response.setSalaryGroupName("");
+            GetSalaryGroupResponse response = new GetSalaryGroupResponse();
+            response.setSalaryGroupName(organization.getName());
+
             List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
             response.setSalaryGroupEntity(salaryGroupEntities.stream().map(r -> {
                 SalaryGroupEntityDTO dto = ConvertHelper.convert(r, SalaryGroupEntityDTO.class);
@@ -254,6 +277,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  获取所有批次
 	    List<Organization> organizations = this.organizationProvider.listOrganizationsByGroupType("SALARYGROUP");
 
+/*
 	    //  查询相关人数
 	    List<Long> salaryGroupIds = new ArrayList<>();
 	    organizations.forEach(r ->{
@@ -261,6 +285,7 @@ public class SalaryServiceImpl implements SalaryService {
             salaryGroupIds.add(salaryGroupId);
         });
 	    List<Object[]> lists = this.salaryEmployeeOriginValProvider.getRelevantNumbersByGroupId(salaryGroupIds);
+*/
 
 	    //  设置批次信息
 	    response.setSalaryGroupList(organizations.stream().map(p ->{
@@ -268,12 +293,12 @@ public class SalaryServiceImpl implements SalaryService {
             dto.setSalaryGroupId(p.getId());
             dto.setSalaryGroupName(p.getName());
             //  设置相关人数
-            if(!lists.isEmpty()){
+/*            if(!lists.isEmpty()){
                 lists.forEach(q -> {
                     if(q[0].equals(dto.getSalaryGroupId()))
                         dto.setRelevantNum((Integer)q[1]);
                 });
-            }
+            }*/
             return dto;
         }).collect(Collectors.toList()));
 
