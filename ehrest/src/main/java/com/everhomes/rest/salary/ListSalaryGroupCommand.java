@@ -1,38 +1,22 @@
+// @formatter:off
 package com.everhomes.rest.salary;
 
 import com.everhomes.util.StringHelper;
 
 /**
- *
- * <ul>参数:
- * <li>salaryGroupId: 批次（薪酬组）id</li>
+ * <ul>
  * <li>ownerType: 'organization'</li>
- * <li>owernId: organizationId</li>
+ * <li>ownerId: organizationId</li>
  * </ul>
  */
-public class GetSalaryGroupCommand {
-
-    private Long salaryGroupId;
+public class ListSalaryGroupCommand {
 
     private String ownerType;
 
     private Long ownerId;
 
-    public GetSalaryGroupCommand() {
+    public ListSalaryGroupCommand() {
 
-    }
-
-    public GetSalaryGroupCommand(Long salaryGroupId) {
-        super();
-        this.salaryGroupId = salaryGroupId;
-    }
-
-    public Long getSalaryGroupId() {
-        return salaryGroupId;
-    }
-
-    public void setSalaryGroupId(Long salaryGroupId) {
-        this.salaryGroupId = salaryGroupId;
     }
 
     public String getOwnerType() {
@@ -55,4 +39,5 @@ public class GetSalaryGroupCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

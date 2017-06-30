@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>userId: 用户id</li>
  * <li>salaryGroupId: 批次id</li>
+ * <li>ownerType: 'organization'</li>
+ * <li>owernId: organizationId</li>
  * </ul>
  */
 public class GetSalaryEmployeesCommand {
@@ -15,6 +17,10 @@ public class GetSalaryEmployeesCommand {
 	private Long userId;
 
 	private Long salaryGroupId;
+
+	private String ownerType;
+
+	private Long ownerId;
 
 
 	public GetSalaryEmployeesCommand() {
@@ -37,7 +43,23 @@ public class GetSalaryEmployeesCommand {
 		this.salaryGroupId = salaryGroupId;
 	}
 
-	@Override
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

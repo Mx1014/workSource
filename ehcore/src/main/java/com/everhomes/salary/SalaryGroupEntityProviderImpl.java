@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.everhomes.user.User;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,16 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
 	}
 
+	//	按员工批次表导出规则查询
+    @Override
+    public List<SalaryGroupEntity> listSalaryGroupWithExportRegular(Long salaryId) {
+        return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
+                .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(salaryId))
+                .and(Tables.EH_SALARY_GROUP_ENTITIES.EDITABLE_FLAG.eq(Byte.valueOf("1")))
+                .orderBy(Tables.EH_SALARY_GROUP_ENTITIES.DEFAULT_ORDER.asc())
+                .fetch().map(r -> ConvertHelper.convert(r, SalaryGroupEntity.class));
+    }
+
 	@Override
 	public List<SalaryGroupEntity> listSalaryGroupEntity() {
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_GROUP_ENTITIES)
@@ -89,7 +100,7 @@ public class SalaryGroupEntityProviderImpl implements SalaryGroupEntityProvider 
                 .where(Tables.EH_SALARY_GROUP_ENTITIES.GROUP_ID.eq(groupId))
                 .execute();
     }
-	
+
 	private EhSalaryGroupEntitiesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

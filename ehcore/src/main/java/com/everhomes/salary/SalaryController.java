@@ -113,8 +113,8 @@ public class SalaryController extends ControllerBase {
 	 */
 	@RequestMapping("listSalaryGroup")
 	@RestReturn(ListSalaryGroupResponse.class)
-	public RestResponse listSalaryGroup(){
-        ListSalaryGroupResponse res = this.salaryService.listSalaryGroup();
+	public RestResponse listSalaryGroup(ListSalaryGroupCommand cmd){
+        ListSalaryGroupResponse res = this.salaryService.listSalaryGroup(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -187,7 +187,7 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
-	 * <p>4-2.导入某个薪酬组excel</p>
+	 * <p>4-2.导入员工薪酬表</p>
 	 * <b>URL: /salary/importSalaryGroup</b>
 	 */
 	@RequestMapping("importSalaryGroup")

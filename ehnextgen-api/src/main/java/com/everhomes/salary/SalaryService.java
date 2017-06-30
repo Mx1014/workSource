@@ -29,7 +29,7 @@ public interface SalaryService {
     public GetSalaryGroupResponse getSalaryGroup(GetSalaryGroupCommand cmd);
 
 
-    public ListSalaryGroupResponse listSalaryGroup();
+    public ListSalaryGroupResponse listSalaryGroup(ListSalaryGroupCommand cmd);
 
 
 	public ListSalaryEmployeesResponse listSalaryEmployees(ListSalaryEmployeesCommand cmd);

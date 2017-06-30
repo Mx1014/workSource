@@ -11,6 +11,8 @@ import java.util.List;
  * <ul>
  * <li>salaryGroupEntity: 批次项目，参考{@link com.everhomes.rest.salary.SalaryGroupEntityDTO}</li>
  * <li>salaryGroupName: 批次名称</li>
+ * <li>ownerType: 'organization'</li>
+ * <li>owernId: organizationId</li>
  * </ul>
  */
 public class AddSalaryGroupCommand {

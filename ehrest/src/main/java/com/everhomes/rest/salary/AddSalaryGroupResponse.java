@@ -9,24 +9,24 @@ import java.util.List;
 /**
  * 
  * <ul>返回值:
- * <li>salaryGroupEntries: 薪酬组选项</li>
+ * <li>salaryGroupEntity: 薪酬组选项</li>
  * </ul>
  */
 public class AddSalaryGroupResponse {
 
 	@ItemType(SalaryGroupEntityDTO.class)
-	private List<SalaryGroupEntityDTO> salaryGroupEntry;
+	private List<SalaryGroupEntityDTO> salaryGroupEntity;
 
 	public AddSalaryGroupResponse() {
 
 	}
 
-	public List<SalaryGroupEntityDTO> getSalaryGroupEntry() {
-		return salaryGroupEntry;
+	public List<SalaryGroupEntityDTO> getSalaryGroupEntity() {
+		return salaryGroupEntity;
 	}
 
-	public void setSalaryGroupEntry(List<SalaryGroupEntityDTO> salaryGroupEntry) {
-		this.salaryGroupEntry = salaryGroupEntry;
+	public void setSalaryGroupEntity(List<SalaryGroupEntityDTO> salaryGroupEntity) {
+		this.salaryGroupEntity = salaryGroupEntity;
 	}
 
 	@Override

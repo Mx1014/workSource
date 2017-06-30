@@ -10,6 +10,8 @@ import java.util.List;
  * 
  * <ul>参数:
  * <li>employeeOriginVal: 个人批次设定</li>
+ * <li>ownerType: 'organization'</li>
+ * <li>owernId: organizationId</li>
  * </ul>
  */
 public class UpdateSalaryEmployeesCommand {

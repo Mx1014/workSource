@@ -2,7 +2,9 @@
 package com.everhomes.rest.salary;
 
 public class SalaryServiceErrorCode {
-    static final String SCOPE = "organization";
+    public static final String SCOPE = "salarygroup";
 
-    static final int ERROR_FILE_IS_EMPTY =  100001;   //   没有文件
+    public static final int ERROR_FILE_IS_EMPTY =  100001;   //   没有文件
+
+    public static final int ERROR_CONTACTNAME_ISNULL =  100002;   //   姓名为空
 }
