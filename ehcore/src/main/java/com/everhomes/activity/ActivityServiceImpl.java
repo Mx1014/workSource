@@ -672,8 +672,12 @@ public class ActivityServiceImpl implements ActivityService {
 
 		CreateWechatJsPayOrderCmd orderCmd = newWechatOrderCmd(activity, roster);
 
+		CreateWechatJsPayOrderBody orderCmdBody = new CreateWechatJsPayOrderBody();
+		orderCmdBody.setBody(orderCmd);
+
 		String wechatJsApi =  this.configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"pay.zuolin.wechatJs", "POST /EDS_PAY/rest/pay_common/payInfo_record/createWechatJsPayOrder");
-		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmd, PayZuolinCreateWechatJsPayOrderResp.class);
+
+		PayZuolinCreateWechatJsPayOrderResp response = (PayZuolinCreateWechatJsPayOrderResp) this.restCall(wechatJsApi, orderCmdBody, PayZuolinCreateWechatJsPayOrderResp.class);
 
 		if(response.getResult()){
 			LOGGER.debug("CreateWechatJsPayOrder successfully, orderNo={}, userId={}, activityId={}, response={}",
@@ -703,10 +707,17 @@ public class ActivityServiceImpl implements ActivityService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		orderCmd.setRealm("wechat_" + namespaceId);
 		String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-		//增加默认公众号   add by yanjun 20170620
-		if(StringUtils.isEmpty(appId)){
+
+		//用于判断公众号是否是默认的，默认的话将realm设置为wechat_0
+		String appId_default = configurationProvider.getValue("wx.offical.account.appid", "");
+		if(appId != null && appId_default != null && appId.equals(appId_default)){
 			orderCmd.setRealm("wechat_0");
 		}
+
+
+//		if(StringUtils.isEmpty(appId)){
+//			orderCmd.setRealm("wechat_0");
+//		}
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.ACTIVITYSIGNUPORDERWECHAT.getPycode());
 		orderCmd.setOnlinePayStyleNo(VendorType.WEI_XIN.getStyleNo());
 		orderCmd.setOrderNo(roster.getOrderNo().toString());
@@ -736,7 +747,7 @@ public class ActivityServiceImpl implements ActivityService {
 		map.put("timestamp",orderCmd.getTimestamp() + "");
 		map.put("randomNum",orderCmd.getRandomNum() + "");
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
-		orderCmd.setSignature(signature);
+		orderCmd.setSignature(URLEncoder.encode(signature));
 		return orderCmd;
 	}
 
