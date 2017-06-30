@@ -30,4 +30,6 @@ public interface ServiceModuleService {
 	List<CommunityDTO> listUserRelatedCommunityByModuleId(ListUserRelatedProjectByModuleCommand cmd);
 
 	Byte checkModuleManage(CheckModuleManageCommand cmd);
+
+	List<ServiceModuleDTO> filterByScopes(int namespaceId, String ownerType, Long ownerId);
 }

@@ -11,6 +11,7 @@ import com.everhomes.acl.WebMenuScope;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.domain.Domain;
 import com.everhomes.entity.EntityType;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -53,6 +54,9 @@ public class WebMenuServiceImpl implements WebMenuService {
 
 	@Autowired
 	private AuthorizationProvider authorizationProvider;
+
+	@Autowired
+	private ServiceModuleService serviceModuleService;
 
 	@Override
 	public List<WebMenuDTO> listUserRelatedWebMenus(ListUserRelatedWebMenusCommand cmd){
@@ -120,6 +124,11 @@ public class WebMenuServiceImpl implements WebMenuService {
 			//获取人员和人员所有机构所赋予的权限模块
 			List<Long> moduleIds = authorizationProvider.getAuthorizationModuleIdsByTarget(targets);
 			if(null != moduleIds && moduleIds.size() > 0)
+				if(moduleIds.contains(0L)){
+					moduleIds = serviceModuleService.filterByScopes(UserContext.getCurrentNamespaceId(), null, null).stream().map(r ->{
+						return r.getId();
+					}).collect(Collectors.toList());
+				}
 				menus = webMenuProvider.listWebMenuByType(WebMenuType.PARK.getCode(), categories, null, moduleIds);
 
 			//拼上菜单的所有父级菜单
