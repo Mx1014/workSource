@@ -89,8 +89,11 @@ public class SalaryController extends ControllerBase {
 	@RequestMapping("copySalaryGroup")
 	@RestReturn(String.class)
 	public RestResponse copySalaryGroup(CopySalaryGroupCommand cmd){
-		salaryService.copySalaryGroup(cmd);
-		return new RestResponse();
+		this.salaryService.copySalaryGroup(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
     /**
