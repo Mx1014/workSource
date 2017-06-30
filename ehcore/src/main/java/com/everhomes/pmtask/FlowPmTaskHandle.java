@@ -80,7 +80,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
 			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
-			createFlowCaseCommand.setCurrentOrganizationId(cmd.getOrganizationId());
+			createFlowCaseCommand.setCurrentOrganizationId(cmd.getFlowOrganizationId());
 
 			createFlowCaseCommand.setProjectId(task.getOwnerId());
 			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());

@@ -369,7 +369,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> searchVisitorDoorAuthByAdmin(Long doorId, String keyword, Byte status, int pageSize, Long startTime, Long endTime) {
         return queryDoorAuthByTime(new ListingLocator(), pageSize, (locator, query) -> {
-            if(status != null) {
+            if (status != null) {
                 Long now = DateHelper.currentGMTTime().getTime();
                 if(status.equals(DoorAuthStatus.INVALID.getCode())) {
                     query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.lt(now).or(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
@@ -377,7 +377,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now).and(Tables.EH_DOOR_AUTH.STATUS.eq(status)));
                 }
             }
-            if(doorId != null) {
+            if (doorId != null) {
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
             }
             if (startTime != null) {
@@ -386,7 +386,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             if (endTime != null) {
                 query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.le(new Timestamp(endTime)));
             }
-            if(keyword != null) {
+            if (keyword != null) {
                 query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));
             }
             query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
