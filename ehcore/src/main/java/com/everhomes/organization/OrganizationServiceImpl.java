@@ -6529,10 +6529,15 @@ public class OrganizationServiceImpl implements OrganizationService {
             member.setTargetType(OrganizationMemberTargetType.USER.getCode());
             organizationProvider.updateOrganizationMember(member);
 
+            OrganizationMemberDetails detail = organizationProvider.findOrganizationMemberDetailsByDetailId(member.getDetailId());
+            detail.setTargetId(member.getTargetId());
+            detail.setTargetType(member.getTargetType());
+            organizationProvider.updateOrganizationMemberDetails(detail,detail.getId());
+
             User user = userProvider.findUserById(member.getTargetId());
-            user.setNickName(member.getContactName());
+            user.setNickName(detail.getContactName());
             if (StringUtils.isEmpty(user.getAvatar())) {
-                user.setAvatar(member.getAvatar());
+                user.setAvatar(detail.getAvatar());
             }
 
             if (StringUtils.isEmpty(user.getAvatar())) {
