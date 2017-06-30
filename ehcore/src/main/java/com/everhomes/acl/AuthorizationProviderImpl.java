@@ -84,7 +84,9 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Project> result  = new ArrayList<>();
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
-		cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		if(null != authId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
 		Condition targetCond = null;
 		for (Target target:targets) {
 			if(null == targetCond){
@@ -103,6 +105,34 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 					result.add(new Project(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE).toString(), Long.valueOf(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID).toString())));
 					return null;
 				});
+		return result;
+	}
+
+	@Override
+	public List<Authorization> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<Authorization> result  = new ArrayList<>();
+		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
+		if(null != authId){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
+		Condition targetCond = null;
+		for (Target target:targets) {
+			if(null == targetCond){
+				targetCond = Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId()));
+			}else{
+				targetCond = targetCond.or(Tables.EH_AUTHORIZATIONS.TARGET_TYPE.eq(target.getTargetType()).and(Tables.EH_AUTHORIZATIONS.TARGET_ID.eq(target.getTargetId())));
+			}
+		}
+		cond = cond.and(targetCond);
+		context.select(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+				.from(Tables.EH_AUTHORIZATIONS)
+				.where(cond)
+				.groupBy(Tables.EH_AUTHORIZATIONS.SCOPE, Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE)
+				.fetch().map((r) -> {
+			result.add(new Authorization(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE),r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID),r.getValue(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE),r.getValue(Tables.EH_AUTHORIZATIONS.SCOPE)));
+			return null;
+		});
 		return result;
 	}
 

@@ -2799,7 +2799,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	private void createAuthorizationsOrAclsByRelation(User user, AuthorizationRelation authorizationRelation, List<AssignmentTarget> targets, List<Project> projects, List<Long> privilegeIds){
 		List<Authorization> authorizations = new ArrayList<>();
-		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId();
+		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + "." + authorizationRelation.getId();
 		for (AssignmentTarget target: targets) {
 			checkTarget(target.getTargetType(), target.getTargetId());
 			if (AllFlagType.NO == AllFlagType.fromCode(authorizationRelation.getAllProjectFlag())) {
@@ -2854,13 +2854,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 */
 	private void deleteAuthorizationsOrAclsByRelation(AuthorizationRelation authorizationRelation){
 
-		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId();
+		String tag = EntityType.AUTHORIZATION_RELATION.getCode() + "." + authorizationRelation.getId();
 
 		//删除权限
 		privilegeProvider.deleteAclsByTag(tag);
 
 		//根据关系删除授权的记录
-		deleteAuthorizations(EntityType.AUTHORIZATION_RELATION.getCode() + authorizationRelation.getId());
+		deleteAuthorizations(tag);
 
 	}
 

@@ -36,6 +36,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
+import com.everhomes.menu.Target;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
@@ -76,6 +77,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.module.Project;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -248,6 +250,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Autowired
     private ImportFileService importFileService;
+
+    @Autowired
+    private AuthorizationProvider authorizationProvider;
 
     private int getPageCount(int totalCount, int pageSize) {
         int pageCount = totalCount / pageSize;
@@ -2412,20 +2417,72 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
 
-//    public List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd){
-//    }
+    @Override
+    public List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd){
+        Long userId = UserContext.current().getUser().getId();
+        return listUserRelateOrganizations(userId);
+    }
 
-//    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
-//        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
-//        List<Long> organizationIds = new ArrayList<>();
-//        for (RoleAssignment roleAssignment: roleAssignments) {
-//            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
-//                organizationIds.add(roleAssignment.getOwnerId());
-//            }
-//        }
-//
-//
-//    }
+    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
+        List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
+
+        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
+        Set<Long> organizationIds = new HashSet<>();
+        for (RoleAssignment roleAssignment: roleAssignments) {
+            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+                organizationIds.add(roleAssignment.getOwnerId());
+            }
+        }
+
+        Set<Long> orgIds = new HashSet<>();
+        List<Target> targets = new ArrayList<>();
+        targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+        List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        for (OrganizationMember member: orgMembers) {
+            if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())){
+                Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+                if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())){
+                    orgIds.add(org.getId());
+                }
+            }
+
+        }
+
+        //获取人员和人员所有机构所赋予模块的所属项目范围
+        List<Authorization> authorizations = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
+        for (Authorization authorization: authorizations) {
+            if(null != authorization.getScope()){
+                String scope = authorization.getScope();
+                String[] scopeStrs = scope.split(".");
+                if(scopeStrs.length == 2){
+                    if(EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])){
+                        AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[0]));
+                        if(EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS){
+                            organizationIds.add(authorizationRelation.getOwnerId());
+                        }
+                    }
+                }
+            }else{
+                if(EntityType.fromCode(authorization.getOwnerType()) == EntityType.ORGANIZATIONS){
+                    organizationIds.add(authorization.getOwnerId());
+                }
+            }
+        }
+
+        for (Long organizationId: organizationIds) {
+            Organization org = organizationProvider.findOrganizationById(organizationId);
+            if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())){
+                OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+                //物业或业委增加小区Id和小区name信息
+                if (org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())) {
+                    this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+                }
+                orgs.add(tempSimpleOrgDTO);
+            }
+        }
+
+        return orgs;
+    }
 
     //Added by Janson 20161217
     @Override

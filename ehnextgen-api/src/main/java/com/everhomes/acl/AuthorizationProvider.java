@@ -53,4 +53,6 @@ public interface AuthorizationProvider {
     AuthorizationRelation findAuthorizationRelationById(Long id);
 
     List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets);
+
+    List<Authorization> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
 }
