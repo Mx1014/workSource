@@ -77,3 +77,43 @@ SET eom.detail_id = (
         AND eomd.contact_token = eom.contact_token
     )
 )
+
+-- 初始化eh_user_organizations的数据
+
+SET @user_organization_id = 0;
+
+INSERT INTO eh_user_organizations (
+	id,
+	namespace_id,
+	user_id,
+	organization_id,
+	STATUS,
+	group_type,
+	group_path,
+	create_time,
+	update_time,
+	visible_flag
+) SELECT
+	(
+		@user_organization_id := @user_organization_id + 1
+	),
+	ifnull(eom.namespace_id, 0),
+	eom.target_id,
+	eom.organization_id,
+	eom. STATUS,
+	eom.group_type,
+	eom.group_path,
+	eom.create_time,
+	eom.update_time,
+	eom.visible_flag
+FROM
+	eh_organization_members eom
+LEFT JOIN eh_organizations eo ON eom.organization_id = eo.id
+WHERE
+	eom.group_type = 'ENTERPRISE'
+AND eom.target_type = 'USER'
+GROUP BY
+	eom.organization_id,
+	eom.contact_token
+ORDER BY
+	eom.id;
