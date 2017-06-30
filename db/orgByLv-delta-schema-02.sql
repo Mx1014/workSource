@@ -147,6 +147,8 @@ CREATE TABLE `eh_organization_member_profile_logs` (
 -- 新增字段
 ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `default_order` `default_order` BIGINT COMMENT 'default value is id';
+
 
 --3.备份eh_organization_members表为eh_organization_members_temp
 -- DROP TABLE IF EXISTS `eh_organization_members_temp`;
