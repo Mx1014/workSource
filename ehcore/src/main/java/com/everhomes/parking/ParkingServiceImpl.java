@@ -689,7 +689,11 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setBody(ParkingRechargeType.fromCode(parkingRechargeOrder.getRechargeType()).toString());
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-		orderCmd.setSubject("停车充值订单");
+		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+			orderCmd.setSubject("停车缴费（月卡车：" + parkingRechargeOrder.getPlateNumber() + "）");
+		}else {
+			orderCmd.setSubject("停车缴费（临时车：" + parkingRechargeOrder.getPlateNumber() + "）");
+		}
 		
 		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
 		if(flag) {
@@ -1573,6 +1577,7 @@ public class ParkingServiceImpl implements ParkingService {
 			//TODO:
 			order.setId(order.getId() + 1);
 			if (handler.recharge(order)) {
+				order.setId(order.getId() - 1);
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				parkingProvider.updateParkingRechargeOrder(order);
