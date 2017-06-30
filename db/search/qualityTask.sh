@@ -4,7 +4,7 @@ INDEX=everhomesv3
 curl -XDELETE http://$ELASTIC/$INDEX/_mapping/qualityTask
 curl -XPUT "http://$ELASTIC/$INDEX/_mapping/qualityTask" -d '
 {
-    "energyMeter": {
+    "qualityTask": {
         "properties": {
             "targetName":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
             "executorName":{"type":"string","index": "not_analyzed"},
