@@ -54,5 +54,9 @@ public interface AuthorizationProvider {
 
     List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets);
 
-    List<Authorization> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
+    List<Project> getAuthorizationProjectsByAuthIdAndTargets(String identityType, String authType, Long authId, List<Target> targets);
+
+    List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets);
+
+    List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets);
 }

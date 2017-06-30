@@ -81,11 +81,25 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 
 	@Override
 	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String authType, Long authId, List<Target> targets){
+		return this.getAuthorizationProjectsByAuthIdAndTargets(null, authType, authId, targets);
+	}
+
+	@Override
+	public List<Project> getManageAuthorizationProjectsByAuthAndTargets(String authType, Long authId, List<Target> targets){
+		return this.getAuthorizationProjectsByAuthIdAndTargets(IdentityType.MANAGE.getCode(), authType, authId, targets);
+	}
+
+	@Override
+	public List<Project> getAuthorizationProjectsByAuthIdAndTargets(String identityType, String authType, Long authId, List<Target> targets){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Project> result  = new ArrayList<>();
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
 		if(null != authId){
 			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
+		}
+
+		if(null != identityType){
+			cond = cond.and(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE.eq(identityType));
 		}
 		Condition targetCond = null;
 		for (Target target:targets) {
@@ -109,9 +123,9 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 	}
 
 	@Override
-	public List<Authorization> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets){
+	public List<String> getAuthorizationScopesByAuthAndTargets(String authType, Long authId, List<Target> targets){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		List<Authorization> result  = new ArrayList<>();
+		List<String> result  = new ArrayList<>();
 		Condition cond = Tables.EH_AUTHORIZATIONS.AUTH_TYPE.eq(authType);
 		if(null != authId){
 			cond = cond.and(Tables.EH_AUTHORIZATIONS.AUTH_ID.eq(authId));
@@ -125,12 +139,13 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 			}
 		}
 		cond = cond.and(targetCond);
-		context.select(Tables.EH_AUTHORIZATIONS.SCOPE, Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+		cond = cond.and(Tables.EH_AUTHORIZATIONS.SCOPE.isNotNull());
+		context.select(Tables.EH_AUTHORIZATIONS.SCOPE)
 				.from(Tables.EH_AUTHORIZATIONS)
 				.where(cond)
-				.groupBy(Tables.EH_AUTHORIZATIONS.SCOPE, Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE)
+				.groupBy(Tables.EH_AUTHORIZATIONS.SCOPE)
 				.fetch().map((r) -> {
-			result.add(new Authorization(r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_TYPE),r.getValue(Tables.EH_AUTHORIZATIONS.OWNER_ID),r.getValue(Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE),r.getValue(Tables.EH_AUTHORIZATIONS.SCOPE)));
+			result.add(r.getValue(Tables.EH_AUTHORIZATIONS.SCOPE));
 			return null;
 		});
 		return result;

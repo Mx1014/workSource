@@ -2424,7 +2424,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
-        List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
+        List<OrganizationSimpleDTO> orgs = new ArrayList<>();
 
         List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
         Set<Long> organizationIds = new HashSet<>();
@@ -2437,6 +2437,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
         targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+
+        List<Project> projects = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
+        for (Project project: projects) {
+            if(EntityType.fromCode(project.getProjectType()) == EntityType.ORGANIZATIONS){
+                organizationIds.add(project.getProjectId());
+            }
+        }
+
         List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         for (OrganizationMember member: orgMembers) {
             if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())){
@@ -2449,10 +2457,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         //获取人员和人员所有机构所赋予模块的所属项目范围
-        List<Authorization> authorizations = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
-        for (Authorization authorization: authorizations) {
-            if(null != authorization.getScope()){
-                String scope = authorization.getScope();
+        List<String> scopes = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
+        for (String scope: scopes) {
+            if(null != scope){
                 String[] scopeStrs = scope.split(".");
                 if(scopeStrs.length == 2){
                     if(EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])){
@@ -2461,10 +2468,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                             organizationIds.add(authorizationRelation.getOwnerId());
                         }
                     }
-                }
-            }else{
-                if(EntityType.fromCode(authorization.getOwnerType()) == EntityType.ORGANIZATIONS){
-                    organizationIds.add(authorization.getOwnerId());
                 }
             }
         }
@@ -2480,7 +2483,6 @@ public class OrganizationServiceImpl implements OrganizationService {
                 orgs.add(tempSimpleOrgDTO);
             }
         }
-
         return orgs;
     }
 
