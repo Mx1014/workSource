@@ -823,4 +823,20 @@ public class QualityController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+
+	/**
+	 * <b>URL: /quality/updateSampleScoreStatTest</b>
+	 * <p>统计测试</p>
+	 * @return {String.class}
+	 */
+	@RequestMapping("updateSampleScoreStatTest")
+	@RestReturn(value=String.class)
+	public RestResponse updateSampleScoreStatTest() {
+
+		qualityService.updateSampleScoreStat();
+		RestResponse res = new RestResponse();
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }

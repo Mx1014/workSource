@@ -3596,7 +3596,7 @@ public class QualityServiceImpl implements QualityService {
 		if(averageScore < 0) {
 			averageScore = 0.0;
 		}
-		response.setAverageScore(averageScore);
+		response.setAverageScore((double)Math.round(1.00*averageScore*100)/100);
 		QualityInspectionSamples sample = qualityProvider.findQualityInspectionSample(cmd.getSampleId(), cmd.getOwnerType(), cmd.getOwnerId());
 		if(sample != null) {
 			response.setName(sample.getName());
@@ -3619,7 +3619,7 @@ public class QualityServiceImpl implements QualityService {
 				if(averageScore < 0) {
 					averageScore = 0.0;
 				}
-				dto.setAverageScore(averageScore);
+				dto.setAverageScore((double)Math.round(1.00*averageScore*100)/100);
 
 				return dto;
 			}).collect(Collectors.toList()));
@@ -3746,14 +3746,17 @@ public class QualityServiceImpl implements QualityService {
 				samplesMap.put(sample.getId(), sample);
 			});
 			List<Long> sampleIds = samples.stream().map(QualityInspectionSamples::getId).collect(Collectors.toList());
+			LOGGER.info("total sampleIds : {}", sampleIds);
 			//查eh_quality_inspection_sample_community_specification_stat 没有的循环添加
 			Map<Long, List<QualityInspectionSampleCommunitySpecificationStat>> sampleCommunitySpecificationStat = qualityProvider.listCommunitySpecifitionStatBySampleId(sampleIds);
-			Map<Long, QualityInspectionSamples> unStatSamples = samplesMap;
+			Map<Long, QualityInspectionSamples> unStatSamples = new HashMap<>();
+			unStatSamples.putAll(samplesMap);
 			if(sampleCommunitySpecificationStat != null && sampleCommunitySpecificationStat.size() > 0) {
 				sampleCommunitySpecificationStat.entrySet().forEach(scss -> {
 					unStatSamples.remove(scss.getKey());
 				});
 			}
+			LOGGER.info("sampleIds not in eh_quality_inspection_sample_community_specification_stat: {}", unStatSamples);
 			if(unStatSamples != null && unStatSamples.size() > 0) {
 				unStatSamples.entrySet().forEach(unStatSample -> {
 					List<QualityInspectionSampleCommunityMap> scms = qualityProvider.findQualityInspectionSampleCommunityMapBySample(unStatSample.getKey());
@@ -3767,11 +3770,14 @@ public class QualityServiceImpl implements QualityService {
 			}
 
 			//查统计表
+			Map<Long, QualityInspectionSamples> unStatSampleScore= new HashMap<>();
+			unStatSampleScore.putAll(samplesMap);
 			Map<Long, QualityInspectionSampleScoreStat> sampleScoreStatMaps = qualityProvider.getQualityInspectionSampleScoreStat(sampleIds);
 			if(sampleScoreStatMaps != null && sampleScoreStatMaps.size() > 0) {
 				//更新统计表
 				sampleScoreStatMaps.entrySet().forEach(sampleScoreStatMap -> {
 					QualityInspectionSampleScoreStat stat = sampleScoreStatMap.getValue();
+					unStatSampleScore.remove(sampleScoreStatMap.getKey());
 					samplesMap.remove(sampleScoreStatMap.getKey());
 					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
 					stat.setUpdateTime(now);
@@ -3779,13 +3785,13 @@ public class QualityServiceImpl implements QualityService {
 					updateSampleCommunitySpecificationStat(results, now);
 				});
 			}
-
-			if(samplesMap != null && samplesMap.size() > 0) {
-				samplesMap.entrySet().forEach(sampleMap -> {
-					QualityInspectionSamples sample = sampleMap.getValue();
-					Long sampleId = sampleMap.getKey();
-					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+			LOGGER.info("sampleIds not in EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT: {}", unStatSampleScore);
+			if(unStatSampleScore != null && unStatSampleScore.size() > 0) {
+				unStatSampleScore.entrySet().forEach(unStatSample -> {
+					QualityInspectionSamples sample = unStatSample.getValue();
+					Long sampleId = unStatSample.getKey();
 					QualityInspectionSampleScoreStat stat = new QualityInspectionSampleScoreStat();
+					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
 					stat.setNamespaceId(sample.getNamespaceId());
 					stat.setTaskCount(0);
 					stat.setCorrectionCount(0);
@@ -3805,6 +3811,32 @@ public class QualityServiceImpl implements QualityService {
 					updateSampleCommunitySpecificationStat(results, now);
 				});
 			}
+
+//			if(samplesMap != null && samplesMap.size() > 0) {
+//				samplesMap.entrySet().forEach(sampleMap -> {
+//					QualityInspectionSamples sample = sampleMap.getValue();
+//					Long sampleId = sampleMap.getKey();
+//					List<QualityInspectionSampleCommunityMap> communityMap = qualityProvider.findQualityInspectionSampleCommunityMapBySample(sampleId);
+//					QualityInspectionSampleScoreStat stat = new QualityInspectionSampleScoreStat();
+//					stat.setNamespaceId(sample.getNamespaceId());
+//					stat.setTaskCount(0);
+//					stat.setCorrectionCount(0);
+//					stat.setOwnerType(sample.getOwnerType());
+//					stat.setOwnerId(sample.getOwnerId());
+//					stat.setSampleId(sampleId);
+//					stat.setDeductScore(0.0);
+//					stat.setHighestScore(100.0);
+//					stat.setLowestScore(100.0);
+//					if(communityMap != null && communityMap.size() > 0) {
+//						stat.setCommunityCount(communityMap.size());
+//					} else {
+//						stat.setCommunityCount(0);
+//					}
+//					List<QualityInspectionSpecificationItemResults> results = getNewestScoreStat(stat);
+//					qualityProvider.createQualityInspectionSampleScoreStat(stat);
+//					updateSampleCommunitySpecificationStat(results, now);
+//				});
+//			}
 		}
 	}
 
