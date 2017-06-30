@@ -2044,18 +2044,17 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		score.setScore(0.0);
 		query.fetch().map((r) -> {
-			Double totalScore = r.getValue("totalScore", Double.class) + score.getScore();
+			Double totalScore = r.getValue("totalScore", Double.class);
 			QualityInspectionSpecifications parentSpecification = getSpecificationById(r.getValue(
 					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID));
 			if(parentSpecification.getScore() < totalScore) {
-				score.setScore(parentSpecification.getScore());
+				score.setScore(parentSpecification.getScore() + score.getScore());
 			} else {
-				score.setScore(totalScore);
+				score.setScore(totalScore + score.getScore());
 			}
 			
 			return null;
 		});
-        
 		return score;
 	}
 
