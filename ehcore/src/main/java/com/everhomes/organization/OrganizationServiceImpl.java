@@ -2411,6 +2411,22 @@ public class OrganizationServiceImpl implements OrganizationService {
         return listUserRelateOrgs(cmd, UserContext.current().getUser());
     }
 
+
+//    public List<OrganizationSimpleDTO> listUserRelateOrganizations(ListUserRelatedOrganizationsCommand cmd){
+//    }
+
+//    public List<OrganizationSimpleDTO> listUserRelateOrganizations(Long userId){
+//        List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByTarget(EntityType.USER.getCode(), userId);
+//        List<Long> organizationIds = new ArrayList<>();
+//        for (RoleAssignment roleAssignment: roleAssignments) {
+//            if(EntityType.ORGANIZATIONS == EntityType.fromCode(roleAssignment.getOwnerType()) && (roleAssignment.getRoleId() == RoleConstants.PM_SUPER_ADMIN || roleAssignment.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN)){
+//                organizationIds.add(roleAssignment.getOwnerId());
+//            }
+//        }
+//
+//
+//    }
+
     //Added by Janson 20161217
     @Override
     public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd, User user) {
