@@ -5,7 +5,8 @@ package com.everhomes.rest.salary;
  * <li>salaryEmployeeId: salaryEmployeeId 确定是哪个员工哪一期的数据</li>
  * <li>groupEntityId: 字段id</li>
  * <li>groupEntityName: 字段项名称</li>
- * <li>salaryValue: 字段项值</li> 
+ * <li>salaryValue: 字段项值</li>
+ * <li>isFormula: 是否为公式 0-否 1-是</li>
  * </ul>
  * */
 public class SalaryPeriodEmployeeEntityDTO {
@@ -14,6 +15,7 @@ public class SalaryPeriodEmployeeEntityDTO {
     private Long groupEntiryId;
     private String groupEntityName;
     private String salaryValue;
+	private Byte isFormula;
 	public Long getSalaryEmployeeId() {
 		return salaryEmployeeId;
 	}
@@ -38,5 +40,12 @@ public class SalaryPeriodEmployeeEntityDTO {
 	public void setSalaryValue(String salaryValue) {
 		this.salaryValue = salaryValue;
 	}
-    
+
+	public Byte getIsFormula() {
+		return isFormula;
+	}
+
+	public void setIsFormula(Byte isFormula) {
+		this.isFormula = isFormula;
+	}
 }

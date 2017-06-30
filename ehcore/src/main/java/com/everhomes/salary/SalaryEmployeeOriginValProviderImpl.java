@@ -94,6 +94,15 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
                 .execute();
     }
 
+	@Override
+	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(String ownerType, Long ownerId, Long userId) {
+
+		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
+				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID.eq(userId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
+				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
+	}
     //  查询批次对应的人数
     @Override
     public List<Object[]> getRelevantNumbersByGroupId(List<Long> salaryGroupIds){
