@@ -42,10 +42,19 @@ public class CreateTaskCommand {
 	private Byte addressType;
 	private Long addressOrgId;
 	private String buildingName;
+	private Long flowOrganizationId;
 
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
-	
+
+	public Long getFlowOrganizationId() {
+		return flowOrganizationId;
+	}
+
+	public void setFlowOrganizationId(Long flowOrganizationId) {
+		this.flowOrganizationId = flowOrganizationId;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
