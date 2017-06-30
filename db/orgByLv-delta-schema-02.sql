@@ -144,9 +144,10 @@ CREATE TABLE `eh_organization_member_profile_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 新增字段
 ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
 
 --3.备份eh_organization_members表为eh_organization_members_temp
 -- DROP TABLE IF EXISTS `eh_organization_members_temp`;
-create table eh_organization_members_temp select * from eh_organization_members
+create table eh_organization_members_temp select * from eh_organization_members;
