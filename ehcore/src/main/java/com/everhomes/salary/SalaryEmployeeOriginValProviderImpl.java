@@ -66,9 +66,11 @@ public class SalaryEmployeeOriginValProviderImpl implements SalaryEmployeeOrigin
 	}
 
 	@Override
-	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId){
+	public List<SalaryEmployeeOriginVal> listSalaryEmployeeOriginValByUserId(Long userId, String ownerType, Long ownerId){
 		return getReadOnlyContext().select().from(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS)
 				.where(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.USER_ID.eq(userId))
+                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_SALARY_EMPLOYEE_ORIGIN_VALS.OWNER_ID.eq(ownerId))
 				.fetch().map(r -> ConvertHelper.convert(r, SalaryEmployeeOriginVal.class));
 	}
 

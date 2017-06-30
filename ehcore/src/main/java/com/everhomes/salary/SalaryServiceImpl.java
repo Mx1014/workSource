@@ -271,7 +271,7 @@ public class SalaryServiceImpl implements SalaryService {
         //  获取对应批次的项目字段
         List<SalaryGroupEntity> salaryGroupEntities = this.salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(cmd.getSalaryGroupId());
         //  获取个人的项目字段
-        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId());
+        List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(cmd.getUserId(),cmd.getOwnerType(),cmd.getOwnerId());
 
         if (!salaryGroupEntities.isEmpty()) {
             salaryGroupEntities.stream().forEach(r -> {
@@ -306,7 +306,7 @@ public class SalaryServiceImpl implements SalaryService {
         if(!cmd.getEmployeeOriginVal().isEmpty()){
             Long userId = cmd.getEmployeeOriginVal().get(0).getUserId();
             Long groupId = cmd.getEmployeeOriginVal().get(0).getSalaryGroupId();
-            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId);
+            List<SalaryEmployeeOriginVal> originVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(userId,cmd.getOwnerType(),cmd.getOwnerId());
             if(originVals.isEmpty()){
                 cmd.getEmployeeOriginVal().stream().forEach(r -> {
                     this.createSalaryEmployeeOriginVal(r, cmd);
@@ -448,8 +448,8 @@ public class SalaryServiceImpl implements SalaryService {
 /*                throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
                         "File content is empty");*/
             }
-//            task.setOwnerType();
-//            task.setOwnerId();
+            task.setOwnerType(cmd.getOwnerType());
+            task.setOwnerId(cmd.getOwnerId());
             task.setType(ImportFileTaskType.SALARY_GROUP.getCode());
             task.setCreatorUid(userId);
             task = this.importFileService.executeTask(new ExecuteImportTaskCallback() {
@@ -468,7 +468,6 @@ public class SalaryServiceImpl implements SalaryService {
                     response.setLogs(results);
                     return response;
 
-//                    return null;
                 }
             },task);
         }catch (Exception e){
