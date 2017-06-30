@@ -2836,11 +2836,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         LOGGER.info("draw w : {}, row: {}, file size: {}" , w, row, files.size());
                         if(row * 8 +w < files.size()) {
 //                            BufferedImage small = ImageIO.read(new File(files.get(j+w)));
-                            LOGGER.info("draw Width : {}, Height: {}" , w * 225, height);
-                            graphics.drawImage(ImageIO.read(new File(files.get(row * 8+w))), w * 225, height, null);
+                            LOGGER.info("draw page: {}, Width : {}, Height: {}" , i, w * 225, height);
+                            graphics.drawImage(ImageIO.read(new File(files.get(i*72 + row * 8 + w))), w * 225, height, null);
                         }
                     }
-                    height = (height+1) * 275;
+                    height = (row+1) * 275;
 
                 }
 
