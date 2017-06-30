@@ -4586,17 +4586,57 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void refreshPunchDayLogs(ListPunchDetailsCommand cmd){
 
+		Long companyId = getTopEnterpriseId(cmd.getOwnerId());
+		
 		Organization org = this.checkOrganization(cmd.getOwnerId());
 		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),(byte) 1);
 		for(Long userId : userIds){ 
+			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+			if(null == userIdentifier){
+				continue;
+			}
 			Calendar start = Calendar.getInstance();
 			Calendar end = Calendar.getInstance();
 			start.setTimeInMillis(cmd.getStartDay());
 			end.setTimeInMillis(cmd.getEndDay());
 			while (start.before(end)) {
-				try {
-					refreshPunchDayLog(userId, getTopEnterpriseId(cmd.getOwnerId()), start);
-				} catch (ParseException e) {
+				try { 
+
+
+					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
+									companyId, dateSF.get().format(start.getTime()));
+					if (null == punchDayLog) {
+						// 数据库没有计算好的数据 
+						PunchLogsDay pdl = new PunchLogsDay();
+						pdl.setPunchDay(String.valueOf(start.get(Calendar.DAY_OF_MONTH)));
+						pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
+						
+						
+						PunchDayLog newPunchDayLog = new PunchDayLog();
+						pdl = calculateDayLog(userId, companyId, start, pdl,newPunchDayLog);
+						if (null == pdl) {
+							start.add(Calendar.DAY_OF_MONTH, 1);
+							continue  ;
+						} 
+						newPunchDayLog.setUserId(userId);
+						newPunchDayLog.setEnterpriseId(companyId);
+						newPunchDayLog.setCreatorUid(userId);
+						newPunchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.get().format(start
+								.getTime())));
+						newPunchDayLog.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+								.getTime()));
+						newPunchDayLog.setPunchTimesPerDay(pdl.getPunchTimesPerDay());
+						newPunchDayLog.setStatus(pdl.getPunchStatus());
+						newPunchDayLog.setMorningStatus(pdl.getMorningPunchStatus());
+						newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
+						newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
+						newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
+						newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.get().format(start
+								.getTime())),companyId));
+						punchProvider.createPunchDayLog(newPunchDayLog);
+			
+					}
+				} catch (Exception e) {
 					LOGGER.error("refresh day log wrong  userId["+userId+"],  day"+start.getTime(),e);
 				}
 	

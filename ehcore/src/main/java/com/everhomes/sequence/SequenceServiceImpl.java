@@ -1401,6 +1401,25 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhSmsLogs.class, Tables.EH_SMS_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SMS_LOGS.ID.max()).from(Tables.EH_SMS_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionSamples.class, Tables.EH_QUALITY_INSPECTION_SAMPLES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SAMPLES.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SAMPLES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionSampleGroupMap.class, Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SAMPLE_GROUP_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionSampleCommunityMap.class, Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionSampleScoreStat.class, Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SAMPLE_SCORE_STAT).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQualityInspectionSampleCommunitySpecificationStat.class, Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SAMPLE_COMMUNITY_SPECIFICATION_STAT).fetchOne().value1();
+
+        });
+        syncTableSequence(null, EhQualityInspectionSpecificationItemResults.class, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS).fetchOne().value1();
 
         });
     }
