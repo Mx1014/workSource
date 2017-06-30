@@ -318,13 +318,11 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		WankeCardInfo card = getCard(order.getPlateNumber());
 		long startPeriod = strToLong2(card.getExpireDate());
 		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
 
 		String json = post(RECHARGE, param);
 
 		order.setErrorDescriptionJson(json);
-		WankeCardInfo newCard = getCard(order.getPlateNumber());
-		long endPeriod = strToLong2(newCard.getExpireDate());
-		order.setEndPeriod(new Timestamp(endPeriod + 1000));
 
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();

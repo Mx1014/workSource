@@ -170,8 +170,6 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 		Long startPeriod = strToLong2(card.getLimitEnd());
 
-		BosigaoCardInfo newCard = getCardInfo(order.getPlateNumber());
-		Long endPeriod = strToLong2(newCard.getLimitEnd());
 		//将充值信息存入订单
 		order.setErrorDescriptionJson(json);
 		//加一秒

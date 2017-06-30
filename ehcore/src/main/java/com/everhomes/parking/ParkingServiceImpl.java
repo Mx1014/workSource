@@ -1727,9 +1727,9 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public DeferredResult getRechargeOrderResult(GetRechargeResultCommand cmd) {
 
-		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L,
-		 RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"time out."));
+		RuntimeErrorException exceptionResult = RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"time out.");
+		final DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>(10000L, exceptionResult);
 //        System.out.println(Thread.currentThread().getName());
 //        map.put("test", deferredResult);
 
@@ -1738,6 +1738,7 @@ public class ParkingServiceImpl implements ParkingService {
 //
 //            deferredResult.setResult(response);
 //        });
+		//这个方法是在客户端支付完成之后才被调用，防止调用此方法之前，支付模块已回调成功，此时直接返回订单
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
 
 		if (order.getStatus() > ParkingRechargeOrderStatus.PAID.getCode()) {
@@ -1751,6 +1752,8 @@ public class ParkingServiceImpl implements ParkingService {
 			response.setErrorCode(ErrorCodes.SUCCESS);
 			response.setErrorDescription("OK");
 			deferredResult.setResult(response);
+			return deferredResult;
+
 		}
 
 		localBusSubscriberBuilder.build("Parking-Recharge" + cmd.getOrderId(), new LocalBusOneshotSubscriber() {
@@ -1772,7 +1775,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 			@Override
 			public void onLocalBusListeningTimeout() {
-				RestResponse response = new RestResponse("Notify timed out");
+				RestResponse response = ConvertHelper.convert(exceptionResult, RestResponse.class);
 				deferredResult.setResult(response);
 			}
 		}).setTimeout(60000).create();

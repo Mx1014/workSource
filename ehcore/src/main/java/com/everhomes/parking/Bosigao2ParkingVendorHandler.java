@@ -223,10 +223,18 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		cmd.setAmount((order.getPrice().intValue()*100) + "");
 		cmd.setPayDate(timeFormat.get().format(order.getPaidTime()));
 		cmd.setChargePaidNo(order.getId().toString());
-		
+
+		Bosigao2ResultEntity cardEntity = getCard(order.getPlateNumber());
+		Bosigao2CardInfo cardInfo = JSONObject.parseObject(cardEntity.getResult().toString(), Bosigao2CardInfo.class);
+		long startPeriod = strToLong2(cardInfo.getExpireDate() + "235959");
+		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
+
 		ParkWebService service = new ParkWebService();
 		ParkWebServiceSoap port = service.getParkWebServiceSoap();
         String json = port.parkingSystemRequestService("", RECHARGE, cmd.toString(), "");
+
+		order.setErrorDescriptionJson(json);
 
 		Bosigao2ResultEntity result = GsonUtil.fromJson(json, Bosigao2ResultEntity.class);
 		checkResultHolderIsNull(result, order.getPlateNumber());

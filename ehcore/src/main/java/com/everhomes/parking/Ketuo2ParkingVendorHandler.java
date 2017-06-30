@@ -78,9 +78,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
 	private static final String CUSTOM = "custom"; //只显示ruleType = 1时的充值项
 
-	
-	private CloseableHttpClient httpclient = HttpClients.createDefault();
-	
 	@Autowired
 	private ParkingProvider parkingProvider;
 	@Autowired
@@ -456,11 +453,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				}
 			}
 
-			String validStart = sdf1.format(Utils.addSeconds(time, 1));
-			String validEnd = sdf1.format(Utils.getTimestampByAddNatureMonth(time, order.getMonthCount().intValue()));
+			Timestamp tempStart = Utils.addSeconds(time, 1);
+			Timestamp tempEnd = Utils.getTimestampByAddNatureMonth(time, order.getMonthCount().intValue());
+			String validStart = sdf1.format(tempStart);
+			String validEnd = sdf1.format(tempEnd);
 			
 			param.put("cardId", card.getCardId());
-//			param.put("ruleType", CUSTOM.equals(order.getRateToken())?"2":order.getRateToken());
 			param.put("ruleType", RULE_TYPE);
 		    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
 		    param.put("payMoney", order.getPrice().intValue()*100);
@@ -486,17 +484,18 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			    param.put("freeMoney", card.getFreeMoney() * order.getMonthCount().intValue());
 			}
 			String json = post(param, RECHARGE);
-	        
-	        if(LOGGER.isDebugEnabled())
-				LOGGER.debug("Result={}, param={}", json, param);
-	        
+
+			//将充值信息存入订单
+			order.setErrorDescriptionJson(json);
+			order.setStartPeriod(tempStart);
+			order.setEndPeriod(tempEnd);
+
 			JSONObject jsonObject = JSONObject.parseObject(json);
 			Object obj = jsonObject.get("resCode");
 			if(null != obj ) {
 				int resCode = (int) obj;
 				if(resCode == 0)
 					return true;
-				
 			}
 			return false;
 		}
@@ -559,9 +558,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		param.put("money", money);
 		String json = post(param, ADD_MONTH_CARD);
         
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-        
         JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
 		if(null != obj ) {
@@ -576,20 +572,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTempFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
-//		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
 		String json = post(param, PAY_TEMP_FEE);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-        
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//		
-//		return entity.isSuccess();
+
         JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
 		if(null != obj ) {
@@ -600,19 +588,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return false;
     }
-//	public static void main(String[] args) {
-//		String s= "{\"data\":{\"parkingTime\":109568},\"resCode\":0,\"resMsg\":null}";
-//		JSONObject json = JSONObject.parseObject(s);
-//		Object obj = json.get("resCode");
-//		if(null != obj ) {
-//			int resCode = (int) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
-//		
-//	}
+
 	@Override
 	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
@@ -621,8 +597,10 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     }
 	
 	public String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.kexing.url", "") + type);
-		StringBuilder result = new StringBuilder();
+		String url = configProvider.getValue("parking.kexing.url", "") + type;
+
+//		HttpPost httpPost = new HttpPost();
+//		StringBuilder result = new StringBuilder();
 		
         String key = configProvider.getValue("parking.kexing.key", "");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
@@ -638,55 +616,64 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Parking encrypt param error.");
 		}
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("data", data));
-		CloseableHttpResponse response = null;
-		InputStream instream = null;
-		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
-			httpPost.addHeader("user", user);
-			httpPost.addHeader("pwd", pwd);
-			response = httpclient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
 
-			LOGGER.info("Data from ketuo, status={}", response.getStatusLine().getStatusCode());
+		Map<String, String> params = new HashMap<>();
+		params.put("data", data);
+		Map<String, String> headers = new HashMap<>();
+		headers.put("user", user);
+		headers.put("pwd", pwd);
 
-			if (entity != null) {
-				instream = entity.getContent();
-				BufferedReader reader = null;
-				reader = new BufferedReader(new InputStreamReader(instream,"utf8"));
-				String s;
-            	
-            	while((s = reader.readLine()) != null){
-            		result.append(s);
-				}
-			}
-		} catch (IOException e) {
-			LOGGER.error("Parking request error, param={}, key={}, iv={}", param, key, iv, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Parking request error.");
-		}finally {
-            try {
-            	if (null != instream) {
-					instream.close();
-				}
-				if (null != response) {
-					response.close();
-				}
-			} catch (IOException e) {
-				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
-			}
-        }
-		String json = result.toString();
+		LOGGER.info("Parking info, namespace={}", this.getClass().getName());
+		return Utils.post(url, params, headers);
 
-		LOGGER.info("Data from ketuo, json={}", json);
-		
-		return json;
+//		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
+//		nvps.add(new BasicNameValuePair("data", data));
+//		CloseableHttpResponse response = null;
+//		InputStream instream = null;
+//		try {
+//			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
+//			httpPost.addHeader("user", user);
+//			httpPost.addHeader("pwd", pwd);
+//			response = httpclient.execute(httpPost);
+//			HttpEntity entity = response.getEntity();
+//
+//			LOGGER.info("Data from ketuo, status={}", response.getStatusLine().getStatusCode());
+//
+//			if (entity != null) {
+//				instream = entity.getContent();
+//				BufferedReader reader = null;
+//				reader = new BufferedReader(new InputStreamReader(instream,"utf8"));
+//				String s;
+//
+//            	while((s = reader.readLine()) != null){
+//            		result.append(s);
+//				}
+//			}
+//		} catch (IOException e) {
+//			LOGGER.error("Parking request error, param={}, key={}, iv={}", param, key, iv, e);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//    				"Parking request error.");
+//		}finally {
+//            try {
+//            	if (null != instream) {
+//					instream.close();
+//				}
+//				if (null != response) {
+//					response.close();
+//				}
+//			} catch (IOException e) {
+//				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
+//			}
+//        }
+//		String json = result.toString();
+//
+//		LOGGER.info("Data from ketuo, json={}", json);
+//
+//		return json;
 	}
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
 		if(CUSTOM.equals(order.getRateToken())) {
 			order.setRateName(CUSTOM);
@@ -724,9 +711,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_TEMP_FEE);
         
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-        
 		KetuoJsonEntity<KetuoTempFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTempFee>>(){});
 		if(entity.isSuccess()){
 			List<KetuoTempFee> list = entity.getData();
@@ -755,17 +739,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 //		dto.setPrice(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
-	}
-
-	@PreDestroy
-	public void destroy() {
-		if (null != httpclient) {
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				LOGGER.error("Close httpclient error.");
-			}
-		}
 	}
 
 	@Override

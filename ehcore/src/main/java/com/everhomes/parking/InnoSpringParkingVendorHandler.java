@@ -331,10 +331,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		//将充值信息存入订单
 		order.setErrorDescriptionJson(json);
 		order.setStartPeriod(newTime);
-		InnoSpringCardInfo newCard = getCard(plateNumber);
-		String newValidEnd = newCard.getEnd_time();
-		Timestamp endPeriod = new Timestamp(strToLong(newValidEnd + "235959"));
-		order.setEndPeriod(endPeriod);
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(time, order.getMonthCount().intValue()));
 
 		String entityJson = parseJson(json);
 
