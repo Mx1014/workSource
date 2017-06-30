@@ -225,8 +225,8 @@ public class WeChatServiceImpl implements WeChatService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		LOGGER.info("cacheAccessToken :" + namespaceId);
     	String params = "grant_type=" + WeChatConstant.ACCESSTOKEN_GRANTTYPE
-    					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPID, "")
-    					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WECHAT_APPSECRET, "");
+    					+ "&appid=" + configProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "")
+    					+ "&secret=" + configProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
 		
 		String body = this.restCall(WeChatConstant.GET_ACCESSTOKEN, null, params);
 		

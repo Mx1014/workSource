@@ -302,12 +302,7 @@ public class WXAuthController {// extends ControllerBase
         String callbackUrl =  configurationProvider.getValue(namespaceId, "home.url", "") + contextPath + wxAuthCallbackUrl;
         callbackUrl = appendParamToUrl(callbackUrl, params);
 
-        String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-
-        //增加默认公众号   add by yanjun 20170620
-        if(StringUtils.isEmpty(appId)){
-            appId = configurationProvider.getValue("wx.offical.account.default.appid", "");
-        }
+        String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
 
         String authorizeUri = String.format("https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s"
                 + "&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect", appId,
@@ -381,15 +376,8 @@ public class WXAuthController {// extends ControllerBase
             LOGGER.info("Process weixin auth request(userinfo calculate), startTime={}", startTime);
         }
         
-        String appId = configurationProvider.getValue(namespaceId, "wx.offical.account.appid", "");
-        String secret = configurationProvider.getValue(namespaceId, "wx.offical.account.secret", "");
-
-        //增加默认公众号   add by yanjun 20170620
-        if(StringUtils.isEmpty(appId)){
-            appId = configurationProvider.getValue("wx.offical.account.default.appid", "");
-            secret = configurationProvider.getValue("wx.offical.account.default.secret", "");
-        }
-
+        String appId = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_APPID, "");
+        String secret = configurationProvider.getValue(namespaceId, WeChatConstant.WX_OFFICAL_ACCOUNT_SECRET, "");
 
         // 微信提供的临时code
         String code = request.getParameter("code");
