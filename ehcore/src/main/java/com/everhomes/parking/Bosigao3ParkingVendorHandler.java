@@ -225,9 +225,6 @@ public class Bosigao3ParkingVendorHandler implements ParkingVendorHandler {
 
 		if ("粤B22222".equals(order.getPlateNumber())) {
 			if (order.getId() % 2 ==0) {
-				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
-				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-				parkingProvider.updateParkingRechargeOrder(order);
 				return true;
 
 			}

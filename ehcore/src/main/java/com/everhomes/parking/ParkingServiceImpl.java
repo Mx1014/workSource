@@ -1607,20 +1607,26 @@ public class ParkingServiceImpl implements ParkingService {
 		refundCmd.setNonce(randomNum);
 
 		refundCmd.setRefundOrderNo(String.valueOf(order.getOrderNo()));
-
 		refundCmd.setOrderNo(String.valueOf(order.getId()));
 
 		refundCmd.setOnlinePayStyleNo(VendorType.fromCode(order.getPaidType()).getStyleNo());
 
 		refundCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
-		refundCmd.setRefundAmount(order.getPrice());
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if (flag) {
+			refundCmd.setRefundAmount(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		}else {
+			refundCmd.setRefundAmount(order.getPrice());
+		}
 
 		refundCmd.setRefundMsg("停车缴费退款");
 		this.setSignatureParam(refundCmd);
 
 		PayZuolinRefundResponse refundResponse = (PayZuolinRefundResponse) this.restCall(refundApi, refundCmd, PayZuolinRefundResponse.class);
 		if(refundResponse.getErrorCode().equals(HttpStatus.OK.value())){
-
+			order.setStatus(ParkingRechargeOrderStatus.REFUNDED.getCode());
+			order.setRefundTime(new Timestamp(System.currentTimeMillis()));
+			parkingProvider.updateParkingRechargeOrder(order);
 		} else{
 			LOGGER.error("Refund failed from vendor, cmd={}, refundCmd={}, response={}",
 					cmd, refundCmd, refundResponse);
@@ -1628,7 +1634,6 @@ public class ParkingServiceImpl implements ParkingService {
 					RentalServiceErrorCode.ERROR_REFOUND_ERROR,
 					"bill refund error");
 		}
-		long endTime = System.currentTimeMillis();
 	}
 
 	/***给支付相关的参数签名*/
