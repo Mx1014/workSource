@@ -82,6 +82,7 @@ public class WeChatServiceImpl implements WeChatService {
 	@Override
 	public String getJsapiTicket() {
 		Map<String, String> map = makeJsApiTicket();
+		LOGGER.info("makeJsApiTicket  map={}", map);
 		String jsapiTicket = map.get(UserContext.getCurrentNamespaceId() + JSAPI_TICKENT);
 		return jsapiTicket;
 	}
