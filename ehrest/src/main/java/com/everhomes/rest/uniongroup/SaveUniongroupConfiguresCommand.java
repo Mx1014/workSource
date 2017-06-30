@@ -8,7 +8,8 @@ import java.util.List;
 /**
  * <ul>参数:
  * <li>groupType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</li>
- * <li>groupId: 组id</li>
+ * <li>groupId: 组id，既是organizationId</li>
+ * <li>enterpriseId: 公司Id</li>
  * <li>targetId: 目标Id</li>
  * <li>targetType: 组类型，参考{@link com.everhomes.rest.talent.TalentOwnerType}</LI>
  * </ul>
@@ -18,6 +19,8 @@ public class SaveUniongroupConfiguresCommand {
     private String groupType;
 
     private Long groupId;
+
+    private Long enterpriseId;
 
     private List<UniongroupTarget> targets;
 
@@ -56,11 +59,17 @@ public class SaveUniongroupConfiguresCommand {
         this.targets = targets;
     }
 
+    public Long getEnterpriseId() {
+        return enterpriseId;
+    }
+
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
+
 
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-
 }

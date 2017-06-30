@@ -50,11 +50,18 @@ public class UniongroupController extends ControllerBase {
      */
     @RequestMapping("getUniongroupMemberDetailsByGroupId")
     @RestReturn(value = UniongroupMemberDetailsDTO.class, collection = true)
-    public RestResponse getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd){
-        RestResponse response = new RestResponse(uniongroupService.getUniongroupMemberDetailsByGroupId(cmd));
+    public RestResponse listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd){
+        RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsByGroupId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+//    public RestResponse listUniongroupMemberDetailsWithCondition(){
+//        RestResponse response = new RestResponse(uniongroupService.listUniongroupMemberDetailsByGroupId(cmd));
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 
 }

@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  * <li>detailId: 人员档案id</li>
  * <li>targetId: 用户id</li>
  * <li>targetType: 用户类型</li>
- * <li>organizationId: 组织id</li>
+ * <li>organizationId: 公司id</li>
  * <li>contactName: 联系名称</li>
  * <li>contactToken: 联系电话</li>
  * <li>operatorUid: 操作人员id</li>
@@ -33,6 +33,10 @@ public class UniongroupMemberDetailsDTO {
     private String contactToken;
     private Timestamp updateTime;
     private Long operatorUid;
+
+    /**add**/
+    private String department;
+    private String jobposition;
 
     public Long getId() {
         return id;

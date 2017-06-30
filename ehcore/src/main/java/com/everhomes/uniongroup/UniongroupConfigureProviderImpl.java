@@ -220,6 +220,27 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUniongroupConfiguresDao.class, null);
     }
 
+    @Override
+    public List<UniongroupMemberDetail> listUniongroupMemberDetailByGroupType(Integer namespaceId, Long groupId, String groupType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        EhUniongroupMemberDetailsDao dao = new EhUniongroupMemberDetailsDao(context.configuration());
+        SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+        List<EhUniongroupMemberDetailsRecord> records = query.fetch();
+        List<UniongroupMemberDetail> result = new ArrayList<>();
+        if (records != null) {
+            records.stream().map(r -> {
+                result.add(ConvertHelper.convert(r, UniongroupMemberDetail.class));
+                return null;
+            }).collect(Collectors.toList());
+        }
+        if (result != null && result.size() != 0) {
+            return result;
+        }
+        return null;
+    }
+
 
     /**
      * Configure

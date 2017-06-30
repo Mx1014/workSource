@@ -2,7 +2,7 @@
 package com.everhomes.uniongroup;
 
 import com.everhomes.rest.uniongroup.GetUniongroupConfiguresCommand;
-import com.everhomes.rest.uniongroup.GetUniongroupMemberDetailsCommand;
+import com.everhomes.rest.uniongroup.ListUniongroupMemberDetailsCommand;
 import com.everhomes.rest.uniongroup.SaveUniongroupConfiguresCommand;
 
 import java.util.List;
@@ -22,11 +22,14 @@ public interface UniongroupService {
     /**
      * 根据组Id获取组内人员记录
      **/
-    public List getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd);
+    public List listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd);
 
     /**
      * 删除一条配置记录
      **/
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure);
+
+    /****/
+    public List listUniongroupMemberDetailsWithCondition();
 
 }

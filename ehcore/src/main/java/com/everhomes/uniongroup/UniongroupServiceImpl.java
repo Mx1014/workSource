@@ -57,6 +57,8 @@ public class UniongroupServiceImpl implements UniongroupService {
                     this.uniongroupConfigureProvider.deleteUniongroupConfigres(old_uc);
                 }
                 UniongroupConfigures uc = new UniongroupConfigures();
+                uc.setNamespaceId(namespaceId);
+                uc.setEnterpriseId(cmd.getEnterpriseId());
                 uc.setGroupType(uniongroupType.getCode());
                 uc.setGroupId(cmd.getGroupId());
                 uc.setTargetType(UniongroupTargetType.fromCode(r.getType()).getCode());
@@ -123,7 +125,7 @@ public class UniongroupServiceImpl implements UniongroupService {
                 uniongroupMemberDetails.setGroupId(cmd.getGroupId());
                 uniongroupMemberDetails.setGroupType(uniongroupType.getCode());
                 uniongroupMemberDetails.setDetailId(r);
-                uniongroupMemberDetails.setOrganizationId(detail.getOrganizationId());
+                uniongroupMemberDetails.setEnterpriseId(detail.getOrganizationId());
                 uniongroupMemberDetails.setTargetType(detail.getTargetType());
                 uniongroupMemberDetails.setTargetId(detail.getTargetId());
                 uniongroupMemberDetails.setNamespaceId(detail.getNamespaceId());
@@ -162,7 +164,7 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List<UniongroupMemberDetailsDTO> getUniongroupMemberDetailsByGroupId(GetUniongroupMemberDetailsCommand cmd) {
+    public List<UniongroupMemberDetailsDTO> listUniongroupMemberDetailsByGroupId(ListUniongroupMemberDetailsCommand cmd) {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId());
@@ -177,6 +179,12 @@ public class UniongroupServiceImpl implements UniongroupService {
     @Override
     public void deleteUniongroupConfigures(UniongroupConfigures uniongroupConfigure) {
         this.uniongroupConfigureProvider.deleteUniongroupConfigres(uniongroupConfigure);
+    }
+
+    @Override
+    public List listUniongroupMemberDetailsWithCondition() {
+//        this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType();
+        return null;
     }
 
 
