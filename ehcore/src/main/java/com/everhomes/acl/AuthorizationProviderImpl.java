@@ -125,7 +125,7 @@ public class AuthorizationProviderImpl implements AuthorizationProvider {
 			}
 		}
 		cond = cond.and(targetCond);
-		context.select(Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
+		context.select(Tables.EH_AUTHORIZATIONS.SCOPE, Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_TYPE, Tables.EH_AUTHORIZATIONS.OWNER_ID)
 				.from(Tables.EH_AUTHORIZATIONS)
 				.where(cond)
 				.groupBy(Tables.EH_AUTHORIZATIONS.SCOPE, Tables.EH_AUTHORIZATIONS.IDENTITY_TYPE)
