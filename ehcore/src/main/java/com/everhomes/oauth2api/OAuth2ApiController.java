@@ -35,8 +35,8 @@ public class OAuth2ApiController extends ControllerBase {
     private UserService userService;
 
     /**
-     * <b>URL: /oauth2api/trd/getUserInfo</b>
-     * <p>给电商用的获取用户信息的接口</p>
+     * <b>URL: /oauth2api/getUserInfo</b>
+     * <p>给内部用的获取用户信息的接口</p>
      */
     @RequestMapping("getUserInfo")
     @RestReturn(value=UserInfo.class)
