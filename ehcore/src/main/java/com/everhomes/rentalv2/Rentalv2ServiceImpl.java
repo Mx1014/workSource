@@ -1596,43 +1596,46 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			 
 					}
 
-					//优惠
-					if(rs.getDiscountType()!=null) {
-						if(	rs.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
-							//满减优惠
-							//每满一次 ,就减多少
-//						int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
-//						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
-							//满了多少次,都只减一个
-							if(siteTotalMoney.compareTo(rs.getFullPrice())>= 0) {
-								siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
-							}
-						}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
-							double multiple =0.0;
-							//满天减免
-							if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
-								for(Date rentalDate:dayMap.keySet()){
-									for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
-										if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
-											multiple = multiple+cmd.getRules().get(0).getRentalCount();
-										}
-									}
-								}
-							}else if (rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
-								for(Date rentalDate:dayMap.keySet()){
-									for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
-										if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
-											multiple =multiple+cmd.getRules().get(0).getRentalCount();
-										}
-									}
-								}
-							}
-							siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
-						}
-					}
+					
 				}
 			}
 
+			//优惠
+			if(rs.getDiscountType()!=null) {
+				if(	rs.getDiscountType().equals(DiscountType.FULL_MOENY_CUT_MONEY.getCode())){
+					//满减优惠
+					//每满一次 ,就减多少
+//				int multiple =  siteTotalMoney.divide(rs.getFullPrice()).intValue();
+//				siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
+					//满了多少次,都只减一个
+					if(siteTotalMoney.compareTo(rs.getFullPrice())>= 0) {
+						siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice());
+					}
+				}else if(DiscountType.FULL_DAY_CUT_MONEY.getCode().equals(rs.getDiscountType()) ){
+					double multiple =0.0;
+					//满天减免
+					if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())){
+						for(Date rentalDate:dayMap.keySet()){
+							for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+								if(dayMap.get(rentalDate).get(resourceNumber).size()>=2) {
+									multiple = multiple+cmd.getRules().get(0).getRentalCount();
+								}
+							}
+						}
+					}else if (rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
+						for(Date rentalDate:dayMap.keySet()){
+							for(String resourceNumber : dayMap.get(rentalDate).keySet()) {
+								if(dayMap.get(rentalDate).get(resourceNumber).size()>=3) {
+									multiple =multiple+cmd.getRules().get(0).getRentalCount();
+								}
+							}
+						}
+					}
+					siteTotalMoney = siteTotalMoney.subtract(rs.getCutPrice().multiply(new BigDecimal(multiple)));
+				}
+			}
+			
+			
 			//不可以在开始时间-最多提前时间之前 预定 太早了
 //			if (reserveTime.before(new java.util.Date(rentalBill.getStartTime().getTime()
 //					- rs.getRentalStartTime()))) {
