@@ -9855,7 +9855,24 @@ System.out.println();
 		return response;
 	}
 
+	// added by R, for salaryGroup 20170630
+	@Override
+	public Organization createSalaryGroupOrganization(Long organizationId, String name){
 
+		User user = UserContext.current().getUser();
+        Organization parOrg = this.checkOrganization(organizationId);
+        Organization organization  = ConvertHelper.convert(parOrg, Organization.class);
+
+        organization.setName(name);
+        organization.setDirectlyEnterpriseId(organizationId);
+		organization.setGroupType("SALARYGROUP");
+        organization.setLevel(parOrg.getLevel()+1);
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organization.setCreatorUid(user.getId());
+		organizationProvider.createOrganization(organization);
+
+		return organization;
+	}
 }
 
 

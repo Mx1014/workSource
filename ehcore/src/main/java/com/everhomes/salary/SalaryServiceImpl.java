@@ -138,15 +138,19 @@ public class SalaryServiceImpl implements SalaryService {
 
         AddSalaryGroupResponse response = new AddSalaryGroupResponse();
         if (!cmd.getSalaryGroupEntity().isEmpty()) {
+
             //	添加批次至组织结构
-            //	this.organizationService.xxxxx
-            response.setSalaryGroupEntry(cmd.getSalaryGroupEntity().stream().map(r -> {
+            Organization org = this.organizationService.createSalaryGroupOrganization(cmd.getOwnerId(),cmd.getSalaryGroupName());
+            Long groupId = org.getId();
+
+            //  添加至薪酬组刘表
+            response.setSalaryGroupEntity(cmd.getSalaryGroupEntity().stream().map(r -> {
                 SalaryGroupEntity entity = new SalaryGroupEntity();
                 if (!StringUtils.isEmpty(cmd.getOwnerType()))
                     entity.setOwnerType(cmd.getOwnerType());
                 if (!StringUtils.isEmpty(cmd.getOwnerId()))
                     entity.setOwnerId(cmd.getOwnerId());
-                entity.setGroupId(r.getGroupId());
+                entity.setGroupId(groupId);
                 entity.setOriginEntityId(r.getOriginEntityId());
                 entity.setType(r.getType());
                 entity.setCategoryId(r.getCategoryId());
@@ -154,10 +158,12 @@ public class SalaryServiceImpl implements SalaryService {
                 entity.setName(r.getName());
                 entity.setEditableFlag(r.getEditableFlag());
                 entity.setTemplateName(r.getTemplateName());
-                entity.setNumberType(r.getNumberType());
+                if (!StringUtils.isEmpty(r.getNumberType()))
+                    entity.setNumberType(r.getNumberType());
                 if (!StringUtils.isEmpty(r.getDefaultValue()))
                     entity.setDefaultValue(r.getDefaultValue());
-                entity.setNeedCheck(r.getNeedCheck());
+                if (!StringUtils.isEmpty(r.getNeedCheck()))
+                    entity.setNeedCheck(r.getNeedCheck());
                 entity.setDefaultOrder(r.getDefaultOrder());
                 entity.setVisibleFlag(r.getVisibleFlag());
                 this.salaryGroupEntityProvider.createSalaryGroupEntity(entity);

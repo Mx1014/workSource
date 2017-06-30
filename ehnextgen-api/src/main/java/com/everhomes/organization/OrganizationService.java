@@ -454,4 +454,7 @@ public interface OrganizationService {
 	ListOrganizationContactCommandResponse listUsersOfEnterprise(listUsersOfEnterpriseCommand cmd);
 	void exportEnterprises(ListEnterprisesCommand cmd, HttpServletResponse response);
 	ListEnterprisesCommandResponse listNewEnterprises(ListEnterprisesCommand cmd);
+
+	// added by R, for salaryGroup 20170630
+	public Organization createSalaryGroupOrganization(Long organizationId, String name);
 }
