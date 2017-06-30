@@ -1560,9 +1560,8 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public UpdateParkingOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd) {
+	public ParkingRechargeOrderDTO updateParkingOrder(UpdateParkingOrderCommand cmd) {
 
-		UpdateParkingOrderDTO dto = ConvertHelper.convert(cmd, UpdateParkingOrderDTO.class);
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
@@ -1577,6 +1576,8 @@ public class ParkingServiceImpl implements ParkingService {
 				order.setStatus(ParkingRechargeOrderStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				parkingProvider.updateParkingRechargeOrder(order);
+
+				ParkingRechargeOrderDTO dto = ConvertHelper.convert(order, ParkingRechargeOrderDTO.class);
 				return dto;
 			}
 		}

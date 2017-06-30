@@ -529,10 +529,10 @@ public class ParkingController extends ControllerBase {
      * <p>更新订单</p>
      */
     @RequestMapping("updateParkingOrder")
-    @RestReturn(value=UpdateParkingOrderDTO.class)
+    @RestReturn(value=ParkingRechargeOrderDTO.class)
     public RestResponse updateParkingOrder(UpdateParkingOrderCommand cmd) {
 
-        UpdateParkingOrderDTO dto = parkingService.updateParkingOrder(cmd);
+        ParkingRechargeOrderDTO dto = parkingService.updateParkingOrder(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
