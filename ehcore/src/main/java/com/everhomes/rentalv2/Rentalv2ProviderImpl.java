@@ -499,7 +499,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			}
 		}else if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY || RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
 			if (rentalTypes.contains(RentalType.HOUR)) {
-				Timestamp[] beginEndTime = calculateBeginEndTime(rentalResource, rentalCell);
+				Timestamp[] beginEndTime = calculateHalfDayBeginEndTime(rentalResource, rentalCell);
 				step.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID.equal(rentalCell.getId())
 						.or(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_TYPE.eq(RentalType.DAY.getCode())
 								.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.RESOURCE_RENTAL_DATE.eq(rentalCell.getResourceRentalDate())))
@@ -543,6 +543,102 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return record == null ? 0D : record.getValue(DSL.sum(maxRentalCount)) == null ? 0D : record.getValue(DSL.sum(maxRentalCount)).doubleValue();
 	}
 
+	@Override
+	public boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
+		List<Byte> rentalTypes = priceRules.stream().map(Rentalv2PriceRule::getRentalType).collect(Collectors.toList());
+		rentalTypes.remove(rentalCell.getRentalType());
+		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.HALFDAY) {
+			rentalTypes.remove(new Byte(RentalType.THREETIMEADAY.getCode()));
+		}
+		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.THREETIMEADAY) {
+			rentalTypes.remove(new Byte(RentalType.HALFDAY.getCode()));
+		}
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = null;
+		//此处如果用一条语句写效率比较低，反而不如像下面这样费事的写
+		for (Byte rentalTypeByte : rentalTypes) {
+			RentalType rentalType = RentalType.fromCode(rentalTypeByte);
+			if (rentalType == RentalType.HOUR) {
+				Timestamp[] beginEndTime = calculateBeginEndTime(rentalResource, rentalCell);
+				record = getHourCloseRecord(context, rentalResource.getId(), beginEndTime[0], beginEndTime[1]);
+			}else if (rentalType == RentalType.DAY) {
+				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
+				record = getDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1]);
+			}else if (rentalType == RentalType.MONTH) {
+				record = getMonthCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate());
+			}else if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
+				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
+				record = getHalfDayCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalTypeByte, amorpm);
+			}
+			if (record != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private Date[] calculateBeginEndDate(RentalResource rentalResource, RentalCell rentalCell) {
+		if (RentalType.fromCode(rentalCell.getRentalType()) == RentalType.MONTH) {
+			return new Date[] {initToMonthFirstDay(rentalCell.getResourceRentalDate()), initToMonthLastDay(rentalCell.getResourceRentalDate())};
+		}
+		return new Date[] {rentalCell.getResourceRentalDate(), rentalCell.getResourceRentalDate()};
+	}
+
+	private Timestamp[] calculateBeginEndTime(RentalResource rentalResource, RentalCell rentalCell) {
+		RentalType rentalType = RentalType.fromCode(rentalCell.getRentalType());
+		if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
+			return calculateHalfDayBeginEndTime(rentalResource, rentalCell);
+		}else if (rentalType == RentalType.DAY) {
+			Long currentTime = rentalCell.getResourceRentalDate().getTime();
+			return new Timestamp[]{new Timestamp(currentTime), new Timestamp(currentTime + 24*60*60*1000 - 1000)};
+		}else if (rentalType == RentalType.MONTH) {
+			Long start = initToMonthFirstDay(rentalCell.getResourceRentalDate()).getTime();
+			Long end = initToMonthLastDay(rentalCell.getResourceRentalDate()).getTime() + 24*60*60*1000 - 1000;
+			return new Timestamp[]{new Timestamp(start), new Timestamp(end)};
+		}
+		return new Timestamp[]{new Timestamp(rentalCell.getResourceRentalDate().getTime()), new Timestamp(rentalCell.getResourceRentalDate().getTime())};
+	}
+
+	private Record getHourCloseRecord(DSLContext context, Long resourceId, Timestamp begin, Timestamp end) {
+		return context.select().from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.HOUR.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.ge(begin))
+				.and(Tables.EH_RENTALV2_CELLS.END_TIME.le(end))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+				.fetchAny();
+	}
+
+	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate, Byte rentalType, Byte amorpm) {
+		return context.select().from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(resourceRentalDate))
+				.and(Tables.EH_RENTALV2_CELLS.AMORPM.eq(amorpm))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+				.fetchAny();
+	}
+
+	private Record getMonthCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate) {
+		return context.select().from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.MONTH.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(resourceRentalDate)))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+				.fetchAny();
+	}
+
+	private Record getDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end) {
+		return context.select().from(Tables.EH_RENTALV2_CELLS)
+				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
+				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.DAY.getCode()))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
+				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.le(end))
+				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
+				.fetchAny();
+	}
+
 	private Date initToMonthLastDay(Date date) {
 		Calendar temp = Calendar.getInstance();
 		temp.setTime(date);
@@ -565,8 +661,23 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return new Date(temp.getTimeInMillis());
 	}
 
-	private Timestamp[] calculateBeginEndTime(RentalResource rentalResource, RentalCell rentalCell) {
-		return null;
+	private Timestamp[] calculateHalfDayBeginEndTime(RentalResource rentalResource, RentalCell rentalCell) {
+		List<RentalTimeInterval> rentalTimeIntervals = queryRentalTimeIntervalByOwner(RentalTimeIntervalOwnerType.RESOURCE_HALF_DAY.getCode(), rentalResource.getId());
+		if (rentalCell.getAmorpm() != null && rentalTimeIntervals.size() > rentalCell.getAmorpm().intValue()) {
+			RentalTimeInterval rentalTimeInterval = rentalTimeIntervals.get(rentalCell.getAmorpm().intValue());
+			Timestamp beginTime = format(rentalCell.getResourceRentalDate(), rentalTimeInterval.getBeginTime());
+			Timestamp endTime = format(rentalCell.getResourceRentalDate(), rentalTimeInterval.getEndTime());
+			return new Timestamp[]{beginTime, endTime};
+		}
+		
+		return new Timestamp[]{new Timestamp(rentalCell.getResourceRentalDate().getTime()), new Timestamp(rentalCell.getResourceRentalDate().getTime())};
+	}
+
+	private Timestamp format(Date date, Double time) {
+		Timestamp result = new Timestamp(date.getTime() + (long)(time*60*60*1000));
+//		result.setHours(time.intValue());
+//		result.setMinutes((int) ((time.doubleValue() - time.intValue()) * 60));
+		return result;
 	}
 
 	@SuppressWarnings("deprecation")

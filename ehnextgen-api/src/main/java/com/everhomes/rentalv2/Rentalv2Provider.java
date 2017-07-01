@@ -287,4 +287,8 @@ public interface Rentalv2Provider {
 
 	MaxMinPrice findMaxMinPrice(Long ownerId, Byte rentalType);
 
+
+	boolean findOtherModeClosed(RentalResource rentalResource, RentalCell rentalCell,
+			List<Rentalv2PriceRule> priceRules);
+
 }

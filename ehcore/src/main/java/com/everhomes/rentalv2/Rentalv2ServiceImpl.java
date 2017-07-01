@@ -3789,6 +3789,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<>());
 
+		
 		processDayRuleDTOs(start, end, response.getSiteDays(), cmd.getSiteId(), rs, response.getAnchorTime(), cmd.getSceneToken());
 		return response;
 	}
@@ -3882,7 +3883,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
 		}
-
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 		for(;start.before(end);start.add(Calendar.MONTH, 1)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			dtos.add(dayDto);
@@ -3933,16 +3934,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //						}
 //					}
 					// 支持复选，要换一种方式计算剩余数量
-					calculateAvailableCount(dto, rs, rsr);
+					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rs);
 
 					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
+					
+					// 多种模式的情况下，一种模式下关闭的其它模式下对应的时间段也要关闭
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+						calculateCurrentStatus(dto, rs, rsr, priceRules);
+					}
+					
 					dayDto.getSiteRules().add(dto);
 				}
 			}
+		}
+	}
+
+	private void calculateCurrentStatus(RentalSiteRulesDTO dto, RentalResource rentalResource, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
+		boolean isClosed = rentalv2Provider.findOtherModeClosed(rentalResource, rentalCell, priceRules);
+		if (isClosed) {
+			dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 		}
 	}
 
@@ -4006,7 +4020,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), sceneToken);
 		}
-
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteDayRulesDTO dayDto = new RentalSiteDayRulesDTO();
 			dtos.add(dayDto);
@@ -4057,13 +4071,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //						}
 //					}
 					// 支持复选，要换一种方式计算剩余数量
-					calculateAvailableCount(dto, rs, rsr);
+					calculateAvailableCount(dto, rs, rsr, priceRules);
 					//根据时间判断来设置status
 					setRentalCellStatus(reserveTime, dto, rsr, rs);
 
 					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
+					
+					//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+						calculateCurrentStatus(dto, rs, rsr, priceRules);
+					}
+					
 					dayDto.getSiteRules().add(dto);
 	
 				}
@@ -4133,6 +4153,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				start.getActualMinimum(Calendar.DAY_OF_WEEK));
 		end.add(Calendar.DAY_OF_YEAR, 7);
 		response.setSiteDays(new ArrayList<RentalSiteNumberDayRulesDTO>());
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteNumberDayRulesDTO dayDto = new RentalSiteNumberDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -4185,7 +4206,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //						}
 //					}
 					// 支持复选，要换一种方式计算剩余数量
-					calculateAvailableCount(dto, rs, rsr);
+					calculateAvailableCount(dto, rs, rsr, priceRules);
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						if ((NormalFlag.NEED.getCode() == rs.getRentalStartTimeFlag())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
@@ -4223,6 +4244,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
+					
+					//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
+					if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+						calculateCurrentStatus(dto, rs, rsr, priceRules);
+					}
+					
 					if(siteNumberMap.get(dto.getSiteNumber())==null)
 						siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
 					siteNumberMap.get(dto.getSiteNumber()).add(dto);
@@ -4294,7 +4321,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
-
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 		for(;start.before(end);start.add(Calendar.DAY_OF_YEAR, 1)){
 			RentalSiteNumberDayRulesDTO dayDto = new RentalSiteNumberDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -4348,13 +4375,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //							}
 //						}
 						// 支持复选，要换一种方式计算剩余数量
-						calculateAvailableCount(dto, rs, rsr);
+						calculateAvailableCount(dto, rs, rsr, priceRules);
 						//根据时间判断来设置status
 						setRentalCellStatus(reserveTime, dto, rsr, rs);
 
 						if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 							dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 						}
+						
+						//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
+						if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+							calculateCurrentStatus(dto, rs, rsr, priceRules);
+						}
+						
 						if(siteNumberMap.get(dto.getSiteNumber())==null)
 							siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
 						siteNumberMap.get(dto.getSiteNumber()).add(dto);
@@ -4428,7 +4461,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			User user = UserContext.current().getUser();
 			sceneTokenDTO = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		}
-
+		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 		for(;start.before(end);start.add(Calendar.MONTH, 1)){
 			RentalSiteNumberDayRulesDTO dayDto = new RentalSiteNumberDayRulesDTO();
 			response.getSiteDays().add(dayDto);
@@ -4482,13 +4515,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //							}
 //						}
 						// 支持复选，要换一种方式计算剩余数量
-						calculateAvailableCount(dto, rs, rsr);
+						calculateAvailableCount(dto, rs, rsr,priceRules);
 						//根据时间判断来设置status
 						setRentalCellStatus(reserveTime, dto, rsr, rs);
 
 						if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 							dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 						}
+						
+						//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
+						if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+							calculateCurrentStatus(dto, rs, rsr, priceRules);
+						}
+						
 						if(siteNumberMap.get(dto.getSiteNumber())==null)
 							siteNumberMap.put(dto.getSiteNumber(), new ArrayList<RentalSiteRulesDTO>());
 						siteNumberMap.get(dto.getSiteNumber()).add(dto);
@@ -4562,6 +4601,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				RentalSiteStatus.NORMAL.getCode(), rs.getRentalStartTimeFlag());
 		// 查sitebills
 		if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
+			List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rs.getId());
 			for (RentalCell rsr : rentalSiteRules) {
 				RentalSiteRulesDTO dto =ConvertHelper.convert(rsr, RentalSiteRulesDTO.class);
 
@@ -4605,7 +4645,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				}
 				
 				// 支持复选，要换一种方式计算剩余数量
-				calculateAvailableCount(dto, rs, rsr);
+				calculateAvailableCount(dto, rs, rsr, priceRules);
 				
 				//根据时间判断来设置status
 				setRentalCellStatus(reserveTime, dto, rsr, rs);
@@ -4613,6 +4653,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				if (dto.getCounts() == 0 || rsr.getStatus().equals((byte)-1)) {
 					dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 				}
+				
+				//如果多个模式，那么其它模式关的，当前模式对应时间也要关闭
+				if (SiteRuleStatus.fromCode(dto.getStatus()) == SiteRuleStatus.OPEN && priceRules.size() > 1) {
+					calculateCurrentStatus(dto, rs, rsr, priceRules);
+				}
+				
 				if(siteNumberMap.get(dto.getSiteNumber())==null)
 					siteNumberMap.put(dto.getSiteNumber(), new ArrayList<>());
 				siteNumberMap.get(dto.getSiteNumber()).add(dto);
@@ -4633,8 +4679,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return response;
 	}
 
-	private void calculateAvailableCount(RentalSiteRulesDTO dto, RentalResource rs, RentalCell rentalCell) {
-		List<Rentalv2PriceRule> priceRules = rentalv2PriceRuleProvider.listPriceRuleByOwner(PriceRuleType.RESOURCE.getCode(), rentalCell.getRentalResourceId());
+	private void calculateAvailableCount(RentalSiteRulesDTO dto, RentalResource rs, RentalCell rentalCell, List<Rentalv2PriceRule> priceRules) {
 		Double rentedCount = null;
 		if (priceRules.size() == 1) {
 			// 如果只有一种规则，那就是当前单元格的规则，则按原来的方式计算
