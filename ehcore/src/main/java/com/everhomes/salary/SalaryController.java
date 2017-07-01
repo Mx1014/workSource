@@ -166,17 +166,17 @@ public class SalaryController extends ControllerBase {
         return response;
     }
 
-    /*
-	*//**
-	 * <p>3-4.设置人员薪酬字段值 有增加没有更新</p>
-	 * <b>URL: /salary/saveSalaryEmployeeOriginVals</b>
-	 *//*
-	@RequestMapping("saveSalaryEmployeeOriginVals")
+
+	/**
+	 * <p>3-4.添加(关联)人员至组织架构的薪酬组</p>
+	 * <b>URL: /salary/addToOrganizationSalaryGroup</b>
+	 */
+	@RequestMapping("addToOrganizationSalaryGroup")
 	@RestReturn(String.class)
-	public RestResponse saveSalaryEmployeeOriginVals(SaveSalaryEmployeeOriginValsCommand cmd){
-		salaryService.saveSalaryEmployeeOriginVals(cmd);
+	public RestResponse addToOrganizationSalaryGroup(AddToOrganizationSalaryGroupCommand cmd){
+		salaryService.addToOrganizationSalaryGroup(cmd);
 		return new RestResponse();
-	}*/
+	}
 
 	/**
 	 * <p>4-1.导出某个薪酬组excel</p>
