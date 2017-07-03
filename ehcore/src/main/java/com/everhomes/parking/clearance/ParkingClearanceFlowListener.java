@@ -104,11 +104,22 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
         if (map != null) {
             String nodeConfigStatus = String.valueOf(map.get("status"));
-            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(nodeConfigStatus);
-
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromName(nodeConfigStatus);
+            if (status == null) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("ParkingClearanceLogStatus config error, nodeConfig = {}", params);
+                }
+                return;
+            }
             Long logId = ctx.getFlowCase().getReferId();
             coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
                 ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                if (log == null) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("can not find clearance log, id = {}", logId);
+                    }
+                    return null;
+                }
                 if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != status) {
                     log.setStatus(status.getCode());
                     clearanceLogProvider.updateClearanceLog(log);
@@ -123,6 +134,12 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
         Long logId = ctx.getFlowCase().getReferId();
         coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
             ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+            if (log == null) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("can not find clearance log, id = {}", logId);
+                }
+                return null;
+            }
             if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
                 log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
                 clearanceLogProvider.updateClearanceLog(log);
@@ -148,11 +165,22 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
         if (map != null && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
             String nodeConfigStatus = String.valueOf(map.get("status"));
-            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(nodeConfigStatus);
-
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.fromName(nodeConfigStatus);
+            if (status == null) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("ParkingClearanceLogStatus config error, nodeConfig = {}", params);
+                }
+                return;
+            }
             Long logId = ctx.getFlowCase().getReferId();
             coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
                 ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                if (log == null) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("can not find clearance log, id = {}", logId);
+                    }
+                    return null;
+                }
                 ParkingClearanceLogStatus logStatus = ParkingClearanceLogStatus.fromCode(log.getStatus());
                 if (logStatus != status) {
                     log.setStatus(status.getCode());
