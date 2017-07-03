@@ -1,11 +1,10 @@
 package com.everhomes.aclink;
 
-import java.util.List;
-
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface DoorAccessService {
     public void onDoorMessageTimeout(Long cmdId);
@@ -129,4 +128,5 @@ public interface DoorAccessService {
 
 	void joinCompanyAutoAuth(Integer namespaceId, Long orgId, Long userId);
 
+    void exportVisitorDoorAuth(ExportDoorAuthCommand cmd, HttpServletResponse httpResponse);
 }

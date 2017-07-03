@@ -3,6 +3,9 @@ package com.everhomes.statistics.transaction;
 import java.util.Calendar;
 import java.util.List;
 
+import com.everhomes.scheduler.RunningFlag;
+import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.util.StringHelper;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -26,6 +29,9 @@ public class StatTransactionScheduleJob extends QuartzJobBean{
 	
 	@Autowired
 	private StatTransactionService statTransactionService;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 	
 	@Override
 	protected void executeInternal(JobExecutionContext context)
@@ -38,9 +44,11 @@ public class StatTransactionScheduleJob extends QuartzJobBean{
 		
 		Long startDate = calendar.getTimeInMillis();
 		Long endDate = calendar.getTimeInMillis();
-		//执行任务
-		List<StatTaskLogDTO> statTaskLogs =  statTransactionService.excuteSettlementTask(startDate, endDate);
-		
-		LOGGER.debug("schedele job result: {}", statTaskLogs);
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE){
+			//执行任务
+			List<StatTaskLogDTO> statTaskLogs =  statTransactionService.excuteSettlementTask(startDate, endDate);
+			LOGGER.debug("schedele job result: {}", StringHelper.toJsonString(statTaskLogs));
+		}
 	}
 }

@@ -206,7 +206,7 @@ public interface OrganizationProvider {
     List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name);
 	
     List<OrganizationMember> listOrganizationMemberByOrganizationIds(ListingLocator locator, int pageSize, Condition cond, List<Long> organizationIds);
-    
+
     List<OrganizationMember> listOrganizationMemberByTokens(String contactPhone, List<Long> organizationIds);
     
     Organization findOrganizationByParentAndName(Long parentId, String name);
@@ -399,5 +399,8 @@ public interface OrganizationProvider {
 			Byte operationType);
 
 	List<UserOrganizations> listUserOrganizations(CrossShardListingLocator locator, int pageSize, ListingQueryBuilderCallback callback);
+
+	Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path);
+
 }
 

@@ -144,12 +144,92 @@ CREATE TABLE `eh_organization_member_profile_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 新增字段
 ALTER TABLE `eh_organization_members` ADD COLUMN `detail_id` BIGINT COMMENT 'id for detail records';
 
-SET FOREIGN_KEY_CHECKS = 1;
+ALTER TABLE `eh_service_alliances` CHANGE COLUMN `default_order` `default_order` BIGINT COMMENT 'default value is id';
 
 
--- 园区入驻3.3 add by sw
+--3.备份eh_organization_members表为eh_organization_members_temp
+-- DROP TABLE IF EXISTS `eh_organization_members_temp`;
+create table eh_organization_members_temp select * from eh_organization_members;
+
+
+CREATE TABLE `eh_quality_inspection_samples` (
+`id` BIGINT NOT NULL,
+`namespace_id` INTEGER NOT NULL DEFAULT '0',
+`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the template, enterprise, etc',
+`owner_id` BIGINT NOT NULL DEFAULT '0',
+`name` VARCHAR(128) NOT NULL DEFAULT '',
+`sample_number` VARCHAR(128),
+`start_time` DATETIME NOT NULL,
+`end_time` DATETIME NOT NULL,
+`creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+`create_time` DATETIME ,
+`status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
+`delete_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
+`delete_time` DATETIME,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ʒ�ʺ˲����м�������λ����
+CREATE TABLE `eh_quality_inspection_sample_group_map` (
+`id` BIGINT NOT NULL COMMENT 'id',
+`namespace_id` INTEGER NOT NULL DEFAULT '0',
+`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
+`organization_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organizations',
+`position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions',
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ʒ�ʺ˲����м�������Ŀ
+CREATE TABLE `eh_quality_inspection_sample_community_map` (
+`id` BIGINT NOT NULL COMMENT 'id',
+`namespace_id` INTEGER NOT NULL DEFAULT '0',
+`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
+`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_communities',
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ʒ�ʺ˲����м�����ɵ�����ͳ�Ʊ�
+CREATE TABLE `eh_quality_inspection_sample_score_stat` (
+`id` BIGINT NOT NULL,
+`namespace_id` INTEGER NOT NULL DEFAULT '0',
+`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the template, enterprise, etc',
+`owner_id` BIGINT NOT NULL DEFAULT '0',
+`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
+`community_count` INTEGER NOT NULL DEFAULT '0',
+`task_count` INTEGER NOT NULL DEFAULT '0',
+`correction_count` INTEGER NOT NULL DEFAULT '0',
+`deduct_score` DOUBLE NOT NULL DEFAULT '0.0',
+`highest_score` DOUBLE NOT NULL DEFAULT '0.0',
+`lowest_score` DOUBLE NOT NULL DEFAULT '0.0',
+`create_time` DATETIME ,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_quality_inspection_specification_item_results ADD COLUMN `manual_flag` BIGINT NOT NULL DEFAULT '0' COMMENT '0: auto 1:manual 2:sample';
+ALTER TABLE eh_quality_inspection_specification_item_results ADD COLUMN `sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample';
+
+-- Ʒ�ʺ˲����м�������Ŀ�۷���ͳ�Ʊ�
+CREATE TABLE `eh_quality_inspection_sample_community_specification_stat` (
+`id` BIGINT NOT NULL,
+`namespace_id` INTEGER NOT NULL DEFAULT '0',
+`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the template, enterprise, etc',
+`owner_id` BIGINT NOT NULL DEFAULT '0',
+`sample_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_equipment_inspection_sample',
+`community_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_communities',
+`specification_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_quality_inspection_specifications',
+`deduct_score` DOUBLE NOT NULL DEFAULT '0.0',
+`create_time` DATETIME ,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE eh_quality_inspection_sample_score_stat ADD COLUMN `update_time` DATETIME;
+ALTER TABLE eh_quality_inspection_sample_score_stat ADD COLUMN `correction_qualified_count` INTEGER NOT NULL DEFAULT '0';
+ALTER TABLE eh_quality_inspection_sample_community_specification_stat ADD COLUMN `update_time` DATETIME;
+ALTER TABLE eh_quality_inspection_sample_community_specification_stat ADD COLUMN `specification_path` VARCHAR(128);
+
 ALTER TABLE `eh_lease_configs` ADD COLUMN `display_name_str` VARCHAR(128);
 ALTER TABLE `eh_lease_configs` ADD COLUMN `display_order_str` VARCHAR(128);
 
@@ -169,138 +249,61 @@ ALTER TABLE `eh_lease_promotions` ADD COLUMN `custom_form_flag` TINYINT NOT NULL
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `default_order` BIGINT NOT NULL DEFAULT 0;
 
 CREATE TABLE `eh_lease_form_requests` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`namespace_id` INT NOT NULL DEFAULT '0',
-	`owner_id` BIGINT NOT NULL,
-	`owner_type` VARCHAR (64) NOT NULL,
+`id` BIGINT NOT NULL COMMENT 'id of the record',
+`namespace_id` INT NOT NULL DEFAULT '0',
+`owner_id` BIGINT NOT NULL,
+`owner_type` VARCHAR (64) NOT NULL,
 
-    `source_id` BIGINT NOT NULL,
-	`source_type` VARCHAR (64) NOT NULL,
+  `source_id` BIGINT NOT NULL,
+`source_type` VARCHAR (64) NOT NULL,
 
-	`create_time` datetime DEFAULT NULL COMMENT 'record create time',
+`create_time` datetime DEFAULT NULL COMMENT 'record create time',
 
-	PRIMARY KEY (`id`)
+PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
 
 CREATE TABLE `eh_lease_configs2` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(32) COMMENT 'owner type, e.g EhCommunities',
-  `owner_id` BIGINT COMMENT 'owner id, e.g eh_communities id',  
-  `config_name` VARCHAR(128),
-  `config_value` VARCHAR(128),  
+`id` BIGINT NOT NULL COMMENT 'id of the record',
+`namespace_id` INTEGER NOT NULL DEFAULT 0,
+`owner_type` VARCHAR(32) COMMENT 'owner type, e.g EhCommunities',
+`owner_id` BIGINT COMMENT 'owner id, e.g eh_communities id',
+`config_name` VARCHAR(128),
+`config_value` VARCHAR(128),
 
-  `create_time` DATETIME,
-  `creator_uid` BIGINT,
-  
-  PRIMARY KEY (`id`)
+`create_time` DATETIME,
+`creator_uid` BIGINT,
+
+PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `eh_general_form_vals` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`namespace_id` INT NOT NULL DEFAULT '0',
-	`organization_id` BIGINT NOT NULL DEFAULT '0',
-	`owner_id` BIGINT NOT NULL,
-	`owner_type` VARCHAR (64) NOT NULL,
-	`module_id` BIGINT DEFAULT NULL COMMENT 'the module id',
-	`module_type` VARCHAR (64) DEFAULT NULL,
+`id` BIGINT NOT NULL COMMENT 'id of the record',
+`namespace_id` INT NOT NULL DEFAULT '0',
+`organization_id` BIGINT NOT NULL DEFAULT '0',
+`owner_id` BIGINT NOT NULL,
+`owner_type` VARCHAR (64) NOT NULL,
+`module_id` BIGINT DEFAULT NULL COMMENT 'the module id',
+`module_type` VARCHAR (64) DEFAULT NULL,
 
-    `source_id` BIGINT NOT NULL,
-	`source_type` VARCHAR (64) NOT NULL,
+  `source_id` BIGINT NOT NULL,
+`source_type` VARCHAR (64) NOT NULL,
 
-	`form_origin_id` BIGINT DEFAULT NULL,
-	`form_version` BIGINT DEFAULT NULL,
-	`field_name` VARCHAR (128) DEFAULT NULL,
-	`field_type` VARCHAR (128) DEFAULT NULL,
-	`field_value` text,
-	`create_time` datetime DEFAULT NULL COMMENT 'record create time',
+`form_origin_id` BIGINT DEFAULT NULL,
+`form_version` BIGINT DEFAULT NULL,
+`field_name` VARCHAR (128) DEFAULT NULL,
+`field_type` VARCHAR (128) DEFAULT NULL,
+`field_value` text,
+`create_time` datetime DEFAULT NULL COMMENT 'record create time',
 
-    `string_tag1` VARCHAR (128) DEFAULT NULL,
-	`string_tag2` VARCHAR (128) DEFAULT NULL,
-	`string_tag3` VARCHAR (128) DEFAULT NULL,
-	`string_tag4` VARCHAR (128) DEFAULT NULL,
-	`string_tag5` VARCHAR (128) DEFAULT NULL,
-	`integral_tag1` BIGINT (20) DEFAULT '0',
-	`integral_tag2` BIGINT (20) DEFAULT '0',
-	`integral_tag3` BIGINT (20) DEFAULT '0',
-	`integral_tag4` BIGINT (20) DEFAULT '0',
-	`integral_tag5` BIGINT (20) DEFAULT '0',
-	PRIMARY KEY (`id`)
+  `string_tag1` VARCHAR (128) DEFAULT NULL,
+`string_tag2` VARCHAR (128) DEFAULT NULL,
+`string_tag3` VARCHAR (128) DEFAULT NULL,
+`string_tag4` VARCHAR (128) DEFAULT NULL,
+`string_tag5` VARCHAR (128) DEFAULT NULL,
+`integral_tag1` BIGINT (20) DEFAULT '0',
+`integral_tag2` BIGINT (20) DEFAULT '0',
+`integral_tag3` BIGINT (20) DEFAULT '0',
+`integral_tag4` BIGINT (20) DEFAULT '0',
+`integral_tag5` BIGINT (20) DEFAULT '0',
+PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
-
--- 人才表，add by tt, 20170511
--- DROP TABLE IF EXISTS `eh_talents`;
-CREATE TABLE `eh_talents` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(64),
-  `owner_id` BIGINT,
-  `name` VARCHAR(64),
-  `avatar_uri` VARCHAR(2048),
-  `phone` VARCHAR(32),
-  `gender` TINYINT,
-  `position` VARCHAR(64),
-  `category_id` BIGINT,
-  `experience` INTEGER,
-  `graduate_school` VARCHAR(64),
-  `degree` TINYINT,
-  `remark` TEXT,
-  `enabled` TINYINT,
-  `default_order` BIGINT,
-  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  `operator_uid` BIGINT,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
--- 人才分类表，add by tt, 20170511
--- DROP TABLE IF EXISTS `eh_talent_categories`;
-CREATE TABLE `eh_talent_categories` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(64),
-  `owner_id` BIGINT,
-  `name` VARCHAR(64),
-  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  `operator_uid` BIGINT,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
--- 查询历史记录表，add by tt, 20170511
--- DROP TABLE IF EXISTS `eh_talent_query_histories`;
-CREATE TABLE `eh_talent_query_histories` (
-  `id` BIGINT NOT NULL,
-  `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(64),
-  `owner_id` BIGINT,
-  `keyword` VARCHAR(64),
-  `status` TINYINT NOT NULL COMMENT '0: inactive, 2: active',
-  `creator_uid` BIGINT,
-  `create_time` DATETIME,
-  `update_time` DATETIME,
-  `operator_uid` BIGINT,
-
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
--- 添加是否设置了管理员标记，add by tt, 20170522
-ALTER TABLE `eh_organizations` ADD COLUMN `set_admin_flag` TINYINT DEFAULT 0;
--- 增加索引，add by tt, 20170522
-ALTER TABLE `eh_organization_community_requests` ADD INDEX `member_id` (`member_id`);
-ALTER TABLE `eh_organization_community_requests` ADD INDEX `community_id` (`community_id`);
-
--- 服务联盟 增加排序和是否显示在app端的字段 by dengs, 20170523
-ALTER TABLE `eh_service_alliances` ADD COLUMN `display_flag` TINYINT NOT NULL DEFAULT '1' COMMENT '0:hide,1:display';
-ALTER TABLE `eh_service_alliances` CHANGE COLUMN `default_order` `default_order` BIGINT COMMENT 'default value is id';
-
--- 给flowCase增加申请人在当前场景下的公司id字段   add by xq.tian  2017/06/08
-ALTER TABLE `eh_flow_cases` ADD COLUMN `applier_organization_id` BIGINT COMMENT 'applier current organization_id';
-
-  

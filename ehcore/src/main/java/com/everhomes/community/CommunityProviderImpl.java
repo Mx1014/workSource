@@ -1380,4 +1380,18 @@ public class CommunityProviderImpl implements CommunityProvider {
         });
         return communities;
     }
+
+    @Override
+    public Map<Long, Community> listCommunitiesByIds(List<Long> ids) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final Map<Long, Community> communities = new HashMap<>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.ID.in(ids));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            communities.put(r.getId(), ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+        return communities;
+    }
 }

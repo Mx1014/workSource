@@ -13,10 +13,7 @@ import com.everhomes.rest.common.OpenMsgSessionActionData;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +31,9 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
 
     @Autowired
     private UserProvider userProvider;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private GroupProvider groupProvider;
@@ -81,7 +81,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
 //            LOGGER.info("resolvMessage： appUrls = " + appUrls + " , senderLogin namespaceId is " + senderLogin.getNamespaceId());
 //        }
         
-        deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
+        deviceMessage.setBadge((int) messagingService.getMessageCountInLoginMessageBox(destLogin));
         
         deviceMessage.setAppId(msg.getAppId());
         deviceMessage.setAudio("doorRing.caf");
@@ -91,14 +91,18 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         } else {
             deviceMessage.setPriorigy(MessagingPriorityConstants.MEDIUM.getCode());
         }
-        
+
+        // 安卓客户端需要知道这条推送消息的类型 {@link com.everhomes.rest.messaging.UserMessageType}
+        String messageType = getMessageType(senderLogin);
+        msg.getMeta().put("messageType", messageType);
+
         String bodyType = msg.getMeta().get("bodyType");
         if(null == bodyType) {
             return deviceMessage;
         }
         
         deviceMessage.getExtra().putAll(msg.getMeta());
-        
+
         if(msg.getMeta().containsKey("actionType")) {
             deviceMessage.setAction(msg.getMeta().get("actionType"));
         } else if(msg.getAppId() == AppConstants.APPID_MESSAGING) {
@@ -156,6 +160,14 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         String senderName = this.getSenderName(msg);
         deviceMessage.setAlert(senderName + deviceMessage.getAlert());
         return deviceMessage;
+    }
+
+    private String getMessageType(UserLogin senderLogin) {
+        if (senderLogin.getUserId() < User.MAX_SYSTEM_USER_ID) {
+            return UserMessageType.NOTICE.getCode();
+        } else {
+            return UserMessageType.MESSAGE.getCode();
+        }
     }
 
     private String getSenderName(Message msg) {

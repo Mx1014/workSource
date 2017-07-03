@@ -10,6 +10,7 @@ import java.util.List;
  * <li>namespaceId：域空间id</li>
  * <li>ownerType：ownerType</li>
  * <li>ownerId：ownerId</li>
+ * <li>currentOrganizationId：用户当前公司id</li>
  * <li>values: 审批项中，每项对应的值{@link PostApprovalFormItem} </li>
  * </ul>
  * @author janson
@@ -23,6 +24,8 @@ public class PostGeneralFormCommand {
 
 	private String sourceType;
 	private Long sourceId;
+
+    private Long currentOrganizationId;
 
 	@ItemType(PostApprovalFormItem.class)
 	private List<PostApprovalFormItem> values;
@@ -75,7 +78,15 @@ public class PostGeneralFormCommand {
 		this.values = values;
 	}
 
-	@Override
+    public Long getCurrentOrganizationId() {
+        return currentOrganizationId;
+    }
+
+    public void setCurrentOrganizationId(Long currentOrganizationId) {
+        this.currentOrganizationId = currentOrganizationId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

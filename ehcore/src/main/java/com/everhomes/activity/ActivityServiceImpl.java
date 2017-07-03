@@ -82,6 +82,7 @@ import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scheduler.RunningFlag;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -367,6 +368,9 @@ public class ActivityServiceImpl implements ActivityService {
     //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
+
+    	//检查版本  add by yanjun 20170626
+    	checkPayVersion(cmd);
     	
     	//先删除已经过期未支付的活动 add by yanjun 20170417
     	this.cancelExpireRosters(cmd.getActivityId());
@@ -538,6 +542,31 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
 	 }
+
+
+	 private void checkPayVersion(ActivitySignupCommand cmd){
+		 Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		 String version = UserContext.current().getVersion();
+
+		 if(activity.getChargeFlag() == null || activity.getChargeFlag().byteValue() == ActivityChargeFlag.UNCHARGE.getCode() ){
+		 	return;
+		 }
+
+		 if(version == null){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
+
+		 VersionRange versionRange = new VersionRange("["+version+","+version+")");
+		 VersionRange versionRangeMin = new VersionRange("[4.5.4,4.5.4)");
+
+		 if(((int)versionRange.getUpperBound()) < ((int)versionRangeMin.getUpperBound())){
+			 throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+					 ActivityServiceErrorCode.ERROR_VERSION_NOT_SUPPORT_PAY,
+					 "Please update your App");
+		 }
+	 }
     
     /**
      * 由signup方法提取处理，填充各种信息
@@ -684,6 +713,14 @@ public class ActivityServiceImpl implements ActivityService {
 		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
 		        }
+		        
+		        ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(cmd.getActivityId(), cmd.getPhone(), ActivityRosterStatus.NORMAL.getCode());
+		        if(oldRoster != null){
+		        	LOGGER.error("Roster already exist. activityId={}, phone={}", cmd.getActivityId(), cmd.getPhone());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_ROSTER_ALREADY_EXIST, "Roster already exist. activityId=" + cmd.getActivityId() + " phone=" + cmd.getPhone());
+		        }
+		        
 		        ActivityRoster roster = newRoster(cmd, user, activity);
 		        
 	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
@@ -700,7 +737,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
 	            
-	            createActivityRoster(roster);
+	            //createActivityRoster(roster);
+	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
 	        });
@@ -855,7 +893,9 @@ public class ActivityServiceImpl implements ActivityService {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
 			User user = UserContext.current().getUser();
 			Activity activity = checkActivityExist(cmd.getActivityId());
-			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
+			List<ActivityRoster> rostersTemp = getRostersFromExcel(files[0]);
+			
+			List<ActivityRoster> rosters = filterExistRoster(cmd.getActivityId(), rostersTemp);
 			//检查是否超过报名人数限制, add by tt, 20161012
 	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
 	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -890,10 +930,18 @@ public class ActivityServiceImpl implements ActivityService {
 			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
 				continue;
 			}
-			if (row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+			if (row.getA() == null || row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
 				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
 	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
 			}
+			
+			//新增条件真实姓名必填  add by yanjun 20170628
+			if (org.apache.commons.lang.StringUtils.isBlank(row.getB())) {
+				continue;
+//				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//	                    ActivityServiceErrorCode.ERROR_INVALID_REALNAME, "invalid realname " + row.getB());
+			}
+			
 			User user = getUserFromPhone(row.getA().trim());
 			ActivityRoster roster = new ActivityRoster();
 			roster.setUuid(UUID.randomUUID().toString());
@@ -906,17 +954,59 @@ public class ActivityServiceImpl implements ActivityService {
 	        roster.setLotteryFlag((byte) 0);
 	        roster.setPhone(row.getA().trim());
 	        roster.setRealName(row.getB().trim());
-	        roster.setGender(getGender(row.getC().trim()));
-	        roster.setCommunityName(row.getD().trim());
-	        roster.setOrganizationName(row.getE().trim());
-	        roster.setPosition(row.getF().trim());
-	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
-	        roster.setEmail(row.getH().trim());
+	        roster.setGender(getGender(getStrTrim(row.getC())));
+	        roster.setCommunityName(getStrTrim(row.getD()));
+	        roster.setOrganizationName(getStrTrim(row.getE()));
+	        roster.setPosition(getStrTrim(row.getF()));
+	        roster.setLeaderFlag(getLeaderFlag(getStrTrim(row.getG())));
+	        roster.setEmail(getStrTrim(row.getH()));
 	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
 	        
 	        rosters.add(roster);
 		}
 		return rosters;
+	}
+	
+	private List<ActivityRoster> filterExistRoster(Long activityId, List<ActivityRoster> rosters){
+		List<ActivityRoster> newRosters = new ArrayList<ActivityRoster>();
+		if(rosters == null){
+			return newRosters;
+		}
+		
+		//筛选重复数据，1、数据库不能有重复的，2、自己不能有重复的。
+		for(int i= 0; i< rosters.size(); i++){
+			ActivityRoster oldRoster = activityProvider.findRosterByPhoneAndActivityId(activityId, rosters.get(i).getPhone(), ActivityRosterStatus.NORMAL.getCode());
+			if(oldRoster != null){
+				continue;
+			}
+			
+			boolean oldFlag = false;
+			for(int j =0; j<newRosters.size(); j++){
+				if(rosters.get(i).getPhone().equals(newRosters.get(j).getPhone())){
+					oldFlag = true;
+					break;
+				}
+			}
+			
+			if(oldFlag){
+				continue;
+			}
+			newRosters.add(rosters.get(i));
+		}
+		return newRosters;
+	}
+	
+	/**
+	 * 防止nullPointException
+	 * @param str
+	 * @return
+	 */
+	private String getStrTrim(String str){
+		if(str == null){
+			return null;
+		}else{
+			return str.trim();
+		}
 	}
 
 	private Byte getLeaderFlag(String leaderFlag) {
@@ -4517,36 +4607,39 @@ public class ActivityServiceImpl implements ActivityService {
     @Scheduled(cron="0 0 * * * ?")
     @Override
 	public void activityWarningSchedule() {
-    	//使用tryEnter方法可以防止分布式部署时重复执行
-    	coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
-        	
-        	final Date now = DateUtils.getCurrentHour();
-        	List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
-        	namespaces.add(new NamespaceInfoDTO(0,"zuolin",""));
-        	
-        	//遍历每个域空间
-        	namespaces.forEach(n->{
-        		WarningSetting warningSetting = findWarningSetting(n.getId());
-        		Timestamp queryStartTime = new Timestamp(now.getTime()+warningSetting.getTime());
-        		Timestamp queryEndTime = new Timestamp(now.getTime()+warningSetting.getTime()+3600*1000);
-        		
-        		// 对于这个域空间时间范围内的活动，再单独设置定时任务
-        		List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
-        		activities.forEach(a->{
-        			if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
-        				final Job job1 = new Job(
-        						WarnActivityBeginningAction.class.getName(),
-        						new Object[] { String.valueOf(a.getId()) });
-        				
+
+		if(RunningFlag.fromCode(scheduleProvider.getRunningFlag()) == RunningFlag.TRUE) {
+			//使用tryEnter方法可以防止分布式部署时重复执行
+			coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(() -> {
+
+				final Date now = DateUtils.getCurrentHour();
+				List<NamespaceInfoDTO> namespaces = namespacesProvider.listNamespace();
+				namespaces.add(new NamespaceInfoDTO(0, "zuolin", ""));
+
+				//遍历每个域空间
+				namespaces.forEach(n -> {
+					WarningSetting warningSetting = findWarningSetting(n.getId());
+					Timestamp queryStartTime = new Timestamp(now.getTime() + warningSetting.getTime());
+					Timestamp queryEndTime = new Timestamp(now.getTime() + warningSetting.getTime() + 3600 * 1000);
+
+					// 对于这个域空间时间范围内的活动，再单独设置定时任务
+					List<Activity> activities = activityProvider.listActivitiesForWarning(n.getId(), queryStartTime, queryEndTime);
+					activities.forEach(a -> {
+						if (a.getSignupAttendeeCount() != null && a.getSignupAttendeeCount() > 0 && a.getStartTime().getTime() - warningSetting.getTime() >= new Date().getTime()) {
+							final Job job1 = new Job(
+									WarnActivityBeginningAction.class.getName(),
+									new Object[]{String.valueOf(a.getId())});
+
 //        				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
 //        						new Date().getTime()+10000);
-        				jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
-        						a.getStartTime().getTime() - warningSetting.getTime());
-        				LOGGER.debug("设置了一个活动提醒："+a.getId());
-					}
-        		});
-        	});
-    	});
+							jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+									a.getStartTime().getTime() - warningSetting.getTime());
+							LOGGER.debug("设置了一个活动提醒：" + a.getId());
+						}
+					});
+				});
+			});
+		}
 	}
 
 	@Override

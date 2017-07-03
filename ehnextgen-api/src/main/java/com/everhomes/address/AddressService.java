@@ -34,6 +34,7 @@ public interface AddressService {
     List<CommunityDoc> searchCommunities(SearchCommunityCommand cmd);
     
     ListApartmentByBuildingNameCommandResponse listApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
+    ListApartmentByBuildingNameCommandResponse listCommunityApartmentsByBuildingName(ListApartmentByBuildingNameCommand cmd);
 	void importCommunityInfos(MultipartFile[] files);
 	void importAddressInfos(MultipartFile[] files);
 	

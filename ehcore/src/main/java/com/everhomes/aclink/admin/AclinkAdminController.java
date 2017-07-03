@@ -1,33 +1,22 @@
 package com.everhomes.aclink.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import com.everhomes.rest.aclink.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.everhomes.aclink.AclinkLog;
-import com.everhomes.aclink.AclinkLogProvider;
-import com.everhomes.aclink.AesServerKeyProvider;
-import com.everhomes.aclink.AesUserKey;
-import com.everhomes.aclink.DoorAccess;
-import com.everhomes.aclink.DoorAccessProvider;
-import com.everhomes.aclink.DoorAccessService;
-import com.everhomes.aclink.DoorAuthMethodType;
-import com.everhomes.aclink.DoorAuthProvider;
+import com.everhomes.aclink.*;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestDoc(value="Aclink Admin controller", site="core")
 @RestController
@@ -351,6 +340,20 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAuthResponse.class)
     public RestResponse searchVisitorDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchVisitorDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/exportVisitorDoorAuthByAdmin</b>
+     * <p>导出访客授权记录</p>
+     */
+    @RequestMapping("exportVisitorDoorAuthByAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse exportVisitorDoorAuthByAdmin(@Valid ExportDoorAuthCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportVisitorDoorAuth(cmd, httpResponse);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

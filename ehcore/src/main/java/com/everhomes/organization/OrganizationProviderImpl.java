@@ -54,7 +54,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
- 
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -68,22 +67,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Autowired 
 	private SequenceProvider sequenceProvider;
 
-	@Override
-	public void createOrganization(Organization organization) {
-		// eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20160722
-		// long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
-	    long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizations.class));
-		organization.setId(id);
-		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organization.setPath(organization.getPath() + "/" + id);
+    @Override
+    public void createOrganization(Organization organization) {
+        // eh_organizations表是global表，不能使用key table表的方式来获取id  modify by lqs 20160722
+        // long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizations.class));
+        organization.setId(id);
+        organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organization.setPath(organization.getPath() + "/" + id);
 		organization.setSetAdminFlag(TrueOrFalseFlag.FALSE.getCode());
-		// DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
-		dao.insert(organization);
-		
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null); 
+        // DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
+        dao.insert(organization);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizations.class, null);
 
 	}
 
@@ -249,7 +248,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
-	
+
 	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {
 		return listEnterpriseByNamespaceIds(namespaceId, organizationType, null, locator, pageSize);
@@ -257,7 +256,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId, String organizationType,
-			Byte setAdminFlag, CrossShardListingLocator locator, int pageSize) {
+														   Byte setAdminFlag, CrossShardListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
@@ -274,7 +273,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if (setAdminFlag != null) {
 			query.addConditions(Tables.EH_ORGANIZATIONS.SET_ADMIN_FLAG.eq(setAdminFlag));
 		}
-		
+
 		if(null != locator.getAnchor()){
 			query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
 		}
@@ -285,7 +284,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		locator.setAnchor(null);
-		
+
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());
@@ -2711,6 +2710,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return addresses;
 	}
 	
+
 	@Override
 	public List<Long> listOrganizationIdByBuildingId(Long buildingId, byte setAdminFlag, int pageSize, CrossShardListingLocator locator) {
 		List<Long> organizationIds = new ArrayList<>();
@@ -4000,6 +4000,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return totalRecords;
     }
 
+
     /**
      * modify by lei lv,增加了detail表，部分信息挪到detail表里去取
      **/
@@ -4620,5 +4621,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Set<Long> listMemberDetailIdWithExclude(Integer namespaceId, String big_path, List<String> small_path) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		//added by wh 2016-10-13 把被拒绝的过滤掉
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()));
+		Condition cond = Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(big_path);
+		if (small_path != null) {
+			for (String p : small_path) {
+				cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.notLike(p));
+			}
+		}
+		query.addConditions(cond);
+		List<EhOrganizationMembersRecord> records = query.fetch();
+		Set<Long> result = new HashSet<>();
+		if (records != null) {
+			records.stream().map(r -> {
+				result.add(r.getDetailId());
+				return null;
+			}).collect(Collectors.toList());
+		}
+		if (result != null && result.size() != 0) {
+			return result;
+		}
+		return null;
 	}
 }
