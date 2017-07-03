@@ -948,14 +948,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field meterType");
             }
-            EnergyMeterCategory category = meterCategoryProvider.findByName(currNamespaceId(), result.getD());
+            EnergyMeterCategory category = meterCategoryProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getD());
             if (category != null) {
                 meter.setBillCategoryId(category.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
-            category = meterCategoryProvider.findByName(currNamespaceId(), result.getE());
+            category = meterCategoryProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getE());
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
             } else {
@@ -984,14 +984,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             } else {
                 meter.setStartReading(new BigDecimal("1"));
             }
-            EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), result.getJ());
+            EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getJ());
             if (formula != null) {
                 meter.setAmountFormulaId(formula.getId());
             } else {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
-            formula = meterFormulaProvider.findByName(currNamespaceId(), result.getK());
+            formula = meterFormulaProvider.findByName(currNamespaceId(), cmd.getCommunityId(), result.getK());
             if (formula != null) {
                 meter.setCostFormulaId(formula.getId());
             } else {
