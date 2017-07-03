@@ -14,3 +14,8 @@ ALTER TABLE eh_parking_recharge_orders CHANGE old_expired_time start_period date
 ALTER TABLE eh_parking_recharge_orders CHANGE new_expired_time end_period datetime;
 
 
+-- merge from forum-2.0 by yanjun 20170703
+-- 投票增加标签字段  add by yanjun 20170613
+ALTER TABLE `eh_polls` ADD COLUMN `tag` VARCHAR(32) NULL;
+-- merge from forum-2.0 by yanjun 20170703
+
