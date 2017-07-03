@@ -1068,7 +1068,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			OrganizationMemberDTO dto = new OrganizationMemberDTO();
 			
 			if(!StringUtils.isEmpty(r.getA())){
-				dto.setEmployeeNo(Long.valueOf(r.getA()));
+				dto.setEmployeeNo(r.getA());
 			}
 			dto.setGroupName(r.getB());
 			dto.setContactName(r.getC());

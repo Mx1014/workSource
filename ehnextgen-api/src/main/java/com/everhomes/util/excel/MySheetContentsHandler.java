@@ -146,7 +146,8 @@ public class MySheetContentsHandler implements XSSFSheetXMLHandler.SheetContents
 			else if(s.startsWith("Z"))
 			{
 				rowResult.setZ(s1);
-			}	
+			}
+			rowResult.getCells().put(s.replace(String.valueOf(resultList.size()), ""), s1);
 		}
 	}
 
