@@ -1,4 +1,4 @@
--- Õ£≥µ≥‰÷µ add by sw 20170703
+-- ÂÅúËΩ¶ÂÖÖÂÄº add by sw 20170703
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN `parking_time` INT DEFAULT NULL COMMENT 'parking-time';
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN `error_description` TEXT DEFAULT NULL COMMENT 'error description';
 ALTER TABLE eh_parking_recharge_orders ADD COLUMN `error_description_json` TEXT DEFAULT NULL COMMENT 'error description';
