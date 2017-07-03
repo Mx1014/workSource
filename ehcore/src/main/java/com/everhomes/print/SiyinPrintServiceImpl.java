@@ -763,7 +763,7 @@ public class SiyinPrintServiceImpl implements SiyinPrintService {
 		BigDecimal defaultdecimal = new BigDecimal(configurationProvider.getValue(PrintErrorCode.PRINT_DEFAULT_PRICE,"0.1"));
 		response.setColorTypeDTO(new PrintSettingColorTypeDTO());
 		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
-		response.getColorTypeDTO().setBlackWhitePrice(defaultdecimal);
+		response.getColorTypeDTO().setColorPrice(defaultdecimal);
 		
 		response.setPaperSizePriceDTO(new PrintSettingPaperSizePriceDTO());
 		
