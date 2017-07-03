@@ -3644,20 +3644,24 @@ public class DoorAccessServiceImpl implements DoorAccessService, LocalBusSubscri
 			}
 			
 			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(userId);
-			CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
-			cmd.setApproveUserId(User.SYSTEM_UID);
-			cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
-			cmd.setAuthType(DoorAuthType.FOREVER.getCode());
-			cmd.setDescription("new user auto created");
-			cmd.setDoorId(doorAccess.getId());
-			cmd.setNamespaceId(userId);
-			if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
-				cmd.setPhone(userInfo.getPhones().get(0));	
-			}
-			cmd.setRightOpen((byte)1);
-			cmd.setRightRemote((byte)1);
-			cmd.setUserId(userId);
-			createDoorAuth(cmd);			
+            if(userInfo != null){
+                CreateDoorAuthCommand cmd = new CreateDoorAuthCommand();
+                cmd.setApproveUserId(User.SYSTEM_UID);
+                cmd.setAuthMethod(DoorAuthMethodType.ADMIN.getCode());
+                cmd.setAuthType(DoorAuthType.FOREVER.getCode());
+                cmd.setDescription("new user auto created");
+                cmd.setDoorId(doorAccess.getId());
+                cmd.setNamespaceId(userId);
+                if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+                    cmd.setPhone(userInfo.getPhones().get(0));
+                }
+                cmd.setRightOpen((byte)1);
+                cmd.setRightRemote((byte)1);
+                cmd.setUserId(userId);
+                createDoorAuth(cmd);
+            }else{
+                return;
+            }
 		}
 	}
 }
