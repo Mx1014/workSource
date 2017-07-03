@@ -17,18 +17,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.parking.wanke.WankeCardInfo;
 import com.everhomes.parking.wanke.WankeCardType;
@@ -45,8 +39,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WankeParkingVendorHandler.class);
 	
 	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
-	private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-	
+
 	private static final String RECHARGE = "/Parking/MouthCardRecharge";
 	private static final String GET_CARD = "/Parking/CardDataQuery";
 	private static final String GET_TYPES = "/Parking/GetMonthCardList";
@@ -64,10 +57,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
     private ConfigurationProvider configProvider;
-	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	@Autowired
-    private DbProvider dbProvider;
 	
 	@Override
     public GetParkingCardsResponse getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -171,34 +160,10 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
     @Override
-    public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
-    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			if(payStatus.toLowerCase().equals("fail")) {
-				LOGGER.error("pay failed, orderNo={}", order.getId());
-			}
-			else {
-				if(recharge(order)){
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
-						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						parkingProvider.updateParkingRechargeOrder(order);
-						
-						String key = "parking-recharge" + order.getId();
-						String value = String.valueOf(order.getId());
-				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-				      
-				        LOGGER.error("Delete parking order key, key={}", key);
-				        redisTemplate.delete(key);
-			        
-			        return null;
-					});
-				}
-			}
-		}
+    public Boolean notifyParkingRechargeOrderPayment(ParkingRechargeOrder order) {
+
+    	return recharge(order);
     }
     
     @Override
@@ -253,19 +218,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		}
 	}
     
-//    private long strToLong(String str) {
-//
-//		long ts;
-//		try {
-//			ts = sdf1.parse(str).getTime();
-//		} catch (ParseException e) {
-//			LOGGER.error("data format is not yyyyMMddHHmmss, str={}", str);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"data format is not yyyyMMddHHmmss.");
-//		}
-//		return ts;
-//	}
-    
     private Long strToLong2(String str) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -274,9 +226,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		try {
 			ts = sdf.parse(str).getTime();
 		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			LOGGER.error("validityPeriod data format is not yyyyMMddHHmmss.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
+					"validityPeriod data format is not yyyyMMddHHmmss.");
 		}
 		
 		return ts;
@@ -297,22 +249,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		
 		return ts;
 	}
-	
-//	@Scheduled(cron="0 0 0/2 * * ? ")
-//	@Override
-//	public void refreshParkingRechargeOrderStatus() {
-//		LOGGER.info("refresh recharge status.");
-//		List<ParkingRechargeOrder> orderList = parkingProvider.findWaitingParkingRechargeOrders(ParkingLotVendor.KETUO);
-//		orderList.stream().map(order -> {
-//			
-//			if(recharge(order)){
-//				order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-//				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-//				parkingProvider.updateParkingRechargeOrder(order);
-//			}
-//			return null;
-//		});
-//	}
     
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -333,10 +269,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	
 	private List<WankeCardType> getCardType() {
 
-		String url = configProvider.getValue("parking.wanke.url", "");
 		List<WankeCardType> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		String json = HttpUtils.post(url + GET_TYPES, param, null);
+		String json = post(GET_TYPES, param);
 		
 		WankeJsonEntity<List<WankeCardType>> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<List<WankeCardType>>>(){});
 
@@ -350,17 +285,13 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	
 	private WankeCardInfo getCard(String plateNumber) {
 
-		String url = configProvider.getValue("parking.wanke.url", "");
-
 		WankeCardInfo card = null;
 		JSONObject param = new JSONObject();
 		
 		param.put("plateNo", plateNumber);
 		param.put("flag", "2");
-		String json = HttpUtils.post(url + GET_CARD, param, null);
-        
-		LOGGER.info("Result={}, param={}", json, param);
-        
+		String json = post(GET_CARD, param);
+
         WankeJsonEntity<WankeCardInfo> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeCardInfo>>(){});
 		if(entity.isSuccess()){
 			card = entity.getData();
@@ -373,8 +304,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
-		String url = configProvider.getValue("parking.wanke.url", "");
-
 		JSONObject param = new JSONObject();
 
 		param.put("plateNo", order.getPlateNumber());
@@ -384,53 +313,37 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("chargePaidNo", order.getId());
 	    param.put("payTime", sdf1.format(new Date()));
 	    param.put("sign", "");
-	    
-		String json = HttpUtils.post(url + RECHARGE, param, null);
-        
-		LOGGER.info("Result={}, param={}", json, param);
-        
+
+		//将充值信息存入订单
+		WankeCardInfo card = getCard(order.getPlateNumber());
+		long startPeriod = strToLong2(card.getExpireDate());
+		order.setStartPeriod(new Timestamp(startPeriod + 1000));
+		order.setEndPeriod(Utils.getTimestampByAddNatureMonth(startPeriod, order.getMonthCount().intValue()));
+
+		String json = post(RECHARGE, param);
+
+		order.setErrorDescriptionJson(json);
+
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();
-		
-//		JSONObject jsonObject = JSONObject.parseObject(json);
-//		Object obj = jsonObject.get("errorCode");
-//		if(null != obj ) {
-//			int resCode = (int) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
+
     }
 	
 	private boolean payTempCardFee(ParkingRechargeOrder order){
-
-		String url = configProvider.getValue("parking.wanke.url", "");
 
 		JSONObject param = new JSONObject();
 
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
-		String json = HttpUtils.post(url + PAY_TEMP_FEE, param, null);
+		String json = post(PAY_TEMP_FEE, param);
 
-		LOGGER.info("Result={}, param={}", json, param);
-        
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 		return entity.isSuccess();
-		
-//        JSONObject jsonObject = JSONObject.parseObject(json);
-//		Object obj = jsonObject.get("errorCode");
-//		if(null != obj ) {
-//			int resCode = (Integer) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
-    }
 
-	private boolean recharge(ParkingRechargeOrder order){
+    }
+	@Override
+	public boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);
@@ -450,16 +363,11 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 
 	private WankeTempFee getTempFee(String plateNumber) {
 
-		String url = configProvider.getValue("parking.wanke.url", "");
-
 		WankeTempFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
 		
-		String json = HttpUtils.post(url + GET_TEMP_FEE, param, null);
-        
-        if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+		String json = post(GET_TEMP_FEE, param);
         
         WankeJsonEntity<WankeTempFee> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeTempFee>>(){});
         
@@ -486,6 +394,17 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		dto.setOrderToken(tempFee.getOrderNo());
 		dto.setPayTime(System.currentTimeMillis());
 		return dto;
+	}
+
+	private String post(String type, JSONObject param) {
+
+		LOGGER.info("Parking info, namespace={}", this.getClass().getName());
+
+		String url = configProvider.getValue("parking.wanke.url", "");
+
+		String json = Utils.post(url + type, param, null);
+
+		return json;
 	}
 
 	@Override

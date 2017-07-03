@@ -20,17 +20,100 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Created by sw on 2017/4/7.
- */
-public class HttpUtils {
+
+public class Utils {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
+    /**
+     * 原有时间加n秒
+     * @param oldPeriod
+     * @param seconds
+     * @return
+     */
+    static Timestamp addSeconds(Long oldPeriod, int seconds) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(oldPeriod);
+        calendar.add(Calendar.SECOND, seconds);
+        Timestamp time = new Timestamp(calendar.getTimeInMillis());
 
+        return time;
+    }
+
+    /**
+     * 原有时间计算月
+     * @param oldPeriod
+     * @param month
+     * @return
+     */
+    static Timestamp getTimestampByAddMonth(Long oldPeriod, int month) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(oldPeriod);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        //如果当前天数是当前月的最后一天，直接往上加月数
+        if(currentDay == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+            calendar.add(Calendar.MONTH, month);
+            //获取新的月份的最大天数
+            int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            calendar.set(Calendar.DAY_OF_MONTH, d);
+        }else{
+            calendar.add(Calendar.MONTH, month);
+        }
+
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    static Long getLongByAddNatureMonth(Long oldPeriod, int month) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(oldPeriod);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        if(currentDay == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+            calendar.add(Calendar.MONTH, month);
+            int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            calendar.set(Calendar.DAY_OF_MONTH, d);
+        }else{
+            calendar.add(Calendar.MONTH, month-1);
+            int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            calendar.set(Calendar.DAY_OF_MONTH, d);
+        }
+
+        return calendar.getTimeInMillis();
+    }
+
+    static Timestamp getTimestampByAddNatureMonth(Long oldPeriod, int month) {
+
+        return new Timestamp(getLongByAddNatureMonth(oldPeriod, month));
+    }
+
+    static long strToDate(String str) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long ts;
+        try {
+            ts = sdf.parse(str).getTime();
+        } catch (ParseException e) {
+            LOGGER.error("Str format is not yyyy-MM-dd HH:mm:ss, str={}", str);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Str format is not yyyy-MM-dd HH:mm:ss.");
+        }
+        return ts;
+    }
 
     /**
      *

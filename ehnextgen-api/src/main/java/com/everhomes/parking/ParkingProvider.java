@@ -19,9 +19,7 @@ public interface ParkingProvider {
     List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId, Long parkingLotId, String cardType);
     
     void createParkingRechargeRate(ParkingRechargeRate parkingRechargeRate);
-    
-    boolean isApplied(String plateNumber, Long parkingLotId);
-    
+
     void requestParkingCard(ParkingCardRequest parkingCardRequest);
     
     List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
@@ -35,7 +33,7 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, String paidType, String cardNumber, Long pageAnchor, Integer pageSize);
+    		Byte rechargeType, String paidType, String cardNumber,  Byte status, Long pageAnchor, Integer pageSize);
     
     BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
@@ -57,21 +55,15 @@ public interface ParkingProvider {
     ParkingCardRequest findParkingCardRequestById(Long id);
     
     void updateParkingCardRequest(List<ParkingCardRequest> list);
-    
-//    void updateInvalidAppliers(Timestamp time, Long parkingLotId);
-    
+
     Integer waitingCardCount(String ownerType, Long ownerId, Long parkingLotId, Timestamp createTime);
     
     ParkingRechargeOrder findParkingRechargeOrderById(Long id);
-    
+
+    ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo);
+
     void updateParkingRechargeOrder(ParkingRechargeOrder order);
-    
-    List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor);
-    
-    ParkingActivity setParkingActivity(ParkingActivity parkingActivity);
-    
-    ParkingActivity getParkingActivity(String ownerType,Long ownerId,Long parkingLotId);
-    
+
     List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
 			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 			CrossShardListingLocator locator);
@@ -87,9 +79,7 @@ public interface ParkingProvider {
     void createParkingStatistic(ParkingStatistic parkingStatistic);
     
     List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr);
-    
-    BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp startDate, Timestamp endDate);
-    
+
     ParkingCarSerie findParkingCarSerie(Long id);
     
     void createParkingAttachment(ParkingAttachment parkingAttachment);
