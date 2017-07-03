@@ -26,6 +26,9 @@ import com.everhomes.util.RuntimeErrorException;
 
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -35,9 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,11 +64,21 @@ public class SalaryServiceImpl implements SalaryService {
 
 //	private static List<SalaryDefaultEntity> salaryDefaultEntities = new ArrayList<SalaryDefaultEntity>();
 //
-//	public SalaryServiceImpl(){
-//		//构造函数初始化entities---这个是不变的
+
+    private StringTemplateLoader templateLoader;
+
+    private Configuration templateConfig;
+
+	public SalaryServiceImpl(){
+
+        templateLoader = new StringTemplateLoader();
+        templateConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+        templateConfig.setTemplateLoader(templateLoader);
+        templateConfig.setTemplateUpdateDelay(0);
+		//构造函数初始化entities---这个是不变的
 //		List<SalaryDefaultEntity> result = salaryDefaultEntityProvider.listSalaryDefaultEntity();
 //		salaryDefaultEntities = result;
-//	}
+	}
 //	private SalaryDefaultEntity findEntity(Long id ){
 //		for (SalaryDefaultEntity entity : salaryDefaultEntities) {
 //			if (entity.getId().equals(id)) {
@@ -692,7 +708,8 @@ public class SalaryServiceImpl implements SalaryService {
 	public void updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd) {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			cmd.getPeriodEmployeeEntities().stream().map(r ->{
-				salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
+                //// TODO: 2017/7/3 这里只会穿需要核算的,但是计算公式的还是要刷新
+                salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
 				return null;
 			});
 			SalaryEmployee salaryEmployee = salaryEmployeeProvider.findSalaryEmployeeById(cmd.getSalaryEmployeeId());
@@ -874,7 +891,9 @@ public class SalaryServiceImpl implements SalaryService {
 	 * */
 	@Scheduled(cron = "5 5 0 1 * ?")
 	public void monthScheduled(){
-		String period = monthSF.get().format(DateHelper.currentGMTTime());
+        Calendar periodCalendar = Calendar.getInstance();
+        periodCalendar.add(Calendar.MONTH,-1);
+        String period = monthSF.get().format(periodCalendar.getTime());
 		//TODO : 1.获取所有的薪酬组
 		List<Organization> salaryOrganizations = null;
 		for (Organization salaryOrg : salaryOrganizations) {
@@ -897,19 +916,23 @@ public class SalaryServiceImpl implements SalaryService {
 				salaryEmployeeProvider.createSalaryEmployee(employee);
 				//  获取个人的项目字段
 				List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals = this.salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(employee.getOwnerType(), employee.getOwnerId(), userId);
-				processSalaryEmployeePeriodVals(salaryGroupEntities,salaryEmployeeOriginVals,userId);
-				//3.循环人员搞vals
+                processSalaryEmployeeOriginValsBeforeCalculate(salaryGroupEntities, salaryEmployeeOriginVals,userId);
+                List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals = new ArrayList<>();
+                //3.循环人员搞vals
 				for (SalaryGroupEntity entity : salaryGroupEntities) {
 					SalaryEmployeePeriodVal val = new SalaryEmployeePeriodVal();
 					val.setOwnerType(entity.getOwnerType());
 					val.setOwnerId(entity.getOwnerId());
 					val.setGroupEntityId(entity.getId());
 					val.setSalaryEmployeeId(employee.getId());
-					if(null != salaryEmployeeOriginVals){
+					if(null != salaryEmployeeOriginVals && !(entity.getNumberType()!= null
+                            && entity.getNumberType().equals(SalaryEntityNumberType.FORMULA.getCode()))){
 						SalaryEmployeeOriginVal originVal = findOriginVal(entity.getId(), salaryEmployeeOriginVals);
-						val.setSalaryValue(originVal.getSalaryValue());
+                        val.setSalaryValue(originVal.getSalaryValue());
 					}
-				}
+                    salaryEmployeePeriodVals.add(val);
+                }
+				processSalaryEmployeePeriodVals(salaryGroupEntities,salaryEmployeeOriginVals,salaryEmployeePeriodVals);
 			}
 		}
 
@@ -925,35 +948,65 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 		return null;
 	}
+    private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId){
+        //如果这个个人没设置vals 就用批次设置的默认值
+        if(null == salaryEmployeeOriginVals){
+            salaryEmployeeOriginVals = new ArrayList<>();
+            for (SalaryGroupEntity entity : salaryGroupEntities) {
+                SalaryEmployeeOriginVal val = ConvertHelper.convert(entity, SalaryEmployeeOriginVal.class);
+                val.setGroupEntityId(entity.getId());
+                val.setGroupEntityName(entity.getName());
+                val.setUserId(userId);
+                if (entity.getType().equals(SalaryEntityType.TEXT) || entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
+                    val.setSalaryValue(entity.getDefaultValue());
+                }
+                salaryEmployeeOriginVals.add(val);
+            }
+        }
+    }
+    /**
+     * 计算 period Vals 的值
+     * */
+	private void processSalaryEmployeePeriodVals( List<SalaryGroupEntity> salaryGroupEntities,
+                                                  List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals,
+                                                  List<SalaryEmployeePeriodVal> salaryEmployeePeriodVals) {
 
-	private void processSalaryEmployeePeriodVals(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId) {
-		//如果这个个人没设置vals 就用批次设置的默认值
-		if(null == salaryEmployeeOriginVals){
-			salaryEmployeeOriginVals = new ArrayList<>();
-			for (SalaryGroupEntity entity : salaryGroupEntities) {
-				SalaryEmployeeOriginVal val = ConvertHelper.convert(entity, SalaryEmployeeOriginVal.class);
-				val.setGroupEntityId(entity.getId());
-				val.setGroupEntityName(entity.getName());
-				val.setUserId(userId);
-				if (entity.getType().equals(SalaryEntityType.TEXT) || entity.getNumberType().equals(SalaryEntityNumberType.VALUE.getCode())) {
-					val.setSalaryValue(entity.getDefaultValue());
-				}
-				salaryEmployeeOriginVals.add(val);
-			}
-		}
 		//循环vals 用把公式部分给搞出来
 		int loopTimes = 0;
-		Map<Long, String> valueMap = new HashMap<>();
+		Map<String, String> valueMap = new HashMap<String, String> ();
 		while(true){
 			if(++loopTimes > 10){
 				//默认不会10层嵌套。如果有 我认栽
 				break;
 			}
 
-			for (SalaryEmployeeOriginVal val : salaryEmployeeOriginVals) {
-				//TODO: 在这里进行计算
-				//如果value不为null直接放进map
-				//其他的如果计算成功放入map计算失败则继续计算
+			for (SalaryEmployeePeriodVal val : salaryEmployeePeriodVals) {
+				//在这里进行计算
+				//如果value不为null说明是直接数值,直接放进map
+                if (val.getSalaryValue() != null) {
+                    valueMap.put(val.getGroupEntityName(), val.getSalaryValue());
+                }
+                else {
+                    try {
+                        //其他的如果计算成功放入map计算失败则继续计算
+                        SalaryGroupEntity entity = findGroupEntity(val.getGroupEntityId(), salaryGroupEntities);
+                        String format = entity.getDefaultValue();
+                        Template freeMarkerTemplate = null;
+                        String templateKey = getTemplateKEY(entity);
+                        templateLoader.putTemplate(templateKey, format);
+                        freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+                        String evalString = "result = " + FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, valueMap);
+                        if(!evalString.contains("${")){
+                            //如果没有${ 说明全部参数都替换成了数字 则进行计算
+                            ScriptEngineManager manager = new ScriptEngineManager();
+                            ScriptEngine engine = manager.getEngineByName("javascript");
+                            String result = engine.eval(evalString).toString();
+                            val.setSalaryValue(result);
+                        }
+                    }catch (Exception e){
+                        LOGGER.debug("calculate format catch a exception ",e);
+                    }
+                }
 
 			}
 
@@ -963,8 +1016,31 @@ public class SalaryServiceImpl implements SalaryService {
 			}
 		}
 	}
+    /**salary.[ownerId].[批次entity的id]*/
+    private String getTemplateKEY(SalaryGroupEntity entity) {
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.append(SalaryConstants.SCOPE);
+        strBuilder.append(".");
+        strBuilder.append(entity.getOwnerId());
+        strBuilder.append(".");
+        strBuilder.append(entity.getId());
 
-	@Override
+        return strBuilder.toString();
+    }
+
+    private SalaryGroupEntity findGroupEntity(Long groupEntityId, List<SalaryGroupEntity> salaryGroupEntities) {
+        if (null == salaryGroupEntities) {
+            return null;
+        }
+        for (SalaryGroupEntity entity : salaryGroupEntities) {
+            if (entity.getId().equals(groupEntityId)) {
+                return entity;
+            }
+        }
+        return null;
+    }
+
+    @Override
 	public ListSalarySendHistoryResponse listSalarySendHistory(ListSalarySendHistoryCommand cmd) {
 		Organization org = organizationProvider.findOrganizationById(punchService.getTopEnterpriseId(cmd.getOrganizationId()));
 		List<Long> userIds = punchService.listDptUserIds(org, cmd.getOrganizationId(), cmd.getKeyWord(), NormalFlag.YES.getCode());
