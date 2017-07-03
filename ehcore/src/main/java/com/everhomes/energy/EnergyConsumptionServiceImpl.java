@@ -2596,7 +2596,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         List<String> files = new ArrayList<>();
         for(EnergyMeter meter : meterList) {
             String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
-            String savePath = filePath + meter.getName() + ".jpg";
+            String savePath = filePath + meter.getId() + meter.getName() + ".jpg";
             graphicsGeneration("Name: "+meter.getName(), "No.: " + meter.getMeterNumber(), qrcode, savePath);
 //            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
 //            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
@@ -2683,7 +2683,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         for(EnergyMeter meter : meterList) {
             String qrcode = generateQRString(meter.getId(),meter.getNamespaceId());
             String savePath = filePath + meter.getId() + meter.getName() + ".jpg";
-            graphicsGeneration(meter.getName(), meter.getMeterNumber(), qrcode, savePath);
+            graphicsGeneration("Name: "+meter.getName(), "No.: " + meter.getMeterNumber(), qrcode, savePath);
 //            Map<String, Object> dataMap = createEnergyMeterQRCodeDoc(meter);
 //            String savePath = filePath + meter.getId()+ "-" + meter.getName() + ".doc";
 //            docUtil.createDoc(dataMap, "energyMeter", savePath);
