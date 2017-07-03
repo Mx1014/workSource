@@ -6674,7 +6674,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationMemberDTO dto = ConvertHelper.convert(c, OrganizationMemberDTO.class);
 
             Long startTime1_1 = System.currentTimeMillis();
-            if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE) {
+            if (OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP) {
 
 //				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), directlyEnterprise.getPath())); //已经跟部门子公司放入一起
 
