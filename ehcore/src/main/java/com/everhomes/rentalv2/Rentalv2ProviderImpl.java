@@ -561,16 +561,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			RentalType rentalType = RentalType.fromCode(rentalTypeByte);
 			if (rentalType == RentalType.HOUR) {
 				Timestamp[] beginEndTime = calculateBeginEndTime(rentalResource, rentalCell);
-				record = getHourCloseRecord(context, rentalResource.getId(), beginEndTime[0], beginEndTime[1]);
+				record = getHourCloseRecord(context, rentalResource.getId(), beginEndTime[0], beginEndTime[1], rentalCell.getResourceNumber());
 			}else if (rentalType == RentalType.DAY) {
 				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-				record = getDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1]);
+				record = getDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalCell.getResourceNumber());
 			}else if (rentalType == RentalType.MONTH) {
-				record = getMonthCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate());
+				record = getMonthCloseRecord(context, rentalResource.getId(), rentalCell.getResourceRentalDate(), rentalCell.getResourceNumber());
 			}else if (rentalType == RentalType.HALFDAY || rentalType == RentalType.THREETIMEADAY) {
 				Byte amorpm = calculateAmorpm(rentalResource, rentalCell);
 				Date[] beginEndDate = calculateBeginEndDate(rentalResource, rentalCell);
-				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm, RentalType.fromCode(rentalCell.getRentalType())==RentalType.HOUR);
+				record = getHalfDayCloseRecord(context, rentalResource.getId(), beginEndDate[0], beginEndDate[1], rentalTypeByte, amorpm, RentalType.fromCode(rentalCell.getRentalType())==RentalType.HOUR, rentalCell.getResourceNumber());
 			}
 			if (record != null) {
 				return true;
@@ -601,23 +601,25 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return new Timestamp[]{new Timestamp(rentalCell.getResourceRentalDate().getTime()), new Timestamp(rentalCell.getResourceRentalDate().getTime())};
 	}
 
-	private Record getHourCloseRecord(DSLContext context, Long resourceId, Timestamp begin, Timestamp end) {
+	private Record getHourCloseRecord(DSLContext context, Long resourceId, Timestamp begin, Timestamp end, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.HOUR.getCode()))
+				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.BEGIN_TIME.ge(begin))
 				.and(Tables.EH_RENTALV2_CELLS.END_TIME.le(end))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
 				.fetchAny();
 	}
 
-	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm, boolean isHour) {
+	private Record getHalfDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, Byte rentalType, Byte amorpm, boolean isHour, String resourceNumber) {
 		if (isHour && amorpm == null) {
 			return null;
 		}
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(rentalType))
+				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.le(end))
 				.and(amorpm == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.AMORPM.eq(amorpm))
@@ -625,19 +627,21 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.fetchAny();
 	}
 
-	private Record getMonthCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate) {
+	private Record getMonthCloseRecord(DSLContext context, Long resourceId, Date resourceRentalDate, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.MONTH.getCode()))
+				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.eq(initToMonthFirstDay(resourceRentalDate)))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
 				.fetchAny();
 	}
 
-	private Record getDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end) {
+	private Record getDayCloseRecord(DSLContext context, Long resourceId, Date begin, Date end, String resourceNumber) {
 		return context.select().from(Tables.EH_RENTALV2_CELLS)
 				.where(Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID.eq(resourceId))
 				.and(Tables.EH_RENTALV2_CELLS.RENTAL_TYPE.eq(RentalType.DAY.getCode()))
+				.and(resourceNumber == null?DSL.trueCondition():Tables.EH_RENTALV2_CELLS.RESOURCE_NUMBER.eq(resourceNumber))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.ge(begin))
 				.and(Tables.EH_RENTALV2_CELLS.RESOURCE_RENTAL_DATE.le(end))
 				.and(Tables.EH_RENTALV2_CELLS.STATUS.eq((byte) -1))
