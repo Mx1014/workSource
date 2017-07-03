@@ -183,9 +183,9 @@ CREATE TABLE `eh_user_organizations` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---备份eh_organization_members表为eh_organization_members_temp
--- DROP TABLE IF EXISTS `eh_organization_members_temp`;
-create table `eh_organization_members_temp` select * from `eh_organization_members`;
+-- --备份eh_organization_members表为eh_organization_members_temp
+-- -- DROP TABLE IF EXISTS `eh_organization_members_temp`;
+-- CREATE TABLE `eh_organization_members_temp` select * from `eh_organization_members`;
 
 -- merge from orgByLv end by lei.lv 20170703
 -- 资源预约价格规则表，add by tt, 20170613
