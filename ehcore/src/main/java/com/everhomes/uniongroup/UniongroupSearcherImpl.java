@@ -49,7 +49,38 @@ public class UniongroupSearcherImpl extends AbstractElasticSearch implements Uni
     }
 
 
-    private XContentBuilder createDoc(Organization organization){
+    private XContentBuilder createDoc(UniongroupMemberDetail uniongroupMemberDetail){
+        try{
+            XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("id", uniongroupMemberDetail.getId());
+            b.field("namespaceId", uniongroupMemberDetail.getNamespaceId());
+            b.field("groupType", uniongroupMemberDetail.getGroupType());
+            b.field("groupId", uniongroupMemberDetail.getGroupId());
+            b.field("detailId", uniongroupMemberDetail.getDetailId());
+            b.field("targetType", uniongroupMemberDetail.getTargetType());
+            b.field("targetId", uniongroupMemberDetail.getTargetId());
+            b.field("enterpriseId", uniongroupMemberDetail.getEnterpriseId());
+            b.field("contact_name", uniongroupMemberDetail.getContactName());
+            b.field("contact_token", uniongroupMemberDetail.getContactToken());
+            b.field("update_time", uniongroupMemberDetail.getUpdateTime());
+            b.field("operator_uid", uniongroupMemberDetail.getOperatorUid());
+            String tagStr = group.getTag();
+            if((null != tagStr) && (!tagStr.isEmpty())) {
+                String[] tags = tagStr.split(",");
+                if(tags.length > 0) {
+                    b.startArray("tags");
+                    for(String tag : tags) {
+                        String newTag = tag.trim();
+                        b.startObject().field("department_name", uniongroupMemberDetail.get)
+                                .field("department_id", newTag)
+                                .endObject();
+                    }
+                    b.endArray();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }
