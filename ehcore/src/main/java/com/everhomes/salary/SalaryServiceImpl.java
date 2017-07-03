@@ -29,6 +29,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
@@ -51,6 +52,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.eclipse.jdt.internal.compiler.parser.Parser.name;
 
 @Component
 public class SalaryServiceImpl implements SalaryService {
@@ -448,20 +451,7 @@ public class SalaryServiceImpl implements SalaryService {
 
             ByteArrayOutputStream out = null;
             XSSFWorkbook workbook = this.creatXSSFSalaryGroupFile(results,organization.getName());
-            try {
-                out = new ByteArrayOutputStream();
-                workbook.write(out);
-                DownloadUtil.download(out, httpServletResponse);
-            } catch (Exception e) {
-                LOGGER.error("EXPORT ERROR, e = {}", e);
-            } finally {
-                try {
-                    workbook.close();
-                    out.close();
-                } catch (IOException e) {
-                    LOGGER.error("CLOSE ERROR", e);
-                }
-            }
+            createOutPutSteam(workbook, out, httpServletResponse);
         }
 
     }
@@ -673,7 +663,7 @@ public class SalaryServiceImpl implements SalaryService {
 		Integer abnormalNumber = 0;
 		//查询异常员工人数
 		//异常员工判断1:未关联批次
-		//TODO:
+		//TODO: 组织架构提供未关联批次的
 		Integer unLinkNumber = 0;
 		abnormalNumber += unLinkNumber;
 		//判断2:关联了批次,但是实发工资为"-"
@@ -769,14 +759,32 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public void updatePeriodSalaryEmployee(UpdatePeriodSalaryEmployeeCommand cmd) {
-		this.dbProvider.execute((TransactionStatus status) -> {
-			cmd.getPeriodEmployeeEntities().stream().map(r ->{
-                //// TODO: 2017/7/3 这里只会穿需要核算的,但是计算公式的还是要刷新
-                salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
-				return null;
-			});
-			SalaryEmployee salaryEmployee = salaryEmployeeProvider.findSalaryEmployeeById(cmd.getSalaryEmployeeId());
-			salaryEmployee.setStatus(cmd.getCheckFlag());
+        this.dbProvider.execute((TransactionStatus status) -> {
+            SalaryEmployee salaryEmployee = salaryEmployeeProvider.findSalaryEmployeeById(cmd.getSalaryEmployeeId());
+            List<SalaryGroupEntity> groupEntities = salaryGroupEntityProvider.listSalaryGroupEntityByGroupId(salaryEmployee.getOrganizationGroupId());
+            List<SalaryEmployeeOriginVal> originVals = salaryEmployeeOriginValProvider.listSalaryEmployeeOriginValByUserId(salaryEmployee.getOwnerType(), salaryEmployee.getOwnerId(), salaryEmployee.getUserId());
+            List<SalaryEmployeePeriodVal> periodVals = salaryEmployeePeriodValProvider.listSalaryEmployeePeriodVals(salaryEmployee.getId());
+            salaryEmployeePeriodValProvider.deletePeriodVals(salaryEmployee.getId());
+            cmd.getPeriodEmployeeEntities().stream().map(r ->{
+                //获取到所有periodVa
+                for (SalaryEmployeePeriodVal periodVal : periodVals) {
+                    if (periodVal.getGroupEntityId().equals(r.getGroupEntityId())) {
+                        periodVal.setSalaryValue(r.getSalaryValue());
+
+                    }
+                }
+//                salaryEmployeePeriodValProvider.updateSalaryEmployeePeriodVal(r.getSalaryEmployeeId(),r.getGroupEntryId(),r.getSalaryValue());
+                return null;
+            });
+            //前置处理originVals --主要是没有设置过个人的设置则继承批次设置
+            processSalaryEmployeeOriginValsBeforeCalculate(groupEntities, originVals, salaryEmployee.getUserId());
+
+            processSalaryEmployeePeriodVals(groupEntities, originVals, periodVals);
+
+            for (SalaryEmployeePeriodVal periodVal : periodVals) {
+                salaryEmployeePeriodValProvider.createSalaryEmployeePeriodVal(periodVal);
+            }
+            salaryEmployee.setStatus(cmd.getCheckFlag());
 			salaryEmployeeProvider.updateSalaryEmployee(salaryEmployee);
 			return null;
 		});
@@ -1011,6 +1019,9 @@ public class SalaryServiceImpl implements SalaryService {
 		}
 		return null;
 	}
+    /**
+     * 前置处理originVals --主要是没有设置过个人的设置则继承批次设置
+     * */
     private void processSalaryEmployeeOriginValsBeforeCalculate(List<SalaryGroupEntity> salaryGroupEntities, List<SalaryEmployeeOriginVal> salaryEmployeeOriginVals, Long userId){
         //如果这个个人没设置vals 就用批次设置的默认值
         if(null == salaryEmployeeOriginVals){
@@ -1065,6 +1076,7 @@ public class SalaryServiceImpl implements SalaryService {
                             ScriptEngine engine = manager.getEngineByName("javascript");
                             String result = engine.eval(evalString).toString();
                             val.setSalaryValue(result);
+                            valueMap.put(val.getGroupEntityName(), val.getSalaryValue());
                         }
                     }catch (Exception e){
                         LOGGER.debug("calculate format catch a exception ",e);
@@ -1133,11 +1145,86 @@ public class SalaryServiceImpl implements SalaryService {
 
 	@Override
 	public void exportSalarySendHistory(ExportSalarySendHistoryCommand cmd, HttpServletResponse httpResponse) {
-	
+        ListSalarySendHistoryCommand listCmd = ConvertHelper.convert(cmd, ListSalarySendHistoryCommand.class);
+        ListSalarySendHistoryResponse resp = listSalarySendHistory(listCmd);
+        if (null != resp && resp.getSalaryPeriodEmployees() != null) {
+
+            ByteArrayOutputStream out = null;
+            XSSFWorkbook workbook = this.createXSSFSalaryHistory(resp.getSalaryPeriodEmployees());
+            createOutPutSteam(workbook, out, httpResponse);
+        }
 
 	}
 
-	@Override
+    private void createOutPutSteam(XSSFWorkbook workbook, ByteArrayOutputStream out, HttpServletResponse httpResponse) {
+        try {
+            out = new ByteArrayOutputStream();
+            workbook.write(out);
+            DownloadUtil.download(out, httpResponse);
+        } catch (Exception e) {
+            LOGGER.error("EXPORT ERROR, e = {}", e);
+        } finally {
+            try {
+                workbook.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("CLOSE ERROR", e);
+            }
+        }
+    }
+
+    private XSSFWorkbook createXSSFSalaryHistory(List<SalaryPeriodEmployeeDTO> salaryPeriodEmployees) {
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName ="Module";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 12));
+        XSSFCellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        //  创建标题
+        createXSSFSalaryHistoryHead(sheet, style);
+
+        createXSSFSalaryHistoryRows(sheet, salaryPeriodEmployees);
+        return wb;
+    }
+
+    private void createXSSFSalaryHistoryRows(XSSFSheet sheet, List<SalaryPeriodEmployeeDTO> salaryPeriodEmployees) {
+        for (SalaryPeriodEmployeeDTO dto : salaryPeriodEmployees) {
+            Row row = sheet.createRow(sheet.getLastRowNum()+1);
+            int i = -1;
+            row.createCell(++i).setCellValue(dto.getEmployeeNo());
+            row.createCell(++i).setCellValue(dto.getContactName());
+            row.createCell(++i).setCellValue(dto.getDepartments());
+            row.createCell(++i).setCellValue(dto.getSalaryPeriod());
+            row.createCell(++i).setCellValue(dto.getSalaryGroupName());
+            row.createCell(++i).setCellValue(dto.getPaidMoney().toString());
+
+        }
+    }
+
+    private void createXSSFSalaryHistoryHead(XSSFSheet sheet,  XSSFCellStyle style) {
+        int rowNum = 0;
+
+        XSSFRow row = sheet.createRow(rowNum++);
+        row.setRowStyle(style);
+        row.createCell(0).setCellValue("员工编号");
+        row.createCell(1).setCellValue("姓名");
+        row.createCell(2).setCellValue("部门");
+        row.createCell(3).setCellValue("时间");
+        row.createCell(4).setCellValue("所属批次");
+        row.createCell(5).setCellValue("实发工资");
+    }
+
+    @Override
 	public void batchSetEmployeeCheckFlag(BatchSetEmployeeCheckFlagCommand cmd) {
 		if(null == cmd.getCheckFlag())
 			cmd.setCheckFlag(NormalFlag.YES.getCode());
