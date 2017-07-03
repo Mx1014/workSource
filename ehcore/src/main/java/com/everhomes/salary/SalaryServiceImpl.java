@@ -816,7 +816,14 @@ public class SalaryServiceImpl implements SalaryService {
 		return new GetPeriodSalaryEmailContentResponse(periodGroup.getEmailContent(),entities);
 	}
 
-	@Override
+    @Override
+    public void batchSetSalaryEmailContent(BatchSetSalaryEmailContentCommand cmd) {
+        for (SetSalaryEmailContentCommand cmd1 : cmd.getSalaryGroupCmd()) {
+            setSalaryEmailContent(cmd1);
+        }
+    }
+
+    @Override
 	public void setSalaryEmailContent(SetSalaryEmailContentCommand cmd) {
 		//TODO: email content 应该跟着批次走
 		if(cmd.getSalaryGroupId() == null){

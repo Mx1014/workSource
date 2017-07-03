@@ -315,6 +315,16 @@ public class SalaryController extends ControllerBase {
 	}
 
 	/**
+	 * <p>18-2.批量设置工资条邮件内容</p>
+	 * <b>URL: /salary/batchSetSalaryEmailContent</b>
+	 */
+	@RequestMapping("batchSetSalaryEmailContent")
+	@RestReturn(String.class)
+	public RestResponse batchSetSalaryEmailContent(BatchSetSalaryEmailContentCommand cmd){
+		salaryService.batchSetSalaryEmailContent(cmd);
+		return new RestResponse();
+	}
+	/**
 	 * <p>19.设置工资条字段项显示状态</p>
 	 * <b>URL: /salary/updateSalaryGroupEntitiesVisable</b>
 	 */
