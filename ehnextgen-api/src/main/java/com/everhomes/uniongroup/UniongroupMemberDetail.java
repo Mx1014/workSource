@@ -12,7 +12,7 @@ public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
 
     private Map<Long, String> department;
 
-    private Map<Long, String> job_level;
+    private Map<Long, String> job_position;
 
     @Override
     public String toString() {
@@ -27,11 +27,11 @@ public class UniongroupMemberDetail extends EhUniongroupMemberDetails {
         this.department = department;
     }
 
-    public Map<Long, String> getJob_level() {
-        return job_level;
+    public Map<Long, String> getJob_position() {
+        return job_position;
     }
 
-    public void setJob_level(Map<Long, String> job_level) {
-        this.job_level = job_level;
+    public void setJob_position(Map<Long, String> job_position) {
+        this.job_position = job_position;
     }
 }

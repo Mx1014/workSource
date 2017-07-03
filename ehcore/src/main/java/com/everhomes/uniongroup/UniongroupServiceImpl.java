@@ -7,6 +7,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMemberDetails;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.uniongroup.*;
 import com.everhomes.server.schema.tables.pojos.EhUniongroupMemberDetails;
 import com.everhomes.user.UserContext;
@@ -18,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -168,7 +166,7 @@ public class UniongroupServiceImpl implements UniongroupService {
 //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
         List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetail(namespaceId, cmd.getGroupId());
-        if(details != null){
+        if (details != null) {
             return details.stream().map(r -> {
                 return ConvertHelper.convert(r, UniongroupMemberDetailsDTO.class);
             }).collect(Collectors.toList());
@@ -182,13 +180,22 @@ public class UniongroupServiceImpl implements UniongroupService {
     }
 
     @Override
-    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, Boolean allGroupFlag) {
+    public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, String groupType, Boolean allGroupFlag) {
         //        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Integer namespaceId = 1000000;
-        this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId,groupId,UniongroupType.fromCode("SALARYGROUP").getCode());
-        return null;
+        List<UniongroupMemberDetail> details = this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId, groupId, UniongroupType.fromCode(groupType).getCode());
+        //查询部门和岗位
+        for (UniongroupMemberDetail detail : details) {
+            Map depart_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getId(), OrganizationGroupType.DEPARTMENT.getCode());
+            if (depart_map != null)
+                detail.setDepartment(depart_map);
+            Map jobp_map = this.organizationProvider.listOrganizationsOfDetail(namespaceId, detail.getId(), OrganizationGroupType.JOB_POSITION.getCode());
+            if (jobp_map != null) {
+                detail.setJob_position(jobp_map);
+            }
+        }
+        return details;
     }
-
 
 
     private Organization checkOrganization(Long orgId) {
