@@ -227,6 +227,9 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         SelectQuery<EhUniongroupMemberDetailsRecord> query = context.selectQuery(Tables.EH_UNIONGROUP_MEMBER_DETAILS);
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_TYPE.eq(groupType));
+        if(groupId!= null && groupId != 0L){
+            query.addConditions(Tables.EH_UNIONGROUP_MEMBER_DETAILS.GROUP_ID.eq(groupId));
+        }
         List<EhUniongroupMemberDetailsRecord> records = query.fetch();
         List<UniongroupMemberDetail> result = new ArrayList<>();
         if (records != null) {
@@ -238,6 +241,11 @@ public class UniongroupConfigureProviderImpl implements UniongroupConfigureProvi
         if (result != null && result.size() != 0) {
             return result;
         }
+        return null;
+    }
+
+    @Override
+    public List<UniongroupMemberDetail> listUniongroupMemberDetailsWithCondition(Integer namespaceId, Long groupId, String groupType) {
         return null;
     }
 

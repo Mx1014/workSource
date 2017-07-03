@@ -183,6 +183,9 @@ public class UniongroupServiceImpl implements UniongroupService {
 
     @Override
     public List listUniongroupMemberDetailsWithCondition(String keywords, Long department, Long groupId, Boolean allGroupFlag) {
+        //        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer namespaceId = 1000000;
+        this.uniongroupConfigureProvider.listUniongroupMemberDetailByGroupType(namespaceId,groupId,UniongroupType.fromCode("SALARYGROUP").getCode());
         return null;
     }
 
