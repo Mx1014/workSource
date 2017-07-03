@@ -2436,7 +2436,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         Set<Long> orgIds = new HashSet<>();
         List<Target> targets = new ArrayList<>();
-        targets.add(new Target(com.everhomes.entity.EntityType.USER.getCode(), userId));
+        targets.add(new Target(EntityType.USER.getCode(), userId));
 
         List<Project> projects = authorizationProvider.getManageAuthorizationProjectsByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
         for (Project project: projects) {
@@ -2450,20 +2450,25 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(OrganizationMemberStatus.ACTIVE == OrganizationMemberStatus.fromCode(member.getStatus())){
                 Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
                 if(null != org && OrganizationStatus.ACTIVE == OrganizationStatus.fromCode(org.getStatus())){
-                    orgIds.add(org.getId());
+                    addPathOrganizationId(org.getPath(), orgIds);
                 }
             }
 
+        }
+
+        //把用户所有关联的部门放到targets里面查询
+        for (Long orgId: orgIds) {
+            targets.add(new Target(EntityType.ORGANIZATIONS.getCode(), orgId));
         }
 
         //获取人员和人员所有机构所赋予模块的所属项目范围
         List<String> scopes = authorizationProvider.getAuthorizationScopesByAuthAndTargets(EntityType.SERVICE_MODULE.getCode(), null, targets);
         for (String scope: scopes) {
             if(null != scope){
-                String[] scopeStrs = scope.split(".");
+                String[] scopeStrs = scope.split("\\.");
                 if(scopeStrs.length == 2){
                     if(EntityType.AUTHORIZATION_RELATION == EntityType.fromCode(scopeStrs[0])){
-                        AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[0]));
+                        AuthorizationRelation authorizationRelation = authorizationProvider.findAuthorizationRelationById(Long.valueOf(scopeStrs[1]));
                         if(EntityType.fromCode(authorizationRelation.getOwnerType()) == EntityType.ORGANIZATIONS){
                             organizationIds.add(authorizationRelation.getOwnerId());
                         }
@@ -6468,17 +6473,26 @@ public class OrganizationServiceImpl implements OrganizationService {
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         List<OrganizationDTO> orgs = getOrganizationMemberGroups(groupTypes, userId, organizationId);
         for (OrganizationDTO dto: orgs) {
-            String[] idStrs = dto.getPath().split("/");
-            for (String idStr: idStrs) {
-                if(!StringUtils.isEmpty(idStr)){
-                    Long id = Long.valueOf(idStr);
-                    if(!orgnaizationIds.contains(id)){
-                        orgnaizationIds.add(id);
-                    }
-                }
-            }
+            addPathOrganizationId(dto.getPath(), orgnaizationIds);
         }
         return orgnaizationIds;
+    }
+
+    private void addPathOrganizationId(String path, List<Long> orgnaizationIds){
+        String[] idStrs = path.split("/");
+        for (String idStr: idStrs) {
+            if(!StringUtils.isEmpty(idStr)){
+                Long id = Long.valueOf(idStr);
+                orgnaizationIds.add(id);
+            }
+        }
+    }
+
+    private void addPathOrganizationId(String path, Set<Long> orgnaizationIds){
+        List<Long> orgIds = new ArrayList<>();
+        orgIds.addAll(orgnaizationIds);
+        this.addPathOrganizationId(path, orgIds);
+        orgnaizationIds.addAll(orgIds);
     }
 
     @Override
